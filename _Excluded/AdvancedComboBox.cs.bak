@@ -1,0 +1,432 @@
+/*******************************************
+ * AdvancedComboBox - KGy
+ * 
+ * Eredendõ problémák:
+ * - A felirat színe Enabled = false-ra mindenképpen szürkül
+ * 
+ * Megoldás:
+ * - DisabledBackColor: Háttérszín letiltott állapotban
+ * - DisabledForeColor: Felirat színe letiltott állapotban
+ * 
+ * Extra fícsörök:
+ * - Egy csomó LoadCombo metódus, ami a feltöltést biztosítja
+ */
+
+using System;
+using System.Collections.Generic;
+using System.Text;
+using System.Windows.Forms;
+using System.Drawing;
+using System.ComponentModel;
+using System.Data;
+using System.Diagnostics;
+using KGySoft.Libraries.Reflection;
+
+namespace KGySoft.Controls
+{
+    /// <summary>
+    /// Advanced version of <see cref="ComboBox"/> control that supports customized coloring even in disabled state.
+    /// Furthermore, supports numerous data-bound combo initializations.
+    /// </summary>
+    public class AdvancedComboBox: ComboBox, IDisabledColorCapable, IComboCapable
+    {
+        #region Fields
+
+        private Color disabledBackColor = Color.FromName("Control");
+        private Color disabledForeColor = Color.FromName("WindowText");
+        private ComboBoxStyle style = ComboBoxStyle.DropDown;
+        bool styleChanging = false;
+        string textSaved = null;
+        int indexSaved = -1;
+        Bitmap bmpSaved;
+        bool lastEnabled = true;
+
+        #endregion
+
+        #region Properties
+
+        #region Overridden/reintroduced properties
+
+        /// <summary>
+        /// Gets or sets the text associated with this control.
+        /// </summary>
+        public override string Text
+        {
+            get
+            {
+                if (!Enabled)
+                    return textSaved;
+                else
+                    return base.Text;
+            }
+            set
+            {
+                base.Text = value;
+                if (!Enabled)
+                {
+                    indexSaved = -1;
+                    textSaved = value;
+                    SetPaintMode();
+                }
+            }
+        }
+
+
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new DrawMode DrawMode
+        {
+            get { return base.DrawMode; }
+            set { base.DrawMode = value; }
+        }
+
+        #endregion
+
+        #region New properties
+
+        /// <summary>
+        /// A control elõtérszíne Enabled = false állapotban
+        /// </summary>
+        [Category("AdvancedComboBox")]
+        [Description("A control elõtérszíne Enabled = false állapotban")]
+        [DefaultValue(typeof(Color), "WindowText")]
+        public Color DisabledForeColor
+        {
+            get { return disabledForeColor; }
+            set
+            {
+                disabledForeColor = value;
+                Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// A control háttérszíne Enabled = false állapotban
+        /// </summary>
+        [Category("AdvancedComboBox")]
+        [Description("A control háttérszíne Enabled = false állapotban")]
+        [DefaultValue(typeof(Color), "Control")]
+        public Color DisabledBackColor
+        {
+            get { return disabledBackColor; }
+            set
+            {
+                disabledBackColor = value;
+                Invalidate();
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Constructor
+
+        public AdvancedComboBox()
+        {
+            EnabledChanged += new EventHandler(AdvancedComboBox_EnabledChanged);
+            DropDownStyleChanged += new EventHandler(AdvancedComboBox_DropDownStyleChanged);
+            SelectedIndexChanged += new EventHandler(AdvancedComboBox_SelectedIndexChanged);
+            DrawMode = DrawMode.OwnerDrawFixed;
+        }
+
+        #endregion
+
+        #region Methods
+
+        #region Protected methods
+
+        [DebuggerStepThrough]
+        protected override void OnDrawItem(DrawItemEventArgs e)
+        {
+            // ez tök jól használható, ha a SelectedIndex >= 0 (egyébként le sem fut)
+            if (e.Index >= 0)
+            {
+                string label = GetItemText(Items[e.Index]);
+
+                Brush brFore;
+                Brush brBack;
+                // Letiltott combo
+                if ((int)(e.State & DrawItemState.Disabled) > 0)
+                {
+                    brFore = new SolidBrush(disabledForeColor);
+                    brBack = new SolidBrush(disabledBackColor);
+                }
+                // Legördült elemek, amik nincseek fókuszban
+                else if ((int)(e.State & DrawItemState.Selected) == 0)
+                {
+                    brFore = new SolidBrush(ForeColor);
+                    brBack = new SolidBrush(BackColor);
+                }
+                // Fókuszban lévõ legördült elem
+                else
+                {
+                    brFore = new SolidBrush(Color.FromName("HighlightText"));
+                    brBack = new SolidBrush(Color.FromName("Highlight"));
+                }
+                e.Graphics.FillRectangle(brBack, e.Bounds);
+                e.Graphics.DrawString(label, e.Font, brFore, e.Bounds.Left - 2, e.Bounds.Top);
+                e.DrawFocusRectangle();
+            }
+            else base.OnDrawItem(e);
+        }
+
+        [DebuggerStepThrough]
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            // ha a SelectedIndex < 0, csak ez használható, ráadásul ezzel a szutyokkal csak DropDownList módban
+            // lehet rajzolni. Emiatt Disabled állapotban DropDownList módba kapcsolunk, és emuláljuk az eredeti mûködést
+            base.OnPaint(e);
+            if (!this.Enabled)
+            {
+                Graphics g = this.CreateGraphics();
+                if (bmpSaved == null) // ha már designerben disabled volt a control, nem mentõdött le a képe - így viszont megoldódik a probléma
+                {
+                    SetStyle(ControlStyles.UserPaint, false);
+                    bmpSaved = new Bitmap(Width, Height);
+                    this.DrawToBitmap(bmpSaved, new Rectangle(0, 0, Width, Height));
+                    SetStyle(ControlStyles.UserPaint, true);
+                }
+                g.DrawImage(bmpSaved, 0, 0);
+                RectangleF rec = ClientRectangle;
+                rec.X += 2;
+                rec.Y += 2;
+                rec.Width -= 4;
+                rec.Height -= 4;
+                if (style != ComboBoxStyle.Simple)
+                    rec.Width -= 16; // hogy a rákba kérhetõ le a kis legördülõ gomb szélessége???
+                g.FillRectangle(new SolidBrush(disabledBackColor), rec);
+                SolidBrush drawBrush = new SolidBrush(disabledForeColor);
+                rec.X -= 1;
+                rec.Y += 1;
+                g.DrawString(textSaved, Font, drawBrush, rec);
+            }
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void SetPaintMode()
+        {
+            // OnPaint lesz minden olyan esetben, amikor nem tudunk az OnDrawItem-mel rajzolni
+            bool userPaint = !Enabled && (style == ComboBoxStyle.Simple || SelectedIndex < 0);
+            SetStyle(ControlStyles.UserPaint, userPaint);
+            Invalidate();
+        }
+
+        #endregion
+
+        #region Handled events
+
+        void AdvancedComboBox_EnabledChanged(object sender, EventArgs e)
+        {
+            styleChanging = true;
+            if (lastEnabled == Enabled) // sajnos nem csak változáskor fut le (pl. parent enabled majd saját enabled = false-ra is)
+                return;
+            lastEnabled = Enabled;
+            if (Enabled)
+            {
+                DropDownStyle = style;
+                SetStyle(ControlStyles.UserPaint, false);
+                if (indexSaved >= 0)
+                {
+                    if (indexSaved < base.Items.Count) SelectedIndex = indexSaved;
+                }
+                else if (textSaved != null)
+                    base.Text = textSaved;
+                Font font = Font;
+                Font = null;
+                Font = font;  // e 3 sor nélkül hülye vastag betûkre vált enabled ki/be után
+                if (!Focused)
+                    SelectionLength = 0; // enélkül meg néha kijelölve marad akkor is, ha nincs fókuszban
+                Invalidate(); // enélkül néha nem jelenik meg Enabled ki/be után
+            }
+            else
+            {
+                style = DropDownStyle;
+                indexSaved = SelectedIndex;
+                textSaved = base.Text;
+                //kihal neha
+                try
+                {
+                    DropDownStyle = ComboBoxStyle.DropDownList; // csak ilyen módban mûködik az OnPaint és OnDrawItem, de ettõl elveszhet a felirat, ezért mentjük TextSaved-be
+                }
+                catch (Exception)
+                {
+                    //ex = ex;
+                }
+                // A kis lenyíló gomb és a keret miatt lementjük a control képét, de csak ha látszik, különben csak egy nagy szürke maszat mentõdik le
+                if (TopLevelControl != null && TopLevelControl.Visible)
+                {
+                    bmpSaved = new Bitmap(Width, Height);
+                    this.DrawToBitmap(bmpSaved, new Rectangle(0, 0, Width, Height));
+                }
+                else bmpSaved = null;
+                SetPaintMode();
+            }
+            styleChanging = false;
+        }
+
+        void AdvancedComboBox_DropDownStyleChanged(object sender, EventArgs e)
+        {
+            if (styleChanging) return;
+            style = DropDownStyle;
+            if (!Enabled)
+            {
+                styleChanging = true;
+                DropDownStyle = ComboBoxStyle.DropDownList;
+                styleChanging = false;
+            }
+            SetPaintMode();
+        }
+
+        void AdvancedComboBox_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            if (styleChanging) return;
+            SetPaintMode();
+        }
+
+        #endregion
+
+        #endregion
+
+        #region IComboCapable Members
+
+        /// <summary>
+        /// Gets whether the there is no selected item in the combo box (<see cref="SelectedValue"/> or is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlUtils.NotSelectedValue"/>)
+        /// </summary>
+        public bool IsEmpty
+        {
+            get { return this.IsEmpty(); }
+        }
+
+        /// <summary>
+        /// Binds the combo box to a <see cref="DataTable"/>.
+        /// </summary>
+        /// <param name="dataTable">The data source table.</param>
+        /// <param name="displayMember">Column name to display in the the combo box.</param>
+        /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
+        /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, the displayed column must contain string values.</param>
+        /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
+        /// <param name="sortByDisplayedValues">If <c>true</c>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
+        /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="ComboPlusItems.ItemAll"/> or <see cref="ComboPlusItems.ItemNone"/> is requested,
+        /// then the value column must have a data type that is convertible to signed integer type.</param>
+        public void LoadCombo(DataTable dataTable, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, ComboPlusItems plusItems)
+        {
+            ComboUtils.LoadCombo(this, dataTable, valueMember, displayMember, translateNames, distinctionPostfix, sortByDisplayedValues, plusItems);
+        }
+
+        /// <summary>
+        /// Binds the combo box to a <see cref="DataTable"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
+        /// </summary>
+        /// <param name="dataTable">The data source table.</param>
+        /// <param name="displayMember">Column name to display in the the combo box.</param>
+        /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
+        /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="ComboPlusItems.ItemAll"/> or <see cref="ComboPlusItems.ItemNone"/> is requested,
+        /// then the value column must have a data type that is convertible to signed integer type.</param>
+        public void LoadCombo(DataTable dataTable, string valueMember, string displayMember, ComboPlusItems plusItems)
+        {
+            ComboUtils.LoadCombo(this, dataTable, valueMember, displayMember, plusItems);
+        }
+
+        /// <summary>
+        /// Binds the combo box to a <see cref="DataTable"/>. Items will not be sorted and translated.
+        /// </summary>
+        /// <param name="dataTable">The data source table.</param>
+        /// <param name="displayMember">Column name to display in the the combo box.</param>
+        /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
+        public void LoadCombo(DataTable dataTable, string valueMember, string displayMember)
+        {
+            ComboUtils.LoadCombo(this, dataTable, valueMember, displayMember);
+        }
+
+        /// <summary>
+        /// Binds the combo box to the values of an <see cref="Enum"/>.
+        /// </summary>
+        /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="translateNames">Indicates whether the displayed enum field names should be translated.</param>
+        /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
+        /// <param name="sortByDisplayedValues">If <c>true</c>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
+        /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="ComboPlusItems.ItemAll"/> or <see cref="ComboPlusItems.ItemNone"/> is requested,
+        /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
+        public void LoadCombo(Type enumType, Type valueMemberType, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, ComboPlusItems plusItems)
+        {
+            ComboUtils.LoadCombo(this, enumType, valueMemberType, translateNames, distinctionPostfix, sortByDisplayedValues, plusItems);
+        }
+
+        /// <summary>
+        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
+        /// </summary>
+        /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="ComboPlusItems.ItemAll"/> or <see cref="ComboPlusItems.ItemNone"/> is requested,
+        /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
+        public void LoadCombo(Type enumType, Type valueMemberType, ComboPlusItems plusItems)
+        {
+            ComboUtils.LoadCombo(this, enumType, valueMemberType, plusItems);
+        }
+
+        /// <summary>
+        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
+        /// </summary>
+        /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
+        public void LoadCombo(Type enumType, Type valueMemberType)
+        {
+            ComboUtils.LoadCombo(this, enumType, valueMemberType);
+        }
+
+        /// <summary>
+        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
+        /// </summary>
+        /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
+        public void LoadCombo(Type enumType)
+        {
+            ComboUtils.LoadCombo(this, enumType);
+        }
+
+        /// <summary>
+        /// Binds the combo box to a <paramref name="collection"/>.
+        /// </summary>
+        /// <param name="collection">The source collection.</param>
+        /// <param name="displayMember">Property name to display in the the combo box.</param>
+        /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
+        /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, <paramref name="displayMember"/> must be writable and should refer to a <see cref="string"/> property.</param>
+        /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
+        /// <param name="sortByDisplayedValues">If <c>true</c>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
+        /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
+        /// which is convertible to signed integer type.</param>
+        public void LoadCombo<T>(IEnumerable<T> collection, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, ComboPlusItems plusItems)
+        {
+            ComboUtils.LoadCombo(this, collection, valueMember, displayMember, translateNames, distinctionPostfix, sortByDisplayedValues, plusItems);
+        }
+
+        /// <summary>
+        /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
+        /// </summary>
+        /// <param name="collection">The source collection.</param>
+        /// <param name="displayMember">Property name to display in the the combo box.</param>
+        /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
+        /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
+        /// which is convertible to signed integer type.</param>
+        public void LoadCombo<T>(IEnumerable<T> collection, string valueMember, string displayMember, ComboPlusItems plusItems)
+        {
+            ComboUtils.LoadCombo(this, collection, valueMember, displayMember, plusItems);
+        }
+
+        /// <summary>
+        /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted and translated.
+        /// </summary>
+        /// <param name="collection">The source collection.</param>
+        /// <param name="displayMember">Property name to display in the the combo box.</param>
+        /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
+        public void LoadCombo<T>(IEnumerable<T> collection, string valueMember, string displayMember)
+        {
+            ComboUtils.LoadCombo(this, collection, valueMember, displayMember);
+        }
+
+        #endregion
+    }
+}

@@ -1,0 +1,1410 @@
+using System;
+using System.ComponentModel;
+using System.Drawing;
+using System.Drawing.Design;
+using System.Windows.Forms;
+
+using KGySoft.Libraries;
+using KGySoft.Libraries.Language;
+using KGySoft.Controls.Properties;
+using KGySoft.ComponentModel;
+
+namespace KGySoft.Controls
+{
+	#region Enumerations relevant to ucCustomSelector
+
+	/// <summary>
+	/// Buttons that can be appeared in a <see cref="ucCustomSelector"/>
+	/// </summary>
+	[Flags]
+	public enum SelectorButtons
+	{
+		None = 0,
+		ClearSelection = 1 << 0,
+		SelectAll = 1 << 1,
+		SelectNone = 1 << 2,
+		Browse = 1 << 3,
+		Editor = 1 << 4,
+		New = 1 << 5
+	}
+
+	/// <summary>
+	/// <see cref="ucCustomSelector.State"/>
+	/// </summary>
+	public enum SelectorStates
+	{
+        NotSelected = ControlUtils.NotSelectedValue,
+        All = ControlUtils.AllSelectedValue,
+        None = ControlUtils.NoneSelectedValue,
+        ValueSet = ControlUtils.UndefinedValue
+	}
+
+	/// <summary>
+	/// <see cref="ucCustomSelector.RelevantControlValue"/>
+	/// </summary>
+	public enum RelevantControlValues
+	{
+		Value,
+		Text,
+		State
+	}
+
+	#endregion
+
+	// todo: its ancestor should be a ucBaseSelector, in which there is no TextBox but only buttons and the image. 
+	// 3 general derived selectors: a labeled one (CustomLabelSelector); this (Mask)TextBoxed one (CustomSelector), and a ComboBoxed one (CustomComboSelector)
+    // OR: just replace inner textbox to AdvancedComboBox - TODO: Real ReadOnly property for AdvancedComboBox (see TextBoxBase or Delphi TCustomComboBox.ReadOnly - Source position: stdctrls.pas line 395)
+    //   -> make ucCustomSelector IComboCapable, and adjust Value to return ValueNotSelected, etc. for ComboPlusItems. (so SelectedValue and Value can be different in case of plus items)
+	// The textboxed one can have MaxLength, Mask, TextEditable, others don't
+	/// <summary>
+	/// Selector control that can be used for general purposes.
+	/// </summary>
+	[DefaultBindingProperty("Value")]
+    [ToolboxItem(true)]
+    public partial class ucCustomSelector: ucCaptionedBase
+	{
+		#region Fields
+
+		private SelectorButtons buttons = SelectorButtons.Browse;
+		private Button btnClearSelection;
+		private Button btnSelectAll;
+		private Button btnSelectNone;
+		private Button btnBrowse;
+		private Button btnEditor;
+		private Button btnNew;
+		private FlatStyle buttonStyle = FlatStyle.Standard;
+        private object value = ControlUtils.NotSelectedValue;
+		private SelectorStates state = SelectorStates.NotSelected;
+		private bool readOnly = false;
+		private bool textEditable = true;
+		private bool autoFind = true;
+		private bool autoImage = false;
+		private bool deleteContent = false;
+		private RelevantControlValues relevantControlValue = RelevantControlValues.Value;
+		private string toolTipClearSelection = String.Empty;
+		private string toolTipSelectAll = String.Empty;
+		private string toolTipSelectNone = String.Empty;
+		private string toolTipBrowse = String.Empty;
+		private string toolTipEditor = String.Empty;
+		private string toolTipNew = String.Empty;
+        private string textNotSelected = ControlUtils.NotSelectedText;
+        private string textAllSelected = ControlUtils.AllSelectedText;
+        private string textNoneSelected = ControlUtils.NoneSelectedText;
+        private object valueNotSelected = ControlUtils.NotSelectedValue;
+        private object valueAllSelected = ControlUtils.AllSelectedValue;
+        private object valueNoneSelected = ControlUtils.NoneSelectedValue;
+
+		#endregion
+
+		#region Properties
+
+		#region Mandatory overridden properties
+
+		protected override Control MainControl
+		{
+			get { return textControl; }
+		}
+
+		/// <summary>
+		/// Gets or sets the relevant property of the control (<see cref="Value"/> or <see cref="Text"/>,
+		/// depends on <see cref="RelevantControlValue"/>.
+		/// </summary>
+		public override object ControlValue
+		{
+			get
+			{
+				switch (relevantControlValue)
+				{
+					case RelevantControlValues.Value:
+						return Value;
+					case RelevantControlValues.Text:
+						return Text;
+					case RelevantControlValues.State:
+						return State;
+					default:
+						return null;
+				}
+			}
+			set { SetControlValue(value); }
+		}
+
+		public override void Clear()
+		{
+			Value = valueNotSelected;
+			base.Clear();
+		}
+
+		#endregion
+
+		#region New properties
+
+		/// <summary>
+		/// Gets or sets the relevant control value for supporting <see cref="ucBase"/> features of
+		/// saving/restoring value and marking control as modified.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the relevant control value for supporting ucBase features of saving/restoring value and marking control as modified.")]
+		[DefaultValue(typeof(RelevantControlValues), "Value")]
+		public RelevantControlValues RelevantControlValue
+		{
+			get { return relevantControlValue; }
+			set { relevantControlValue = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets the associated integer value of the selector control.
+		/// You may use this property for data binding.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the associated value of the selector control. You may use this property for data binding.")]
+        [DefaultValue(ControlUtils.NotSelectedValue)]
+		[RefreshProperties(RefreshProperties.All)]
+		[Bindable(BindableSupport.Default, BindingDirection.TwoWay)]
+		public object Value
+		{
+			get { return value; }
+			set { SetValue(value); }
+		}
+
+		/// <summary>
+		/// Gets or sets the value of the NotSelected <see cref="State"/>.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the value of the NotSelected State.")]
+		[Browsable(true)]
+		[RefreshProperties(RefreshProperties.All)]
+        [DefaultValue(ControlUtils.NotSelectedValue)]
+		public object ValueNotSelected
+		{
+			get { return valueNotSelected; }
+			set
+			{
+				if (!Object.Equals(value, valueNotSelected) && !Object.Equals(value, valueAllSelected) && !Object.Equals(value, valueNoneSelected))
+				{
+					valueNotSelected = value;
+					if (state == SelectorStates.NotSelected)
+						SetValue(value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the value of the All <see cref="State"/>.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the value of the All State.")]
+		[Browsable(true)]
+		[RefreshProperties(RefreshProperties.All)]
+        [DefaultValue(ControlUtils.AllSelectedValue)]
+		public object ValueAllSelected
+		{
+			get { return valueAllSelected; }
+			set
+			{
+				if (!Object.Equals(value, valueNotSelected) && !Object.Equals(value, valueAllSelected) && !Object.Equals(value, valueNoneSelected))
+				{
+					valueAllSelected = value;
+					if (state == SelectorStates.All)
+						SetValue(value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the value of the None <see cref="State"/>.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the value of the None State.")]
+		[Browsable(true)]
+		[RefreshProperties(RefreshProperties.All)]
+        [DefaultValue(ControlUtils.NoneSelectedValue)]
+		public object ValueNoneSelected
+		{
+			get { return valueNoneSelected; }
+			set
+			{
+				if (!Object.Equals(value, valueNotSelected) && !Object.Equals(value, valueAllSelected) && !Object.Equals(value, valueNoneSelected))
+				{
+					valueNoneSelected = value;
+					if (state == SelectorStates.None)
+						SetValue(value);
+				}
+			}
+		}
+
+		/// <summary>
+		/// State of the selector control.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("State of the control.")]
+		[DefaultValue(typeof(SelectorStates), "NotSelected")]
+		[RefreshProperties(RefreshProperties.All)]
+		public SelectorStates State
+		{
+			get { return state; }
+			set { SetState(value); }
+		}
+
+		/// <summary>
+		/// Visible buttons.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Visible buttons.")]
+		[DefaultValue(typeof(SelectorButtons), "Browse")]
+		[TypeConverter(typeof(FlagsEnumConverter))]
+		public SelectorButtons Buttons
+		{
+			get { return buttons; }
+			set
+			{
+				buttons = value;
+				RefreshActionPanel();
+			}
+		}
+
+		/// <summary>
+		/// Style of the buttons.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Style of the buttons.")]
+		[DefaultValue(typeof(FlatStyle), "Standard")]
+		public FlatStyle ButtonStyle
+		{
+			get { return buttonStyle; }
+			set
+			{
+				buttonStyle = value;
+				RefreshActionPanel();
+			}
+		}
+
+		/// <summary>
+		/// The image of the selector control.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("The image of the selector control.")]
+		[DefaultValue(null)]
+		public Image Image
+		{
+			get
+			{
+				if (autoImage) return null;
+				else return pbImage.Image;
+			}
+			set
+			{
+				pbImage.Image = value;
+				pbImage.Visible = value != null;
+				autoImage = false;
+			}
+		}
+
+		/// <summary>
+		/// Size mode of the image of the selector.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Size mode of the image of the selector.")]
+		[DefaultValue(typeof(PictureBoxSizeMode), "CenterImage")]
+		public PictureBoxSizeMode ImageSizeMode
+		{
+			get { return pbImage.SizeMode; }
+			set
+			{
+				if (value != PictureBoxSizeMode.AutoSize)
+					pbImage.SizeMode = value;
+			}
+		}
+
+		/// <summary>
+		/// Border style of the image of the selector.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Border style of the image of the selector.")]
+		[DefaultValue(typeof(BorderStyle), "None")]
+		public BorderStyle ImageBorderStyle
+		{
+			get { return pbImage.BorderStyle; }
+			set { pbImage.BorderStyle = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets whether the image of the selector control should
+		/// display automatically an image depending on the state of the control.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets whether the image of the selector control should display automatically an image depending on the state of the control.")]
+		[DefaultValue(false)]
+		public bool AutoImage
+		{
+			get { return autoImage; }
+			set
+			{
+				autoImage = value;
+				if (!value) Image = null;
+				else RefreshImage();
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets whether the text field can be edited manually.
+		/// If the selector is not ReadOnly but this property is false,
+		/// then the control value can be edited only via the selector buttons.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets whether the text field can be edited manually. If the selector is not ReadOnly but this property is false, then the control value can be edited only via the selector buttons.")]
+		[DefaultValue(true)]
+		public virtual bool TextEditable
+		{
+			get { return textEditable; }
+			set
+			{
+				textEditable = value;
+				textControl.ReadOnly = readOnly || !value;
+				ResetColor();
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets whether there should be an <see cref="AutoFind"/> call on leaving the text field with a changed content
+		/// in case of <see cref="TextEditable"/>. When this property is true while <see cref="AutoFind"/> event is not handled, then
+		/// simply <see cref="Value"/> will get the value of <see cref="Text"/>. If this property is false,
+		/// then <see cref="Value"/> will not be changed when <see cref="Text"/> was edited.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets whether there should be an AutoFind call on leaving the text field with a changed content " +
+			"in case of TextEditable. When this property is true while AutoFind event is not handled, then " +
+			"simply Value will get the value of Text. If this property is false, " +
+			"then Value will not be changed when Text was edited.")]
+		[DefaultValue(true)]
+		public virtual bool AutoFindText
+		{
+			get { return autoFind; }
+			set { autoFind = value; }
+		}
+
+		/// <summary>
+		/// Gets or sets the text of the inner <see cref="TextBox"/>.
+		/// For data binding using <see cref="Value"/> property is preferable..
+		/// <remarks>
+		/// <para>
+		/// Setting Text does not changes <see cref="Value"/> (though at runtime if <see cref="AutoFindText"/> is true, then 
+		/// <see cref="AutoFind"/> may set Value and Text).
+		/// </para>
+		/// <para>
+		/// If <see cref="Value"/> has meaning in a scenario (<see cref="RelevantControlValue"/> is Value), then <see cref="Text"/> should never be set
+		/// directly from code. Text of a value can be returned by an overridden <see cref="GetTextByValue"/> method.
+		/// </para>
+		/// <para>
+		/// If you need to set both <see cref="Value"/> and <see cref="Text"/> without raising events
+		/// use the <see cref="Assign"/> property.
+		/// </para>
+		/// </remarks>
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the text of the inner TextBox. Can be set only in ValueSet state. Setting Text property does not changes Value, therefore if RelevantControlValue is Value, then primarily Value property should be set.")]
+		[Browsable(true)]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+		[Bindable(BindableSupport.Yes, BindingDirection.TwoWay)]
+		[RefreshProperties(RefreshProperties.All)]
+		public override string Text
+		{
+			get { return textControl.Text; }
+			set
+			{
+				// this is for prevent Text to be set "ucCustomSelector1" or similar
+				// in design time.
+				if ((DesignMode && value == ToString().Split(new char[] { ' ' })[0])
+					// this is for prevent setting text when the selector is in
+					// not selected/all/none state
+					|| this.state != SelectorStates.ValueSet) return;
+				textControl.Text = value;
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the read-only state for the control. This disables most of the
+		/// buttons, too. To disable manual text editing only, use <see cref="TextEditable"/> property.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the read-only state for the control. This disables most of the buttons, too. To disable manual text editing only, use TextEditable property.")]
+		public override bool ReadOnly
+		{
+			get { return readOnly; }
+			set
+			{
+				readOnly = value;
+				textControl.ReadOnly = !textEditable || value;
+				RefreshActionPanel();
+				ResetColor();
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the tooltip text of the Clear Selection button.
+		/// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the tooltip text of the Clear Selection button. (Translatable text).")]
+		[Browsable(true)]
+		[DefaultValue("")]
+		public string ToolTipClearSelection
+		{
+			get { return toolTipClearSelection; }
+			set
+			{
+				toolTipClearSelection = value;
+				SetToolTip(btnClearSelection, Language.Translate(value));
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the tooltip text of the Select All button.
+		/// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the tooltip text of the Select All button. (Translatable text).")]
+		[Browsable(true)]
+		[DefaultValue("")]
+		public string ToolTipSelectAll
+		{
+			get { return toolTipSelectAll; }
+			set
+			{
+				toolTipSelectAll = value;
+				SetToolTip(btnSelectAll, Language.Translate(value));
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the tooltip text of the Select None button.
+		/// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the tooltip text of the Select None button. (Translatable text).")]
+		[Browsable(true)]
+		[DefaultValue("")]
+		public string ToolTipSelectNone
+		{
+			get { return toolTipSelectNone; }
+			set
+			{
+				toolTipSelectNone = value;
+				SetToolTip(btnSelectNone, Language.Translate(value));
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the tooltip text of the Browse button.
+		/// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the tooltip text of the Browse button. (Translatable text).")]
+		[Browsable(true)]
+		[DefaultValue("")]
+		public string ToolTipBrowse
+		{
+			get { return toolTipBrowse; }
+			set
+			{
+				toolTipBrowse = value;
+				SetToolTip(btnBrowse, Language.Translate(value));
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the tooltip text of the Editor button.
+		/// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the tooltip text of the Editor button. (Translatable text).")]
+		[Browsable(true)]
+		[DefaultValue("")]
+		public string ToolTipEditor
+		{
+			get { return toolTipEditor; }
+			set
+			{
+				toolTipEditor = value;
+				SetToolTip(btnEditor, Language.Translate(value));
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the tooltip text of the New button.
+		/// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the tooltip text of the New button. (Translatable text).")]
+		[Browsable(true)]
+		[DefaultValue("")]
+		public string ToolTipNew
+		{
+			get { return toolTipNew; }
+			set
+			{
+				toolTipNew = value;
+				SetToolTip(btnNew, Language.Translate(value));
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the <see cref="Text"/> of NotSelected <see cref="State"/>.
+		/// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the Text NotSelected State. (Translatable text).")]
+		[Browsable(true)]
+		[RefreshProperties(RefreshProperties.All)]
+        [DefaultValue(ControlUtils.NotSelectedText)]
+		public string TextNotSelected
+		{
+			get { return textNotSelected; }
+			set
+			{
+				textNotSelected = value;
+				if (state == SelectorStates.NotSelected)
+					textControl.Text = Language.Translate(value);
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the <see cref="Text"/> of All <see cref="State"/>.
+		/// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the Text of All State. (Translatable text).")]
+		[Browsable(true)]
+		[RefreshProperties(RefreshProperties.All)]
+        [DefaultValue(ControlUtils.AllSelectedText)]
+		public string TextAllSelected
+		{
+			get { return textAllSelected; }
+			set
+			{
+				textAllSelected = value;
+				if (state == SelectorStates.All)
+					textControl.Text = Language.Translate(value);
+			}
+		}
+
+		/// <summary>
+		/// Gets or sets the <see cref="Text"/> of None <see cref="State"/>.
+		/// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("Gets or sets the Text of None State. (Translatable text).")]
+		[Browsable(true)]
+		[RefreshProperties(RefreshProperties.All)]
+        [DefaultValue(ControlUtils.NoneSelectedText)]
+		public string TextNoneSelected
+		{
+			get { return textNoneSelected; }
+			set
+			{
+			    TextBox.AutoCompleteCustomSource = null;
+				textNoneSelected = value;
+				if (state == SelectorStates.None)
+					textControl.Text = Language.Translate(value);
+			}
+		}
+
+		/// <summary>
+		/// Gets the inner <see cref="TextBox"/>.
+		/// </summary>
+		[Category("ucCustomSelector")]
+		[Description("The inner TextBox")]
+		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)] // Do not change this! If something is needed, make a new property instead.
+		[Browsable(false)]
+		public AdvancedTextBox TextBox
+		{
+			get { return textControl; }
+		}
+
+        /// <summary>
+        /// Gets or sets an option that controls how automatic completion works for the inner text box.
+        /// </summary>
+        [Category("ucCustomSelector")]
+        [Description("Gets or sets an option that controls how automatic completion works for the inner text box.")]
+        [DefaultValue(AutoCompleteMode.None)]
+        public AutoCompleteMode AutoCompleteMode
+        {
+            get { return textControl.AutoCompleteMode; }
+            set { textControl.AutoCompleteMode = value; }
+        }
+
+        ///<summary>
+        /// Gets or sets a value specifying the source of complete strings used for automatic completion.
+        ///</summary>
+        [Category("ucCustomSelector")]
+        [Description("Gets or sets a value specifying the source of complete strings used for automatic completion.")]
+        [DefaultValue(AutoCompleteSource.None)]
+        public AutoCompleteSource AutoCompleteSource
+        {
+            get { return textControl.AutoCompleteSource; }
+            set { textControl.AutoCompleteSource = value; }
+        }
+
+        ///<summary>
+        /// Gets or sets a custom <see cref="AutoCompleteStringCollection"/> to <see cref="AutoCompleteSource"/> property is <see cref="System.Windows.Forms.AutoCompleteSource.CustomSource"/>.
+        ///</summary>
+        [Category("ucCustomSelector")]
+        [Description("Gets or sets a custom AutoCompleteStringCollection to AutoCompleteSource property is CustomSource.")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
+        [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
+        public AutoCompleteStringCollection AutoCompleteCustomSource
+        {
+            get { return textControl.AutoCompleteCustomSource; }
+            set { textControl.AutoCompleteCustomSource = value; }
+        }
+
+		#endregion
+
+		#endregion
+
+		#region Events
+
+		/// <summary>
+		/// Occurs when <see cref="Value"/> is changed.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when Value is changed.")
+		]
+		public event EventHandler ValueChanged;
+
+		/// <summary>
+		/// Occurs when <see cref="State"/> is changed.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when State is changed.")
+		]
+		public event EventHandler StateChanged;
+
+		/// <summary>
+		/// Occurs when Clear button is clicked.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when Clear button is clicked.")
+		]
+		public event EventHandler ButtonClearClick;
+
+		/// <summary>
+		/// Occurs when All button is clicked.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when All button is clicked.")
+		]
+		public event EventHandler ButtonAllClick;
+
+		/// <summary>
+		/// Occurs when None button is clicked.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when None button is clicked.")
+		]
+		public event EventHandler ButtonNoneClick;
+
+		/// <summary>
+		/// Occurs when Browse button is clicked.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when Browse button is clicked.")
+		]
+		public event EventHandler ButtonBrowseClick;
+
+		/// <summary>
+		/// Occurs when Editor button is clicked.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when Editor button is clicked.")
+		]
+		public event EventHandler ButtonEditorClick;
+
+		/// <summary>
+		/// Occurs when New button is clicked.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when New button is clicked.")
+		]
+		public event EventHandler ButtonNewClick;
+
+		/// <summary>
+		/// Occurs when the control loses focus while <see cref="TextEditable"/> and <see cref="AutoFindText"/> are true
+		/// and the <see cref="Text"/> of the control has been changed. Can be used for calculating <see cref="Value"/>
+		/// based on the edited <see cref="Text"/> in the editor.
+		/// If not handled <see cref="DefaultAutoFind"/> will be called, which simply makes <see cref="Value"/> equal to <see cref="Text"/>.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when the control loses focus while TextEditable and AutoFindText are true " +
+				"and the Text of the control has been changed. Can be used for calculating Value " +
+				"based on the edited Text in the editor. " +
+				"If not handled DefaultAutoFind will be called, which simply makes Value equal to Text.")
+		]
+		public event EventHandler<AutoFindEventArgs> AutoFind;
+
+		/// <summary>
+		/// Occurs when a displayed text of a value needs to be calculated. Does not occur when <see cref="Value"/> equals <see cref="ValueNotSelected"/>,
+		/// <see cref="ValueAllSelected"/> or <see cref="ValueNoneSelected"/>.
+		/// If not handled, then calculated text will gain its value from Value.ToString() or will be an empty string if Value is null.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when a displayed text of a value needs to be calculated. Does not occur when Value equals ValueNotSelected, " +
+				"ValueAllSelected or ValueNoneSelected. If not handled, then calculated text will gain its value from Value.ToString() " +
+				"or will be an empty string if Value is null.")
+		]
+		public event EventHandler<CalculateTextEventArgs> CalculateText;
+
+
+		/// <summary>
+		/// Occurs when the <see cref="Image"/> of the control been clicked.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when the Image of the control been clicked.")
+		]
+		public event EventHandler ImageClick;
+
+		/// <summary>
+		/// Occurs when the <see cref="Image"/> of the control been double clicked.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs when the Image of the control been double clicked.")
+		]
+		public event EventHandler ImageDoubleClick;
+
+		/// <summary>
+		/// Occurs when the text of the inner textbox changes.
+		/// </summary>
+		[
+			Browsable(true),
+			Category("ucCustomSelector"),
+			Description("Occurs when the text of the inner textbox changes.")
+		]
+		public new event EventHandler TextChanged
+		{
+			add { textControl.TextChanged += value; }
+			remove { textControl.TextChanged -= value; }
+		}
+
+		/// <summary>
+		/// Occurs on leave when content differs from the content at getting focused.
+		/// </summary>
+		[
+			Category("ucCustomSelector"),
+			Description("Occurs on leave when content differs from the content at getting focused.")
+		]
+		public event EventHandler TextChangedOnLeave
+		{
+			add { textControl.TextChangedOnLeave += value; }
+			remove { textControl.TextChangedOnLeave -= value; }
+		}
+
+		#endregion
+
+		#region Constructor
+
+		public ucCustomSelector()
+		{
+			InitializeComponent();
+
+			textControl.TextChangedOnLeave += new System.EventHandler(this.ucCustomSelector_TextChangedOnLeave);
+			this.textControl.Enter += new System.EventHandler(this.textControl_Enter);
+			this.textControl.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.textControl_KeyPress);
+			MainControl.TextChanged += new EventHandler(MainControl_TextChanged);
+			CreateActionPanel();
+			RefreshActionPanel();
+			pbImage.Click += new EventHandler(pbImage_Click);
+			pbImage.DoubleClick += new EventHandler(pbImage_DoubleClick);
+		}
+
+		#endregion
+
+		#region Methods
+
+		#region Public methods
+
+		#region Simple public methods
+
+		/// <summary>
+		/// Sets the value-text pair without raising events.
+		/// <remarks>
+		/// This can be useful tipically for LoadFromDataBase-like methods.
+		/// </remarks>
+		/// </summary>
+		public void Assign(object value, string text)
+		{
+			if (value == null || value.In(valueNotSelected, valueAllSelected, valueNoneSelected))
+			{
+				Value = value;
+				return;
+			}
+
+			state = SelectorStates.ValueSet;
+			RefreshImage();
+			this.value = value;
+			Text = text;
+		}
+
+		#endregion
+
+		#region New overridable public methods
+
+		/// <summary>
+		/// Default behaviour for clicking the Clear button.
+		/// Can be overridden and can be called from a handled <see cref="ButtonClearClick"/>.
+		/// </summary>
+		public virtual void DefaultClearClick()
+		{
+			Value = valueNotSelected;
+		}
+
+		/// <summary>
+		/// Default behaviour for clicking the All button.
+		/// Can be overridden and can be called from a handled <see cref="ButtonAllClick"/>.
+		/// </summary>
+		public virtual void DefaultAllClick()
+		{
+			Value = valueAllSelected;
+		}
+
+		/// <summary>
+		/// Default behaviour for clicking the None button.
+		/// Can be overridden and can be called from a handled <see cref="ButtonNoneClick"/>.
+		/// </summary>
+		public virtual void DefaultNoneClick()
+		{
+			Value = valueNoneSelected;
+		}
+
+		/// <summary>
+		/// Default behaviour for clicking the Browse button.
+		/// Can be overridden and can be called from a handled <see cref="ButtonBrowseClick"/>.
+		/// </summary>
+		public virtual void DefaultBrowseClick()
+		{
+			string text = textControl.Text;
+			if (Dialogs.InputDialog(ref text) && text != textControl.Text)
+			{
+				Value = text;
+			}
+		}
+
+		/// <summary>
+		/// Default behaviour for clicking the Edditor button.
+		/// Can be overridden and can be called from a handled <see cref="ButtonEditorClick"/>.
+		/// </summary>
+		public virtual void DefaultEditorClick()
+		{
+			Dialogs.InfoMessage("This is an abstract default method for {0} button. " +
+				"You should implement Button{0}Click event or inherit class {1} and override Default{0}Click method.",
+				"Editor",
+				GetType().Name);
+		}
+
+		/// <summary>
+		/// Default behaviour for clicking the New button.
+		/// Can be overridden and can be called from a handled <see cref="ButtonNewClick"/>.
+		/// </summary>
+		public virtual void DefaultNewClick()
+		{
+			Dialogs.InfoMessage("This is an abstract default method for {0} button. " +
+				"You should implement Button{0}Click event or inherit class {1} and override Default{0}Click method.",
+				"New",
+				GetType().Name);
+		}
+
+		/// <summary>
+		/// Default AutoFind behaviour if event <see cref="AutoFind"/> is not handled.
+		/// Can be overridden to set <see cref="Value"/> and <see cref="Text"/> based on
+		/// the written text or text chunk and can be called also from a handled <see cref="AutoFind"/>.
+		/// </summary>
+		/// <param name="text">Text or text chunk for that can be used for search.</param>
+		public virtual void DefaultAutoFind(string text)
+		{
+			Value = text;
+		}
+
+		#endregion
+
+		#endregion
+
+		#region Protected methods
+
+		#region Simple protected methods
+
+		/// <summary>
+		/// Egy gomb létrehozása
+		/// </summary>
+		/// <param name="bmp">Kép</param>
+		/// <param name="caption">Felirat</param>
+		/// <returns></returns>
+		protected Button CreateActionButton(Bitmap bmp, string toolTip)
+		{
+			Button result = new Button();
+			result.Size = new Size(23, 22);
+			result.Margin = new Padding(0, 0, 0, 0);
+			result.Padding = new Padding(0, 0, 0, 0);
+			result.Image = bmp;
+			SetToolTip(result, toolTip);
+			result.TabStop = false;
+			result.FlatStyle = buttonStyle;
+			result.Visible = false;
+			result.Click += new EventHandler(SelectorButtonClick);
+			pnlActionPanel.Controls.Add(result);
+			return result;
+		}
+
+		protected void RefreshImage()
+		{
+			if (!autoImage) return;
+			pbImage.SizeMode = PictureBoxSizeMode.CenterImage;
+			pbImage.Visible = true;
+			switch (state)
+			{
+				case SelectorStates.NotSelected: pbImage.Image = Resources.Clear; break;
+				case SelectorStates.All: pbImage.Image = Resources.All; break;
+				case SelectorStates.None: pbImage.Image = Resources.None; break;
+				case SelectorStates.ValueSet: pbImage.Image = Resources.Edit; break;
+			}
+		}
+
+		#endregion
+
+		#region Overridden methods
+
+		protected override void ResetColor()
+		{
+			// BackColor when control is Enabled and not ReadOnly and TextEditable is true
+			if (Enabled && MainControl.Enabled && !ReadOnly && TextEditable)
+			{
+				if (!IsModified && MainControl.BackColor != ColorEnabled)
+					MainControl.BackColor = ColorEnabled;
+				else if (IsModified && MainControl.BackColor != ColorModified)
+					MainControl.BackColor = ColorModified;
+			}
+			// BackColor when control is not Enabled or is ReadOnly or TextEditable is false
+			else if (!Enabled || !MainControl.Enabled || ReadOnly || !TextEditable)
+			{
+				if (textControl.DisabledBackColor != ColorDisabled)
+					textControl.DisabledBackColor = ColorDisabled;
+			}
+
+			// TextColor in Enabled state (also ReadOnly and not TextEditable)
+			if (Enabled && MainControl.Enabled && MainControl.Enabled)
+			{
+				if (MainControl.ForeColor != ColorControlTextEnabled)
+					MainControl.ForeColor = ColorControlTextEnabled;
+			}
+			// TextColor in disabled state (ReadOnly state is indifferent)
+			else
+			{
+				if (textControl.DisabledForeColor != ColorControlTextDisabled)
+					textControl.DisabledForeColor = ColorControlTextDisabled;
+			}
+
+		}
+
+		#endregion
+
+		#region New overridable protected methods
+
+		/// <summary>
+		/// Refreshing controls in action panel.
+		/// </summary>
+		protected virtual void RefreshActionPanel()
+		{
+			btnClearSelection.Visible = (buttons & SelectorButtons.ClearSelection) != 0;
+			btnClearSelection.Enabled = !readOnly;
+			btnSelectAll.Visible = (buttons & SelectorButtons.SelectAll) != 0;
+			btnSelectAll.Enabled = !readOnly;
+			btnSelectNone.Visible = (buttons & SelectorButtons.SelectNone) != 0;
+			btnSelectNone.Enabled = !readOnly;
+			btnBrowse.Visible = (buttons & SelectorButtons.Browse) != 0;
+			btnBrowse.Enabled = !readOnly;
+			btnEditor.Visible = (buttons & SelectorButtons.Editor) != 0;
+			btnNew.Visible = (buttons & SelectorButtons.New) != 0;
+			foreach (Control c in pnlActionPanel.Controls)
+				if (c is Button)
+				{
+					(c as Button).FlatStyle = ButtonStyle;
+					//(c as Button).Size...
+				}
+		}
+
+		/// <summary>
+		/// Creating controls in action panel.
+		/// </summary>
+		protected virtual void CreateActionPanel()
+		{
+			pnlActionPanel.Controls.Clear();
+			btnClearSelection = CreateActionButton(Resources.Clear, toolTipClearSelection);
+			btnSelectAll = CreateActionButton(Resources.All, toolTipSelectAll);
+			btnSelectNone = CreateActionButton(Resources.None, toolTipSelectNone);
+			btnBrowse = CreateActionButton(Resources.Browse, toolTipBrowse);
+			btnEditor = CreateActionButton(Resources.Edit, toolTipEditor);
+			btnNew = CreateActionButton(Resources.New, toolTipNew);
+		}
+
+		/// <summary>
+		/// Returns the text based on <see cref="Value"/>.
+		/// In <see cref="ucCustomSelector"/> <see cref="GetTextByValue"/> returns only texts for special states.
+		/// Otherwise, returns with the ToString of <see cref="Value"/>.
+		/// Override this method to calculate texts for other values.
+		/// </summary>
+		protected virtual string GetTextByValue(object value)
+		{
+			if (Object.Equals(value, valueNotSelected))
+				return Language.Translate(textNotSelected);
+			else if (Object.Equals(value, valueAllSelected))
+				return Language.Translate(textAllSelected);
+			else if (Object.Equals(value, valueNoneSelected))
+				return Language.Translate(textNoneSelected);
+			else
+			{
+				CalculateTextEventArgs e = new CalculateTextEventArgs(value);
+				if (CalculateText != null)
+				{
+					OnCalculateText(e);
+					return e.Text;
+				}
+                else if (Object.Equals(value, ControlUtils.UndefinedValue))
+					return textControl.Text;
+				else
+					return e.Text;
+			}
+		}
+
+		/// <summary>
+		/// Sets value while adjusts <see cref="Text"/> and <see cref="State"/>.
+		/// </summary>
+		/// <param name="value">The value to set.</param>
+		protected virtual void SetValue(object value)
+		{
+			if (this.value != value)
+			{
+				this.value = value;
+				SelectorStates newState;
+				if (Object.Equals(value, valueNotSelected))
+					newState = SelectorStates.NotSelected;
+				else if (Object.Equals(value, valueAllSelected))
+					newState = SelectorStates.All;
+				else if (Object.Equals(value, valueNoneSelected))
+					newState = SelectorStates.None;
+				else
+					newState = SelectorStates.ValueSet;
+
+				if (state != newState)
+				{
+					state = newState;
+					OnStateChanged(EventArgs.Empty);
+				}
+				RefreshImage();
+				SetTextByValue();
+				ResetColor();
+				OnValueChanged(EventArgs.Empty);
+			}
+			else SetTextByValue();
+		}
+
+
+		/// <summary>
+		/// Invokes the <see cref="ValueChanged"/> event.
+		/// </summary>
+		protected virtual void OnValueChanged(EventArgs e)
+		{
+			if (ValueChanged != null)
+				ValueChanged(this, e);
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="StateChanged"/> event.
+		/// </summary>
+		protected virtual void OnStateChanged(EventArgs e)
+		{
+			if (StateChanged != null)
+				StateChanged(this, e);
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="ButtonClearClick"/> event or when it is not handled
+		/// calls the <see cref="DefaultClearClick"/> method.
+		/// </summary>
+		protected virtual void OnButtonClearClick(EventArgs e)
+		{
+			if (ButtonClearClick != null)
+				ButtonClearClick(this, e);
+			else DefaultClearClick();
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="ButtonAllClick"/> event or when it is not handled
+		/// calls the <see cref="DefaultAllClick"/> method.
+		/// </summary>
+		protected virtual void OnButtonAllClick(EventArgs e)
+		{
+			if (ButtonAllClick != null)
+				ButtonAllClick(this, e);
+			else DefaultAllClick();
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="ButtonNoneClick"/> event or when it is not handled
+		/// calls the <see cref="DefaultNoneClick"/> method.
+		/// </summary>
+		protected virtual void OnButtonNoneClick(EventArgs e)
+		{
+			if (ButtonNoneClick != null)
+				ButtonNoneClick(this, e);
+			else DefaultNoneClick();
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="ButtonBrowseClick"/> event or when it is not handled
+		/// calls the <see cref="DefaultBrowseClick"/> method.
+		/// </summary>
+		protected virtual void OnButtonBrowseClick(EventArgs e)
+		{
+			if (ButtonBrowseClick != null)
+				ButtonBrowseClick(this, e);
+			else DefaultBrowseClick();
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="ButtonEditorClick"/> event or when it is not handled
+		/// calls the <see cref="DefaultEditorClick"/> method.
+		/// </summary>
+		protected virtual void OnButtonEditorClick(EventArgs e)
+		{
+			if (ButtonEditorClick != null)
+				ButtonEditorClick(this, e);
+			else DefaultEditorClick();
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="ButtonNewClick"/> event or when it is not handled
+		/// calls the <see cref="DefaultNewClick"/> method.
+		/// </summary>
+		protected virtual void OnButtonNewClick(EventArgs e)
+		{
+			if (ButtonNewClick != null)
+				ButtonNewClick(this, e);
+			else DefaultNewClick();
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="AutoFind"/> event or when it is not handled
+		/// calls the <see cref="DefaultAutoFind"/> method.
+		protected virtual void OnAutoFind(AutoFindEventArgs e)
+		{
+			if (AutoFind != null)
+			{
+				AutoFind(this, e);
+				this.Value = e.Value;
+			}
+			else DefaultAutoFind(e.SearchPattern);
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="CalculateText"/> event.
+		/// </summary>
+		protected virtual void OnCalculateText(CalculateTextEventArgs e)
+		{
+			if (CalculateText != null)
+				CalculateText(this, e);
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="ImageClick"/> event.
+		/// </summary>
+		protected virtual void OnImageClick(EventArgs e)
+		{
+			if (ImageClick != null)
+				ImageClick(this, e);
+		}
+
+		/// <summary>
+		/// Invokes the <see cref="ImageDoubleClick"/> event.
+		/// </summary>
+		protected virtual void OnImageDoubleClick(EventArgs e)
+		{
+			if (ImageDoubleClick != null)
+				ImageDoubleClick(this, e);
+		}
+
+		#endregion
+
+		#endregion
+
+		#region Private methods
+
+		#region Private implementation
+
+		/// <summary>
+		/// Sets the text based on Value.
+		/// </summary>
+		private void SetTextByValue()
+		{
+			string text = GetTextByValue(value) ?? String.Empty;
+
+            if (textControl.Text != text)
+				textControl.Text = text;
+		}
+
+		/// <summary>
+		/// Sets <see cref="State"/> adjusting <see cref="Value"/> and <see cref="Text"/>.
+		/// </summary>
+		/// <param name="value">State to set.</param>
+		private void SetState(SelectorStates newState)
+		{
+			if (newState != state)
+			{
+				switch (newState)
+				{
+					case SelectorStates.NotSelected:
+						SetValue(valueNotSelected);
+						break;
+					case SelectorStates.All:
+						SetValue(valueAllSelected);
+						break;
+					case SelectorStates.None:
+						SetValue(valueNoneSelected);
+						break;
+					case SelectorStates.ValueSet:
+					default:
+                        SetValue(ControlUtils.UndefinedValue);
+						break;
+				}
+			}
+		}
+
+		private void SetControlValue(object value)
+		{
+			switch (relevantControlValue)
+			{
+				case RelevantControlValues.Value:
+					Value = value;
+					break;
+				case RelevantControlValues.Text:
+					if (value.Equals(String.Empty) || value.Equals(Language.Translate(textNotSelected)))
+						Value = valueNotSelected;
+					else if (value.Equals(Language.Translate(textAllSelected)))
+						Value = valueAllSelected;
+					else if (value.Equals(Language.Translate(textNoneSelected)))
+						Value = valueNoneSelected;
+					else
+					{
+						if (value != null)
+						{
+							Value = value;
+						}
+						else
+							Value = valueNotSelected;
+					}
+					break;
+				case RelevantControlValues.State:
+					if (value is RelevantControlValues)
+					{
+						SetState((SelectorStates)value);
+					}
+					else
+						Value = valueNotSelected;
+					break;
+			}
+		}
+
+		#endregion
+
+		#region Handled events
+
+		private void SelectorButtonClick(object sender, EventArgs e)
+		{
+			if (sender == btnClearSelection) OnButtonClearClick(e);
+			else if (sender == btnSelectAll) OnButtonAllClick(e);
+			else if (sender == btnSelectNone) OnButtonNoneClick(e);
+			else if (sender == btnBrowse) OnButtonBrowseClick(e);
+			else if (sender == btnEditor) OnButtonEditorClick(e);
+			else if (sender == btnNew) OnButtonNewClick(e);
+		}
+
+		private void pbImage_Click(object sender, EventArgs e)
+		{
+			OnImageClick(e);
+		}
+
+		private void pbImage_DoubleClick(object sender, EventArgs e)
+		{
+			OnImageDoubleClick(e);
+		}
+
+		private void textControl_KeyPress(object sender, KeyPressEventArgs e)
+		{
+			if (readOnly || !textEditable) return;
+			if (state != SelectorStates.ValueSet && deleteContent)
+			{
+				textControl.Text = String.Empty;
+				deleteContent = false;
+			}
+		}
+
+		private void ucCustomSelector_TextChangedOnLeave(object sender, EventArgs e)
+		{
+			ResetColor();
+			if (autoFind)
+			{
+				OnAutoFind(new AutoFindEventArgs(textControl.Text, valueNotSelected));
+			}
+			else
+			{
+				Value = textControl.Text;
+			}
+		}
+
+		private void textControl_Enter(object sender, EventArgs e)
+		{
+			deleteContent = state != SelectorStates.ValueSet;
+		}
+
+		private void ucCustomSelector_Load(object sender, EventArgs e)
+		{
+			SetTextByValue();
+		}
+
+		void MainControl_TextChanged(object sender, EventArgs e)
+		{
+			if (MainControl.Focused)
+				return;
+			else
+				ResetColor();
+		}
+
+		#endregion
+
+		#region Designer-related methods
+
+        /// <summary>
+        /// This method indicates to designers whether the property
+        /// value is different from the ambient value, in which case
+        /// the designer should persist the value.
+        /// </summary>
+        private bool ShouldSerializeText()
+        {
+            return state == SelectorStates.ValueSet;
+        }
+
+		#endregion
+
+		#endregion
+
+		#endregion
+	}
+}

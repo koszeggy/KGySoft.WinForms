@@ -1,0 +1,543 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{3B635381-FF0A-41BD-828E-76937ED6F5DF}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>KGySoft.Controls</RootNamespace>
+    <AssemblyName>KGySoft.Controls</AssemblyName>
+    <SignAssembly>true</SignAssembly>
+    <AssemblyOriginatorKeyFile>..\KGySoft.snk</AssemblyOriginatorKeyFile>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <UpgradeBackupLocation>
+    </UpgradeBackupLocation>
+    <PublishUrl>publish\</PublishUrl>
+    <Install>true</Install>
+    <InstallFrom>Disk</InstallFrom>
+    <UpdateEnabled>false</UpdateEnabled>
+    <UpdateMode>Foreground</UpdateMode>
+    <UpdateInterval>7</UpdateInterval>
+    <UpdateIntervalUnits>Days</UpdateIntervalUnits>
+    <UpdatePeriodically>false</UpdatePeriodically>
+    <UpdateRequired>false</UpdateRequired>
+    <MapFileExtensions>true</MapFileExtensions>
+    <ApplicationRevision>0</ApplicationRevision>
+    <ApplicationVersion>1.0.0.%2a</ApplicationVersion>
+    <IsWebBootstrapper>false</IsWebBootstrapper>
+    <UseApplicationTrust>false</UseApplicationTrust>
+    <BootstrapperEnabled>true</BootstrapperEnabled>
+    <TargetFrameworkProfile />
+    <DocumentationFile>bin\$(Configuration)\KGySoft.Controls.xml</DocumentationFile>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <OutputPath>bin\$(Configuration)</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug_NET35|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <DefineConstants>TRACE;DEBUG;NET35</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_NET35|AnyCPU' ">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;NET35</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug_NET40|AnyCPU'">
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>TRACE;DEBUG;NET40</DefineConstants>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_NET40|AnyCPU'">
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <DefineConstants>TRACE;NET40</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug_NET45|AnyCPU'">
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_NET45|AnyCPU'">
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <DefineConstants>TRACE;NET45</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="PresentationCore" />
+    <Reference Include="PresentationFramework" />
+    <Reference Include="System" />
+    <Reference Include="System.AddIn.Contract" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Design" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Windows.Presentation">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Condition=" '$(TargetFrameworkVersion)' != 'v3.5' " Include="System.Xaml" />
+    <Reference Include="System.Xml" />
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsFormsIntegration">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Classes\Extensions\ColorTools.cs" />
+    <Compile Include="Classes\Extensions\ListControlTools.cs" />
+    <Compile Include="Classes\InternalHelpers\ControlAppearanceState.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\ButtonBaseAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\ButtonFlatAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\ButtonPopupAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\ButtonStandardAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\CheckableControlBaseAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\CheckBoxBaseAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\CheckBoxFlatAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\CheckBoxPopupAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\CheckBoxStandardAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\RadioButtonBaseAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\RadioButtonFlatAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\RadioButtonPopupAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonAdapters\RadioButtonStandardAdapter.cs" />
+    <Compile Include="Classes\InternalHelpers\ControlPaintAccess.cs" />
+    <Compile Include="Classes\InternalHelpers\FadingPainterInternal.cs" />
+    <Compile Include="Classes\InternalHelpers\LayoutUtils.cs" />
+    <Compile Include="Classes\InternalHelpers\ButtonBaseAccess.cs" />
+    <Compile Include="Classes\Screenshot.cs" />
+    <Compile Include="Controls\AdvancedButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\AdvancedCheckBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\AdvancedLabel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\AdvancedProgressBar.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\AdvancedRadioButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CommandLinkButton.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Enums\AdvancedBorderStyle.cs" />
+    <Compile Include="Controls\AdvancedTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\CalendarColumn.cs" />
+    <Compile Include="Controls\ContentPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\EnumCheckedListBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\EnumCheckedListBox.Designer.cs">
+      <DependentUpon>EnumCheckedListBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Controls\AdvancedComboBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\AdvancedDateTimePicker.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\DecimalTextBox.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Controls\AdvancedPanel.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Design\AdvancedPanelDesigner.cs" />
+    <Compile Include="Enums\AdvancedProgressBarStyle.cs" />
+    <Compile Include="Enums\FadingOptions.cs" />
+    <Compile Include="Enums\HyperlinkResolveModes.cs" />
+    <Compile Include="Enums\ProgressBarState.cs" />
+    <Compile Include="Enums\SelectionPlusItems.cs" />
+    <Compile Include="Enums\TaskDialogControlCollectionChangeTypes.cs" />
+    <Compile Include="Enums\TaskDialogStates.cs" />
+    <Compile Include="Enums\TaskDialogOptions.cs" />
+    <Compile Include="Enums\TaskDialogProgressBarStyle.cs" />
+    <Compile Include="Enums\TaskDialogResult.cs" />
+    <Compile Include="Enums\TaskDialogStandardButtonFlags.cs" />
+    <Compile Include="Enums\TaskDialogStandardButtons.cs" />
+    <Compile Include="Enums\TaskDialogStandardIcons.cs" />
+    <Compile Include="EventArgs\FileTypeChangedEventArgs.cs" />
+    <Compile Include="EventArgs\PaintStateEventArgs.cs" />
+    <Compile Include="Classes\ReportSenderEventArgs.cs" />
+    <Compile Include="EventArgs\SelectedFileChangedEventArgs.cs" />
+    <Compile Include="EventArgs\TaskDialogDetailsVisibleChangedEventArgs.cs" />
+    <Compile Include="EventArgs\HyperlinkClickedEventArgs.cs" />
+    <Compile Include="EventArgs\TaskDialogTickEventArgs.cs" />
+    <Compile Include="Forms\AdvancedMessageDialog.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\AdvancedMessageDialog.Designer.cs">
+      <DependentUpon>AdvancedMessageDialog.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\TaskDialogForm.ExpandoButton.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Classes\Extensions\ContentAlignmentTools.cs" />
+    <Compile Include="Classes\Extensions\SizeFTools.cs" />
+    <Compile Include="Classes\Extensions\TextFormatFlagsTools.cs" />
+    <Compile Include="Classes\InternalHelpers\NCHelper.cs" />
+    <Compile Include="Interfaces\IRenderingQuality.cs" />
+    <Compile Include="Interfaces\ISupportButtonAdapter.cs" />
+    <Compile Include="Interfaces\ISupportsFading.cs" />
+    <Compile Include="Interfaces\ISupportsFadingInternal.cs" />
+    <Compile Include="WinApi\BP_ANIMATIONPARAMS.cs" />
+    <Compile Include="WinApi\BP_ANIMATIONSTYLE.cs" />
+    <Compile Include="WinApi\BP_BUFFERFORMAT.cs" />
+    <Compile Include="Classes\FadingPainter.cs" />
+    <Compile Include="WinApi\BUTTONPARTS.cs" />
+    <Compile Include="WinApi\COMMANDLINKSTATES.cs" />
+    <Compile Include="WinApi\PUSHBUTTONSTATES.cs" />
+    <Compile Include="WinApi\SIZE.cs" />
+    <Compile Include="WinApi\TASKDIALOG_ELEMENTS.cs" />
+    <Compile Include="Forms\TaskDialogForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\TaskDialogForm.Designer.cs">
+      <DependentUpon>TaskDialogForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\WaitForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\WaitForm.Designer.cs">
+      <DependentUpon>WaitForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\BaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\BaseForm.Designer.cs">
+      <DependentUpon>BaseForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\DialogBaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\DialogBaseForm.Designer.cs">
+      <DependentUpon>DialogBaseForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Forms\InputBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="Forms\InputBox.Designer.cs">
+      <DependentUpon>InputBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Interfaces\IListControl.cs" />
+    <Compile Include="Interfaces\IDisabledColorCapable.cs" />
+    <Compile Include="Interfaces\IReadOnlyCapable.cs" />
+    <Compile Include="Interfaces\ITaskDialog.cs" />
+    <Compile Include="Interop\AdvancedWinformsHost.cs" />
+    <Compile Include="Classes\Extensions\ComboUtils.cs" />
+    <Compile Include="Classes\Extensions\ControlUtils.cs" />
+    <Compile Include="Classes\DataGridViewTextAndImageColumn.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Include="Classes\Dialogs.cs" />
+    <Compile Include="Classes\AdvancedSaveFileDialog.cs">
+    </Compile>
+    <Compile Include="Classes\LanguageWinForms.cs" />
+    <Compile Include="Classes\TaskDialog\NativeTaskDialog.cs" />
+    <Compile Include="Classes\TaskDialog\TaskDialog.cs" />
+    <Compile Include="Classes\TaskDialog\TaskDialogButton.cs" />
+    <Compile Include="Classes\TaskDialog\TaskDialogButtonBase.cs" />
+    <Compile Include="Classes\TaskDialog\TaskDialogControl.cs" />
+    <Compile Include="Classes\InternalHelpers\TaskDialogControlCollection.cs" />
+    <Compile Include="Classes\TaskDialog\TaskDialogRadioButton.cs" />
+    <Compile Include="Classes\Extensions\TreeNodeUtils.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Properties\CurrencyImages.Designer.cs" />
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Include="Design\ucCaptionedContainerDesigner.cs">
+    </Compile>
+    <Compile Include="UserControls\EventArgs\AutoFindEventsArgs.cs" />
+    <Compile Include="UserControls\EventArgs\CalculateTextEventArgs.cs" />
+    <Compile Include="Enums\RelevantControlValues.cs" />
+    <Compile Include="Enums\SelectorStates.cs" />
+    <Compile Include="Enums\SelectorButtons.cs" />
+    <Compile Include="UserControls\ucAllInvertNone.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucAllInvertNone.Designer.cs">
+      <DependentUpon>ucAllInvertNone.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucBase.designer.cs">
+      <DependentUpon>ucBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucCaptionedBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucCaptionedBase.designer.cs">
+      <DependentUpon>ucCaptionedBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucCheckBox.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucCheckBox.designer.cs">
+      <DependentUpon>ucCheckBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucCombo.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucCombo.designer.cs">
+      <DependentUpon>ucCombo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucCustomSelector.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucCustomSelector.Designer.cs">
+      <DependentUpon>ucCustomSelector.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucDate.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucDate.designer.cs">
+      <DependentUpon>ucDate.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucDateInterval.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucDateInterval.designer.cs">
+      <DependentUpon>ucDateInterval.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucDecimal.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucDecimal.designer.cs">
+      <DependentUpon>ucDecimal.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucDecimalUpDown.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucDecimalUpDown.designer.cs">
+      <DependentUpon>ucDecimalUpDown.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucCaptionedContainer.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucCaptionedContainer.Designer.cs">
+      <DependentUpon>ucCaptionedContainer.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucPropertyGrid.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucPropertyGrid.Designer.cs">
+      <DependentUpon>ucPropertyGrid.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucPropertyGrid.LocalizedObjectDescriptor.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucText.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucText.designer.cs">
+      <DependentUpon>ucText.cs</DependentUpon>
+    </Compile>
+    <Compile Include="UserControls\ucTextBase.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="UserControls\ucTextBase.Designer.cs">
+      <DependentUpon>ucTextBase.cs</DependentUpon>
+    </Compile>
+    <Compile Include="WinApi\ACTCTX.cs" />
+    <Compile Include="WinApi\Comctl32.cs" />
+    <Compile Include="WinApi\Comctl32ActivationContext.cs" />
+    <Compile Include="Debug\Comdlg32.cs" />
+    <Compile Include="WinApi\Constants.cs" />
+    <Compile Include="WinApi\DLGTEMPLATE.cs" />
+    <Compile Include="WinApi\Kernel32.cs" />
+    <Compile Include="WinApi\NCCALCSIZE_PARAMS.cs" />
+    <Compile Include="WinApi\NMHDR.cs" />
+    <Compile Include="WinApi\OPENFILENAME.cs" />
+    <Compile Include="WinApi\POINT.cs" />
+    <Compile Include="WinApi\RECT.cs" />
+    <Compile Include="WinApi\TASKDIALOGCONFIG.cs" />
+    <Compile Include="WinApi\TASKDIALOG_BUTTON.cs" />
+    <Compile Include="WinApi\TASKDIALOG_FLAGS.cs" />
+    <Compile Include="WinApi\TASKDIALOG_MESSAGES.cs" />
+    <Compile Include="WinApi\TASKDIALOG_NOTIFICATIONS.cs" />
+    <Compile Include="WinApi\User32.cs" />
+    <Compile Include="WinApi\UxTheme.cs" />
+    <Compile Include="WinApi\WindowsUtils.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Forms\BaseForm.resx">
+      <DependentUpon>BaseForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\DialogBaseForm.resx">
+      <DependentUpon>DialogBaseForm.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\AdvancedMessageDialog.resx">
+      <DependentUpon>AdvancedMessageDialog.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\TaskDialogForm.resx">
+      <DependentUpon>TaskDialogForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\WaitForm.resx">
+      <DependentUpon>WaitForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Forms\InputBox.resx">
+      <DependentUpon>InputBox.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <SubType>Designer</SubType>
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Resources\Toolbox.CommandLinkButton.png" />
+    <EmbeddedResource Include="UserControls\ucAllInvertNone.resx">
+      <DependentUpon>ucAllInvertNone.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucBase.resx">
+      <DependentUpon>ucBase.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucCaptionedBase.resx">
+      <DependentUpon>ucCaptionedBase.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucCaptionedContainer.resx">
+      <SubType>Designer</SubType>
+      <DependentUpon>ucCaptionedContainer.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucCheckBox.resx">
+      <DependentUpon>ucCheckBox.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucCombo.resx">
+      <DependentUpon>ucCombo.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucCustomSelector.resx">
+      <DependentUpon>ucCustomSelector.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucDate.resx">
+      <DependentUpon>ucDate.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucDateInterval.resx">
+      <DependentUpon>ucDateInterval.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucDecimal.resx">
+      <DependentUpon>ucDecimal.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucDecimalUpDown.resx">
+      <DependentUpon>ucDecimalUpDown.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucPropertyGrid.resx">
+      <DependentUpon>ucPropertyGrid.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucText.resx">
+      <DependentUpon>ucText.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <EmbeddedResource Include="UserControls\ucTextBase.resx">
+      <DependentUpon>ucTextBase.cs</DependentUpon>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\KGySoft.snk">
+      <Link>KGySoft.snk</Link>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Drawing\KGySoft.Drawing.csproj">
+      <Project>{06AEC656-8AE3-409C-AB2E-64C6A3712F8B}</Project>
+      <Name>KGySoft.Drawing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Language\KGySoft.Language.csproj">
+      <Project>{308021B7-4BA7-493A-BBBD-9A88B2911C28}</Project>
+      <Name>KGySoft.Language</Name>
+      <Aliases>lang</Aliases>
+    </ProjectReference>
+    <ProjectReference Include="..\Libraries\KGySoft.Libraries.csproj">
+      <Project>{D14B4B4A-86C4-45AD-B6F8-86CD878199E0}</Project>
+      <Name>KGySoft.Libraries</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\TaskDialog.ico" />
+    <EmbeddedResource Include="Resources\Toolbox.AdvancedLabel.png" />
+    <None Include="Resources\CommandLinkDisabled.png" />
+    <None Include="Resources\CommandLinkHovered.png" />
+    <None Include="Resources\CommandLinkNormal.png" />
+    <None Include="Resources\ExpandoHoveredDown.png" />
+    <None Include="Resources\ExpandoHoveredUp.png" />
+    <None Include="Resources\ExpandoNormalDown.png" />
+    <None Include="Resources\ExpandoNormalUp.png" />
+    <None Include="Resources\ExpandoPressedDown.png" />
+    <None Include="Resources\ExpandoPressedUp.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <BootstrapperPackage Include="Microsoft.Net.Client.3.5">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1 Client Profile</ProductName>
+      <Install>false</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Net.Framework.3.5.SP1">
+      <Visible>False</Visible>
+      <ProductName>.NET Framework 3.5 SP1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+    <BootstrapperPackage Include="Microsoft.Windows.Installer.3.1">
+      <Visible>False</Visible>
+      <ProductName>Windows Installer 3.1</ProductName>
+      <Install>true</Install>
+    </BootstrapperPackage>
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+    <MSBuild Condition=" '$(TargetFrameworkVersion.Replace(&quot;v&quot;,&quot;&quot;))' &gt;= '4.0' " Projects="$(MSBuildProjectFile)" Properties="TargetFrameworkVersion=v3.5" RunEachTargetSeparately="true" />
+  </Target>
+  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls_x005C_FileControls="KGySoft.Controls.Controls.FileControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls="KGySoft.Controls.Controls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_Design="KGySoft.Controls.UserControls.Design" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_NewFolder1="KGySoft.Controls.UserControls.NewFolder1" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_EventArgs="KGySoft.Controls.UserControls.EventArgs" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls="KGySoft.Controls.UserControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Libraries="KGySoft.Controls.Libraries" LastExportedMakefileHash="zr6SNy3VgexhAFeppxNRVw==" ED14F191-6CDA-4bbb-BB1B-C329DD754E20_OutputCondition="" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Properties="KGySoft.Controls.Properties" ExternalBuildIntegrationEnabled="True" />
+    </VisualStudio>
+  </ProjectExtensions>
+  <PropertyGroup>
+    <PostBuildEvent>
+    </PostBuildEvent>
+  </PropertyGroup>
+</Project>
