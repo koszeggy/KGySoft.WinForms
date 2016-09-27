@@ -290,9 +290,9 @@ namespace KGySoft.Controls
 
         public static bool IsHorizontalRelation(TextImageRelation relation)
         {
-            // ReSharper disable BitwiseOperatorOnEnumWihtoutFlags
+            // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
             return ((relation & (TextImageRelation.TextBeforeImage | TextImageRelation.ImageBeforeText)) != TextImageRelation.Overlay);
-            // ReSharper restore BitwiseOperatorOnEnumWihtoutFlags
+            // ReSharper restore BitwiseOperatorOnEnumWithoutFlags
         }
 
         //        public static bool IsIntersectHorizontally(Rectangle rect1, Rectangle rect2)
@@ -315,16 +315,16 @@ namespace KGySoft.Controls
 
         public static bool IsVerticalAlignment(ContentAlignment align)
         {
-            // ReSharper disable BitwiseOperatorOnEnumWihtoutFlags
+            // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
             return ((align & (ContentAlignment.BottomCenter | ContentAlignment.TopCenter)) != ((ContentAlignment)0));
-            // ReSharper restore BitwiseOperatorOnEnumWihtoutFlags
+            // ReSharper restore BitwiseOperatorOnEnumWithoutFlags
         }
 
         public static bool IsVerticalRelation(TextImageRelation relation)
         {
-            // ReSharper disable BitwiseOperatorOnEnumWihtoutFlags
+            // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
             return ((relation & (TextImageRelation.TextAboveImage | TextImageRelation.ImageAboveText)) != TextImageRelation.Overlay);
-            // ReSharper restore BitwiseOperatorOnEnumWihtoutFlags
+            // ReSharper restore BitwiseOperatorOnEnumWithoutFlags
         }
 
         //        public static bool IsZeroWidthOrHeight(Rectangle rectangle)
@@ -449,7 +449,7 @@ namespace KGySoft.Controls
 
         public static Rectangle VAlign(Size alignThis, Rectangle withinThis, ContentAlignment align)
         {
-            // ReSharper disable BitwiseOperatorOnEnumWihtoutFlags
+            // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
             if ((align & (ContentAlignment.BottomRight | ContentAlignment.BottomCenter | ContentAlignment.BottomLeft)) != ((ContentAlignment)0))
             {
                 withinThis.Y += withinThis.Height - alignThis.Height;
@@ -460,7 +460,7 @@ namespace KGySoft.Controls
             }
             withinThis.Height = alignThis.Height;
             return withinThis;
-            // ReSharper restore BitwiseOperatorOnEnumWihtoutFlags
+            // ReSharper restore BitwiseOperatorOnEnumWithoutFlags
         }
 
         //        public static Rectangle VAlign(Size alignThis, Rectangle withinThis, AnchorStyles anchorStyles)

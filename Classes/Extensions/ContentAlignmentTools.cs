@@ -16,14 +16,14 @@ namespace KGySoft.Controls
     {
         #region Private Constants
 
-        // ReSharper disable BitwiseOperatorOnEnumWihtoutFlags
+        // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
         private const ContentAlignment anyLeft = ContentAlignment.BottomLeft | ContentAlignment.MiddleLeft | ContentAlignment.TopLeft;
         private const ContentAlignment anyTop = ContentAlignment.TopRight | ContentAlignment.TopCenter | ContentAlignment.TopLeft;
         private const ContentAlignment anyBottom = ContentAlignment.BottomRight | ContentAlignment.BottomCenter | ContentAlignment.BottomLeft;
         private const ContentAlignment anyMiddle = ContentAlignment.MiddleRight | ContentAlignment.MiddleCenter | ContentAlignment.MiddleLeft;
         private const ContentAlignment anyRight = ContentAlignment.BottomRight | ContentAlignment.MiddleRight | ContentAlignment.TopRight;
         private const ContentAlignment anyCenter = ContentAlignment.BottomCenter | ContentAlignment.MiddleCenter | ContentAlignment.TopCenter;
-        // ReSharper restore BitwiseOperatorOnEnumWihtoutFlags
+        // ReSharper restore BitwiseOperatorOnEnumWithoutFlags
 
         #endregion
 
@@ -62,7 +62,7 @@ namespace KGySoft.Controls
             return (ContentAlignment)RtlTranslateContentMethod.Invoke(instance, alignment);
         }
 
-        // ReSharper disable BitwiseOperatorOnEnumWihtoutFlags
+        // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
         /// <summary>
         /// Gets if any left alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
@@ -110,7 +110,7 @@ namespace KGySoft.Controls
         {
             return (contentAlignment & anyCenter) != 0;
         }
-        // ReSharper restore BitwiseOperatorOnEnumWihtoutFlags
+        // ReSharper restore BitwiseOperatorOnEnumWithoutFlags
 
         #endregion
     }

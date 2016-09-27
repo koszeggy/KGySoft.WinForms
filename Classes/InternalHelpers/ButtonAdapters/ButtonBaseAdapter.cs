@@ -188,7 +188,7 @@ namespace KGySoft.Controls
 
             private static readonly int combineCheck = BitVector32.CreateMask();
             private static readonly int combineImageText = BitVector32.CreateMask(combineCheck);
-            // ReSharper disable BitwiseOperatorOnEnumWihtoutFlags
+            // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
             private static readonly TextImageRelation[] _imageAlignToRelation = new TextImageRelation[] {
                 /* TopLeft = */       TextImageRelation.ImageAboveText | TextImageRelation.ImageBeforeText,
                 /* TopCenter = */     TextImageRelation.ImageAboveText,
@@ -202,7 +202,7 @@ namespace KGySoft.Controls
                 /* BottomCenter = */  TextImageRelation.TextAboveImage,
                 /* BottomRight = */   TextImageRelation.TextAboveImage | TextImageRelation.TextBeforeImage
             };
-            // ReSharper restore BitwiseOperatorOnEnumWihtoutFlags
+            // ReSharper restore BitwiseOperatorOnEnumWithoutFlags
 
             #endregion
 
@@ -566,7 +566,7 @@ namespace KGySoft.Controls
                     maxCombinedBounds.Size = LayoutUtils.UnionSizes(maxCombinedBounds.Size, combinedSize);
                     Rectangle combinedBounds = LayoutUtils.Align(combinedSize, maxCombinedBounds, ContentAlignment.MiddleCenter);
 
-                    // ReSharper disable BitwiseOperatorOnEnumWihtoutFlags
+                    // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
                     // imageEdge indicates whether the combination of imageAlign and textImageRelation place
                     // the image along the edge of the control.  If so, we can increase the space for text.
                     bool imageEdge = (AnchorStyles)(ImageAlignToRelation(imageAlign) & textImageRelation) != AnchorStyles.None;
@@ -574,7 +574,7 @@ namespace KGySoft.Controls
                     // textEdge indicates whether the combination of textAlign and textImageRelation place
                     // the text along the edge of the control.  If so, we can increase the space for image.
                     bool textEdge = (AnchorStyles)(TextAlignToRelation(textAlign) & textImageRelation) != AnchorStyles.None;
-                    // ReSharper restore BitwiseOperatorOnEnumWihtoutFlags
+                    // ReSharper restore BitwiseOperatorOnEnumWithoutFlags
 
                     if (imageEdge)
                     {
