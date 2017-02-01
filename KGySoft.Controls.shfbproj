@@ -7,7 +7,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{053d0fe1-9664-4a4d-acb5-e08fcc4cad11}</ProjectGuid>
-    <SHFBSchemaVersion>1.9.9.0</SHFBSchemaVersion>
+    <SHFBSchemaVersion>2015.6.5.0</SHFBSchemaVersion>
     <!-- AssemblyName, Name, and RootNamespace are not used by SHFB but Visual Studio adds them anyway -->
     <AssemblyName>Documentation</AssemblyName>
     <RootNamespace>Documentation</RootNamespace>
@@ -19,7 +19,8 @@
     <Language>en-US</Language>
     <DocumentationSources>
       <DocumentationSource sourceFile="bin\Release\v3.5\KGySoft.Controls.dll" />
-<DocumentationSource sourceFile="bin\Release\v3.5\KGySoft.Controls.xml" /></DocumentationSources>
+      <DocumentationSource sourceFile="bin\Release\v3.5\KGySoft.Controls.xml" />
+    </DocumentationSources>
     <NamespaceSummaries>
       <NamespaceSummaryItem name="KGySoft.Controls" isDocumented="True" xmlns="">Contains controls, user controls, forms and other control-relevant classes.</NamespaceSummaryItem>
       <NamespaceSummaryItem name="KGySoft.Controls.Interop" isDocumented="True" xmlns="">Contains types for Windows Forms-WPF interoperatibily</NamespaceSummaryItem>
