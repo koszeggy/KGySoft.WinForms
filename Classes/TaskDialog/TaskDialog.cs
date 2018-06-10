@@ -21,8 +21,8 @@ namespace KGySoft.Controls
 {
     /// <summary>
     /// Represents a task dialog window that is able display regular buttons, Vista-like command options,
-    /// radio buttons and progress bar. Can work in compaibility mode so dialog can be use even with Windows XP.
-    /// <note type="implementnote"><see cref="TaskDialog"/> implements <see cref="IDisposable"/>. When task a dialog is disposed, it frees
+    /// radio buttons and progress bar. Can work in compatibility mode so dialog can be use even with Windows XP.
+    /// <note><see cref="TaskDialog"/> implements <see cref="IDisposable"/>. When task a dialog is disposed, it frees
     /// every event subscriptions so it is not needed to unsubscribe events explicitly.</note>
     /// </summary>
     public sealed class TaskDialog : IWin32Window, IDisposable
