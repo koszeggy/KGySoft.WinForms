@@ -707,7 +707,7 @@ namespace KGySoft.Controls
                 }
 
                 if (alert)
-                    throw new Exception("Value \"" + value.ToString() + "\" violates current Range");
+                    throw new OverflowException("Value \"" + value + "\" violates current Range");
             }
             else Blank = true;
 
@@ -820,7 +820,7 @@ namespace KGySoft.Controls
                     // itt lenyeljük, mert ez csak szerkesztéskor van - ilyenkor egyszerűen nincs felszorzás
                     // Text-nek való értékadáskor már dobnánk hibát
                 }
-                text = num.ToString();
+                text = num.ToString(CultureInfo.CurrentCulture);
                 while (text.IndexOf(decimalSeparator) >= 0 && text[text.Length - 1].In(decimalSeparator, '0'))
                     text = text.Remove(text.Length - 1);
             }
