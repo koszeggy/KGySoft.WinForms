@@ -44,7 +44,7 @@ namespace KGySoft.Controls
         #region Static Fields
 
         private static Image securityShieldImage;
-        private static readonly string nbsp = Unicode.nbsp.ToString(null);
+        private static readonly string nbsp = '\u00A0'.ToString(null);
         private static FieldAccessor systemSizeField;
 
         #endregion
