@@ -9,7 +9,7 @@ namespace KGySoft.Controls
     {
         /// <summary>
         /// Gets the hyperlink that was clicked. If resolving was not handled,
-        /// the <see cref="HandledEventArgs.Handled"/> property can be set to <c>false</c>
+        /// the <see cref="HandledEventArgs.Handled"/> property can be set to <see langword="false"/>
         /// to make the system resolve the hyperlink.
         /// </summary>
         public string Hyperlink { get; private set; }

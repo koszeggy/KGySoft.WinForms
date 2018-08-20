@@ -30,13 +30,13 @@ namespace KGySoft.Controls
         /// <summary>
         /// Binds the list control to a <see cref="DataTable"/>.
         /// </summary>
-        /// <param name="dataTable">The data source table. If <paramref name="translateNames"/> is <c>true</c> or <paramref name="plusItems"/> is not <see cref="SelectionPlusItems.None"/>, then the data table will be modified.
+        /// <param name="dataTable">The data source table. If <paramref name="translateNames"/> is <see langword="true"/> or <paramref name="plusItems"/> is not <see cref="SelectionPlusItems.None"/>, then the data table will be modified.
         /// If the source table must be kept intact, then clone the table before calling this method by <see cref="DataTable.Clone"/>.</param>
         /// <param name="displayMember">Column name to display in the the list control.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the list control.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, the displayed column must contain string values.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
-        /// <param name="sortByDisplayedValues">If <c>true</c>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
+        /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the value column must have a data type that is convertible to signed integer type.</param>
         void LoadFrom(DataTable dataTable, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems);
@@ -66,7 +66,7 @@ namespace KGySoft.Controls
         /// <param name="valueMemberType">Type of the actual value for the items in the list control. If <see langword="null"/>, then original enum value will used as value member.</param>
         /// <param name="translateNames">Indicates whether the displayed enum field names should be translated.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
-        /// <param name="sortByDisplayedValues">If <c>true</c>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
+        /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
         void LoadFrom(Type enumType, Type valueMemberType, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems);
@@ -101,7 +101,7 @@ namespace KGySoft.Controls
         /// <param name="valueMember">Property name to use as the actual value for the items in the list control.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, <paramref name="displayMember"/> must be writable and should refer to a <see cref="string"/> property.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
-        /// <param name="sortByDisplayedValues">If <c>true</c>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
+        /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
         void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems);

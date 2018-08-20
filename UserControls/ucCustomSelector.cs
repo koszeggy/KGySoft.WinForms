@@ -201,7 +201,7 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Gets or sets whether the enabled combo box should be drawn by the system in <see cref="ComboBoxStyle.DropDownList"/> mode.
-        /// If this property is <c>false</c>, then drop-down list appearance will be the same as in case of <see cref="ComboBoxStyle.DropDown"/> mode
+        /// If this property is <see langword="false"/>, then drop-down list appearance will be the same as in case of <see cref="ComboBoxStyle.DropDown"/> mode
         /// even with Windows Vista/Windows 7 themes.
         /// </summary>
         [Category("AdvancedComboBox")]
@@ -355,8 +355,8 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Gets or sets whether <see cref="Value"/> should be auto-calculated based on the typed text.
-        /// If the value of this property is <c>false</c>, then <see cref="Text"/> will be simply assigned to <see cref="Value"/>
-        /// on leaving the control. If the property is <c>true</c>, then <see cref="Value"/> is calculated by
+        /// If the value of this property is <see langword="false"/>, then <see cref="Text"/> will be simply assigned to <see cref="Value"/>
+        /// on leaving the control. If the property is <see langword="true"/>, then <see cref="Value"/> is calculated by
         /// <see cref="AutoFind"/> event or by <see cref="DefaultAutoFind"/> method if AutoFind event is not subscribed.
         /// </summary>
         [Category("ucCustomSelector")]
@@ -702,7 +702,7 @@ namespace KGySoft.Controls
         public event EventHandler ButtonNewClick;
 
         /// <summary>
-        /// Occurs on leaving the control after editing the text manually and when <see cref="AutoFindText"/> property is <c>true</c>.
+        /// Occurs on leaving the control after editing the text manually and when <see cref="AutoFindText"/> property is <see langword="true"/>.
         /// Can be used for calculating <see cref="Value"/> based on the typed text. If this event is not subscribed, then <see cref="DefaultAutoFind"/> will be called,
         /// which tries to find the element in <see cref="Items"/> or simply makes <see cref="Value"/> equal to <see cref="Text"/>.
         /// </summary>
@@ -1647,7 +1647,7 @@ namespace KGySoft.Controls
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, the displayed column must contain string values.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
-        /// <param name="sortByDisplayedValues">If <c>true</c>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
+        /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the value column must have a data type that is convertible to signed integer type.</param>
         public void LoadFrom(DataTable dataTable, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)
@@ -1686,7 +1686,7 @@ namespace KGySoft.Controls
         /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
         /// <param name="translateNames">Indicates whether the displayed enum field names should be translated.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
-        /// <param name="sortByDisplayedValues">If <c>true</c>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
+        /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
         public void LoadFrom(Type enumType, Type valueMemberType, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)
@@ -1733,7 +1733,7 @@ namespace KGySoft.Controls
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, <paramref name="displayMember"/> must be writable and should refer to a <see cref="string"/> property.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
-        /// <param name="sortByDisplayedValues">If <c>true</c>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
+        /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)

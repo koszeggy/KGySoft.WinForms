@@ -26,7 +26,7 @@ namespace KGySoft.Controls
     // TODO: colorok mint gombnál
     /// <summary>
     /// Represents a date-time picker that supports coloring in disabled state.
-    /// Its <see cref="Value"/> property is redefined so it returns <see cref="DateTime.MaxValue"/> if <see cref="DateTimePicker.Checked"/> is <c>false</c> and
+    /// Its <see cref="Value"/> property is redefined so it returns <see cref="DateTime.MaxValue"/> if <see cref="DateTimePicker.Checked"/> is <see langword="false"/> and
     /// instead of throwing exception when invalid date is assigned to it, it simpy changes <see cref="DateTimePicker.Checked"/> false (if checkbox is visible), or just ignores the value.
     /// </summary>
     public class AdvancedDateTimePicker : DateTimePicker, IDisabledColorCapable
@@ -66,7 +66,7 @@ namespace KGySoft.Controls
         /// <summary>
         /// Gets or sets the date/time value assigned to the control.
         /// </summary>
-        /// <value>Returns <see cref="DateTime.MaxValue"/> if <see cref="DateTimePicker.ShowCheckBox"/> is <c>true</c> and <see cref="DateTimePicker.Checked"/> is false.</value>
+        /// <value>Returns <see cref="DateTime.MaxValue"/> if <see cref="DateTimePicker.ShowCheckBox"/> is <see langword="true"/> and <see cref="DateTimePicker.Checked"/> is false.</value>
         [Bindable(BindableSupport.Default, BindingDirection.TwoWay)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)] // ne mentse a mai dátumot mindig a designerbe
         [Browsable(false)]

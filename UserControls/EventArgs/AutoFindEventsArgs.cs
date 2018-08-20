@@ -24,13 +24,13 @@ namespace KGySoft.Controls
 	    /// If in the used scenario <see cref="ucCustomSelector.Value"/> has no special meaning,
 	    /// then you may set this property to <see cref="ControlTools.UndefinedValue"/> so <see cref="ucCustomSelector.Text"/>
 	    /// will not be changed - you have to do it manually.
-	    /// To fallback to default logic set <see cref="DefaultAutoFind"/> to <c>true</c>.
+	    /// To fallback to default logic set <see cref="DefaultAutoFind"/> to <see langword="true"/>.
 	    /// </summary>
 	    public object Value { get; set; }
 
 	    /// <summary>
 	    /// Gets or sets whether <see cref="ucCustomSelector.DefaultAutoFind"/> should be called.
-	    /// Set this property to <c>true</c> to fallback to default logic instead of accepting <see cref="Value"/>.
+	    /// Set this property to <see langword="true"/> to fallback to default logic instead of accepting <see cref="Value"/>.
 	    /// </summary>
         public bool DefaultAutoFind { get; set; }
 

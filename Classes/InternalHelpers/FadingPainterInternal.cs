@@ -347,7 +347,7 @@ namespace KGySoft.Controls
         /// </summary>
         /// <param name="prevState">Previous state.</param>
         /// <param name="newState">New state.</param>
-        /// <returns><c>true</c>, if states are equal; otherwise, <c>false</c>.</returns>
+        /// <returns><see langword="true"/>, if states are equal; otherwise, <see langword="false"/>.</returns>
         protected override bool StateEquals(ControlAppearanceState prevState, ControlAppearanceState newState)
         {
             Debug.Assert(newState != null);

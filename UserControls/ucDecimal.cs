@@ -56,7 +56,7 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Gets or sets whether the <see cref="DecimalTextBox"/> is in blank state.
-        /// Can be set on ly if <see cref="BlankEnabled"/> is <c>true</c>.
+        /// Can be set on ly if <see cref="BlankEnabled"/> is <see langword="true"/>.
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets whether the DecimalTextBox is in blank state. Can be set only if BlankEnabled is true.")]
@@ -81,7 +81,7 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Gets or sets whether <see cref="Blank"/> state can be enabled.
-        /// When <c>true</c>, then the <see cref="DecimalTextBox"/> will be automatically blank if <see cref="Value"/> is out of range.
+        /// When <see langword="true"/>, then the <see cref="DecimalTextBox"/> will be automatically blank if <see cref="Value"/> is out of range.
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets whether Blank state can be enabled. " +
@@ -133,7 +133,7 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Gets or sets the the valid range of <see cref="Value"/>.
-        /// If <see cref="Value"/> violates newly set range, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <c>false</c>.
+        /// If <see cref="Value"/> violates newly set range, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <see langword="false"/>.
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets the the valid range of Value. " +
@@ -147,7 +147,7 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Gets or sets accepted minimum <see cref="Value"/>.
-        /// If <see cref="Value"/> violates newly set minimum value, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <c>false</c>.
+        /// If <see cref="Value"/> violates newly set minimum value, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <see langword="false"/>.
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets accepted minimum Value. " +
@@ -162,7 +162,7 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Gets or sets accepted maximum <see cref="Value"/>.
-        /// If <see cref="Value"/> violates newly set maximum value, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <c>false</c>.
+        /// If <see cref="Value"/> violates newly set maximum value, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <see langword="false"/>.
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets accepted maximum Value. " +

@@ -280,7 +280,7 @@ namespace KGySoft.Controls
         /// Gets the double buffering state of a control
         /// </summary>
         /// <param name="control">The control to set.</param>
-        /// <param name="useDoubleBuffering"><c>true</c>, if <paramref name="control"/> should use double buffering; otherwise, <c>false</c>.</param>
+        /// <param name="useDoubleBuffering"><see langword="true"/>, if <paramref name="control"/> should use double buffering; otherwise, <see langword="false"/>.</param>
         public static void SetDoubleBuffered(this Control control, bool useDoubleBuffering)
         {
             if (control == null)

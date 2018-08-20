@@ -83,7 +83,7 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Occurs when a link is clicked.
-        /// To handle clicked links automatically, set <see cref="AutoHandleUrls"/> <c>true</c>, and if this event is subsribed, set <see cref="HyperlinkClickedEventArgs.Handled"/> <c>false</c> in the event handler.
+        /// To handle clicked links automatically, set <see cref="AutoHandleUrls"/> <see langword="true"/>, and if this event is subsribed, set <see cref="HyperlinkClickedEventArgs.Handled"/> <see langword="false"/> in the event handler.
         /// </summary>
         [Description("Occurs when a link is clicked. To handle clicked links automatically, set AutoHandleUrls true, and if this event is subsribed, set HyperlinkClickedEventArgs.Handled false in the event handler.")]
         [Category("AdvancedLabel")]
@@ -101,8 +101,8 @@ namespace KGySoft.Controls
         #region Properties
 
         /// <summary>
-        /// Gets or sets whether clicked links should be handled automatically or when <see cref="HyperlinkClickedEventArgs.Handled"/> is set to <c>false</c>.
-        /// <note type="caution">Caution: Setting this property to <c>true</c> may cause security issues. Use only in secure circumstances!</note>
+        /// Gets or sets whether clicked links should be handled automatically or when <see cref="HyperlinkClickedEventArgs.Handled"/> is set to <see langword="false"/>.
+        /// <note type="caution">Caution: Setting this property to <see langword="true"/> may cause security issues. Use only in secure circumstances!</note>
         /// </summary>
         [Category("AdvancedLabel")]
         [DefaultValue(false)]

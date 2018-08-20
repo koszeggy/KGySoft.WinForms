@@ -32,8 +32,8 @@ namespace KGySoft.Controls
         #region Events
 
         /// <summary>
-        /// Occurs when <see cref="TaskDialogRadioButton"/> is selected. That is, when <see cref="Checked"/> becomes <c>true</c>.
-        /// If you need a notification even if <see cref="Checked"/> bacames <c>false</c>, use <see cref="TaskDialogControl.PropertyChanged"/> event instead.
+        /// Occurs when <see cref="TaskDialogRadioButton"/> is selected. That is, when <see cref="Checked"/> becomes <see langword="true"/>.
+        /// If you need a notification even if <see cref="Checked"/> bacames <see langword="false"/>, use <see cref="TaskDialogControl.PropertyChanged"/> event instead.
         /// </summary>
         public event EventHandler Selected
         {
