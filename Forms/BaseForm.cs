@@ -1,4 +1,3 @@
-extern alias lang;
 using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
@@ -10,8 +9,8 @@ using System.Reflection;
 using System.Windows.Forms;
 
 using KGySoft.Controls.WinApi;
+using KGySoft.Libraries.Language;
 using KGySoft.Reflection;
-using Language = lang::KGySoft.Libraries.Language.Language;
 
 namespace KGySoft.Controls
 {

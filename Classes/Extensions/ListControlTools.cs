@@ -1,5 +1,4 @@
-﻿extern alias lang;
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -9,8 +8,8 @@ using System.Reflection;
 using System.Windows.Forms;
 using KGySoft.Collections;
 using KGySoft.Libraries;
+using KGySoft.Libraries.Language;
 using KGySoft.Reflection;
-using Language = lang::KGySoft.Libraries.Language.Language;
 
 // TODO: Enum-os LoadFrom-nál meg lehessen adni, hogy int vagy enum legyen-e a ValueMember (EnumToDataTable-nél ez mód megadható)
 namespace KGySoft.Controls

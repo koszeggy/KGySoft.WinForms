@@ -1,5 +1,4 @@
-﻿extern alias lang;
-#region Used namespaces
+﻿#region Used namespaces
 
 using System;
 using System.Collections;
@@ -12,8 +11,7 @@ using System.Windows.Forms;
 
 using KGySoft.Drawing;
 using KGySoft.Libraries;
-
-using Language = lang::KGySoft.Libraries.Language.Language;
+using KGySoft.Libraries.Language;
 
 #endregion
 

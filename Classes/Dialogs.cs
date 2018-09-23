@@ -1,11 +1,8 @@
-extern alias lang;
-
 using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Windows.Forms;
-
-using Language = lang::KGySoft.Libraries.Language.Language;
+using KGySoft.Libraries.Language;
 
 namespace KGySoft.Controls
 {
@@ -30,7 +27,7 @@ namespace KGySoft.Controls
         /// <summary>
         /// Information message
         /// </summary>
-        /// <param name="msg">Message in invariant language (will be translated to <see cref="Language.ActiveLanguage"/>)</param>
+        /// <param name="msg">Message in invariant language (will be translated to <see cref="Libraries.Language.Language.ActiveLanguage"/>)</param>
         static public void InfoMessage(string msg)
         {
             if (!UseAdvancedDialogs)

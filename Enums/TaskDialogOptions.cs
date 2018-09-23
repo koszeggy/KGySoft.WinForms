@@ -1,10 +1,7 @@
-﻿extern alias lang;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-
-using Language = lang::KGySoft.Libraries.Language.Language;
 
 namespace KGySoft.Controls
 {

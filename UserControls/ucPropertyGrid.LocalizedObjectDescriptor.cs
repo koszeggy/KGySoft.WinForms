@@ -1,12 +1,11 @@
 ﻿#region Used namespaces
 
-extern alias lang;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
-using Language = lang::KGySoft.Libraries.Language.Language;
+using KGySoft.Libraries.Language;
 
 #endregion
 

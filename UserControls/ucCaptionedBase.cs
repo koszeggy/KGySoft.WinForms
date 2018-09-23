@@ -1,6 +1,4 @@
 // If you want to see ucCaptionedBase derived classes in design time, then remove comment in next line:
-extern alias lang;
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,7 +10,7 @@ using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
 using KGySoft.Libraries;
-using Language = lang::KGySoft.Libraries.Language.Language;
+using KGySoft.Libraries.Language;
 
 namespace KGySoft.Controls
 {
