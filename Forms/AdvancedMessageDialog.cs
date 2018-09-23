@@ -7,10 +7,9 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
-
+using KGySoft.Diagnostics;
 using KGySoft.Drawing;
 using Language = lang::KGySoft.Libraries.Language.Language;
-using KGySoft.Libraries.Diagnostics;
 
 namespace KGySoft.Controls
 {
