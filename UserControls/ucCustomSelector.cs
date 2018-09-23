@@ -14,7 +14,7 @@ using KGySoft.Drawing;
 using KGySoft.Controls.Properties;
 using KGySoft.Libraries;
 using KGySoft.ComponentModel;
-using KGySoft.Libraries.Reflection;
+using KGySoft.Reflection;
 using Language = lang::KGySoft.Libraries.Language.Language;
 
 namespace KGySoft.Controls

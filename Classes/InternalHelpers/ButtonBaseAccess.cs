@@ -4,10 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Reflection;
 using System.Windows.Forms;
-
-using KGySoft.Libraries.Reflection;
-
-using MethodInvoker = KGySoft.Libraries.Reflection.MethodInvoker;
+using KGySoft.Reflection;
+using MethodInvoker = KGySoft.Reflection.MethodInvoker;
 
 namespace KGySoft.Controls
 {

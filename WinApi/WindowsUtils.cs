@@ -4,7 +4,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using KGySoft.Libraries.Reflection;
+using KGySoft.Reflection;
 
 namespace KGySoft.Controls.WinApi
 {

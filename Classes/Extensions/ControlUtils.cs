@@ -9,9 +9,8 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 using KGySoft.Libraries;
-using KGySoft.Libraries.Reflection;
-
-using MethodInvoker = KGySoft.Libraries.Reflection.MethodInvoker;
+using KGySoft.Reflection;
+using MethodInvoker = KGySoft.Reflection.MethodInvoker;
 
 #endregion
 

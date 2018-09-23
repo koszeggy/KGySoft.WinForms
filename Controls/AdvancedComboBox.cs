@@ -23,7 +23,7 @@ using System.Data;
 using System.Diagnostics;
 using KGySoft.Controls.WinApi;
 using KGySoft.Libraries;
-using KGySoft.Libraries.Reflection;
+using KGySoft.Reflection;
 
 namespace KGySoft.Controls
 {
