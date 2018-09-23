@@ -7,11 +7,9 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
-
+using KGySoft.Collections;
 using KGySoft.Libraries;
 using KGySoft.Libraries.Reflection;
-using KGySoft.Libraries.Collections;
-
 using Language = lang::KGySoft.Libraries.Language.Language;
 
 // TODO: Enum-os LoadFrom-nál meg lehessen adni, hogy int vagy enum legyen-e a ValueMember (EnumToDataTable-nél ez mód megadható)

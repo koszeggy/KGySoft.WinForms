@@ -1,4 +1,6 @@
 ﻿extern alias lang;
+using KGySoft.Collections;
+
 #region Used namespaces
 
 using System;
@@ -18,8 +20,6 @@ using KGySoft.Controls.Properties;
 using KGySoft.Controls.WinApi;
 using KGySoft.Drawing;
 using KGySoft.Libraries;
-using KGySoft.Libraries.Collections;
-
 using ContentAlignment = System.Drawing.ContentAlignment;
 using Language = lang::KGySoft.Libraries.Language.Language;
 
