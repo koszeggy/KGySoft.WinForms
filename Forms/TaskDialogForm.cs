@@ -16,7 +16,6 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
-using KGySoft.Controls.Properties;
 using KGySoft.Controls.WinApi;
 using KGySoft.Drawing;
 using KGySoft.Libraries;
@@ -27,6 +26,7 @@ using Language = lang::KGySoft.Libraries.Language.Language;
 
 namespace KGySoft.Controls
 {
+    using Resources = KGySoft.Controls.Properties.Resources;
     // Known incompatibilities (they are intended):
     // - Icon position is the same in case of all icon types
     // - Different animation on toggling expando button resizing

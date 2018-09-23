@@ -11,7 +11,6 @@ using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
-using KGySoft.Controls.Properties;
 using KGySoft.Controls.WinApi;
 using KGySoft.Drawing;
 using KGySoft.Libraries;
@@ -23,6 +22,8 @@ using ContentAlignment = System.Drawing.ContentAlignment;
 
 namespace KGySoft.Controls
 {
+    using Resources = KGySoft.Controls.Properties.Resources;
+
     /// <summary>
     /// Represents a command link button. Works also in compatibility mode in a pre-Vista Windows.
     /// To force system rendering set <see cref="FlatStyle"/> to <see cref="System.Windows.Forms.FlatStyle.System"/> (only in case of Windows Vista and above).

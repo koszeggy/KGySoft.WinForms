@@ -17,6 +17,7 @@ using KGySoft.Drawing;
 
 namespace KGySoft.Controls
 {
+    using Resources = KGySoft.Controls.Properties.Resources;
     partial class TaskDialogForm
     {
         private sealed class ExpandoButton : AdvancedButton
