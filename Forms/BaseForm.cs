@@ -7,7 +7,7 @@ using System.Drawing;
 using System.Text;
 using System.Reflection;
 using System.Windows.Forms;
-
+using KGySoft.ComponentModel;
 using KGySoft.Controls.WinApi;
 using KGySoft.Libraries.Language;
 using KGySoft.Reflection;
@@ -31,6 +31,7 @@ namespace KGySoft.Controls
         private bool resumeCaller;
         private bool isTranslated;
         private MdiClient mdiClient;
+        private CommandBindingsCollection commandBindings = new WinformsCollandBindingsCollection();
 
         private static FieldAccessor fieldForm_formState;
         private static FieldAccessor fieldForm_FormStateRenderSizeGrip;
@@ -107,6 +108,13 @@ namespace KGySoft.Controls
         {
             get { return suspended; }
         }
+
+        /// <summary>
+        /// Gets the command bindings of this form.
+        /// </summary>
+        [Browsable(false)] // TODO: create a usable designer
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public CommandBindingsCollection CommandBindings { get; } = new WinformsCollandBindingsCollection();
 
         #endregion
 
