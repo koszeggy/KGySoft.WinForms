@@ -112,7 +112,6 @@ namespace KGySoft.Controls
         /// <summary>
         /// Gets the command bindings of this form.
         /// </summary>
-        [Browsable(false)] // TODO: create a usable designer
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CommandBindingsCollection CommandBindings { get; } = new WinformsCollandBindingsCollection();
 
@@ -175,6 +174,7 @@ namespace KGySoft.Controls
             if (disposing && (components != null))
             {
                 components.Dispose();
+                commandBindings.Dispose();
             }
             base.Dispose(disposing);
             mdiClient = null;
