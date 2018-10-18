@@ -31,7 +31,7 @@ namespace KGySoft.Controls
         private bool resumeCaller;
         private bool isTranslated;
         private MdiClient mdiClient;
-        private CommandBindingsCollection commandBindings = new WinformsCollandBindingsCollection();
+        private readonly CommandBindingsCollection commandBindings = new WinformsCollandBindingsCollection();
 
         private static FieldAccessor fieldForm_formState;
         private static FieldAccessor fieldForm_FormStateRenderSizeGrip;
@@ -41,10 +41,10 @@ namespace KGySoft.Controls
         #region Events
 
         /// <summary>
-        /// Occurs when an MDI child whose caller was this form in a <see cref="ShowMdiChild"/> call is closed.
+        /// Occurs when an MDI child showed by a <see cref="ShowMdiChild"/> call is closed.
         /// </summary>
         [Category("BaseForm")]
-        [Description("Occurs when an MDI child whose caller was this form in a ShowMdiChild call is closed.")]
+        [Description("Occurs when an MDI child showed by a ShowMdiChild call is closed.")]
         public event FormClosedEventHandler CalledMdiChildClosed;
 
         /// <summary>
@@ -97,11 +97,6 @@ namespace KGySoft.Controls
         }
 
         /// <summary>
-        /// Gets or sets the main form in an MDI application.
-        /// </summary>
-        public static BaseForm MainMdiParent { get; set; }
-
-        /// <summary>
         /// Gets whether the form is suspended by a called MDI child.
         /// </summary>
         public bool IsSuspended
@@ -113,7 +108,7 @@ namespace KGySoft.Controls
         /// Gets the command bindings of this form.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public CommandBindingsCollection CommandBindings { get; } = new WinformsCollandBindingsCollection();
+        public CommandBindingsCollection CommandBindings => commandBindings;
 
         #endregion
 
@@ -131,25 +126,46 @@ namespace KGySoft.Controls
 
         #region Public methods
 
+        ///// <summary>
+        ///// Shows the form as an MDI child of the specified caller form.
+        ///// </summary>
+        ///// <param name="caller">Caller form</param>
+        ///// <param name="suspendCaller">When true, suspends the caller form (dialog effect).
+        ///// Because shown form is not a dialog form, execution of caller will not be suspended.
+        ///// If user needs to react of closing the child form, then either subscribe to caller's
+        ///// <see cref="CalledMdiChildClosed"/> event or override its <see cref="OnCalledMdiChildClosed"/> method.</param>
+        //public void ShowMdiChild(BaseForm caller, bool suspendCaller)
+        //{
+        //    if (MainMdiParent == null && caller != null && caller.IsMdiContainer)
+        //        MainMdiParent = caller;
+        //    if (MainMdiParent == null)
+        //        throw new InvalidOperationException("BaseForm.MainMdiParent property is not set.");
+        //    this.MdiParent = MainMdiParent;
+        //    callerMdiForm = caller;
+        //    resumeCaller = suspendCaller;
+        //    if (suspendCaller && caller != null)
+        //        caller.Suspend();
+        //    this.Show();
+        //}
+
         /// <summary>
         /// Shows the form as an MDI child of the specified caller form.
         /// </summary>
-        /// <param name="caller">Caller form</param>
+        /// <param name="child">The child to show</param>
         /// <param name="suspendCaller">When true, suspends the caller form (dialog effect).
         /// Because shown form is not a dialog form, execution of caller will not be suspended.
         /// If user needs to react of closing the child form, then either subscribe to caller's
         /// <see cref="CalledMdiChildClosed"/> event or override its <see cref="OnCalledMdiChildClosed"/> method.</param>
-        public void ShowMdiChild(BaseForm caller, bool suspendCaller)
+        public void ShowMdiChild(Form child, bool suspendCaller)
         {
-            if (MainMdiParent == null && caller != null && caller.IsMdiContainer)
-                MainMdiParent = caller;
-            if (MainMdiParent == null)
-                throw new InvalidOperationException("BaseForm.MainMdiParent property is not set.");
-            this.MdiParent = MainMdiParent;
-            callerMdiForm = caller;
-            resumeCaller = suspendCaller;
-            if (suspendCaller && caller != null)
-                caller.Suspend();
+            child.MdiParent = this;
+            if (child is BaseForm baseChild)
+            {
+                baseChild.callerMdiForm = this;
+                baseChild.resumeCaller = suspendCaller;
+                if (suspendCaller)
+                    Suspend();
+            }
             this.Show();
         }
 

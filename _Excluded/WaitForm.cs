@@ -97,7 +97,7 @@ namespace KGySoft.Controls
         /// <param name="showProgressBar">Specifies whether the progress bar should be visible. Default style is marquee but can be changed via <see cref="ProgressBar"/> property.</param>
         /// <param name="doAction">An optionally defined callback action that will be called during the wait process.</param>
         /// <param name="interval">Interval in millisecundum for calling <paramref name="doAction"/>.</param>
-        public void Execute(BaseForm caller, bool suspend, string caption, bool showProgressBar, Action<WaitForm, WaitActionArgs> doAction, int interval)
+        public void Execute(IWin32Window owner, bool suspend, string caption, bool showProgressBar, Action<WaitForm, WaitActionArgs> doAction, int interval)
         {
             Action doExecute = delegate
             {
@@ -110,14 +110,14 @@ namespace KGySoft.Controls
                 Timer.Interval = interval;
                 Timer.Enabled = OnAction != null;
 
-                if (MainMdiParent != null)
-                {
-                    ShowMdiChild(caller, suspend);
-                }
-                else
-                {
-                    Show(caller); // itt a hívót nem tiltjuk le, esetleg meg lehet csinálni, csak a form bezárásakor ne felejtsük el újra engedélyezni
-                }
+                //if (MainMdiParent != null)
+                //{
+                //    ShowMdiChild(caller, suspend);
+                //}
+                //else
+                //{
+                    Show(owner); // itt a hívót nem tiltjuk le, esetleg meg lehet csinálni, csak a form bezárásakor ne felejtsük el újra engedélyezni
+                //}
                 Refresh();
             };
 
@@ -134,9 +134,9 @@ namespace KGySoft.Controls
         /// <param name="suspend">If true, suspends caller MDI child specified as <paramref name="caller"/>.</param>
         /// <param name="caption">Caption. When null, caption is not changed, which is "Please wait..." by default.</param>
         /// <param name="showProgressBar">Specifies whether the progress bar should be visible. Default style is marquee but can be changed via <see cref="ProgressBar"/> property.</param>
-        public void Execute(BaseForm caller, bool suspend, string caption, bool showProgressBar)
+        public void Execute(IWin32Window owner, bool suspend, string caption, bool showProgressBar)
         {
-            Execute(caller, suspend, caption, showProgressBar, null, 1000);
+            Execute(owner, suspend, caption, showProgressBar, null, 1000);
         }
 
         /// <summary>

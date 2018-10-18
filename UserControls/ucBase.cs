@@ -7,6 +7,7 @@ using System.Drawing.Design;
 using System.Text;
 using System.Windows.Forms;
 using System.Collections;
+using KGySoft.ComponentModel;
 using KGySoft.Libraries.Language;
 
 namespace KGySoft.Controls
@@ -34,10 +35,17 @@ namespace KGySoft.Controls
         private bool autoSaveValue = true;
         private bool translationEnabled = true;
         private TypeDescriptionProvider localizableProvider;
+        private readonly CommandBindingsCollection commandBindings = new WinformsCollandBindingsCollection();
 
         #endregion
 
         #region Properties
+
+        /// <summary>
+        /// Gets the command bindings of this form.
+        /// </summary>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public CommandBindingsCollection CommandBindings => commandBindings;
 
         /// <summary>
         /// Gets or sets the ReadOnly state of the inner content.
@@ -285,6 +293,7 @@ namespace KGySoft.Controls
             if (disposing && (components != null))
             {
                 components.Dispose();
+                commandBindings.Dispose();
             }
             base.Dispose(disposing);
         }
