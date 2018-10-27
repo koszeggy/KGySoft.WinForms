@@ -31,7 +31,7 @@ namespace KGySoft.Controls
         private bool resumeCaller;
         private bool isTranslated;
         private MdiClient mdiClient;
-        private readonly CommandBindingsCollection commandBindings = new WinformsCollandBindingsCollection();
+        private readonly CommandBindingsCollection commandBindings = new WinformsCommandBindingsCollection();
 
         private static FieldAccessor fieldForm_formState;
         private static FieldAccessor fieldForm_FormStateRenderSizeGrip;
@@ -105,7 +105,8 @@ namespace KGySoft.Controls
         }
 
         /// <summary>
-        /// Gets the command bindings of this form.
+        /// Gets the command bindings of this form. The <see cref="O:KGySoft.ComponentModel.CommandBindingsCollection.Add">Add</see> methods also add
+        /// the <see cref="PropertyCommandStateUpdater"/> to the created bindings.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CommandBindingsCollection CommandBindings => commandBindings;

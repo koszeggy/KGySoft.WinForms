@@ -11,16 +11,16 @@ namespace KGySoft.Controls.Classes
     /// <summary>
     /// Provides special handling for ToolTipText: tries to find the associated <see cref="ToolTip"/> component.
     /// </summary>
-    internal class WinFormsStateUpdater : ICommandStateUpdater
+    internal class WinFormsPropertyCommandStateUpdater : ICommandStateUpdater
     {
         private const string ToolTipTextProperty = "ToolTipText";
-        private static readonly WinFormsStateUpdater instance = new WinFormsStateUpdater();
+        private static readonly WinFormsPropertyCommandStateUpdater instance = new WinFormsPropertyCommandStateUpdater();
 
-        private WinFormsStateUpdater()
+        private WinFormsPropertyCommandStateUpdater()
         {
         }
 
-        public static ICommandStateUpdater Updater => instance;
+        internal static ICommandStateUpdater Updater => instance;
 
         public bool TryUpdateState(object commandSource, string stateName, object value)
         {

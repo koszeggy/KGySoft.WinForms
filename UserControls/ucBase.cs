@@ -35,14 +35,15 @@ namespace KGySoft.Controls
         private bool autoSaveValue = true;
         private bool translationEnabled = true;
         private TypeDescriptionProvider localizableProvider;
-        private readonly CommandBindingsCollection commandBindings = new WinformsCollandBindingsCollection();
+        private readonly CommandBindingsCollection commandBindings = new WinformsCommandBindingsCollection();
 
         #endregion
 
         #region Properties
 
         /// <summary>
-        /// Gets the command bindings of this form.
+        /// Gets the command bindings of this control. The <see cref="O:KGySoft.ComponentModel.CommandBindingsCollection.Add">Add</see> methods also add
+        /// the <see cref="PropertyCommandStateUpdater"/> to the created bindings.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CommandBindingsCollection CommandBindings => commandBindings;
