@@ -4,7 +4,7 @@ using KGySoft.Controls.Classes;
 
 namespace KGySoft.Controls
 {
-    internal class WinformsCommandBindingsCollection : CommandBindingsCollection
+    public class WinformsCommandBindingsCollection : CommandBindingsCollection
     {
         public override ICommandBinding Add(ICommand command, IDictionary<string, object> initialState = null, bool disposeCommand = false)
             => base.Add(command, initialState, disposeCommand)
