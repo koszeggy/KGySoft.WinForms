@@ -16,6 +16,7 @@ using KGySoft.Drawing;
 using KGySoft.Libraries;
 using KGySoft.ComponentModel;
 using KGySoft.Controls.WinApi;
+using KGySoft.CoreLibraries;
 
 #endregion
 

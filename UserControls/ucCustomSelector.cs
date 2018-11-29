@@ -13,6 +13,7 @@ using KGySoft.Drawing;
 using KGySoft.Controls.Properties;
 using KGySoft.Libraries;
 using KGySoft.ComponentModel;
+using KGySoft.CoreLibraries;
 using KGySoft.Libraries.Language;
 using KGySoft.Reflection;
 

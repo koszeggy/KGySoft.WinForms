@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Threading;
 using System.Globalization;
 using KGySoft.Controls.WinApi;
+using KGySoft.CoreLibraries;
 using KGySoft.Libraries;
 
 namespace KGySoft.Controls

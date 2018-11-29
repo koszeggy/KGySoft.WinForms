@@ -22,6 +22,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Diagnostics;
 using KGySoft.Controls.WinApi;
+using KGySoft.CoreLibraries;
 using KGySoft.Libraries;
 using KGySoft.Reflection;
 

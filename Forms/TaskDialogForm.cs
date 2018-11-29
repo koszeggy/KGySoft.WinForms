@@ -1,4 +1,5 @@
 ﻿using KGySoft.Collections;
+using KGySoft.CoreLibraries;
 using KGySoft.Libraries.Language;
 
 #region Used namespaces

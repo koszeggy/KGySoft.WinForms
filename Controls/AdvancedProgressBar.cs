@@ -7,6 +7,7 @@ using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 using KGySoft.Controls.WinApi;
+using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.Libraries;
 

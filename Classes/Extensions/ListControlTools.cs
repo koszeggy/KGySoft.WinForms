@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
 using KGySoft.Collections;
+using KGySoft.CoreLibraries;
 using KGySoft.Libraries;
 using KGySoft.Libraries.Language;
 using KGySoft.Reflection;

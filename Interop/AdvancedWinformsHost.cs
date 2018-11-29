@@ -13,6 +13,7 @@ using System.Windows.Forms;
 
 using KGySoft.Libraries;
 using KGySoft.Controls.WinApi;
+using KGySoft.CoreLibraries;
 using KGySoft.Reflection;
 
 namespace KGySoft.Controls.Interop

@@ -15,6 +15,7 @@ using System.Threading;
 using KGySoft.Drawing;
 using KGySoft.Libraries;
 using KGySoft.Controls.WinApi;
+using KGySoft.CoreLibraries;
 
 #endregion
 

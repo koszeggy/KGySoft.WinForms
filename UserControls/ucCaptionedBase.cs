@@ -9,6 +9,7 @@ using System.IO;
 using System.Text;
 using System.Windows.Forms;
 using System.Diagnostics;
+using KGySoft.CoreLibraries;
 using KGySoft.Libraries;
 using KGySoft.Libraries.Language;
 

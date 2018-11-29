@@ -8,7 +8,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Windows.Forms;
-
+using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.Libraries;
 using KGySoft.Libraries.Language;
