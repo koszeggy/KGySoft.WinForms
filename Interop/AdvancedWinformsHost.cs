@@ -63,7 +63,7 @@ namespace KGySoft.Controls.Interop
 
             if (handleContract != null)
             {
-                List<int> tokens = (List<int>)Reflector.GetInstanceFieldByName(handleContract, "m_lifetimeTokens");
+                List<int> tokens = (List<int>)Reflector.GetField(handleContract, "m_lifetimeTokens");
                 if (tokens != null)
                 {
                     foreach (int i in tokens.ToArray())
@@ -78,9 +78,9 @@ namespace KGySoft.Controls.Interop
             if (Dispatcher != null)
             {
                 // Removing Dispatcher._reserved0 (as MediaContext) from MediaSystem._mediaContexts
-                object fieldDispatcher__reserved0_MediaContext = Reflector.GetInstanceFieldByName(Dispatcher, "_reserved0");
+                object fieldDispatcher__reserved0_MediaContext = Reflector.GetField(Dispatcher, "_reserved0");
                 Type typeMediaSystem = Reflector.ResolveType("System.Windows.Media.MediaSystem");
-                Reflector.RunStaticMethodByName(typeMediaSystem, "Shutdown", fieldDispatcher__reserved0_MediaContext);
+                Reflector.RunMethod(typeMediaSystem, "Shutdown", fieldDispatcher__reserved0_MediaContext);
 
                 //// nullifying Dispatcher._reserved0
                 //Reflector.SetInstanceFieldByName(Dispatcher, "_reserved0", null);

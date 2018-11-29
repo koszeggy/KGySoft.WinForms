@@ -5,7 +5,6 @@ using System.Text;
 using System.Reflection;
 using System.Windows.Forms;
 using KGySoft.Reflection;
-using MethodInvoker = KGySoft.Reflection.MethodInvoker;
 
 namespace KGySoft.Controls
 {
@@ -15,7 +14,7 @@ namespace KGySoft.Controls
     internal static class ButtonBaseAccess
     {
         private static PropertyAccessor propertyShowToolTip;
-        private static MethodInvoker methodAnimate;
+        private static MethodAccessor methodAnimate;
         private static FieldAccessor fieldEventPaint;
 
         /// <summary>
@@ -24,7 +23,7 @@ namespace KGySoft.Controls
         internal static void ShowToolTip(this ButtonBase instance, bool value)
         {
             if (propertyShowToolTip == null)
-                propertyShowToolTip = PropertyAccessor.GetPropertyAccessor(typeof(ButtonBase).GetProperty("ShowToolTip", BindingFlags.Instance | BindingFlags.NonPublic));
+                propertyShowToolTip = PropertyAccessor.GetAccessor(typeof(ButtonBase).GetProperty("ShowToolTip", BindingFlags.Instance | BindingFlags.NonPublic));
 
             propertyShowToolTip.Set(instance, value);
         }
@@ -35,7 +34,7 @@ namespace KGySoft.Controls
         internal static void Animate(this ButtonBase instance)
         {
             if (methodAnimate == null)
-                methodAnimate = MethodInvoker.GetMethodInvoker(typeof(ButtonBase).GetMethod("Animate", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null));
+                methodAnimate = MethodAccessor.GetAccessor(typeof(ButtonBase).GetMethod("Animate", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null));
 
             methodAnimate.Invoke(instance);
         }
@@ -48,7 +47,7 @@ namespace KGySoft.Controls
             get
             {
                 if (fieldEventPaint == null)
-                    fieldEventPaint = FieldAccessor.GetFieldAccessor(typeof(Control).GetField("EventPaint", BindingFlags.Static | BindingFlags.NonPublic));
+                    fieldEventPaint = FieldAccessor.GetAccessor(typeof(Control).GetField("EventPaint", BindingFlags.Static | BindingFlags.NonPublic));
 
                 return fieldEventPaint.Get(null);
             }

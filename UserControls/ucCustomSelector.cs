@@ -1310,7 +1310,7 @@ namespace KGySoft.Controls
         {
             Debug.Assert(DataSource != null && !String.IsNullOrEmpty(ValueMember) && !String.IsNullOrEmpty(DisplayMember));
 
-            return Reflector.GetInstancePropertyByName(item, ValueMember);
+            return Reflector.GetProperty(item, ValueMember);
         }
 
         /// <summary>

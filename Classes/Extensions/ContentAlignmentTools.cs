@@ -5,7 +5,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
-using MethodInvoker = KGySoft.Reflection.MethodInvoker;
+using KGySoft.Reflection;
 
 namespace KGySoft.Controls
 {
@@ -29,20 +29,20 @@ namespace KGySoft.Controls
 
         #region Fields
 
-        private static MethodInvoker rtlTranslateContentMethod;
+        private static MethodAccessor rtlTranslateContentMethod;
 
         #endregion
 
         #region Properties
 
-        private static MethodInvoker RtlTranslateContentMethod
+        private static MethodAccessor RtlTranslateContentMethod
         {
             get
             {
                 if (rtlTranslateContentMethod != null)
                     return rtlTranslateContentMethod;
 
-                rtlTranslateContentMethod = MethodInvoker.GetMethodInvoker(typeof(Control).GetMethod("RtlTranslateContent", BindingFlags.Instance | BindingFlags.NonPublic));
+                rtlTranslateContentMethod = MethodAccessor.GetAccessor(typeof(Control).GetMethod("RtlTranslateContent", BindingFlags.Instance | BindingFlags.NonPublic));
                 return rtlTranslateContentMethod;
             }
         }

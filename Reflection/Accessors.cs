@@ -1,7 +1,6 @@
 ﻿using System.Reflection;
 using System.Windows.Forms;
 using KGySoft.Reflection;
-using MethodInvoker = KGySoft.Reflection.MethodInvoker;
 
 namespace KGySoft.Controls.Reflection
 {
@@ -19,7 +18,7 @@ namespace KGySoft.Controls.Reflection
 
         #region Method Accessors
 
-        private static MethodInvoker methodErrorProvider_UnwireEvents;
+        private static MethodAccessor methodErrorProvider_UnwireEvents;
 
         #endregion
 
@@ -30,10 +29,10 @@ namespace KGySoft.Controls.Reflection
         #region Field Accessors
 
         internal static FieldAccessor ErrorProvider_currentChanged => fieldErrorProvider_currentChanged 
-            ?? (fieldErrorProvider_currentChanged = FieldAccessor.GetFieldAccessor(typeof(ErrorProvider).GetField("currentChanged", BindingFlags.Instance | BindingFlags.NonPublic)));
+            ?? (fieldErrorProvider_currentChanged = FieldAccessor.GetAccessor(typeof(ErrorProvider).GetField("currentChanged", BindingFlags.Instance | BindingFlags.NonPublic)));
 
         internal static FieldAccessor ErrorProvider_errorManager => fieldErrorProvider_errorManager
-            ?? (fieldErrorProvider_errorManager = FieldAccessor.GetFieldAccessor(typeof(ErrorProvider).GetField("errorManager", BindingFlags.Instance | BindingFlags.NonPublic)));
+            ?? (fieldErrorProvider_errorManager = FieldAccessor.GetAccessor(typeof(ErrorProvider).GetField("errorManager", BindingFlags.Instance | BindingFlags.NonPublic)));
 
         #endregion
 
@@ -42,7 +41,7 @@ namespace KGySoft.Controls.Reflection
         internal static void UnwireEvents(this ErrorProvider errorProvider, BindingManagerBase listManager)
         {
             if (methodErrorProvider_UnwireEvents == null)
-                methodErrorProvider_UnwireEvents = MethodInvoker.GetMethodInvoker(typeof(ErrorProvider).GetMethod("UnwireEvents", BindingFlags.Instance | BindingFlags.NonPublic));
+                methodErrorProvider_UnwireEvents = MethodAccessor.GetAccessor(typeof(ErrorProvider).GetMethod("UnwireEvents", BindingFlags.Instance | BindingFlags.NonPublic));
             methodErrorProvider_UnwireEvents.Invoke(errorProvider, listManager);
         }
 

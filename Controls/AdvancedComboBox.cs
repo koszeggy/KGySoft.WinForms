@@ -897,7 +897,7 @@ namespace KGySoft.Controls
         private bool GetSelfEnabled()
         {
             if (stateField == null)
-                stateField = FieldAccessor.GetFieldAccessor(typeof(Control).GetField("state", BindingFlags.Instance | BindingFlags.NonPublic));
+                stateField = FieldAccessor.GetAccessor(typeof(Control).GetField("state", BindingFlags.Instance | BindingFlags.NonPublic));
             return ((int)stateField.Get(this) & 4) != 0;
         }
 

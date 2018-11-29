@@ -114,7 +114,7 @@ namespace KGySoft.Controls
                 if (systemSizeField != null)
                     return systemSizeField;
 
-                return systemSizeField = FieldAccessor.GetFieldAccessor(typeof(Button).GetField("systemSize", BindingFlags.Instance | BindingFlags.NonPublic));
+                return systemSizeField = FieldAccessor.GetAccessor(typeof(Button).GetField("systemSize", BindingFlags.Instance | BindingFlags.NonPublic));
             }
         }
 

@@ -10,7 +10,6 @@ using System.Windows.Forms;
 
 using KGySoft.Libraries;
 using KGySoft.Reflection;
-using MethodInvoker = KGySoft.Reflection.MethodInvoker;
 
 #endregion
 
@@ -31,8 +30,8 @@ namespace KGySoft.Controls
         public const string AllSelectedText = " (All)";
         public const string NoneSelectedText = " (None)";
         public const string UndefinedText = " (Undefined)";
-        private static MethodInvoker methodPaintBackground;
-        private static MethodInvoker methodPaint;
+        private static MethodAccessor methodPaintBackground;
+        private static MethodAccessor methodPaint;
 
         #endregion
 
@@ -40,7 +39,7 @@ namespace KGySoft.Controls
 
         private static PropertyAccessor propertyControl_ShowKeyboardCues;
         private static PropertyAccessor propertyControl_DoubleBuffered;
-        private static MethodInvoker methodControl_SetStyle;
+        private static MethodAccessor methodControl_SetStyle;
 
         #endregion
 
@@ -53,7 +52,7 @@ namespace KGySoft.Controls
                 if (propertyControl_ShowKeyboardCues != null)
                     return propertyControl_ShowKeyboardCues;
 
-                propertyControl_ShowKeyboardCues = PropertyAccessor.GetPropertyAccessor(typeof(Control).GetProperty("ShowKeyboardCues", BindingFlags.Instance | BindingFlags.NonPublic));
+                propertyControl_ShowKeyboardCues = PropertyAccessor.GetAccessor(typeof(Control).GetProperty("ShowKeyboardCues", BindingFlags.Instance | BindingFlags.NonPublic));
                 return propertyControl_ShowKeyboardCues;
             }
         }
@@ -65,19 +64,19 @@ namespace KGySoft.Controls
                 if (propertyControl_DoubleBuffered != null)
                     return propertyControl_DoubleBuffered;
 
-                propertyControl_DoubleBuffered = PropertyAccessor.GetPropertyAccessor(typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic));
+                propertyControl_DoubleBuffered = PropertyAccessor.GetAccessor(typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic));
                 return propertyControl_DoubleBuffered;
             }
         }
 
-        private static MethodInvoker MethodControl_SetStyle
+        private static MethodAccessor MethodControl_SetStyle
         {
             get
             {
                 if (methodControl_SetStyle != null)
                     return methodControl_SetStyle;
 
-                methodControl_SetStyle = MethodInvoker.GetMethodInvoker(typeof(Control).GetMethod("SetStyle", BindingFlags.Instance | BindingFlags.NonPublic));
+                methodControl_SetStyle = MethodAccessor.GetAccessor(typeof(Control).GetMethod("SetStyle", BindingFlags.Instance | BindingFlags.NonPublic));
                 return methodControl_SetStyle;
             }
         }
@@ -309,7 +308,7 @@ namespace KGySoft.Controls
         internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset)
         {
             if (methodPaintBackground == null)
-                methodPaintBackground = MethodInvoker.GetMethodInvoker(typeof(Control).GetMethod("PaintBackground", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point) }, null));
+                methodPaintBackground = MethodAccessor.GetAccessor(typeof(Control).GetMethod("PaintBackground", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point) }, null));
 
             methodPaintBackground.Invoke(c, e, rectangle, backColor, scrollOffset);
         }
@@ -348,7 +347,7 @@ namespace KGySoft.Controls
         private static void InvokePaint(Control c, PaintEventArgs e)
         {
             if (methodPaint == null)
-                methodPaint = MethodInvoker.GetMethodInvoker(typeof(Control).GetMethod("OnPaint", BindingFlags.Instance | BindingFlags.NonPublic));
+                methodPaint = MethodAccessor.GetAccessor(typeof(Control).GetMethod("OnPaint", BindingFlags.Instance | BindingFlags.NonPublic));
 
             methodPaint.Invoke(c, e);
         }

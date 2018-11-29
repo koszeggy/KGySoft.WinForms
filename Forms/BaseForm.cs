@@ -352,9 +352,9 @@ namespace KGySoft.Controls
         private bool IsGripVisible()
         {
             if (fieldForm_formState == null)
-                fieldForm_formState = FieldAccessor.GetFieldAccessor(typeof(Form).GetField("formState", BindingFlags.Instance | BindingFlags.NonPublic));
+                fieldForm_formState = FieldAccessor.GetAccessor(typeof(Form).GetField("formState", BindingFlags.Instance | BindingFlags.NonPublic));
             if (fieldForm_FormStateRenderSizeGrip == null)
-                fieldForm_FormStateRenderSizeGrip = FieldAccessor.GetFieldAccessor(typeof(Form).GetField("FormStateRenderSizeGrip", BindingFlags.Static | BindingFlags.NonPublic));
+                fieldForm_FormStateRenderSizeGrip = FieldAccessor.GetAccessor(typeof(Form).GetField("FormStateRenderSizeGrip", BindingFlags.Static | BindingFlags.NonPublic));
 
             return ((BitVector32)fieldForm_formState.Get(this))[(BitVector32.Section)fieldForm_FormStateRenderSizeGrip.Get(null)] != 0;
         }
