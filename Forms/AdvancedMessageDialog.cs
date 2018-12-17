@@ -154,7 +154,7 @@ namespace KGySoft.Controls
         {
             ResetDetails(true);
             Text = caption;
-            txtDetails.Text = DiagnosticTools.ExceptionToString(e);
+            txtDetails.Text = e?.ToString();
             exception = e;
             txtMessage.Text = e != null ? e.Message : Language.Translate("Unknown error__Dialogs");
 
@@ -334,9 +334,10 @@ namespace KGySoft.Controls
                     break;
             }
 
-            string details = showDetails ? (Language.Translate("Message: {0}{1}{2}{1}{3}__Dialogs", message, Environment.NewLine,
-                "System information:", DiagnosticTools.SysInfoToString())) : String.Empty;
-            return Execute(message, details, caption, dialogType,
+            // TODO: SysInfo?
+            //string details = showDetails ? (Language.Translate("Message: {0}{1}{2}{1}{3}__Dialogs", message, Environment.NewLine,
+            //    Language.Translate("System information:"), DiagnosticTools.SysInfoToString())) : String.Empty;
+            return Execute(message, /*details*/null, caption, dialogType,
                 btn,                                           // buttons
                 showDetails && ReportSender != null,           // saveLog
                 showDetails && ReportSender != null,           // saveScreenshot
