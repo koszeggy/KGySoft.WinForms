@@ -168,7 +168,7 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Occurs when <see cref="TaskDialogOptions.HyperlinksEnabled"/> is set in <see cref="Options"/>
-        /// and user clicks a hyperlink. If this event is not subscribed or <see cref="HandledEventArgs.Handled"/> is set to <see langword="false"/> in <see cref="HyperlinkClickedEventArgs"/>,
+        /// and user clicks a hyperlink. If this event is not subscribed or <see cref="HandledEventArgs.Handled"/> is set to <see langword="false"/>&#160;in <see cref="HyperlinkClickedEventArgs"/>,
         /// then system tries to resolve the hyperlink.
         /// <note>Resolving the link by the operating system might be blocked so usually the best way is to subscribe this event.</note>
         /// </summary>

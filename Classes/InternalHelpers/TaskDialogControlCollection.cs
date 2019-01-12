@@ -26,7 +26,7 @@ namespace KGySoft.Controls
         /// Gets an item of the <see cref="TaskDialogControlCollection{T}"/> by name.
         /// </summary>
         /// <param name="name">Name of the control</param>
-        /// <returns>A <see cref="TaskDialogControl"/> instance with the searched name or <see langword="null"/> if no control found with such name.</returns>
+        /// <returns>A <see cref="TaskDialogControl"/> instance with the searched name or <see langword="null"/>&#160;if no control found with such name.</returns>
         public T this[string name]
         {
             get

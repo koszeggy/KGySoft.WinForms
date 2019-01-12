@@ -11,7 +11,7 @@ namespace KGySoft.Controls
     {
         /// <summary>
         /// Gets the current item of the underlying data source.
-        /// Can be <see langword="null"/> if the message is required for a binding error.
+        /// Can be <see langword="null"/>&#160;if the message is required for a binding error.
         /// </summary>
         public object Current { get; }
 

@@ -30,7 +30,7 @@ namespace KGySoft.Controls
 
 	    /// <summary>
 	    /// Gets or sets whether <see cref="ucCustomSelector.DefaultAutoFind"/> should be called.
-	    /// Set this property to <see langword="true"/> to fallback to default logic instead of accepting <see cref="Value"/>.
+	    /// Set this property to <see langword="true"/>&#160;to fallback to default logic instead of accepting <see cref="Value"/>.
 	    /// </summary>
         public bool DefaultAutoFind { get; set; }
 

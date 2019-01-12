@@ -171,7 +171,7 @@ namespace KGySoft.Controls
         }
 
         /// <summary>
-        /// Invalidates the MDI client area. Applicable only if the <see cref="Form.IsMdiContainer"/> is <see langword="true"/> for this form.
+        /// Invalidates the MDI client area. Applicable only if the <see cref="Form.IsMdiContainer"/> is <see langword="true"/>&#160;for this form.
         /// </summary>
         public void InvalidateMdiClientArea()
         {
