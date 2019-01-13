@@ -372,7 +372,7 @@ namespace KGySoft.Controls
         }
 
         /// <summary>
-        /// Gets or sets the text of the inner <see cref="ComboBox"/>. Can be set only in <see cref="SelectorStates.ValueSet"/> <see cref="State"/>. 
+        /// Gets or sets the text of the inner <see cref="ComboBox"/>. Can be set only in <see cref="SelectorStates.ValueSet"/>&#160;<see cref="State"/>. 
         /// For data binding using <see cref="Value"/> property is preferable.
         /// </summary>
         /// <remarks>
@@ -1067,7 +1067,7 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Returns the text based on <see cref="Value"/>.
-        /// In <see cref="ucCustomSelector"/> <see cref="GetTextByValue"/> returns only texts for special values
+        /// In <see cref="ucCustomSelector"/>&#160;<see cref="GetTextByValue"/> returns only texts for special values
         /// or when <see cref="DataSource"/> is not <see langword="null"/>&#160;and <paramref name="value"/> can be found in <see cref="ValueMember"/> of data source.
         /// Otherwise, returns with the ToString of <see cref="Value"/>.
         /// Override this method to calculate texts for other values.

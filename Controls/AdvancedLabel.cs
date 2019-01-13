@@ -84,7 +84,7 @@ namespace KGySoft.Controls
 
         /// <summary>
         /// Occurs when a link is clicked.
-        /// To handle clicked links automatically, set <see cref="AutoHandleUrls"/> <see langword="true"/>, and if this event is subsribed, set <see cref="HyperlinkClickedEventArgs.Handled"/> <see langword="false"/>&#160;in the event handler.
+        /// To handle clicked links automatically, set <see cref="AutoHandleUrls"/>&#160;<see langword="true"/>, and if this event is subsribed, set <see cref="HyperlinkClickedEventArgs.Handled"/>&#160;<see langword="false"/>&#160;in the event handler.
         /// </summary>
         [Description("Occurs when a link is clicked. To handle clicked links automatically, set AutoHandleUrls true, and if this event is subsribed, set HyperlinkClickedEventArgs.Handled false in the event handler.")]
         [Category("AdvancedLabel")]
