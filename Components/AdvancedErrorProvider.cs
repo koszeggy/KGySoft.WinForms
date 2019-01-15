@@ -133,7 +133,7 @@ namespace KGySoft.Controls
         /// <summary>
         /// Releases this <see cref="AdvancedErrorProvider" /> instance.
         /// </summary>
-        /// <param name="disposing"><see langword="true" /> to release both managed and unmanaged resources; <see langword="false" /> to release only unmanaged resources.</param>
+        /// <param name="disposing"><see langword="true"/>&#160;to release both managed and unmanaged resources; <see langword="false"/>&#160;to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
             setMessageHandler = null;
