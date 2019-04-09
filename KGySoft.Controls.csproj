@@ -122,6 +122,7 @@
     <Compile Include="Classes\InternalHelpers\FadingPainterInternal.cs" />
     <Compile Include="Classes\InternalHelpers\LayoutUtils.cs" />
     <Compile Include="Classes\InternalHelpers\ButtonBaseAccess.cs" />
+    <Compile Include="Classes\RecursivelyEditableTypeDescriptor.cs" />
     <Compile Include="Classes\Screenshot.cs" />
     <Compile Include="Classes\WinFormsCommandBindingsCollection.cs" />
     <Compile Include="Classes\WinFormsStateUpdater.cs" />
@@ -530,7 +531,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties ExternalBuildIntegrationEnabled="True" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Properties="KGySoft.Controls.Properties" ED14F191-6CDA-4bbb-BB1B-C329DD754E20_OutputCondition="" LastExportedMakefileHash="zr6SNy3VgexhAFeppxNRVw==" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Libraries="KGySoft.Controls.Libraries" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls="KGySoft.Controls.UserControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_EventArgs="KGySoft.Controls.UserControls.EventArgs" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_NewFolder1="KGySoft.Controls.UserControls.NewFolder1" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_Design="KGySoft.Controls.UserControls.Design" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls="KGySoft.Controls.Controls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls_x005C_FileControls="KGySoft.Controls.Controls.FileControls" />
+      <UserProperties _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls_x005C_FileControls="KGySoft.Controls.Controls.FileControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls="KGySoft.Controls.Controls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_Design="KGySoft.Controls.UserControls.Design" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_NewFolder1="KGySoft.Controls.UserControls.NewFolder1" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_EventArgs="KGySoft.Controls.UserControls.EventArgs" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls="KGySoft.Controls.UserControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Libraries="KGySoft.Controls.Libraries" LastExportedMakefileHash="zr6SNy3VgexhAFeppxNRVw==" ED14F191-6CDA-4bbb-BB1B-C329DD754E20_OutputCondition="" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Properties="KGySoft.Controls.Properties" ExternalBuildIntegrationEnabled="True" />
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>

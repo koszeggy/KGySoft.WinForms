@@ -1,6 +1,8 @@
 ﻿using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
+using KGySoft.Controls.Classes;
 using KGySoft.Libraries.Language;
 
 namespace KGySoft.Controls
@@ -13,6 +15,7 @@ namespace KGySoft.Controls
     {
         private bool showDescription = true;
         private bool readOnly = false;
+        private bool allowPropertyRecursion = true;
 
         /// <summary>
         /// Creates a new instance of <see cref="ucPropertyGrid"/>
@@ -41,6 +44,22 @@ namespace KGySoft.Controls
             }
         }
 
+        ///<summary>
+        /// Gets or sets whether properties can be edited recursively.
+        ///</summary>
+        [DefaultValue(true)]
+        [Description("Gets or sets whether properties can be edited recursively.")]
+        [Category("ucPropertyGrid")]
+        public bool AllowPropertyRecursion
+        {
+            get { return allowPropertyRecursion; }
+            set
+            {
+                allowPropertyRecursion = value;
+                SelectedObjects = SelectedObjects;
+            }
+        }
+
         /// <summary>
         /// Gets the inner property grid
         /// </summary>
@@ -60,13 +79,7 @@ namespace KGySoft.Controls
         [Browsable(false)]
         public object SelectedObject
         {
-            get
-            {
-                LocalizedObjectDescriptor descriptor = propertyGrid.SelectedObject as LocalizedObjectDescriptor;
-                if (descriptor != null)
-                    return descriptor.Object;
-                return propertyGrid.SelectedObject;
-            }
+            get { return Unwrap(propertyGrid.SelectedObject); }
             set
             {
                 if (value == null)
@@ -131,17 +144,13 @@ namespace KGySoft.Controls
 
         private void SetSelectedObjects(object[] values)
         {
-            if (TranslationEnabled && values != null && values.Length != 0)
+            if (values == null || !TranslationEnabled && !AllowPropertyRecursion)
             {
-                LocalizedObjectDescriptor[] localizedObjectDescriptors = new LocalizedObjectDescriptor[values.Length];
-                for (int i = 0; i < values.Length; i++)
-                {
-                    localizedObjectDescriptors[i] = values[i] == null ? null : new LocalizedObjectDescriptor(values[i]);
-                }
-                propertyGrid.SelectedObjects = localizedObjectDescriptors;
-            }
-            else
                 propertyGrid.SelectedObjects = values;
+                return;
+            }
+
+            propertyGrid.SelectedObjects = values.Select(Wrap).ToArray();
         }
 
         private object[] GetSelectedObjects()
@@ -150,13 +159,23 @@ namespace KGySoft.Controls
             if (result == null)
                 return result;
             for (int i = 0; i < result.Length; i++)
-            {
-                LocalizedObjectDescriptor descriptor = result[i] as LocalizedObjectDescriptor;
-                if (descriptor != null)
-                    result[i] = descriptor.Object;
-            }
+                result[i] = Unwrap(result[i]);
             return result;
         }
+
+        private object Wrap(object o)
+        {
+            if (AllowPropertyRecursion && !(o is RecursivelyEditableTypeDescriptor))
+                o = new RecursivelyEditableTypeDescriptor(o);
+            if (TranslationEnabled)
+                o = new LocalizedObjectDescriptor(o);
+            return o;
+        }
+
+        private static object Unwrap(object obj) =>
+            obj is LocalizedObjectDescriptor localizedObjectDescriptor ? Unwrap(localizedObjectDescriptor.Object)
+            : obj is RecursivelyEditableTypeDescriptor recursivelyEditableTypeDescriptor ? Unwrap(recursivelyEditableTypeDescriptor.Object)
+            : obj;
 
         private void propertyGrid_SelectedGridItemChanged(object sender, SelectedGridItemChangedEventArgs e)
         {

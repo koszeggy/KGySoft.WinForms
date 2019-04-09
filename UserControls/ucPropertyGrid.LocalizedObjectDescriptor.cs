@@ -5,6 +5,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
+using System.Linq;
 using KGySoft.Libraries.Language;
 
 #endregion
@@ -431,74 +432,64 @@ namespace KGySoft.Controls
 
             public AttributeCollection GetAttributes()
             {
-                return TypeDescriptor.GetAttributes(Object, true);
+                return TypeDescriptor.GetAttributes(Unwrap(Object), true);
             }
 
             public string GetClassName()
             {
-                return TypeDescriptor.GetClassName(Object, true);
+                return TypeDescriptor.GetClassName(Unwrap(Object), true);
             }
 
             public string GetComponentName()
             {
-                return TypeDescriptor.GetComponentName(Object, true);
+                return TypeDescriptor.GetComponentName(Unwrap(Object), true);
             }
 
             public TypeConverter GetConverter()
             {
-                return TypeDescriptor.GetConverter(Object, true);
+                return TypeDescriptor.GetConverter(Unwrap(Object), true);
             }
 
             public EventDescriptor GetDefaultEvent()
             {
-                return TypeDescriptor.GetDefaultEvent(Object, true);
+                return TypeDescriptor.GetDefaultEvent(Unwrap(Object), true);
             }
 
             public PropertyDescriptor GetDefaultProperty()
             {
-                return TypeDescriptor.GetDefaultProperty(Object);
+                return TypeDescriptor.GetDefaultProperty(Unwrap(Object));
             }
 
             public object GetEditor(Type editorBaseType)
             {
-                return TypeDescriptor.GetEditor(Object, editorBaseType, true);
+                return TypeDescriptor.GetEditor(Unwrap(Object), editorBaseType, true);
             }
 
             public EventDescriptorCollection GetEvents(Attribute[] attributes)
             {
-                return TypeDescriptor.GetEvents(Object, attributes, true);
+                return TypeDescriptor.GetEvents(Unwrap(Object), attributes, true);
             }
 
             public EventDescriptorCollection GetEvents()
             {
-                return TypeDescriptor.GetEvents(Object, true);
+                return TypeDescriptor.GetEvents(Unwrap(Object), true);
             }
 
             public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
             {
-                PropertyDescriptorCollection result = new PropertyDescriptorCollection(null);
-                foreach (PropertyDescriptor property in TypeDescriptor.GetProperties(Object, attributes, true))
-                {
-                    PropertyDescriptor newDescriptor = new LocalizedPropertyDescriptor(property);
-                    result.Add(newDescriptor);
-                }
-                return result;
+                var properties = (Object as ICustomTypeDescriptor)?.GetProperties(attributes) ?? TypeDescriptor.GetProperties(Object, attributes, true);
+                return new PropertyDescriptorCollection(properties.Cast<PropertyDescriptor>().Select(p => (PropertyDescriptor)new LocalizedPropertyDescriptor(p)).ToArray());
             }
 
             public PropertyDescriptorCollection GetProperties()
             {
-                PropertyDescriptorCollection result = new PropertyDescriptorCollection(null);
-                foreach (PropertyDescriptor property in TypeDescriptor.GetProperties(Object, true))
-                {
-                    PropertyDescriptor newDescriptor = new LocalizedPropertyDescriptor(property);
-                    result.Add(newDescriptor);
-                }
-                return result;
+                var properties = (Object as ICustomTypeDescriptor)?.GetProperties() ?? TypeDescriptor.GetProperties(Object, true);
+                return new PropertyDescriptorCollection(properties.Cast<PropertyDescriptor>().Select(p => (PropertyDescriptor)new LocalizedPropertyDescriptor(p)).ToArray());
             }
 
             public object GetPropertyOwner(PropertyDescriptor pd)
             {
-                return Object;
+                return Unwrap(Object);
             }
 
             #endregion
