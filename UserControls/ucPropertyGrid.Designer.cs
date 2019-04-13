@@ -62,6 +62,7 @@
             this.txtDescription.Location = new System.Drawing.Point(0, 177);
             this.txtDescription.Multiline = true;
             this.txtDescription.Name = "txtDescription";
+            this.txtDescription.Padding = new System.Windows.Forms.Padding(2, 0, 2, 0);
             this.txtDescription.ReadOnly = true;
             this.txtDescription.ScrollBars = System.Windows.Forms.ScrollBars.None;
             this.txtDescription.Size = new System.Drawing.Size(342, 68);
