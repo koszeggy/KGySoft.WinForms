@@ -80,7 +80,7 @@ namespace KGySoft.Controls.Interop
                 // Removing Dispatcher._reserved0 (as MediaContext) from MediaSystem._mediaContexts
                 object fieldDispatcher__reserved0_MediaContext = Reflector.GetField(Dispatcher, "_reserved0");
                 Type typeMediaSystem = Reflector.ResolveType("System.Windows.Media.MediaSystem");
-                Reflector.RunMethod(typeMediaSystem, "Shutdown", fieldDispatcher__reserved0_MediaContext);
+                Reflector.InvokeMethod(typeMediaSystem, "Shutdown", fieldDispatcher__reserved0_MediaContext);
 
                 //// nullifying Dispatcher._reserved0
                 //Reflector.SetInstanceFieldByName(Dispatcher, "_reserved0", null);
