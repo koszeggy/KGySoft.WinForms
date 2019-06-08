@@ -1,0 +1,210 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003" ToolsVersion="4.0">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.30729</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9C839754-CEF4-4871-A9EC-EEBF9AA8A092}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>ControlTest</RootNamespace>
+    <AssemblyName>ControlTest</AssemblyName>
+    <FileUpgradeFlags>
+    </FileUpgradeFlags>
+    <OldToolsVersion>3.5</OldToolsVersion>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <CodeAnalysisRuleSet>AllRules.ruleset</CodeAnalysisRuleSet>
+    <OutputPath>bin\$(Configuration)</OutputPath>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug_NET35|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <DefineConstants>TRACE;DEBUG;NET35</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release_NET35|AnyCPU' ">
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE;NET35</DefineConstants>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug_NET40|AnyCPU'">
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>TRACE;DEBUG;NET40</DefineConstants>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_NET40|AnyCPU'">
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <DefineConstants>TRACE;NET40</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug_NET45|AnyCPU'">
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <DebugSymbols>true</DebugSymbols>
+    <DefineConstants>TRACE;DEBUG;NET45</DefineConstants>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release_NET45|AnyCPU'">
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <DefineConstants>TRACE;NET45</DefineConstants>
+    <Optimize>true</Optimize>
+    <DebugType>pdbonly</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.XML" />
+    <Reference Include="System.Xml.Linq" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="ControlTestForms\frmAdvancedButton.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedButton.Designer.cs">
+      <DependentUpon>frmAdvancedButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedCheckBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedCheckBox.Designer.cs">
+      <DependentUpon>frmAdvancedCheckBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedComboBox.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedComboBox.Designer.cs">
+      <DependentUpon>frmAdvancedComboBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedLabel.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedLabel.Designer.cs">
+      <DependentUpon>frmAdvancedLabel.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedProgressBar.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedProgressBar.Designer.cs">
+      <DependentUpon>frmAdvancedProgressBar.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedRadioButton.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlTestForms\frmAdvancedRadioButton.Designer.cs">
+      <DependentUpon>frmAdvancedRadioButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlTestForms\frmCommandLinkButton.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlTestForms\frmCommandLinkButton.Designer.cs">
+      <DependentUpon>frmCommandLinkButton.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlTestForms\ControlsTestBaseForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlTestForms\ControlsTestBaseForm.Designer.cs">
+      <DependentUpon>ControlsTestBaseForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="ControlTestForms\frmFadingDemo.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="ControlTestForms\frmFadingDemo.Designer.cs">
+      <DependentUpon>frmFadingDemo.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <EmbeddedResource Include="ControlTestForms\frmAdvancedButton.resx">
+      <DependentUpon>frmAdvancedButton.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlTestForms\frmAdvancedCheckBox.resx">
+      <DependentUpon>frmAdvancedCheckBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlTestForms\frmAdvancedComboBox.resx">
+      <DependentUpon>frmAdvancedComboBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlTestForms\frmAdvancedLabel.resx">
+      <DependentUpon>frmAdvancedLabel.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlTestForms\frmAdvancedProgressBar.resx">
+      <DependentUpon>frmAdvancedProgressBar.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlTestForms\frmAdvancedRadioButton.resx">
+      <DependentUpon>frmAdvancedRadioButton.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlTestForms\frmCommandLinkButton.resx">
+      <DependentUpon>frmCommandLinkButton.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlTestForms\ControlsTestBaseForm.resx">
+      <DependentUpon>ControlsTestBaseForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="ControlTestForms\frmFadingDemo.resx">
+      <DependentUpon>frmFadingDemo.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\KGySoft.Controls\KGySoft.Controls.csproj">
+      <Project>{3B635381-FF0A-41BD-828E-76937ED6F5DF}</Project>
+      <Name>KGySoft.Controls</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Drawing\KGySoft.Drawing.csproj">
+      <Project>{06AEC656-8AE3-409C-AB2E-64C6A3712F8B}</Project>
+      <Name>KGySoft.Drawing</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Language\KGySoft.Language.csproj">
+      <Project>{308021B7-4BA7-493A-BBBD-9A88B2911C28}</Project>
+      <Name>KGySoft.Language</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Libraries\KGySoft.CoreLibraries.csproj">
+      <Project>{D14B4B4A-86C4-45AD-B6F8-86CD878199E0}</Project>
+      <Name>KGySoft.CoreLibraries</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\DataSources\CompareStruct.datasource" />
+    <None Include="Properties\DataSources\DataBindingTest.datasource" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Properties="WindowsApplication1.Properties" ED14F191-6CDA-4bbb-BB1B-C329DD754E20_OutputCondition="" ExternalBuildIntegrationEnabled="True" />
+    </VisualStudio>
+  </ProjectExtensions>
+</Project>
