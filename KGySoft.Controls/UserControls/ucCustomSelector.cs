@@ -947,16 +947,16 @@ namespace KGySoft.Controls
             switch (state)
             {
                 case SelectorStates.NotSelected:
-                    pbImage.Image = Images.Clear;
+                    pbImage.Image = Properties.Resources.Clear;
                     break;
                 case SelectorStates.All:
-                    pbImage.Image = Images.All;
+                    pbImage.Image = Properties.Resources.All;
                     break;
                 case SelectorStates.None:
-                    pbImage.Image = Images.None;
+                    pbImage.Image = Properties.Resources.None;
                     break;
                 case SelectorStates.ValueSet:
-                    pbImage.Image = Images.Edit;
+                    pbImage.Image = Properties.Resources.Edit;
                     break;
             }
         }
@@ -1030,12 +1030,12 @@ namespace KGySoft.Controls
         protected virtual void CreateActionPanel()
         {
             pnlActionPanel.Controls.Clear();
-            btnClearSelection = CreateActionButton(Images.Clear, toolTipClearSelection);
-            btnSelectAll = CreateActionButton(Images.All, toolTipSelectAll);
-            btnSelectNone = CreateActionButton(Images.None, toolTipSelectNone);
-            btnBrowse = CreateActionButton(Images.Browse, toolTipBrowse);
-            btnEditor = CreateActionButton(Images.Edit, toolTipEditor);
-            btnNew = CreateActionButton(Images.New, toolTipNew);
+            btnClearSelection = CreateActionButton(Properties.Resources.Clear, toolTipClearSelection);
+            btnSelectAll = CreateActionButton(Properties.Resources.All, toolTipSelectAll);
+            btnSelectNone = CreateActionButton(Properties.Resources.None, toolTipSelectNone);
+            btnBrowse = CreateActionButton(Properties.Resources.Browse, toolTipBrowse);
+            btnEditor = CreateActionButton(Properties.Resources.Edit, toolTipEditor);
+            btnNew = CreateActionButton(Properties.Resources.New, toolTipNew);
         }
 
         /// <summary>

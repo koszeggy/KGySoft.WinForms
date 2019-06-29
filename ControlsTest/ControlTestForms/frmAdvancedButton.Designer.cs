@@ -157,7 +157,6 @@
             // 
             this.advancedButton7.Location = new System.Drawing.Point(152, 77);
             this.advancedButton7.Name = "advancedButton7";
-            this.advancedButton7.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.advancedButton7.Size = new System.Drawing.Size(140, 23);
             this.advancedButton7.TabIndex = 5;
             this.advancedButton7.Text = "High Quality, GDI+";
@@ -168,7 +167,6 @@
             // 
             this.advancedButton8.Location = new System.Drawing.Point(152, 48);
             this.advancedButton8.Name = "advancedButton8";
-            this.advancedButton8.RenderingQuality = KGySoft.Drawing.RenderingQuality.Medium;
             this.advancedButton8.Size = new System.Drawing.Size(140, 23);
             this.advancedButton8.TabIndex = 4;
             this.advancedButton8.Text = "Medium Quality, GDI+";
@@ -179,7 +177,6 @@
             // 
             this.advancedButton9.Location = new System.Drawing.Point(152, 19);
             this.advancedButton9.Name = "advancedButton9";
-            this.advancedButton9.RenderingQuality = KGySoft.Drawing.RenderingQuality.Low;
             this.advancedButton9.Size = new System.Drawing.Size(140, 23);
             this.advancedButton9.TabIndex = 3;
             this.advancedButton9.Text = "Low Quality, GDI+";
@@ -190,7 +187,6 @@
             // 
             this.advancedButton6.Location = new System.Drawing.Point(6, 77);
             this.advancedButton6.Name = "advancedButton6";
-            this.advancedButton6.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.advancedButton6.Size = new System.Drawing.Size(140, 23);
             this.advancedButton6.TabIndex = 2;
             this.advancedButton6.Text = "High Quality, GDI";
@@ -200,7 +196,6 @@
             // 
             this.advancedButton5.Location = new System.Drawing.Point(6, 48);
             this.advancedButton5.Name = "advancedButton5";
-            this.advancedButton5.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.advancedButton5.Size = new System.Drawing.Size(140, 23);
             this.advancedButton5.TabIndex = 1;
             this.advancedButton5.Text = "Medium Quality, GDI";
@@ -210,7 +205,6 @@
             // 
             this.advancedButton4.Location = new System.Drawing.Point(6, 19);
             this.advancedButton4.Name = "advancedButton4";
-            this.advancedButton4.RenderingQuality = KGySoft.Drawing.RenderingQuality.Low;
             this.advancedButton4.Size = new System.Drawing.Size(140, 23);
             this.advancedButton4.TabIndex = 0;
             this.advancedButton4.Text = "Low Quality, GDI";

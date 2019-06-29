@@ -147,7 +147,6 @@
             this.lblDetailsMain.Location = new System.Drawing.Point(0, 33);
             this.lblDetailsMain.Name = "lblDetailsMain";
             this.lblDetailsMain.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
-            this.lblDetailsMain.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.lblDetailsMain.Size = new System.Drawing.Size(309, 23);
             this.lblDetailsMain.TabIndex = 4;
             this.lblDetailsMain.Text = "lblDetailsMain";
@@ -160,7 +159,6 @@
             this.lblMessage.Location = new System.Drawing.Point(0, 10);
             this.lblMessage.Name = "lblMessage";
             this.lblMessage.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
-            this.lblMessage.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.lblMessage.Size = new System.Drawing.Size(309, 23);
             this.lblMessage.TabIndex = 3;
             this.lblMessage.Text = "lblMessage";
@@ -184,7 +182,6 @@
             this.lblMainInstruction.Location = new System.Drawing.Point(0, 0);
             this.lblMainInstruction.Name = "lblMainInstruction";
             this.lblMainInstruction.Padding = new System.Windows.Forms.Padding(8);
-            this.lblMainInstruction.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.lblMainInstruction.Size = new System.Drawing.Size(309, 29);
             this.lblMainInstruction.TabIndex = 1;
             this.lblMainInstruction.Text = "lblMainInstruction";
@@ -268,7 +265,6 @@
             this.btnShowHideDetails.ImageAlign = System.Drawing.ContentAlignment.BottomLeft;
             this.btnShowHideDetails.Location = new System.Drawing.Point(3, 3);
             this.btnShowHideDetails.Name = "btnShowHideDetails";
-            this.btnShowHideDetails.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.btnShowHideDetails.Size = new System.Drawing.Size(168, 24);
             this.btnShowHideDetails.TabIndex = 0;
             this.btnShowHideDetails.Text = "btnShowHideDetails";
@@ -282,7 +278,6 @@
             this.cbCheckBox.Location = new System.Drawing.Point(8, 33);
             this.cbCheckBox.Margin = new System.Windows.Forms.Padding(8, 3, 3, 3);
             this.cbCheckBox.Name = "cbCheckBox";
-            this.cbCheckBox.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.cbCheckBox.Size = new System.Drawing.Size(163, 17);
             this.cbCheckBox.TabIndex = 1;
             this.cbCheckBox.Text = "cbCheckBox";
@@ -357,7 +352,6 @@
             this.lblFooter.Location = new System.Drawing.Point(27, 0);
             this.lblFooter.Name = "lblFooter";
             this.lblFooter.Padding = new System.Windows.Forms.Padding(5, 7, 5, 7);
-            this.lblFooter.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.lblFooter.Size = new System.Drawing.Size(329, 27);
             this.lblFooter.TabIndex = 1;
             this.lblFooter.Text = "lblFooter";
@@ -390,7 +384,6 @@
             this.lblDetailsFooter.Location = new System.Drawing.Point(0, 261);
             this.lblDetailsFooter.Name = "lblDetailsFooter";
             this.lblDetailsFooter.Padding = new System.Windows.Forms.Padding(5, 7, 5, 7);
-            this.lblDetailsFooter.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.lblDetailsFooter.Size = new System.Drawing.Size(359, 27);
             this.lblDetailsFooter.TabIndex = 8;
             this.lblDetailsFooter.Text = "lblDetailsFooter";

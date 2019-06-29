@@ -36,12 +36,11 @@ namespace KGySoft.Controls
 - Adjustable rendering qualities
 - Adjustable colors in disabled state
 - Fading animations")]
-    public class AdvancedRadioButton : RadioButton, IDisabledColorCapable, IRenderingQuality, ISupportButtonAdapter, ISupportsFadingInternal
+    public class AdvancedRadioButton : RadioButton, IDisabledColorCapable, ISupportButtonAdapter, ISupportsFadingInternal
     {
         #region Fields
 
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
-        private RenderingQuality renderingQuality;
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private FlatStyle lastAdapterType;
         private Color disabledForeColor;
@@ -74,33 +73,6 @@ namespace KGySoft.Controls
         #region Properties
 
         #region Public Properties
-
-        /// <summary>
-        /// Gets or sets the rendering quality of the <see cref="AdvancedRadioButton"/>.
-        /// </summary>
-        [Category("AdvancedRadioButton")]
-        [Description("Gets or sets the rendering quality of the advanced radio button. Has effect only when FlatStyle is not System.")]
-        [DefaultValue(RenderingQuality.SystemDefault)]
-        public RenderingQuality RenderingQuality
-        {
-            get { return renderingQuality; }
-            set
-            {
-                if (renderingQuality == value)
-                    return;
-
-                if (!Enum<RenderingQuality>.IsDefined(value))
-                    throw new ArgumentOutOfRangeException("value");
-
-                renderingQuality = value;
-                Invalidate();
-                if (AutoSize)
-                {
-                    ResetSizeCache();
-                    PerformLayout();
-                }
-            }
-        }
 
         /// <summary>
         /// Gets or sets disabled fore color.
@@ -298,7 +270,7 @@ namespace KGySoft.Controls
 
             using (Graphics g = Graphics.FromHwnd(Handle))
             {
-                g.SetQuality(renderingQuality, UseCompatibleTextRendering);
+                g.SetQuality();
                 preferredSize = ((ISupportButtonAdapter)this).Adapter.GetPreferredSizeCore(g, proposedSize, GetAppearance());
             }
 
@@ -508,7 +480,7 @@ namespace KGySoft.Controls
 
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
-            e.Graphics.SetQuality(renderingQuality, UseCompatibleTextRendering);
+            e.Graphics.SetQuality();
             e.Graphics.SmoothingMode = SmoothingMode.Default; // preventing 1 pixel width invalid area of ClientRectangle
 
             // ButtonBase.OnPaint:

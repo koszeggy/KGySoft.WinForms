@@ -1106,7 +1106,7 @@ namespace KGySoft.Controls
             using (Bitmap bmp = value.ToAlphaBitmap())
             {
                 value.Dispose();
-                value = IconTools.IconFromImage(bmp, requiredSize, true);
+                value = bmp.ToIcon(requiredSize, true);
             }
         }
 

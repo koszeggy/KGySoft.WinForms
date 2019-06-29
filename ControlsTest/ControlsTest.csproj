@@ -59,6 +59,12 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="KGySoft.CoreLibraries, Version=4.6.0.0, Culture=neutral, PublicKeyToken=b45eba277439ddfe, processorArchitecture=MSIL">
+      <HintPath>..\packages\KGySoft.CoreLibraries.4.6.0\lib\net45\KGySoft.CoreLibraries.dll</HintPath>
+    </Reference>
+    <Reference Include="KGySoft.Drawing, Version=4.6.0.0, Culture=neutral, PublicKeyToken=b45eba277439ddfe, processorArchitecture=MSIL">
+      <HintPath>..\packages\KGySoft.Drawing.4.6.0\lib\net45\KGySoft.Drawing.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
@@ -152,42 +158,12 @@
     <EmbeddedResource Include="ControlTestForms\frmFadingDemo.resx">
       <DependentUpon>frmFadingDemo.cs</DependentUpon>
     </EmbeddedResource>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-      <SubType>Designer</SubType>
-    </EmbeddedResource>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-      <DesignTime>True</DesignTime>
-    </Compile>
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\KGySoft.Controls\KGySoft.Controls.csproj">
       <Project>{3B635381-FF0A-41BD-828E-76937ED6F5DF}</Project>
       <Name>KGySoft.Controls</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Drawing\KGySoft.Drawing.csproj">
-      <Project>{06AEC656-8AE3-409C-AB2E-64C6A3712F8B}</Project>
-      <Name>KGySoft.Drawing</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Language\KGySoft.Language.csproj">
-      <Project>{308021B7-4BA7-493A-BBBD-9A88B2911C28}</Project>
-      <Name>KGySoft.Language</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Libraries\KGySoft.CoreLibraries.csproj">
-      <Project>{D14B4B4A-86C4-45AD-B6F8-86CD878199E0}</Project>
-      <Name>KGySoft.CoreLibraries</Name>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>

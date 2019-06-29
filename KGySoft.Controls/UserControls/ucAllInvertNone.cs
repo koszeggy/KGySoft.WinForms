@@ -24,9 +24,9 @@ namespace KGySoft.Controls
         {
             InitializeComponent();
 
-            this.buttonNone.Image = Images.None;
-            this.buttonInvert.Image = Images.Options;
-            this.buttonAll.Image = Images.All;
+            this.buttonNone.Image = Properties.Resources.None;
+            this.buttonInvert.Image = Properties.Resources.Options;
+            this.buttonAll.Image = Properties.Resources.All;
 
             buttonAll.Click += new EventHandler(buttonAll_Click);
             buttonInvert.Click += new EventHandler(buttonInvert_Click);

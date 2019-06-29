@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Reflection;
 using System.Windows.Forms;
 using KGySoft.Controls.WinApi;
@@ -38,7 +39,7 @@ namespace KGySoft.Controls
 - Different rendering qualities
 - Adjustable colors in disabled state
 - Fading animations")]
-    public class AdvancedButton : Button, IDisabledColorCapable, IRenderingQuality, ISupportButtonAdapter, ISupportsFadingInternal
+    public class AdvancedButton : Button, IDisabledColorCapable, ISupportButtonAdapter, ISupportsFadingInternal
     {
         #region Fields
 
@@ -60,7 +61,6 @@ namespace KGySoft.Controls
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private FlatStyle reportedFlatStyle = FlatStyle.Standard;
         private FlatStyle lastAdapterType;
-        private RenderingQuality renderingQuality;
         private Color disabledForeColor;
         private Color disabledBackColor;
         private ButtonBaseAdapter adapter;
@@ -100,7 +100,7 @@ namespace KGySoft.Controls
                 if (securityShieldImage != null)
                     return securityShieldImage;
 
-                return securityShieldImage = Images.SecurityShield;
+                return securityShieldImage = Icons.SecurityShield.ExtractNearestBitmap(new Size(16, 16), PixelFormat.Format32bppArgb); // TODO: ToMultiResBitmap, and handle GetPreferredSize correctly
             }
         }
 
@@ -227,33 +227,6 @@ namespace KGySoft.Controls
                 base.Image = value;
                 isImageUpToDate = false;
                 CheckImage();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the rendering quality of the control.
-        /// </summary>
-        [Category("AdvancedButton")]
-        [Description("Gets or sets the rendering quality of the command link button. Has effect only when FlatStyle is not System.")]
-        [DefaultValue(RenderingQuality.SystemDefault)]
-        public RenderingQuality RenderingQuality
-        {
-            get { return renderingQuality; }
-            set
-            {
-                if (renderingQuality == value)
-                    return;
-
-                if (!Enum<RenderingQuality>.IsDefined(value))
-                    throw new ArgumentOutOfRangeException("value");
-
-                renderingQuality = value;
-                Invalidate();
-                if (AutoSize)
-                {
-                    ResetSizeCache();
-                    PerformLayout();
-                }
             }
         }
 
@@ -477,7 +450,7 @@ namespace KGySoft.Controls
 
             using (Graphics g = Graphics.FromHwnd(Handle))
             {
-                g.SetQuality(renderingQuality, base.UseCompatibleTextRendering);
+                g.SetQuality();
                 preferredSize = LayoutUtils.UnionSizes(((ISupportButtonAdapter)this).Adapter.GetPreferredSizeCore(g, proposedConstraints, GetAppearance()) + Padding.Size, MinimumSize);
             }
 
@@ -651,7 +624,7 @@ namespace KGySoft.Controls
 
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
-            e.Graphics.SetQuality(renderingQuality, UseCompatibleTextRendering);
+            e.Graphics.SetQuality();
             e.Graphics.SmoothingMode = SmoothingMode.Default; // preventing 1 pixel width invalid area of ClientRectangle
 
             // ButtonBase.OnPaint:

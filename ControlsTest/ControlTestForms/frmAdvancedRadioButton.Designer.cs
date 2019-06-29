@@ -136,7 +136,6 @@
             this.advancedRadioButton8.AutoSize = true;
             this.advancedRadioButton8.Location = new System.Drawing.Point(165, 55);
             this.advancedRadioButton8.Name = "advancedRadioButton8";
-            this.advancedRadioButton8.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.advancedRadioButton8.Size = new System.Drawing.Size(117, 18);
             this.advancedRadioButton8.TabIndex = 5;
             this.advancedRadioButton8.Text = "High Quality, GDI+";
@@ -148,7 +147,6 @@
             this.advancedRadioButton7.AutoSize = true;
             this.advancedRadioButton7.Location = new System.Drawing.Point(165, 37);
             this.advancedRadioButton7.Name = "advancedRadioButton7";
-            this.advancedRadioButton7.RenderingQuality = KGySoft.Drawing.RenderingQuality.Medium;
             this.advancedRadioButton7.Size = new System.Drawing.Size(134, 18);
             this.advancedRadioButton7.TabIndex = 4;
             this.advancedRadioButton7.Text = "Medium Quality, GDI+";
@@ -160,7 +158,6 @@
             this.advancedRadioButton6.AutoSize = true;
             this.advancedRadioButton6.Location = new System.Drawing.Point(165, 19);
             this.advancedRadioButton6.Name = "advancedRadioButton6";
-            this.advancedRadioButton6.RenderingQuality = KGySoft.Drawing.RenderingQuality.Low;
             this.advancedRadioButton6.Size = new System.Drawing.Size(114, 18);
             this.advancedRadioButton6.TabIndex = 3;
             this.advancedRadioButton6.Text = "Low Quality, GDI+";
@@ -172,7 +169,6 @@
             this.advancedRadioButton5.AutoSize = true;
             this.advancedRadioButton5.Location = new System.Drawing.Point(12, 55);
             this.advancedRadioButton5.Name = "advancedRadioButton5";
-            this.advancedRadioButton5.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.advancedRadioButton5.Size = new System.Drawing.Size(107, 17);
             this.advancedRadioButton5.TabIndex = 2;
             this.advancedRadioButton5.Text = "High Quality, GDI";
@@ -183,7 +179,6 @@
             this.advancedRadioButton4.AutoSize = true;
             this.advancedRadioButton4.Location = new System.Drawing.Point(12, 37);
             this.advancedRadioButton4.Name = "advancedRadioButton4";
-            this.advancedRadioButton4.RenderingQuality = KGySoft.Drawing.RenderingQuality.Medium;
             this.advancedRadioButton4.Size = new System.Drawing.Size(122, 17);
             this.advancedRadioButton4.TabIndex = 1;
             this.advancedRadioButton4.Text = "Medium Quality, GDI";
@@ -194,7 +189,6 @@
             this.advancedRadioButton3.AutoSize = true;
             this.advancedRadioButton3.Location = new System.Drawing.Point(12, 19);
             this.advancedRadioButton3.Name = "advancedRadioButton3";
-            this.advancedRadioButton3.RenderingQuality = KGySoft.Drawing.RenderingQuality.Low;
             this.advancedRadioButton3.Size = new System.Drawing.Size(105, 17);
             this.advancedRadioButton3.TabIndex = 0;
             this.advancedRadioButton3.Text = "Low Quality, GDI";

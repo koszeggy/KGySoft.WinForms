@@ -293,7 +293,6 @@
             this.advancedLabel17.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel17.Location = new System.Drawing.Point(153, 46);
             this.advancedLabel17.Name = "advancedLabel17";
-            this.advancedLabel17.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.advancedLabel17.Size = new System.Drawing.Size(99, 17);
             this.advancedLabel17.TabIndex = 5;
             this.advancedLabel17.Text = "High Quality, GDI+";
@@ -305,7 +304,6 @@
             this.advancedLabel16.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel16.Location = new System.Drawing.Point(153, 33);
             this.advancedLabel16.Name = "advancedLabel16";
-            this.advancedLabel16.RenderingQuality = KGySoft.Drawing.RenderingQuality.Medium;
             this.advancedLabel16.Size = new System.Drawing.Size(116, 17);
             this.advancedLabel16.TabIndex = 4;
             this.advancedLabel16.Text = "Medium Quality, GDI+";
@@ -317,7 +315,6 @@
             this.advancedLabel15.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel15.Location = new System.Drawing.Point(153, 20);
             this.advancedLabel15.Name = "advancedLabel15";
-            this.advancedLabel15.RenderingQuality = KGySoft.Drawing.RenderingQuality.Low;
             this.advancedLabel15.Size = new System.Drawing.Size(96, 17);
             this.advancedLabel15.TabIndex = 3;
             this.advancedLabel15.Text = "Low Quality, GDI+";
@@ -329,7 +326,6 @@
             this.advancedLabel14.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel14.Location = new System.Drawing.Point(22, 46);
             this.advancedLabel14.Name = "advancedLabel14";
-            this.advancedLabel14.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.advancedLabel14.Size = new System.Drawing.Size(95, 13);
             this.advancedLabel14.TabIndex = 2;
             this.advancedLabel14.Text = "High Quality, GDI";
@@ -340,7 +336,6 @@
             this.advancedLabel13.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel13.Location = new System.Drawing.Point(22, 33);
             this.advancedLabel13.Name = "advancedLabel13";
-            this.advancedLabel13.RenderingQuality = KGySoft.Drawing.RenderingQuality.Medium;
             this.advancedLabel13.Size = new System.Drawing.Size(111, 13);
             this.advancedLabel13.TabIndex = 1;
             this.advancedLabel13.Text = "Medium Quality, GDI";
@@ -351,7 +346,6 @@
             this.advancedLabel12.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel12.Location = new System.Drawing.Point(22, 20);
             this.advancedLabel12.Name = "advancedLabel12";
-            this.advancedLabel12.RenderingQuality = KGySoft.Drawing.RenderingQuality.Low;
             this.advancedLabel12.Size = new System.Drawing.Size(87, 13);
             this.advancedLabel12.TabIndex = 0;
             this.advancedLabel12.Text = "Low Quality, GDI";
@@ -391,7 +385,6 @@
             this.advancedLabel18.Name = "advancedLabel18";
             this.advancedLabel18.RawText = "An AdvancedLabel may contain hyperlinks such as <a href=\"http://kgysoft.try.hu\">h" +
     "yperlink</a> or http://kgysoft.try.hu. See ResolveHyperlinks property.";
-            this.advancedLabel18.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.advancedLabel18.ResolveHyperlinks = KGySoft.Controls.HyperlinkResolveModes.ResolveAll;
             this.advancedLabel18.Size = new System.Drawing.Size(444, 30);
             this.advancedLabel18.TabIndex = 0;

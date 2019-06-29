@@ -7,6 +7,7 @@ using System.ComponentModel.Design;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -30,7 +31,7 @@ namespace KGySoft.Controls
     /// </summary>
     [ToolboxBitmap(typeof(CommandLinkButton), "Resources.Toolbox.CommandLinkButton.png")]
     [Description("Vista-like CommandLink button that works also in compatibility mode. In Vista and above you may set FlatStyle to System to render the button by the Windows.")]
-    public class CommandLinkButton : Button, IDisabledColorCapable, IRenderingQuality, ISupportsFadingInternal
+    public class CommandLinkButton : Button, IDisabledColorCapable, ISupportsFadingInternal
     {
         #region Fields
 
@@ -91,7 +92,6 @@ namespace KGySoft.Controls
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private FlatStyle reportedFlatStyle = FlatStyle.Standard;
         private ContentAlignment lastImageAlign;
-        private RenderingQuality renderingQuality;
 
         private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
@@ -139,7 +139,7 @@ namespace KGySoft.Controls
                 if (securityShield != null)
                     return securityShield;
 
-                securityShield = Images.SecurityShield;
+                securityShield = Icons.SecurityShield.ExtractNearestBitmap(new Size(16, 16), PixelFormat.Format32bppArgb); // TODO: ToMultiResBitmap, and handle GetPreferredSize correctly
                 return securityShield;
             }
         }
@@ -549,33 +549,6 @@ namespace KGySoft.Controls
         }
 
         /// <summary>
-        /// Gets or sets the rendering quality of the control.
-        /// </summary>
-        [Category("CommandLinkButton")]
-        [Description("Gets or sets the rendering quality of the command link button. Has effect only when FlatStyle is not System.")]
-        [DefaultValue(RenderingQuality.High)]
-        public RenderingQuality RenderingQuality
-        {
-            get { return renderingQuality; }
-            set
-            {
-                if (renderingQuality == value)
-                    return;
-
-                if (!Enum<RenderingQuality>.IsDefined(value))
-                    throw new ArgumentOutOfRangeException("value");
-
-                renderingQuality = value;
-                Invalidate();
-                if (AutoSize)
-                {
-                    ResetSizeCache();
-                    PerformLayout();
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
         /// </summary>
         public new bool UseCompatibleTextRendering
@@ -832,7 +805,7 @@ namespace KGySoft.Controls
                 if (outerBorder != null)
                     return outerBorder;
 
-                return outerBorder = GraphicsPathTools.RoundedRect(new Rectangle(0, 0, Width - 1, Height - 1), 3);
+                return outerBorder = Accessors.GraphicsExtensions_CallCreateRoundedRectangle(new Rectangle(0, 0, Width - 1, Height - 1), 3);
             }
         }
 
@@ -843,7 +816,7 @@ namespace KGySoft.Controls
                 if (innerBorder != null)
                     return innerBorder;
 
-                return innerBorder = GraphicsPathTools.RoundedRect(new Rectangle(1, 1, Width - 3, Height - 3), 2);
+                return innerBorder = Accessors.GraphicsExtensions_CallCreateRoundedRectangle(new Rectangle(1, 1, Width - 3, Height - 3), 2);
             }
         }
 
@@ -863,7 +836,7 @@ namespace KGySoft.Controls
                 }
 
                 // themed/flat selection
-                return selectionBorder = GraphicsPathTools.RoundedRect(new Rectangle(1, 0, Width - 3, Height - 1), 3);
+                return selectionBorder = Accessors.GraphicsExtensions_CallCreateRoundedRectangle(new Rectangle(1, 0, Width - 3, Height - 1), 3);
             }
         }
 
@@ -938,7 +911,6 @@ namespace KGySoft.Controls
             base.AutoEllipsis = true;
             base.TextAlign = ContentAlignment.TopLeft;
             base.ImageAlign = lastImageAlign = ContentAlignment.TopLeft;
-            renderingQuality = RenderingQuality.High;
             ResetTheme();
             fadingPainter = new FadingPainterInternal(this, "BUTTON");
         }
@@ -1051,7 +1023,7 @@ namespace KGySoft.Controls
             using (Graphics g = Graphics.FromHwnd(Handle))
             {
                 bool gdiPlusTextRendering = UseCompatibleTextRendering;
-                g.SetQuality(renderingQuality, gdiPlusTextRendering);
+                g.SetQuality();
 
                 Size textSize = Size.Empty;
                 StringFormat sf = gdiPlusTextRendering ? formatFlags.ToStringFormat() : null;
@@ -1299,7 +1271,7 @@ namespace KGySoft.Controls
 
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
-            e.Graphics.SetQuality(renderingQuality, UseCompatibleTextRendering);
+            e.Graphics.SetQuality();
 
             if (!e.State.Visible)
             {
@@ -1554,7 +1526,7 @@ namespace KGySoft.Controls
             }
 
             bool gdiPlusTextRendering = UseCompatibleTextRendering;
-            e.Graphics.SetQuality(renderingQuality, gdiPlusTextRendering);
+            e.Graphics.SetQuality();
 
             // painting background
             if (useTheming)

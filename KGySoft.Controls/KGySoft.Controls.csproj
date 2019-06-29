@@ -80,6 +80,15 @@
     <DebugType>pdbonly</DebugType>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="KGySoft.CoreLibraries, Version=4.6.0.0, Culture=neutral, PublicKeyToken=b45eba277439ddfe, processorArchitecture=MSIL">
+      <HintPath>..\packages\KGySoft.CoreLibraries.4.6.0\lib\net35\KGySoft.CoreLibraries.dll</HintPath>
+    </Reference>
+    <Reference Include="KGySoft.Drawing, Version=4.6.0.0, Culture=neutral, PublicKeyToken=b45eba277439ddfe, processorArchitecture=MSIL">
+      <HintPath>..\packages\KGySoft.Drawing.4.6.0\lib\net35\KGySoft.Drawing.dll</HintPath>
+    </Reference>
+    <Reference Include="KGySoft.Language">
+      <HintPath>..\..\KGySoft.Language\KGySoft.Language\bin\Debug_NET35\KGySoft.Language.dll</HintPath>
+    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -102,30 +111,31 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Classes\Extensions\ColorTools.cs" />
-    <Compile Include="Classes\Extensions\ListControlTools.cs" />
-    <Compile Include="Classes\InternalHelpers\ControlAppearanceState.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\ButtonBaseAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\ButtonFlatAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\ButtonPopupAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\ButtonStandardAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\CheckableControlBaseAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\CheckBoxBaseAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\CheckBoxFlatAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\CheckBoxPopupAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\CheckBoxStandardAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\RadioButtonBaseAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\RadioButtonFlatAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\RadioButtonPopupAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonAdapters\RadioButtonStandardAdapter.cs" />
-    <Compile Include="Classes\InternalHelpers\ControlPaintAccess.cs" />
-    <Compile Include="Classes\InternalHelpers\FadingPainterInternal.cs" />
-    <Compile Include="Classes\InternalHelpers\LayoutUtils.cs" />
-    <Compile Include="Classes\InternalHelpers\ButtonBaseAccess.cs" />
-    <Compile Include="Classes\RecursivelyEditableTypeDescriptor.cs" />
-    <Compile Include="Classes\Screenshot.cs" />
-    <Compile Include="Classes\WinFormsCommandBindingsCollection.cs" />
-    <Compile Include="Classes\WinFormsStateUpdater.cs" />
+    <Compile Include="_Classes\Accessors.cs" />
+    <Compile Include="_Classes\Extensions\ColorTools.cs" />
+    <Compile Include="_Classes\Extensions\ListControlTools.cs" />
+    <Compile Include="_Classes\InternalHelpers\ControlAppearanceState.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\ButtonBaseAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\ButtonFlatAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\ButtonPopupAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\ButtonStandardAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\CheckableControlBaseAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\CheckBoxBaseAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\CheckBoxFlatAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\CheckBoxPopupAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\CheckBoxStandardAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\RadioButtonBaseAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\RadioButtonFlatAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\RadioButtonPopupAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonAdapters\RadioButtonStandardAdapter.cs" />
+    <Compile Include="_Classes\InternalHelpers\ControlPaintAccess.cs" />
+    <Compile Include="_Classes\InternalHelpers\FadingPainterInternal.cs" />
+    <Compile Include="_Classes\InternalHelpers\LayoutUtils.cs" />
+    <Compile Include="_Classes\InternalHelpers\ButtonBaseAccess.cs" />
+    <Compile Include="_Classes\RecursivelyEditableTypeDescriptor.cs" />
+    <Compile Include="_Classes\Screenshot.cs" />
+    <Compile Include="_Classes\WinFormsCommandBindingsCollection.cs" />
+    <Compile Include="_Classes\WinFormsStateUpdater.cs" />
     <Compile Include="Components\AdvancedErrorProvider.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -189,7 +199,7 @@
     <Compile Include="Enums\TaskDialogStandardIcons.cs" />
     <Compile Include="EventArgs\FileTypeChangedEventArgs.cs" />
     <Compile Include="EventArgs\PaintStateEventArgs.cs" />
-    <Compile Include="Classes\ReportSenderEventArgs.cs" />
+    <Compile Include="_Classes\ReportSenderEventArgs.cs" />
     <Compile Include="EventArgs\SelectedFileChangedEventArgs.cs" />
     <Compile Include="EventArgs\TaskDialogDetailsVisibleChangedEventArgs.cs" />
     <Compile Include="EventArgs\HyperlinkClickedEventArgs.cs" />
@@ -203,11 +213,10 @@
     <Compile Include="Forms\TaskDialogForm.ExpandoButton.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="Classes\Extensions\ContentAlignmentTools.cs" />
-    <Compile Include="Classes\Extensions\SizeFTools.cs" />
-    <Compile Include="Classes\Extensions\TextFormatFlagsTools.cs" />
-    <Compile Include="Classes\InternalHelpers\NCHelper.cs" />
-    <Compile Include="Interfaces\IRenderingQuality.cs" />
+    <Compile Include="_Classes\Extensions\ContentAlignmentTools.cs" />
+    <Compile Include="_Classes\Extensions\SizeFTools.cs" />
+    <Compile Include="_Classes\Extensions\TextFormatFlagsTools.cs" />
+    <Compile Include="_Classes\InternalHelpers\NCHelper.cs" />
     <Compile Include="Interfaces\ISupportButtonAdapter.cs" />
     <Compile Include="Interfaces\ISupportsFading.cs" />
     <Compile Include="Interfaces\ISupportsFadingInternal.cs" />
@@ -215,7 +224,7 @@
     <Compile Include="WinApi\BP_ANIMATIONPARAMS.cs" />
     <Compile Include="WinApi\BP_ANIMATIONSTYLE.cs" />
     <Compile Include="WinApi\BP_BUFFERFORMAT.cs" />
-    <Compile Include="Classes\FadingPainter.cs" />
+    <Compile Include="_Classes\FadingPainter.cs" />
     <Compile Include="WinApi\BUTTONPARTS.cs" />
     <Compile Include="WinApi\Comdlg32.cs" />
     <Compile Include="WinApi\COMMANDLINKSTATES.cs" />
@@ -251,23 +260,23 @@
     <Compile Include="Interfaces\IReadOnlyCapable.cs" />
     <Compile Include="Interfaces\ITaskDialog.cs" />
     <Compile Include="Interop\AdvancedWinformsHost.cs" />
-    <Compile Include="Classes\Extensions\ComboUtils.cs" />
-    <Compile Include="Classes\Extensions\ControlUtils.cs" />
-    <Compile Include="Classes\DataGridViewTextAndImageColumn.cs">
+    <Compile Include="_Classes\Extensions\ComboUtils.cs" />
+    <Compile Include="_Classes\Extensions\ControlUtils.cs" />
+    <Compile Include="_Classes\DataGridViewTextAndImageColumn.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Classes\Dialogs.cs" />
-    <Compile Include="Classes\AdvancedSaveFileDialog.cs">
+    <Compile Include="_Classes\Dialogs.cs" />
+    <Compile Include="_Classes\AdvancedSaveFileDialog.cs">
     </Compile>
-    <Compile Include="Classes\LanguageWinForms.cs" />
-    <Compile Include="Classes\TaskDialog\NativeTaskDialog.cs" />
-    <Compile Include="Classes\TaskDialog\TaskDialog.cs" />
-    <Compile Include="Classes\TaskDialog\TaskDialogButton.cs" />
-    <Compile Include="Classes\TaskDialog\TaskDialogButtonBase.cs" />
-    <Compile Include="Classes\TaskDialog\TaskDialogControl.cs" />
-    <Compile Include="Classes\InternalHelpers\TaskDialogControlCollection.cs" />
-    <Compile Include="Classes\TaskDialog\TaskDialogRadioButton.cs" />
-    <Compile Include="Classes\Extensions\TreeNodeUtils.cs" />
+    <Compile Include="_Classes\LanguageWinForms.cs" />
+    <Compile Include="_Classes\TaskDialog\NativeTaskDialog.cs" />
+    <Compile Include="_Classes\TaskDialog\TaskDialog.cs" />
+    <Compile Include="_Classes\TaskDialog\TaskDialogButton.cs" />
+    <Compile Include="_Classes\TaskDialog\TaskDialogButtonBase.cs" />
+    <Compile Include="_Classes\TaskDialog\TaskDialogControl.cs" />
+    <Compile Include="_Classes\TaskDialog\TaskDialogControlCollection.cs" />
+    <Compile Include="_Classes\TaskDialog\TaskDialogRadioButton.cs" />
+    <Compile Include="_Classes\Extensions\TreeNodeUtils.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\CurrencyImages.Designer.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
@@ -388,6 +397,7 @@
     <Compile Include="WinApi\User32.cs" />
     <Compile Include="WinApi\UxTheme.cs" />
     <Compile Include="WinApi\WindowsUtils.cs" />
+    <Compile Include="_Extensions\GraphicsExtensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Forms\BaseForm.resx">
@@ -476,21 +486,7 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Drawing\KGySoft.Drawing.csproj">
-      <Project>{06AEC656-8AE3-409C-AB2E-64C6A3712F8B}</Project>
-      <Name>KGySoft.Drawing</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\Language\KGySoft.Language.csproj">
-      <Project>{308021B7-4BA7-493A-BBBD-9A88B2911C28}</Project>
-      <Name>KGySoft.Language</Name>
-      <Aliases>global</Aliases>
-    </ProjectReference>
-    <ProjectReference Include="..\Libraries\KGySoft.CoreLibraries.csproj">
-      <Project>{D14B4B4A-86C4-45AD-B6F8-86CD878199E0}</Project>
-      <Name>KGySoft.CoreLibraries</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
+    <None Include="packages.config" />
     <None Include="Resources\TaskDialog.ico" />
     <EmbeddedResource Include="Resources\Toolbox.AdvancedLabel.png" />
     <None Include="Resources\CommandLinkDisabled.png" />
@@ -520,6 +516,27 @@
       <Install>true</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\All.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\None.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Options.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Clear.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Edit.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\Browse.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Resources\New.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -531,7 +548,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls_x005C_FileControls="KGySoft.Controls.Controls.FileControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls="KGySoft.Controls.Controls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_Design="KGySoft.Controls.UserControls.Design" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_NewFolder1="KGySoft.Controls.UserControls.NewFolder1" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_EventArgs="KGySoft.Controls.UserControls.EventArgs" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls="KGySoft.Controls.UserControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Libraries="KGySoft.Controls.Libraries" LastExportedMakefileHash="zr6SNy3VgexhAFeppxNRVw==" ED14F191-6CDA-4bbb-BB1B-C329DD754E20_OutputCondition="" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Properties="KGySoft.Controls.Properties" ExternalBuildIntegrationEnabled="True" />
+      <UserProperties ExternalBuildIntegrationEnabled="True" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Properties="KGySoft.Controls.Properties" ED14F191-6CDA-4bbb-BB1B-C329DD754E20_OutputCondition="" LastExportedMakefileHash="zr6SNy3VgexhAFeppxNRVw==" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Libraries="KGySoft.Controls.Libraries" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls="KGySoft.Controls.UserControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_EventArgs="KGySoft.Controls.UserControls.EventArgs" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_NewFolder1="KGySoft.Controls.UserControls.NewFolder1" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_Design="KGySoft.Controls.UserControls.Design" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls="KGySoft.Controls.Controls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls_x005C_FileControls="KGySoft.Controls.Controls.FileControls" />
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>

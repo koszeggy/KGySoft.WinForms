@@ -48,7 +48,7 @@ namespace KGySoft.Controls
 - Adjustable colors in disabled state
 - Fading animations
 - Automatic resolving of hyperlinks")]
-    public class AdvancedLabel : LinkLabel, IDisabledColorCapable, IRenderingQuality, ISupportsFadingInternal
+    public class AdvancedLabel : LinkLabel, IDisabledColorCapable, ISupportsFadingInternal
     {
         #region Fields
 
@@ -63,7 +63,6 @@ namespace KGySoft.Controls
 
         private AdvancedBorderStyle borderStyle;
         private int borderWidth;
-        private RenderingQuality renderingQuality;
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
         private Size lastProposedSize;
@@ -248,37 +247,6 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         }
 
         /// <summary>
-        /// Gets or sets the rendering quality of the <see cref="AdvancedLabel"/>.
-        /// </summary>
-        [Category("AdvancedLabel")]
-        [Description("Gets or sets the rendering quality of the advanced label. Has effect only when FlatStyle is not System.")]
-        [DefaultValue(RenderingQuality.SystemDefault)]
-        public RenderingQuality RenderingQuality
-        {
-            get { return renderingQuality; }
-            set
-            {
-                if (renderingQuality == value)
-                    return;
-
-                if (!Enum<RenderingQuality>.IsDefined(value))
-                    throw new ArgumentOutOfRangeException("value");
-
-                renderingQuality = value;
-                Invalidate();
-                if (AutoSize)
-                {
-                    ResetSizeCache();
-                    NCHelper.InvalidateNC(Handle);
-
-                    // bug: Otherwise PerformLayout wouldn't work.
-                    Size = Size.Empty;
-                    PerformLayout();
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets or sets disabled fore color.
         /// </summary>
         [Category("AdvancedLabel")]
@@ -426,7 +394,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
             using (Graphics g = Graphics.FromHwnd(Handle))
             {
-                g.SetQuality(renderingQuality, !useGdi);
+                g.SetQuality();
 
                 if (String.IsNullOrEmpty(base.Text))
                 {
@@ -568,7 +536,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
             ControlAppearanceState state = e.State;
-            e.Graphics.SetQuality(renderingQuality, UseCompatibleTextRendering);
+            e.Graphics.SetQuality();
 
             try
             {

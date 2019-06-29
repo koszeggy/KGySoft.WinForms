@@ -145,7 +145,7 @@ namespace KGySoft.Controls
             {
                 using (Graphics g = Graphics.FromHwnd(Handle))
                 {
-                    g.SetQuality(RenderingQuality, UseCompatibleTextRendering);
+                    g.SetQuality();
                     return LayoutUtils.UnionSizes(imageSize, GetTextSize(g, null, proposedSize) + new Size(0, 1)) // +1 for focus rectangle
                         + new Size(Margin.Left + imageSize.Width, Margin.Top);
                 }

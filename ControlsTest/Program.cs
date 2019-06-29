@@ -309,7 +309,7 @@ namespace ControlsTest
             {
                 dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
                 dlg.Icon = TaskDialogStandardIcons.Information;
-                dlg.CustomFooterIcon = IconTools.IconFromImage(Images.Gear, SystemIconSize.Small);
+                dlg.CustomFooterIcon =  Icons.Application;
                 dlg.Width = 300;
 
                 dlg.Caption = caption;

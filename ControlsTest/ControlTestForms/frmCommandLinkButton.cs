@@ -10,7 +10,7 @@ namespace ControlsTest
         public frmCommandLinkButton()
         {
             InitializeComponent();
-            this.gbCustomBackground.BackgroundImage = Images.ShieldLarge;
+            this.gbCustomBackground.BackgroundImage = Icons.Shield.ToBitmap();
         }
     }
 }

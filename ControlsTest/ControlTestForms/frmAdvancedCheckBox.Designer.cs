@@ -136,7 +136,6 @@
             this.advancedCheckBox8.AutoSize = true;
             this.advancedCheckBox8.Location = new System.Drawing.Point(165, 55);
             this.advancedCheckBox8.Name = "advancedCheckBox8";
-            this.advancedCheckBox8.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.advancedCheckBox8.Size = new System.Drawing.Size(118, 18);
             this.advancedCheckBox8.TabIndex = 5;
             this.advancedCheckBox8.Text = "High Quality, GDI+";
@@ -148,7 +147,6 @@
             this.advancedCheckBox7.AutoSize = true;
             this.advancedCheckBox7.Location = new System.Drawing.Point(165, 37);
             this.advancedCheckBox7.Name = "advancedCheckBox7";
-            this.advancedCheckBox7.RenderingQuality = KGySoft.Drawing.RenderingQuality.Medium;
             this.advancedCheckBox7.Size = new System.Drawing.Size(135, 18);
             this.advancedCheckBox7.TabIndex = 4;
             this.advancedCheckBox7.Text = "Medium Quality, GDI+";
@@ -160,7 +158,6 @@
             this.advancedCheckBox6.AutoSize = true;
             this.advancedCheckBox6.Location = new System.Drawing.Point(165, 19);
             this.advancedCheckBox6.Name = "advancedCheckBox6";
-            this.advancedCheckBox6.RenderingQuality = KGySoft.Drawing.RenderingQuality.Low;
             this.advancedCheckBox6.Size = new System.Drawing.Size(115, 18);
             this.advancedCheckBox6.TabIndex = 3;
             this.advancedCheckBox6.Text = "Low Quality, GDI+";
@@ -172,7 +169,6 @@
             this.advancedCheckBox5.AutoSize = true;
             this.advancedCheckBox5.Location = new System.Drawing.Point(12, 55);
             this.advancedCheckBox5.Name = "advancedCheckBox5";
-            this.advancedCheckBox5.RenderingQuality = KGySoft.Drawing.RenderingQuality.High;
             this.advancedCheckBox5.Size = new System.Drawing.Size(108, 17);
             this.advancedCheckBox5.TabIndex = 2;
             this.advancedCheckBox5.Text = "High Quality, GDI";
@@ -183,7 +179,6 @@
             this.advancedCheckBox4.AutoSize = true;
             this.advancedCheckBox4.Location = new System.Drawing.Point(12, 37);
             this.advancedCheckBox4.Name = "advancedCheckBox4";
-            this.advancedCheckBox4.RenderingQuality = KGySoft.Drawing.RenderingQuality.Medium;
             this.advancedCheckBox4.Size = new System.Drawing.Size(123, 17);
             this.advancedCheckBox4.TabIndex = 1;
             this.advancedCheckBox4.Text = "Medium Quality, GDI";
@@ -194,7 +189,6 @@
             this.advancedCheckBox3.AutoSize = true;
             this.advancedCheckBox3.Location = new System.Drawing.Point(12, 19);
             this.advancedCheckBox3.Name = "advancedCheckBox3";
-            this.advancedCheckBox3.RenderingQuality = KGySoft.Drawing.RenderingQuality.Low;
             this.advancedCheckBox3.Size = new System.Drawing.Size(106, 17);
             this.advancedCheckBox3.TabIndex = 0;
             this.advancedCheckBox3.Text = "Low Quality, GDI";
