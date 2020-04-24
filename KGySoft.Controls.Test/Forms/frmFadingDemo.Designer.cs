@@ -1,4 +1,4 @@
-﻿namespace ControlsTest
+﻿namespace KGySoft.Controls.Test.Forms
 {
     partial class frmFadingDemo
     {
@@ -32,7 +32,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.fadingLabelDemo1 = new ControlsTest.FadingLabelDemo();
+            this.fadingLabelDemo1 = new FadingLabelDemo();
             this.pnlTestArea.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.panel1.SuspendLayout();

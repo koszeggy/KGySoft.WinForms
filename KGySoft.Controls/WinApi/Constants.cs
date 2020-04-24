@@ -168,7 +168,7 @@ namespace KGySoft.Controls.WinApi
         //internal const int IDNO = 7;
         //internal const int IDCLOSE = 8;
 
-        internal const int ACTCTX_FLAG_ASSEMBLY_DIRECTORY_VALID = 0x004;
+        internal const int ACTCTX_FLAG_ASSEMBLY_RESOURCE_NAME_VALID = 0x008;
 
         internal const int TDI_MAIN = 0;
         internal const int TDI_FOOTER = 1;

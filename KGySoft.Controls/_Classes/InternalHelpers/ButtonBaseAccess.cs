@@ -13,6 +13,13 @@ namespace KGySoft.Controls
     /// </summary>
     internal static class ButtonBaseAccess
     {
+        private const string fieldNameEventPaint =
+#if NETFRAMEWORK
+            "EventPaint";
+#else
+            "s_paintEvent";
+#endif
+
         private static PropertyAccessor propertyShowToolTip;
         private static MethodAccessor methodAnimate;
         private static FieldAccessor fieldEventPaint;
@@ -47,7 +54,7 @@ namespace KGySoft.Controls
             get
             {
                 if (fieldEventPaint == null)
-                    fieldEventPaint = FieldAccessor.GetAccessor(typeof(Control).GetField("EventPaint", BindingFlags.Static | BindingFlags.NonPublic));
+                    fieldEventPaint = FieldAccessor.GetAccessor(typeof(Control).GetField(fieldNameEventPaint, BindingFlags.Static | BindingFlags.NonPublic));
 
                 return fieldEventPaint.Get(null);
             }

@@ -1,13 +1,11 @@
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
 using System.Windows.Forms;
-using KGySoft.Controls;
+using KGySoft.Controls.Test.Forms;
 using KGySoft.Drawing;
 using KGySoft.Reflection;
 
-namespace ControlsTest
+namespace KGySoft.Controls.Test
 {
     static class Program
     {
@@ -55,7 +53,7 @@ namespace ControlsTest
 
                     button.Click += (sender, args) =>
                     {
-                        using (ControlsTestBaseForm frm = (ControlsTestBaseForm)Reflector.CreateInstance(Reflector.ResolveType("ControlsTest.frm" + name)))
+                        using (ControlsTestBaseForm frm = (ControlsTestBaseForm)Reflector.CreateInstance(Reflector.ResolveType($"{typeof(Program).Namespace}.Forms.frm{name}")))
                         {
                             frm.ShowDialog();
                         }                        

@@ -38,6 +38,6 @@ using System.Security;
 [assembly: AllowPartiallyTrustedCallers]
 #if NET40 || NET45
 [assembly: SecurityRules(SecurityRuleSet.Level1)]
-#elif !NET35
+#elif !(NET35 || NETCOREAPP)
 #error .NET version is not set or not supported!
 #endif

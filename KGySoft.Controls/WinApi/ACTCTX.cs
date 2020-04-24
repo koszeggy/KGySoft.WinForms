@@ -1,4 +1,6 @@
-﻿namespace KGySoft.Controls.WinApi
+﻿using System;
+
+namespace KGySoft.Controls.WinApi
 {
     internal struct ACTCTX
     {
@@ -8,7 +10,7 @@
         public ushort wProcessorArchitecture;
         public ushort wLangId;
         public string lpAssemblyDirectory;
-        public string lpResourceName;
+        public IntPtr lpResourceName;
         public string lpApplicationName;
     }
 }

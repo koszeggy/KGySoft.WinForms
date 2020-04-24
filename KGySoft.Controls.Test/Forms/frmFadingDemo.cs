@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Windows.Forms;
 
-using KGySoft.Controls;
-
-namespace ControlsTest
+namespace KGySoft.Controls.Test.Forms
 {
     internal partial class frmFadingDemo: ControlsTestBaseForm
     {

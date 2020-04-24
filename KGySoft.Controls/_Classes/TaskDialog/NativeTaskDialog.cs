@@ -6,14 +6,14 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Linq;
 using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
-
+using System.Windows.Forms;
 using KGySoft.Drawing;
-using KGySoft.Libraries;
 using KGySoft.Controls.WinApi;
 using KGySoft.CoreLibraries;
 
@@ -21,7 +21,6 @@ using KGySoft.CoreLibraries;
 
 namespace KGySoft.Controls
 {
-    using System.Drawing.Imaging;
 
     /// <summary>
     /// A wrapper class around the in-built task dialog available from Vista
@@ -73,7 +72,7 @@ namespace KGySoft.Controls
             {
                 // NOTE: it is possible to activate Comctl32 V6 even with disabled visual styles 
                 // but it fails if Comctl32 V5 is already loaded. In that case reporting false here.
-                return WindowsUtils.IsVistaOrLater && WindowsUtils.IsComCtlV6Available;
+                return WindowsUtils.IsVistaOrLater && WindowsUtils.IsComCtlV6Available && ThemingActivationContext.IsThemingAvailable;
             }
         }
 
@@ -844,7 +843,7 @@ namespace KGySoft.Controls
                 // Using activation context forces to load Comctl32.dll V6.
                 // It works only when V5 has not been loaded yet, otherwise, an EntryPointNotFound exception occurs.
                 // IsAvailable checks whether V6 context is accessible, so when using via the TaskDialog class, this using is not really necessary
-                using (new Comctl32ActivationContext(true))
+                using (new ThemingActivationContext(true))
                 {
                     hResult = Comctl32.TaskDialogIndirect(ref config, out selectedButtonIndex, out selectedRadioButtonIndex, out checkBoxChecked);
                 }

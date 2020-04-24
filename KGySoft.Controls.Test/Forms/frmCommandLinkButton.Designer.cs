@@ -1,4 +1,4 @@
-﻿namespace ControlsTest
+﻿namespace KGySoft.Controls.Test.Forms
 {
     partial class frmCommandLinkButton
     {
