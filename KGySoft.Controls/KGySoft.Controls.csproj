@@ -86,9 +86,6 @@
     <Reference Include="KGySoft.Drawing, Version=4.6.0.0, Culture=neutral, PublicKeyToken=b45eba277439ddfe, processorArchitecture=MSIL">
       <HintPath>..\packages\KGySoft.Drawing.4.6.0\lib\net35\KGySoft.Drawing.dll</HintPath>
     </Reference>
-    <Reference Include="KGySoft.Language">
-      <HintPath>..\..\KGySoft.Language\KGySoft.Language\bin\Debug_NET35\KGySoft.Language.dll</HintPath>
-    </Reference>
     <Reference Include="PresentationCore" />
     <Reference Include="PresentationFramework" />
     <Reference Include="System" />
@@ -111,6 +108,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Language\Language.cs" />
+    <Compile Include="Language\ICustomTranslated.cs" />
     <Compile Include="_Classes\Accessors.cs" />
     <Compile Include="_Classes\Extensions\ColorTools.cs" />
     <Compile Include="_Classes\Extensions\ListControlTools.cs" />
@@ -537,6 +536,7 @@
   <ItemGroup>
     <None Include="Resources\New.png" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
@@ -548,7 +548,7 @@
   -->
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties ExternalBuildIntegrationEnabled="True" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Properties="KGySoft.Controls.Properties" ED14F191-6CDA-4bbb-BB1B-C329DD754E20_OutputCondition="" LastExportedMakefileHash="zr6SNy3VgexhAFeppxNRVw==" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Libraries="KGySoft.Controls.Libraries" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls="KGySoft.Controls.UserControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_EventArgs="KGySoft.Controls.UserControls.EventArgs" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_NewFolder1="KGySoft.Controls.UserControls.NewFolder1" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_Design="KGySoft.Controls.UserControls.Design" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls="KGySoft.Controls.Controls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls_x005C_FileControls="KGySoft.Controls.Controls.FileControls" />
+      <UserProperties _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls_x005C_FileControls="KGySoft.Controls.Controls.FileControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Controls="KGySoft.Controls.Controls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_Design="KGySoft.Controls.UserControls.Design" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_NewFolder1="KGySoft.Controls.UserControls.NewFolder1" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls_x005C_EventArgs="KGySoft.Controls.UserControls.EventArgs" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_UserControls="KGySoft.Controls.UserControls" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Libraries="KGySoft.Controls.Libraries" LastExportedMakefileHash="zr6SNy3VgexhAFeppxNRVw==" ED14F191-6CDA-4bbb-BB1B-C329DD754E20_OutputCondition="" _x0031_6C4EB2F-0B07-4121-8521-611530EAB978_FolderNamespace_Properties="KGySoft.Controls.Properties" ExternalBuildIntegrationEnabled="True" />
     </VisualStudio>
   </ProjectExtensions>
   <PropertyGroup>

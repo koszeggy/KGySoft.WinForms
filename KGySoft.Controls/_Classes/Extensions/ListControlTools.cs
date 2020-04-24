@@ -244,7 +244,7 @@ namespace KGySoft.Controls
             // sorting
             if (sortByDisplayedValues)
             {
-                StringComparer comparer = translateNames ? StringComparer.Create(Language.FormattingCulture, true) : StringComparer.InvariantCultureIgnoreCase;
+                StringComparer comparer = translateNames ? StringComparer.Create(LanguageSettings.FormattingLanguage, true) : StringComparer.InvariantCultureIgnoreCase;
                 result.Sort((item1, item2) => comparer.Compare(item1.Value, item2.Value));
             }
 
@@ -359,7 +359,7 @@ namespace KGySoft.Controls
             // sorting
             if (sortByDisplayedValues)
             {
-                StringComparer comparer = translateNames ? StringComparer.Create(Language.FormattingCulture, true) : StringComparer.InvariantCultureIgnoreCase;
+                StringComparer comparer = translateNames ? StringComparer.Create(LanguageSettings.FormattingLanguage, true) : StringComparer.InvariantCultureIgnoreCase;
                 result.Sort((item1, item2) => comparer.Compare(item1.Value, item2.Value));
             }
 

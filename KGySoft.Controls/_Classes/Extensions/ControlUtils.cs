@@ -275,7 +275,7 @@ namespace KGySoft.Controls
         }
 
         /// <summary>
-        /// Gets the double buffering state of a control
+        /// Sets the double buffering state of a control
         /// </summary>
         /// <param name="control">The control to set.</param>
         /// <param name="useDoubleBuffering"><see langword="true"/>, if <paramref name="control"/> should use double buffering; otherwise, <see langword="false"/>.</param>
