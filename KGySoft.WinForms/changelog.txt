@@ -1,0 +1,41 @@
+﻿Legend:
+! Breaking change
+* Compatible change
+- Bugfix
++ New feature
+===============================================================================
+
+
+~~~~~~~~~
+! v4.0.0:
+~~~~~~~~~
+
+! Assembly changes:
+===================
+! The KGySoft.Controls.dll assembly has been renamed to KGySoft.WinForms.dll
+* Making the package freely available to public
++ Targeting also .NET Core 3.0.
+
+! KGySoft.Controls namespace:
+=============================
+! The namespace has been removed and its content have been moved to:
+  ! KGySoft.ComponentModel
+  ! KGySoft.WinForms
+  ! KGySoft.WinForms.Components
+  ! KGySoft.WinForms.Controls
+  ! KGySoft.WinForms.Forms
+! Completely removed types:
+  ! ComboUtils (it was obsolete already in v3.5.2.0)
+
+! KGySoft.Controls.Interop namespace:
+=====================================
+! The namespace has been removed and its AdvancedWinformsHost WPF control does not belong to this assembly anymore.
+
+! KGySoft.WinForms namespace:
+=============================
+...
+
+- KGySoft.WinForms.Components namespace:
+========================================
+- TaskDialog class:
+  - Changing the way of creating the activation context for theming to be compatible with .NET Core

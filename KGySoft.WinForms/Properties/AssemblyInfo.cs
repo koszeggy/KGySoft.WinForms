@@ -6,12 +6,16 @@ using System.Security;
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("Common Controls")]
-[assembly: AssemblyDescription("")]
-[assembly: AssemblyConfiguration("")]
+[assembly: AssemblyTitle("KGySoft.WinForms")]
+[assembly: AssemblyDescription("KGy SOFT Windows Forms Libraries")]
+#if DEBUG
+[assembly: AssemblyConfiguration("Debug")]
+#else
+[assembly: AssemblyConfiguration("Release")]
+#endif
 [assembly: AssemblyCompany("KGy SOFT")]
-[assembly: AssemblyProduct("KGy SOFT Common Controls")]
-[assembly: AssemblyCopyright("")]
+[assembly: AssemblyProduct("KGy SOFT Windows Forms")]
+[assembly: AssemblyCopyright("Copyright © KGy SOFT. All rights reserved.")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -32,12 +36,11 @@ using System.Security;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("3.5.5.2")]
-[assembly: AssemblyFileVersion("3.5.5.2")]
+[assembly: AssemblyVersion("4.0.0.0")]
+[assembly: AssemblyFileVersion("4.0.0.0")]
+[assembly: AssemblyInformationalVersion("4.0.0-alpha.1")]
 
 [assembly: AllowPartiallyTrustedCallers]
-#if NET40 || NET45
-[assembly: SecurityRules(SecurityRuleSet.Level1)]
-#elif !(NET35 || NETCOREAPP)
-#error .NET version is not set or not supported!
+#if !NET35
+[assembly: SecurityRules(SecurityRuleSet.Level1, SkipVerificationInFullTrust = true)]
 #endif
