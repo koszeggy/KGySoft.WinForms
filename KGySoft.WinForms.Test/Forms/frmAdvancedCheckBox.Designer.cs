@@ -1,4 +1,4 @@
-﻿namespace KGySoft.Controls.Test.Forms
+﻿namespace KGySoft.WinForms.Test.Forms
 {
     partial class frmAdvancedCheckBox
     {
@@ -30,30 +30,30 @@
         {
             this.checkBox1 = new System.Windows.Forms.CheckBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.advancedCheckBox1 = new KGySoft.Controls.AdvancedCheckBox();
+            this.advancedCheckBox1 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.advancedCheckBox8 = new KGySoft.Controls.AdvancedCheckBox();
-            this.advancedCheckBox7 = new KGySoft.Controls.AdvancedCheckBox();
-            this.advancedCheckBox6 = new KGySoft.Controls.AdvancedCheckBox();
-            this.advancedCheckBox5 = new KGySoft.Controls.AdvancedCheckBox();
-            this.advancedCheckBox4 = new KGySoft.Controls.AdvancedCheckBox();
-            this.advancedCheckBox3 = new KGySoft.Controls.AdvancedCheckBox();
-            this.ucCaptionedContainer1 = new KGySoft.Controls.ucCaptionedContainer();
-            this.advancedCheckBox15 = new KGySoft.Controls.AdvancedCheckBox();
+            this.advancedCheckBox8 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.advancedCheckBox7 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.advancedCheckBox6 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.advancedCheckBox5 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.advancedCheckBox4 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.advancedCheckBox3 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.ucCaptionedContainer1 = new KGySoft.WinForms.Controls.ucCaptionedContainer();
+            this.advancedCheckBox15 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
             this.checkBox9 = new System.Windows.Forms.CheckBox();
-            this.advancedCheckBox14 = new KGySoft.Controls.AdvancedCheckBox();
+            this.advancedCheckBox14 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
             this.checkBox8 = new System.Windows.Forms.CheckBox();
-            this.advancedCheckBox11 = new KGySoft.Controls.AdvancedCheckBox();
-            this.advancedCheckBox12 = new KGySoft.Controls.AdvancedCheckBox();
-            this.advancedCheckBox13 = new KGySoft.Controls.AdvancedCheckBox();
-            this.advancedCheckBox10 = new KGySoft.Controls.AdvancedCheckBox();
-            this.advancedCheckBox9 = new KGySoft.Controls.AdvancedCheckBox();
+            this.advancedCheckBox11 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.advancedCheckBox12 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.advancedCheckBox13 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.advancedCheckBox10 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.advancedCheckBox9 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
             this.checkBox5 = new System.Windows.Forms.CheckBox();
             this.checkBox6 = new System.Windows.Forms.CheckBox();
             this.checkBox7 = new System.Windows.Forms.CheckBox();
             this.checkBox4 = new System.Windows.Forms.CheckBox();
             this.checkBox3 = new System.Windows.Forms.CheckBox();
-            this.advancedCheckBox2 = new KGySoft.Controls.AdvancedCheckBox();
+            this.advancedCheckBox2 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
             this.checkBox2 = new System.Windows.Forms.CheckBox();
             this.pnlTestArea.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -443,31 +443,31 @@
         #endregion
 
         private System.Windows.Forms.GroupBox groupBox1;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox1;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox1;
         private System.Windows.Forms.CheckBox checkBox1;
         private System.Windows.Forms.GroupBox groupBox4;
-        private KGySoft.Controls.ucCaptionedContainer ucCaptionedContainer1;
+        private KGySoft.WinForms.Controls.ucCaptionedContainer ucCaptionedContainer1;
         private System.Windows.Forms.CheckBox checkBox2;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox2;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox8;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox7;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox6;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox5;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox4;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox3;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox10;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox9;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox2;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox8;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox7;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox6;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox5;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox4;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox3;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox10;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox9;
         private System.Windows.Forms.CheckBox checkBox5;
         private System.Windows.Forms.CheckBox checkBox6;
         private System.Windows.Forms.CheckBox checkBox7;
         private System.Windows.Forms.CheckBox checkBox4;
         private System.Windows.Forms.CheckBox checkBox3;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox11;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox12;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox13;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox15;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox11;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox12;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox13;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox15;
         private System.Windows.Forms.CheckBox checkBox9;
-        private KGySoft.Controls.AdvancedCheckBox advancedCheckBox14;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox14;
         private System.Windows.Forms.CheckBox checkBox8;
     }
 }

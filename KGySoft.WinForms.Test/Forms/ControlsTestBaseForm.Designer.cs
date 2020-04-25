@@ -1,4 +1,4 @@
-﻿namespace KGySoft.Controls.Test.Forms
+﻿namespace KGySoft.WinForms.Test.Forms
 {
     partial class ControlsTestBaseForm
     {
@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.pnlTestArea = new System.Windows.Forms.Panel();
-            this.lblInstuction = new KGySoft.Controls.AdvancedLabel();
+            this.lblInstuction = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.grdProperties = new System.Windows.Forms.PropertyGrid();
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.pnlTestArea.SuspendLayout();
@@ -48,7 +48,7 @@
             // 
             this.lblInstuction.AutoSize = true;
             this.lblInstuction.BackColor = System.Drawing.SystemColors.Window;
-            this.lblInstuction.BorderStyle = KGySoft.Controls.AdvancedBorderStyle.Flat;
+            this.lblInstuction.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Flat;
             this.lblInstuction.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblInstuction.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.lblInstuction.ForeColor = System.Drawing.SystemColors.WindowText;
@@ -100,6 +100,6 @@
         private System.Windows.Forms.PropertyGrid grdProperties;
         protected System.Windows.Forms.Panel pnlTestArea;
         private System.Windows.Forms.Splitter splitter1;
-        protected KGySoft.Controls.AdvancedLabel lblInstuction;
+        protected KGySoft.WinForms.Controls.AdvancedLabel lblInstuction;
     }
 }

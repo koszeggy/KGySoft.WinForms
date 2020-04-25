@@ -1,6 +1,6 @@
 ﻿using KGySoft.Drawing;
 
-namespace KGySoft.Controls.Test.Forms
+namespace KGySoft.WinForms.Test.Forms
 {
 
     internal partial class frmCommandLinkButton : ControlsTestBaseForm

@@ -1,11 +1,12 @@
 using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-using KGySoft.Controls.Test.Forms;
 using KGySoft.Drawing;
 using KGySoft.Reflection;
+using KGySoft.WinForms.Components;
+using KGySoft.WinForms.Test.Forms;
 
-namespace KGySoft.Controls.Test
+namespace KGySoft.WinForms.Test
 {
     static class Program
     {
@@ -110,7 +111,7 @@ namespace KGySoft.Controls.Test
             {
                 dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
                 dlg.DetailsText = "This is the DetailsText";
-                dlg.Message = "This is a <a href=\"http://kgysoft.try.hu\">sample link</a>";
+                dlg.Message = "This is a <a href=\"https://kgysoft.net\">sample link</a>";
                 dlg.Options = TaskDialogOptions.HyperlinksEnabled | TaskDialogOptions.UseCommandLinks | TaskDialogOptions.DetailsExpanded;
                 dlg.FooterIcon = TaskDialogStandardIcons.Warning;
                 dlg.FooterText = "Warning: In native mode RightToLeftLayout cannot be undone";
@@ -295,10 +296,10 @@ namespace KGySoft.Controls.Test
 
             const string caption = "This is the Caption. When not set, displays application name.";
             const string mainInstruction = "This is the MainInstruction. When not set, Message is displayed here.";
-            const string message = "This is the Message. When not set, it takes no place.\nCan contain <a href=\"http://kgysoft.try.hu\">links</a>.";
+            const string message = "This is the Message. When not set, it takes no place.\nCan contain <a href=\"https://kgysoft.net\">links</a>.";
             const string detailsText = "This is the DetailsText. When set, an expando button appears. It can take place either under Message or under FooterText, depending on Options.\n"
-                + "Use the radio buttons to change its place.\nCan contain <a href=\"http://kgysoft.try.hu\">links</a>.";
-            const string footerText = "This is FooterText. When set, this footer area appears. It can have a different icon from the main icon.\nCan contain <a href=\"http://kgysoft.try.hu\">links</a>.";
+                + "Use the radio buttons to change its place.\nCan contain <a href=\"https://kgysoft.net\">links</a>.";
+            const string footerText = "This is FooterText. When set, this footer area appears. It can have a different icon from the main icon.\nCan contain <a href=\"https://kgysoft.net\">links</a>.";
             const string checkBoxText = "This is CheckBoxText. When set, this check box appears.";
             const string showDetailsText = "This is ShowDetailsText. When not set, shows HideDetailsText or a default text.";
             const string hideDetailsText = "This is HideDetailsText. When not set, shows ShowDetailsText or a default text.";

@@ -1,4 +1,4 @@
-﻿namespace KGySoft.Controls.Test.Forms
+﻿namespace KGySoft.WinForms.Test.Forms
 {
     partial class frmCommandLinkButton
     {
@@ -30,21 +30,21 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmCommandLinkButton));
             this.gbCustomBackground = new System.Windows.Forms.GroupBox();
-            this.commandLinkButton5 = new KGySoft.Controls.CommandLinkButton();
-            this.commandLinkButton6 = new KGySoft.Controls.CommandLinkButton();
+            this.commandLinkButton5 = new KGySoft.WinForms.Controls.CommandLinkButton();
+            this.commandLinkButton6 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.commandLinkButton13 = new KGySoft.Controls.CommandLinkButton();
-            this.commandLinkButton11 = new KGySoft.Controls.CommandLinkButton();
-            this.commandLinkButton12 = new KGySoft.Controls.CommandLinkButton();
-            this.commandLinkButton3 = new KGySoft.Controls.CommandLinkButton();
-            this.commandLinkButton4 = new KGySoft.Controls.CommandLinkButton();
-            this.commandLinkButton2 = new KGySoft.Controls.CommandLinkButton();
-            this.commandLinkButton1 = new KGySoft.Controls.CommandLinkButton();
+            this.commandLinkButton13 = new KGySoft.WinForms.Controls.CommandLinkButton();
+            this.commandLinkButton11 = new KGySoft.WinForms.Controls.CommandLinkButton();
+            this.commandLinkButton12 = new KGySoft.WinForms.Controls.CommandLinkButton();
+            this.commandLinkButton3 = new KGySoft.WinForms.Controls.CommandLinkButton();
+            this.commandLinkButton4 = new KGySoft.WinForms.Controls.CommandLinkButton();
+            this.commandLinkButton2 = new KGySoft.WinForms.Controls.CommandLinkButton();
+            this.commandLinkButton1 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.commandLinkButton10 = new KGySoft.Controls.CommandLinkButton();
-            this.commandLinkButton9 = new KGySoft.Controls.CommandLinkButton();
-            this.commandLinkButton8 = new KGySoft.Controls.CommandLinkButton();
-            this.commandLinkButton7 = new KGySoft.Controls.CommandLinkButton();
+            this.commandLinkButton10 = new KGySoft.WinForms.Controls.CommandLinkButton();
+            this.commandLinkButton9 = new KGySoft.WinForms.Controls.CommandLinkButton();
+            this.commandLinkButton8 = new KGySoft.WinForms.Controls.CommandLinkButton();
+            this.commandLinkButton7 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.pnlTestArea.SuspendLayout();
             this.gbCustomBackground.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -308,21 +308,21 @@
         #endregion
 
         private System.Windows.Forms.GroupBox gbCustomBackground;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton6;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton5;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton6;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton5;
         private System.Windows.Forms.GroupBox groupBox1;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton11;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton12;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton3;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton4;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton2;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton1;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton13;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton11;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton12;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton3;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton4;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton2;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton1;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton13;
         private System.Windows.Forms.GroupBox groupBox2;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton10;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton9;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton8;
-        private KGySoft.Controls.CommandLinkButton commandLinkButton7;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton10;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton9;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton8;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton7;
 
 
 

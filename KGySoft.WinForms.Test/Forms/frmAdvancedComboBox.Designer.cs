@@ -1,4 +1,4 @@
-﻿namespace KGySoft.Controls.Test.Forms
+﻿namespace KGySoft.WinForms.Test.Forms
 {
     partial class frmAdvancedComboBox
     {

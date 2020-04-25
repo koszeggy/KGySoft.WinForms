@@ -1,4 +1,4 @@
-﻿namespace KGySoft.Controls.Test.Forms
+﻿namespace KGySoft.WinForms.Test.Forms
 {
     partial class frmAdvancedRadioButton
     {
@@ -30,30 +30,30 @@
         {
             this.radioButton1 = new System.Windows.Forms.RadioButton();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.advancedRadioButton1 = new KGySoft.Controls.AdvancedRadioButton();
+            this.advancedRadioButton1 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.advancedRadioButton8 = new KGySoft.Controls.AdvancedRadioButton();
-            this.advancedRadioButton7 = new KGySoft.Controls.AdvancedRadioButton();
-            this.advancedRadioButton6 = new KGySoft.Controls.AdvancedRadioButton();
-            this.advancedRadioButton5 = new KGySoft.Controls.AdvancedRadioButton();
-            this.advancedRadioButton4 = new KGySoft.Controls.AdvancedRadioButton();
-            this.advancedRadioButton3 = new KGySoft.Controls.AdvancedRadioButton();
-            this.ucCaptionedContainer1 = new KGySoft.Controls.ucCaptionedContainer();
-            this.advancedRadioButton15 = new KGySoft.Controls.AdvancedRadioButton();
+            this.advancedRadioButton8 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
+            this.advancedRadioButton7 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
+            this.advancedRadioButton6 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
+            this.advancedRadioButton5 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
+            this.advancedRadioButton4 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
+            this.advancedRadioButton3 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
+            this.ucCaptionedContainer1 = new KGySoft.WinForms.Controls.ucCaptionedContainer();
+            this.advancedRadioButton15 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
             this.radioButton9 = new System.Windows.Forms.RadioButton();
-            this.advancedRadioButton14 = new KGySoft.Controls.AdvancedRadioButton();
+            this.advancedRadioButton14 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
             this.radioButton8 = new System.Windows.Forms.RadioButton();
-            this.advancedRadioButton11 = new KGySoft.Controls.AdvancedRadioButton();
-            this.advancedRadioButton12 = new KGySoft.Controls.AdvancedRadioButton();
-            this.advancedRadioButton13 = new KGySoft.Controls.AdvancedRadioButton();
-            this.advancedRadioButton10 = new KGySoft.Controls.AdvancedRadioButton();
-            this.advancedRadioButton9 = new KGySoft.Controls.AdvancedRadioButton();
+            this.advancedRadioButton11 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
+            this.advancedRadioButton12 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
+            this.advancedRadioButton13 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
+            this.advancedRadioButton10 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
+            this.advancedRadioButton9 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
             this.radioButton5 = new System.Windows.Forms.RadioButton();
             this.radioButton6 = new System.Windows.Forms.RadioButton();
             this.radioButton7 = new System.Windows.Forms.RadioButton();
             this.radioButton4 = new System.Windows.Forms.RadioButton();
             this.radioButton3 = new System.Windows.Forms.RadioButton();
-            this.advancedRadioButton2 = new KGySoft.Controls.AdvancedRadioButton();
+            this.advancedRadioButton2 = new KGySoft.WinForms.Controls.AdvancedRadioButton();
             this.radioButton2 = new System.Windows.Forms.RadioButton();
             this.pnlTestArea.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -423,31 +423,31 @@
         #endregion
 
         private System.Windows.Forms.GroupBox groupBox1;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton1;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton1;
         private System.Windows.Forms.RadioButton radioButton1;
         private System.Windows.Forms.GroupBox groupBox4;
-        private KGySoft.Controls.ucCaptionedContainer ucCaptionedContainer1;
+        private KGySoft.WinForms.Controls.ucCaptionedContainer ucCaptionedContainer1;
         private System.Windows.Forms.RadioButton radioButton2;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton2;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton8;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton7;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton6;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton5;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton4;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton3;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton10;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton9;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton2;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton8;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton7;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton6;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton5;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton4;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton3;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton10;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton9;
         private System.Windows.Forms.RadioButton radioButton5;
         private System.Windows.Forms.RadioButton radioButton6;
         private System.Windows.Forms.RadioButton radioButton7;
         private System.Windows.Forms.RadioButton radioButton4;
         private System.Windows.Forms.RadioButton radioButton3;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton11;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton12;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton13;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton15;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton11;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton12;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton13;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton15;
         private System.Windows.Forms.RadioButton radioButton9;
-        private KGySoft.Controls.AdvancedRadioButton advancedRadioButton14;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton14;
         private System.Windows.Forms.RadioButton radioButton8;
     }
 }

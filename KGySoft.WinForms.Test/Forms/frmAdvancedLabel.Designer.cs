@@ -1,4 +1,4 @@
-﻿namespace KGySoft.Controls.Test.Forms
+﻿namespace KGySoft.WinForms.Test.Forms
 {
     partial class frmAdvancedLabel
     {
@@ -30,33 +30,33 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvancedLabel));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.advancedLabel1 = new KGySoft.Controls.AdvancedLabel();
+            this.advancedLabel1 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.label1 = new System.Windows.Forms.Label();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.advancedLabel10 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel9 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel8 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel7 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel6 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel5 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel4 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel3 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel2 = new KGySoft.Controls.AdvancedLabel();
+            this.advancedLabel10 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel9 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel8 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel7 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel6 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel5 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel4 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel3 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel2 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.label4 = new System.Windows.Forms.Label();
             this.label3 = new System.Windows.Forms.Label();
             this.label2 = new System.Windows.Forms.Label();
             this.groupBox4 = new System.Windows.Forms.GroupBox();
-            this.advancedLabel17 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel16 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel15 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel14 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel13 = new KGySoft.Controls.AdvancedLabel();
-            this.advancedLabel12 = new KGySoft.Controls.AdvancedLabel();
+            this.advancedLabel17 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel16 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel15 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel14 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel13 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.advancedLabel12 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
-            this.advancedLabel18 = new KGySoft.Controls.AdvancedLabel();
-            this.ucCaptionedContainer1 = new KGySoft.Controls.ucCaptionedContainer();
-            this.advancedLabel11 = new KGySoft.Controls.AdvancedLabel();
+            this.advancedLabel18 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.ucCaptionedContainer1 = new KGySoft.WinForms.Controls.ucCaptionedContainer();
+            this.advancedLabel11 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.label5 = new System.Windows.Forms.Label();
             this.pnlTestArea.SuspendLayout();
             this.groupBox1.SuspendLayout();
@@ -147,7 +147,7 @@
             // advancedLabel10
             // 
             this.advancedLabel10.AutoSize = true;
-            this.advancedLabel10.BorderStyle = KGySoft.Controls.AdvancedBorderStyle.Flat;
+            this.advancedLabel10.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Flat;
             this.advancedLabel10.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel10.Location = new System.Drawing.Point(123, 150);
             this.advancedLabel10.Name = "advancedLabel10";
@@ -158,7 +158,7 @@
             // advancedLabel9
             // 
             this.advancedLabel9.AutoSize = true;
-            this.advancedLabel9.BorderStyle = KGySoft.Controls.AdvancedBorderStyle.SunkenLow;
+            this.advancedLabel9.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.SunkenLow;
             this.advancedLabel9.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel9.Location = new System.Drawing.Point(123, 132);
             this.advancedLabel9.Name = "advancedLabel9";
@@ -169,7 +169,7 @@
             // advancedLabel8
             // 
             this.advancedLabel8.AutoSize = true;
-            this.advancedLabel8.BorderStyle = KGySoft.Controls.AdvancedBorderStyle.RaisedFrame;
+            this.advancedLabel8.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.RaisedFrame;
             this.advancedLabel8.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel8.Location = new System.Drawing.Point(123, 114);
             this.advancedLabel8.Name = "advancedLabel8";
@@ -180,7 +180,7 @@
             // advancedLabel7
             // 
             this.advancedLabel7.AutoSize = true;
-            this.advancedLabel7.BorderStyle = KGySoft.Controls.AdvancedBorderStyle.SunkenFrame;
+            this.advancedLabel7.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.SunkenFrame;
             this.advancedLabel7.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel7.Location = new System.Drawing.Point(123, 96);
             this.advancedLabel7.Name = "advancedLabel7";
@@ -191,7 +191,7 @@
             // advancedLabel6
             // 
             this.advancedLabel6.AutoSize = true;
-            this.advancedLabel6.BorderStyle = KGySoft.Controls.AdvancedBorderStyle.RaisedHigh;
+            this.advancedLabel6.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.RaisedHigh;
             this.advancedLabel6.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel6.Location = new System.Drawing.Point(123, 78);
             this.advancedLabel6.Name = "advancedLabel6";
@@ -202,7 +202,7 @@
             // advancedLabel5
             // 
             this.advancedLabel5.AutoSize = true;
-            this.advancedLabel5.BorderStyle = KGySoft.Controls.AdvancedBorderStyle.Raised;
+            this.advancedLabel5.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Raised;
             this.advancedLabel5.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel5.Location = new System.Drawing.Point(123, 62);
             this.advancedLabel5.Name = "advancedLabel5";
@@ -213,7 +213,7 @@
             // advancedLabel4
             // 
             this.advancedLabel4.AutoSize = true;
-            this.advancedLabel4.BorderStyle = KGySoft.Controls.AdvancedBorderStyle.Sunken;
+            this.advancedLabel4.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Sunken;
             this.advancedLabel4.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel4.Location = new System.Drawing.Point(123, 46);
             this.advancedLabel4.Name = "advancedLabel4";
@@ -224,7 +224,7 @@
             // advancedLabel3
             // 
             this.advancedLabel3.AutoSize = true;
-            this.advancedLabel3.BorderStyle = KGySoft.Controls.AdvancedBorderStyle.FixedSingle;
+            this.advancedLabel3.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.FixedSingle;
             this.advancedLabel3.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel3.Location = new System.Drawing.Point(123, 30);
             this.advancedLabel3.Name = "advancedLabel3";
@@ -383,9 +383,9 @@
             this.advancedLabel18.LinkArea = new System.Windows.Forms.LinkArea(48, 9);
             this.advancedLabel18.Location = new System.Drawing.Point(3, 16);
             this.advancedLabel18.Name = "advancedLabel18";
-            this.advancedLabel18.RawText = "An AdvancedLabel may contain hyperlinks such as <a href=\"http://kgysoft.try.hu\">h" +
-    "yperlink</a> or http://kgysoft.try.hu. See ResolveHyperlinks property.";
-            this.advancedLabel18.ResolveHyperlinks = KGySoft.Controls.HyperlinkResolveModes.ResolveAll;
+            this.advancedLabel18.RawText = "An AdvancedLabel may contain hyperlinks such as <a href=\"https://kgysoft.net\">h" +
+    "yperlink</a> or https://kgysoft.net. See ResolveHyperlinks property.";
+            this.advancedLabel18.ResolveHyperlinks = KGySoft.WinForms.HyperlinkResolveMode.ResolveAll;
             this.advancedLabel18.Size = new System.Drawing.Size(444, 30);
             this.advancedLabel18.TabIndex = 0;
             this.advancedLabel18.TabStop = true;
@@ -451,33 +451,33 @@
         #endregion
 
         private System.Windows.Forms.GroupBox groupBox2;
-        private KGySoft.Controls.AdvancedLabel advancedLabel6;
-        private KGySoft.Controls.AdvancedLabel advancedLabel5;
-        private KGySoft.Controls.AdvancedLabel advancedLabel4;
-        private KGySoft.Controls.AdvancedLabel advancedLabel3;
-        private KGySoft.Controls.AdvancedLabel advancedLabel2;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel6;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel5;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel4;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel3;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel2;
         private System.Windows.Forms.Label label4;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.GroupBox groupBox1;
-        private KGySoft.Controls.AdvancedLabel advancedLabel1;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel1;
         private System.Windows.Forms.Label label1;
-        private KGySoft.Controls.AdvancedLabel advancedLabel10;
-        private KGySoft.Controls.AdvancedLabel advancedLabel9;
-        private KGySoft.Controls.AdvancedLabel advancedLabel8;
-        private KGySoft.Controls.AdvancedLabel advancedLabel7;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel10;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel9;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel8;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel7;
         private System.Windows.Forms.GroupBox groupBox5;
         private System.Windows.Forms.GroupBox groupBox4;
-        private KGySoft.Controls.AdvancedLabel advancedLabel17;
-        private KGySoft.Controls.AdvancedLabel advancedLabel16;
-        private KGySoft.Controls.AdvancedLabel advancedLabel15;
-        private KGySoft.Controls.AdvancedLabel advancedLabel14;
-        private KGySoft.Controls.AdvancedLabel advancedLabel13;
-        private KGySoft.Controls.AdvancedLabel advancedLabel12;
-        private KGySoft.Controls.ucCaptionedContainer ucCaptionedContainer1;
-        private KGySoft.Controls.AdvancedLabel advancedLabel11;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel17;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel16;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel15;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel14;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel13;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel12;
+        private KGySoft.WinForms.Controls.ucCaptionedContainer ucCaptionedContainer1;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel11;
         private System.Windows.Forms.Label label5;
-        private KGySoft.Controls.AdvancedLabel advancedLabel18;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel18;
         private System.Windows.Forms.LinkLabel linkLabel1;
 
     }

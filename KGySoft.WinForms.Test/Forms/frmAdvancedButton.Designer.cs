@@ -1,4 +1,4 @@
-﻿namespace KGySoft.Controls.Test.Forms
+﻿namespace KGySoft.WinForms.Test.Forms
 {
     partial class frmAdvancedButton
     {
@@ -30,22 +30,22 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvancedButton));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.advancedButton3 = new KGySoft.Controls.AdvancedButton();
-            this.advancedButton2 = new KGySoft.Controls.AdvancedButton();
-            this.advancedButton1 = new KGySoft.Controls.AdvancedButton();
+            this.advancedButton3 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.advancedButton2 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.advancedButton1 = new KGySoft.WinForms.Controls.AdvancedButton();
             this.button1 = new System.Windows.Forms.Button();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
-            this.advancedButton7 = new KGySoft.Controls.AdvancedButton();
-            this.advancedButton8 = new KGySoft.Controls.AdvancedButton();
-            this.advancedButton9 = new KGySoft.Controls.AdvancedButton();
-            this.advancedButton6 = new KGySoft.Controls.AdvancedButton();
-            this.advancedButton5 = new KGySoft.Controls.AdvancedButton();
-            this.advancedButton4 = new KGySoft.Controls.AdvancedButton();
-            this.ucCaptionedContainer1 = new KGySoft.Controls.ucCaptionedContainer();
-            this.advancedButton13 = new KGySoft.Controls.AdvancedButton();
-            this.advancedButton12 = new KGySoft.Controls.AdvancedButton();
-            this.advancedButton11 = new KGySoft.Controls.AdvancedButton();
-            this.advancedButton10 = new KGySoft.Controls.AdvancedButton();
+            this.advancedButton7 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.advancedButton8 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.advancedButton9 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.advancedButton6 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.advancedButton5 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.advancedButton4 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.ucCaptionedContainer1 = new KGySoft.WinForms.Controls.ucCaptionedContainer();
+            this.advancedButton13 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.advancedButton12 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.advancedButton11 = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.advancedButton10 = new KGySoft.WinForms.Controls.AdvancedButton();
             this.button5 = new System.Windows.Forms.Button();
             this.button4 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
@@ -330,24 +330,24 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.Button button1;
         private System.Windows.Forms.GroupBox groupBox2;
-        private KGySoft.Controls.AdvancedButton advancedButton7;
-        private KGySoft.Controls.AdvancedButton advancedButton8;
-        private KGySoft.Controls.AdvancedButton advancedButton9;
-        private KGySoft.Controls.AdvancedButton advancedButton6;
-        private KGySoft.Controls.AdvancedButton advancedButton5;
-        private KGySoft.Controls.AdvancedButton advancedButton4;
-        private KGySoft.Controls.ucCaptionedContainer ucCaptionedContainer1;
-        private KGySoft.Controls.AdvancedButton advancedButton13;
-        private KGySoft.Controls.AdvancedButton advancedButton12;
-        private KGySoft.Controls.AdvancedButton advancedButton11;
-        private KGySoft.Controls.AdvancedButton advancedButton10;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton7;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton8;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton9;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton6;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton5;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton4;
+        private KGySoft.WinForms.Controls.ucCaptionedContainer ucCaptionedContainer1;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton13;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton12;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton11;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton10;
         private System.Windows.Forms.Button button5;
         private System.Windows.Forms.Button button4;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button2;
-        private KGySoft.Controls.AdvancedButton advancedButton3;
-        private KGySoft.Controls.AdvancedButton advancedButton2;
-        private KGySoft.Controls.AdvancedButton advancedButton1;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton3;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton2;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton1;
 
     }
 }

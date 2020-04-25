@@ -1,9 +1,10 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <TargetFrameworks>net35;net40;net45;netcoreapp3.0</TargetFrameworks>
+    <!--<TargetFrameworks>net35;net40;net45;netcoreapp3.0</TargetFrameworks>-->
+    <TargetFrameworks>net45</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <RootNamespace>KGySoft.Controls.Test</RootNamespace>
+    <RootNamespace>KGySoft.WinForms.Test</RootNamespace>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <UseWindowsForms>true</UseWindowsForms>
@@ -20,7 +21,7 @@
     <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\KGySoft.Controls\KGySoft.Controls.csproj" />
+    <ProjectReference Include="..\KGySoft.WinForms\KGySoft.WinForms.csproj" />
   </ItemGroup>
 
   <!--<ItemGroup>
