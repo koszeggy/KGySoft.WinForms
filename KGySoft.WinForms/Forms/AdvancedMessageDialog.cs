@@ -1,0 +1,656 @@
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Threading;
+using System.Windows.Forms;
+using KGySoft.Drawing;
+using KGySoft.Libraries.Language;
+
+namespace KGySoft.WinForms.Forms
+{
+
+    #region Típusok
+
+    public enum AdvancedDialogTypes
+    {
+        Information,
+        Confirmation,
+        Warning,
+        Error,
+        Exception,
+        CustomImage
+    }
+
+    public enum ButtonTypes
+    {
+        // Standard gomb típusok DialogResult visszatéréshez
+        OK,
+        YesNo,
+        YesNoCancel,
+        OKCancel,
+        RetryCancel,
+        AbortRetryIgnore,
+
+        // Gomb típusok speciális m?veletekhez
+        Closewin,                   // ajtó ikonos ablakbezárás, DialogResult.None visszatérés
+        ClosewinSendreport,         // --"-- + hibalog küldés gomb
+        ClosewinSendreportCloseapp  // --"-- + alkalmazás bezárás gomb
+    }
+
+    #endregion
+
+    /// <summary>
+    /// Provides error and other message dialogs.
+    /// </summary>
+    public sealed partial class AdvancedMessageDialog : BaseForm
+    {
+        #region Public static events
+
+        // <summary>
+        // Ha saját projektben külön is akarunk kezdeni valamit az elkapott hibákkal (pl. adatbázisba log),
+        // akkor állítsunk rá egy tetsz?leges rutint. Alapértelmezés: null
+        // </summary>
+        //public static Action<Exception> CustomErrorHandler = null;
+
+        /// <summary>
+        /// Report sender event. When assigned, report sender button will be visible when requested.
+        /// </summary>
+        public static event EventHandler<ReportSenderEventArgs> ReportSender;
+
+        /// <summary>
+        /// Occurs before the application terminated if user chooses closing apllication.
+        /// </summary>
+        public static event EventHandler BeforeKillApplication;
+
+        // <summary>
+        // Elkapott hiba esetén legyen-e EMail-es hibaküldési lehet?ség. Alapértelmezés: false
+        // </summary>
+        //public static bool EnableSendingReport = false;
+
+        // <summary>
+        // Legyen-e log és screenshot mentés (lásd <see cref="ErrorHandling.ErrorLogDirectory"/>)
+        // </summary>
+        //public static bool CaptureScreenShotOnException = false;
+
+        #endregion
+
+        #region Objektumváltozók, típusok
+
+        private const string TextOk = "&OK__Dialogs";
+        private const string TextYes = "&Yes__Dialogs";
+        private const string TextNo = "&No__Dialogs";
+        private const string TextCancel = "&Cancel__Dialogs";
+        private const string TextAbort = "&Abort__Dialogs";
+        private const string TextRetry = "&Retry__Dialogs";
+        private const string TextIgnore = "&Ignore__Dialogs";
+
+        private string screenshot = String.Empty; // Képerny?mentés útvonala
+        private Exception exception = null; // Az elkapott hiba (csak a megfelel? Execute esetén)
+        private bool detailsVisible;
+
+        #endregion
+
+        #region Konstruktor
+
+        /// <summary>
+        /// Creates a new instance of AdvancedMessageDialog
+        /// </summary>
+        public AdvancedMessageDialog()
+        {
+            InitializeComponent();
+            //btnCloseApp.Image = Images.Delete;
+            //btnIgnore.Image = Images.Exit;
+            //btnSendReport.Image = Images.Mail;
+        }
+
+        #endregion
+
+        #region Properties
+
+        #region Static Properties
+
+        /// <summary>
+        /// Gets or sets log directory for saving logs and screenshots.
+        /// </summary>
+        public static string ErrorLogDirectory { get; set; }
+
+        #endregion
+
+        #region Instance Properties
+
+        [Localizable(false)]
+        public override string Text
+        {
+            get { return base.Text; }
+            set { base.Text = value; }
+        }
+
+        /// <summary>
+        /// Gets or sets the dialog Image
+        /// </summary>
+        public Image Image
+        {
+            get { return pbImage.Image; }
+            set { pbImage.Image = value; }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Publikus metódusok hibakezeléshez
+
+        /// <summary>
+        /// Message dialog for catched exceptions.
+        /// </summary>
+        /// <param name="e">Exception</param>
+        /// <param name="caption">Caption</param>
+        /// <param name="logNamePrefix">Prefix of log file name to save. Path can be set in <see cref="ErrorLogDirectory"/>. Can be null for not saving log.</param>
+        public void Execute(Exception e, string caption, string logNamePrefix)
+        {
+            ResetDetails(true);
+            Text = caption;
+            txtDetails.Text = e?.ToString();
+            exception = e;
+            txtMessage.Text = e != null ? e.Message : Language.Translate("Unknown error__Dialogs");
+
+            using (Icon icon = Icons.Shield)
+            {
+                pbImage.Image = icon.ExtractNearestBitmap(pbImage.Size, PixelFormat.Format32bppArgb, false);
+            }
+
+            btnSendReport.Visible = ReportSender != null;
+            pnlStandardButtons.Visible = false;
+            try
+            {
+                Cursor.Current = Cursors.WaitCursor;
+                try
+                {
+                    //if (CustomErrorHandler != null)
+                    //    CustomErrorHandler(e);
+
+                    if (!String.IsNullOrEmpty(logNamePrefix))
+                    {
+                        string filename = logNamePrefix + DateTime.Now.ToString("yyyyMMddhhmmssffff");
+                        screenshot = Screenshot(filename);
+                        ErrorToFile(filename, txtDetails.Text);
+                    }
+                }
+                finally
+                {
+                    Cursor.Current = Cursors.Default;
+                }
+                ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                // hiba a hibakezel?ben... na, ez gáz. De ha van saját beállítva, azt meghívjuk. Csak az ne dobjon további hibát...
+                //if (CustomErrorHandler != null)
+                //    CustomErrorHandler(ex);
+            }
+        }
+
+        /// <summary>
+        /// Message dialog for catched exceptions with a default caption.
+        /// Saves log and screenshot if directory is set in <see cref="ErrorHandling.ErrorLogDirectory"/>.
+        /// </summary>
+        /// <param name="e">Exception</param>
+        public void Execute(Exception e)
+        {
+            Execute(e, Language.Translate("Unhandled error caught__Dialogs"), "fatalerror");
+        }
+
+        #endregion
+
+        #region DialogResult visszatérésű publikus metódusok általános típusú üzenetablakozáshoz
+
+        /// <summary>
+        /// Message dialog for any kind of message.
+        /// </summary>
+        /// <param name="message">Message</param>
+        /// <param name="details">Details (if null or empty, Details button will be hidden)</param>
+        /// <param name="caption">Caption of the window</param>
+        /// <param name="dialogType">Type of the dialog icon</param>
+        /// <param name="buttons">Showed buttons</param>
+        /// <param name="saveLog">True for saving log (see also <see cref="ErrorLogDirectory"/>)</param>
+        /// <param name="saveScreenshot">True for saving screenshot (see also <see cref="ErrorLogDirectory"/>)</param>
+        /// <param name="logNamePrefix">File name prefix if log saving requested.</param>
+        public DialogResult Execute(string message, string details, string caption, AdvancedDialogTypes dialogType,
+            ButtonTypes buttons, bool saveLog, bool saveScreenshot, string logNamePrefix)
+        {
+            try
+            {
+                ResetDetails(!String.IsNullOrEmpty(details));
+                Text = caption;
+                txtMessage.Text = message ?? String.Empty;
+                txtDetails.Text = details ?? String.Empty;
+                btnDetails.Visible = txtDetails.Text.Length > 0;
+
+                switch (dialogType)
+                {
+                    case AdvancedDialogTypes.Information:
+                        using (Icon icon = Icons.Information)
+                        using (Bitmap bmp256 = icon.ExtractBitmap(0, false))
+                            pbImage.Image = bmp256.Resize(new Size(128, 128), true);
+                        break;
+                    case AdvancedDialogTypes.Confirmation:
+                        using (Icon icon = Icons.Question)
+                        using (Bitmap bmp256 = icon.ExtractBitmap(0, false))
+                            pbImage.Image = bmp256.Resize(new Size(128, 128), true);
+                        break;
+                    case AdvancedDialogTypes.Warning:
+                        using (Icon icon = Icons.Warning)
+                        using (Bitmap bmp256 = icon.ExtractBitmap(0, false))
+                            pbImage.Image = bmp256.Resize(new Size(128, 128), true);
+                        break;
+                    case AdvancedDialogTypes.Error:
+                        using (Icon icon = Icons.Error)
+                        using (Bitmap bmp256 = icon.ExtractBitmap(0, false))
+                            pbImage.Image = bmp256.Resize(new Size(128, 128), true);
+                        break;
+                    case AdvancedDialogTypes.Exception:
+                        using (Icon icon = Icons.Shield) // it has 128x128 size
+                            pbImage.Image = icon.ExtractNearestBitmap(pbImage.Size, PixelFormat.Format32bppArgb, false);
+                        break;
+                    case AdvancedDialogTypes.CustomImage:
+                        // nincs kép beállítás; a kép az Execute előtt állítható be (Image)
+                        break;
+                }
+
+                SetButtons(buttons);
+
+                if (saveScreenshot || saveLog)
+                {
+                    Cursor.Current = Cursors.WaitCursor;
+                    try
+                    {
+                        string filename = (logNamePrefix ?? String.Empty) + DateTime.Now.ToString("yyyyMMddhhmmssffff");
+                        if (saveScreenshot)
+                            screenshot = Screenshot(filename);
+                        if (saveLog)
+                            ErrorToFile(filename, details);
+                    }
+                    finally
+                    {
+                        Cursor.Current = Cursors.Default;
+                    }
+                }
+                exception = null;
+                return ShowDialog();
+            }
+            catch (Exception ex)
+            {
+                // ha hiba volt a hibakezel? formban (ami elég nagy gáz lenne), még az esetleges egyéni hibakezel?t meghívjuk
+                //if (CustomErrorHandler != null)
+                //    CustomErrorHandler(ex);
+                return DialogResult.None;
+            }
+        }
+
+        /// <summary>
+        /// Message dialog for any kind of message.
+        /// </summary>
+        /// <param name="message">Message</param>
+        /// <param name="details">Details (if null or empty, Details button will be hidden)</param>
+        /// <param name="caption">Caption of the window</param>
+        /// <param name="dialogType">Type of the dialog icon</param>
+        /// <param name="buttons">Shown buttons</param>
+        public DialogResult Execute(string message, string details, string caption, AdvancedDialogTypes dialogType, ButtonTypes buttons)
+        {
+            return Execute(message, details, caption, dialogType, buttons, false, false, null);
+        }
+
+        /// <summary>
+        /// Message dialog for any kind of message.
+        /// <para>- Details will be shown if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/></para>
+        /// <para>- Log and screenshot will be saved if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/> and <see cref="ReportSender"/> is assigned</para>
+        /// <para>- Buttons are controlled by <paramref name="dialogType"/>.</para>
+        /// </summary>
+        /// <param name="message">Message</param>
+        /// <param name="caption">Caption of the window</param>
+        /// <param name="dialogType">Affects dialog icon, Details button and send report button</param>
+        public DialogResult Execute(string message, string caption, AdvancedDialogTypes dialogType)
+        {
+            bool showDetails = dialogType == AdvancedDialogTypes.Exception;
+            ButtonTypes btn;
+
+            switch (dialogType)
+            {
+                //case AdvancedDialogTypes.Error:
+                //    btn = ButtonTypes.ClosewinSendreport;
+                //    break;
+                case AdvancedDialogTypes.Exception:
+                    btn = ButtonTypes.ClosewinSendreportCloseapp;
+                    break;
+                case AdvancedDialogTypes.Confirmation:
+                    btn = ButtonTypes.YesNo;
+                    break;
+                default:
+                    btn = ButtonTypes.OK;
+                    break;
+            }
+
+            // TODO: SysInfo?
+            //string details = showDetails ? (Language.Translate("Message: {0}{1}{2}{1}{3}__Dialogs", message, Environment.NewLine,
+            //    Language.Translate("System information:"), DiagnosticTools.SysInfoToString())) : String.Empty;
+            return Execute(message, /*details*/null, caption, dialogType,
+                btn,                                           // buttons
+                showDetails && ReportSender != null,           // saveLog
+                showDetails && ReportSender != null,           // saveScreenshot
+                "error");                                      // logNamePrefix
+        }
+
+        /// <summary>
+        /// Message dialog for any kind of message.
+        /// <para>- Details will be shown if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/></para>
+        /// <para>- Log and screenshot will be saved if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/> and <see cref="ReportSender"/> is assigned</para>
+        /// <para>- Buttons are controlled by <paramref name="dialogType"/>.</para>
+        /// </summary>
+        /// <param name="message">Message</param>
+        /// <param name="dialogType">Affects dialog icon, dialog caption, Details button and send report button</param>
+        public DialogResult Execute(string message, AdvancedDialogTypes dialogType)
+        {
+            string title = dialogType.ToString() + Language.DistinctionSeparator + "Dialogs";
+            if (dialogType == AdvancedDialogTypes.Exception)
+                title = "Unhandled error caught" + Language.DistinctionSeparator + "Dialogs";
+            return Execute(message, Language.Translate(title), dialogType);
+        }
+
+        /// <summary>
+        /// Shows an information dialog.
+        /// </summary>
+        /// <param name="message">Message</param>
+        public DialogResult Execute(string message)
+        {
+            return Execute(message, AdvancedDialogTypes.Information);
+        }
+
+        #endregion
+
+        #region Private metódusok
+
+        private void ResetDetails(bool enableDetails)
+        {
+            pnlMessageHeader.Visible = enableDetails;
+            pnlMessage.Dock = DockStyle.Fill;
+            splitter.Visible = false;
+            pnlDetailsHeader.Visible = false;
+            pnlDetails.Visible = false;
+            detailsVisible = false;
+        }
+
+        private void ShowDetails(bool visible)
+        {
+            btnDetails.Text = visible ? Language.Translate("Hide Details__Dialogs") : Language.Translate("Show Details__Dialogs");
+            pnlMessage.Dock = visible ? DockStyle.Top : DockStyle.Fill;
+            splitter.Visible = visible;
+            splitter.BringToFront();
+            pnlDetailsHeader.Visible = visible;
+            pnlDetailsHeader.BringToFront();
+            pnlDetails.Visible = visible;
+            pnlDetails.BringToFront();
+            detailsVisible = visible;
+        }
+
+        private static string ErrorToFile(string filename, string logMessage)
+        {
+            try
+            {
+                if (!String.IsNullOrEmpty(ErrorLogDirectory) && !Path.IsPathRooted(filename))
+                {
+                    filename = Path.Combine(ErrorLogDirectory, filename);
+                }
+                filename += ".log";
+                string dir = Path.GetDirectoryName(Path.GetFullPath(filename));
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                using (StreamWriter sw = new StreamWriter(filename, true))
+                {
+                    sw.WriteLine(logMessage);
+                    return Path.GetFullPath(filename);
+                }
+            }
+            catch
+            {
+                // suppressing any error
+                return String.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Screenshot saving into file. Does not throw exception, on error returns empty string.
+        /// </summary>
+        /// <param name="filename">Filename without extension.</param>
+        /// <returns>Path or empty string if there was no save.</returns>
+        private static string Screenshot(string filename)
+        {
+            try
+            {
+                if (!String.IsNullOrEmpty(ErrorLogDirectory) && !Path.IsPathRooted(filename))
+                {
+                    filename = Path.Combine(ErrorLogDirectory, filename);
+                }
+                filename += ".png";
+                string dir = Path.GetDirectoryName(Path.GetFullPath(filename));
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                Application.DoEvents();
+                Thread.Sleep(100);
+                Application.DoEvents();
+                using (Image screenshot = KGySoft.WinForms.Screenshot.CaptureScreenshot())
+                {
+                    screenshot.Save(filename, ImageFormat.Png);
+
+                    return Path.GetFullPath(filename);
+                }
+            }
+            catch
+            {
+                return String.Empty;
+            }
+        }
+
+        private void SetButtons(ButtonTypes buttons)
+        {
+            if (buttons < ButtonTypes.Closewin)
+            {
+                pnlErrorButtons.Visible = false;
+                pnlStandardButtons.Controls.Clear();
+            }
+            else
+                pnlStandardButtons.Visible = false;
+
+            Button b;
+            switch (buttons)
+            {
+                case ButtonTypes.OK:
+                    b = new Button();
+                    b.Text = TextOk;
+                    b.DialogResult = DialogResult.OK;
+                    //b.Image = Images.Accept;
+                    this.AcceptButton = b;
+                    this.CancelButton = b;
+                    pnlStandardButtons.Controls.Add(b, 0, 0);
+                    break;
+                case ButtonTypes.YesNo:
+                    pnlStandardButtons.ColumnCount = 2;
+                    b = new Button();
+                    b.Text = TextYes;
+                    b.DialogResult = DialogResult.Yes;
+                    //b.Image = Images.Accept;
+                    pnlStandardButtons.Controls.Add(b, 0, 0);
+                    b = new Button();
+                    b.Text = TextNo;
+                    b.DialogResult = DialogResult.No;
+                    //b.Image = Images.Refuse;
+                    pnlStandardButtons.Controls.Add(b, 1, 0);
+                    break;
+                case ButtonTypes.YesNoCancel:
+                    pnlStandardButtons.ColumnCount = 3;
+                    b = new Button();
+                    b.Text = TextYes;
+                    b.DialogResult = DialogResult.Yes;
+                    //b.Image = Images.Accept;
+                    pnlStandardButtons.Controls.Add(b, 0, 0);
+                    b = new Button();
+                    b.Text = TextNo;
+                    b.DialogResult = DialogResult.No;
+                    //b.Image = Images.Refuse;
+                    pnlStandardButtons.Controls.Add(b, 1, 0);
+                    b = new Button();
+                    b.Text = TextCancel;
+                    b.DialogResult = DialogResult.Cancel;
+                    //b.Image = Images.Delete;
+                    this.CancelButton = b;
+                    pnlStandardButtons.Controls.Add(b, 2, 0);
+                    break;
+                case ButtonTypes.OKCancel:
+                    pnlStandardButtons.ColumnCount = 2;
+                    b = new Button();
+                    b.Text = TextOk;
+                    b.DialogResult = DialogResult.OK;
+                    //b.Image = Images.Accept;
+                    this.AcceptButton = b;
+                    pnlStandardButtons.Controls.Add(b, 0, 0);
+                    b = new Button();
+                    b.Text = TextCancel;
+                    b.DialogResult = DialogResult.Cancel;
+                    //b.Image = Images.Delete;
+                    this.CancelButton = b;
+                    pnlStandardButtons.Controls.Add(b, 1, 0);
+                    break;
+                case ButtonTypes.RetryCancel:
+                    pnlStandardButtons.ColumnCount = 2;
+                    b = new Button();
+                    b.Text = TextRetry;
+                    b.DialogResult = DialogResult.Retry;
+                    //b.Image = Images.Redo;
+                    pnlStandardButtons.Controls.Add(b, 0, 0);
+                    b = new Button();
+                    b.Text = TextCancel;
+                    b.DialogResult = DialogResult.Cancel;
+                    //b.Image = Images.Delete;
+                    this.CancelButton = b;
+                    pnlStandardButtons.Controls.Add(b, 1, 0);
+                    break;
+                case ButtonTypes.AbortRetryIgnore:
+                    pnlStandardButtons.ColumnCount = 3;
+                    b = new Button();
+                    b.Text = TextAbort;
+                    b.DialogResult = DialogResult.Abort;
+                    //b.Image = Images.Refuse;
+                    pnlStandardButtons.Controls.Add(b, 0, 0);
+                    b = new Button();
+                    b.Text = TextRetry;
+                    b.DialogResult = DialogResult.Retry;
+                    //b.Image = Images.Redo;
+                    pnlStandardButtons.Controls.Add(b, 1, 0);
+                    b = new Button();
+                    b.Text = TextIgnore;
+                    b.DialogResult = DialogResult.Ignore;
+                    //b.Image = Images.None;
+                    this.CancelButton = b;
+                    pnlStandardButtons.Controls.Add(b, 2, 0);
+                    break;
+                case ButtonTypes.Closewin:
+                    btnSendReport.Visible = false;
+                    btnCloseApp.Visible = false;
+                    break;
+                case ButtonTypes.ClosewinSendreport:
+                    btnSendReport.Visible = ReportSender != null;
+                    btnCloseApp.Visible = false;
+                    break;
+                case ButtonTypes.ClosewinSendreportCloseapp:
+                    btnSendReport.Visible = ReportSender != null;
+                    break;
+            }
+
+            if (buttons < ButtonTypes.Closewin)
+            {
+                foreach (Control c in pnlStandardButtons.Controls)
+                {
+                    b = c as Button;
+                    if (b != null)
+                    {
+                        b.Size = new Size(160, 28);
+                        b.Anchor = AnchorStyles.None;
+                        //b.TextImageRelation = TextImageRelation.ImageBeforeText;
+                        //b.TextAlign = ContentAlignment.MiddleRight;
+                    }
+                }
+                for (int i = 0; i < pnlStandardButtons.ColumnStyles.Count; i++)
+                {
+                    pnlStandardButtons.ColumnStyles[i].SizeType = SizeType.Percent;
+                    pnlStandardButtons.ColumnStyles[i].Width = 100 / pnlStandardButtons.ColumnStyles.Count;
+                }
+            }
+        }
+
+        #endregion
+
+        #region Event invokers
+
+        private void OnSendReport(ReportSenderEventArgs e)
+        {
+            if (ReportSender != null)
+                ReportSender(this, e);
+        }
+
+        #endregion
+
+        #region Handled events
+
+        private void btnDetails_Click(object sender, EventArgs e)
+        {
+            ShowDetails(!detailsVisible);
+        }
+
+        private void btnIgnore_Click(object sender, EventArgs e)
+        {
+            Close();
+        }
+
+        private void btnCloseApp_Click(object sender, EventArgs e)
+        {
+            if (Dialogs.ConfirmMessage("Are you sure to terminate application? All unsaved work will be lost!"))
+            {
+                if (BeforeKillApplication != null)
+                    BeforeKillApplication(null, EventArgs.Empty);
+                Process.GetCurrentProcess().Kill();
+                Application.Exit();
+            }
+        }
+
+        private void btnSendReport_Click(object sender, EventArgs e)
+        {
+            if (ReportSender != null)
+            {
+                ReportSenderEventArgs args = new ReportSenderEventArgs(txtMessage.Text, txtDetails.Text, screenshot);
+                Hide();
+                try
+                {
+                    ReportSender(this, args);
+                    if (args.CloseMessageDialog)
+                        Close();
+
+                }
+                finally
+                {
+                    Show();
+                }
+            }
+        }
+
+        #endregion
+    }
+}
+
