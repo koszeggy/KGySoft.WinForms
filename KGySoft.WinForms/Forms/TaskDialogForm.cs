@@ -12,6 +12,7 @@ using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+
 using KGySoft.Collections;
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
@@ -19,7 +20,12 @@ using KGySoft.Libraries.Language;
 using KGySoft.WinForms.Components;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.WinApi;
+
 using ContentAlignment = System.Drawing.ContentAlignment;
+using TaskDialogControl = KGySoft.WinForms.Components.TaskDialogControl;
+using TaskDialog = KGySoft.WinForms.Components.TaskDialog;
+using TaskDialogButton = KGySoft.WinForms.Components.TaskDialogButton;
+using TaskDialogRadioButton = KGySoft.WinForms.Components.TaskDialogRadioButton;
 
 #endregion
 

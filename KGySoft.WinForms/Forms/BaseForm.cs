@@ -7,6 +7,7 @@ using System.Windows.Forms;
 using KGySoft.ComponentModel;
 using KGySoft.Libraries.Language;
 using KGySoft.Reflection;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
 namespace KGySoft.WinForms.Forms
@@ -29,9 +30,6 @@ namespace KGySoft.WinForms.Forms
         private bool isTranslated;
         private MdiClient mdiClient;
         private readonly CommandBindingsCollection commandBindings = new WinformsCommandBindingsCollection();
-
-        private static FieldAccessor fieldForm_formState;
-        private static FieldAccessor fieldForm_FormStateRenderSizeGrip;
 
         #endregion
 
@@ -243,6 +241,7 @@ namespace KGySoft.WinForms.Forms
                 Resumed.Invoke(this, e);
         }
 
+#if NETFRAMEWORK || NETCOREAPP3_0
         protected override void WndProc(ref Message m)
         {
             switch (m.Msg)
@@ -254,7 +253,8 @@ namespace KGySoft.WinForms.Forms
                     base.WndProc(ref m);
                     break;
             }
-        }
+        } 
+#endif
 
         #endregion
 
@@ -315,12 +315,14 @@ namespace KGySoft.WinForms.Forms
             return result;
         }
 
+#if NETFRAMEWORK || NETCOREAPP3_0
         /// <summary>
         /// Bugfix: When size grip is visible, and form is above and left of the primary monitor, form cannot be dragged anymore due to forced diagonal resizing.
+        /// In .NET 5 I already fixed this in WinForms: https://github.com/dotnet/winforms/pull/2032
         /// </summary>
         private void WmNCHitTest(ref Message m)
         {
-            if (IsGripVisible())
+            if (this.IsGripVisible())
             {
                 // Here is the bug in original code: LParam contains two shorts. Without the cast negative values are positive ints
                 int x = (short)(m.LParam.ToInt32() & 0xffff);
@@ -345,16 +347,7 @@ namespace KGySoft.WinForms.Forms
                 }
             }
         }
-
-        private bool IsGripVisible()
-        {
-            if (fieldForm_formState == null)
-                fieldForm_formState = FieldAccessor.GetAccessor(typeof(Form).GetField("formState", BindingFlags.Instance | BindingFlags.NonPublic));
-            if (fieldForm_FormStateRenderSizeGrip == null)
-                fieldForm_FormStateRenderSizeGrip = FieldAccessor.GetAccessor(typeof(Form).GetField("FormStateRenderSizeGrip", BindingFlags.Static | BindingFlags.NonPublic));
-
-            return ((BitVector32)fieldForm_formState.Get(this))[(BitVector32.Section)fieldForm_FormStateRenderSizeGrip.Get(null)] != 0;
-        }
+#endif
 
         #endregion
 

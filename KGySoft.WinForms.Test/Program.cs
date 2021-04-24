@@ -6,6 +6,10 @@ using KGySoft.Reflection;
 using KGySoft.WinForms.Components;
 using KGySoft.WinForms.Test.Forms;
 
+using TaskDialog = KGySoft.WinForms.Components.TaskDialog;
+using TaskDialogButton = KGySoft.WinForms.Components.TaskDialogButton;
+using TaskDialogRadioButton = KGySoft.WinForms.Components.TaskDialogRadioButton;
+
 namespace KGySoft.WinForms.Test
 {
     static class Program

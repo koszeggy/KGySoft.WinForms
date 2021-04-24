@@ -14,6 +14,7 @@ using System.Windows.Forms.VisualStyles;
 using KGySoft.ComponentModel;
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 using ContentAlignment = System.Drawing.ContentAlignment;
 
@@ -803,7 +804,7 @@ namespace KGySoft.WinForms.Controls
                 if (outerBorder != null)
                     return outerBorder;
 
-                return outerBorder = Accessors.GraphicsExtensions_CallCreateRoundedRectangle(new Rectangle(0, 0, Width - 1, Height - 1), 3);
+                return outerBorder = Accessors.CreateRoundedRectangle(new Rectangle(0, 0, Width - 1, Height - 1), 3);
             }
         }
 
@@ -814,7 +815,7 @@ namespace KGySoft.WinForms.Controls
                 if (innerBorder != null)
                     return innerBorder;
 
-                return innerBorder = Accessors.GraphicsExtensions_CallCreateRoundedRectangle(new Rectangle(1, 1, Width - 3, Height - 3), 2);
+                return innerBorder = Accessors.CreateRoundedRectangle(new Rectangle(1, 1, Width - 3, Height - 3), 2);
             }
         }
 
@@ -834,7 +835,7 @@ namespace KGySoft.WinForms.Controls
                 }
 
                 // themed/flat selection
-                return selectionBorder = Accessors.GraphicsExtensions_CallCreateRoundedRectangle(new Rectangle(1, 0, Width - 3, Height - 1), 3);
+                return selectionBorder = Accessors.CreateRoundedRectangle(new Rectangle(1, 0, Width - 3, Height - 1), 3);
             }
         }
 
@@ -1281,11 +1282,11 @@ namespace KGySoft.WinForms.Controls
             if (AutoEllipsis)
             {
                 int preferredHeight = GetPreferredSize(new Size(Width, 0)).Height;
-                this.ShowToolTip(Height < preferredHeight);
+                this.SetShowToolTip(Height < preferredHeight);
             }
             else
             {
-                this.ShowToolTip(false);
+                this.SetShowToolTip(false);
             }
 
             if (GetStyle(ControlStyles.UserPaint))
@@ -1300,7 +1301,7 @@ namespace KGySoft.WinForms.Controls
                 PaintState.Invoke(this, e);
 
             // Control.OnPaint:
-            PaintEventHandler handler = (PaintEventHandler)Events[ButtonBaseAccess.EventPaint];
+            PaintEventHandler handler = (PaintEventHandler)Events[Accessors.PaintEvent];
             if (handler != null)
             {
                 handler(this, e);

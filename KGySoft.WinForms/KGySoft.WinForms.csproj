@@ -1,7 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <TargetFrameworks>net35;net40;net45;netcoreapp3.0</TargetFrameworks>
+    <!--<TargetFrameworks>net35;net40;net45;netcoreapp3.0;net5.0-windows</TargetFrameworks>-->
+    <TargetFrameworks>net5.0-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>KGySoft.WinForms</RootNamespace>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
@@ -12,6 +13,7 @@
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,8 +28,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="KGySoft.CoreLibraries" Version="5.1.1" />
-    <PackageReference Include="KGySoft.Drawing" Version="5.1.0" />
+    <PackageReference Include="KGySoft.CoreLibraries" Version="5.6.1" />
+    <PackageReference Include="KGySoft.Drawing" Version="5.3.1" />
     <!--<PackageReference Include="Microsoft.CodeAnalysis.FxCopAnalyzers" Version="2.9.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -59,7 +61,11 @@
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
   </ItemGroup>
+
   <ItemGroup>
+    <EmbeddedResource Update="KGySoft.WinForms.Messages.resx">
+      <LogicalName>KGySoft.WinForms.Messages.resources</LogicalName>
+    </EmbeddedResource>
     <EmbeddedResource Update="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>

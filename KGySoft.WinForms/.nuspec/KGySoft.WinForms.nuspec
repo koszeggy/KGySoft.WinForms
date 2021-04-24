@@ -22,7 +22,7 @@ Among others:
 - Advanced components and controls that extend existing functionality or add new ones
 
 Find Documentation: https://docs.kgysoft.net/winforms</description>
-    <releaseNotes>See the detailed release notes here: https://github.com/koszeggy/KGySoft.Drawing/blob/master/KGySoft.WinForms/changelog.txt</releaseNotes>
+    <releaseNotes>See the detailed release notes here: https://github.com/koszeggy/KGySoft.WinForms/blob/master/KGySoft.WinForms/changelog.txt</releaseNotes>
     <copyright>Copyright © KGy SOFT</copyright>
     <tags>KGySoft WinForms controls components TaskDialog forms</tags>
     <language>en-US</language>
@@ -43,8 +43,6 @@ Find Documentation: https://docs.kgysoft.net/winforms</description>
       <group targetFramework="netcoreapp3.0" >
         <dependency id="KGySoft.CoreLibraries" version="5.1.1" />
         <dependency id="KGySoft.Drawing" version="5.1.0" />
-        <dependency id="System.Drawing.Common" version="4.7.0" />
-        <dependency id="System.Windows.Extensions" version="4.7.0" />
       </group>
     </dependencies>
   </metadata>

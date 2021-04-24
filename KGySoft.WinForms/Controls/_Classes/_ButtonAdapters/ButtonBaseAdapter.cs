@@ -7,6 +7,8 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
 
+using KGySoft.WinForms.Reflection;
+
 #endregion
 
 namespace KGySoft.WinForms.Controls
@@ -1249,11 +1251,9 @@ namespace KGySoft.WinForms.Controls
             {
                 if (!state.Enabled)
                     // need to specify width and height
-                    ControlPaintAccess.DrawImageDisabled(graphics, image, imageBounds, state.BackColor, true /* unscaled image*/);
+                    graphics.DrawImageDisabled(image, imageBounds, state.BackColor, true);
                 else
-                {
                     graphics.DrawImage(image, imageBounds.X, imageBounds.Y, image.Width, image.Height);
-                }
             }
 
             finally

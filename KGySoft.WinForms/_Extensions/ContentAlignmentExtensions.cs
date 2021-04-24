@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Windows.Forms;
 using KGySoft.Reflection;
+using KGySoft.WinForms.Reflection;
 
 namespace KGySoft.WinForms
 {
@@ -27,28 +28,6 @@ namespace KGySoft.WinForms
 
         #endregion
 
-        #region Fields
-
-        private static MethodAccessor rtlTranslateContentMethod;
-
-        #endregion
-
-        #region Properties
-
-        private static MethodAccessor RtlTranslateContentMethod
-        {
-            get
-            {
-                if (rtlTranslateContentMethod != null)
-                    return rtlTranslateContentMethod;
-
-                rtlTranslateContentMethod = MethodAccessor.GetAccessor(typeof(Control).GetMethod("RtlTranslateContent", BindingFlags.Instance | BindingFlags.NonPublic));
-                return rtlTranslateContentMethod;
-            }
-        }
-
-        #endregion
-
         #region Methods
 
         /// <summary>
@@ -58,9 +37,7 @@ namespace KGySoft.WinForms
         /// <param name="instance">The <see cref="Control"/> instance.</param>
         /// <returns></returns>
         public static ContentAlignment RtlTranslateContent(this ContentAlignment alignment, Control instance)
-        {
-            return (ContentAlignment)RtlTranslateContentMethod.Invoke(instance, alignment);
-        }
+            => instance.RtlTranslateContent(alignment);
 
         // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
         /// <summary>

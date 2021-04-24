@@ -11,6 +11,7 @@ using System.Windows.Forms;
 using KGySoft.Libraries;
 using KGySoft.Reflection;
 using KGySoft.WinForms.Controls;
+using KGySoft.WinForms.Reflection;
 
 #endregion
 
@@ -31,56 +32,6 @@ namespace KGySoft.WinForms
         public const string AllSelectedText = " (All)";
         public const string NoneSelectedText = " (None)";
         public const string UndefinedText = " (Undefined)";
-        private static MethodAccessor methodPaintBackground;
-        private static MethodAccessor methodPaint;
-
-        #endregion
-
-        #region Fields
-
-        private static PropertyAccessor propertyControl_ShowKeyboardCues;
-        private static PropertyAccessor propertyControl_DoubleBuffered;
-        private static MethodAccessor methodControl_SetStyle;
-
-        #endregion
-
-        #region Properties
-
-        private static PropertyAccessor PropertyControl_ShowKeyboardCues
-        {
-            get
-            {
-                if (propertyControl_ShowKeyboardCues != null)
-                    return propertyControl_ShowKeyboardCues;
-
-                propertyControl_ShowKeyboardCues = PropertyAccessor.GetAccessor(typeof(Control).GetProperty("ShowKeyboardCues", BindingFlags.Instance | BindingFlags.NonPublic));
-                return propertyControl_ShowKeyboardCues;
-            }
-        }
-
-        private static PropertyAccessor PropertyControl_DoubleBuffered
-        {
-            get
-            {
-                if (propertyControl_DoubleBuffered != null)
-                    return propertyControl_DoubleBuffered;
-
-                propertyControl_DoubleBuffered = PropertyAccessor.GetAccessor(typeof(Control).GetProperty("DoubleBuffered", BindingFlags.Instance | BindingFlags.NonPublic));
-                return propertyControl_DoubleBuffered;
-            }
-        }
-
-        private static MethodAccessor MethodControl_SetStyle
-        {
-            get
-            {
-                if (methodControl_SetStyle != null)
-                    return methodControl_SetStyle;
-
-                methodControl_SetStyle = MethodAccessor.GetAccessor(typeof(Control).GetMethod("SetStyle", BindingFlags.Instance | BindingFlags.NonPublic));
-                return methodControl_SetStyle;
-            }
-        }
 
         #endregion
 
@@ -269,7 +220,7 @@ namespace KGySoft.WinForms
             if (!useMnemonic)
                 flags |= TextFormatFlags.NoPrefix;
             ISupportButtonAdapter adapter = c as ISupportButtonAdapter;
-            if (adapter != null && !adapter.ShowKeyboardCues || !(bool)PropertyControl_ShowKeyboardCues.Get(c))
+            if (adapter != null && !adapter.ShowKeyboardCues || !c.ShowKeyboardCues())
                 flags |= TextFormatFlags.HidePrefix;
 
             return flags;
@@ -284,8 +235,7 @@ namespace KGySoft.WinForms
         {
             if (control == null)
                 throw new ArgumentNullException("control");
-
-            PropertyControl_DoubleBuffered.Set(control, useDoubleBuffering);
+            Accessors.SetDoubleBuffered(control, useDoubleBuffering);
         }
 
         /// <summary>
@@ -298,21 +248,12 @@ namespace KGySoft.WinForms
         {
             if (control == null)
                 throw new ArgumentNullException("control");
-
-            MethodControl_SetStyle.Invoke(control, flags, value);
+            Accessors.SetStyle(control, flags, value);
         }
 
         #endregion
 
         #region Internal Methods
-
-        internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset)
-        {
-            if (methodPaintBackground == null)
-                methodPaintBackground = MethodAccessor.GetAccessor(typeof(Control).GetMethod("PaintBackground", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] { typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point) }, null));
-
-            methodPaintBackground.Invoke(c, e, rectangle, backColor, scrollOffset);
-        }
 
         internal static void PaintTransparentBackground(this Control c, PaintEventArgs e)
         {
@@ -331,26 +272,14 @@ namespace KGySoft.WinForms
                     e.Graphics.TranslateTransform(-c.Left, -c.Top);
                     rectangle.Offset(c.Left, c.Top);
                     PaintEventArgs pe = new PaintEventArgs(e.Graphics, rectangle);
-                    PaintBackground(parent, pe, rectangle, parent.BackColor, Point.Empty);
-                    InvokePaint(parent, pe);
+                    parent.PaintBackground(pe, rectangle, parent.BackColor, Point.Empty);
+                    parent.OnPaint(pe);
                 }
                 finally
                 {
                     e.Graphics.EndContainer(cstate);
                 }
             }
-        }
-
-        #endregion
-
-        #region Private Methods
-
-        private static void InvokePaint(Control c, PaintEventArgs e)
-        {
-            if (methodPaint == null)
-                methodPaint = MethodAccessor.GetAccessor(typeof(Control).GetMethod("OnPaint", BindingFlags.Instance | BindingFlags.NonPublic));
-
-            methodPaint.Invoke(c, e);
         }
 
         #endregion

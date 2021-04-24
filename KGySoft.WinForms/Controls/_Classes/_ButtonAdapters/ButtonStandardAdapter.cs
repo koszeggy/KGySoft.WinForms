@@ -3,6 +3,7 @@
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -365,10 +366,9 @@ namespace KGySoft.WinForms.Controls
                     }
                 }
             }
-            if ((ButtonInstance.BackgroundImage != null) && !SystemInformation.HighContrast)
-            {
-                ControlPaintAccess.DrawBackgroundImage(e.Graphics, ButtonInstance.BackgroundImage, Color.Transparent, ButtonInstance.BackgroundImageLayout, ButtonInstance.ClientRectangle, bounds, ButtonInstance.DisplayRectangle.Location, ButtonInstance.RightToLeft);
-            }
+
+            if (ButtonInstance.BackgroundImage != null && !SystemInformation.HighContrast)
+                e.Graphics.DrawBackgroundImage(ButtonInstance.BackgroundImage, Color.Transparent, ButtonInstance.BackgroundImageLayout, ButtonInstance.ClientRectangle, bounds, ButtonInstance.DisplayRectangle.Location, ButtonInstance.RightToLeft);
         }
 
         private void PaintWorker(PaintStateEventArgs e, bool up)

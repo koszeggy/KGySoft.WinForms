@@ -59,7 +59,7 @@ namespace KGySoft.WinForms.Components
 
         #region Private Properties
 
-        private BindingManagerBase BindingManager => (BindingManagerBase)Reflection.Accessors.ErrorProvider_errorManager.Get(this);
+        private BindingManagerBase? BindingManager => this.GetErrorManager();
 
         #endregion
 
@@ -162,7 +162,7 @@ namespace KGySoft.WinForms.Components
             // call the DataSource and DataMember of this class.
             // ReSharper disable once ConvertToLocalFunction - it will be converted to delegate anyway
             EventHandler injectedCurrentChanged = InjectedCurrentChanged;
-            Reflection.Accessors.ErrorProvider_currentChanged.Set(this, injectedCurrentChanged);
+            this.SetCurrentChanged(injectedCurrentChanged);
         }
 
         private void UnwireRedirectedEvents(BindingManagerBase manager)

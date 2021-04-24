@@ -12,6 +12,7 @@ using KGySoft.ComponentModel;
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.Reflection;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -46,7 +47,6 @@ namespace KGySoft.WinForms.Controls
 
         private static Image securityShieldImage;
         private static readonly string nbsp = '\u00A0'.ToString(null);
-        private static FieldAccessor systemSizeField;
 
         #endregion
 
@@ -100,20 +100,6 @@ namespace KGySoft.WinForms.Controls
                     return securityShieldImage;
 
                 return securityShieldImage = Icons.SecurityShield.ExtractNearestBitmap(new Size(16, 16), PixelFormat.Format32bppArgb); // TODO: ToMultiResBitmap, and handle GetPreferredSize correctly
-            }
-        }
-
-        /// <summary>
-        /// Gets Button.systemSize field.
-        /// </summary>
-        private static FieldAccessor SystemSizeField
-        {
-            get
-            {
-                if (systemSizeField != null)
-                    return systemSizeField;
-
-                return systemSizeField = FieldAccessor.GetAccessor(typeof(Button).GetField("systemSize", BindingFlags.Instance | BindingFlags.NonPublic));
             }
         }
 
@@ -420,7 +406,7 @@ namespace KGySoft.WinForms.Controls
                 else
                 {
                     // in system mode we must calculate with the image so hacking base.systemSize field
-                    Size systemSize = (Size)SystemSizeField.Get(this);
+                    Size systemSize = this.GetSystemSize();
                     if (systemSize.Width == Int32.MinValue)
                     {
                         systemSize = SizeFromClientSize(TextRenderer.MeasureText(base.Text, base.Font));
@@ -429,7 +415,7 @@ namespace KGySoft.WinForms.Controls
                         Size imageSize = base.Image != null ? base.Image.Size : SecurityShieldImage.Size;
                         if (imageSize.Height + 7 > systemSize.Height)
                             systemSize.Height = imageSize.Height + 7;
-                        systemSizeField.Set(this, systemSize);
+                        this.SetSystemSize(systemSize);
                     }
 
                     // now base.GetPreferresSize will return correct result
@@ -630,11 +616,11 @@ namespace KGySoft.WinForms.Controls
             if (AutoEllipsis)
             {
                 int preferredHeight = GetPreferredSize(new Size(Width, 0)).Height;
-                this.ShowToolTip(Height < preferredHeight);
+                this.SetShowToolTip(Height < preferredHeight);
             }
             else
             {
-                this.ShowToolTip(false);
+                this.SetShowToolTip(false);
             }
 
             if (GetStyle(ControlStyles.UserPaint))
@@ -649,11 +635,8 @@ namespace KGySoft.WinForms.Controls
                 PaintState.Invoke(this, e);
 
             // Control.OnPaint:
-            PaintEventHandler handler = (PaintEventHandler)Events[ButtonBaseAccess.EventPaint];
-            if (handler != null)
-            {
-                handler(this, e);
-            }
+            PaintEventHandler handler = (PaintEventHandler)Events[Accessors.PaintEvent];
+            handler?.Invoke(this, e);
         }
 
         #endregion
@@ -755,7 +738,7 @@ namespace KGySoft.WinForms.Controls
             // Image > Elevated > no image
             if (FlatStyle == FlatStyle.System && WindowsUtils.IsVistaOrLater)
             {
-                SystemSizeField.Set(this, new Size(Int32.MinValue, Int32.MinValue));
+                this.SetSystemSize(new Size(Int32.MinValue, Int32.MinValue));
             }
 
             Invalidate();

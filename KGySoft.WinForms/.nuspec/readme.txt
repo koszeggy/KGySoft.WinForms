@@ -1,40 +1,11 @@
-Thank you for installing KGy SOFT Drawing Libraries 5.1.0
+Thank you for installing KGy SOFT Windows Forms Libraries 4.0.0
 
-KGy SOFT Drawing Libraries offer advanced features built around the System.Drawing types.
+KGy SOFT Windows Forms Libraries offer advanced controls and components built around System.Windows.Forms types.
 
-Main new features in 5.x:
-- Targeting .NET Core 2.0 and .NET Core 3.0 (additionally to .NET Framework 3.5, 4.0 and 4.5)
-- Supporting Linux/Unix platforms (requires libgdiplus). Tested with Mono and .NET Core.
-  For Mono use the .NET Framework builds. Some APIs may throw a PlatformNotSupportedException on Linux/Unix. 
-- Fast direct Bitmap access for every PixelFormat
-- Quantizing and dithering
+Among others:
+- A BaseForm with command bindings, MDI application and dynamic localization support, fixing some high-DPI and multi-monitor issues also for older frameworks
+- Screenshot support
+- Task dialogs, supporting even Windows XP
+- Advanced components and controls that extend existing functionality or add new ones
 
-Release Notes: https://github.com/koszeggy/KGySoft.Drawing/blob/master/KGySoft.Drawing/changelog.txt
-
-                                                 ~~*~~
-
-+----------------------------------------------------------------------------------------------------------------+
-| Debugger Visualizers for System.Drawing types built on KGy SOFT Drawing Libraries along with demo application: |
-|                            https://github.com/koszeggy/KGySoft.Drawing.Tools                                   |
-+----------------------------------------------------------------------------------------------------------------+
-
-                                                 ~~*~~
-
-Project Home Page: https://kgysoft.net/drawing
-Online documentation: https://docs.kgysoft.net/drawing
-Offline documentation: <packages folder>\KGySoft.Drawing.<version>\Help\KGySoft.Drawing.chm
-GitHub: https://github.com/koszeggy/KGySoft.Drawing
-
-                                                 ~~*~~
-
-Some Highlights of KGy SOFT Drawing Libraries:
-
-- Fast direct Bitmap data access for every PixelFormat
-- Quantizing and dithering
-- Several built-in icons as well as simple access to Windows associated and stock icons.
-- Extracting bitmaps from multi-frame bitmaps and icons.
-- Creating combined icons and multi-resolution bitmaps.
-- Saving metafiles in EMF/WMF formats.
-- Advanced support for saving images as Icon, BMP, JPEG, PNG, GIF and TIFF formats.
-- Converting between various pixel formats preserving transparency if possible.
-- Useful extensions for the Icon, Bitmap, Image, Metafile and Graphics types.
+TODO

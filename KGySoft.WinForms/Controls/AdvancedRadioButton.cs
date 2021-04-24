@@ -9,6 +9,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 using KGySoft.ComponentModel;
 using KGySoft.CoreLibraries;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -484,11 +485,11 @@ namespace KGySoft.WinForms.Controls
             if (AutoEllipsis)
             {
                 int preferredHeight = GetPreferredSize(new Size(Width, 0)).Height;
-                this.ShowToolTip(Height < preferredHeight);
+                this.SetShowToolTip(Height < preferredHeight);
             }
             else
             {
-                this.ShowToolTip(false);
+                this.SetShowToolTip(false);
             }
 
             if (GetStyle(ControlStyles.UserPaint))
@@ -503,7 +504,7 @@ namespace KGySoft.WinForms.Controls
                 PaintState.Invoke(this, e);
 
             // Control.OnPaint:
-            PaintEventHandler handler = (PaintEventHandler)Events[ButtonBaseAccess.EventPaint];
+            PaintEventHandler handler = (PaintEventHandler)Events[Accessors.PaintEvent];
             if (handler != null)
             {
                 handler(this, e);

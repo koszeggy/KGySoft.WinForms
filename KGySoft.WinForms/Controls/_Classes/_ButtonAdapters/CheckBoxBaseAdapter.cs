@@ -4,6 +4,7 @@ using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -78,14 +79,11 @@ namespace KGySoft.WinForms.Controls
                 ? GetCheckBoxImage(checkColor, checkBounds, ref checkImageCheckedBackColor, ref checkImageChecked)
                 : GetCheckBoxImage(checkColor, checkBounds, ref checkImageIndeterminateBackColor, ref checkImageIndeterminate);
             if (layout.options.everettButtonCompat)
-            {
                 checkBounds.Y--;
-            }
             else
-            {
                 checkBounds.Y -= 2;
-            }
-            ControlPaintAccess.DrawImageColorized(g, image, checkBounds, checkColor);
+
+            g.DrawImageColorized(image, checkBounds, checkColor);
         }
 
         private static Bitmap GetCheckBoxImage(Color checkColor, Rectangle fullSize, ref Color cacheCheckColor, ref Bitmap cacheCheckImage)

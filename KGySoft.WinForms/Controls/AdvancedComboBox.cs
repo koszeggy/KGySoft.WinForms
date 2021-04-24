@@ -23,6 +23,7 @@ using System.Reflection;
 using System.Windows.Forms;
 using KGySoft.CoreLibraries;
 using KGySoft.Reflection;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
 namespace KGySoft.WinForms.Controls
@@ -103,8 +104,6 @@ namespace KGySoft.WinForms.Controls
         private Color disabledForeColor = SystemColors.ControlDarkDark;
         private Color enabledBackColor = SystemColors.Window;
         private Color enabledForeColor = SystemColors.WindowText;
-
-        private static FieldAccessor stateField;
 
         private ComboBoxStyle style = ComboBoxStyle.DropDown;
         private bool styleChanging;
@@ -893,12 +892,7 @@ namespace KGySoft.WinForms.Controls
                 Invalidate();
         }
 
-        private bool GetSelfEnabled()
-        {
-            if (stateField == null)
-                stateField = FieldAccessor.GetAccessor(typeof(Control).GetField("state", BindingFlags.Instance | BindingFlags.NonPublic));
-            return ((int)stateField.Get(this) & 4) != 0;
-        }
+        private bool GetSelfEnabled() => (this.GetControlState() & 4) != 0;
 
         #endregion
 
