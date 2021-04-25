@@ -1,4 +1,4 @@
-Thank you for installing KGy SOFT Windows Forms Libraries 4.0.0
+Thank you for installing KGy SOFT Windows Forms Libraries 5.0.0
 
 KGy SOFT Windows Forms Libraries offer advanced controls and components built around System.Windows.Forms types.
 
