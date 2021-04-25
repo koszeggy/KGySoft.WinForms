@@ -1,5 +1,7 @@
 ﻿using System;
+#if NETFRAMEWORK || NETCOREAPP3_0
 using System.Collections.Specialized;
+#endif
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -8,6 +10,7 @@ using System.Threading;
 using System.Windows.Forms;
 
 using KGySoft.Collections;
+using KGySoft.CoreLibraries;
 using KGySoft.Reflection;
 
 namespace KGySoft.WinForms.Reflection
@@ -49,7 +52,7 @@ namespace KGySoft.WinForms.Reflection
             {
                 const string fieldName =
 #if NETFRAMEWORK
-                "EventPaint";
+                    "EventPaint";
 #else
                     "s_paintEvent";
 #endif

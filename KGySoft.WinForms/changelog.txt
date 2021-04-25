@@ -5,6 +5,18 @@
 + New feature
 ===============================================================================
 
+~~~~~~~~~
+! v5.0.0:
+~~~~~~~~~
+
+* Assembly changes:
+===================
++ Targeting also .NET 3.0.
+
+! KGySoft.Language namespace - TODO
+============================
+! The namespace has been removed
+
 
 ~~~~~~~~~
 ! v4.0.0:

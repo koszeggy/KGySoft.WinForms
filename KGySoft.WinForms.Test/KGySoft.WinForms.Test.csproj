@@ -1,8 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
 
   <PropertyGroup>
-    <!--<TargetFrameworks>net35;net40;net45;netcoreapp3.0;net5.0-windows</TargetFrameworks>-->
-    <TargetFrameworks>net5.0-windows</TargetFrameworks>
+    <TargetFrameworks>net35;net40;net45;netcoreapp3.0;net5.0-windows</TargetFrameworks>
+    <!--<TargetFrameworks>net5.0-windows</TargetFrameworks>-->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>KGySoft.WinForms.Test</RootNamespace>
     <LangVersion>latest</LangVersion>
