@@ -1,8 +1,8 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.WindowsDesktop">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net35;net40;net45;netcoreapp3.0;net5.0-windows</TargetFrameworks>
-    <!--<TargetFrameworks>net5.0-windows</TargetFrameworks>-->
+    <!--<TargetFrameworks>net35;net40;net45;netcoreapp3.0;net5.0-windows</TargetFrameworks>-->
+    <TargetFrameworks>net5.0-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>KGySoft.WinForms.Test</RootNamespace>
     <LangVersion>latest</LangVersion>
@@ -10,11 +10,6 @@
     <UseWindowsForms>true</UseWindowsForms>
     <OutputType>WinExe</OutputType>
   </PropertyGroup>
-
-  <ItemGroup>
-    <PackageReference Include="KGySoft.CoreLibraries" Version="5.6.1" />
-    <PackageReference Include="KGySoft.Drawing" Version="5.3.1" />
-  </ItemGroup>
 
   <!-- .NET Framework only references -->
   <ItemGroup Condition="'$(TargetFramework)'=='net35' OR '$(TargetFramework)'=='net40' OR '$(TargetFramework)'=='net45'">

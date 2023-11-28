@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>KGySoft.WinForms</id>
-    <version>5.0.0-alpha.1</version>
+    <version>5.0.0-alpha.2</version>
     <title>KGy SOFT Windows Forms Libraries</title>
     <authors>György Kőszeg</authors>
     <owners>György Kőszeg</owners>
@@ -29,25 +29,25 @@ Find Documentation: https://docs.kgysoft.net/winforms</description>
     <repository type="git" url="https://github.com/koszeggy/KGySoft.WinForms" />
     <dependencies>
       <group targetFramework=".NETFramework3.5">
-        <dependency id="KGySoft.CoreLibraries" version="5.6.1" />
-        <dependency id="KGySoft.Drawing" version="5.3.1" />
+        <dependency id="KGySoft.CoreLibraries" version="8.0.0" />
+        <dependency id="KGySoft.Drawing" version="7.2.0" />
       </group>
       <group targetFramework=".NETFramework4.0">
-        <dependency id="KGySoft.CoreLibraries" version="5.6.1" />
-        <dependency id="KGySoft.Drawing" version="5.3.1" />
+        <dependency id="KGySoft.CoreLibraries" version="8.0.0" />
+        <dependency id="KGySoft.Drawing" version="7.2.0" />
       </group>
-      <group targetFramework=".NETFramework4.5">
-        <dependency id="KGySoft.CoreLibraries" version="5.6.1" />
-        <dependency id="KGySoft.Drawing" version="5.3.1" />
-      </group>
+      <!--<group targetFramework=".NETFramework4.5">
+        <dependency id="KGySoft.CoreLibraries" version="8.0.0" />
+        <dependency id="KGySoft.Drawing" version="7.2.0" />
+      </group>-->
       <group targetFramework="netcoreapp3.0" >
-        <dependency id="KGySoft.CoreLibraries" version="5.6.1" />
-        <dependency id="KGySoft.Drawing" version="5.3.1" />
+        <dependency id="KGySoft.CoreLibraries" version="8.0.0" />
+        <dependency id="KGySoft.Drawing" version="7.2.0" />
       </group>
-      <group targetFramework="net5.0-windows" >
-        <dependency id="KGySoft.CoreLibraries" version="5.6.1" />
-        <dependency id="KGySoft.Drawing" version="5.3.1" />
-      </group>
+      <!--<group targetFramework="net5.0-windows7.0" >
+        <dependency id="KGySoft.CoreLibraries" version="8.0.0" />
+        <dependency id="KGySoft.Drawing" version="7.2.0" />
+      </group>-->
     </dependencies>
   </metadata>
   <files>
@@ -59,11 +59,11 @@ Find Documentation: https://docs.kgysoft.net/winforms</description>
     <file src="..\bin\Release\net35\KGySoft.WinForms.xml" target="lib\net35" />
     <file src="..\bin\Release\net40\KGySoft.WinForms.dll" target="lib\net40" />
     <file src="..\bin\Release\net40\KGySoft.WinForms.xml" target="lib\net40" />
-    <file src="..\bin\Release\net45\KGySoft.WinForms.dll" target="lib\net45" />
-    <file src="..\bin\Release\net45\KGySoft.WinForms.xml" target="lib\net45" />
+    <!--<file src="..\bin\Release\net45\KGySoft.WinForms.dll" target="lib\net45" />
+    <file src="..\bin\Release\net45\KGySoft.WinForms.xml" target="lib\net45" />-->
     <file src="..\bin\Release\netcoreapp3.0\KGySoft.WinForms.dll" target="lib\netcoreapp3.0" />
     <file src="..\bin\Release\netcoreapp3.0\KGySoft.WinForms.xml" target="lib\netcoreapp3.0" />
-    <file src="..\bin\Release\net5.0-windows\KGySoft.WinForms.dll" target="lib\net5.0-windows" />
-    <file src="..\bin\Release\net5.0-windows\KGySoft.WinForms.xml" target="lib\net5.0-windows" />
+    <!--<file src="..\bin\Release\net5.0-windows\KGySoft.WinForms.dll" target="lib\net5.0-windows7.0" />
+    <file src="..\bin\Release\net5.0-windows\KGySoft.WinForms.xml" target="lib\net5.0-windows7.0" />-->
   </files>
 </package>
