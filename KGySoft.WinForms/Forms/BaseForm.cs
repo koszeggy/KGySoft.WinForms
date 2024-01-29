@@ -325,8 +325,8 @@ namespace KGySoft.WinForms.Forms
             if (this.IsGripVisible())
             {
                 // Here is the bug in original code: LParam contains two shorts. Without the cast negative values are positive ints
-                int x = (short)(m.LParam.ToInt32() & 0xffff);
-                int y = (short)((m.LParam.ToInt32() >> 16) & 0xffff);
+                int x = (short)((nint)m.LParam & 0xffff);
+                int y = (short)(((nint)m.LParam >> 16) & 0xffff);
                 POINT pt = new POINT(x, y);
                 User32.ScreenToClient(Handle, ref pt);
                 Size clientSize = ClientSize;
@@ -340,7 +340,7 @@ namespace KGySoft.WinForms.Forms
             DefWndProc(ref m);
             if (AutoSizeMode == AutoSizeMode.GrowAndShrink)
             {
-                int result = (int)m.Result;
+                nint result = m.Result;
                 if ((result >= 10) && (result <= 17))
                 {
                     m.Result = (IntPtr)18;
