@@ -75,7 +75,7 @@ namespace KGySoft.WinForms.Controls
                 {
                     focusWidth = 1 - focusWidth;
                 }
-                if (!layout.options.everettButtonCompat)
+                if (!layout.options.dotNetOneButtonCompat)
                 {
                     layout.textBounds.Offset(-1, -1);
                 }
@@ -106,13 +106,20 @@ namespace KGySoft.WinForms.Controls
         {
             LayoutOptions options = CommonLayout(state);
             options.checkPaddingSize = 1;
-            options.everettButtonCompat = !Application.RenderWithVisualStyles;
+            options.dotNetOneButtonCompat = !Application.RenderWithVisualStyles;
             if (Application.RenderWithVisualStyles)
             {
                 //using (Graphics graphics = WindowsFormsUtils.CreateMeasurementGraphics())
                 //{
                     options.checkSize = CheckBoxRenderer.GetGlyphSize(graphics, (CheckBoxState)state.SystemStateId).Width;
                 //}
+            }
+            else
+            {
+                //options.checkSize = ScaleHelper.IsThreadPerMonitorV2Aware
+                //    ? ButtonInstance.LogicalToDeviceUnits(options.checkSize)
+                //    : (int)(options.checkSize * GetDpiScaleRatio());
+                options.checkSize = ButtonInstance.PerMonitorScale(options.checkSize);
             }
 
             return options;

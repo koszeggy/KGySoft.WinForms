@@ -181,12 +181,15 @@ namespace KGySoft.WinForms.Controls
         {
             LayoutOptions options = CommonLayout(state);
             options.shadowedText = false;
+            int checkSize = (int)(FlatCheckSize * GetDpiScaleRatio());
+            
             if (show3D)
             {
-                options.checkSize = 12;
+                options.checkSize = checkSize + 1;
                 return options;
             }
-            options.checkSize = 11;
+
+            options.checkSize = checkSize;
             options.checkPaddingSize = 1;
             return options;
         }

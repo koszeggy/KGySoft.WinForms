@@ -13,6 +13,12 @@ namespace KGySoft.WinForms.Controls
 {
     internal abstract class CheckBoxBaseAdapter: CheckableControlBaseAdapter
     {
+        #region Constants
+
+        protected const int FlatCheckSize = 11;
+
+        #endregion
+
         #region Fields
 
         [ThreadStatic]
@@ -78,7 +84,7 @@ namespace KGySoft.WinForms.Controls
             Bitmap image = state.CheckState == CheckState.Checked
                 ? GetCheckBoxImage(checkColor, checkBounds, ref checkImageCheckedBackColor, ref checkImageChecked)
                 : GetCheckBoxImage(checkColor, checkBounds, ref checkImageIndeterminateBackColor, ref checkImageIndeterminate);
-            if (layout.options.everettButtonCompat)
+            if (layout.options.dotNetOneButtonCompat)
                 checkBounds.Y--;
             else
                 checkBounds.Y -= 2;

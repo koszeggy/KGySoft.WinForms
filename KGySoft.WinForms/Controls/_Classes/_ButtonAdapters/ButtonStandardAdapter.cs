@@ -336,7 +336,7 @@ namespace KGySoft.WinForms.Controls
         {
             LayoutOptions options = CommonLayout(state);
             options.textOffset = !up;
-            options.everettButtonCompat = !Application.RenderWithVisualStyles;
+            options.dotNetOneButtonCompat = !Application.RenderWithVisualStyles;
             return options;
         }
 

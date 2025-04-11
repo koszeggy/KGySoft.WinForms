@@ -1,6 +1,7 @@
 ﻿#region Used namespaces
 
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 #endregion
@@ -25,33 +26,31 @@ namespace KGySoft.WinForms.Controls
         private static void DrawCheckBackground3DLite(PaintStateEventArgs e, Rectangle bounds, Color checkBackground, ColorData colors, bool disabledColors)
         {
             Graphics graphics = e.Graphics;
+            GraphicsState? prevState = graphics.DpiX / ScaleHelper.OneHundredPercentLogicalDpi > 1.1f ? graphics.Save() : null;
+            if (prevState != null)
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
             ControlAppearanceState state = e.State;
             Color backColor = checkBackground;
             if (!state.Enabled && disabledColors)
-            {
                 backColor = state.BackColor;
-            }
-            using (Brush brush = new SolidBrush(backColor))
-            {
-                using (Pen pen = new Pen(colors.buttonShadow))
-                {
-                    using (Pen pen2 = new Pen(colors.buttonFace))
-                    {
-                        using (Pen pen3 = new Pen(colors.highlight))
-                        {
-                            bounds.Width--;
-                            bounds.Height--;
-                            graphics.DrawPie(pen, bounds, 136f, 88f);
-                            graphics.DrawPie(pen, bounds, 226f, 88f);
-                            graphics.DrawPie(pen3, bounds, 316f, 88f);
-                            graphics.DrawPie(pen3, bounds, 46f, 88f);
-                            bounds.Inflate(-1, -1);
-                            graphics.FillEllipse(brush, bounds);
-                            graphics.DrawEllipse(pen2, bounds);
-                        }
-                    }
-                }
-            }
+
+            using Brush brush = new SolidBrush(backColor);
+            using Pen pen = new Pen(colors.buttonShadow);
+            using Pen pen2 = new Pen(colors.buttonFace);
+            using Pen pen3 = new Pen(colors.highlight);
+            bounds.Width--;
+            bounds.Height--;
+            graphics.DrawPie(pen, bounds, 136f, 88f);
+            graphics.DrawPie(pen, bounds, 226f, 88f);
+            graphics.DrawPie(pen3, bounds, 316f, 88f);
+            graphics.DrawPie(pen3, bounds, 46f, 88f);
+            bounds.Inflate(-1, -1);
+            graphics.FillEllipse(brush, bounds);
+            graphics.DrawEllipse(pen2, bounds);
+
+            if (prevState != null)
+                graphics.Restore(prevState);
         }
 
         #endregion

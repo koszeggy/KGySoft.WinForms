@@ -45,8 +45,8 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Fields
 
-        private static Image securityShieldImage;
         private static readonly string nbsp = '\u00A0'.ToString(null);
+        private static readonly Size referenceIconSize = new Size(16, 16);
 
         #endregion
 
@@ -72,6 +72,8 @@ namespace KGySoft.WinForms.Controls
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
         private Timer defaultAnimationTimer;
         private bool isAlternativeDefaultImage;
+        private Bitmap? cachedSecurityShieldImage;
+        private Size cachedSecurityShieldImageSize;
 
         #endregion
 
@@ -89,23 +91,6 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Properties
-
-        #region Static Properties
-
-        private static Image SecurityShieldImage
-        {
-            get
-            {
-                if (securityShieldImage != null)
-                    return securityShieldImage;
-
-                return securityShieldImage = Icons.SecurityShield.ExtractNearestBitmap(new Size(16, 16), PixelFormat.Format32bppArgb); // TODO: ToMultiResBitmap, and handle GetPreferredSize correctly
-            }
-        }
-
-        #endregion
-
-        #region Instance Properties
 
         #region Public Properties
 
@@ -300,6 +285,28 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Private Properties
+
+        private Image SecurityShieldImage
+        {
+            get
+            {
+                Size currentSize = this.ScaleSize(referenceIconSize);
+                if (currentSize != cachedSecurityShieldImageSize || cachedSecurityShieldImage == null)
+                {
+                    cachedSecurityShieldImage?.Dispose();
+                    using var icon = Icons.SecurityShield;
+                    cachedSecurityShieldImage = icon.ExtractNearestBitmap(currentSize, PixelFormat.Format32bppArgb);
+                    cachedSecurityShieldImageSize = currentSize;
+                }
+
+                return cachedSecurityShieldImage;
+            }
+        }
+
+
+        #endregion
+
         #region Explicitly Implemented Interface Properties
 
         ButtonBaseAdapter ISupportButtonAdapter.Adapter
@@ -342,8 +349,6 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #endregion
-
         #region Construction and Destruction
 
         #region Constructors
@@ -377,6 +382,9 @@ namespace KGySoft.WinForms.Controls
                     defaultAnimationTimer.Dispose();
                     defaultAnimationTimer = null;
                 }
+
+                cachedSecurityShieldImage?.Dispose();
+                cachedSecurityShieldImage = null;
             }
 
             base.Dispose(disposing);

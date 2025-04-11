@@ -78,13 +78,17 @@ namespace KGySoft.WinForms.Controls
         {
             LayoutOptions options = CommonLayout(state);
             options.hintTextUp = false;
-            options.everettButtonCompat = !Application.RenderWithVisualStyles;
+            options.dotNetOneButtonCompat = !Application.RenderWithVisualStyles;
             if (Application.RenderWithVisualStyles)
             {
                 //using (Graphics graphics = WindowsFormsUtils.CreateMeasurementGraphics())
                 //{
                     options.checkSize = RadioButtonRenderer.GetGlyphSize(graphics, (RadioButtonState)state.SystemStateId).Width;
                 //}
+            }
+            else
+            {
+                options.checkSize = (int)(options.checkSize * GetDpiScaleRatio());
             }
             return options;
         }

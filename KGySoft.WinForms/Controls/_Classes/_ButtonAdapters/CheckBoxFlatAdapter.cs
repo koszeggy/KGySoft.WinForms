@@ -19,7 +19,7 @@ namespace KGySoft.WinForms.Controls
         protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state)
         {
             LayoutOptions options = CommonLayout(state);
-            options.checkSize = 11;
+            options.checkSize = (int)(FlatCheckSize * GetDpiScaleRatio());
             options.shadowedText = false;
             return options;
         }

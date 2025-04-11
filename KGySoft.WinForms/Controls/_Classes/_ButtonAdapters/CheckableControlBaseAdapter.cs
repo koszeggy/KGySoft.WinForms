@@ -9,6 +9,12 @@ namespace KGySoft.WinForms.Controls
 {
     internal abstract class CheckableControlBaseAdapter: ButtonBaseAdapter
     {
+        #region Constants
+
+        private const int standardCheckSize = 13;
+
+        #endregion
+
         #region Fields
 
         private ButtonBaseAdapter buttonAdapter;
@@ -55,6 +61,16 @@ namespace KGySoft.WinForms.Controls
 
         #region Methods
 
+        #region Static Methods
+
+        internal static float GetDpiScaleRatio(Control? control) => control is not null && control.IsHandleCreated
+            ? control.GetScale().X
+            : ScaleHelper.SystemScale.X;
+
+        #endregion
+
+        #region Instance Methods
+
         #region Internal Methods
 
         internal override LayoutOptions CommonLayout(ControlAppearanceState state)
@@ -65,9 +81,11 @@ namespace KGySoft.WinForms.Controls
             options.paddingSize = 0;
             options.maxFocus = false;
             options.focusOddEvenFixup = true;
-            options.checkSize = 13;
+            options.checkSize = standardCheckSize;
             return options;
         }
+
+        internal float GetDpiScaleRatio() => GetDpiScaleRatio(ButtonInstance);
 
         internal override Size GetPreferredSizeCore(Graphics g, Size proposedSize, ControlAppearanceState state)
         {
@@ -125,6 +143,8 @@ namespace KGySoft.WinForms.Controls
         }
 
         protected abstract ButtonBaseAdapter CreateButtonAdapter();
+
+        #endregion
 
         #endregion
 

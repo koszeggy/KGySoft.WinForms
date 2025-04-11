@@ -233,7 +233,7 @@ namespace KGySoft.WinForms.Controls
             internal bool layoutRTL;
             internal bool verticalText = false;
             internal bool useCompatibleTextRendering = false;
-            internal bool everettButtonCompat = true;
+            internal bool dotNetOneButtonCompat = true;
             internal TextFormatFlags gdiTextFormatFlags = TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl;
             internal StringFormatFlags gdipFormatFlags;
             internal StringTrimming gdipTrimming;
@@ -546,7 +546,7 @@ namespace KGySoft.WinForms.Controls
 
                     // FOR EVERETT COMPATIBILITY - DO NOT CHANGE
                     Size size = imageSize;
-                    if (layout.options.everettButtonCompat && imageSize != Size.Empty)
+                    if (layout.options.dotNetOneButtonCompat && imageSize != Size.Empty)
                     {
                         size = new Size(size.Width + 1, size.Height + 1);
                     }
@@ -645,7 +645,7 @@ namespace KGySoft.WinForms.Controls
                 }
 
                 // FOR EVERETT COMPATIBILITY - DO NOT CHANGE
-                if (layout.options.everettButtonCompat)
+                if (layout.options.dotNetOneButtonCompat)
                 {
                     layout.imageStart = layout.imageBounds.Location;
                     layout.imageBounds = Rectangle.Intersect(layout.imageBounds, layout.field);
@@ -1225,7 +1225,7 @@ namespace KGySoft.WinForms.Controls
         {
             Region oldClip = graphics.Clip;
 
-            if (!layout.options.everettButtonCompat)
+            if (!layout.options.dotNetOneButtonCompat)
             { // FOR EVERETT COMPATIBILITY - DO NOT CHANGE
                 Rectangle bounds = new Rectangle(ButtonBorderSize, ButtonBorderSize, control.Width - (2 * ButtonBorderSize), control.Height - (2 * ButtonBorderSize));
 
@@ -1258,7 +1258,7 @@ namespace KGySoft.WinForms.Controls
 
             finally
             {
-                if (!layout.options.everettButtonCompat)
+                if (!layout.options.dotNetOneButtonCompat)
                 {// FOR EVERETT COMPATIBILITY - DO NOT CHANGE
                     graphics.Clip = oldClip;
                 }

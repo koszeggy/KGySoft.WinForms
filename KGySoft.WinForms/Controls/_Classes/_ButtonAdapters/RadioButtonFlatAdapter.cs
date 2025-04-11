@@ -9,6 +9,12 @@ namespace KGySoft.WinForms.Controls
 {
     internal class RadioButtonFlatAdapter: RadioButtonBaseAdapter
     {
+        #region Constants
+
+        private const int flatCheckSize = 12;
+
+        #endregion
+
         #region Constructors
 
         internal RadioButtonFlatAdapter(ButtonBase control)
@@ -97,7 +103,7 @@ namespace KGySoft.WinForms.Controls
         protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state)
         {
             LayoutOptions options = CommonLayout(state);
-            options.checkSize = 12;
+            options.checkSize = (int)(flatCheckSize * GetDpiScaleRatio());
             options.shadowedText = false;
             return options;
         }
