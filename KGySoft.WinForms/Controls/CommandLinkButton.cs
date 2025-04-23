@@ -76,8 +76,8 @@ namespace KGySoft.WinForms.Controls
         private Font themedFontLarge;
         private Font themedFontSmall;
         private Font descriptionFont;
-        private Image currentImage;
-        private Image disabledImage;
+        private Image? currentImage;
+        private Image? disabledImage;
 
         private Color foreColor;
         private Color descriptionColor;
@@ -1450,45 +1450,9 @@ namespace KGySoft.WinForms.Controls
 
             ControlAppearanceState state = e.State;
             if (img != null && !state.Enabled)
-            {
-                img = disabledImage ?? (disabledImage = img.ToGrayscale());
-            }
+                img = disabledImage ??= img.ToGrayscale();
 
             bool useTheming = IsThemed && base.FlatStyle == FlatStyle.Standard;
-            int imageOffsetH = 0;
-            int imageOffsetV = 0;
-            int leftMargin = HorizontalBasePadding;
-            int topMargin = VerticalBasePadding;
-            bool isDefaultGlyph = false;
-            if (img == null)
-            {
-                if (isElevated)
-                {
-                    img = state.Enabled ? SecurityShield : SecurityShieldGray;
-                    if (!useTheming)
-                        imageOffsetH = -2;
-                }
-                else if (useDefaultGlyph)
-                {
-                    isDefaultGlyph = true;
-                    if (useTheming)
-                    {
-                        imageOffsetH = 1;
-                        imageOffsetV = 2;
-                    }
-                    else
-                        imageOffsetH = -3;
-
-                    if (!state.Enabled)
-                        img = Resources.CommandLinkDisabled;
-                    else if (state.Hovered && !state.Pressed)
-                        img = Resources.CommandLinkHovered;
-                    else
-                        img = Resources.CommandLinkNormal;
-                }
-            }
-            else if (!useTheming)
-                imageOffsetH = -2;
 
             // setting colors
             Color textColor = state.ForeColor;
@@ -1497,11 +1461,6 @@ namespace KGySoft.WinForms.Controls
             {
                 textColor = PressedTextColor;
                 descColor = PressedDescriptionColor;
-                if (!useTheming && base.FlatStyle != FlatStyle.Flat)
-                {
-                    leftMargin++;
-                    topMargin++;
-                }
             }
             else if (state.Hovered)
             {
@@ -1527,57 +1486,14 @@ namespace KGySoft.WinForms.Controls
             bool gdiPlusTextRendering = UseCompatibleTextRendering;
             e.Graphics.SetQuality();
 
-            // painting background
+            // painting background and image
+            Padding imageMargin;
             if (useTheming)
-                PaintThemedAppearance(e);
+                PaintThemedAppearance(e, img, out imageMargin);
             else if (base.FlatStyle == FlatStyle.Flat)
-                PaintFlatAppearance(e);
+                PaintFlatAppearance(e, img, out imageMargin);
             else
-                PaintClassicAppearance(e);
-
-            // drawing image
-            ContentAlignment imageAlignment = RtlTranslateContent(ImageAlign);
-            if (img != null)
-            {
-                bool isClassicPressed = !useTheming && state.Pressed && base.FlatStyle != FlatStyle.Flat;
-                int x;
-                if (imageAlignment.AnyLeft())
-                    x = leftMargin + 5 + imageOffsetH;
-                else if (imageAlignment.AnyCenter())
-                {
-                    x = Width / 2 - img.Width / 2;
-                    if (isClassicPressed)
-                        x++;
-                }
-                else // any right
-                {
-                    x = Width - (leftMargin + 5 + imageOffsetH + img.Width);
-                    if (isClassicPressed)
-                        x += 2;
-
-                    // mirroring glyph
-                    if (isDefaultGlyph)
-                        img.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                }
-
-                int y;
-                if (imageAlignment.AnyTop())
-                    y = topMargin + imageOffsetV + Math.Max(0, FontHeight / 2 - img.Height / 2 - 1);
-                else if (imageAlignment.AnyMiddle())
-                {
-                    y = Height / 2 - img.Height / 2;
-                    if (isClassicPressed)
-                        y++;
-                }
-                else // any bottom
-                {
-                    y = Math.Max(topMargin, Height - topMargin - img.Height);
-                    if (isClassicPressed)
-                        y += 2;
-                }
-
-                e.Graphics.DrawImage(img, x, y, img.Width, img.Height);
-            }
+                PaintClassicAppearance(e, img, out imageMargin);
 
             // drawing text
             TextFormatFlags formatFlags = this.GetFormatFlags();
@@ -1606,16 +1522,14 @@ namespace KGySoft.WinForms.Controls
             else if (((formatFlags & TextFormatFlags.VerticalCenter) != 0))
                 verticalOffset = Math.Max(proposedSize.Height / 2 - combinedSize.Height / 2, 0);
 
-            int imagePadding = imageAlignment.AnyLeft() ? ImagePadding : 0;
+            int imagePadding = RtlTranslateContent(ImageAlign).AnyLeft() ? ImagePadding : 0;
             if (!String.IsNullOrEmpty(Text))
             {
-                Rectangle rectangle = new Rectangle(leftMargin + imagePadding + (useTheming ? 1 : 0), topMargin + verticalOffset, proposedSize.Width, Math.Min(textSize.Height, proposedSize.Height));
+                Rectangle rectangle = new Rectangle(imageMargin.Left + imagePadding + (useTheming ? 1 : 0), imageMargin.Top + verticalOffset, proposedSize.Width, Math.Min(textSize.Height, proposedSize.Height));
                 if (gdiPlusTextRendering)
                 {
-                    using (Brush b = new SolidBrush(textColor))
-                    {
-                        e.Graphics.DrawString(state.Text, Font, b, rectangle, sf);
-                    }
+                    using Brush b = new SolidBrush(textColor);
+                    e.Graphics.DrawString(state.Text, Font, b, rectangle, sf);
                 }
                 else
                     TextRenderer.DrawText(e.Graphics, state.Text, Font, rectangle, textColor, formatFlags);
@@ -1623,13 +1537,11 @@ namespace KGySoft.WinForms.Controls
 
             if (!String.IsNullOrEmpty(description) && proposedSize.Height > textSize.Height)
             {
-                Rectangle rectangle = new Rectangle(leftMargin + imagePadding + (useTheming ? 2 : 0), topMargin + textSize.Height + verticalOffset + (useTheming ? 1 : 2), proposedSize.Width, Math.Min(descSize.Height, proposedSize.Height - textSize.Height));
+                Rectangle rectangle = new Rectangle(imageMargin.Left + imagePadding + (useTheming ? 2 : 0), imageMargin.Top + textSize.Height + verticalOffset + (useTheming ? 1 : 2), proposedSize.Width, Math.Min(descSize.Height, proposedSize.Height - textSize.Height));
                 if (gdiPlusTextRendering)
                 {
-                    using (Brush b = new SolidBrush(descColor))
-                    {
-                        e.Graphics.DrawString(description, descriptionFont, b, rectangle, sf);
-                    }
+                    using Brush b = new SolidBrush(descColor);
+                    e.Graphics.DrawString(description, descriptionFont, b, rectangle, sf);
                 }
                 else
                 {
@@ -1644,7 +1556,7 @@ namespace KGySoft.WinForms.Controls
             //image.Dispose();
         }
 
-        private void PaintThemedAppearance(PaintStateEventArgs e)
+        private void PaintThemedAppearance(PaintStateEventArgs e, Image? image, out Padding imageMargin)
         {
             ControlAppearanceState state = e.State;
             Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
@@ -1656,17 +1568,27 @@ namespace KGySoft.WinForms.Controls
             }
             else
             {
-                using (Brush b = new SolidBrush(state.BackColor))
-                {
-                    e.Graphics.FillRectangle(b, backRect);
-                }
+                using Brush b = new SolidBrush(state.BackColor);
+                e.Graphics.FillRectangle(b, backRect);
             }
 
             // Native rendering
             if (WindowsUtils.IsVistaOrLater)
             {
+                // background
                 VisualStyleRenderer renderer = new VisualStyleRenderer("BUTTON", state.SystemPartId, state.SystemStateId);
                 renderer.DrawBackground(e.Graphics, ClientRectangle);
+
+                // image
+                if (isElevated || image != null)
+                    PaintImage(e, image, out imageMargin);
+                else if (useDefaultGlyph)
+                {
+                    renderer = new VisualStyleRenderer("BUTTON", (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId);
+                    renderer.DrawBackground(e.Graphics, GetImageBounds(state, renderer.GetPartSize(e.Graphics, ThemeSizeType.Draw), true, out imageMargin));
+                }
+                else
+                    imageMargin = Padding.Empty;
             }
             // Compatibility rendering
             else
@@ -1698,17 +1620,20 @@ namespace KGySoft.WinForms.Controls
                         }
                     }
                 }
+
+                PaintImage(e, image, out imageMargin);
             }
 
             if (state.Enabled && Focused && ShowFocusCues)
                 ControlPaint.DrawFocusRectangle(e.Graphics, new Rectangle(backRect.X + 4, backRect.Y + 4, backRect.Width - 7, backRect.Height - 7), state.ForeColor, state.BackColor);
         }
 
-        private void PaintClassicAppearance(PaintStateEventArgs e)
+        private void PaintClassicAppearance(PaintStateEventArgs e, Image? image, out Padding imageMargin)
         {
             ControlAppearanceState state = e.State;
             Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
 
+            // Background
             using (Pen selectedFramePen = new Pen(SystemColors.ControlText, 1f))
             {
                 if (state.Pressed)
@@ -1740,11 +1665,14 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
+            // Image
+            PaintImage(e, image, out imageMargin);
+
             if (state.Enabled && Focused && ShowFocusCues)
                 ControlPaint.DrawFocusRectangle(e.Graphics, new Rectangle(backRect.X + 4, backRect.Y + 4, backRect.Width - 7, backRect.Height - 7), state.ForeColor, state.BackColor);
         }
 
-        private void PaintFlatAppearance(PaintStateEventArgs e)
+        private void PaintFlatAppearance(PaintStateEventArgs e, Image? image, out Padding imageMargin)
         {
             ControlAppearanceState state = e.State;
             Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
@@ -1834,6 +1762,9 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
+            // Image
+            PaintImage(e, image, out imageMargin);
+
             if (state.Enabled && Focused && ShowFocusCues)
             {
                 Color focusColor = SystemInformation.HighContrast ? SystemColors.WindowText
@@ -1846,6 +1777,112 @@ namespace KGySoft.WinForms.Controls
                     e.Graphics.DrawRectangle(pen, rectangle);
                 }
             }
+        }
+
+        private void PaintImage(PaintStateEventArgs e, Image? image, out Padding imageMargin)
+        {
+            var state = e.State;
+            bool isDefaultGlyph = false;
+            var img = image;
+            bool dispose = false;
+            if (img == null)
+            {
+                if (isElevated)
+                    img = state.Enabled ? SecurityShield : SecurityShieldGray;
+                else if (useDefaultGlyph)
+                {
+                    isDefaultGlyph = true;
+                    if (!state.Enabled)
+                        img = Resources.CommandLinkDisabled;
+                    else if (state.Hovered && !state.Pressed)
+                        img = Resources.CommandLinkHovered;
+                    else
+                        img = Resources.CommandLinkNormal;
+
+                    // mirroring glyph
+                    if (RtlTranslateContent(ImageAlign).AnyRight())
+                    {
+                        img = (Bitmap)img.Clone();
+                        img.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                        dispose = true;
+                    }
+                }
+            }
+
+            imageMargin = Padding.Empty;
+            if (img != null)
+                e.Graphics.DrawImage(img, GetImageBounds(state, img.Size, isDefaultGlyph, out imageMargin));
+            if (dispose)
+                img!.Dispose();
+        }
+
+        private Rectangle GetImageBounds(ControlAppearanceState state, Size imageSize, bool isDefaultGlyph, out Padding imageMargin)
+        {
+            bool useTheming = IsThemed && base.FlatStyle == FlatStyle.Standard;
+            ContentAlignment imageAlignment = RtlTranslateContent(ImageAlign);
+            bool isClassicPressed = !useTheming && state.Pressed && base.FlatStyle != FlatStyle.Flat;
+
+            var bounds = new Rectangle(Point.Empty, imageSize);
+            int leftMargin = HorizontalBasePadding;
+            int topMargin = VerticalBasePadding;
+            int imageOffsetH = 0;
+            int imageOffsetV = 0;
+            if (state.Pressed && !useTheming && base.FlatStyle != FlatStyle.Flat)
+            {
+                leftMargin++;
+                topMargin++;
+            }
+
+            if (isElevated)
+            {
+                if (!useTheming)
+                    imageOffsetH = -2;
+            }
+            else if (isDefaultGlyph)
+            {
+                if (useTheming)
+                {
+                    imageOffsetH = 1;
+                    imageOffsetV = 2;
+                }
+                else
+                    imageOffsetH = -3;
+            }
+            else if (!useTheming)
+                imageOffsetH = -2;
+
+            if (imageAlignment.AnyLeft())
+                bounds.X = leftMargin + 5 + imageOffsetH;
+            else if (imageAlignment.AnyCenter())
+            {
+                bounds.X = Width / 2 - imageSize.Width / 2;
+                if (isClassicPressed)
+                    bounds.X++;
+            }
+            else // any right
+            {
+                bounds.X = Width - (leftMargin + 5 + imageOffsetH + imageSize.Width);
+                if (isClassicPressed)
+                    bounds.X += 2;
+            }
+
+            if (imageAlignment.AnyTop())
+                bounds.Y = topMargin + imageOffsetV + Math.Max(0, FontHeight / 2 - imageSize.Height / 2 - 1);
+            else if (imageAlignment.AnyMiddle())
+            {
+                bounds.Y = Height / 2 - imageSize.Height / 2;
+                if (isClassicPressed)
+                    bounds.Y++;
+            }
+            else // any bottom
+            {
+                bounds.Y = Math.Max(topMargin, Height - topMargin - imageSize.Height);
+                if (isClassicPressed)
+                    bounds.Y += 2;
+            }
+
+            imageMargin = new Padding(leftMargin, topMargin, 0, 0);
+            return bounds;
         }
 
         /// <summary>
