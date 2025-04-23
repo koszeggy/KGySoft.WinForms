@@ -32,6 +32,12 @@ namespace KGySoft.WinForms.Controls
     [Description("Vista-like CommandLink button that works also in compatibility mode. In Vista and above you may set FlatStyle to System to render the button by the Windows.")]
     public class CommandLinkButton : Button, ISupportsDisabledColor, ISupportsFadingInternal
     {
+        #region Constants
+
+        private const string className = "BUTTON";
+
+        #endregion
+
         #region Fields
 
         #region Static Fields
@@ -45,10 +51,9 @@ namespace KGySoft.WinForms.Controls
         private static readonly Color hoveredBackColor = Color.FromArgb(96, 222, 222, 222);
         private static readonly Color selectedFrameColor = Color.FromArgb(64, 0, 204, 255);
         private static readonly Color selectedFrameColorAlternative = Color.FromArgb(192, 0, 204, 255);
+        private static readonly Size referenceIconSize = new Size(16, 16);
 
         private static Bitmap noGlyph;
-        private static Image securityShield;
-        private static Image securityShieldGray;
 
         #endregion
 
@@ -78,6 +83,14 @@ namespace KGySoft.WinForms.Controls
         private Font descriptionFont;
         private Image? currentImage;
         private Image? disabledImage;
+        private Image? cachedSecurityShieldImage;
+        private Image? cachedSecurityShieldImageGray;
+        private Size cachedSecurityShieldImageSize;
+
+        private Color themedForeColor;
+        private Color themedDisabledColor;
+        private Color themedHoveredColor;
+        private Color themedPressedColor;
 
         private Color foreColor;
         private Color descriptionColor;
@@ -128,30 +141,6 @@ namespace KGySoft.WinForms.Controls
                 noGlyph = new Bitmap(1, 1);
                 noGlyph.SetPixel(0, 0, Color.Transparent);
                 return noGlyph;
-            }
-        }
-
-        private static Image SecurityShield
-        {
-            get
-            {
-                if (securityShield != null)
-                    return securityShield;
-
-                securityShield = Icons.SecurityShield.ExtractNearestBitmap(new Size(16, 16), PixelFormat.Format32bppArgb); // TODO: ToMultiResBitmap, and handle GetPreferredSize correctly
-                return securityShield;
-            }
-        }
-
-        private static Image SecurityShieldGray
-        {
-            get
-            {
-                if (securityShieldGray != null)
-                    return securityShieldGray;
-
-                securityShieldGray = SecurityShield.ToGrayscale();
-                return securityShieldGray;
             }
         }
 
@@ -359,13 +348,9 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the text color of the command link button. Has effect only when FlatStyle is not System.")]
         public override Color ForeColor
         {
-            get
-            {
-                if (foreColor != Color.Empty)
-                    return foreColor;
-
-                return !IsThemed ? base.ForeColor : defaultForeColor;
-            }
+            get => !foreColor.IsEmpty ? foreColor
+                : !IsThemed ? base.ForeColor
+                : themedForeColor;
             set
             {
                 if (foreColor == value)
@@ -383,18 +368,13 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the description color of the command link button. Has effect only when FlatStyle is not System.")]
         public Color DescriptionColor
         {
-            get
-            {
-                if (descriptionColor != Color.Empty)
-                    return descriptionColor;
-
-                return !IsThemed ? base.ForeColor : defaultForeColor;
-            }
+            get => !descriptionColor.IsEmpty ? descriptionColor
+                : !IsThemed ? base.ForeColor
+                : themedForeColor;
             set
             {
                 if (descriptionColor == value)
                     return;
-
                 descriptionColor = value;
                 Invalidate();
             }
@@ -407,13 +387,9 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the highlighted text color of the command link button. Has effect only when FlatStyle is not System.")]
         public Color HighlightTextColor
         {
-            get
-            {
-                if (highlightTextColor != Color.Empty)
-                    return highlightTextColor;
-
-                return !IsThemed ? base.ForeColor : defaultHoveredColor;
-            }
+            get => !highlightTextColor.IsEmpty ? highlightTextColor
+                : !IsThemed ? base.ForeColor
+                : themedHoveredColor;
             set
             {
                 if (highlightTextColor == value)
@@ -431,13 +407,9 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the highlighted description color of the command link button. Has effect only when FlatStyle is not System.")]
         public Color HighlightDescriptionColor
         {
-            get
-            {
-                if (highlightDescriptionColor != Color.Empty)
-                    return highlightDescriptionColor;
-
-                return !IsThemed ? base.ForeColor : defaultHoveredColor;
-            }
+            get => !highlightTextColor.IsEmpty ? highlightTextColor
+                : !IsThemed ? base.ForeColor
+                : themedHoveredColor;
             set
             {
                 if (highlightDescriptionColor == value)
@@ -455,14 +427,9 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the pressed text color of the command link button. Has effect only when FlatStyle is not System.")]
         public Color PressedTextColor
         {
-            get
-            {
-                if (pressedTextColor != Color.Empty)
-                    return pressedTextColor;
-
-                return !IsThemed ? base.ForeColor : defaultPressedColor;
-
-            }
+            get => !pressedTextColor.IsEmpty ? pressedTextColor
+                : !IsThemed ? base.ForeColor
+                : themedPressedColor;
             set
             {
                 if (pressedTextColor == value)
@@ -480,13 +447,9 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the pressed description color of the command link button. Has effect only when FlatStyle is not System.")]
         public Color PressedDescriptionColor
         {
-            get
-            {
-                if (pressedDescriptionColor != Color.Empty)
-                    return pressedDescriptionColor;
-
-                return !IsThemed ? base.ForeColor : defaultPressedColor;
-            }
+            get => !pressedTextColor.IsEmpty ? pressedTextColor
+                : !IsThemed ? base.ForeColor
+                : themedPressedColor;
             set
             {
                 if (pressedDescriptionColor == value)
@@ -504,18 +467,9 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets disabled fore color. Has effect only when FlatStyle is not System.")]
         public Color DisabledForeColor
         {
-            get
-            {
-                if (disabledForeColor != Color.Empty)
-                    return disabledForeColor;
-
-                if (!IsThemed)
-                {
-                    return ControlPaint.DarkDark(BackColor);
-                }
-
-                return defaultDisabledColor;
-            }
+            get => !disabledBackColor.IsEmpty ? disabledBackColor
+                : !IsThemed ? SystemColors.GrayText
+                : themedDisabledColor;
             set
             {
                 if (disabledForeColor == value)
@@ -620,6 +574,35 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Private Properties
+
+        private Image SecurityShieldImage
+        {
+            get
+            {
+                Size currentSize = this.ScaleSize(referenceIconSize);
+                if (currentSize != cachedSecurityShieldImageSize || cachedSecurityShieldImage == null)
+                {
+                    cachedSecurityShieldImage?.Dispose();
+                    using var icon = Icons.SecurityShield;
+                    cachedSecurityShieldImage = icon.ExtractNearestBitmap(currentSize, PixelFormat.Format32bppArgb);
+                    cachedSecurityShieldImageSize = currentSize;
+                }
+
+                return cachedSecurityShieldImage;
+            }
+        }
+
+        private Image SecurityShieldGray
+        {
+            get
+            {
+                if (cachedSecurityShieldImageGray != null)
+                    return cachedSecurityShieldImageGray;
+
+                cachedSecurityShieldImageGray = SecurityShieldImage.ToGrayscale();
+                return cachedSecurityShieldImageGray;
+            }
+        }
 
         private bool IsNativeRendering
         {
@@ -952,6 +935,12 @@ namespace KGySoft.WinForms.Controls
                     disabledImage.Dispose();
                     disabledImage = null;
                 }
+
+                cachedSecurityShieldImage?.Dispose();
+                cachedSecurityShieldImage = null;
+
+                cachedSecurityShieldImageGray?.Dispose();
+                cachedSecurityShieldImageGray = null;
             }
 
             base.Dispose(disposing);
@@ -962,6 +951,15 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Methods
+
+        #region Static Methods
+
+        private static Color GetDefaultTextColor(COMMANDLINKSTATES state) =>
+            new VisualStyleRenderer(className, (int)BUTTONPARTS.BP_COMMANDLINK, (int)state).GetColor(ColorProperty.TextColor);
+
+        #endregion
+
+        #region Instance Methods
 
         #region Public Methods
 
@@ -1467,21 +1465,8 @@ namespace KGySoft.WinForms.Controls
                 textColor = HighlightTextColor;
                 descColor = HighlightDescriptionColor;
             }
-            else
-            {
-                if (!state.Enabled)
-                {
-                    if (state.ForeColor != Color.Empty)
-                        textColor = descColor = state.ForeColor;
-                    else
-                    {
-                        if (useTheming)
-                            textColor = descColor = defaultDisabledColor;
-                        else
-                            textColor = descColor = SystemColors.GrayText;
-                    }
-                }
-            }
+            else if (!state.Enabled)
+                textColor = descColor = DisabledForeColor;
 
             bool gdiPlusTextRendering = UseCompatibleTextRendering;
             e.Graphics.SetQuality();
@@ -1576,7 +1561,7 @@ namespace KGySoft.WinForms.Controls
             if (WindowsUtils.IsVistaOrLater)
             {
                 // background
-                VisualStyleRenderer renderer = new VisualStyleRenderer("BUTTON", state.SystemPartId, state.SystemStateId);
+                VisualStyleRenderer renderer = new VisualStyleRenderer(className, state.SystemPartId, state.SystemStateId);
                 renderer.DrawBackground(e.Graphics, ClientRectangle);
 
                 // image
@@ -1584,7 +1569,7 @@ namespace KGySoft.WinForms.Controls
                     PaintImage(e, image, out imageMargin);
                 else if (useDefaultGlyph)
                 {
-                    renderer = new VisualStyleRenderer("BUTTON", (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId);
+                    renderer = new VisualStyleRenderer(className, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId);
                     renderer.DrawBackground(e.Graphics, GetImageBounds(state, renderer.GetPartSize(e.Graphics, ThemeSizeType.Draw), true, out imageMargin));
                 }
                 else
@@ -1788,12 +1773,12 @@ namespace KGySoft.WinForms.Controls
             if (img == null)
             {
                 if (isElevated)
-                    img = state.Enabled ? SecurityShield : SecurityShieldGray;
+                    img = state.Enabled ? SecurityShieldImage : SecurityShieldGray;
                 else if (useDefaultGlyph)
                 {
                     isDefaultGlyph = true;
                     if (!state.Enabled)
-                        img = Resources.CommandLinkDisabled;
+                        img = Resources.CommandLinkDisabled; // TODO: create icons with scaled images (Vista/Win10)
                     else if (state.Hovered && !state.Pressed)
                         img = Resources.CommandLinkHovered;
                     else
@@ -1842,8 +1827,8 @@ namespace KGySoft.WinForms.Controls
             {
                 if (useTheming)
                 {
-                    imageOffsetH = 1;
-                    imageOffsetV = 2;
+                    imageOffsetH = (referenceIconSize.Width - imageSize.Width) / 2 + 1;
+                    imageOffsetV = (referenceIconSize.Height - imageSize.Height) / 2 + 2;
                 }
                 else
                     imageOffsetH = -3;
@@ -1948,12 +1933,10 @@ namespace KGySoft.WinForms.Controls
         {
             Font = DefaultTextFont;
             DescriptionFont = DefaultDescriptionFont;
-            //ForeColor = DefaultTextColor;
-            //DescriptionColor = DefaultTextColor;
-            //HighlightTextColor = DefaultHighlightColor;
-            //HighlightDescriptionColor = DefaultHighlightColor;
-            //PressedTextColor = DefaultPressedColor;
-            //PressedDescriptionColor = DefaultPressedColor;
+            themedForeColor = IsNativelySupported ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL) : defaultForeColor;
+            themedHoveredColor = IsNativelySupported ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT) : defaultHoveredColor;
+            themedDisabledColor = IsNativelySupported ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED) : defaultDisabledColor;
+            themedPressedColor = IsNativelySupported ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED) : defaultPressedColor;
         }
 
         private bool ShouldSerializeFont()
@@ -2075,6 +2058,8 @@ namespace KGySoft.WinForms.Controls
         }
 
         // ReSharper restore InconsistentNaming
+        #endregion
+
         #endregion
 
         #endregion
