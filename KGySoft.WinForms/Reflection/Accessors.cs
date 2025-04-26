@@ -27,7 +27,6 @@ namespace KGySoft.WinForms.Reflection
         private static IThreadSafeCacheAccessor<(Type DeclaringType, string MethodName), MethodAccessor?>? methods;
 
         // not from methods because these are not unique
-        private static MethodAccessor? methodGraphicsExtensions_CreateRoundedRectangle;
         private static MethodAccessor? methodControl_PaintBackground;
         private static MethodAccessor? methodButtonBase_Animate;
         private static MethodAccessor? methodControlPaint_DrawImageDisabled;
@@ -181,16 +180,6 @@ namespace KGySoft.WinForms.Reflection
             return formState[section] != 0;
         }
 #endif
-
-        #endregion
-
-        #region GraphicsExtensions
-
-        internal static GraphicsPath CreateRoundedRectangle(Rectangle bounds, int radius)
-        {
-            methodGraphicsExtensions_CreateRoundedRectangle ??= MethodAccessor.GetAccessor(typeof(Drawing.GraphicsExtensions).GetMethod("CreateRoundedRectangle", BindingFlags.Static | BindingFlags.NonPublic, null, new[] { typeof(Rectangle), typeof(int) }, null)!);
-            return (GraphicsPath)methodGraphicsExtensions_CreateRoundedRectangle.Invoke(null, bounds, radius)!;
-        }
 
         #endregion
 

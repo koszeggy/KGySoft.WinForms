@@ -51,7 +51,8 @@ namespace KGySoft.WinForms.Controls
         private static readonly Color hoveredBackColor = Color.FromArgb(96, 222, 222, 222);
         private static readonly Color selectedFrameColor = Color.FromArgb(64, 0, 204, 255);
         private static readonly Color selectedFrameColorAlternative = Color.FromArgb(192, 0, 204, 255);
-        private static readonly Size referenceIconSize = new Size(16, 16);
+        private static readonly Size referenceElevatedIconSize = new Size(16, 16);
+        private static readonly Size referenceDefaultGlyphSize = new Size(20, 20);
 
         private static Bitmap noGlyph;
 
@@ -85,7 +86,11 @@ namespace KGySoft.WinForms.Controls
         private Image? disabledImage;
         private Image? cachedSecurityShieldImage;
         private Image? cachedSecurityShieldImageGray;
+        private Image? cachedDefaultGlyphNormal;
+        private Image? cachedDefaultGlyphHovered;
+        private Image? cachedDefaultGlyphDisabled;
         private Size cachedSecurityShieldImageSize;
+        private Size defaultGlyphSize;
 
         private Color themedForeColor;
         private Color themedDisabledColor;
@@ -144,10 +149,12 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private static bool IsNativelySupported
-        {
-            get { return WindowsUtils.IsVistaOrLater && WindowsUtils.IsComCtlV6Available; }
-        }
+        /// <summary>
+        /// Gets whether the current operating system supports command link buttons natively.
+        /// That is on Windows Vista or later, when Application.EnableVisualStyles() was called.
+        /// NOTE: it does not mean that visual styles are actually used (use <see cref="IsNativeVisualStylesRenderingAvailable"/> to check that).
+        /// </summary>
+        private static bool IsNativelySupported => WindowsUtils.IsVistaOrLater && WindowsUtils.IsComCtlV6Available;
 
         #endregion
 
@@ -519,7 +526,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
         {
-            get { return reportedFlatStyle; }
+            get => reportedFlatStyle;
             set
             {
                 if (reportedFlatStyle == value && base.FlatStyle == value && lastFlatStyle == value)
@@ -543,6 +550,7 @@ namespace KGySoft.WinForms.Controls
                 base.Image = value;
                 isImageUpToDate = false;
                 CheckImage();
+                PerformLayout();
             }
         }
 
@@ -579,11 +587,11 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                Size currentSize = this.ScaleSize(referenceIconSize);
+                Size currentSize = this.ScaleSize(referenceElevatedIconSize);
                 if (currentSize != cachedSecurityShieldImageSize || cachedSecurityShieldImage == null)
                 {
                     cachedSecurityShieldImage?.Dispose();
-                    using var icon = Icons.SecurityShield;
+                    using var icon = Icons.SystemShield;
                     cachedSecurityShieldImage = icon.ExtractNearestBitmap(currentSize, PixelFormat.Format32bppArgb);
                     cachedSecurityShieldImageSize = currentSize;
                 }
@@ -604,16 +612,17 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private bool IsNativeRendering
-        {
-            get { return base.FlatStyle == FlatStyle.System && IsNativelySupported; }
-        }
+        /// <summary>
+        /// Gets whether Vista+ system rendering is used.
+        /// </summary>
+        private bool IsNativeRendering => base.FlatStyle == FlatStyle.System && IsNativelySupported;
 
-        private bool IsCustomRendering
-        {
-            get { return base.FlatStyle != FlatStyle.System; }
-        }
+        private bool IsCustomRendering => base.FlatStyle != FlatStyle.System;
 
+        /// <summary>
+        /// Gets whether visual styles are enabled both in the OS and in the application.
+        /// NOTE: it does not mean that native command link rendering is available (use <see cref="IsNativeVisualStylesRenderingAvailable"/> to check that).
+        /// </summary>
         private bool IsThemed
         {
             get
@@ -625,6 +634,8 @@ namespace KGySoft.WinForms.Controls
                 return isThemed.Value;
             }
         }
+
+        private bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && IsThemed;
 
         private Font DefaultTextFont
         {
@@ -784,10 +795,13 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                if (outerBorder != null)
-                    return outerBorder;
+                if (outerBorder == null)
+                {
+                    outerBorder = new GraphicsPath();
+                    outerBorder.AddRoundedRectangle(new Rectangle(0, 0, Width - 1, Height - 1), 3);
+                }
 
-                return outerBorder = Accessors.CreateRoundedRectangle(new Rectangle(0, 0, Width - 1, Height - 1), 3);
+                return outerBorder;
             }
         }
 
@@ -795,10 +809,13 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                if (innerBorder != null)
-                    return innerBorder;
+                if (innerBorder == null)
+                {
+                    innerBorder = new GraphicsPath();
+                    innerBorder.AddRoundedRectangle(new Rectangle(1, 1, Width - 3, Height - 3), 2);
+                }
 
-                return innerBorder = Accessors.CreateRoundedRectangle(new Rectangle(1, 1, Width - 3, Height - 3), 2);
+                return innerBorder;
             }
         }
 
@@ -818,58 +835,44 @@ namespace KGySoft.WinForms.Controls
                 }
 
                 // themed/flat selection
-                return selectionBorder = Accessors.CreateRoundedRectangle(new Rectangle(1, 0, Width - 3, Height - 1), 3);
+                selectionBorder = new GraphicsPath();
+                selectionBorder.AddRoundedRectangle(new Rectangle(1, 0, Width - 3, Height - 1), 3);
+                return selectionBorder;
             }
         }
 
-        private Size BordersAndPadding
-        {
-            get { return new Size(HorizontalPadding, VerticalPadding); }
-        }
+        /// <summary>
+        /// The size of every non-text content, including image, borders and padding.
+        /// </summary>
+        private Size BordersAndPadding => new(HorizontalPadding, VerticalPadding);
+        private int HorizontalPadding => (HorizontalBasePadding << 1) + (ImageAlign.AnyCenter() ? 0 : ImagePadding + ImageSize.Width + ImageTextMargin);
+        private int HorizontalBasePadding => base.FlatStyle == FlatStyle.Standard && !IsThemed || base.FlatStyle == FlatStyle.Popup ? 3 : 2;
+        private int VerticalPadding => VerticalBasePadding << 1;
+        private int VerticalBasePadding => base.FlatStyle == FlatStyle.Standard && !IsThemed || base.FlatStyle == FlatStyle.Popup ? 6 : 10;
 
-        private int HorizontalPadding
-        {
-            get { return (HorizontalBasePadding << 1) + ImagePadding; }
-        }
+        private int ImagePadding => base.FlatStyle == FlatStyle.Standard && !IsThemed || base.FlatStyle == FlatStyle.Popup ? 2 : 5;
+        private int ImageTextMargin => 1;
 
-        private int HorizontalBasePadding
-        {
-            get { return base.FlatStyle == FlatStyle.Standard && !IsThemed || base.FlatStyle == FlatStyle.Popup ? 3 : 2; }
-        }
+        private Size ImageSize => isElevated ? SecurityShieldImage.Size // note: cachedSecurityShieldImageSize is the scaled reference size, not necessarily the actual extracted size
+            : base.Image != null ? base.Image.Size
+            : useDefaultGlyph ? DefaultGlyphSize
+            : new Size(1, 1);
 
-        private int VerticalPadding
+        private Image DefaultGlyphNormal => cachedDefaultGlyphNormal ??= GetScaledDefaultGlyph(Resources.CommandLinkNormal);
+        private Image DefaultGlyphHovered => cachedDefaultGlyphHovered ??= GetScaledDefaultGlyph(Resources.CommandLinkHovered);
+        private Image DefaultGlyphDisabled => cachedDefaultGlyphDisabled ??= GetScaledDefaultGlyph(Resources.CommandLinkDisabled);
+        
+        private Size DefaultGlyphSize
         {
             get
             {
-                return VerticalBasePadding << 1;
-            }
-        }
-
-        private int VerticalBasePadding
-        {
-            get { return base.FlatStyle == FlatStyle.Standard && !IsThemed || base.FlatStyle == FlatStyle.Popup ? 6 : 10; }
-        }
-
-        private int ImagePadding
-        {
-            get
-            {
-                if (base.Image == null && !isElevated && !useDefaultGlyph
-                    || ImageAlign.AnyCenter())
+                if (defaultGlyphSize.IsEmpty)
                 {
-                    return 7;
+                    using var g = Graphics.FromHwnd(Handle);
+                    defaultGlyphSize = GetDefaultGlyphSize(g);
                 }
 
-                if (base.Image != null)
-                    return base.Image.Width + 6;
-
-                if (isElevated)
-                    return 22;
-
-                if (useDefaultGlyph)
-                    return base.FlatStyle == FlatStyle.Standard && !IsThemed || base.FlatStyle == FlatStyle.Flat ? 23 : 26;
-
-                return 7;
+                return defaultGlyphSize;
             }
         }
 
@@ -938,9 +941,14 @@ namespace KGySoft.WinForms.Controls
 
                 cachedSecurityShieldImage?.Dispose();
                 cachedSecurityShieldImage = null;
-
                 cachedSecurityShieldImageGray?.Dispose();
                 cachedSecurityShieldImageGray = null;
+                cachedDefaultGlyphDisabled?.Dispose();
+                cachedDefaultGlyphDisabled = null;
+                cachedDefaultGlyphNormal?.Dispose();
+                cachedDefaultGlyphNormal = null;
+                cachedDefaultGlyphHovered?.Dispose();
+                cachedDefaultGlyphHovered = null;
             }
 
             base.Dispose(disposing);
@@ -968,8 +976,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public override Size GetPreferredSize(Size proposedSize)
         {
-            Size preferredSize;
-            if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | proposedSize.Width, out preferredSize))
+            if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | proposedSize.Width, out var preferredSize))
             {
                 return preferredSize;
             }
@@ -1043,14 +1050,14 @@ namespace KGySoft.WinForms.Controls
                 if (!IsThemed && base.FlatStyle == FlatStyle.Standard || base.FlatStyle == FlatStyle.Popup)
                     preferredSize.Height++;
 
-                // HorizonatalPadding already contains image width. Height is calculated here.
+                // HorizontalPadding already contains image width. Height is calculated here.
                 int preferredImageHeight = 0;
                 if (base.Image != null)
                     preferredImageHeight = base.Image.Height + VerticalPadding;
                 else if (isElevated)
-                    preferredImageHeight = 16 + VerticalPadding;
+                    preferredImageHeight = SecurityShieldImage.Height + VerticalPadding;
                 else if (useDefaultGlyph)
-                    preferredImageHeight = 17 + VerticalPadding;
+                    preferredImageHeight = GetDefaultGlyphSize(g).Height + 1 + VerticalPadding;
 
                 if (preferredImageHeight > preferredSize.Height)
                     preferredSize.Height = preferredImageHeight;
@@ -1059,6 +1066,19 @@ namespace KGySoft.WinForms.Controls
                 return preferredSize;
             }
 
+        }
+
+        private Size GetDefaultGlyphSize(Graphics g)
+        {
+            // TODO: invalidate on DPI change
+            if (defaultGlyphSize.IsEmpty)
+            {
+                defaultGlyphSize = IsNativeVisualStylesRenderingAvailable
+                    ? new VisualStyleRenderer(className, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, 1).GetPartSize(g, ThemeSizeType.Draw)
+                    : DefaultGlyphNormal.Size;
+            }
+
+            return defaultGlyphSize;
         }
 
         #endregion
@@ -1472,13 +1492,12 @@ namespace KGySoft.WinForms.Controls
             e.Graphics.SetQuality();
 
             // painting background and image
-            Padding imageMargin;
             if (useTheming)
-                PaintThemedAppearance(e, img, out imageMargin);
+                PaintThemedAppearance(e, img);
             else if (base.FlatStyle == FlatStyle.Flat)
-                PaintFlatAppearance(e, img, out imageMargin);
+                PaintFlatAppearance(e, img);
             else
-                PaintClassicAppearance(e, img, out imageMargin);
+                PaintClassicAppearance(e, img);
 
             // drawing text
             TextFormatFlags formatFlags = this.GetFormatFlags();
@@ -1501,16 +1520,17 @@ namespace KGySoft.WinForms.Controls
             }
 
             Size combinedSize = new Size(proposedSize.Width, Math.Min(proposedSize.Height, textSize.Height + descSize.Height));
-            int verticalOffset = 0;
+            int offset = !useTheming && state.Pressed && base.FlatStyle != FlatStyle.Flat ? 1 : 0;
+            int left = HorizontalBasePadding + (RtlTranslateContent(ImageAlign).AnyLeft() ? ImagePadding + ImageSize.Width + ImageTextMargin : 0) + offset;
+            int top = VerticalBasePadding + offset;
             if ((formatFlags & TextFormatFlags.Bottom) != 0)
-                verticalOffset = Math.Max(proposedSize.Height - combinedSize.Height, 0);
+                top += Math.Max(proposedSize.Height - combinedSize.Height, 0);
             else if (((formatFlags & TextFormatFlags.VerticalCenter) != 0))
-                verticalOffset = Math.Max(proposedSize.Height / 2 - combinedSize.Height / 2, 0);
+                top += Math.Max(proposedSize.Height / 2 - combinedSize.Height / 2, 0);
 
-            int imagePadding = RtlTranslateContent(ImageAlign).AnyLeft() ? ImagePadding : 0;
             if (!String.IsNullOrEmpty(Text))
             {
-                Rectangle rectangle = new Rectangle(imageMargin.Left + imagePadding + (useTheming ? 1 : 0), imageMargin.Top + verticalOffset, proposedSize.Width, Math.Min(textSize.Height, proposedSize.Height));
+                Rectangle rectangle = new Rectangle(left + (useTheming ? 1 : 0), top, proposedSize.Width, Math.Min(textSize.Height, proposedSize.Height));
                 if (gdiPlusTextRendering)
                 {
                     using Brush b = new SolidBrush(textColor);
@@ -1522,7 +1542,7 @@ namespace KGySoft.WinForms.Controls
 
             if (!String.IsNullOrEmpty(description) && proposedSize.Height > textSize.Height)
             {
-                Rectangle rectangle = new Rectangle(imageMargin.Left + imagePadding + (useTheming ? 2 : 0), imageMargin.Top + textSize.Height + verticalOffset + (useTheming ? 1 : 2), proposedSize.Width, Math.Min(descSize.Height, proposedSize.Height - textSize.Height));
+                Rectangle rectangle = new Rectangle(left + (useTheming ? 2 : 0), top + textSize.Height + (useTheming ? 1 : 2), proposedSize.Width, Math.Min(descSize.Height, proposedSize.Height - textSize.Height));
                 if (gdiPlusTextRendering)
                 {
                     using Brush b = new SolidBrush(descColor);
@@ -1541,7 +1561,7 @@ namespace KGySoft.WinForms.Controls
             //image.Dispose();
         }
 
-        private void PaintThemedAppearance(PaintStateEventArgs e, Image? image, out Padding imageMargin)
+        private void PaintThemedAppearance(PaintStateEventArgs e, Image? image)
         {
             ControlAppearanceState state = e.State;
             Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
@@ -1560,20 +1580,8 @@ namespace KGySoft.WinForms.Controls
             // Native rendering
             if (WindowsUtils.IsVistaOrLater)
             {
-                // background
                 VisualStyleRenderer renderer = new VisualStyleRenderer(className, state.SystemPartId, state.SystemStateId);
                 renderer.DrawBackground(e.Graphics, ClientRectangle);
-
-                // image
-                if (isElevated || image != null)
-                    PaintImage(e, image, out imageMargin);
-                else if (useDefaultGlyph)
-                {
-                    renderer = new VisualStyleRenderer(className, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId);
-                    renderer.DrawBackground(e.Graphics, GetImageBounds(state, renderer.GetPartSize(e.Graphics, ThemeSizeType.Draw), true, out imageMargin));
-                }
-                else
-                    imageMargin = Padding.Empty;
             }
             // Compatibility rendering
             else
@@ -1605,15 +1613,16 @@ namespace KGySoft.WinForms.Controls
                         }
                     }
                 }
-
-                PaintImage(e, image, out imageMargin);
             }
+
+            // Image
+            PaintImage(e, image);
 
             if (state.Enabled && Focused && ShowFocusCues)
                 ControlPaint.DrawFocusRectangle(e.Graphics, new Rectangle(backRect.X + 4, backRect.Y + 4, backRect.Width - 7, backRect.Height - 7), state.ForeColor, state.BackColor);
         }
 
-        private void PaintClassicAppearance(PaintStateEventArgs e, Image? image, out Padding imageMargin)
+        private void PaintClassicAppearance(PaintStateEventArgs e, Image? image)
         {
             ControlAppearanceState state = e.State;
             Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
@@ -1630,7 +1639,7 @@ namespace KGySoft.WinForms.Controls
                 else if (state.Hovered)
                 {
                     e.Graphics.FillRectangle(HoveredBrush, backRect);
-                    ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.Raised);
+                    ControlPaint.DrawBorder3D(e.Graphics, ClientRectangle, Border3DStyle.Raised);
 
                     // with classic state selection is drawn even if button is hovered
                     if (state.Enabled && (Focused || state.IsDefault))
@@ -1651,13 +1660,13 @@ namespace KGySoft.WinForms.Controls
             }
 
             // Image
-            PaintImage(e, image, out imageMargin);
+            PaintImage(e, image);
 
             if (state.Enabled && Focused && ShowFocusCues)
                 ControlPaint.DrawFocusRectangle(e.Graphics, new Rectangle(backRect.X + 4, backRect.Y + 4, backRect.Width - 7, backRect.Height - 7), state.ForeColor, state.BackColor);
         }
 
-        private void PaintFlatAppearance(PaintStateEventArgs e, Image? image, out Padding imageMargin)
+        private void PaintFlatAppearance(PaintStateEventArgs e, Image? image)
         {
             ControlAppearanceState state = e.State;
             Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
@@ -1748,7 +1757,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             // Image
-            PaintImage(e, image, out imageMargin);
+            PaintImage(e, image);
 
             if (state.Enabled && Focused && ShowFocusCues)
             {
@@ -1764,10 +1773,37 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private void PaintImage(PaintStateEventArgs e, Image? image, out Padding imageMargin)
+        private void PaintImage(PaintStateEventArgs e, Image? image)
         {
+            Rectangle bounds = GetImageBounds(e);
             var state = e.State;
-            bool isDefaultGlyph = false;
+            if (IsNativeVisualStylesRenderingAvailable && !isElevated && image == null && useDefaultGlyph)
+            {
+                if (RightToLeft != RightToLeft.Yes)
+                {
+                    var renderer = new VisualStyleRenderer(className, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId);
+                    renderer.DrawBackground(e.Graphics, bounds);
+                    return;
+                }
+
+                // RTL only for Windows 8 and later: manually drawing the mirrored glyph
+                if (WindowsUtils.IsWindows8OrLater)
+                {
+                    var color = !state.Enabled ? themedDisabledColor
+                        : state.Pressed ? themedPressedColor
+                        : state.Hovered ? themedHoveredColor
+                        : themedForeColor;
+                    float unit = bounds.Width / 20f;
+                    using Pen pen = new Pen(color, Math.Max(2, 1.5f * unit));
+                    var y = bounds.Y + 12 * unit;
+                    var x1 = bounds.X + 7 * unit;
+                    e.Graphics.DrawLine(pen, bounds.X + unit, y, bounds.X + 18 * unit, y);
+                    e.Graphics.DrawLines(pen, new PointF[] { new(x1, bounds.Y + 6 * unit), new(bounds.X + unit, y), new(x1, bounds.Y + 18 * unit) });
+
+                    return;
+                }
+            }
+
             var img = image;
             bool dispose = false;
             if (img == null)
@@ -1776,16 +1812,12 @@ namespace KGySoft.WinForms.Controls
                     img = state.Enabled ? SecurityShieldImage : SecurityShieldGray;
                 else if (useDefaultGlyph)
                 {
-                    isDefaultGlyph = true;
-                    if (!state.Enabled)
-                        img = Resources.CommandLinkDisabled; // TODO: create icons with scaled images (Vista/Win10)
-                    else if (state.Hovered && !state.Pressed)
-                        img = Resources.CommandLinkHovered;
-                    else
-                        img = Resources.CommandLinkNormal;
+                    img = !state.Enabled ? DefaultGlyphDisabled
+                        : state.Hovered && !state.Pressed ? DefaultGlyphHovered
+                        : DefaultGlyphNormal;
 
                     // mirroring glyph
-                    if (RtlTranslateContent(ImageAlign).AnyRight())
+                    if (RightToLeft == RightToLeft.Yes)
                     {
                         img = (Bitmap)img.Clone();
                         img.RotateFlip(RotateFlipType.RotateNoneFlipX);
@@ -1794,79 +1826,37 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            imageMargin = Padding.Empty;
             if (img != null)
-                e.Graphics.DrawImage(img, GetImageBounds(state, img.Size, isDefaultGlyph, out imageMargin));
+                e.Graphics.DrawImage(img, bounds);
             if (dispose)
                 img!.Dispose();
         }
 
-        private Rectangle GetImageBounds(ControlAppearanceState state, Size imageSize, bool isDefaultGlyph, out Padding imageMargin)
+        private Rectangle GetImageBounds(PaintStateEventArgs e)
         {
+            ControlAppearanceState state = e.State;
             bool useTheming = IsThemed && base.FlatStyle == FlatStyle.Standard;
             ContentAlignment imageAlignment = RtlTranslateContent(ImageAlign);
             bool isClassicPressed = !useTheming && state.Pressed && base.FlatStyle != FlatStyle.Flat;
 
+            Size imageSize = ImageSize;
             var bounds = new Rectangle(Point.Empty, imageSize);
-            int leftMargin = HorizontalBasePadding;
-            int topMargin = VerticalBasePadding;
-            int imageOffsetH = 0;
-            int imageOffsetV = 0;
-            if (state.Pressed && !useTheming && base.FlatStyle != FlatStyle.Flat)
-            {
-                leftMargin++;
-                topMargin++;
-            }
-
-            if (isElevated)
-            {
-                if (!useTheming)
-                    imageOffsetH = -2;
-            }
-            else if (isDefaultGlyph)
-            {
-                if (useTheming)
-                {
-                    imageOffsetH = (referenceIconSize.Width - imageSize.Width) / 2 + 1;
-                    imageOffsetV = (referenceIconSize.Height - imageSize.Height) / 2 + 2;
-                }
-                else
-                    imageOffsetH = -3;
-            }
-            else if (!useTheming)
-                imageOffsetH = -2;
+            var offset = isClassicPressed ? new Size(1, 1) : Size.Empty;
 
             if (imageAlignment.AnyLeft())
-                bounds.X = leftMargin + 5 + imageOffsetH;
+                bounds.X = HorizontalBasePadding + ImagePadding + offset.Width;
             else if (imageAlignment.AnyCenter())
-            {
-                bounds.X = Width / 2 - imageSize.Width / 2;
-                if (isClassicPressed)
-                    bounds.X++;
-            }
+                bounds.X = Width / 2 - imageSize.Width / 2 + offset.Width;
             else // any right
-            {
-                bounds.X = Width - (leftMargin + 5 + imageOffsetH + imageSize.Width);
-                if (isClassicPressed)
-                    bounds.X += 2;
-            }
+                bounds.X = Width - (HorizontalBasePadding + ImagePadding + imageSize.Width) + offset.Width;
 
-            if (imageAlignment.AnyTop())
-                bounds.Y = topMargin + imageOffsetV + Math.Max(0, FontHeight / 2 - imageSize.Height / 2 - 1);
+            if (imageAlignment.AnyTop()) // actually to the middle of the first row of Text - that's how System rendering also works
+                bounds.Y = VerticalBasePadding + Math.Max(0, FontHeight / 2 - imageSize.Height / 2 - 1) + offset.Height;
             else if (imageAlignment.AnyMiddle())
-            {
-                bounds.Y = Height / 2 - imageSize.Height / 2;
-                if (isClassicPressed)
-                    bounds.Y++;
-            }
+                bounds.Y = Height / 2 - imageSize.Height / 2 + offset.Height;
             else // any bottom
-            {
-                bounds.Y = Math.Max(topMargin, Height - topMargin - imageSize.Height);
-                if (isClassicPressed)
-                    bounds.Y += 2;
-            }
+                bounds.Y = Math.Max(VerticalBasePadding, Height - VerticalBasePadding - imageSize.Height) + offset.Height;
 
-            imageMargin = new Padding(leftMargin, topMargin, 0, 0);
             return bounds;
         }
 
@@ -1933,10 +1923,19 @@ namespace KGySoft.WinForms.Controls
         {
             Font = DefaultTextFont;
             DescriptionFont = DefaultDescriptionFont;
-            themedForeColor = IsNativelySupported ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL) : defaultForeColor;
-            themedHoveredColor = IsNativelySupported ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT) : defaultHoveredColor;
-            themedDisabledColor = IsNativelySupported ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED) : defaultDisabledColor;
-            themedPressedColor = IsNativelySupported ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED) : defaultPressedColor;
+            isThemed = null;
+            bool isNativeRenderingAvailable = IsNativeVisualStylesRenderingAvailable;
+            themedForeColor = isNativeRenderingAvailable ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL) : defaultForeColor;
+            themedHoveredColor = isNativeRenderingAvailable ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT) : defaultHoveredColor;
+            themedDisabledColor = isNativeRenderingAvailable ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED) : defaultDisabledColor;
+            themedPressedColor = isNativeRenderingAvailable ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED) : defaultPressedColor;
+            cachedDefaultGlyphDisabled?.Dispose();
+            cachedDefaultGlyphDisabled = null;
+            cachedDefaultGlyphNormal?.Dispose();
+            cachedDefaultGlyphNormal = null;
+            cachedDefaultGlyphHovered?.Dispose();
+            cachedDefaultGlyphHovered = null;
+            defaultGlyphSize = Size.Empty;
         }
 
         private bool ShouldSerializeFont()
@@ -2043,6 +2042,25 @@ namespace KGySoft.WinForms.Controls
             {
                 selectionBorder.Dispose();
                 selectionBorder = null;
+            }
+        }
+
+        private Bitmap GetScaledDefaultGlyph(Icon icon)
+        {
+            try
+            {
+                Size desiredSize = this.ScaleSize(referenceDefaultGlyphSize);
+                Bitmap scaledDefaultGlyph = icon.ExtractNearestBitmap(desiredSize, PixelFormat.Format32bppArgb);
+                if (scaledDefaultGlyph.Width >= desiredSize.Width || desiredSize.Width < scaledDefaultGlyph.Width * 1.25f)
+                    return scaledDefaultGlyph;
+
+                var resizedDefaultGlyph = scaledDefaultGlyph.Resize(desiredSize);
+                scaledDefaultGlyph.Dispose();
+                return resizedDefaultGlyph;
+            }
+            finally
+            {
+                icon.Dispose();
             }
         }
 

@@ -295,7 +295,7 @@ namespace KGySoft.WinForms.Controls
                 if (currentSize != cachedSecurityShieldImageSize || cachedSecurityShieldImage == null)
                 {
                     cachedSecurityShieldImage?.Dispose();
-                    using var icon = Icons.SecurityShield;
+                    using var icon = Icons.SystemShield;
                     cachedSecurityShieldImage = icon.ExtractNearestBitmap(currentSize, PixelFormat.Format32bppArgb);
                     cachedSecurityShieldImageSize = currentSize;
                 }

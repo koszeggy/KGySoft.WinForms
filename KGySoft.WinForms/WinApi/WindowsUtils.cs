@@ -1,54 +1,51 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: WindowsUtils.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.Windows.Forms;
-using KGySoft.Reflection;
+
 using KGySoft.WinForms.Reflection;
+
+#endregion
 
 namespace KGySoft.WinForms.WinApi
 {
     internal static class WindowsUtils
     {
+        #region Fields
+
+        private static bool? isWin8OrLater;
         private static bool? isVistaOrLater;
         private static bool? isXpOrLater;
         private static bool? isComCtlV6Available;
+        private static Version? windowsVersion;
+
+        #endregion
+
+        #region Properties
 
         internal static bool IsVistaOrLater
-        {
-            get
-            {
-                if (isVistaOrLater.HasValue)
-                {
-                    return isVistaOrLater.Value;
-                }
+            => isVistaOrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 0, 5243);
 
-                OperatingSystem os = Environment.OSVersion;
-                if (os.Platform != PlatformID.Win32NT)
-                {
-                    isVistaOrLater = false;
-                    return false;
-                }
-
-                isVistaOrLater = os.Version >= new Version(6, 0, 5243);
-                return isVistaOrLater.Value;
-            }
-        }
+        internal static bool IsWindows8OrLater
+            => isWin8OrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 2, 9200);
 
         internal static bool IsWindowsXpOrLater
-        {
-            get
-            {
-                if (isXpOrLater.HasValue)
-                {
-                    return isXpOrLater.Value;
-                }
-
-                isXpOrLater = Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version >= new Version(5, 1, 2600);
-                return isXpOrLater.Value;
-            }
-        }
+            => isWin8OrLater ??= GetWindowsVersion() is Version version && version >= new Version(5, 1, 2600);
 
         /// <summary>
         /// Gets whether comctl32.dll V6 is available, without loading it explicitly.
@@ -82,5 +79,23 @@ namespace KGySoft.WinForms.WinApi
                 return isComCtlV6Available.Value;
             }
         }
+
+        #endregion
+
+        #region Methods
+
+        private static Version? GetWindowsVersion()
+        {
+            if (windowsVersion is not null)
+                return windowsVersion;
+            OperatingSystem osVer = Environment.OSVersion;
+            if (osVer.Platform != PlatformID.Win32NT)
+                return null;
+
+            windowsVersion = osVer.Version;
+            return windowsVersion;
+        }
+
+        #endregion
     }
 }
