@@ -1,11 +1,26 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: FadingPainterInternal.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+
 using KGySoft.Drawing;
 using KGySoft.WinForms.WinApi;
 
@@ -29,9 +44,10 @@ namespace KGySoft.WinForms.Controls
 
         #region Instance Fields
 
-        private Bitmap prevStateImage;
         private readonly Dictionary<long, int> speedCache = new Dictionary<long, int>();
         private readonly string className;
+
+        private Bitmap? prevStateImage;
         private DateTime lastEnableToggled;
 
         #endregion
@@ -42,10 +58,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Properties
 
-        internal static bool IsSupported
-        {
-            get { return WindowsUtils.IsVistaOrLater && Application.RenderWithVisualStyles; }
-        }
+        internal static bool IsSupported => WindowsUtils.IsVistaOrLater && Application.RenderWithVisualStyles;
 
         #endregion
 
@@ -56,27 +69,19 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets whether the fading painter is enabled.
         /// </summary>
-        protected override bool Enabled
-        {
-            get { return base.Enabled && Host.FadingAnimationOptions != FadingOptions.None; }
-        }
+        protected override bool Enabled => base.Enabled && Host.FadingAnimationOptions != FadingOptions.None;
 
         #endregion
 
         #region Private Properties
 
-        private ISupportsFadingInternal Host
-        {
-            get { return (ISupportsFadingInternal)Control; }
-        }
+        private ISupportsFadingInternal Host => (ISupportsFadingInternal)Control;
 
         #endregion
 
         #endregion
 
         #endregion
-
-        #region Construction and Destruction
 
         #region Constructors
 
@@ -88,26 +93,6 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region Explicit Disposing
-
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                if (prevStateImage != null)
-                {
-                    prevStateImage.Dispose();
-                    prevStateImage = null;
-                }
-            }
-
-            base.Dispose(disposing);
-        }
-
-        #endregion
-
-        #endregion
-
         #region Methods
 
         #region Internal Methods
@@ -115,8 +100,8 @@ namespace KGySoft.WinForms.Controls
         internal override void PaintCore(PaintEventArgs e, ControlAppearanceState newState)
         {
             bool isStandardChangeOnly = (Host.FadingAnimationOptions & FadingOptions.StandardEffects) != FadingOptions.None
-                && !newState.EqualsWithOptions(State, FadingOptions.StandardEffects)
-                && newState.EqualsWithOptions(State, ControlAppearanceState.NonStandardChanges);
+                    && !newState.EqualsWithOptions(State, FadingOptions.StandardEffects)
+                    && newState.EqualsWithOptions(State, ControlAppearanceState.NonStandardChanges);
 
             // performing base paint if regular changes are required
             if ((Host.FadingAnimationOptions & FadingOptions.AnyChange) == FadingOptions.None)
@@ -128,14 +113,14 @@ namespace KGySoft.WinForms.Controls
                 }
 
                 // Bug workaround: When disabling a button, command link or enabling/disabling a label, a further paint is immediately triggered and UxTheme.BufferedPaintRenderAnimation
-                // fails to report that animating is in progress. Therefore here maskig double triggered enabling/disabling to avoid a flickering effect
+                // fails to report that animating is in progress. Therefore, here masking double triggered enabling/disabling to avoid a flickering effect
                 if (Equals(newState, State) && lastEnableToggled != default(DateTime) && DateTime.UtcNow - lastEnableToggled < disablingMaskingTime)
                 {
                     lastEnableToggled = default(DateTime);
                     return;
                 }
 
-                if (isStandardChangeOnly && State.Enabled != newState.Enabled)
+                if (isStandardChangeOnly && State!.Enabled != newState.Enabled)
                     lastEnableToggled = DateTime.UtcNow;
                 else
                     lastEnableToggled = default(DateTime);
@@ -182,13 +167,13 @@ namespace KGySoft.WinForms.Controls
                         bg.Render(graphicsImage);
                     }
 
-                    // if no actual change or no speed is set rendering result fastly (maybe just Invalidate was called)
+                    // if no actual change or no speed is set rendering result quickly (maybe just Invalidate was called)
                     bool equal = false;
                     if (State == null || (State.Visible == newState.Visible && (prevStateImage == null || (equal = prevStateImage.EqualsByContent(newStateImage)))
-                        || prevStateImage.Size != newStateImage.Size || (Host.FadingAnimationDefaultSpeed <= 0 && !isStandardChangeOnly)))
+                            || prevStateImage?.Size != newStateImage.Size || (Host.FadingAnimationDefaultSpeed <= 0 && !isStandardChangeOnly)))
                     {
                         // Bug workaround: When disabling a button or enabling/disabling a label, a further paint is immediately triggered and UxTheme.BufferedPaintRenderAnimation
-                        // fails to report that animating is in progress. Therefore here maskig double triggered enabling/disabling to avoid a flickering effect
+                        // fails to report that animating is in progress. Therefore, here masking double triggered enabling/disabling to avoid a flickering effect
                         if (equal && lastEnableToggled != default(DateTime) && DateTime.UtcNow - lastEnableToggled < disablingMaskingTime)
                         {
                             lastEnableToggled = default(DateTime);
@@ -202,8 +187,7 @@ namespace KGySoft.WinForms.Controls
                             newStateImage.Dispose();
                         else
                         {
-                            if (prevStateImage != null)
-                                prevStateImage.Dispose();
+                            prevStateImage?.Dispose();
 
                             prevStateImage = newStateImage;
                         }
@@ -231,32 +215,26 @@ namespace KGySoft.WinForms.Controls
             IntPtr hdc = e.Graphics.GetHdc();
             try
             {
-                IntPtr hdcFrom, hdcTo;
-                hbpAnimation = UxTheme.BeginBufferedAnimation(Control.Handle, hdc, ref rc, BP_BUFFERFORMAT.BPBF_COMPATIBLEBITMAP, IntPtr.Zero, ref animParams, out hdcFrom, out hdcTo);
+                hbpAnimation = UxTheme.BeginBufferedAnimation(Control.Handle, hdc, ref rc, BP_BUFFERFORMAT.BPBF_COMPATIBLEBITMAP, IntPtr.Zero, ref animParams, out IntPtr hdcFrom, out IntPtr hdcTo);
                 if (hbpAnimation != IntPtr.Zero)
                 {
                     if (hdcFrom != IntPtr.Zero)
                     {
-                        using (Graphics g = Graphics.FromHdc(hdcFrom))
-                        {
-                            // is previous state was invisible, letting the control paint
-                            if (base.State != null && !State.Visible)
-                                Host.PaintState(State, new PaintEventArgs(g, Control.ClientRectangle));
-                            else
-                                g.DrawImage(prevStateImage, Control.ClientRectangle);
-                        }
+                        using Graphics g = Graphics.FromHdc(hdcFrom);
+
+                        // if previous state was invisible, letting the control paint
+                        if (State?.Visible == false)
+                            Host.PaintState(State, new PaintEventArgs(g, Control.ClientRectangle));
+                        else
+                            g.DrawImage(prevStateImage, Control.ClientRectangle);
                     }
                     if (hdcTo != IntPtr.Zero)
                     {
-                        using (Graphics g = Graphics.FromHdc(hdcTo))
-                        {
-                            g.DrawImage(newStateImage, Control.ClientRectangle);
-                        }
+                        using Graphics g = Graphics.FromHdc(hdcTo);
+                        g.DrawImage(newStateImage, Control.ClientRectangle);
                     }
 
-                    if (prevStateImage != null)
-                        prevStateImage.Dispose();
-
+                    prevStateImage?.Dispose();
                     prevStateImage = newStateImage;
                     State = newState;
                     UxTheme.EndBufferedAnimation(hbpAnimation, true);
@@ -268,12 +246,10 @@ namespace KGySoft.WinForms.Controls
                 e.Graphics.ReleaseHdc(hdc);
             }
 
-            // fallbacking
+            // fallback
             if (hbpAnimation == IntPtr.Zero)
             {
-                if (prevStateImage != null)
-                    prevStateImage.Dispose();
-
+                prevStateImage?.Dispose();
                 prevStateImage = newStateImage;
                 State = newState;
                 e.Graphics.DrawImage(newStateImage, Control.ClientRectangle);
@@ -283,6 +259,20 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Protected Methods
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (prevStateImage != null)
+                {
+                    prevStateImage.Dispose();
+                    prevStateImage = null;
+                }
+            }
+
+            base.Dispose(disposing);
+        }
 
         /// <summary>
         /// Stops all animations for the host control.
@@ -311,12 +301,12 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected override int GetSpeed(ControlAppearanceState prevState, ControlAppearanceState newState)
         {
-            if (newState == null || prevState == null || !WindowsUtils.IsVistaOrLater)
+            if (!WindowsUtils.IsVistaOrLater)
                 return base.GetSpeed(prevState, newState);
 
             // not considering color change because color may change with these events (enabled-disabled)
             bool isStandardChangeOnly = !newState.EqualsWithOptions(State, FadingOptions.StandardEffects)
-                && newState.EqualsWithOptions(State, ControlAppearanceState.NonStandardChanges);
+                    && newState.EqualsWithOptions(State, ControlAppearanceState.NonStandardChanges);
 
             if (!isStandardChangeOnly)
             {
@@ -324,8 +314,7 @@ namespace KGySoft.WinForms.Controls
                 return isEnabledChangeOnly ? base.GetSpeed(prevState, newState) : 0;
             }
 
-            int speed;
-            if (speedCache.TryGetValue(((long)newState.SystemPartId << 32) | (prevState.SystemStateId << 16) | newState.SystemStateId, out speed))
+            if (speedCache.TryGetValue(((long)newState.SystemPartId << 32) | (uint)(prevState.SystemStateId << 16) | (uint)newState.SystemStateId, out int speed))
                 return speed;
 
             IntPtr hTheme = UxTheme.OpenThemeData(Control.Handle, className);
@@ -337,7 +326,7 @@ namespace KGySoft.WinForms.Controls
             if (speed == 0)
                 UxTheme.GetThemeTransitionDuration(hTheme, newState.SystemPartId, newState.SystemStateId, prevState.SystemStateId, Constants.TMT_TRANSITIONDURATIONS, out speed);
 
-            speedCache[((long)newState.SystemPartId << 32) | (prevState.SystemStateId << 16) | newState.SystemStateId] = speed;
+            speedCache[((long)newState.SystemPartId << 32) | (uint)(prevState.SystemStateId << 16) | (uint)newState.SystemStateId] = speed;
             return speed;
         }
 
@@ -348,13 +337,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="newState">New state.</param>
         /// <returns><see langword="true"/>, if states are equal; otherwise, <see langword="false"/>.</returns>
         protected override bool StateEquals(ControlAppearanceState prevState, ControlAppearanceState newState)
-        {
-            Debug.Assert(newState != null);
-            if (prevState == null)
-                return false;
-
-            return prevState.EqualsWithOptions(newState, Host.FadingAnimationOptions);
-        }
+            => prevState.EqualsWithOptions(newState, Host.FadingAnimationOptions);
 
         #endregion
 

@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ControlAppearanceState.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System.Drawing;
 using System.Windows.Forms;
@@ -58,7 +73,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets the text that should be painted for the control.
         /// </summary>
-        public string Text { get; internal set; }
+        public string? Text { get; internal set; }
 
         /// <summary>
         /// Gets whether the control should be painted in a visible state.
@@ -80,20 +95,14 @@ namespace KGySoft.WinForms.Controls
 
         #region Internal Properties
 
-        internal int SystemPartId
-        {
-            get { return systemPartId; }
-        }
+        internal int SystemPartId => systemPartId;
 
-        internal int SystemStateId
-        {
-            get { return systemStateId; }
-        }
+        internal int SystemStateId => systemStateId;
 
         /// <summary>
         /// Gets or sets a custom state that may help to indicate any non-standard change
         /// </summary>
-        internal object CustomState { get; set; }
+        internal object? CustomState { get; set; }
 
         #endregion
 
@@ -113,15 +122,16 @@ namespace KGySoft.WinForms.Controls
 
         #region Public Methods
 
+        /// <inheritdoc />
         public override int GetHashCode()
         {
             return systemStateId.GetHashCode();
         }
 
-        public override bool Equals(object obj)
+        /// <inheritdoc />
+        public override bool Equals(object? obj)
         {
-            ControlAppearanceState other = obj as ControlAppearanceState;
-            if (other == null)
+            if (obj is not ControlAppearanceState other)
                 return false;
 
             return systemStateId == other.systemStateId
@@ -138,16 +148,14 @@ namespace KGySoft.WinForms.Controls
                 && Equals(CustomState, other.CustomState);
         }
 
-        public override string ToString()
-        {
-            return string.Format("Part: {0}; State: {1}", SystemPartId, SystemStateId);
-        }
+        /// <inheritdoc />
+        public override string ToString() => $"Part: {SystemPartId}; State: {SystemStateId}";
 
         #endregion
 
         #region Internal Methods
 
-        internal bool EqualsWithOptions(ControlAppearanceState other, FadingOptions options)
+        internal bool EqualsWithOptions(ControlAppearanceState? other, FadingOptions options)
         {
             if (other == null || systemPartId != other.systemPartId)
                 return false;

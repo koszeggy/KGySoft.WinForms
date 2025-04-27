@@ -165,7 +165,7 @@ namespace KGySoft.WinForms.WinApi
         /// <param name="lParam">Specifies additional message-specific information.</param>
         /// <returns>The return value specifies the result of the message processing; it depends on the message sent.</returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        internal static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, string lParam);
+        internal static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, string? lParam);
 
         /// <summary>
         /// The SendMessage function sends the specified message to a window or windows.

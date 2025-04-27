@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: FadingPainter.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Drawing;
@@ -19,7 +34,6 @@ namespace KGySoft.WinForms.Controls
 
         private ISupportsFading<TState> host;
         private bool disposed;
-        private TState prevState;
         private bool operating;
 
         #endregion
@@ -32,11 +46,7 @@ namespace KGySoft.WinForms.Controls
         /// Gets or sets the stored last state explicitly. Setting this property does not
         /// invalidate the host control.
         /// </summary>
-        public TState State
-        {
-            get { return prevState; }
-            set { prevState = value; }
-        }
+        public TState? State { get; set; }
 
         #endregion
 
@@ -45,18 +55,12 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets the host control.
         /// </summary>
-        protected Control Control
-        {
-            get { return (Control)host; }
-        }
+        protected Control Control => (Control)host;
 
         /// <summary>
         /// Gets whether the fading painter is enabled.
         /// </summary>
-        protected virtual bool Enabled
-        {
-            get { return operating && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported; }
-        }
+        protected virtual bool Enabled => operating && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported;
 
         #endregion
 
@@ -71,7 +75,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         /// <param name="host">The host control that implements <see cref="ISupportsFading{TState}"/>.</param>
         /// <param name="initialState">Initial state of the host control.</param>
-        public FadingPainter(ISupportsFading<TState> host, TState initialState)
+        public FadingPainter(ISupportsFading<TState> host, TState? initialState)
         {
             if (host == null)
                 throw new ArgumentNullException("host");
@@ -98,12 +102,17 @@ namespace KGySoft.WinForms.Controls
 
         #region Explicit Disposing
 
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Disposes the resources used by the <see cref="FadingPainter{TState}"/> class.
+        /// </summary>
+        /// <param name="disposing"><see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing)
         {
             if (disposed)
@@ -118,10 +127,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             if (disposing)
-            {
-                host = null;
-            }
-
+                host = null!;
             disposed = true;
         }
 
@@ -184,7 +190,7 @@ namespace KGySoft.WinForms.Controls
 
         internal virtual void PaintCore(PaintEventArgs e, TState newState)
         {
-            int speed = !StateEquals(prevState, newState) ? GetSpeed(prevState, newState) : 0;
+            int speed = !StateEquals(State ??= host.State, newState) ? GetSpeed(State, newState) : 0;
             if (speed < 0)
                 speed = 0;
 
@@ -235,14 +241,11 @@ namespace KGySoft.WinForms.Controls
                     //    }
                     //}
 
-
-
-
                     if (hdcFrom != IntPtr.Zero)
                     {
                         using (Graphics g = Graphics.FromHdc(hdcFrom))
                         {
-                            host.PaintState(prevState, new PaintEventArgs(g, e.ClipRectangle));
+                            host.PaintState(State ?? host.State, new PaintEventArgs(g, e.ClipRectangle));
                             //g.DrawImage(prevStateImage, Control.ClientRectangle);
                             //prevStateImage.Save(@"d:\temp\"+DateTime.UtcNow.ToFileTime()+".png", System.Drawing.Imaging.ImageFormat.Png);
                         }
@@ -257,7 +260,7 @@ namespace KGySoft.WinForms.Controls
                         }
                     }
 
-                    prevState = newState;
+                    State = newState;
                     UxTheme.EndBufferedAnimation(hbpAnimation, true);
                 }
             }
@@ -270,7 +273,7 @@ namespace KGySoft.WinForms.Controls
             Size clientSize = Control.ClientSize;
             if (hbpAnimation == IntPtr.Zero && clientSize.Width > 0 && clientSize.Height > 0)
             {
-                prevState = newState;
+                State = newState;
                 using (BufferedGraphicsContext context = new BufferedGraphicsContext())
                 {
                     using (BufferedGraphics bg = context.Allocate(e.Graphics, new Rectangle(Point.Empty, clientSize)))
@@ -291,16 +294,22 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
+        /// <summary>
+        /// Hooks the events of the host control.
+        /// </summary>
         protected virtual void HookEvents()
         {
-            Control.SystemColorsChanged += new EventHandler(Control_SystemColorsChanged);
-            Control.SizeChanged += new EventHandler(Control_SizeChanged);
+            Control.SystemColorsChanged += Control_SystemColorsChanged;
+            Control.SizeChanged += Control_SizeChanged;
         }
 
+        /// <summary>
+        /// Unhooks the events of the host control.
+        /// </summary>
         protected virtual void UnhookEvents()
         {
             Control.SystemColorsChanged -= Control_SystemColorsChanged;
-            Control.SizeChanged -= new EventHandler(Control_SizeChanged);
+            Control.SizeChanged -= Control_SizeChanged;
         }
 
         /// <summary>
@@ -349,10 +358,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="prevState">Previous state.</param>
         /// <param name="newState">New state.</param>
         /// <returns><see langword="true"/>, if states are equal; otherwise, <see langword="false"/>.</returns>
-        protected virtual bool StateEquals(TState prevState, TState newState)
-        {
-            return Equals(prevState, newState);
-        }
+        protected virtual bool StateEquals(TState prevState, TState newState) => Equals(prevState, newState);
 
         /// <summary>
         /// Stops all animations for the host control.
@@ -365,14 +371,14 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region Private Methods
+        #region Event Handlers
 
-        void Control_SystemColorsChanged(object sender, EventArgs e)
+        void Control_SystemColorsChanged(object? sender, EventArgs e)
         {
             OnThemeChanged();
         }
 
-        void Control_SizeChanged(object sender, EventArgs e)
+        void Control_SizeChanged(object? sender, EventArgs e)
         {
             StopAnimations();
             Control.Invalidate();
