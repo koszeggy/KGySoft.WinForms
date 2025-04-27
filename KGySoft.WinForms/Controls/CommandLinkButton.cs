@@ -509,7 +509,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets disabled fore color. Has effect only when FlatStyle is not System.")]
         public Color DisabledForeColor
         {
-            get => !disabledBackColor.IsEmpty ? disabledBackColor
+            get => !disabledForeColor.IsEmpty ? disabledForeColor
                 : !IsThemed ? SystemColors.GrayText
                 : ThemedDisabledColor;
             set
@@ -1854,29 +1854,38 @@ namespace KGySoft.WinForms.Controls
         {
             Rectangle bounds = GetImageBounds(e);
             var state = e.State;
+
+            // default glyph when visual styles are available
             if (IsNativeVisualStylesRenderingAvailable && !isElevated && image == null && useDefaultGlyph)
             {
-                if (RightToLeft != RightToLeft.Yes)
-                {
-                    var renderer = new VisualStyleRenderer(className, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId);
-                    renderer.DrawBackground(e.Graphics, bounds);
-                    return;
-                }
+                bool isSimpleArrow = WindowsUtils.IsWindows8OrLater;
+                bool isRightToLeft = RightToLeft == RightToLeft.Yes;
+                bool isCustomColorArrow = isSimpleArrow
+                    && (!state.Enabled && DisabledForeColor != ThemedDisabledColor
+                    || state.Enabled && (ForeColor != ThemedForeColor || HighlightTextColor != ThemedHoveredColor || PressedTextColor != ThemedPressedColor));
 
-                // RTL only for Windows 8 and later: manually drawing the mirrored glyph
-                if (WindowsUtils.IsWindows8OrLater)
+                // only Windows 8 and later: manually drawing the glyph if it has custom colors or is mirrored
+                if (isSimpleArrow && (isRightToLeft || isCustomColorArrow))
                 {
-                    var color = !state.Enabled ? ThemedDisabledColor
-                        : state.Pressed ? ThemedPressedColor
-                        : state.Hovered ? ThemedHoveredColor
-                        : ThemedForeColor;
+                    var color = !state.Enabled ? DisabledForeColor
+                        : state.Pressed ? PressedTextColor
+                        : state.Hovered ? HighlightTextColor
+                        : ForeColor;
                     float unit = bounds.Width / 20f;
                     using Pen pen = new Pen(color, Math.Max(2, 1.5f * unit));
                     var y = bounds.Y + 12 * unit;
-                    var x1 = bounds.X + 7 * unit;
+                    var x1 = bounds.X + (isRightToLeft ? 7 : 12) * unit;
+                    var x2 = bounds.X + (isRightToLeft ? 1 : 18) * unit;
                     e.Graphics.DrawLine(pen, bounds.X + unit, y, bounds.X + 18 * unit, y);
-                    e.Graphics.DrawLines(pen, new PointF[] { new(x1, bounds.Y + 6 * unit), new(bounds.X + unit, y), new(x1, bounds.Y + 18 * unit) });
+                    e.Graphics.DrawLines(pen, new PointF[] { new(x1, bounds.Y + 6 * unit), new(x2, y), new(x1, bounds.Y + 18 * unit) });
 
+                    return;
+                }
+
+                if (!isRightToLeft)
+                {
+                    var renderer = new VisualStyleRenderer(className, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId);
+                    renderer.DrawBackground(e.Graphics, bounds);
                     return;
                 }
             }
