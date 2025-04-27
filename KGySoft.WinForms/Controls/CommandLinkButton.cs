@@ -310,10 +310,11 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the alignment of the image on the command link button control.
+        /// Gets or sets the alignment of the image on the command link button control. A Top alignment attempts to align the image to the middle of the first row of <see cref="Text"/>.
         /// </summary>
         [DefaultValue(ContentAlignment.TopLeft)] // "overridden" only because of default value
-        [Description("Gets or sets the alignment of the image on the command link button control. Has effect only when FlatStyle is not System.")]
+        [Description("Gets or sets the alignment of the image on the command link button control. Has effect only when FlatStyle is not System. "
+            + "A Top alignment attempts to align the image to the middle of the first row of Text.")]
         public new ContentAlignment ImageAlign
         {
             get => base.ImageAlign;
@@ -1998,6 +1999,7 @@ namespace KGySoft.WinForms.Controls
         private void ResetTheme()
         {
             isThemed = null;
+            base.Font = Font;
 
             // Not allowing caching the themed fore color if starting with non-themed rendering. See more details in ThemedForeColor.
             cacheThemedForeColor ??= IsThemed;
