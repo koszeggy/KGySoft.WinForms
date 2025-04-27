@@ -55,7 +55,8 @@ namespace KGySoft.WinForms.Controls
         private static readonly Size referenceThemedGlyphSize = new Size(20, 20);
         private static readonly Size referenceNonThemedGlyphSize = new Size(17, 17);
 
-        private static Bitmap noGlyph;
+        private static Bitmap? noGlyph;
+        private static Font? defaultNonThemedTextFont;
 
         #endregion
 
@@ -80,9 +81,10 @@ namespace KGySoft.WinForms.Controls
         private GraphicsPath outerBorder;
         private GraphicsPath innerBorder;
         private GraphicsPath selectionBorder;
-        private Font themedFontLarge;
-        private Font themedFontSmall;
-        private Font descriptionFont;
+        private Font? themedFontLarge;
+        private Font? themedFontSmall;
+        private Font? textFont;
+        private Font? descriptionFont;
         private Image? currentImage;
         private Image? disabledImage;
         private Image? cachedSecurityShieldImage;
@@ -93,11 +95,11 @@ namespace KGySoft.WinForms.Controls
         private Size cachedSecurityShieldImageSize;
         private Size defaultGlyphSize;
 
+        private bool? cacheThemedForeColor;
         private Color themedForeColor;
         private Color themedDisabledColor;
         private Color themedHoveredColor;
         private Color themedPressedColor;
-
         private Color foreColor;
         private Color descriptionColor;
         private Color highlightTextColor;
@@ -156,6 +158,8 @@ namespace KGySoft.WinForms.Controls
         /// NOTE: it does not mean that visual styles are actually used (use <see cref="IsNativeVisualStylesRenderingAvailable"/> to check that).
         /// </summary>
         private static bool IsNativelySupported => WindowsUtils.IsVistaOrLater && WindowsUtils.IsComCtlV6Available;
+
+        private static Font DefaultNonThemedTextFont => defaultNonThemedTextFont ??= new Font(SystemFonts.DialogFont, FontStyle.Bold);
 
         #endregion
 
@@ -324,10 +328,13 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the font of the text displayed by the control. Has effect only when FlatStyle is not System.")]
         public override Font Font
         {
-            get { return base.Font; }
+            get => textFont ?? DefaultTextFont;
             set
             {
+                if (ReferenceEquals(base.Font, value))
+                    return;
                 ResetSizeCache();
+                textFont = value;
                 base.Font = value ?? DefaultTextFont;
             }
         }
@@ -337,13 +344,13 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("CommandLinkButton")]
         [Description("Gets or sets the font of the description displayed by the control. Has effect only when FlatStyle is not System.")]
-        public Font DescriptionFont
+        public Font? DescriptionFont
         {
-            get { return descriptionFont; }
+            get => descriptionFont ?? DefaultDescriptionFont;
             set
             {
                 ResetSizeCache();
-                descriptionFont = value ?? DefaultDescriptionFont;
+                descriptionFont = value;
                 Invalidate();
                 if (AutoSize)
                     PerformLayout();
@@ -358,7 +365,7 @@ namespace KGySoft.WinForms.Controls
         {
             get => !foreColor.IsEmpty ? foreColor
                 : !IsThemed ? base.ForeColor
-                : themedForeColor;
+                : ThemedForeColor;
             set
             {
                 if (foreColor == value)
@@ -378,7 +385,7 @@ namespace KGySoft.WinForms.Controls
         {
             get => !descriptionColor.IsEmpty ? descriptionColor
                 : !IsThemed ? base.ForeColor
-                : themedForeColor;
+                : ThemedForeColor;
             set
             {
                 if (descriptionColor == value)
@@ -397,7 +404,7 @@ namespace KGySoft.WinForms.Controls
         {
             get => !highlightTextColor.IsEmpty ? highlightTextColor
                 : !IsThemed ? base.ForeColor
-                : themedHoveredColor;
+                : ThemedHoveredColor;
             set
             {
                 if (highlightTextColor == value)
@@ -417,7 +424,7 @@ namespace KGySoft.WinForms.Controls
         {
             get => !highlightTextColor.IsEmpty ? highlightTextColor
                 : !IsThemed ? base.ForeColor
-                : themedHoveredColor;
+                : ThemedHoveredColor;
             set
             {
                 if (highlightDescriptionColor == value)
@@ -437,7 +444,7 @@ namespace KGySoft.WinForms.Controls
         {
             get => !pressedTextColor.IsEmpty ? pressedTextColor
                 : !IsThemed ? base.ForeColor
-                : themedPressedColor;
+                : ThemedPressedColor;
             set
             {
                 if (pressedTextColor == value)
@@ -457,7 +464,7 @@ namespace KGySoft.WinForms.Controls
         {
             get => !pressedTextColor.IsEmpty ? pressedTextColor
                 : !IsThemed ? base.ForeColor
-                : themedPressedColor;
+                : ThemedPressedColor;
             set
             {
                 if (pressedDescriptionColor == value)
@@ -477,7 +484,7 @@ namespace KGySoft.WinForms.Controls
         {
             get => !disabledBackColor.IsEmpty ? disabledBackColor
                 : !IsThemed ? SystemColors.GrayText
-                : themedDisabledColor;
+                : ThemedDisabledColor;
             set
             {
                 if (disabledForeColor == value)
@@ -643,9 +650,7 @@ namespace KGySoft.WinForms.Controls
             get
             {
                 if (!IsThemed)
-                {
-                    return new Font(SystemFonts.DialogFont, FontStyle.Bold);
-                }
+                    return DefaultNonThemedTextFont;
 
                 if (themedFontLarge != null)
                     return themedFontLarge;
@@ -666,9 +671,7 @@ namespace KGySoft.WinForms.Controls
             get
             {
                 if (!IsThemed)
-                {
                     return SystemFonts.DialogFont;
-                }
 
                 if (themedFontSmall != null)
                     return themedFontSmall;
@@ -842,6 +845,73 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        private Color ThemedForeColor
+        {
+            get
+            {
+                if (themedForeColor.IsEmpty)
+                {
+                    if (!IsNativeVisualStylesRenderingAvailable)
+                        return defaultForeColor;
+
+                    // ISSUE: When changing from high contrast to normal theme, the VisualStyleRenderer.GetColor(ColorProperty.TextColor) keeps returning
+                    // the high contrast SystemColors.ControlText color for a while. Skipping the caching until returning from OnSystemColorsChanged or
+                    // invalidating in the first Paint does not help. This is still not optimal, because the appearance can be invalid until the user hovers the button.
+                    var color = GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL);
+                    if (cacheThemedForeColor != true)
+                        return color;
+                    themedForeColor = color;
+                }
+
+                return themedForeColor;
+            }
+        }
+
+        private Color ThemedHoveredColor
+        {
+            get
+            {
+                if (themedHoveredColor.IsEmpty)
+                {
+                    if (!IsNativeVisualStylesRenderingAvailable)
+                        return defaultHoveredColor;
+                    themedHoveredColor = GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT);
+                }
+
+                return themedHoveredColor;
+            }
+        }
+
+        private Color ThemedPressedColor
+        {
+            get
+            {
+                if (themedPressedColor.IsEmpty)
+                {
+                    if (!IsNativeVisualStylesRenderingAvailable)
+                        return defaultPressedColor;
+                    themedPressedColor = GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED);
+                }
+
+                return themedPressedColor;
+            }
+        }
+
+        private Color ThemedDisabledColor
+        {
+            get
+            {
+                if (themedDisabledColor.IsEmpty)
+                {
+                    if (!IsNativeVisualStylesRenderingAvailable)
+                        return defaultDisabledColor;
+                    themedDisabledColor = GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED);
+                }
+
+                return themedDisabledColor;
+            }
+        }
+
         /// <summary>
         /// The size of every non-text content, including image, borders and padding.
         /// </summary>
@@ -908,6 +978,7 @@ namespace KGySoft.WinForms.Controls
 
         protected override void Dispose(bool disposing)
         {
+            textFont = null; // disposed by owner, if needed
             descriptionFont = null; // disposed by owner, if needed
 
             if (disposing)
@@ -1044,8 +1115,8 @@ namespace KGySoft.WinForms.Controls
                 if (!String.IsNullOrEmpty(description))
                 {
                     descSize = gdiPlusTextRendering
-                       ? g.MeasureString(description, descriptionFont, proposedTextSize, sf).Ceiling()
-                       : TextRenderer.MeasureText(g, description, descriptionFont, proposedTextSize, formatFlags);
+                       ? g.MeasureString(description, DescriptionFont, proposedTextSize, sf).Ceiling()
+                       : TextRenderer.MeasureText(g, description, DescriptionFont, proposedTextSize, formatFlags);
                 }
 
                 bool useTheming = UsesTheming;
@@ -1087,6 +1158,8 @@ namespace KGySoft.WinForms.Controls
             ResetTheme();
             OnFlatStyleChanged(false, false);
             CheckStyles();
+            if (AutoSize)
+                PerformLayout();
         }
 
         protected override void WndProc(ref Message m)
@@ -1510,8 +1583,8 @@ namespace KGySoft.WinForms.Controls
             {
                 Size size = new Size(proposedSize.Width, proposedSize.Height - textSize.Height);
                 descSize = gdiPlusTextRendering
-                    ? e.Graphics.MeasureString(description, descriptionFont, size, sf).ToSize()
-                    : TextRenderer.MeasureText(e.Graphics, description, descriptionFont, size, formatFlags);
+                    ? e.Graphics.MeasureString(description, DescriptionFont, size, sf).ToSize()
+                    : TextRenderer.MeasureText(e.Graphics, description, DescriptionFont, size, formatFlags);
             }
 
             Size combinedSize = new Size(proposedSize.Width, Math.Min(proposedSize.Height, textSize.Height + descSize.Height));
@@ -1541,11 +1614,11 @@ namespace KGySoft.WinForms.Controls
                 if (gdiPlusTextRendering)
                 {
                     using Brush b = new SolidBrush(descColor);
-                    e.Graphics.DrawString(description, descriptionFont, b, rectangle, sf);
+                    e.Graphics.DrawString(description, DescriptionFont, b, rectangle, sf);
                 }
                 else
                 {
-                    TextRenderer.DrawText(e.Graphics, description, descriptionFont, rectangle, descColor, formatFlags);
+                    TextRenderer.DrawText(e.Graphics, description, DescriptionFont, rectangle, descColor, formatFlags);
                 }
             }
 
@@ -1800,10 +1873,10 @@ namespace KGySoft.WinForms.Controls
                 // RTL only for Windows 8 and later: manually drawing the mirrored glyph
                 if (WindowsUtils.IsWindows8OrLater)
                 {
-                    var color = !state.Enabled ? themedDisabledColor
-                        : state.Pressed ? themedPressedColor
-                        : state.Hovered ? themedHoveredColor
-                        : themedForeColor;
+                    var color = !state.Enabled ? ThemedDisabledColor
+                        : state.Pressed ? ThemedPressedColor
+                        : state.Hovered ? ThemedHoveredColor
+                        : ThemedForeColor;
                     float unit = bounds.Width / 20f;
                     using Pen pen = new Pen(color, Math.Max(2, 1.5f * unit));
                     var y = bounds.Y + 12 * unit;
@@ -1932,14 +2005,10 @@ namespace KGySoft.WinForms.Controls
 
         private void ResetTheme()
         {
-            Font = DefaultTextFont;
-            DescriptionFont = DefaultDescriptionFont;
             isThemed = null;
-            bool isNativeRenderingAvailable = IsNativeVisualStylesRenderingAvailable;
-            themedForeColor = isNativeRenderingAvailable ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL) : defaultForeColor;
-            themedHoveredColor = isNativeRenderingAvailable ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT) : defaultHoveredColor;
-            themedDisabledColor = isNativeRenderingAvailable ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED) : defaultDisabledColor;
-            themedPressedColor = isNativeRenderingAvailable ? GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED) : defaultPressedColor;
+
+            // Not allowing caching the themed fore color if starting with non-themed rendering. See more details in ThemedForeColor.
+            cacheThemedForeColor ??= IsThemed;
             cachedDefaultGlyphDisabled?.Dispose();
             cachedDefaultGlyphDisabled = null;
             cachedDefaultGlyphNormal?.Dispose();
@@ -1949,15 +2018,8 @@ namespace KGySoft.WinForms.Controls
             defaultGlyphSize = Size.Empty;
         }
 
-        private bool ShouldSerializeFont()
-        {
-            return !Equals(Font, DefaultTextFont);
-        }
-
-        private bool ShouldSerializeDescriptionFont()
-        {
-            return !Equals(DescriptionFont, DefaultDescriptionFont);
-        }
+        private bool ShouldSerializeFont() => textFont != null;
+        private bool ShouldSerializeDescriptionFont() => descriptionFont != null;
 
         private bool ShouldSerializeForeColor()
         {
