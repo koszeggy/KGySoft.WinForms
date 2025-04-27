@@ -64,6 +64,13 @@ namespace KGySoft.WinForms.Controls
             return GetScale(control.Handle);
         }
 
+        internal static PointF GetScale(this Graphics graphics)
+        {
+            if (graphics == null)
+                throw new ArgumentNullException(nameof(graphics));
+            return new PointF(graphics.DpiX / 96f, graphics.DpiY / 96f);
+        }
+
         internal static int PerMonitorScale(this Control control, int value)
         {
             if (control == null)
@@ -86,6 +93,9 @@ namespace KGySoft.WinForms.Controls
 
         internal static Size Scale(this Size size, PointF scale) =>
             Size.Round(ScaleF(size, scale));
+
+        internal static int Scale(this int size, float scale) =>
+            (int)Math.Round(size * scale);
 
         #endregion
 

@@ -52,7 +52,8 @@ namespace KGySoft.WinForms.Controls
         private static readonly Color selectedFrameColor = Color.FromArgb(64, 0, 204, 255);
         private static readonly Color selectedFrameColorAlternative = Color.FromArgb(192, 0, 204, 255);
         private static readonly Size referenceElevatedIconSize = new Size(16, 16);
-        private static readonly Size referenceDefaultGlyphSize = new Size(20, 20);
+        private static readonly Size referenceThemedGlyphSize = new Size(20, 20);
+        private static readonly Size referenceNonThemedGlyphSize = new Size(17, 17);
 
         private static Bitmap noGlyph;
 
@@ -846,12 +847,13 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private Size BordersAndPadding => new(HorizontalPadding, VerticalPadding);
         private int HorizontalPadding => (HorizontalBasePadding << 1) + (ImageAlign.AnyCenter() ? 0 : ImagePadding + ImageSize.Width + ImageTextMargin);
-        private int HorizontalBasePadding => base.FlatStyle == FlatStyle.Standard && !IsThemed || base.FlatStyle == FlatStyle.Popup ? 3 : 2;
+        private int HorizontalBasePadding => UsesTheming ? 2 : 3;
         private int VerticalPadding => VerticalBasePadding << 1;
-        private int VerticalBasePadding => base.FlatStyle == FlatStyle.Standard && !IsThemed || base.FlatStyle == FlatStyle.Popup ? 6 : 10;
+        private int VerticalBasePadding => UsesTheming ? 10 : 6;
 
-        private int ImagePadding => base.FlatStyle == FlatStyle.Standard && !IsThemed || base.FlatStyle == FlatStyle.Popup ? 2 : 5;
-        private int ImageTextMargin => 1;
+        private bool UsesTheming => IsThemed && base.FlatStyle == FlatStyle.Standard;
+        private int ImagePadding => UsesTheming ? 5 : 3;
+        private int ImageTextMargin => UsesTheming ? 1 : 4;
 
         private Size ImageSize => isElevated ? SecurityShieldImage.Size // note: cachedSecurityShieldImageSize is the scaled reference size, not necessarily the actual extracted size
             : base.Image != null ? base.Image.Size
@@ -1046,18 +1048,11 @@ namespace KGySoft.WinForms.Controls
                        : TextRenderer.MeasureText(g, description, descriptionFont, proposedTextSize, formatFlags);
                 }
 
-                preferredSize = new Size(Math.Max(textSize.Width, descSize.Width), textSize.Height + (descSize.Height > 0 ? descSize.Height + 1 : 0)) + padding;
-                if (!IsThemed && base.FlatStyle == FlatStyle.Standard || base.FlatStyle == FlatStyle.Popup)
-                    preferredSize.Height++;
+                bool useTheming = UsesTheming;
+                preferredSize = new Size(Math.Max(textSize.Width, descSize.Width), textSize.Height + (descSize.Height > 0 ? descSize.Height + (useTheming ? 1 : 2) : 0)) + padding;
 
                 // HorizontalPadding already contains image width. Height is calculated here.
-                int preferredImageHeight = 0;
-                if (base.Image != null)
-                    preferredImageHeight = base.Image.Height + VerticalPadding;
-                else if (isElevated)
-                    preferredImageHeight = SecurityShieldImage.Height + VerticalPadding;
-                else if (useDefaultGlyph)
-                    preferredImageHeight = GetDefaultGlyphSize(g).Height + 1 + VerticalPadding;
+                int preferredImageHeight = ImageSize.Height + VerticalPadding;
 
                 if (preferredImageHeight > preferredSize.Height)
                     preferredSize.Height = preferredImageHeight;
@@ -1470,7 +1465,7 @@ namespace KGySoft.WinForms.Controls
             if (img != null && !state.Enabled)
                 img = disabledImage ??= img.ToGrayscale();
 
-            bool useTheming = IsThemed && base.FlatStyle == FlatStyle.Standard;
+            bool useTheming = UsesTheming;
 
             // setting colors
             Color textColor = state.ForeColor;
@@ -1619,27 +1614,29 @@ namespace KGySoft.WinForms.Controls
             PaintImage(e, image);
 
             if (state.Enabled && Focused && ShowFocusCues)
-                ControlPaint.DrawFocusRectangle(e.Graphics, new Rectangle(backRect.X + 4, backRect.Y + 4, backRect.Width - 7, backRect.Height - 7), state.ForeColor, state.BackColor);
+                DrawFocusRectangle(e);
         }
 
         private void PaintClassicAppearance(PaintStateEventArgs e, Image? image)
         {
+            e.Graphics.SmoothingMode = SmoothingMode.Default;
             ControlAppearanceState state = e.State;
-            Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
+            Rectangle backRect = ClientRectangle;
 
             // Background
-            using (Pen selectedFramePen = new Pen(SystemColors.ControlText, 1f))
+            using (Pen selectedFramePen = new Pen(SystemColors.WindowFrame, 1f))
             {
                 if (state.Pressed)
                 {
                     e.Graphics.FillRectangle(PressedBrush, backRect);
-                    ControlPaint.DrawBorder3D(e.Graphics, ClientRectangle, Border3DStyle.Sunken);
                     e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
+                    backRect.Inflate(-1, -1);
+                    ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.SunkenOuter);
                 }
                 else if (state.Hovered)
                 {
                     e.Graphics.FillRectangle(HoveredBrush, backRect);
-                    ControlPaint.DrawBorder3D(e.Graphics, ClientRectangle, Border3DStyle.Raised);
+                    ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.Raised);
 
                     // with classic state selection is drawn even if button is hovered
                     if (state.Enabled && (Focused || state.IsDefault))
@@ -1663,7 +1660,7 @@ namespace KGySoft.WinForms.Controls
             PaintImage(e, image);
 
             if (state.Enabled && Focused && ShowFocusCues)
-                ControlPaint.DrawFocusRectangle(e.Graphics, new Rectangle(backRect.X + 4, backRect.Y + 4, backRect.Width - 7, backRect.Height - 7), state.ForeColor, state.BackColor);
+                DrawFocusRectangle(e);
         }
 
         private void PaintFlatAppearance(PaintStateEventArgs e, Image? image)
@@ -1773,6 +1770,20 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        private void DrawFocusRectangle(PaintStateEventArgs e)
+        {
+            var state = e.State;
+            int width = UsesTheming ? 1 : 2;
+            width = Math.Min(HorizontalBasePadding, width.Scale(e.Graphics.GetScale().X));
+            Rectangle rect = ClientRectangle;
+            rect.Inflate(-3, -3);
+            for (int i = 0; i < width; i++)
+            {
+                ControlPaint.DrawFocusRectangle(e.Graphics, rect, state.ForeColor, state.BackColor);
+                rect.Inflate(-1, -1);
+            }
+        }
+
         private void PaintImage(PaintStateEventArgs e, Image? image)
         {
             Rectangle bounds = GetImageBounds(e);
@@ -1835,7 +1846,7 @@ namespace KGySoft.WinForms.Controls
         private Rectangle GetImageBounds(PaintStateEventArgs e)
         {
             ControlAppearanceState state = e.State;
-            bool useTheming = IsThemed && base.FlatStyle == FlatStyle.Standard;
+            bool useTheming = UsesTheming;
             ContentAlignment imageAlignment = RtlTranslateContent(ImageAlign);
             bool isClassicPressed = !useTheming && state.Pressed && base.FlatStyle != FlatStyle.Flat;
 
@@ -2049,7 +2060,7 @@ namespace KGySoft.WinForms.Controls
         {
             try
             {
-                Size desiredSize = this.ScaleSize(referenceDefaultGlyphSize);
+                Size desiredSize = this.ScaleSize(IsThemed ? referenceThemedGlyphSize : referenceNonThemedGlyphSize);
                 Bitmap scaledDefaultGlyph = icon.ExtractNearestBitmap(desiredSize, PixelFormat.Format32bppArgb);
                 if (scaledDefaultGlyph.Width >= desiredSize.Width || desiredSize.Width < scaledDefaultGlyph.Width * 1.25f)
                     return scaledDefaultGlyph;
@@ -2067,7 +2078,7 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Event Handlers
-        // ReSharper disable InconsistentNaming
+        // ReSharper disabsle InconsistentNaming
 
         void defaultAnimationTimer_Tick(object sender, EventArgs e)
         {

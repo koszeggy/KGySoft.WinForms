@@ -9,7 +9,7 @@ namespace KGySoft.WinForms
         internal static void SetQuality(this Graphics graphics)
         {
             graphics.TextContrast = 4;
-            graphics.SmoothingMode = SmoothingMode.HighQuality;
+            graphics.SmoothingMode = SmoothingMode.AntiAlias;
             //graphics.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
             graphics.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
             graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
