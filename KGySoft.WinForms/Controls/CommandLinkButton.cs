@@ -661,7 +661,13 @@ namespace KGySoft.WinForms.Controls
                 if (isThemed.HasValue)
                     return isThemed.Value;
 
-                isThemed = Application.RenderWithVisualStyles;
+                // VisualStyleRenderer.IsSupported: relevant for example in Windows 7 when switching from Aero to classic or high contrast theme.
+                // For a short period VisualStyleRenderer is still not supported, though visual styles are already enabled. Not caching in this case.
+                bool result = Application.RenderWithVisualStyles;
+                bool isSupported = VisualStyleRenderer.IsSupported;
+                if (result && !isSupported)
+                    return false;
+                isThemed = result && isSupported;
                 return isThemed.Value;
             }
         }
@@ -1858,7 +1864,7 @@ namespace KGySoft.WinForms.Controls
             // default glyph when visual styles are available
             if (IsNativeVisualStylesRenderingAvailable && !isElevated && image == null && useDefaultGlyph)
             {
-                bool isSimpleArrow = WindowsUtils.IsWindows8OrLater;
+                bool isSimpleArrow = WindowsUtils.IsWindows10OrLater;
                 bool isRightToLeft = RightToLeft == RightToLeft.Yes;
                 bool isCustomColorArrow = isSimpleArrow
                     && (!state.Enabled && DisabledForeColor != ThemedDisabledColor

@@ -20,6 +20,10 @@ using System.Windows.Forms;
 
 using KGySoft.WinForms.Reflection;
 
+#if !NETCOREAPP
+using Microsoft.Win32;
+#endif
+
 #endregion
 
 namespace KGySoft.WinForms.WinApi
@@ -28,9 +32,9 @@ namespace KGySoft.WinForms.WinApi
     {
         #region Fields
 
-        private static bool? isWin8OrLater;
-        private static bool? isVistaOrLater;
         private static bool? isXpOrLater;
+        private static bool? isVistaOrLater;
+        private static bool? isWin10OrLater;
         private static bool? isComCtlV6Available;
         private static Version? windowsVersion;
 
@@ -38,14 +42,14 @@ namespace KGySoft.WinForms.WinApi
 
         #region Properties
 
+        internal static bool IsWindowsXpOrLater
+            => isXpOrLater ??= GetWindowsVersion() is Version version && version >= new Version(5, 1, 2600);
+
         internal static bool IsVistaOrLater
             => isVistaOrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 0, 5243);
 
-        internal static bool IsWindows8OrLater
-            => isWin8OrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 2, 9200);
-
-        internal static bool IsWindowsXpOrLater
-            => isWin8OrLater ??= GetWindowsVersion() is Version version && version >= new Version(5, 1, 2600);
+        internal static bool IsWindows10OrLater
+            => isWin10OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 10240);
 
         /// <summary>
         /// Gets whether comctl32.dll V6 is available, without loading it explicitly.
@@ -92,7 +96,42 @@ namespace KGySoft.WinForms.WinApi
             if (osVer.Platform != PlatformID.Win32NT)
                 return null;
 
+#if NETCOREAPP
             windowsVersion = osVer.Version;
+#else
+            if (osVer.Version != new Version(6, 2, 9200, 0))
+                windowsVersion = osVer.Version;
+            else
+            {
+                // .NET Framework never returns a higher version than Windows 8, so we need to access the Registry
+                // NOTE: This can be fixed by an app.manifest file with supportedOS element, but we cannot guarantee that in a consumer application
+                const string path = @"SOFTWARE\Microsoft\Windows NT\CurrentVersion";
+                const string keyLcuVer = "LCUVer";
+                const string keyMajor = "CurrentMajorVersionNumber";
+                const string keyMinor = "CurrentMinorVersionNumber";
+                const string keyBuild = "CurrentBuild";
+                const int defaultMajor = 10;
+                const int defaultMinor = 0;
+                try
+                {
+                    using RegistryKey? reg = Registry.LocalMachine.OpenSubKey(path);
+                    if (reg == null)
+                        windowsVersion = osVer.Version;
+                    else if (reg.GetValue(keyLcuVer) is string versionString && VersionExtensions.TryParse(versionString, out Version? version))
+                        windowsVersion = version;
+                    else if (reg.GetValue(keyBuild) is string build && Int32.TryParse(build, out int buildNumber))
+                        windowsVersion = new Version(reg.GetValue(keyMajor, defaultMajor) is int major ? major : defaultMajor,
+                            reg.GetValue(keyMinor, defaultMinor) is int minor ? minor : defaultMinor,
+                            buildNumber);
+                    else
+                        windowsVersion = osVer.Version;
+                }
+                catch (Exception e) when (!e.IsCritical())
+                {
+                    windowsVersion = osVer.Version;
+                }
+            }
+#endif
             return windowsVersion;
         }
 
