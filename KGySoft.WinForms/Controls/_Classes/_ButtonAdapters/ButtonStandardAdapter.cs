@@ -377,8 +377,12 @@ namespace KGySoft.WinForms.Controls
             ControlAppearanceState state = e.State;
             up = up && (state.CheckState == CheckState.Unchecked);
             ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
-            LayoutData layout = Application.RenderWithVisualStyles ? PaintLayout(state, true).Layout(g) : PaintLayout(state, up).Layout(g);
-            if (Application.RenderWithVisualStyles)
+            bool renderWithVisualStyles = Application.RenderWithVisualStyles;
+            LayoutData layout = renderWithVisualStyles
+                ? PaintLayout(state, true).Layout(g)
+                : PaintLayout(state, up).Layout(g);
+
+            if (renderWithVisualStyles)
             {
                 PaintThemedButtonBackground(e, ButtonInstance.ClientRectangle, up);
             }
@@ -403,12 +407,12 @@ namespace KGySoft.WinForms.Controls
                 }
             }
             PaintImage(e, layout);
-            if (Application.RenderWithVisualStyles)
+            if (renderWithVisualStyles)
             {
                 layout.focus.Inflate(1, 1);
             }
             PaintField(e, layout, colors, true);
-            if (!Application.RenderWithVisualStyles)
+            if (!renderWithVisualStyles)
             {
                 Rectangle r = ButtonInstance.ClientRectangle;
                 if (state.IsDefault)

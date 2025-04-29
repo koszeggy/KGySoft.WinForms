@@ -465,7 +465,7 @@ namespace KGySoft.WinForms.Controls
                     layout.focus = layout.field;
                     layout.focus.Inflate(-1, -1);
 
-                    // Adjust for padding. VSWhidbey #387208
+                    // Adjust for padding.
                     layout.focus = LayoutUtils.InflateRect(layout.focus, padding);
                 }
                 else
@@ -544,7 +544,7 @@ namespace KGySoft.WinForms.Controls
                     // Do not worry about text/image overlaying
                     Size textSize = GetTextSize(g, maxBounds.Size);
 
-                    // FOR EVERETT COMPATIBILITY - DO NOT CHANGE
+                    // For .NET Framework 1.1 compatibility
                     Size size = imageSize;
                     if (layout.options.dotNetOneButtonCompat && imageSize != Size.Empty)
                     {
@@ -602,11 +602,10 @@ namespace KGySoft.WinForms.Controls
                 //Don't call "layout.imageBounds = Rectangle.Intersect(layout.imageBounds, maxBounds);"
                 // because that is a breaking change that causes images to be scaled to the dimensions of the control.
                 //adjust textBounds so that the text is still visible even if the image is larger than the button's size
-                //fixes Whidbey 234985
+
                 //why do we intersect with layout.field for textBounds while we intersect with maxBounds for imageBounds?
                 //this is because there are some legacy code which squeezes the button so small that text will get clipped
                 //if we intersect with maxBounds. Have to do this for backward compatibility.
-                //See Whidbey 341480
                 if (textImageRelation == TextImageRelation.TextBeforeImage || textImageRelation == TextImageRelation.ImageBeforeText)
                 {
                     //adjust the vertical position of textBounds so that the text doesn't fall off the boundary of the button
@@ -644,7 +643,7 @@ namespace KGySoft.WinForms.Controls
                     layout.textBounds.Offset(1, 1);
                 }
 
-                // FOR EVERETT COMPATIBILITY - DO NOT CHANGE
+                // For .NET Framework 1.1 compatibility.
                 if (layout.options.dotNetOneButtonCompat)
                 {
                     layout.imageStart = layout.imageBounds.Location;
@@ -662,7 +661,6 @@ namespace KGySoft.WinForms.Controls
                 int bottom;
                 // If we are using GDI to measure text, then we can get into a situation, where
                 // the proposed height is ignore. In this case, we want to clip it against
-                // maxbounds. VSWhidbey #480670
                 if (!useCompatibleTextRendering)
                 {
                     bottom = Math.Min(layout.textBounds.Bottom, maxBounds.Bottom);
@@ -670,18 +668,17 @@ namespace KGySoft.WinForms.Controls
                 }
                 else
                 {
-                    // If we are using GDI+ (like Everett), then use the old Everett code
+                    // If we are using GDI+ (like .NET Framework 1.1), then use the old code
                     // This ensures that we have pixel-level rendering compatibility
                     bottom = Math.Min(layout.textBounds.Bottom, layout.field.Bottom);
                     layout.textBounds.Y = Math.Max(layout.textBounds.Y, layout.field.Y);
                 }
+
                 layout.textBounds.Height = bottom - layout.textBounds.Y;
 
-                //This causes a breaking change because images get shrunk to the new clipped size instead of clipped.
-                //********** bottom = Math.Min(layout.imageBounds.Bottom, maxBounds.Bottom);
-                //********** layout.imageBounds.Y = Math.Max(layout.imageBounds.Y, maxBounds.Y);
-                //********** layout.imageBounds.Height = bottom - layout.imageBounds.Y;
-
+                // Difference from original: the image is shifted just like the text.
+                if (!textOffset)
+                    layout.imageStart.Offset(-1, -1);
             }
 
             #endregion
@@ -711,7 +708,7 @@ namespace KGySoft.WinForms.Controls
                     //}
                 }
                 else if (!string.IsNullOrEmpty(text))
-                { // GDI text rendering (Whidbey feature).
+                { // GDI text rendering (.NET Framework 2.0 feature).
                     textSize = TextRenderer.MeasureText(g, text, font, proposedSize, TextFormatFlags);
                 }
                 //else skip calling MeasureText, it should return 0,0
@@ -931,7 +928,7 @@ namespace KGySoft.WinForms.Controls
             internal Rectangle field;
             internal Rectangle focus;
             internal Rectangle imageBounds;
-            internal Point imageStart; // FOR EVERETT COMPATIBILITY - DO NOT CHANGE
+            internal Point imageStart;
             internal LayoutOptions options;
 
             #endregion
@@ -1191,7 +1188,11 @@ namespace KGySoft.WinForms.Controls
 
         protected void PaintImage(PaintStateEventArgs e, LayoutData layout)
         {
-            DrawImage(e.Graphics, layout, e.State);
+            if (control.Image != null)
+            {
+                //setup new clip region & draw
+                DrawImageCore(e.Graphics, control.Image, layout.imageBounds, layout.imageStart, layout, e.State);
+            }
         }
 
         #endregion
@@ -1209,24 +1210,12 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        /// <summary>
-        /// Draws the button's image.
-        /// </summary>
-        void DrawImage(Graphics graphics, LayoutData layout, ControlAppearanceState state)
-        {
-            if (control.Image != null)
-            {
-                //setup new clip region & draw
-                DrawImageCore(graphics, control.Image, layout.imageBounds, layout.imageStart, layout, state);
-            }
-        }
-
         private void DrawImageCore(Graphics graphics, Image image, Rectangle imageBounds, Point imageStart, LayoutData layout, ControlAppearanceState state)
         {
             Region oldClip = graphics.Clip;
 
             if (!layout.options.dotNetOneButtonCompat)
-            { // FOR EVERETT COMPATIBILITY - DO NOT CHANGE
+            {
                 Rectangle bounds = new Rectangle(ButtonBorderSize, ButtonBorderSize, control.Width - (2 * ButtonBorderSize), control.Height - (2 * ButtonBorderSize));
 
                 Region newClip = oldClip.Clone();
@@ -1239,13 +1228,11 @@ namespace KGySoft.WinForms.Controls
             }
             else
             {
-                // FOR EVERETT COMPATIBILITY - DO NOT CHANGE
                 imageBounds.Width += 1;
                 imageBounds.Height += 1;
                 imageBounds.X = imageStart.X + 1;
                 imageBounds.Y = imageStart.Y + 1;
             }
-
 
             try
             {
@@ -1259,7 +1246,7 @@ namespace KGySoft.WinForms.Controls
             finally
             {
                 if (!layout.options.dotNetOneButtonCompat)
-                {// FOR EVERETT COMPATIBILITY - DO NOT CHANGE
+                {
                     graphics.Clip = oldClip;
                 }
             }
@@ -1274,7 +1261,8 @@ namespace KGySoft.WinForms.Controls
             bool disabledText3D = layout.options.shadowedText;
 
             if (control.UseCompatibleTextRendering)
-            { // Draw text using GDI+
+            {
+                // Draw text using GDI+
                 using (StringFormat stringFormat = control.GetFormatFlags().ToStringFormat())
                 {
                     // DrawString doesn't seem to draw where it says it does
@@ -1313,7 +1301,8 @@ namespace KGySoft.WinForms.Controls
                 }
             }
             else
-            { // Draw text using GDI (Whidbey feature).
+            {
+                // Draw text using GDI (.NET Framework 2.0+ feature).
                 TextFormatFlags formatFlags = control.GetFormatFlags();
 
                 if (disabledText3D && !state.Enabled)

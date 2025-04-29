@@ -485,7 +485,7 @@ namespace KGySoft.WinForms.Controls
         {
             if (fadingAnimationsEnabled && FadingPainterInternal.IsSupported)
             {
-                // to enabling animations, double buffering must be disabled
+                // to enable animations, double buffering must be disabled
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
                 return;
             }
