@@ -1,8 +1,27 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: NCHelper.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
+
 using KGySoft.WinForms.WinApi;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
@@ -11,14 +30,17 @@ namespace KGySoft.WinForms.Controls
     /// </summary>
     internal static class NCHelper
     {
-        internal static void CalcSizeNC(IntPtr lParam, int borderWidth)
+        #region Methods
+
+        internal static unsafe void CalcSizeNC(IntPtr lParam, int borderWidth)
         {
-            NCCALCSIZE_PARAMS csp = (NCCALCSIZE_PARAMS)Marshal.PtrToStructure(lParam, typeof(NCCALCSIZE_PARAMS));
-            csp.rgrc0.Top += borderWidth;
-            csp.rgrc0.Bottom -= borderWidth;
-            csp.rgrc0.Left += borderWidth;
-            csp.rgrc0.Right -= borderWidth;
-            Marshal.StructureToPtr(csp, lParam, false);
+            // actually if WParam is 1, the LParam points to an NCCALCSIZE_PARAMS structure rather than a RECT,
+            // but as we only use the first field, we can always cast it to RECT after all
+            var rect = (RECT*)lParam;
+            rect->Top += borderWidth;
+            rect->Bottom -= borderWidth;
+            rect->Left += borderWidth;
+            rect->Right -= borderWidth;
         }
 
         /// <summary>
@@ -82,7 +104,7 @@ namespace KGySoft.WinForms.Controls
             finally
             {
                 User32.ReleaseDC(hWnd, hDC);
-            }            
+            }
         }
 
         /// <summary>
@@ -92,8 +114,9 @@ namespace KGySoft.WinForms.Controls
         {
             User32.SetWindowPos(handle, IntPtr.Zero, 0, 0, 0, 0,
                 Constants.SWP_NOMOVE | Constants.SWP_NOSIZE | Constants.SWP_NOZORDER |
-                Constants.SWP_NOACTIVATE | Constants.SWP_DRAWFRAME);
+                    Constants.SWP_NOACTIVATE | Constants.SWP_DRAWFRAME);
         }
 
+        #endregion
     }
 }
