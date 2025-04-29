@@ -661,13 +661,7 @@ namespace KGySoft.WinForms.Controls
                 if (isThemed.HasValue)
                     return isThemed.Value;
 
-                // VisualStyleRenderer.IsSupported: relevant for example in Windows 7 when switching from Aero to classic or high contrast theme.
-                // For a short period VisualStyleRenderer is still not supported, though visual styles are already enabled. Not caching in this case.
-                bool result = Application.RenderWithVisualStyles;
-                bool isSupported = VisualStyleRenderer.IsSupported;
-                if (result && !isSupported)
-                    return false;
-                isThemed = result && isSupported;
+                isThemed = Application.RenderWithVisualStyles;
                 return isThemed.Value;
             }
         }
@@ -1259,8 +1253,18 @@ namespace KGySoft.WinForms.Controls
             if (invalidated)
                 return;
 
-            fadingPainter.State ??= GetAppearance();
-            fadingPainter.Paint(e);
+            try
+            {
+                fadingPainter.State ??= GetAppearance();
+                fadingPainter.Paint(e);
+            }
+            catch (Exception ex) when (!ex.IsCritical())
+            {
+                // May occur in Windows 7 when switching from Aero to classic or high contrast theme,
+                // that visual styles are turned off in the middle of the painting session.
+                ResetTheme();
+                Invalidate();
+            }
         }
 
         /// <inheritdoc />
