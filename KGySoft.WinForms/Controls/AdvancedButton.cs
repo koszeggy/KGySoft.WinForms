@@ -1,17 +1,32 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: AdvancedButton.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
-using System.Reflection;
 using System.Windows.Forms;
+
 using KGySoft.ComponentModel;
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
-using KGySoft.Reflection;
 using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
@@ -56,13 +71,13 @@ namespace KGySoft.WinForms.Controls
 
         private bool isElevated;
         private bool isImageUpToDate = true;
-        private Image currentImage;
+        private Image? currentImage;
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private FlatStyle reportedFlatStyle = FlatStyle.Standard;
         private FlatStyle lastAdapterType;
         private Color disabledForeColor;
         private Color disabledBackColor;
-        private ButtonBaseAdapter adapter;
+        private ButtonBaseAdapter? adapter;
         private bool isHovered;
         private bool isMouseDown;
         private bool isPressed;
@@ -70,7 +85,7 @@ namespace KGySoft.WinForms.Controls
         private int fadingAnimationDefaultSpeed = 500;
         private FadingPainterInternal fadingPainter;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
-        private Timer defaultAnimationTimer;
+        private Timer? defaultAnimationTimer;
         private bool isAlternativeDefaultImage;
         private Bitmap? cachedSecurityShieldImage;
         private Size cachedSecurityShieldImageSize;
@@ -86,7 +101,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Description("Occurs when the control is painted in a specific state.")]
         [Category("AdvancedButton")]
-        public event EventHandler<PaintStateEventArgs> PaintState;
+        public event EventHandler<PaintStateEventArgs>? PaintState;
 
         #endregion
 
@@ -102,7 +117,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool IsElevated
         {
-            get { return isElevated; }
+            get => isElevated;
             set
             {
                 if (isElevated == value)
@@ -124,6 +139,7 @@ namespace KGySoft.WinForms.Controls
         /// <returns>
         /// The text associated with this control.
         /// </returns>
+        [AllowNull]
         public override string Text
         {
             get
@@ -148,7 +164,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoSizeMode.GrowOnly)]
         public new AutoSizeMode AutoSizeMode
         {
-            get { return base.AutoSizeMode; }
+            get => base.AutoSizeMode;
             set
             {
                 ResetSizeCache();
@@ -162,7 +178,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(TextImageRelation.ImageBeforeText)]
         public new TextImageRelation TextImageRelation
         {
-            get { return base.TextImageRelation; }
+            get => base.TextImageRelation;
             set
             {
                 ResetSizeCache();
@@ -175,7 +191,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
         {
-            get { return reportedFlatStyle; }
+            get => reportedFlatStyle;
             set
             {
                 if (reportedFlatStyle == value && base.FlatStyle == value && lastFlatStyle == value)
@@ -189,9 +205,9 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the image that is displayed on the button control.
         /// </summary>
-        public new Image Image // it is also detected when base.Image changes but reacting onto that in OnPaint has a performance cost
+        public new Image? Image // it is also detected when base.Image changes but reacting onto that in OnPaint has a performance cost
         {
-            get { return base.Image; }
+            get => base.Image;
             set
             {
                 base.Image = value;
@@ -205,7 +221,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public new bool UseCompatibleTextRendering
         {
-            get { return base.UseCompatibleTextRendering; }
+            get => base.UseCompatibleTextRendering;
             set
             {
                 ResetSizeCache();
@@ -220,7 +236,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets disabled fore color.")]
         public Color DisabledForeColor
         {
-            get { return disabledForeColor != Color.Empty ? disabledForeColor : ControlPaint.DarkDark(BackColor); }
+            get => disabledForeColor != Color.Empty ? disabledForeColor : ControlPaint.DarkDark(BackColor);
             set
             {
                 if (disabledForeColor == value)
@@ -239,7 +255,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets disabled back color.")]
         public Color DisabledBackColor
         {
-            get { return disabledBackColor != Color.Empty ? disabledBackColor : BackColor; }
+            get => disabledBackColor != Color.Empty ? disabledBackColor : BackColor;
             set
             {
                 if (disabledBackColor == value)
@@ -262,7 +278,7 @@ namespace KGySoft.WinForms.Controls
         /// </returns>
         public override Color BackColor
         {
-            get { return base.BackColor; }
+            get => base.BackColor;
             set
             {
                 base.BackColor = value;
@@ -275,13 +291,8 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Properties
 
-        protected override Size DefaultSize
-        {
-            get
-            {
-                return new Size(100, base.DefaultSize.Height);
-            }
-        }
+        /// <inheritdoc />
+        protected override Size DefaultSize => new(100, base.DefaultSize.Height);
 
         #endregion
 
@@ -315,35 +326,23 @@ namespace KGySoft.WinForms.Controls
             {
                 if ((adapter == null) || (base.FlatStyle != lastAdapterType))
                 {
-                    switch (base.FlatStyle)
+                    adapter = base.FlatStyle switch
                     {
-                        case FlatStyle.Flat:
-                            adapter = new ButtonFlatAdapter(this);
-                            break;
+                        FlatStyle.Flat => new ButtonFlatAdapter(this),
+                        FlatStyle.Popup => new ButtonPopupAdapter(this),
+                        FlatStyle.Standard => new ButtonStandardAdapter(this),
+                        _ => throw new InvalidOperationException()
+                    };
 
-                        case FlatStyle.Popup:
-                            adapter = new ButtonPopupAdapter(this);
-                            break;
-
-                        case FlatStyle.Standard:
-                            adapter = new ButtonStandardAdapter(this);
-                            break;
-                    }
                     lastAdapterType = base.FlatStyle;
                 }
                 return adapter;
             }
         }
 
-        bool ISupportButtonAdapter.ShowFocusCues
-        {
-            get { return ShowFocusCues; }
-        }
+        bool ISupportButtonAdapter.ShowFocusCues => ShowFocusCues;
 
-        bool ISupportButtonAdapter.ShowKeyboardCues
-        {
-            get { return ShowKeyboardCues; }
-        }
+        bool ISupportButtonAdapter.ShowKeyboardCues => ShowKeyboardCues;
 
         #endregion
 
@@ -367,22 +366,14 @@ namespace KGySoft.WinForms.Controls
 
         #region Explicit Disposing
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing)
             {
-                if (fadingPainter != null)
-                {
-                    fadingPainter.Dispose();
-                    fadingPainter = null;
-                }
-
-                if (defaultAnimationTimer != null)
-                {
-                    defaultAnimationTimer.Dispose();
-                    defaultAnimationTimer = null;
-                }
-
+                fadingPainter.Dispose();
+                defaultAnimationTimer?.Dispose();
+                defaultAnimationTimer = null;
                 cachedSecurityShieldImage?.Dispose();
                 cachedSecurityShieldImage = null;
             }
@@ -398,13 +389,11 @@ namespace KGySoft.WinForms.Controls
 
         #region Public Methods
 
+        /// <inheritdoc />
         public override Size GetPreferredSize(Size proposedSize)
         {
-            Size preferredSize;
-            if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | proposedSize.Width, out preferredSize))
-            {
+            if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out var preferredSize))
                 return preferredSize;
-            }
 
             // System mode
             if (base.FlatStyle == FlatStyle.System)
@@ -430,7 +419,7 @@ namespace KGySoft.WinForms.Controls
                     preferredSize = base.GetPreferredSize(proposedSize);
                 }
 
-                preferredSizeCache[((long)proposedSize.Height << 32) | proposedSize.Width] = preferredSize;
+                preferredSizeCache[((long)proposedSize.Height << 32) | (uint)proposedSize.Width] = preferredSize;
                 return preferredSize;
             }
 
@@ -449,10 +438,10 @@ namespace KGySoft.WinForms.Controls
 
             if (AutoSizeMode != AutoSizeMode.GrowAndShrink)
             {
-                preferredSize = LayoutUtils.UnionSizes(preferredSize, base.Size);
+                preferredSize = LayoutUtils.UnionSizes(preferredSize, Size);
             }
 
-            preferredSizeCache[((long)proposedSize.Height << 32) | proposedSize.Width] = preferredSize;
+            preferredSizeCache[((long)proposedSize.Height << 32) | (uint)proposedSize.Width] = preferredSize;
             return preferredSize;
         }
 
@@ -460,6 +449,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
+        /// <inheritdoc />
         protected override void OnSystemColorsChanged(EventArgs e)
         {
             // Needed to react Theme changes (classic to non-classic and vice versa)
@@ -467,6 +457,7 @@ namespace KGySoft.WinForms.Controls
             CheckStyles();
         }
 
+        /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
             if (base.FlatStyle != FlatStyle.System)
@@ -496,6 +487,7 @@ namespace KGySoft.WinForms.Controls
             base.WndProc(ref m);
         }
 
+        /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
             // adjusting flatstyle if needed (in System mode this is in WndProc)
@@ -519,16 +511,16 @@ namespace KGySoft.WinForms.Controls
             if (invalidated)
                 return;
 
-            if (fadingPainter.State == null)
-                fadingPainter.State = GetAppearance();
-
+            fadingPainter.State ??= GetAppearance();
             fadingPainter.Paint(e);
         }
 
+        /// <inheritdoc />
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
         }
 
+        /// <inheritdoc />
         protected override void OnMouseLeave(EventArgs e)
         {
             isHovered = false;
@@ -536,6 +528,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseLeave(e);
         }
 
+        /// <inheritdoc />
         protected override void OnMouseEnter(EventArgs e)
         {
             isHovered = true;
@@ -543,6 +536,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseEnter(e);
         }
 
+        /// <inheritdoc />
         protected override void OnMouseUp(MouseEventArgs e)
         {
             isPressed = false;
@@ -551,6 +545,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseUp(e);
         }
 
+        /// <inheritdoc />
         protected override void OnMouseDown(MouseEventArgs e)
         {
             isPressed = e.Button == MouseButtons.Left;
@@ -559,6 +554,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseDown(e);
         }
 
+        /// <inheritdoc />
         protected override void OnMouseMove(MouseEventArgs mevent)
         {
             if (isMouseDown)
@@ -567,6 +563,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseMove(mevent);
         }
 
+        /// <inheritdoc />
         protected override void OnKeyDown(KeyEventArgs e)
         {
             if (e.KeyData == Keys.Space && !isPressed)
@@ -577,6 +574,7 @@ namespace KGySoft.WinForms.Controls
             base.OnKeyDown(e);
         }
 
+        /// <inheritdoc />
         protected override void OnKeyUp(KeyEventArgs e)
         {
             if (e.KeyData == Keys.Space && isPressed)
@@ -587,12 +585,14 @@ namespace KGySoft.WinForms.Controls
             base.OnKeyUp(e);
         }
 
+        /// <inheritdoc />
         protected override void OnFontChanged(EventArgs e)
         {
             ResetSizeCache();
             base.OnFontChanged(e);
         }
 
+        /// <inheritdoc />
         protected override void OnVisibleChanged(EventArgs e)
         {
             // storing invisible state so when control turns visible it will fading when enabled
@@ -603,18 +603,24 @@ namespace KGySoft.WinForms.Controls
             base.OnVisibleChanged(e);
         }
 
+        /// <inheritdoc />
         protected override void OnSizeChanged(EventArgs e)
         {
             ResetSizeCache();
             base.OnSizeChanged(e);
         }
 
+        /// <inheritdoc />
         protected override void OnPaddingChanged(EventArgs e)
         {
             ResetSizeCache();
             base.OnPaddingChanged(e);
         }
 
+        /// <summary>
+        /// Paints the specified state of this control, and raises the <see cref="PaintState"/> event.
+        /// </summary>
+        /// <param name="e">A <see cref="PaintStateEventArgs"/> that contains the event data.</param>
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
             e.Graphics.SetQuality();
@@ -643,7 +649,7 @@ namespace KGySoft.WinForms.Controls
                 PaintState.Invoke(this, e);
 
             // Control.OnPaint:
-            PaintEventHandler handler = (PaintEventHandler)Events[Accessors.PaintEvent];
+            PaintEventHandler? handler = (PaintEventHandler?)Events[Accessors.PaintEvent];
             handler?.Invoke(this, e);
         }
 
@@ -716,7 +722,7 @@ namespace KGySoft.WinForms.Controls
                         defaultAnimationTimer.Interval = duration;
                     else
                         defaultAnimationTimer.Interval = 1000;
-                    defaultAnimationTimer.Tick += new EventHandler(defaultAnimationTimer_Tick);
+                    defaultAnimationTimer.Tick += defaultAnimationTimer_Tick;
                 }
 
                 isAlternativeDefaultImage = false;
@@ -852,7 +858,7 @@ namespace KGySoft.WinForms.Controls
         #region Event Handlers
         // ReSharper disable InconsistentNaming
 
-        void defaultAnimationTimer_Tick(object sender, EventArgs e)
+        void defaultAnimationTimer_Tick(object? sender, EventArgs e)
         {
             isAlternativeDefaultImage = !isAlternativeDefaultImage;
             Invalidate();
@@ -874,7 +880,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets whether fading animations are enabled for the control. Animations work in Windows Vista and above, with non-classic themes.")]
         public bool FadingAnimationsEnabled
         {
-            get { return fadingAnimationsEnabled; }
+            get => fadingAnimationsEnabled;
             set
             {
                 if (fadingAnimationsEnabled == value)
@@ -894,7 +900,7 @@ namespace KGySoft.WinForms.Controls
         [TypeConverter(typeof(FlagsEnumConverter))]
         public FadingOptions FadingAnimationOptions
         {
-            get { return fadingOptions; }
+            get => fadingOptions;
             set
             {
                 if (fadingOptions == value)
@@ -921,7 +927,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
         public int FadingAnimationDefaultSpeed
         {
-            get { return fadingAnimationDefaultSpeed; }
+            get => fadingAnimationDefaultSpeed;
             set
             {
                 if (fadingAnimationDefaultSpeed == value)
@@ -934,10 +940,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        ControlAppearanceState ISupportsFading<ControlAppearanceState>.State
-        {
-            get { return GetAppearance(); }
-        }
+        ControlAppearanceState ISupportsFading<ControlAppearanceState>.State => GetAppearance();
 
         int ISupportsFading<ControlAppearanceState>.GetFadingAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo)
         {

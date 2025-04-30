@@ -1,10 +1,27 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: TaskDialogForm.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.WinApi;
 
@@ -12,26 +29,16 @@ using KGySoft.WinForms.WinApi;
 
 namespace KGySoft.WinForms.Forms
 {
+    #region Usings
+
     using Resources = Properties.Resources;
+    
+    #endregion
 
     partial class TaskDialogForm
     {
         private sealed class ExpandoButton : AdvancedButton
         {
-            #region Enumerations
-
-            enum EXPANDOBUTTONSTATES
-            {
-                TDLGEBS_NORMAL = 1,
-                TDLGEBS_HOVER = 2,
-                TDLGEBS_PRESSED = 3,
-                TDLGEBS_EXPANDEDNORMAL = 4,
-                TDLGEBS_EXPANDEDHOVER = 5,
-                TDLGEBS_EXPANDEDPRESSED = 6,
-            };
-
-            #endregion
-
             #region Fields
 
             #region Static Fields
@@ -45,8 +52,8 @@ namespace KGySoft.WinForms.Forms
             private bool isHovered;
             private bool isMouseDown;
             private bool isPressed;
-            private string textExpanded = String.Empty;
-            private string textCollapsed = String.Empty;
+            private string? textExpanded;
+            private string? textCollapsed;
             private bool isExpanded;
 
             #endregion
@@ -55,7 +62,7 @@ namespace KGySoft.WinForms.Forms
 
             #region Events
 
-            internal event EventHandler ExpandedChanged;
+            internal event EventHandler? ExpandedChanged;
 
             #endregion
 
@@ -63,9 +70,10 @@ namespace KGySoft.WinForms.Forms
 
             #region Public Properties
 
+            [AllowNull]
             public override string Text
             {
-                get { return base.Text; }
+                get => base.Text;
                 set
                 {
                     if (isExpanded)
@@ -81,7 +89,7 @@ namespace KGySoft.WinForms.Forms
 
             internal bool IsExpanded
             {
-                get { return isExpanded; }
+                get => isExpanded;
                 set
                 {
                     if (isExpanded == value)
@@ -95,9 +103,9 @@ namespace KGySoft.WinForms.Forms
                 }
             }
 
-            internal string TextExpanded
+            internal string? TextExpanded
             {
-                get { return textExpanded; }
+                get => textExpanded;
                 set
                 {
                     if (textExpanded == value)
@@ -112,9 +120,9 @@ namespace KGySoft.WinForms.Forms
                 }
             }
 
-            internal string TextCollapsed
+            internal string? TextCollapsed
             {
-                get { return textCollapsed; }
+                get => textCollapsed;
                 set
                 {
                     if (textCollapsed == value)
@@ -217,7 +225,7 @@ namespace KGySoft.WinForms.Forms
                 Size textSize = GetTextSize(e.Graphics, isExpanded, Size);
                 TextFormatFlags formatFlags = this.GetFormatFlags(); //TextFormatFlags.WordBreak | TextFormatFlags.Left | TextFormatFlags.EndEllipsis;
                 Rectangle textRect = new Rectangle(Margin.Left + imageSize.Width, Margin.Top, textSize.Width, textSize.Height);
-                TextRenderer.DrawText(e.Graphics, Text, base.Font, textRect, ForeColor, formatFlags);
+                TextRenderer.DrawText(e.Graphics, Text, Font, textRect, ForeColor, formatFlags);
                 if (ShowFocusCues && Enabled && (IsDefault || Focused))
                 {
                     textRect.Inflate(0, 1);
@@ -246,8 +254,8 @@ namespace KGySoft.WinForms.Forms
 
                 proposedSize -= new Size(Margin.Left + imageSize.Width, Margin.Top);
                 TextFormatFlags flags = this.GetFormatFlags();
-                return LayoutUtils.UnionSizes(!expanded.HasValue || expanded.Value ? TextRenderer.MeasureText(g, textExpanded, Font, proposedSize, flags) : Size.Empty,
-                    !expanded.HasValue || !expanded.Value ? TextRenderer.MeasureText(g, textCollapsed, Font, proposedSize, flags) : Size.Empty);
+                return LayoutUtils.UnionSizes(!expanded.HasValue || expanded.Value ? TextRenderer.MeasureText(g, TextExpanded, Font, proposedSize, flags) : Size.Empty,
+                    !expanded.HasValue || !expanded.Value ? TextRenderer.MeasureText(g, TextCollapsed, Font, proposedSize, flags) : Size.Empty);
             }
 
             private void PaintNativeButton(Graphics g)
@@ -326,7 +334,7 @@ namespace KGySoft.WinForms.Forms
                             offset = 2;
                     }
 
-                    ImageAttributes attr = null;
+                    ImageAttributes? attr = null;
                     if (isHovered && !isPressed)
                     {
                         attr = new ImageAttributes();

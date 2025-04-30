@@ -1,4 +1,23 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: TaskDialogForm.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System.Diagnostics.CodeAnalysis;
+
+#region Used Namespaces
 
 using System;
 using System.ComponentModel;
@@ -21,19 +40,30 @@ using KGySoft.WinForms.Components;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.WinApi;
 
+#endregion
+
+#region Used Aliases
+
 using ContentAlignment = System.Drawing.ContentAlignment;
-using TaskDialogControl = KGySoft.WinForms.Components.TaskDialogControl;
 using TaskDialog = KGySoft.WinForms.Components.TaskDialog;
 using TaskDialogButton = KGySoft.WinForms.Components.TaskDialogButton;
+using TaskDialogControl = KGySoft.WinForms.Components.TaskDialogControl;
 using TaskDialogRadioButton = KGySoft.WinForms.Components.TaskDialogRadioButton;
+
+#endregion
 
 #endregion
 
 namespace KGySoft.WinForms.Forms
 {
+    #region Usings
+
     using Resources = Properties.Resources;
+
+    #endregion
+
     // Known incompatibilities (they are intended):
-    // - Icon position is the same in case of all icon types
+    // - Icon position is the same for every icon type
     // - Different animation on toggling expando button resizing
     // - When colored icon background is used without instruction color, only the icon has the colored background
     // - Auto width is calculated differently (better) when expando button or checkbox has very long text.
@@ -47,7 +77,7 @@ namespace KGySoft.WinForms.Forms
     // - Security question mode with colored background
     // [- Selectable message/details text mode]
     // [- Formattable message/details text mode]
-    // [- Help button, ha van feliratkozás a helpre. Figyelni a menet közbeni feliratkozást is.]
+    // [- Help button, if help is subscribed. Watch dynamic subscriptions while the dialog is shown.]
     /// <summary>
     /// A task dialog implementation with Windows Forms technology
     /// </summary>
@@ -95,7 +125,7 @@ namespace KGySoft.WinForms.Forms
 
         private class MainInstructionPanel : Panel
         {
-            internal TaskDialogForm Owner { get; set; }
+            internal TaskDialogForm Owner { get; set; } = null!;
 
             protected override void OnPaintBackground(PaintEventArgs e)
             {
@@ -125,7 +155,7 @@ namespace KGySoft.WinForms.Forms
 
         private class Configuration
         {
-            // not static because canbe changed with system settings
+            // not static because can be changed with system settings
             int baseUnitX;
 
             internal bool HasMainInstruction { get; set; }
@@ -163,7 +193,9 @@ namespace KGySoft.WinForms.Forms
 
         #region Static Fields
 
+        [SuppressMessage("ReSharper", "CollectionNeverUpdated.Local", Justification = "False alarm, GetSystemText is the loader delegate")]
         private static readonly Cache<SystemTextIds, string> systemTextCache = new Cache<SystemTextIds, string>(GetSystemText, 6, EnumComparer<SystemTextIds>.Comparer);
+        
         private static readonly TaskDialogStandardIcons[] iconsWithColoredHeader = new[] { TaskDialogStandardIcons.SecuritySuccess, TaskDialogStandardIcons.SecurityWarning, TaskDialogStandardIcons.SecurityError, TaskDialogStandardIcons.SecurityShieldGray, TaskDialogStandardIcons.SecurityShieldBlue, TaskDialogStandardIcons.SecurityQuestion };
 
         #endregion
@@ -171,8 +203,8 @@ namespace KGySoft.WinForms.Forms
         #region Instance Fields
 
         private TaskDialogStatus dialogState = TaskDialogStatus.Initializing;
-        private TaskDialog host;
-        private IWin32Window ownerWindow;
+        private TaskDialog host = null!;
+        private IWin32Window? ownerWindow;
         private int selectedCustomButtonIndex;
         private bool isDetailsExpanded; // Indicates only the state if details is not empty. Does not mean it is visible.
         private bool isDetailsInFooter;
@@ -184,8 +216,8 @@ namespace KGySoft.WinForms.Forms
         private bool isRadioButtonChecking;
         private bool isForcedClosing;
         private bool isThemed;
-        private Font themedFontLarge;
-        private Font themedFontSmall;
+        private Font? themedFontLarge;
+        private Font? themedFontSmall;
         private bool altF4Pressed;
         private bool isResizing;
         private bool isResettingHeight;
@@ -206,22 +238,22 @@ namespace KGySoft.WinForms.Forms
         {
             InitializeComponent();
             pnlMainInstruction.Owner = this;
-            HandleCreated += new EventHandler(TaskDialogForm_HandleCreated);
-            Load += new EventHandler(TaskDialogForm_Load);
-            FormClosing += new FormClosingEventHandler(TaskDialogForm_FormClosing);
-            Closed += new EventHandler(TaskDialogForm_Closed);
-            KeyDown += new KeyEventHandler(TaskDialogForm_KeyDown);
-            btnShowHideDetails.ExpandedChanged += new EventHandler(btnShowHideDetails_ExpandedChanged);
-            pnlMain.SizeChanged += new EventHandler(Control_SizeChanged);
-            pnlMainControls.SizeChanged += new EventHandler(Control_SizeChanged);
-            pnlFooter.SizeChanged += new EventHandler(Control_SizeChanged);
-            cbCheckBox.CheckedChanged += new EventHandler(cbCheckBox_CheckedChanged);
-            timer.Tick += new EventHandler(timer_Tick);
-            lblMessage.HyperlinkClicked += new EventHandler<HyperlinkClickedEventArgs>(TaskDialogForm_HyperlinkClicked);
-            lblDetailsMain.HyperlinkClicked += new EventHandler<HyperlinkClickedEventArgs>(TaskDialogForm_HyperlinkClicked);
-            lblDetailsFooter.HyperlinkClicked += new EventHandler<HyperlinkClickedEventArgs>(TaskDialogForm_HyperlinkClicked);
-            lblFooter.HyperlinkClicked += new EventHandler<HyperlinkClickedEventArgs>(TaskDialogForm_HyperlinkClicked);
-            HelpRequested += new HelpEventHandler(TaskDialogForm_HelpRequested);
+            HandleCreated += TaskDialogForm_HandleCreated;
+            Load += TaskDialogForm_Load;
+            FormClosing += TaskDialogForm_FormClosing;
+            Closed += TaskDialogForm_Closed;
+            KeyDown += TaskDialogForm_KeyDown;
+            btnShowHideDetails.ExpandedChanged += btnShowHideDetails_ExpandedChanged;
+            pnlMain.SizeChanged += Control_SizeChanged;
+            pnlMainControls.SizeChanged += Control_SizeChanged;
+            pnlFooter.SizeChanged += Control_SizeChanged;
+            cbCheckBox.CheckedChanged += cbCheckBox_CheckedChanged;
+            timer.Tick += timer_Tick;
+            lblMessage.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
+            lblDetailsMain.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
+            lblDetailsFooter.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
+            lblFooter.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
+            HelpRequested += TaskDialogForm_HelpRequested;
         }
 
         #endregion
@@ -340,7 +372,7 @@ namespace KGySoft.WinForms.Forms
                 if (length == 0)
                     return Enum<SystemTextIds>.ToString(id);
 
-                return Marshal.PtrToStringAuto(result, length);
+                return Marshal.PtrToStringAuto(result, length)!;
             }
             finally
             {
@@ -614,12 +646,12 @@ namespace KGySoft.WinForms.Forms
         {
             if (String.IsNullOrEmpty(host.Caption))
             {
-                string[] args = Environment.GetCommandLineArgs();
-                if (args != null && !String.IsNullOrEmpty(args[0]))
+                string?[] args = Environment.GetCommandLineArgs();
+                if (!String.IsNullOrEmpty(args[0]))
                     Text = Path.GetFileName(args[0]);
                 else
                 {
-                    ProcessModule mainModule = Process.GetCurrentProcess().MainModule;
+                    ProcessModule? mainModule = Process.GetCurrentProcess().MainModule;
                     Text = mainModule != null ? mainModule.ModuleName : String.Empty;
                 }
             }
@@ -658,7 +690,7 @@ namespace KGySoft.WinForms.Forms
                     Tag = radioButton
                 };
 
-                rb.CheckedChanged += new EventHandler(RadioButton_CheckedChanged);
+                rb.CheckedChanged += RadioButton_CheckedChanged;
 
                 if (radioButton.Checked)
                 {
@@ -718,7 +750,7 @@ namespace KGySoft.WinForms.Forms
                                 IsElevated = button.IsElevated
                             };
 
-                        btn.Click += new EventHandler(Button_Click);
+                        btn.Click += Button_Click;
                         BaseToolTip.SetToolTip(btn, button.Description);
                         button.Id = index++;
                         if (!button.IsElevated && button.CustomIcon != null)
@@ -775,7 +807,7 @@ namespace KGySoft.WinForms.Forms
                         UseDefaultGlyph = (host.Options & TaskDialogOptions.UseCommandLinks) != TaskDialogOptions.None
                     };
 
-                btn.Click += new EventHandler(Button_Click);
+                btn.Click += Button_Click;
                 button.Id = index++;
                 if (!button.IsElevated && button.CustomIcon != null)
                     btn.Image = button.CustomIcon.ToAlphaBitmap();
@@ -787,8 +819,8 @@ namespace KGySoft.WinForms.Forms
 
         private void ResetDefaultButton(Configuration cfg)
         {
-            TaskDialogButton defaultDialogButton = host.Buttons.FirstOrDefault(b => b.IsDefault);
-            Button defaultButton;
+            TaskDialogButton? defaultDialogButton = host.Buttons.FirstOrDefault(b => b.IsDefault);
+            Button? defaultButton;
             if (defaultDialogButton != null)
             {
                 Control buttonsParent = cfg.HasCommandLinks ? pnlCommandLinks : pnlButtons;
@@ -1048,7 +1080,7 @@ namespace KGySoft.WinForms.Forms
                 Width = Math.Min(desiredWidth + widthClientDiff, screenWidth);
             }
 
-            // resetting button sizes along with max size sow they will not be wider than text
+            // resetting button sizes along with max size so they will not be wider than text
             if (cfg.HasButtons)
             {
                 Size maxButtonSize = new Size(pnlButtons.Width - pnlButtons.Padding.Horizontal, 0);
@@ -1413,7 +1445,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Updates text of a control (does not handle if it has to be appear now)
         /// </summary>
-        private void UpdateText(Control control, string value, bool affectsVisibility, bool updateDescription)
+        private void UpdateText(Control control, string? value, bool affectsVisibility, bool updateDescription)
         {
             if (!updateDescription && control.Text == value)
                 return;
@@ -1421,7 +1453,7 @@ namespace KGySoft.WinForms.Forms
             Size origSize = control.Visible ? control.Size : Size.Empty;
             Size preferredSize = origSize;
             bool visibilityChange = affectsVisibility && (String.IsNullOrEmpty(value) || control.Text.Length == 0);
-            Configuration cfg = null;
+            Configuration? cfg = null;
             SuspendLayout();
             try
             {
@@ -1468,13 +1500,12 @@ namespace KGySoft.WinForms.Forms
         private void UpdateButtonIcon(Control control, TaskDialogButton taskDialogButton)
         {
             Size origSize = control.Size;
-            Size preferredSize = origSize;
+            Size preferredSize;
             SuspendLayout();
             try
             {
                 // because of suspending, control is not resized here
-                CommandLinkButton commandLinkButton = control as CommandLinkButton;
-                if (commandLinkButton != null)
+                if (control is CommandLinkButton commandLinkButton)
                 {
                     commandLinkButton.IsElevated = taskDialogButton.IsElevated;
                     if (!taskDialogButton.IsElevated && taskDialogButton.CustomIcon != null)
@@ -1570,12 +1601,9 @@ namespace KGySoft.WinForms.Forms
         #region Event Handlers
         // ReSharper disable InconsistentNaming
 
-        void TaskDialogForm_HandleCreated(object sender, EventArgs e)
-        {
-            host.Handle = Handle;
-        }
+        private void TaskDialogForm_HandleCreated(object? sender, EventArgs e) => host.Handle = Handle;
 
-        void TaskDialogForm_Load(object sender, EventArgs e)
+        private void TaskDialogForm_Load(object? sender, EventArgs e)
         {
             dialogState = TaskDialogStatus.Showing;
             switch (host.Icon)
@@ -1598,7 +1626,7 @@ namespace KGySoft.WinForms.Forms
             timer.Enabled = host.IsTickAssigned;
         }
 
-        private void TaskDialogForm_KeyDown(object sender, KeyEventArgs e)
+        private void TaskDialogForm_KeyDown(object? sender, KeyEventArgs e)
         {
             if (e.KeyData == (Keys.Alt | Keys.F4))
                 altF4Pressed = true;
@@ -1606,7 +1634,7 @@ namespace KGySoft.WinForms.Forms
                 DialogResult = DialogResult.Cancel;
         }
 
-        void TaskDialogForm_FormClosing(object sender, FormClosingEventArgs e)
+        private void TaskDialogForm_FormClosing(object? sender, FormClosingEventArgs e)
         {
             if (e.CloseReason == CloseReason.UserClosing)
             {
@@ -1638,7 +1666,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        void TaskDialogForm_Closed(object sender, EventArgs e)
+        private void TaskDialogForm_Closed(object? sender, EventArgs e)
         {
             dialogState = TaskDialogStatus.Closed;
             host.Handle = IntPtr.Zero;
@@ -1650,14 +1678,13 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        void RadioButton_CheckedChanged(object sender, EventArgs e)
+        private void RadioButton_CheckedChanged(object? sender, EventArgs e)
         {
-            RadioButton rb = (RadioButton)sender;
-
+            RadioButton rb = (RadioButton)sender!;
             isRadioButtonChecking = true;
             try
             {
-                ((TaskDialogRadioButton)rb.Tag).Checked = rb.Checked;
+                ((TaskDialogRadioButton)rb.Tag!).Checked = rb.Checked;
             }
             finally
             {
@@ -1665,11 +1692,11 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        void Button_Click(object sender, EventArgs e)
+        private void Button_Click(object? sender, EventArgs e)
         {
-            Button btn = (Button)sender;
+            Button btn = (Button)sender!;
             HandledEventArgs args = new HandledEventArgs(true);
-            TaskDialogButton button = (TaskDialogButton)btn.Tag;
+            TaskDialogButton button = (TaskDialogButton)btn.Tag!;
             button.OnClick(args);
             if (!args.Handled)
             {
@@ -1678,7 +1705,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        void btnShowHideDetails_ExpandedChanged(object sender, EventArgs e)
+        private void btnShowHideDetails_ExpandedChanged(object? sender, EventArgs e)
         {
             isDetailsExpanded = btnShowHideDetails.IsExpanded;
             if (String.IsNullOrEmpty(host.DetailsText) || isResizing)
@@ -1811,7 +1838,7 @@ namespace KGySoft.WinForms.Forms
             host.OnDetailsVisibleChanged(new TaskDialogDetailsVisibleChangedEventArgs(btnShowHideDetails.IsExpanded));
         }
 
-        void Control_SizeChanged(object sender, EventArgs e)
+        private void Control_SizeChanged(object? sender, EventArgs e)
         {
             // watching this event to recalculate sizes if scrollbar of the form appears/disappears
             if (!Visible || isResizing)
@@ -1822,7 +1849,7 @@ namespace KGySoft.WinForms.Forms
             ResetHeights(GetConfiguration());
         }
 
-        void cbCheckBox_CheckedChanged(object sender, EventArgs e)
+        private void cbCheckBox_CheckedChanged(object? sender, EventArgs e)
         {
             if (dialogState == TaskDialogStatus.Initializing || isCheckboxChecking)
                 return;
@@ -1830,7 +1857,7 @@ namespace KGySoft.WinForms.Forms
             host.OnCheckBoxCheckedChanged(cbCheckBox.Checked);
         }
 
-        void timer_Tick(object sender, EventArgs e)
+        private void timer_Tick(object? sender, EventArgs e)
         {
             // called only when host.Tick is subscribed so it is not a waste to create event args here
             TaskDialogTickEventArgs args = new TaskDialogTickEventArgs((int)(DateTime.UtcNow - dialogStarted).TotalMilliseconds);
@@ -1841,15 +1868,9 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        void TaskDialogForm_HyperlinkClicked(object sender, HyperlinkClickedEventArgs e)
-        {
-            host.OnHyperlinkClicked(e);
-        }
+        private void TaskDialogForm_HyperlinkClicked(object? sender, HyperlinkClickedEventArgs e) => host.OnHyperlinkClicked(e);
 
-        void TaskDialogForm_HelpRequested(object sender, HelpEventArgs hlpevent)
-        {
-            host.OnHelpRequested();
-        }
+        private void TaskDialogForm_HelpRequested(object? sender, HelpEventArgs hlpevent) => host.OnHelpRequested();
 
         // ReSharper restore InconsistentNaming
         #endregion
@@ -1860,10 +1881,7 @@ namespace KGySoft.WinForms.Forms
 
         #region ITaskDialog Members
 
-        TaskDialogStatus ITaskDialog.ShowState
-        {
-            get { return dialogState; }
-        }
+        TaskDialogStatus ITaskDialog.ShowState => dialogState;
 
         void ITaskDialog.Close(TaskDialogResult result)
         {
@@ -1916,7 +1934,7 @@ namespace KGySoft.WinForms.Forms
                 result = TaskDialogResult.Custom;
 
             selectedRadioButtonIndex = -1;
-            TaskDialogRadioButton selectedRadioButton = host.RadioButtons.FirstOrDefault(rb => rb.Checked);
+            TaskDialogRadioButton? selectedRadioButton = host.RadioButtons.FirstOrDefault(rb => rb.Checked);
             if (selectedRadioButton != null)
                 selectedRadioButtonIndex = selectedRadioButton.Id;
 
@@ -2087,8 +2105,7 @@ namespace KGySoft.WinForms.Forms
 
         void ITaskDialog.ControlPropertyChanged(TaskDialogControl taskDialogControl, string propName)
         {
-            TaskDialogButton button = taskDialogControl as TaskDialogButton;
-            if (button != null)
+            if (taskDialogControl is TaskDialogButton button)
             {
                 Control control = GetControl(button);
                 switch (propName)
@@ -2122,8 +2139,7 @@ namespace KGySoft.WinForms.Forms
                 }
             }
 
-            TaskDialogRadioButton radioButton = taskDialogControl as TaskDialogRadioButton;
-            if (radioButton != null)
+            if (taskDialogControl is TaskDialogRadioButton radioButton)
             {
                 Debug.Assert(pnlRadioButtons.Controls.Count > radioButton.Id);
                 Control control = GetControl(radioButton);

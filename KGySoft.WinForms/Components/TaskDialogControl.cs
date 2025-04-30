@@ -1,8 +1,24 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: TaskDialogControl.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+
 using KGySoft.Libraries.Language;
 
 #endregion
@@ -17,10 +33,10 @@ namespace KGySoft.WinForms.Components
         #region Fields
 
         private bool disposed;
-        private PropertyChangedEventHandler propertyChanged;
-        private TaskDialog parent;
-        private string name;
-        private object tag;
+        private PropertyChangedEventHandler? propertyChanged;
+        private TaskDialog? parent;
+        private string? name;
+        private object? tag;
 
         #endregion
 
@@ -29,7 +45,7 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Occurs when a property value changes.
         /// </summary>
-        public event PropertyChangedEventHandler PropertyChanged
+        public event PropertyChangedEventHandler? PropertyChanged
         {
             add
             {
@@ -37,7 +53,7 @@ namespace KGySoft.WinForms.Components
                 propertyChanged += value;
             }
 
-            remove { propertyChanged -= value; }
+            remove => propertyChanged -= value;
         }
 
         #endregion
@@ -49,19 +65,16 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets the parent dialog that is hosting the control.
         /// </summary>
-        public TaskDialog Parent
-        {
-            get { return parent; }
-        }
+        public TaskDialog? Parent => parent;
 
         /// <summary>
-        /// Gets or sets the name of this control. Name is not required to be set but it can be used
+        /// Gets or sets the name of this control. Name is not required to be set, but it can be used
         /// to identify controls in a <see cref="TaskDialogControlCollection{T}"/> by name.
         /// This property can be changed without restriction.
         /// </summary>
-        public string Name
+        public string? Name
         {
-            get { return name; }
+            get => name;
             set
             {
                 CheckDisposed();
@@ -73,9 +86,9 @@ namespace KGySoft.WinForms.Components
         /// Gets or sets a tag to the <see cref="TaskDialogControl"/>.
         /// A tag can be any object for custom purposes.
         /// </summary>
-        public object Tag
+        public object? Tag
         {
-            get { return tag; }
+            get => tag;
             set
             {
                 CheckDisposed();
@@ -160,23 +173,20 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Returns the string representation of this instance.
         /// </summary>
-        public override string ToString()
-        {
-            return !String.IsNullOrEmpty(Name) ? Name : base.ToString();
-        }
+        public override string? ToString() => !String.IsNullOrEmpty(Name) ? Name : base.ToString();
 
         #endregion
 
         #region Internal Methods
 
-        internal void AssignParent(TaskDialog parentDialog)
+        internal void AssignParent(TaskDialog? parentDialog)
         {
             if (parentDialog != null)
             {
                 CheckDisposed();
                 if (parent != null)
                 {
-                    throw new InvalidOperationException(Language.Translate("Control {0} is already parented", ToString()));
+                    throw new InvalidOperationException(Language.Translate("Control {0} is already parented", ToString()!));
                 }
             }
 

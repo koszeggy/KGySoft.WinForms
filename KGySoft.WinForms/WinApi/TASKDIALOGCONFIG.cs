@@ -1,30 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: TASKDIALOGCONFIG.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
+
 using KGySoft.WinForms.Components;
+
+#endregion
 
 namespace KGySoft.WinForms.WinApi
 {
     /// <summary>
-    /// The signature of the callback that receives messages from the Task Dialog when various events occur.
-    /// </summary>
-    /// <param name="hwnd">The window handle of the </param>
-    /// <param name="uNotification">The message being passed.</param>
-    /// <param name="wParam">wParam which is interpreted differently depending on the message.</param>
-    /// <param name="lParam">wParam which is interpreted differently depending on the message.</param>
-    /// <param name="refData">The refrence data that was set to TaskDialog.CallbackData.</param>
-    /// <returns>A HRESULT value. The return value is specific to the message being processed. </returns>
-    internal delegate int TaskDialogCallbackProc(IntPtr hwnd, TASKDIALOG_NOTIFICATIONS uNotification, IntPtr wParam, IntPtr lParam, IntPtr refData);
-
-    /// <summary>
     /// The TASKDIALOGCONFIG structure contains information used to display a task dialog. The TaskDialogIndirect function uses this structure.
     /// </summary>
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode, Pack = 1)]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "WinAPI")]
     internal struct TASKDIALOGCONFIG
     {
+        #region Fields
+
         /// <summary>
         /// Specifies the structure size, in bytes.
         /// </summary>
@@ -58,14 +67,14 @@ namespace KGySoft.WinForms.WinApi
         /// If this parameter is NULL, the filename of the executable program is used.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string pszWindowTitle;
+        public string? pszWindowTitle;
 
         /// <summary>
         /// A handle to an Icon that is to be displayed in the task dialog.
         /// This member is ignored unless the TDF_USE_HICON_MAIN flag is specified.
         /// If this member is NULL and the TDF_USE_HICON_MAIN is specified, no icon will be displayed.
         /// -or-
-        /// An integer resource identifier of one of the predefined values in <see cref="TaskDialogIcons"/>.
+        /// An integer resource identifier of one of the predefined values in <see cref="TaskDialogStandardIcons"/>.
         /// </summary>
         public IntPtr hMainIcon;
 
@@ -73,14 +82,14 @@ namespace KGySoft.WinForms.WinApi
         /// Pointer that references the string to be used for the main instruction.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string pszMainInstruction;
+        public string? pszMainInstruction;
 
         /// <summary>
         /// Pointer that references the string to be used for the dialog's primary content.
-        /// If the ENABLE_HYPERLINKS flag is specified for the dwFlags member, then this string may contain hyperlinks in the form: <A HREF="executablestring">Hyperlink Text</A>. 
+        /// If the ENABLE_HYPERLINKS flag is specified for the dwFlags member, then this string may contain hyperlinks in the form: <A HREF="executablestring">Hyperlink Text</A>.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string pszContent;
+        public string? pszContent;
 
         /// <summary>
         /// The number of entries in the pButtons array that is used to create buttons or command links in the task dialog.
@@ -123,7 +132,7 @@ namespace KGySoft.WinForms.WinApi
         /// If the pfVerificationFlagChecked parameter of TaskDialogIndirect is NULL, the checkbox is not enabled.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string pszVerificationText;
+        public string? pszVerificationText;
 
         /// <summary>
         /// Pointer that references the string to be used for displaying additional information.
@@ -131,7 +140,7 @@ namespace KGySoft.WinForms.WinApi
         /// If the TDF_ENABLE_HYPERLINKS flag is specified for the dwFlags member, then this string may contain hyperlinks in the form: <A HREF="executablestring">Hyperlink Text</A>.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string pszExpandedInformation;
+        public string? pszExpandedInformation;
 
         /// <summary>
         /// Pointer that references the string to be used to label the button for collapsing the expandable information.
@@ -139,22 +148,22 @@ namespace KGySoft.WinForms.WinApi
         /// If this member is NULL and the pszCollapsedControlText is specified, then the pszCollapsedControlText value will be used for this member as well.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string pszExpandedControlText;
+        public string? pszExpandedControlText;
 
         /// <summary>
-        /// Pointer that references the string to be used to label the button for expanding the expandable information. 
+        /// Pointer that references the string to be used to label the button for expanding the expandable information.
         /// This member is ignored when the pszExpandedInformation member is NULL.
         /// If this member is NULL and the pszCollapsedControlText is specified, then the pszCollapsedControlText value will be used for this member as well.
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string pszCollapsedControlText;
+        public string? pszCollapsedControlText;
 
         /// <summary>
         /// A handle to an Icon that is to be displayed in the footer of the task dialog.
         /// This member is ignored unless the TDF_USE_HICON_FOOTER flag is specified and the pszFooterIcon is not.
         /// If this member is NULL and the TDF_USE_HICON_FOOTER is specified, no icon is displayed.
         /// -or-
-        /// An integer resource identifier of one of the predefined values in <see cref="TaskDialogIcons"/>.
+        /// An integer resource identifier of one of the predefined values in <see cref="TaskDialogStandardIcons"/>.
         /// </summary>
         public IntPtr hFooterIcon;
 
@@ -164,12 +173,12 @@ namespace KGySoft.WinForms.WinApi
         /// <A HREF="executablestring">Hyperlink Text</A>
         /// </summary>
         [MarshalAs(UnmanagedType.LPWStr)]
-        public string pszFooter;
+        public string? pszFooter;
 
         /// <summary>
         /// Pointer to an application-defined callback function.
         /// </summary>
-        public TaskDialogCallbackProc pfCallback;
+        public TaskDialogCallbackProc? pfCallback;
 
         /// <summary>
         /// A pointer to application-defined reference data. This value is defined by the caller.
@@ -180,5 +189,7 @@ namespace KGySoft.WinForms.WinApi
         /// The width of the task dialog's client area, in dialog units. If 0, the task dialog manager will calculate the ideal width.
         /// </summary>
         public uint cxWidth;
+
+        #endregion
     }
 }

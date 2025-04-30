@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: NativeTaskDialog.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Collections;
@@ -12,6 +27,7 @@ using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.WinForms.WinApi;
@@ -44,10 +60,10 @@ namespace KGySoft.WinForms.Components
         #region Instance Fields
 
         private TaskDialogStatus dialogState = TaskDialogStatus.Initializing;
-        private TaskDialog host;
+        private TaskDialog host = null!;
         private IntPtr ownerHandle;
         private IntPtr dialogHandle;
-        private Dictionary<TASKDIALOG_ELEMENTS, IntPtr> updatedTexts;
+        private Dictionary<TASKDIALOG_ELEMENTS, IntPtr>? updatedTexts;
         bool isForcedClosing;
         private bool ignoreFirstRadioButtonCheck;
         TASKDIALOGCONFIG config;
@@ -81,18 +97,12 @@ namespace KGySoft.WinForms.Components
 
         ~NativeTaskDialog()
         {
-            Dispose(false);
+            Dispose();
         }
 
         #region Explicit Disposing
 
         public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
         {
             // Happens only when TaskDialog.Dispose was called while showing: forcing close and waiting for being closed
             if (dialogState != TaskDialogStatus.Closed)
@@ -112,6 +122,8 @@ namespace KGySoft.WinForms.Components
 
             // freeing unmanaged resources
             FreeUpdatedTexts();
+
+            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -125,7 +137,7 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Building native buttons and returning the unamanged pointer to the result array
         /// </summary>
-        private static IntPtr AllocateButtons(IList buttons, int startId, bool needDescription)
+        private static IntPtr AllocateButtons(IList? buttons, int startId, bool needDescription)
         {
             if (buttons == null || buttons.Count == 0)
             {
@@ -136,7 +148,7 @@ namespace KGySoft.WinForms.Components
             TASKDIALOG_BUTTON[] nativeButtons = new TASKDIALOG_BUTTON[buttons.Count];
             for (int i = 0; i < nativeButtons.Length; i++)
             {
-                TaskDialogButtonBase button = (TaskDialogButtonBase)buttons[i];
+                TaskDialogButtonBase button = (TaskDialogButtonBase)buttons[i]!;
                 button.Id = nativeButtons[i].nButtonID = i + startId;
                 StringBuilder text = new StringBuilder(button.Text ?? String.Empty);
                 if (needDescription && !String.IsNullOrEmpty(button.Description))
@@ -209,7 +221,7 @@ namespace KGySoft.WinForms.Components
             config.pszCollapsedControlText = host.ShowDetailsText;
             config.hFooterIcon = (IntPtr)host.FooterIcon; // overridden if custom
             config.pszFooter = host.FooterText;
-            config.pfCallback = new TaskDialogCallbackProc(ProcessDialogMessages);
+            config.pfCallback = ProcessDialogMessages;
             config.cxWidth = (uint)host.Width;
 
             // setting custom main icon
@@ -225,13 +237,11 @@ namespace KGySoft.WinForms.Components
                     // only when initializing, otherwise, will be changed by UpdateStandardIcon
                     if (dialogState == TaskDialogStatus.Initializing)
                     {
-                        using (Icon icon = host.Icon == TaskDialogStandardIcons.Question ? Icons.SystemQuestion : Icons.SecurityQuestion)
-                        {
-                            host.EmulatedStandardMainIcon = icon;
-                        }
+                        using Icon icon = host.Icon == TaskDialogStandardIcons.Question ? Icons.SystemQuestion : Icons.SecurityQuestion;
+                        host.EmulatedStandardMainIcon = icon;
                     }
 
-                    config.hMainIcon = host.EmulatedStandardMainIcon.Handle;
+                    config.hMainIcon = host.EmulatedStandardMainIcon?.Handle ?? IntPtr.Zero;
                 }
             }
 
@@ -248,13 +258,11 @@ namespace KGySoft.WinForms.Components
                     // only when initializing, otherwise, will be changed by UpdateStandardFooterIcon
                     if (dialogState == TaskDialogStatus.Initializing)
                     {
-                        using (Icon icon = host.FooterIcon == TaskDialogStandardIcons.Question ? Icons.SystemQuestion : Icons.SecurityQuestion)
-                        {
-                            host.EmulatedStandardFooterIcon = icon;
-                        }
+                        using Icon icon = host.FooterIcon == TaskDialogStandardIcons.Question ? Icons.SystemQuestion : Icons.SecurityQuestion;
+                        host.EmulatedStandardFooterIcon = icon;
                     }
 
-                    config.hFooterIcon = host.EmulatedStandardFooterIcon.Handle;
+                    config.hFooterIcon = host.EmulatedStandardFooterIcon?.Handle ?? IntPtr.Zero;
                 }
             }
 
@@ -288,11 +296,9 @@ namespace KGySoft.WinForms.Components
             if (config.pButtons != IntPtr.Zero)
             {
                 config.cButtons = (uint)host.Buttons.Count;
-                TaskDialogButton defaultButton = host.Buttons.FirstOrDefault(b => b.IsDefault);
+                TaskDialogButton? defaultButton = host.Buttons.FirstOrDefault(b => b.IsDefault);
                 if (defaultButton != null)
-                {
                     config.nDefaultButton = defaultButton.Id;
-                }
             }
             else
             {
@@ -304,7 +310,7 @@ namespace KGySoft.WinForms.Components
             if (config.pRadioButtons != IntPtr.Zero)
             {
                 config.cRadioButtons = (uint)host.RadioButtons.Count;
-                TaskDialogRadioButton checkedRadioButton = null;
+                TaskDialogRadioButton? checkedRadioButton = null;
                 bool checkedFound = false;
                 foreach (TaskDialogRadioButton rb in host.RadioButtons)
                 {
@@ -410,7 +416,7 @@ namespace KGySoft.WinForms.Components
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_HYPERLINK_CLICKED:
                         {
-                            string link = Marshal.PtrToStringUni(lParam);
+                            string link = Marshal.PtrToStringUni(lParam)!;
                             HyperlinkClickedEventArgs e = new HyperlinkClickedEventArgs(link);
                             host.OnHyperlinkClicked(e);
                             return Convert.ToInt32(e.Handled);
@@ -581,7 +587,7 @@ namespace KGySoft.WinForms.Components
             User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_ENABLE_RADIO_BUTTON, radioButton.Id, radioButton.Enabled ? 1 : 0);
         }
 
-        private void UpdateText(TASKDIALOG_ELEMENTS element, string text)
+        private void UpdateText(TASKDIALOG_ELEMENTS element, string? text)
         {
             IntPtr ptrText;
             if (updatedTexts == null)
@@ -643,7 +649,7 @@ namespace KGySoft.WinForms.Components
             User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, element, (int)icon);
         }
 
-        private void UpdateCustomIcon(int element, Icon icon)
+        private void UpdateCustomIcon(int element, Icon? icon)
         {
             if (element == Constants.TDI_FOOTER && String.IsNullOrEmpty(host.FooterText))
                 return;
@@ -659,9 +665,9 @@ namespace KGySoft.WinForms.Components
             // storing icon handle in config so it can be compared later again
             IntPtr iconHandle;
             if (element == Constants.TDI_MAIN)
-                config.hMainIcon = iconHandle = host.Icon != TaskDialogStandardIcons.None ? host.EmulatedStandardMainIcon.Handle : icon.Handle;
+                config.hMainIcon = iconHandle = host.Icon != TaskDialogStandardIcons.None ? host.EmulatedStandardMainIcon!.Handle : icon?.Handle ?? IntPtr.Zero;
             else
-                config.hFooterIcon = iconHandle = host.FooterIcon != TaskDialogStandardIcons.None ? host.EmulatedStandardFooterIcon.Handle : icon.Handle;
+                config.hFooterIcon = iconHandle = host.FooterIcon != TaskDialogStandardIcons.None ? host.EmulatedStandardFooterIcon!.Handle : icon?.Handle ?? IntPtr.Zero;
 
             User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, (IntPtr)element, iconHandle);
             if (element == Constants.TDI_MAIN && host.FormIcon != null)
@@ -794,10 +800,8 @@ namespace KGySoft.WinForms.Components
             // freeing pointers of updated texts
             foreach (IntPtr ptrText in updatedTexts.Values)
             {
-                if (ptrText != null)
-                {
+                if (ptrText != IntPtr.Zero)
                     Marshal.FreeHGlobal(ptrText);
-                }
             }
 
             updatedTexts = null;
@@ -987,8 +991,7 @@ namespace KGySoft.WinForms.Components
                 throw new InvalidOperationException("Changing property in invalid state.");
             }
 
-            TaskDialogButton button = control as TaskDialogButton;
-            if (button != null)
+            if (control is TaskDialogButton button)
             {
                 switch (propName)
                 {
@@ -1015,7 +1018,7 @@ namespace KGySoft.WinForms.Components
 
                     case TaskDialogButton.PropertyIsDefault:
                         // updating only if the change has effect
-                        TaskDialogButton realDefault = host.Buttons.FirstOrDefault(b => b.IsDefault);
+                        TaskDialogButton? realDefault = host.Buttons.FirstOrDefault(b => b.IsDefault);
 
                         if (button.IsDefault)
                         {
@@ -1029,7 +1032,7 @@ namespace KGySoft.WinForms.Components
                         {
                             // default flag cleared: has only effect if... 
                             if ((realDefault != null && realDefault.Id > button.Id) // real default has larger index
-                                || (realDefault == null)) // or, when there is no default custom button any more (now either a standard button or the first custom button will be the default)
+                                || (realDefault == null)) // or, when there is no default custom button anymore (now either a standard button or the first custom button will be the default)
                             {
                                 ReallocateDialog();
                             }
@@ -1046,8 +1049,7 @@ namespace KGySoft.WinForms.Components
                 }
             }
 
-            TaskDialogRadioButton radioButton = control as TaskDialogRadioButton;
-            if (radioButton != null)
+            if (control is TaskDialogRadioButton radioButton)
             {
                 switch (propName)
                 {

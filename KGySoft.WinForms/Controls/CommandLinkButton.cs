@@ -1378,7 +1378,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Paints the specified state of this control, and raises the <see cref="PaintState"/> event.
         /// </summary>
-        /// <param name="e"></param>
+        /// <param name="e">A <see cref="PaintStateEventArgs"/> that contains the event data.</param>
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
             e.Graphics.SetQuality();

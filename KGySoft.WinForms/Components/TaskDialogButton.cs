@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: TaskDialogButton.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.ComponentModel;
@@ -42,9 +57,9 @@ namespace KGySoft.WinForms.Components
         #region Fields
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private EventHandler<HandledEventArgs> click;
+        private EventHandler<HandledEventArgs>? click;
         private bool isElevated;
-        private Icon customIcon;
+        private Icon? customIcon;
         private bool isDefault;
 
         #endregion
@@ -63,7 +78,7 @@ namespace KGySoft.WinForms.Components
                 CheckDisposed();
                 click += value;
             }
-            remove { click -= value; }
+            remove => click -= value;
         }
 
         #endregion
@@ -75,7 +90,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public bool IsElevated
         {
-            get { return isElevated; }
+            get => isElevated;
             set
             {
                 if (isElevated == value)
@@ -92,9 +107,9 @@ namespace KGySoft.WinForms.Components
         /// If <see cref="IsElevated"/> is also set, the elevated icon is displayed.
         /// </summary>
         /// <seealso cref="TaskDialog.ForceCompatibilityMode"/>
-        public Icon CustomIcon
+        public Icon? CustomIcon
         {
-            get { return customIcon; }
+            get => customIcon;
             set
             {
                 if (customIcon == value)
@@ -112,7 +127,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public bool IsDefault
         {
-            get { return isDefault; }
+            get => isDefault;
             set
             {
                 if (isDefault == value)
@@ -162,6 +177,7 @@ namespace KGySoft.WinForms.Components
 
         #region Explicit Disposing
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

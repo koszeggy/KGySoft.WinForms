@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: ISupportButtonAdapter.cs
+//  File: EXPANDOBUTTONSTATES.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -13,22 +13,18 @@
 
 #endregion
 
-#region Usings
+using System.Diagnostics.CodeAnalysis;
 
-using KGySoft.WinForms.Controls;
-
-#endregion
-
-namespace KGySoft.WinForms
+namespace KGySoft.WinForms.WinApi
 {
-    internal interface ISupportButtonAdapter
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "WinAPI")]
+    internal enum EXPANDOBUTTONSTATES
     {
-        #region Properties
-
-        ButtonBaseAdapter Adapter { get; }
-        bool ShowFocusCues { get; }
-        bool ShowKeyboardCues { get; }
-
-        #endregion
-    }
+        TDLGEBS_NORMAL = 1,
+        TDLGEBS_HOVER = 2,
+        TDLGEBS_PRESSED = 3,
+        TDLGEBS_EXPANDEDNORMAL = 4,
+        TDLGEBS_EXPANDEDHOVER = 5,
+        TDLGEBS_EXPANDEDPRESSED = 6,
+    };
 }

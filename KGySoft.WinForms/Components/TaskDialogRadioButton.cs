@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: TaskDialogRadioButton.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Globalization;
@@ -25,7 +40,7 @@ namespace KGySoft.WinForms.Components
         #region Fields
 
         private bool isChecked;
-        private EventHandler selected;
+        private EventHandler? selected;
 
         #endregion
 
@@ -42,7 +57,7 @@ namespace KGySoft.WinForms.Components
                 CheckDisposed();
                 selected += value;
             }
-            remove { selected -= value; }
+            remove => selected -= value;
         }
 
         #endregion
@@ -56,7 +71,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public bool Checked
         {
-            get { return isChecked; }
+            get => isChecked;
             set
             {
                 if (isChecked == value)
@@ -81,7 +96,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         internal bool CheckedInternal
         {
-            set { isChecked = value; }
+            set => isChecked = value;
         }
 
         #endregion
@@ -124,6 +139,7 @@ namespace KGySoft.WinForms.Components
 
         #region Explicit Disposing
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: TaskDialogButtonBase.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 
@@ -35,9 +50,9 @@ namespace KGySoft.WinForms.Components
 
         #region Fields
 
-        private string text;
+        private string? text;
         private bool enabled = true;
-        private string description;
+        private string? description;
 
         #endregion
 
@@ -46,12 +61,9 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets or sets the button text.
         /// </summary>
-        public string Text
+        public string? Text
         {
-            get
-            {
-                return text;
-            }
+            get => text;
             set
             {
                 if (text == value)
@@ -68,9 +80,9 @@ namespace KGySoft.WinForms.Components
         /// under the main text. Otherwise, the description might be displayed as a tooltip (only when <see cref="TaskDialog"/> is used in compatibility mode).
         /// </summary>
         /// <seealso cref="TaskDialog.ForceCompatibilityMode"/>
-        public string Description
+        public string? Description
         {
-            get { return description; }
+            get => description;
             set
             {
                 if (description == value)
@@ -87,7 +99,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public bool Enabled
         {
-            get { return enabled; }
+            get => enabled;
             set
             {
                 if (enabled == value)
@@ -138,6 +150,7 @@ namespace KGySoft.WinForms.Components
 
         #region Explicit Disposing
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);

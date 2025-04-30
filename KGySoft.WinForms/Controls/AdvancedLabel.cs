@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: AdvancedLabel.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Collections.Generic;
@@ -11,6 +26,7 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Windows.Forms;
+
 using KGySoft.ComponentModel;
 using KGySoft.CoreLibraries;
 using KGySoft.WinForms.WinApi;
@@ -66,7 +82,7 @@ namespace KGySoft.WinForms.Controls
         private Color disabledForeColor;
         private Color disabledBackColor;
         private HyperlinkResolveMode resolveHyperlinks;
-        private string rawText;
+        private string? rawText;
         private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
         private FadingPainterInternal fadingPainter;
@@ -84,14 +100,14 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Description("Occurs when a link is clicked. To handle clicked links automatically, set AutoHandleUrls true, and if this event is subsribed, set HyperlinkClickedEventArgs.Handled false in the event handler.")]
         [Category("AdvancedLabel")]
-        public event EventHandler<HyperlinkClickedEventArgs> HyperlinkClicked;
+        public event EventHandler<HyperlinkClickedEventArgs>? HyperlinkClicked;
 
         /// <summary>
         /// Occurs when the control is painted in a specific state.
         /// </summary>
         [Description("Occurs when the control is painted in a specific state.")]
         [Category("AdvancedLabel")]
-        public event EventHandler<PaintStateEventArgs> PaintState;
+        public event EventHandler<PaintStateEventArgs>? PaintState;
 
         #endregion
 
@@ -124,7 +140,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>
 When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
         public HyperlinkResolveMode ResolveHyperlinks
         {
-            get { return resolveHyperlinks; }
+            get => resolveHyperlinks;
             set
             {
                 if (resolveHyperlinks == value)
@@ -146,7 +162,7 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
         [DefaultValue(AdvancedBorderStyle.None)]
         new public AdvancedBorderStyle BorderStyle
         {
-            get { return borderStyle; }
+            get => borderStyle;
             set
             {
                 if (borderStyle == value)
@@ -200,10 +216,10 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
         [Category("AdvancedLabel")]
         [Description(@"Gets or sets text of the label. When ResolveHyperlinks is true, hyperlinks in text like the following will be converted to hyperlinks:
 This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
-        public override string Text
+        public override string? Text
         {
-            get { return base.Text; }
-            set { RawText = value; }
+            get => base.Text;
+            set => RawText = value;
         }
 
         /// <summary>
@@ -214,9 +230,9 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         [RefreshProperties(RefreshProperties.Repaint)]
         [Description("Gets or sets raw text of the label. When ResolveHyperlinks is not HyperlinkResolveModes.None, value of this property may differ from Text.")]
         [Editor(typeof(MultilineStringEditor), typeof(UITypeEditor))]
-        public string RawText
+        public string? RawText
         {
-            get { return rawText; }
+            get => rawText;
             set
             {
                 if (rawText == value)
@@ -235,7 +251,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         /// </returns>
         public override Font Font
         {
-            get { return base.Font; }
+            get => base.Font;
             set
             {
                 ResetSizeCache();
@@ -250,7 +266,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         [Description("Gets or sets disabled fore color.")]
         public Color DisabledForeColor
         {
-            get { return disabledForeColor != Color.Empty ? disabledForeColor : ControlPaint.DarkDark(BackColor); }
+            get => disabledForeColor != Color.Empty ? disabledForeColor : ControlPaint.DarkDark(BackColor);
             set
             {
                 if (disabledForeColor == value)
@@ -269,7 +285,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         [Description("Gets or sets disabled back color.")]
         public Color DisabledBackColor
         {
-            get { return disabledBackColor != Color.Empty ? disabledBackColor : BackColor; }
+            get => disabledBackColor != Color.Empty ? disabledBackColor : BackColor;
             set
             {
                 if (disabledBackColor == value)
@@ -286,7 +302,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         /// </summary>
         public new bool UseCompatibleTextRendering
         {
-            get { return base.UseCompatibleTextRendering; }
+            get => base.UseCompatibleTextRendering;
             set
             {
                 ResetSizeCache();
@@ -299,7 +315,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         /// </summary>
         public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
         {
-            get { return base.FlatStyle; }
+            get => base.FlatStyle;
             set
             {
                 if (base.FlatStyle == value && lastFlatStyle == value)
@@ -322,7 +338,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         /// </summary>
         public AdvancedLabel()
         {
-            LinkClicked += new LinkLabelLinkClickedEventHandler(AdvancedLabel_LinkClicked);
+            LinkClicked += AdvancedLabel_LinkClicked;
             fadingPainter = new FadingPainterInternal(this, "BUTTON"); // using button timings for enabling/disabling
             CheckStyles();
         }
@@ -331,18 +347,13 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         #region Explicit Disposing
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             LinkClicked -= AdvancedLabel_LinkClicked;
 
             if (disposing)
-            {
-                if (fadingPainter != null)
-                {
-                    fadingPainter.Dispose();
-                    fadingPainter = null;
-                }
-            }
+                fadingPainter.Dispose();
 
             base.Dispose(disposing);
         }
@@ -355,6 +366,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         #region Public Methods
 
+        /// <inheritdoc />
         public override Size GetPreferredSize(Size proposedSize)
         {
             // Workaround: Immediately after calculating preferred size (eg. Dock == Top), another request arrives with empty proposedSize, which ruins the constrained result.
@@ -372,7 +384,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             }
 
             Size preferredSize;
-            if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | proposedSize.Width, out preferredSize))
+            if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out preferredSize))
             {
                 return preferredSize;
             }
@@ -412,7 +424,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             if (proposedSize.Height > preferredSize.Height)
                 preferredSize.Height = proposedSize.Height;
 
-            preferredSizeCache[((long)proposedSize.Height << 32) | proposedSize.Width] = preferredSize;
+            preferredSizeCache[((long)proposedSize.Height << 32) | (uint)proposedSize.Width] = preferredSize;
             return preferredSize;
         }
 
@@ -420,6 +432,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         #region Protected Methods
 
+        /// <inheritdoc />
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
@@ -432,6 +445,10 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             }
         }
 
+        /// <summary>
+        /// Raises the <see cref="HyperlinkClicked"/> event.
+        /// </summary>
+        /// <param name="args">A <see cref="HyperlinkClickedEventArgs"/> that contains the event data.</param>
         protected virtual void OnHyperlinkClicked(HyperlinkClickedEventArgs args)
         {
             if (HyperlinkClicked != null)
@@ -452,6 +469,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             }
         }
 
+        /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
             // adjusting flatstyle if needed (in System mode this is in WndProc)
@@ -462,16 +480,16 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                 return;
             }
 
-            if (fadingPainter.State == null)
-                fadingPainter.State = GetAppearance();
-
+            fadingPainter.State ??= GetAppearance();
             fadingPainter.Paint(e);
         }
 
+        /// <inheritdoc />
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
         }
 
+        /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
             switch (m.Msg)
@@ -509,12 +527,14 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             base.WndProc(ref m);
         }
 
+        /// <inheritdoc />
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
             NCHelper.InvalidateNC(Handle);
         }
 
+        /// <inheritdoc />
         protected override void OnVisibleChanged(EventArgs e)
         {
             // storing invisible state so when control turns visible it will fading when enabled
@@ -524,12 +544,17 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             base.OnVisibleChanged(e);
         }
 
+        /// <inheritdoc />
         protected override void OnPaddingChanged(EventArgs e)
         {
             ResetSizeCache();
             base.OnPaddingChanged(e);
         }
 
+        /// <summary>
+        /// Paints the specified state of this control, and raises the <see cref="PaintState"/> event.
+        /// </summary>
+        /// <param name="e">A <see cref="PaintStateEventArgs"/> that contains the event data.</param>
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
             ControlAppearanceState state = e.State;
@@ -607,8 +632,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         void AdvancedLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            string url = e.Link.LinkData as string;
-            if (url != null)
+            if (e.Link.LinkData is string url)
             {
                 HyperlinkClickedEventArgs args = new HyperlinkClickedEventArgs(url);
                 OnHyperlinkClicked(args);
@@ -779,7 +803,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         [Description("Gets or sets whether fading animations are enabled for the control. Animations work in Windows Vista and above, with non-classic themes.")]
         public bool FadingAnimationsEnabled
         {
-            get { return fadingAnimationsEnabled; }
+            get => fadingAnimationsEnabled;
             set
             {
                 if (fadingAnimationsEnabled == value)
@@ -799,7 +823,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         [TypeConverter(typeof(FlagsEnumConverter))]
         public FadingOptions FadingAnimationOptions
         {
-            get { return fadingOptions; }
+            get => fadingOptions;
             set
             {
                 if (fadingOptions == value)
@@ -826,7 +850,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         [Description("Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
         public int FadingAnimationDefaultSpeed
         {
-            get { return fadingAnimationDefaultSpeed; }
+            get => fadingAnimationDefaultSpeed;
             set
             {
                 if (fadingAnimationDefaultSpeed == value)
@@ -839,10 +863,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             }
         }
 
-        ControlAppearanceState ISupportsFading<ControlAppearanceState>.State
-        {
-            get { return GetAppearance(); }
-        }
+        ControlAppearanceState ISupportsFading<ControlAppearanceState>.State => GetAppearance();
 
         int ISupportsFading<ControlAppearanceState>.GetFadingAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo)
         {

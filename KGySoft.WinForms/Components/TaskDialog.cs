@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: TaskDialog.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Collections;
@@ -8,6 +23,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
 using System.Windows.Forms;
+
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.Libraries.Language;
@@ -18,8 +34,8 @@ using KGySoft.WinForms.Forms;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Represents a task dialog window that is able display regular buttons, Vista-like command options,
-    /// radio buttons and progress bar. Can work in compatibility mode so dialog can be use even with Windows XP.
+    /// Represents a task dialog window that is able to display regular buttons, Vista-like command options,
+    /// radio buttons and progress bar. Can work in compatibility mode so dialog can be use even with Windows XP or when visual styles are not available.
     /// <note><see cref="TaskDialog"/> implements <see cref="IDisposable"/>. When task a dialog is disposed, it frees
     /// every event subscriptions so it is not needed to unsubscribe events explicitly.</note>
     /// </summary>
@@ -67,24 +83,24 @@ namespace KGySoft.WinForms.Components
         #region Fields
 
         private bool disposed;
-        private ITaskDialog dialogInstance;
-        private string message;
-        private string mainInstruction;
-        private string caption;
-        private string footerText;
+        private ITaskDialog? dialogInstance;
+        private string? message;
+        private string? mainInstruction;
+        private string? caption;
+        private string? footerText;
         private bool forceCompatibilityMode;
-        private string checkBoxText;
-        private string detailsText;
+        private string? checkBoxText;
+        private string? detailsText;
         private TaskDialogOptions options;
-        private string showDetailsText;
-        private string hideDetailsText;
+        private string? showDetailsText;
+        private string? hideDetailsText;
         private TaskDialogStandardIcons icon;
-        private Icon customIcon;
+        private Icon? customIcon;
         private TaskDialogStandardIcons footerIcon;
-        private Icon customFooterIcon;
+        private Icon? customFooterIcon;
         private bool isEmulatedStandardMainIcon;
         private bool isEmulatedStandardFooterIcon;
-        private Icon formIcon;
+        private Icon? formIcon;
         private TaskDialogStandardButtonFlags standardButtons;
         private TaskDialogStandardButtons defaultStandardButton;
         private bool checkBoxChecked;
@@ -103,21 +119,21 @@ namespace KGySoft.WinForms.Components
 
         // hiding event backing fields as they were simple auto events
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private EventHandler created;
+        private EventHandler? created;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private EventHandler<TaskDialogTickEventArgs> tick;
+        private EventHandler<TaskDialogTickEventArgs>? tick;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private EventHandler<CancelEventArgs> closing;
+        private EventHandler<CancelEventArgs>? closing;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private EventHandler closed;
+        private EventHandler? closed;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private EventHandler<HyperlinkClickedEventArgs> hyperlinkClicked;
+        private EventHandler<HyperlinkClickedEventArgs>? hyperlinkClicked;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private EventHandler checkBoxCheckedChanged;
+        private EventHandler? checkBoxCheckedChanged;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private EventHandler helpRequested;
+        private EventHandler? helpRequested;
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private EventHandler<TaskDialogDetailsVisibleChangedEventArgs> detailsVisibleChanged;
+        private EventHandler<TaskDialogDetailsVisibleChangedEventArgs>? detailsVisibleChanged;
 
         #endregion
 
@@ -133,7 +149,7 @@ namespace KGySoft.WinForms.Components
                 CheckDisposed();
                 created += value;
             }
-            remove { created -= value; }
+            remove => created -= value;
         }
 
         /// <summary>
@@ -149,7 +165,7 @@ namespace KGySoft.WinForms.Components
                 {
                     tick = value;
                     if (IsDialogShowing)
-                        dialogInstance.TimerChanged(true);
+                        dialogInstance!.TimerChanged(true);
                     return;
                 }
 
@@ -162,7 +178,7 @@ namespace KGySoft.WinForms.Components
 
                 tick -= value;
                 if (tick == null && IsDialogShowing)
-                    dialogInstance.TimerChanged(false);
+                    dialogInstance!.TimerChanged(false);
             }
         }
 
@@ -179,7 +195,7 @@ namespace KGySoft.WinForms.Components
                 CheckDisposed();
                 hyperlinkClicked += value;
             }
-            remove { hyperlinkClicked -= value; }
+            remove => hyperlinkClicked -= value;
         }
 
         /// <summary>
@@ -192,7 +208,7 @@ namespace KGySoft.WinForms.Components
                 CheckDisposed();
                 checkBoxCheckedChanged += value;
             }
-            remove { checkBoxCheckedChanged -= value; }
+            remove => checkBoxCheckedChanged -= value;
         }
 
         /// <summary>
@@ -205,7 +221,7 @@ namespace KGySoft.WinForms.Components
                 CheckDisposed();
                 helpRequested += value;
             }
-            remove { helpRequested -= value; }
+            remove => helpRequested -= value;
         }
 
         /// <summary>
@@ -218,7 +234,7 @@ namespace KGySoft.WinForms.Components
                 CheckDisposed();
                 detailsVisibleChanged += value;
             }
-            remove { detailsVisibleChanged -= value; }
+            remove => detailsVisibleChanged -= value;
         }
 
         /// <summary>
@@ -231,7 +247,7 @@ namespace KGySoft.WinForms.Components
                 CheckDisposed();
                 closing += value;
             }
-            remove { closing -= value; }
+            remove => closing -= value;
         }
 
         #endregion
@@ -243,9 +259,9 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets or sets the message text.
         /// </summary>
-        public string Message
+        public string? Message
         {
-            get { return message; }
+            get => message;
             set
             {
                 if (message == value)
@@ -255,16 +271,16 @@ namespace KGySoft.WinForms.Components
                 message = value;
 
                 if (IsDialogShowing)
-                    dialogInstance.PropertyChanged(PropertyMessage);
+                    dialogInstance!.PropertyChanged(PropertyMessage);
             }
         }
 
         /// <summary>
         /// Gets or sets the main instruction text.
         /// </summary>
-        public string MainInstruction
+        public string? MainInstruction
         {
-            get { return mainInstruction; }
+            get => mainInstruction;
             set
             {
                 if (mainInstruction == value)
@@ -274,16 +290,16 @@ namespace KGySoft.WinForms.Components
                 mainInstruction = value;
 
                 if (IsDialogShowing)
-                    dialogInstance.PropertyChanged(PropertyMainInstruction);
+                    dialogInstance!.PropertyChanged(PropertyMainInstruction);
             }
         }
 
         /// <summary>
         /// Gets or sets the caption of the task dialog. If caption is <see langword="null"/>, the filename of the executable program is used.
         /// </summary>
-        public string Caption
+        public string? Caption
         {
-            get { return caption; }
+            get => caption;
             set
             {
                 if (caption == value)
@@ -293,16 +309,16 @@ namespace KGySoft.WinForms.Components
                 caption = value;
 
                 if (IsDialogShowing)
-                    dialogInstance.PropertyChanged(PropertyCaption);
+                    dialogInstance!.PropertyChanged(PropertyCaption);
             }
         }
 
         /// <summary>
         /// Gets or sets the footer text.
         /// </summary>
-        public string FooterText
+        public string? FooterText
         {
-            get { return footerText; }
+            get => footerText;
             set
             {
                 if (footerText == value)
@@ -312,16 +328,16 @@ namespace KGySoft.WinForms.Components
                 footerText = value;
 
                 if (IsDialogShowing)
-                    dialogInstance.PropertyChanged(PropertyFooterText);
+                    dialogInstance!.PropertyChanged(PropertyFooterText);
             }
         }
 
         /// <summary>
         /// Gets or sets the verification text of the checkbox of the task dialog. The checkbox will be visible when this property is not empty when the dialog is shown.
         /// </summary>
-        public string CheckBoxText
+        public string? CheckBoxText
         {
-            get { return checkBoxText; }
+            get => checkBoxText;
             set
             {
                 if (checkBoxText == value)
@@ -331,7 +347,7 @@ namespace KGySoft.WinForms.Components
                 checkBoxText = value;
 
                 if (IsDialogShowing)
-                    dialogInstance.PropertyChanged(PropertyCheckBoxText);
+                    dialogInstance!.PropertyChanged(PropertyCheckBoxText);
             }
         }
 
@@ -344,7 +360,7 @@ namespace KGySoft.WinForms.Components
         /// <seealso cref="CheckBoxText"/>
         public bool CheckBoxChecked
         {
-            get { return checkBoxChecked; }
+            get => checkBoxChecked;
             set
             {
                 if (checkBoxChecked == value)
@@ -355,7 +371,7 @@ namespace KGySoft.WinForms.Components
 
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyCheckBoxChecked);
+                    dialogInstance!.PropertyChanged(PropertyCheckBoxChecked);
                 }
 
                 OnCheckBoxCheckedChanged(value);
@@ -365,9 +381,9 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets or sets the details text. See/Hide details button will be visible only when this property is not empty.
         /// </summary>
-        public string DetailsText
+        public string? DetailsText
         {
-            get { return detailsText; }
+            get => detailsText;
             set
             {
                 if (detailsText == value)
@@ -377,7 +393,7 @@ namespace KGySoft.WinForms.Components
                 detailsText = value;
 
                 if (IsDialogShowing)
-                    dialogInstance.PropertyChanged(PropertyDetailsText);
+                    dialogInstance!.PropertyChanged(PropertyDetailsText);
             }
         }
 
@@ -386,7 +402,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public TaskDialogOptions Options
         {
-            get { return options; }
+            get => options;
             set
             {
                 if (options == value)
@@ -401,7 +417,7 @@ namespace KGySoft.WinForms.Components
                 options = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyOptions);
+                    dialogInstance!.PropertyChanged(PropertyOptions);
                 }
 
                 //if (dialogInstance != null)
@@ -425,9 +441,9 @@ namespace KGySoft.WinForms.Components
         /// When both <see cref="ShowDetailsText"/> and <see cref="HideDetailsText"/> properties are empty, a default text will be displayed. When one
         /// of these properties is empty while the other is set, the non-empty value will be displayed in both expanded and collapsed states.
         /// </remarks>
-        public string ShowDetailsText
+        public string? ShowDetailsText
         {
-            get { return showDetailsText; }
+            get => showDetailsText;
             set
             {
                 if (showDetailsText == value)
@@ -437,7 +453,7 @@ namespace KGySoft.WinForms.Components
                 showDetailsText = value;
 
                 if (IsDialogShowing)
-                    dialogInstance.PropertyChanged(PropertyShowDetailsText);
+                    dialogInstance!.PropertyChanged(PropertyShowDetailsText);
             }
         }
 
@@ -448,9 +464,9 @@ namespace KGySoft.WinForms.Components
         /// When both <see cref="ShowDetailsText"/> and <see cref="HideDetailsText"/> properties are empty, a default text will be displayed. When one
         /// of these properties is empty while the other is set, the non-empty value will be displayed in both expanded and collapsed states.
         /// </remarks>
-        public string HideDetailsText
+        public string? HideDetailsText
         {
-            get { return hideDetailsText; }
+            get => hideDetailsText;
             set
             {
                 if (hideDetailsText == value)
@@ -460,7 +476,7 @@ namespace KGySoft.WinForms.Components
                 hideDetailsText = value;
 
                 if (IsDialogShowing)
-                    dialogInstance.PropertyChanged(PropertyHideDetailsText);
+                    dialogInstance!.PropertyChanged(PropertyHideDetailsText);
             }
         }
 
@@ -470,7 +486,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public TaskDialogStandardIcons Icon
         {
-            get { return icon; }
+            get => icon;
             set
             {
                 if (icon == value && customIcon == null)
@@ -489,7 +505,7 @@ namespace KGySoft.WinForms.Components
                 icon = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyIcon);
+                    dialogInstance!.PropertyChanged(PropertyIcon);
                 }
             }
         }
@@ -498,9 +514,9 @@ namespace KGySoft.WinForms.Components
         /// Gets or sets a custom <see cref="System.Drawing.Icon"/> as the main icon for the dialog.
         /// Setting this property clears <see cref="Icon"/> and vice-versa.
         /// </summary>
-        public Icon CustomIcon
+        public Icon? CustomIcon
         {
-            get { return isEmulatedStandardMainIcon ? null : customIcon; }
+            get => isEmulatedStandardMainIcon ? null : customIcon;
             set
             {
                 if (customIcon == value)
@@ -514,7 +530,7 @@ namespace KGySoft.WinForms.Components
                 formIcon = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyCustomIcon);
+                    dialogInstance!.PropertyChanged(PropertyCustomIcon);
                 }
             }
         }
@@ -525,7 +541,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public TaskDialogStandardIcons FooterIcon
         {
-            get { return footerIcon; }
+            get => footerIcon;
             set
             {
                 if (footerIcon == value && customFooterIcon == null)
@@ -543,7 +559,7 @@ namespace KGySoft.WinForms.Components
                 footerIcon = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyFooterIcon);
+                    dialogInstance!.PropertyChanged(PropertyFooterIcon);
                 }
             }
         }
@@ -552,9 +568,9 @@ namespace KGySoft.WinForms.Components
         /// Gets or sets a custom <see cref="System.Drawing.Icon"/> as the footer icon for the dialog.
         /// Setting this property clears <see cref="FooterIcon"/> and vice-versa.
         /// </summary>
-        public Icon CustomFooterIcon
+        public Icon? CustomFooterIcon
         {
-            get { return isEmulatedStandardFooterIcon ? null : customFooterIcon; }
+            get => isEmulatedStandardFooterIcon ? null : customFooterIcon;
             set
             {
                 if (customFooterIcon == value)
@@ -566,7 +582,7 @@ namespace KGySoft.WinForms.Components
                 ReplaceIcon(ref customFooterIcon, value, 16);
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyCustomFooterIcon);
+                    dialogInstance!.PropertyChanged(PropertyCustomFooterIcon);
                 }
             }
         }
@@ -579,7 +595,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public TaskDialogStandardButtonFlags StandardButtons
         {
-            get { return standardButtons; }
+            get => standardButtons;
             set
             {
                 if (standardButtons == value)
@@ -594,7 +610,7 @@ namespace KGySoft.WinForms.Components
                 standardButtons = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyStandardButtons);
+                    dialogInstance!.PropertyChanged(PropertyStandardButtons);
                 }
             }
         }
@@ -606,7 +622,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public TaskDialogStandardButtons DefaultStandardButton
         {
-            get { return defaultStandardButton; }
+            get => defaultStandardButton;
             set
             {
                 if (defaultStandardButton == value)
@@ -621,7 +637,7 @@ namespace KGySoft.WinForms.Components
                 defaultStandardButton = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyDefaultStandardButton);
+                    dialogInstance!.PropertyChanged(PropertyDefaultStandardButton);
                 }
             }
         }
@@ -634,7 +650,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public int Width
         {
-            get { return width; }
+            get => width;
             set
             {
                 if (width == value && value != 0)
@@ -649,7 +665,7 @@ namespace KGySoft.WinForms.Components
                 width = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyWidth);
+                    dialogInstance!.PropertyChanged(PropertyWidth);
                 }
             }
         }
@@ -683,7 +699,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public TaskDialogProgressBarStyle ProgressBarStyle
         {
-            get { return progressBarStyle; }
+            get => progressBarStyle;
             set
             {
                 if (progressBarStyle == value)
@@ -699,7 +715,7 @@ namespace KGySoft.WinForms.Components
                 progressBarStyle = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyProgressBarStyle);
+                    dialogInstance!.PropertyChanged(PropertyProgressBarStyle);
                 }
             }
         }
@@ -709,7 +725,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public ProgressBarState ProgressBarState
         {
-            get { return progressBarState; }
+            get => progressBarState;
             set
             {
                 if (progressBarState == value)
@@ -725,7 +741,7 @@ namespace KGySoft.WinForms.Components
                 progressBarState = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyProgressBarState);
+                    dialogInstance!.PropertyChanged(PropertyProgressBarState);
                 }
             }
         }
@@ -736,7 +752,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public int ProgressBarMinimum
         {
-            get { return progressBarMinimum; }
+            get => progressBarMinimum;
             set
             {
                 if (progressBarMinimum == value)
@@ -757,7 +773,7 @@ namespace KGySoft.WinForms.Components
                 progressBarMinimum = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyProgressBarMinimum);
+                    dialogInstance!.PropertyChanged(PropertyProgressBarMinimum);
                 }
             }
         }
@@ -768,7 +784,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public int ProgressBarMaximum
         {
-            get { return progressBarMaximum; }
+            get => progressBarMaximum;
             set
             {
                 if (progressBarMaximum == value)
@@ -789,7 +805,7 @@ namespace KGySoft.WinForms.Components
                 progressBarMaximum = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyProgressBarMaximum);
+                    dialogInstance!.PropertyChanged(PropertyProgressBarMaximum);
                 }
             }
         }
@@ -800,7 +816,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public int ProgressBarValue
         {
-            get { return progressBarValue; }
+            get => progressBarValue;
             set
             {
                 if (progressBarValue == value)
@@ -816,7 +832,7 @@ namespace KGySoft.WinForms.Components
                 progressBarValue = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyProgressBarValue);
+                    dialogInstance!.PropertyChanged(PropertyProgressBarValue);
                 }
             }
         }
@@ -828,7 +844,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public int ProgressBarMarqueeAnimationSpeed
         {
-            get { return progressBarMarqueeAnimationSpeed; }
+            get => progressBarMarqueeAnimationSpeed;
             set
             {
                 if (progressBarMarqueeAnimationSpeed == value)
@@ -844,7 +860,7 @@ namespace KGySoft.WinForms.Components
                 progressBarMarqueeAnimationSpeed = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyProgressBarMarqueeAnimationSpeed);
+                    dialogInstance!.PropertyChanged(PropertyProgressBarMarqueeAnimationSpeed);
                 }
             }
         }
@@ -855,7 +871,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public bool ForceCompatibilityMode
         {
-            get { return forceCompatibilityMode; }
+            get => forceCompatibilityMode;
             set
             {
                 if (dialogInstance != null)
@@ -871,10 +887,7 @@ namespace KGySoft.WinForms.Components
         /// Gets whether <see cref="TaskDialog"/> is displayed in compatibility mode.
         /// When dialog is not displayed, returns <see langword="false"/>.
         /// </summary>
-        public bool IsInCompatibilityMode
-        {
-            get { return IsDialogShowing && dialogInstance is Form; }
-        }
+        public bool IsInCompatibilityMode => IsDialogShowing && dialogInstance is Form;
 
         /// <summary>
         /// After the dialog is closed, gets the index of the clicked custom button defined in <see cref="Buttons"/> collection; otherwise, returns <c>-1</c>.
@@ -882,10 +895,7 @@ namespace KGySoft.WinForms.Components
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedRadioButtonIndex"/>
         /// <seealso cref="CheckBoxChecked"/>
-        public int SelectedButtonIndex
-        {
-            get { return selectedButtonIndex; }
-        }
+        public int SelectedButtonIndex => selectedButtonIndex;
 
         /// <summary>
         /// After the dialog is closed, gets the index of the selected radio button defined in <see cref="RadioButtons"/> collection; otherwise, returns <c>-1</c>.
@@ -893,10 +903,7 @@ namespace KGySoft.WinForms.Components
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedButtonIndex"/>
         /// <seealso cref="CheckBoxChecked"/>
-        public int SelectedRadioButtonIndex
-        {
-            get { return selectedRadioButtonIndex; }
-        }
+        public int SelectedRadioButtonIndex => selectedRadioButtonIndex;
 
         /// <summary>
         /// <para>When read, gets the last result of a closed <see cref="TaskDialog"/> (if the dialog was closed by one of the <see cref="StandardButtons"/>).</para>
@@ -907,7 +914,7 @@ namespace KGySoft.WinForms.Components
         /// <seealso cref="CheckBoxChecked"/>
         public TaskDialogResult DialogResult
         {
-            get { return dialogResult; }
+            get => dialogResult;
             set
             {
                 CheckDisposed();
@@ -921,7 +928,7 @@ namespace KGySoft.WinForms.Components
 
                     if (IsDialogShowing)
                     {
-                        dialogInstance.Close(value);
+                        dialogInstance!.Close(value);
                     }
                     else
                     {
@@ -935,28 +942,20 @@ namespace KGySoft.WinForms.Components
 
         #region Internal Properties
 
-        internal bool IsDialogShowing
-        {
-            get
-            {
-                return (dialogInstance != null)
-                    && (dialogInstance.ShowState == TaskDialogStatus.Showing
-                    || dialogInstance.ShowState == TaskDialogStatus.Closing);
-            }
-        }
+        internal bool IsDialogShowing =>
+            (dialogInstance != null)
+            && (dialogInstance.ShowState == TaskDialogStatus.Showing
+                || dialogInstance.ShowState == TaskDialogStatus.Closing);
 
-        internal bool IsTickAssigned
-        {
-            get { return tick != null; }
-        }
+        internal bool IsTickAssigned => tick != null;
 
         /// <summary>
         /// When an <see cref="ITaskDialog"/> implementation does not support one of the <see cref="TaskDialogStandardIcons"/>, it can set this property
         /// to handle a standard icon as a custom one.
         /// </summary>
-        internal Icon EmulatedStandardMainIcon
+        internal Icon? EmulatedStandardMainIcon
         {
-            get { return isEmulatedStandardMainIcon ? customIcon : null; }
+            get => isEmulatedStandardMainIcon ? customIcon : null;
             set
             {
                 isEmulatedStandardMainIcon = true;
@@ -964,7 +963,7 @@ namespace KGySoft.WinForms.Components
                 formIcon = value;
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyCustomIcon);
+                    dialogInstance!.PropertyChanged(PropertyCustomIcon);
                 }
             }
         }
@@ -973,16 +972,16 @@ namespace KGySoft.WinForms.Components
         /// When an <see cref="ITaskDialog"/> implementation does not support one of the <see cref="TaskDialogStandardIcons"/>, it can set this property
         /// to handle a standard icon as a custom one.
         /// </summary>
-        internal Icon EmulatedStandardFooterIcon
+        internal Icon? EmulatedStandardFooterIcon
         {
-            get { return isEmulatedStandardFooterIcon ? customFooterIcon : null; }
+            get => isEmulatedStandardFooterIcon ? customFooterIcon : null;
             set
             {
                 isEmulatedStandardFooterIcon = true;
                 ReplaceIcon(ref customFooterIcon, value, 16);
                 if (IsDialogShowing)
                 {
-                    dialogInstance.PropertyChanged(PropertyCustomFooterIcon);
+                    dialogInstance!.PropertyChanged(PropertyCustomFooterIcon);
                 }
             }
         }
@@ -990,10 +989,7 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets the form icon. It is set by setting <see cref="CustomIcon"/> or <see cref="EmulatedStandardMainIcon"/>.
         /// </summary>
-        internal Icon FormIcon
-        {
-            get { return formIcon; }
-        }
+        internal Icon? FormIcon => formIcon;
 
         #endregion
 
@@ -1064,8 +1060,8 @@ namespace KGySoft.WinForms.Components
                 ReplaceIcon(ref customIcon, null, 0);
                 ReplaceIcon(ref customFooterIcon, null, 0);
                 ReplaceIcon(ref formIcon, null, 0);
-                buttons = null;
-                radioButtons = null;
+                buttons = null!;
+                radioButtons = null!;
             }
         }
 
@@ -1077,7 +1073,7 @@ namespace KGySoft.WinForms.Components
 
         #region Static Methods
 
-        internal static void ReplaceIcon(ref Icon value, Icon newValue, int requiredSize)
+        internal static void ReplaceIcon(ref Icon? value, Icon? newValue, int requiredSize)
         {
             // same instances
             if (value == newValue)
@@ -1138,9 +1134,7 @@ namespace KGySoft.WinForms.Components
         /// <seealso cref="SelectedRadioButtonIndex"/>
         /// <seealso cref="CheckBoxChecked"/>
         public TaskDialogResult Show(IntPtr owner, out int customButtonIndex, out int radioButtonIndex, out bool verificationTextChecked)
-        {
-            return ShowInternal(owner, out customButtonIndex, out radioButtonIndex, out verificationTextChecked);
-        }
+            => ShowInternal(owner, out customButtonIndex, out radioButtonIndex, out verificationTextChecked);
 
         /// <summary>
         /// Shows the <see cref="TaskDialog"/> using the current configuration.
@@ -1163,10 +1157,8 @@ namespace KGySoft.WinForms.Components
         /// <seealso cref="SelectedButtonIndex"/>
         /// <seealso cref="SelectedRadioButtonIndex"/>
         /// <seealso cref="CheckBoxChecked"/>
-        public TaskDialogResult Show(IWin32Window owner, out int customButtonIndex, out int radioButtonIndex, out bool verificationTextChecked)
-        {
-            return Show(owner == null ? IntPtr.Zero : owner.Handle, out customButtonIndex, out radioButtonIndex, out verificationTextChecked);
-        }
+        public TaskDialogResult Show(IWin32Window? owner, out int customButtonIndex, out int radioButtonIndex, out bool verificationTextChecked)
+            => Show(owner?.Handle ?? IntPtr.Zero, out customButtonIndex, out radioButtonIndex, out verificationTextChecked);
 
         /// <summary>
         /// Shows the <see cref="TaskDialog"/> using the current configuration.
@@ -1180,13 +1172,7 @@ namespace KGySoft.WinForms.Components
         /// <seealso cref="SelectedButtonIndex"/>
         /// <seealso cref="SelectedRadioButtonIndex"/>
         /// <seealso cref="CheckBoxChecked"/>
-        public TaskDialogResult Show(IntPtr owner)
-        {
-            int customButtonIndex;
-            int radioButtonIndex;
-            bool verificationTextChecked;
-            return Show(owner, out customButtonIndex, out radioButtonIndex, out verificationTextChecked);
-        }
+        public TaskDialogResult Show(IntPtr owner) => Show(owner, out int _, out int _, out bool _);
 
         /// <summary>
         /// Shows the <see cref="TaskDialog"/> using the current configuration.
@@ -1200,13 +1186,7 @@ namespace KGySoft.WinForms.Components
         /// <seealso cref="SelectedButtonIndex"/>
         /// <seealso cref="SelectedRadioButtonIndex"/>
         /// <seealso cref="CheckBoxChecked"/>
-        public TaskDialogResult Show(IWin32Window owner)
-        {
-            int customButtonIndex;
-            int radioButtonIndex;
-            bool verificationTextChecked;
-            return Show(owner == null ? IntPtr.Zero : owner.Handle, out customButtonIndex, out radioButtonIndex, out verificationTextChecked);
-        }
+        public TaskDialogResult Show(IWin32Window? owner) => Show(owner?.Handle ?? IntPtr.Zero, out int _, out int _, out bool _);
 
         /// <summary>
         /// Shows the <see cref="TaskDialog"/> using the current configuration.
@@ -1219,22 +1199,13 @@ namespace KGySoft.WinForms.Components
         /// <seealso cref="SelectedButtonIndex"/>
         /// <seealso cref="SelectedRadioButtonIndex"/>
         /// <seealso cref="CheckBoxChecked"/>
-        public TaskDialogResult Show()
-        {
-            int customButtonIndex;
-            int radioButtonIndex;
-            bool verificationTextChecked;
-            return Show(IntPtr.Zero, out customButtonIndex, out radioButtonIndex, out verificationTextChecked);
-        }
+        public TaskDialogResult Show() => Show(IntPtr.Zero, out int _, out int _, out bool _);
 
         /// <summary>
         /// Forces to close the dialog. This causes that <see cref="DialogResult"/> will be <see cref="TaskDialogResult.Close"/>
         /// even if there was no Close button on the dialog.
         /// </summary>
-        public void Close()
-        {
-            DialogResult = TaskDialogResult.Close;
-        }
+        public void Close() => DialogResult = TaskDialogResult.Close;
 
         #endregion
 
@@ -1256,14 +1227,10 @@ namespace KGySoft.WinForms.Components
 
             if (dialogInstance != null)
             {
-                if (collection == buttons)
-                {
+                if (ReferenceEquals(collection, buttons))
                     dialogInstance.CustomButtonsChanged(changeType, index);
-                }
-                else if (collection == radioButtons)
-                {
+                else if (ReferenceEquals(collection, radioButtons))
                     dialogInstance.RadioButtonsChanged(changeType, index);
-                }
             }
         }
 
@@ -1383,7 +1350,7 @@ namespace KGySoft.WinForms.Components
             CreateDialogInstance();
             try
             {
-                dialogResult = dialogInstance.Execute(this, owner, out selectedButtonIndex, out selectedRadioButtonIndex, out checkBoxChecked);
+                dialogResult = dialogInstance!.Execute(this, owner, out selectedButtonIndex, out selectedRadioButtonIndex, out checkBoxChecked);
                 customButtonIndex = selectedButtonIndex;
                 radioButtonIndex = selectedRadioButtonIndex;
                 verificationTextChecked = checkBoxChecked;
@@ -1391,22 +1358,16 @@ namespace KGySoft.WinForms.Components
             }
             finally
             {
-                dialogInstance.Dispose();
+                dialogInstance!.Dispose();
                 dialogInstance = null;
             }
         }
 
         private void CreateDialogInstance()
         {
-            // compatibility mode
-            if (forceCompatibilityMode || IsNonNativeFeatureRequired() || !NativeTaskDialog.IsAvailable)
-            {
-                dialogInstance = new TaskDialogForm();
-            }
-            else
-            {
-                dialogInstance = new NativeTaskDialog();
-            }
+            dialogInstance = forceCompatibilityMode || IsNonNativeFeatureRequired() || !NativeTaskDialog.IsAvailable
+                ? new TaskDialogForm()
+                : new NativeTaskDialog();
         }
 
         /// <summary>
@@ -1427,6 +1388,7 @@ namespace KGySoft.WinForms.Components
 
         #region IDisposable Members
 
+        /// <inheritdoc />
         public void Dispose()
         {
             Dispose(true);
