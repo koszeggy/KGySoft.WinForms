@@ -233,6 +233,7 @@ namespace KGySoft.WinForms.Forms
         private Color gradientStart;
         private Color gradientEnd;
         private Color mainInstructionsColor;
+        private bool? cacheMainInstructionsColor;
         private Font? mainInstructionsFont;
         private bool useLinks;
         private bool isRadioButtonChecking;
@@ -389,9 +390,16 @@ namespace KGySoft.WinForms.Forms
             {
                 if (mainInstructionsColor.IsEmpty)
                 {
-                    mainInstructionsColor = !Application.RenderWithVisualStyles ? SystemColors.WindowText
-                        : WindowsUtils.IsVistaOrLater ? new VisualStyleRenderer(classTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 1).GetColor(ColorProperty.TextColor)
+                    var color = WindowsUtils.IsVistaOrLater
+                        ? new VisualStyleRenderer(classTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 1).GetColor(ColorProperty.TextColor)
                         : Color.FromArgb(0, 51, 153);
+
+                    // ISSUE: When changing from high contrast to normal theme, the VisualStyleRenderer.GetColor(ColorProperty.TextColor) keeps returning
+                    // the high contrast SystemColors.ControlText color for a while. Skipping the caching until returning from OnSystemColorsChanged or
+                    // invalidating in the first Paint does not help. This is still not optimal, because the appearance can be invalid until the label is repainted.
+                    if (cacheMainInstructionsColor != true)
+                        return color;
+                    mainInstructionsColor = color;
                 }
                 return mainInstructionsColor;
             }
@@ -455,7 +463,11 @@ namespace KGySoft.WinForms.Forms
         protected override void OnSystemColorsChanged(EventArgs e)
         {
             base.OnSystemColorsChanged(e);
+            PointF scale = this.GetScale();
+            Configuration cfg = GetConfiguration();
             ResetTheme();
+            ResetWidths(cfg, scale);
+            ResetHeights(cfg);
         }
 
         #endregion
@@ -1257,15 +1269,20 @@ namespace KGySoft.WinForms.Forms
         private void ResetTheme()
         {
             // clearing caches
-            mainInstructionsColor = Color.Empty;
+            btnShowHideDetails.ResetTheme();
             mainInstructionsFont?.Dispose();
             mainInstructionsFont = null;
-            btnShowHideDetails.ResetTheme();
+
+            // fonts
+            lblMainInstruction.Font = null!;
+            lblMainInstruction.Font = !String.IsNullOrEmpty(host.MainInstruction) ? MainInstructionsFont : Font;
 
             // colors
             bool isThemed = Application.RenderWithVisualStyles;
+            cacheMainInstructionsColor ??= isThemed; // Not allowing caching the themed fore color if starting with non-themed rendering. See more details in ThemedMainInstructionsColor.
             BackColor = isThemed ? Color.FromArgb(240, 240, 240) : SystemColors.Control;
-            pnlMain.BackColor = isThemed ? Color.White : SystemColors.Control;
+            pnlMain.BackColor = isThemed ? SystemColors.Window : SystemColors.Control;
+            pnlMain.ForeColor = isThemed ? SystemColors.WindowText : SystemColors.ControlText;
             Color dividerBottom = isThemed ? Color.FromArgb(223, 223, 223) : SystemColors.Control;
             Color dividerTop = isThemed ? Color.White : SystemColors.GrayText;
             pnlDividerMainBottom.BackColor = dividerBottom;
@@ -1281,14 +1298,10 @@ namespace KGySoft.WinForms.Forms
             }
             else
             {
-                lblMainInstruction.ForeColor = ThemedMainInstructionsColor;
+                lblMainInstruction.ForeColor = isThemed ? ThemedMainInstructionsColor : SystemColors.ControlText;
                 pnlMainIconBackground.BackColor = pnlMain.BackColor;
                 lblMainInstruction.Padding = new Padding(8, 12, 8, 5);
             }
-
-            // fonts
-            if (!String.IsNullOrEmpty(host.MainInstruction))
-                lblMainInstruction.Font = MainInstructionsFont;
 
             // progress bar
             if (!WindowsUtils.IsVistaOrLater)

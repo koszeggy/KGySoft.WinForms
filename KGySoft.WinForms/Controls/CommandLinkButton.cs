@@ -1491,7 +1491,7 @@ namespace KGySoft.WinForms.Controls
                     defaultAnimationTimer.Interval = UxTheme.GetThemeTransitionDuration(hTheme, (int)BUTTONPARTS.BP_COMMANDLINK,
                         (int)COMMANDLINKSTATES.CMDLS_DEFAULTED, 
                         (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING,
-                        Constants.TMT_TRANSITIONDURATIONS, out int duration) == 0 ? duration : 1000;
+                        Constants.TMT_TRANSITIONDURATIONS, out int duration) == 0 && duration != 0 ? duration : 1000;
                     defaultAnimationTimer.Tick += defaultAnimationTimer_Tick;
                 }
 
