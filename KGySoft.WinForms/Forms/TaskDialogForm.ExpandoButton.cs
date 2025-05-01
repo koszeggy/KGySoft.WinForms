@@ -22,6 +22,7 @@ using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
+using KGySoft.Drawing;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.WinApi;
 
@@ -43,7 +44,7 @@ namespace KGySoft.WinForms.Forms
 
             #region Static Fields
 
-            static readonly Size imageSize = new Size(19, 21);
+            static readonly Size referenceImageSize = new Size(19, 21);
 
             #endregion
 
@@ -52,9 +53,15 @@ namespace KGySoft.WinForms.Forms
             private bool isHovered;
             private bool isMouseDown;
             private bool isPressed;
+            private bool isExpanded;
             private string? textExpanded;
             private string? textCollapsed;
-            private bool isExpanded;
+            private Image? cachedDefaultImageNormalDown;
+            private Image? cachedDefaultImageHoveredDown;
+            private Image? cachedDefaultImagePressedDown;
+            private Image? cachedDefaultImageNormalUp;
+            private Image? cachedDefaultImageHoveredUp;
+            private Image? cachedDefaultImagePressedUp;
 
             #endregion
 
@@ -139,6 +146,17 @@ namespace KGySoft.WinForms.Forms
 
             #endregion
 
+            #region Private Properties
+
+            private Image DefaultImageNormalDown => cachedDefaultImageNormalDown ??= ExtractBitmap(Resources.ExpandoNormalDown);
+            private Image DefaultImageHoveredDown => cachedDefaultImageHoveredDown ??= ExtractBitmap(Resources.ExpandoHoveredDown);
+            private Image DefaultImagePressedDown => cachedDefaultImagePressedDown ??= ExtractBitmap(Resources.ExpandoPressedDown);
+            private Image DefaultImageNormalUp => cachedDefaultImageNormalUp ??= ExtractBitmap(Resources.ExpandoNormalUp);
+            private Image DefaultImageHoveredUp => cachedDefaultImageHoveredUp ??= ExtractBitmap(Resources.ExpandoHoveredUp);
+            private Image DefaultImagePressedUp => cachedDefaultImagePressedUp ??= ExtractBitmap(Resources.ExpandoPressedUp);
+
+            #endregion
+
             #endregion
 
             #region Methods
@@ -147,12 +165,31 @@ namespace KGySoft.WinForms.Forms
 
             public override Size GetPreferredSize(Size proposedSize)
             {
-                using (Graphics g = Graphics.FromHwnd(Handle))
-                {
-                    g.SetQuality();
-                    return LayoutUtils.UnionSizes(imageSize, GetTextSize(g, null, proposedSize) + new Size(0, 1)) // +1 for focus rectangle
-                        + new Size(Margin.Left + imageSize.Width, Margin.Top);
-                }
+                using Graphics g = Graphics.FromHwnd(Handle);
+                g.SetQuality();
+                var imageSize = GetImageSize(g);
+                return LayoutUtils.UnionSizes(imageSize, GetTextSize(g, imageSize, null, proposedSize) + new Size(0, 1)) // +1 for focus rectangle
+                    + new Size(Margin.Left + imageSize.Width, Margin.Top);
+            }
+
+            #endregion
+
+            #region Internal Methods
+
+            internal void ResetTheme()
+            {
+                cachedDefaultImageNormalDown?.Dispose();
+                cachedDefaultImageHoveredDown?.Dispose();
+                cachedDefaultImagePressedDown?.Dispose();
+                cachedDefaultImageNormalUp?.Dispose();
+                cachedDefaultImageHoveredUp?.Dispose();
+                cachedDefaultImagePressedUp?.Dispose();
+                cachedDefaultImageNormalDown = null;
+                cachedDefaultImageHoveredDown = null;
+                cachedDefaultImagePressedDown = null;
+                cachedDefaultImageNormalUp = null;
+                cachedDefaultImageHoveredUp = null;
+                cachedDefaultImagePressedUp = null;
             }
 
             #endregion
@@ -205,32 +242,46 @@ namespace KGySoft.WinForms.Forms
 
             protected override void OnPaintState(PaintStateEventArgs e)
             {
+                Graphics g = e.Graphics;
                 using (Brush b = new SolidBrush(BackColor))
                 {
-                    e.Graphics.FillRectangle(b, ClientRectangle);
+                    g.FillRectangle(b, ClientRectangle);
                 }
 
+                Size imageSize;
                 if (Application.RenderWithVisualStyles)
                 {
                     if (WindowsUtils.IsVistaOrLater)
-                        PaintNativeButton(e.Graphics);
+                        PaintNativeButton(g, out imageSize);
                     else
-                        PaintThemedButton(e.Graphics);
+                        PaintThemedButton(g, out imageSize);
                 }
                 else
-                {
-                    PaintClassicButton(e.Graphics);
-                }
+                    PaintClassicButton(g, out imageSize);
 
-                Size textSize = GetTextSize(e.Graphics, isExpanded, Size);
+                Size textSize = GetTextSize(g, imageSize, isExpanded, Size);
                 TextFormatFlags formatFlags = this.GetFormatFlags(); //TextFormatFlags.WordBreak | TextFormatFlags.Left | TextFormatFlags.EndEllipsis;
                 Rectangle textRect = new Rectangle(Margin.Left + imageSize.Width, Margin.Top, textSize.Width, textSize.Height);
-                TextRenderer.DrawText(e.Graphics, Text, Font, textRect, ForeColor, formatFlags);
+                TextRenderer.DrawText(g, Text, Font, textRect, ForeColor, formatFlags);
                 if (ShowFocusCues && Enabled && (IsDefault || Focused))
                 {
                     textRect.Inflate(0, 1);
-                    ControlPaint.DrawFocusRectangle(e.Graphics, textRect, ForeColor, BackColor);
+                    ControlPaint.DrawFocusRectangle(g, textRect, ForeColor, BackColor);
                 }
+            }
+
+            protected override void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    cachedDefaultImageNormalDown?.Dispose();
+                    cachedDefaultImageHoveredDown?.Dispose();
+                    cachedDefaultImagePressedDown?.Dispose();
+                    cachedDefaultImageNormalUp?.Dispose();
+                    cachedDefaultImageHoveredUp?.Dispose();
+                    cachedDefaultImagePressedUp?.Dispose();
+                }
+                base.Dispose(disposing);
             }
 
             #endregion
@@ -245,7 +296,42 @@ namespace KGySoft.WinForms.Forms
             //    }
             //}
 
-            private Size GetTextSize(Graphics g, bool? expanded, Size proposedSize)
+            private Size GetImageSize(Graphics g)
+            {
+                if (Application.RenderWithVisualStyles)
+                {
+                    if (WindowsUtils.IsVistaOrLater)
+                    {
+                        VisualStyleRenderer renderer = new VisualStyleRenderer(classTaskDialog, Constants.TDLG_EXPANDOBUTTON, (int)EXPANDOBUTTONSTATES.TDLGEBS_NORMAL);
+                        return renderer.GetPartSize(g, ThemeSizeType.True);
+                    }
+
+                    return DefaultImageNormalDown.Size;
+                }
+
+                return referenceImageSize.Scale(g.GetScale());
+            }
+
+            private Image ExtractBitmap(Icon icon)
+            {
+                try
+                {
+                    Size desiredSize = this.ScaleSize(referenceImageSize);
+                    Bitmap scaledDefaultGlyph = icon.ExtractNearestBitmap(desiredSize, PixelFormat.Format32bppArgb);
+                    if (scaledDefaultGlyph.Width >= desiredSize.Width || desiredSize.Width < scaledDefaultGlyph.Width * 1.25f)
+                        return scaledDefaultGlyph;
+
+                    var resizedDefaultGlyph = scaledDefaultGlyph.Resize(desiredSize);
+                    scaledDefaultGlyph.Dispose();
+                    return resizedDefaultGlyph;
+                }
+                finally
+                {
+                    icon.Dispose();
+                }
+            }
+
+            private Size GetTextSize(Graphics g, Size imageSize, bool? expanded, Size proposedSize)
             {
                 if (proposedSize.Width <= 1)
                     proposedSize.Width = Int32.MaxValue;
@@ -258,7 +344,7 @@ namespace KGySoft.WinForms.Forms
                     !expanded.HasValue || !expanded.Value ? TextRenderer.MeasureText(g, TextCollapsed, Font, proposedSize, flags) : Size.Empty);
             }
 
-            private void PaintNativeButton(Graphics g)
+            private void PaintNativeButton(Graphics g, out Size imageSize)
             {
                 EXPANDOBUTTONSTATES state;
                 if (!isExpanded)
@@ -280,37 +366,34 @@ namespace KGySoft.WinForms.Forms
                         state = EXPANDOBUTTONSTATES.TDLGEBS_EXPANDEDNORMAL;
                 }
 
-                VisualStyleRenderer renderer = new VisualStyleRenderer("TASKDIALOG", Constants.TDLG_EXPANDOBUTTON, (int)state);
-                renderer.DrawBackground(g, new Rectangle(Point.Empty, renderer.GetPartSize(g, ThemeSizeType.True)));
+                VisualStyleRenderer renderer = new VisualStyleRenderer(classTaskDialog, Constants.TDLG_EXPANDOBUTTON, (int)state);
+                imageSize = renderer.GetPartSize(g, ThemeSizeType.True);
+                renderer.DrawBackground(g, new Rectangle(Point.Empty, imageSize));
             }
 
-            private void PaintThemedButton(Graphics g)
+            private void PaintThemedButton(Graphics g, out Size imageSize)
             {
                 Image image;
                 if (!isExpanded)
                 {
-                    if (isPressed)
-                        image = Resources.ExpandoPressedDown;
-                    else if (isHovered)
-                        image = Resources.ExpandoHoveredDown;
-                    else
-                        image = Resources.ExpandoNormalDown;
+                    image = isPressed ? DefaultImagePressedDown
+                        : isHovered ? DefaultImageHoveredDown
+                        : DefaultImageNormalDown;
                 }
                 else
                 {
-                    if (isPressed)
-                        image = Resources.ExpandoPressedUp;
-                    else if (isHovered)
-                        image = Resources.ExpandoHoveredUp;
-                    else
-                        image = Resources.ExpandoNormalUp;
+                    image = isPressed ? DefaultImagePressedUp
+                        : isHovered ? DefaultImageHoveredUp
+                        : DefaultImageNormalUp;
                 }
 
-                g.DrawImage(image, new Point(0, 1));
+                imageSize = image.Size;
+                g.DrawImage(image, new Rectangle(Point.Empty, imageSize));
             }
 
-            private void PaintClassicButton(Graphics g)
+            private void PaintClassicButton(Graphics g, out Size imageSize)
             {
+                imageSize = referenceImageSize.Scale(g.GetScale());
                 Rectangle rect = new Rectangle(Point.Empty, imageSize);
                 ButtonState state = ButtonState.Normal;
                 if (isPressed)

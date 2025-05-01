@@ -1,8 +1,24 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: UxTheme.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.Runtime.InteropServices;
-using System.Text;
+
+#endregion
 
 namespace KGySoft.WinForms.WinApi
 {
@@ -11,6 +27,40 @@ namespace KGySoft.WinForms.WinApi
     /// </summary>
     internal static class UxTheme
     {
+        #region Methods
+
+        #region Public Methods
+
+        /// <summary>
+        /// Gets the duration for the specified transition.
+        /// </summary>
+        /// <param name="hTheme">Handle of the theme data.</param>
+        /// <param name="iPartId">ID of the part.</param>
+        /// <param name="iStateIdFrom">State ID of the part before the transition.</param>
+        /// <param name="iStateIdTo">State ID of the part after the transition.</param>
+        /// <param name="iPropId">Property ID.</param>
+        /// <param name="pdwDuration">Address of a variable that receives the transition duration, in milliseconds.</param>
+        /// <returns>If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.</returns>
+        [DllImport("uxtheme")]
+        public static extern int GetThemeTransitionDuration(IntPtr hTheme, int iPartId, int iStateIdFrom, int iStateIdTo, int iPropId, out int pdwDuration);
+
+        /// <summary>
+        /// Retrieves the value of a font property.
+        /// </summary>
+        /// <param name="hTheme">Handle to a window's specified theme data. Use OpenThemeData to create an HTHEME.</param>
+        /// <param name="hdc">HDC. This parameter may be set to NULL.</param>
+        /// <param name="iPartId">Value of type int that specifies the part that contains the font property. See Parts and States.</param>
+        /// <param name="iStateId">Value of type int that specifies the state of the part. See Parts and States.</param>
+        /// <param name="iPropId">Value of type int that specifies the property to retrieve. For a list of possible values, see Property Identifiers.</param>
+        /// <param name="pFont">Pointer to a LOGFONT structure that receives the font property value.</param>
+        /// <returns></returns>
+        [DllImport("uxtheme")]
+        public static extern int GetThemeFont(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, int iPropId, out LOGFONT pFont);
+
+        #endregion
+
+        #region Internal Methods
+
         /// <summary>
         /// Initialize buffered painting for the current thread.
         /// </summary>
@@ -29,7 +79,7 @@ namespace KGySoft.WinForms.WinApi
         internal static extern int BufferedPaintUnInit();
 
         /// <summary>
-        /// Begins a buffered animation operation. The animation consists of a cross-fade between the contents of two buffers over a specified period of time. 
+        /// Begins a buffered animation operation. The animation consists of a cross-fade between the contents of two buffers over a specified period of time.
         /// </summary>
         /// <param name="hwnd">A handle to the window in which the animations play.</param>
         /// <param name="hdcTarget">A handle of the target DC on which the buffer is animated.</param>
@@ -86,17 +136,8 @@ namespace KGySoft.WinForms.WinApi
         [DllImport("uxtheme", CharSet = CharSet.Auto)]
         internal static extern IntPtr OpenThemeData(IntPtr hwnd, string pszClassList);
 
-        /// <summary>
-        /// Gets the duration for the specified transition.
-        /// </summary>
-        /// <param name="hTheme">Handle of the theme data.</param>
-        /// <param name="iPartId">ID of the part.</param>
-        /// <param name="iStateIdFrom">State ID of the part before the transition.</param>
-        /// <param name="iStateIdTo">State ID of the part after the transition.</param>
-        /// <param name="iPropId">Property ID.</param>
-        /// <param name="pdwDuration">Address of a variable that receives the transition duration, in milliseconds.</param>
-        /// <returns>If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.</returns>
-        [DllImport("uxtheme")]
-        public static extern int GetThemeTransitionDuration(IntPtr hTheme, int iPartId, int iStateIdFrom, int iStateIdTo, int iPropId, out int pdwDuration);
+        #endregion
+
+        #endregion
     }
 }

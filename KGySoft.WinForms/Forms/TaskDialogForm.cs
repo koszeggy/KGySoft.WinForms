@@ -15,13 +15,12 @@
 
 #region Usings
 
-using System.Diagnostics.CodeAnalysis;
-
 #region Used Namespaces
 
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -31,6 +30,7 @@ using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
+using System.Windows.Forms.VisualStyles;
 
 using KGySoft.Collections;
 using KGySoft.CoreLibraries;
@@ -97,22 +97,11 @@ namespace KGySoft.WinForms.Forms
             Close = 807,
         }
 
-        //[Flags]
-        //private enum ResizableElements
-        //{
-        //    None = 0,
-        //    MainInstruction = 1,
-        //    Buttons = 1 << 1,
-        //    MainTexts = 1 << 2,
-        //    CommandLinks = 1 << 3,
-        //    RadioButtons = 1 << 4,
-
-        //    All = 0xFF,
-        //}
-
         #endregion
 
         #region Nested classes
+
+        #region Win32Window class
 
         private class Win32Window : IWin32Window
         {
@@ -123,9 +112,19 @@ namespace KGySoft.WinForms.Forms
             #endregion
         }
 
+        #endregion
+
+        #region MainInstructionPanel class
+
         private class MainInstructionPanel : Panel
         {
+            #region Properties
+
             internal TaskDialogForm Owner { get; set; } = null!;
+
+            #endregion
+
+            #region Methods
 
             protected override void OnPaintBackground(PaintEventArgs e)
             {
@@ -141,22 +140,30 @@ namespace KGySoft.WinForms.Forms
             {
                 if (!DesignMode && Owner.isSpecialHeadColors)
                 {
-                    using (LinearGradientBrush brush = new LinearGradientBrush(ClientRectangle, Owner.gradientStart, Owner.gradientEnd, LinearGradientMode.Horizontal))
-                    {
-                        e.Graphics.FillRectangle(brush, ClientRectangle);
-                    }
-
+                    using LinearGradientBrush brush = new LinearGradientBrush(ClientRectangle, Owner.gradientStart, Owner.gradientEnd, LinearGradientMode.Horizontal);
+                    e.Graphics.FillRectangle(brush, ClientRectangle);
                     return;
                 }
 
                 base.OnPaint(e);
             }
+
+            #endregion
         }
+
+        #endregion
+
+        #region Configuration class
 
         private class Configuration
         {
-            // not static because can be changed with system settings
+            #region Fields
+
             int baseUnitX;
+
+            #endregion
+
+            #region Properties
 
             internal bool HasMainInstruction { get; set; }
             internal bool HasMessage { get; set; }
@@ -174,18 +181,31 @@ namespace KGySoft.WinForms.Forms
             internal bool IsDetailsVisibleInFooter { get; set; }
             internal bool IsRightToLeft { get; set; }
 
+            #endregion
+
+            #region Methods
+
             internal int DluToPixelsX(int dialogUnitX)
             {
                 if (baseUnitX == 0)
-                {
                     baseUnitX = (int)User32.GetDialogBaseUnits() & 0xFFFF;
-                }
 
                 return dialogUnitX * baseUnitX / 4;
             }
+
+            #endregion
         }
 
         #endregion
+
+        #endregion
+
+        #endregion
+
+        #region Constants
+
+        private const string classTaskDialog = "TASKDIALOG";
+        private const string classTextStyle = "TEXTSTYLE";
 
         #endregion
 
@@ -212,12 +232,11 @@ namespace KGySoft.WinForms.Forms
         private bool isSpecialHeadColors;
         private Color gradientStart;
         private Color gradientEnd;
+        private Color mainInstructionsColor;
+        private Font? mainInstructionsFont;
         private bool useLinks;
         private bool isRadioButtonChecking;
         private bool isForcedClosing;
-        private bool isThemed;
-        private Font? themedFontLarge;
-        private Font? themedFontSmall;
         private bool altF4Pressed;
         private bool isResizing;
         private bool isResettingHeight;
@@ -237,6 +256,7 @@ namespace KGySoft.WinForms.Forms
         public TaskDialogForm()
         {
             InitializeComponent();
+            this.DisableAutoScaling();
             pnlMainInstruction.Owner = this;
             HandleCreated += TaskDialogForm_HandleCreated;
             Load += TaskDialogForm_Load;
@@ -254,6 +274,8 @@ namespace KGySoft.WinForms.Forms
             lblDetailsFooter.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
             lblFooter.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
             HelpRequested += TaskDialogForm_HelpRequested;
+            if (SystemFonts.MessageBoxFont is Font font)
+                Font = font;
         }
 
         #endregion
@@ -271,11 +293,6 @@ namespace KGySoft.WinForms.Forms
             {
                 isForcedClosing = true;
                 dialogState = TaskDialogStatus.Closed;
-            }
-
-            if (disposing && (components != null))
-            {
-                components.Dispose();
             }
 
             FreeRadioButtons();
@@ -300,17 +317,8 @@ namespace KGySoft.WinForms.Forms
 
             if (disposing)
             {
-                if (themedFontLarge != null)
-                {
-                    themedFontLarge.Dispose();
-                    themedFontLarge = null;
-                }
-
-                if (themedFontSmall != null)
-                {
-                    themedFontSmall.Dispose();
-                    themedFontSmall = null;
-                }
+                components?.Dispose();
+                mainInstructionsFont?.Dispose();
             }
 
             base.Dispose(disposing);
@@ -322,27 +330,70 @@ namespace KGySoft.WinForms.Forms
 
         #region Properties
 
-        private Font ThemedFontLarge
+        private Font MainInstructionsFont
         {
             get
             {
-                if (themedFontLarge != null)
-                    return themedFontLarge;
+                if (mainInstructionsFont == null)
+                {
+                    if (Application.RenderWithVisualStyles)
+                    {
+                        if (WindowsUtils.IsVistaOrLater)
+                        {
+                            // ISSUE: the following throws an exception because only FontProperty.GlyphFont is accepted by VisualStyleRenderer.GetFont
+                            //var renderer = new VisualStyleRenderer(classTextStyle, Constants.TEXT_MAININSTRUCTION, 0);
+                            //using Graphics g = Graphics.FromHwnd(Handle);
+                            //mainInstructionsFont = renderer.GetFont(g, (FontProperty)Constants.TMT_FONT);
 
-                themedFontLarge = new Font("Arial", 11.75f, FontStyle.Regular, GraphicsUnit.Point);
-                return themedFontLarge;
+                            IntPtr hTheme = UxTheme.OpenThemeData(lblMainInstruction.Handle, classTextStyle);
+                            if (hTheme != IntPtr.Zero)
+                            {
+                                using Graphics g = Graphics.FromHwnd(lblMainInstruction.Handle);
+                                IntPtr hdc = g.GetHdc();
+                                try
+                                {
+                                    UxTheme.GetThemeFont(hTheme, hdc, Constants.TEXT_MAININSTRUCTION, 0, Constants.TMT_FONT, out LOGFONT logFont);
+                                    using Font font = new Font(SystemFonts.MessageBoxFont, FontStyle.Bold);
+                                    mainInstructionsFont = Font.FromLogFont(logFont);
+                                }
+                                catch (Exception e) when (!e.IsCritical())
+                                {
+                                    mainInstructionsFont = new Font("Segoe UI", 16);
+                                }
+                                finally
+                                {
+                                    g.ReleaseHdc(hdc);
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Windows XP
+                            mainInstructionsFont = new Font("Arial", 11.75f, FontStyle.Regular, GraphicsUnit.Point);
+                        }
+                    }
+                    else
+                    {
+                        // No visual styles
+                        mainInstructionsFont = new Font(SystemFonts.DialogFont, FontStyle.Bold);
+                    }
+                }
+
+                return mainInstructionsFont!;
             }
         }
 
-        private Font ThemedFontSmall
+        private Color ThemedMainInstructionsColor
         {
             get
             {
-                if (themedFontSmall != null)
-                    return themedFontSmall;
-
-                themedFontSmall = new Font("Arial", 8f, FontStyle.Regular, GraphicsUnit.Point);
-                return themedFontSmall;
+                if (mainInstructionsColor.IsEmpty)
+                {
+                    mainInstructionsColor = !Application.RenderWithVisualStyles ? SystemColors.WindowText
+                        : WindowsUtils.IsVistaOrLater ? new VisualStyleRenderer(classTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 1).GetColor(ColorProperty.TextColor)
+                        : Color.FromArgb(0, 51, 153);
+                }
+                return mainInstructionsColor;
             }
         }
 
@@ -397,11 +448,14 @@ namespace KGySoft.WinForms.Forms
         {
             // can happen when RightToLeft changes
             if (dialogState == TaskDialogStatus.Showing)
-            {
                 isRecreatingDialog = true;
-            }
-
             base.OnHandleDestroyed(e);
+        }
+
+        protected override void OnSystemColorsChanged(EventArgs e)
+        {
+            base.OnSystemColorsChanged(e);
+            ResetTheme();
         }
 
         #endregion
@@ -459,6 +513,7 @@ namespace KGySoft.WinForms.Forms
             isDetailsInFooter = (host.Options & TaskDialogOptions.ExpandFooterArea) != TaskDialogOptions.None;
             useLinks = (host.Options & TaskDialogOptions.HyperlinksEnabled) != TaskDialogOptions.None;
             Configuration cfg = GetConfiguration();
+            PointF scale = this.GetScale();
 
             // options
             ControlBox = (host.Options & TaskDialogOptions.AllowCancel) != TaskDialogOptions.None || (host.StandardButtons & TaskDialogStandardButtonFlags.Cancel) != TaskDialogStandardButtonFlags.None;
@@ -468,15 +523,19 @@ namespace KGySoft.WinForms.Forms
             lblDetailsMain.ResolveHyperlinks = resolve;
             lblFooter.ResolveHyperlinks = resolve;
             lblDetailsFooter.ResolveHyperlinks = resolve;
-            MinimumSize = new Size(cfg.DluToPixelsX(180), 0);
             RightToLeft = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
+
+            // size constraints (TODO: reset on DPI change)
+            MinimumSize = new Size(cfg.DluToPixelsX(180), 0).Scale(scale);
+            pnlMainTexts.MinimumSize = new Size(0, 25).Scale(scale);
+            pnlMainIconBackground.MinimumSize = new Size(0, 49).Scale(scale);
 
             // visibilities
             ResetVisibilities(cfg);
 
             // setting icon
-            ResetMainIcon();
-            ResetFooterIcon();
+            ResetMainIcon(scale);
+            ResetFooterIcon(scale);
 
             // set theme
             ResetTheme();
@@ -508,7 +567,7 @@ namespace KGySoft.WinForms.Forms
             ResetRadioButtons(cfg);
 
             // buttons
-            ResetButtons(cfg);
+            ResetButtons(cfg, scale);
 
             // command links
             ResetCommandLinks(cfg);
@@ -522,7 +581,7 @@ namespace KGySoft.WinForms.Forms
             isResizing = false;
 
             // setting sizes
-            ResetWidths(cfg);
+            ResetWidths(cfg, scale);
 
             // setting heights (will be called also on OnShow if needed - this is just to prevent immediate resizing when form is appearing)
             ResetHeights(cfg);
@@ -531,12 +590,12 @@ namespace KGySoft.WinForms.Forms
 
         private void ResetChecksWidth(Configuration cfg, bool minSize)
         {
-            int maxWidth = cfg.DluToPixelsX(120);
+            int maxWidth = pnlMainControls.Width / 2;
             int desiredWidth = 0;
 
             if (minSize)
             {
-                // setting minimum size so buttons may comsum the rest place: counting desiredWidth from checks
+                // setting minimum size so buttons may consume the rest place: counting desiredWidth from checks
                 if (cfg.HasVerification)
                     desiredWidth = cbCheckBox.GetPreferredSize(Size.Empty).Width + cbCheckBox.Margin.Horizontal + pnlChecks.Margin.Horizontal;
 
@@ -597,7 +656,7 @@ namespace KGySoft.WinForms.Forms
                         if (cfg.HasButtons)
                         {
                             pnlMainControls.ColumnStyles[0].SizeType = SizeType.Absolute;
-                            pnlMainControls.ColumnStyles[0].Width = 200f; // can be refined below
+                            pnlMainControls.ColumnStyles[0].Width = pnlMainControls.Width / 2f; // will be refined in ResetChecksWidth
                             pnlMainControls.ColumnStyles[1].SizeType = SizeType.Percent;
                             pnlMainControls.ColumnStyles[1].Width = 100f;
                         }
@@ -679,7 +738,7 @@ namespace KGySoft.WinForms.Forms
             {
                 AdvancedRadioButton rb = new AdvancedRadioButton
                 {
-                    AutoSize = false,
+                    AutoSize = true,
                     CheckAlign = ContentAlignment.TopLeft,
                     Name = radioButton.Name,
                     Text = radioButton.Text,
@@ -709,7 +768,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Resets standard and custom buttons (not command links).
         /// </summary>
-        private void ResetButtons(Configuration cfg)
+        private void ResetButtons(Configuration cfg, PointF scale)
         {
             if (dialogState != TaskDialogStatus.Initializing)
             {
@@ -724,7 +783,7 @@ namespace KGySoft.WinForms.Forms
             // a simple OK button
             if (host.StandardButtons == TaskDialogStandardButtonFlags.None && host.Buttons.Count == 0)
             {
-                AddStandardButton(TaskDialogStandardButtonFlags.OK);
+                AddStandardButton(TaskDialogStandardButtonFlags.OK, scale);
             }
             else
             {
@@ -735,20 +794,20 @@ namespace KGySoft.WinForms.Forms
                     foreach (TaskDialogButton button in host.Buttons)
                     {
                         AdvancedButton btn = new AdvancedButton
-                            {
-                                UseVisualStyleBackColor = true,
-                                AutoSize = false,
-                                Name = button.Name,
-                                Text = button.Text,
-                                Enabled = button.Enabled,
-                                TextImageRelation = TextImageRelation.ImageBeforeText,
-                                Tag = button,
-                                Margin = new Padding(3, 0, 3, 0),
-                                AutoSizeMode = AutoSizeMode.GrowAndShrink, // though AutoSize is false, GetPreferredSize would otherwise union with self Size
-                                Size = new Size(70, 23),
-                                MinimumSize = new Size(70, 23),
-                                IsElevated = button.IsElevated
-                            };
+                        {
+                            UseVisualStyleBackColor = true,
+                            AutoSize = false,
+                            Name = button.Name,
+                            Text = button.Text,
+                            Enabled = button.Enabled,
+                            TextImageRelation = TextImageRelation.ImageBeforeText,
+                            Tag = button,
+                            Margin = new Padding(3.Scale(scale.X), 0, 3.Scale(scale.X), 0),
+                            AutoSizeMode = AutoSizeMode.GrowAndShrink, // though AutoSize is false, GetPreferredSize would otherwise union with self Size
+                            Size = new Size(70, 23).Scale(scale),
+                            MinimumSize = new Size(70, 23).Scale(scale),
+                            IsElevated = button.IsElevated
+                        };
 
                         btn.Click += Button_Click;
                         BaseToolTip.SetToolTip(btn, button.Description);
@@ -765,7 +824,7 @@ namespace KGySoft.WinForms.Forms
                 {
                     foreach (TaskDialogStandardButtonFlags flag in Enum<TaskDialogStandardButtonFlags>.GetFlags(host.StandardButtons, false))
                     {
-                        AddStandardButton(flag);
+                        AddStandardButton(flag, scale);
                     }
                 }
             }
@@ -796,16 +855,16 @@ namespace KGySoft.WinForms.Forms
                 }
 
                 CommandLinkButton btn = new CommandLinkButton
-                    {
-                        Name = button.Name,
-                        Text = text,
-                        Description = description.ToString(),
-                        Enabled = button.Enabled,
-                        Tag = button,
-                        Dock = DockStyle.Top,
-                        IsElevated = button.IsElevated,
-                        UseDefaultGlyph = (host.Options & TaskDialogOptions.UseCommandLinks) != TaskDialogOptions.None
-                    };
+                {
+                    Name = button.Name,
+                    Text = text,
+                    Description = description.ToString(),
+                    Enabled = button.Enabled,
+                    Tag = button,
+                    Dock = DockStyle.Top,
+                    IsElevated = button.IsElevated,
+                    UseDefaultGlyph = (host.Options & TaskDialogOptions.UseCommandLinks) != TaskDialogOptions.None
+                };
 
                 btn.Click += Button_Click;
                 button.Id = index++;
@@ -828,7 +887,7 @@ namespace KGySoft.WinForms.Forms
             }
             else
             {
-                // standard buton
+                // standard button
                 defaultButton = null;
                 if (host.DefaultStandardButton != TaskDialogStandardButtons.None)
                 {
@@ -875,9 +934,7 @@ namespace KGySoft.WinForms.Forms
                     if (cfg.HasMainInstruction)
                     {
                         if (isSpecialHeadColors)
-                            pnlMainInstruction.Height =
-                                pnlMainIconBackground.Height =
-                                Math.Max(lblMainInstruction.Height, pnlMainIconBackground.MinimumSize.Height);
+                            pnlMainInstruction.Height = pnlMainIconBackground.Height = Math.Max(lblMainInstruction.Height, pnlMainIconBackground.MinimumSize.Height);
                         else
                             pnlMainInstruction.Height = lblMainInstruction.Height + pnlMainInstruction.Padding.Vertical;
                     }
@@ -990,20 +1047,14 @@ namespace KGySoft.WinForms.Forms
                 Top = screenHeight + screen.Top - Height;
         }
 
-        private void ResetWidths(Configuration cfg)
+        private void ResetWidths(Configuration cfg, PointF scale)
         {
-            // setting pnlChecks minimum width (It always has priority regardles of form width. Its maximum size is smaller than minimum form size so it is ok)
-            if (cfg.HasVerification || cfg.HasDetails)
-            {
-                ResetChecksWidth(cfg, true);
-            }
-
             // setting form width
             Rectangle screen = Screen.FromControl(this).WorkingArea;
             int screenWidth = screen.Width;
             if (host.Width > 0)
             {
-                int desiredWidth = Math.Max(MinimumSize.Width, cfg.DluToPixelsX(host.Width));
+                int desiredWidth = Math.Max(MinimumSize.Width, cfg.DluToPixelsX(host.Width).Scale(scale.X));
                 Width = Math.Min(desiredWidth, screenWidth);
             }
             // auto width
@@ -1033,7 +1084,7 @@ namespace KGySoft.WinForms.Forms
                 }
 
                 // lblMessage, lblDetailsMain, command links text: up to 280 DLU
-                int maxWidth = cfg.DluToPixelsX(280);
+                int maxWidth = cfg.DluToPixelsX(280).Scale(scale.X);
                 if (desiredWidth < maxWidth)
                 {
                     // message
@@ -1080,6 +1131,12 @@ namespace KGySoft.WinForms.Forms
                 Width = Math.Min(desiredWidth + widthClientDiff, screenWidth);
             }
 
+            // setting pnlChecks minimum width (It always has priority regardless of form width. Its maximum size is smaller than minimum form size so it is ok)
+            if (cfg.HasVerification || cfg.HasDetails)
+            {
+                ResetChecksWidth(cfg, true);
+            }
+
             // resetting button sizes along with max size so they will not be wider than text
             if (cfg.HasButtons)
             {
@@ -1110,16 +1167,16 @@ namespace KGySoft.WinForms.Forms
                 Left = screenWidth + screen.Left - Width;
         }
 
-        private void AddStandardButton(TaskDialogStandardButtonFlags standardButton)
+        private void AddStandardButton(TaskDialogStandardButtonFlags standardButton, PointF scale)
         {
             AdvancedButton btn = new AdvancedButton
             {
                 UseVisualStyleBackColor = true,
                 AutoSize = false,
-                Margin = new Padding(3, 0, 3, 0),
+                Margin = new Padding(3.Scale(scale.X), 0, 3.Scale(scale.X), 0),
                 AutoSizeMode = AutoSizeMode.GrowAndShrink, // though AutoSize is false, GetPreferredSize would otherwise union with self Size
-                Size = new Size(70, 23),
-                MinimumSize = new Size(70, 23),
+                Size = new Size(70, 23).Scale(scale),
+                MinimumSize = new Size(70, 23).Scale(scale),
             };
             if ((host.Options & TaskDialogOptions.TranslateStandardButtons) != TaskDialogOptions.None)
             {
@@ -1199,9 +1256,14 @@ namespace KGySoft.WinForms.Forms
 
         private void ResetTheme()
         {
-            isThemed = Application.RenderWithVisualStyles;
+            // clearing caches
+            mainInstructionsColor = Color.Empty;
+            mainInstructionsFont?.Dispose();
+            mainInstructionsFont = null;
+            btnShowHideDetails.ResetTheme();
 
             // colors
+            bool isThemed = Application.RenderWithVisualStyles;
             BackColor = isThemed ? Color.FromArgb(240, 240, 240) : SystemColors.Control;
             pnlMain.BackColor = isThemed ? Color.White : SystemColors.Control;
             Color dividerBottom = isThemed ? Color.FromArgb(223, 223, 223) : SystemColors.Control;
@@ -1219,16 +1281,14 @@ namespace KGySoft.WinForms.Forms
             }
             else
             {
-                lblMainInstruction.ForeColor = isThemed ? Color.FromArgb(0, 51, 153) : SystemColors.WindowText;
+                lblMainInstruction.ForeColor = ThemedMainInstructionsColor;
                 pnlMainIconBackground.BackColor = pnlMain.BackColor;
                 lblMainInstruction.Padding = new Padding(8, 12, 8, 5);
             }
 
             // fonts
             if (!String.IsNullOrEmpty(host.MainInstruction))
-            {
-                lblMainInstruction.Font = isThemed ? ThemedFontLarge : new Font(SystemFonts.DialogFont, FontStyle.Bold);
-            }
+                lblMainInstruction.Font = MainInstructionsFont;
 
             // progress bar
             if (!WindowsUtils.IsVistaOrLater)
@@ -1237,11 +1297,11 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetMainIcon()
+        private void ResetMainIcon(PointF scale)
         {
             bool hasMainIcon = host.CustomIcon != null || host.Icon != TaskDialogStandardIcons.None;
             pnlMainIcon.Visible = hasMainIcon;
-            pnlMain.ColumnStyles[0].Width = hasMainIcon ? 50f : 0f;
+            pnlMain.ColumnStyles[0].Width = hasMainIcon ? 50.Scale(scale.X) : 0;
             bool requireSpecialHeadColors = !SystemInformation.HighContrast && host.Icon.In(iconsWithColoredHeader);
 
             if (requireSpecialHeadColors)
@@ -1308,7 +1368,7 @@ namespace KGySoft.WinForms.Forms
                     case TaskDialogStandardIcons.SecurityShield:
                     case TaskDialogStandardIcons.SecurityShieldBlue:
                     case TaskDialogStandardIcons.SecurityShieldGray:
-                        icon = Icons.SecurityShield;
+                        icon = Icons.SystemShield;
                         break;
                     case TaskDialogStandardIcons.SecurityQuestion:
                         icon = Icons.SecurityQuestion;
@@ -1348,11 +1408,11 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetFooterIcon()
+        private void ResetFooterIcon(PointF scale)
         {
             bool hasFooterIcon = host.CustomFooterIcon != null || host.FooterIcon != TaskDialogStandardIcons.None;
             pnlFooterIcon.Visible = hasFooterIcon;
-            pnlFooter.ColumnStyles[0].Width = hasFooterIcon ? 24f : 0f;
+            pnlFooter.ColumnStyles[0].Width = hasFooterIcon ? 24.Scale(scale.X) : 0;
 
             if (!hasFooterIcon)
                 return;
@@ -1390,7 +1450,7 @@ namespace KGySoft.WinForms.Forms
                 case TaskDialogStandardIcons.SecurityShield:
                 case TaskDialogStandardIcons.SecurityShieldBlue:
                 case TaskDialogStandardIcons.SecurityShieldGray:
-                    icon = Icons.SecurityShield;
+                    icon = Icons.SystemShield;
                     break;
                 case TaskDialogStandardIcons.SecurityQuestion:
                     icon = Icons.SecurityQuestion;
@@ -1491,7 +1551,7 @@ namespace KGySoft.WinForms.Forms
             if (visibilityChange || origSize != preferredSize)
                 ResetHeights(cfg ?? GetConfiguration());
 
-            // workaround: hide scrollbar if gets accidentaly visible
+            // workaround: hide scrollbar if it gets accidentally visible
             int screenHeight = Screen.FromControl(this).WorkingArea.Height;
             if (Height < screenHeight)
                 AdjustFormScrollbars(false);
@@ -1950,6 +2010,7 @@ namespace KGySoft.WinForms.Forms
             }
 
             Configuration cfg;
+            PointF scale = this.GetScale();
             switch (propName)
             {
                 case TaskDialog.PropertyMessage:
@@ -2003,7 +2064,7 @@ namespace KGySoft.WinForms.Forms
                             ResetVisibilities(cfg);
                         }
 
-                        ResetButtons(cfg);
+                        ResetButtons(cfg, scale);
                     }
                     finally
                     {
@@ -2013,7 +2074,7 @@ namespace KGySoft.WinForms.Forms
                     ResetDefaultButton(cfg);
                     if (host.Width == 0)
                     {
-                        ResetWidths(cfg);
+                        ResetWidths(cfg, scale);
                     }
 
                     ResetHeights(cfg);
@@ -2024,7 +2085,7 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 case TaskDialog.PropertyWidth:
-                    ResetWidths(cfg = GetConfiguration());
+                    ResetWidths(cfg = GetConfiguration(), scale);
                     ResetHeights(cfg);
                     return;
 
@@ -2046,12 +2107,12 @@ namespace KGySoft.WinForms.Forms
 
                 case TaskDialog.PropertyIcon:
                 case TaskDialog.PropertyCustomIcon:
-                    ResetMainIcon();
+                    ResetMainIcon(this.GetScale());
                     return;
 
                 case TaskDialog.PropertyFooterIcon:
                 case TaskDialog.PropertyCustomFooterIcon:
-                    ResetFooterIcon();
+                    ResetFooterIcon(this.GetScale());
                     return;
 
                 case TaskDialog.PropertyProgressBarStyle:
@@ -2178,6 +2239,7 @@ namespace KGySoft.WinForms.Forms
         {
             Configuration cfg = GetConfiguration();
             bool buttonsChanged = (host.Options & (TaskDialogOptions.UseCommandLinks | TaskDialogOptions.UseCommandLinksNoIcon)) == 0;
+            PointF scale = this.GetScale();
             SuspendLayout();
             try
             {
@@ -2191,7 +2253,7 @@ namespace KGySoft.WinForms.Forms
                 }
 
                 if (buttonsChanged)
-                    ResetButtons(cfg);
+                    ResetButtons(cfg, scale);
                 else
                     ResetCommandLinks(cfg);
             }
@@ -2203,7 +2265,7 @@ namespace KGySoft.WinForms.Forms
             ResetDefaultButton(cfg);
             if (host.Width == 0 || buttonsChanged)
             {
-                ResetWidths(cfg);
+                ResetWidths(cfg, scale);
             }
 
             ResetHeights(cfg);

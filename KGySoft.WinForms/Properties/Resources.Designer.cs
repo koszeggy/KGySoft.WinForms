@@ -131,62 +131,62 @@ namespace KGySoft.WinForms.Properties {
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Bitmap ExpandoHoveredDown {
+        internal static System.Drawing.Icon ExpandoHoveredDown {
             get {
                 object obj = ResourceManager.GetObject("ExpandoHoveredDown", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Icon)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Bitmap ExpandoHoveredUp {
+        internal static System.Drawing.Icon ExpandoHoveredUp {
             get {
                 object obj = ResourceManager.GetObject("ExpandoHoveredUp", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Icon)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Bitmap ExpandoNormalDown {
+        internal static System.Drawing.Icon ExpandoNormalDown {
             get {
                 object obj = ResourceManager.GetObject("ExpandoNormalDown", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Icon)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Bitmap ExpandoNormalUp {
+        internal static System.Drawing.Icon ExpandoNormalUp {
             get {
                 object obj = ResourceManager.GetObject("ExpandoNormalUp", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Icon)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Bitmap ExpandoPressedDown {
+        internal static System.Drawing.Icon ExpandoPressedDown {
             get {
                 object obj = ResourceManager.GetObject("ExpandoPressedDown", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Icon)(obj));
             }
         }
         
         /// <summary>
-        ///   Looks up a localized resource of type System.Drawing.Bitmap.
+        ///   Looks up a localized resource of type System.Drawing.Icon similar to (Icon).
         /// </summary>
-        internal static System.Drawing.Bitmap ExpandoPressedUp {
+        internal static System.Drawing.Icon ExpandoPressedUp {
             get {
                 object obj = ResourceManager.GetObject("ExpandoPressedUp", resourceCulture);
-                return ((System.Drawing.Bitmap)(obj));
+                return ((System.Drawing.Icon)(obj));
             }
         }
         

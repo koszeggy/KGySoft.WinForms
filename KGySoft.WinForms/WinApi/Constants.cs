@@ -188,6 +188,11 @@ namespace KGySoft.WinForms.WinApi
         internal const int TMT_TRANSITIONDURATIONS = 6000;
 
         internal const int TDLG_EXPANDOBUTTON = 13;
+        internal const int TDLG_MAININSTRUCTIONPANE = 2;
+
+        internal const int TEXT_MAININSTRUCTION = 1;
+
+        internal const int TMT_FONT = 210;
 
         internal const int PBM_SETVALUE = WM_USER + 2;
         internal const int PBM_SETMARQUEE = WM_USER + 10;
