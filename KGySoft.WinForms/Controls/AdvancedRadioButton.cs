@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
@@ -39,7 +38,7 @@ namespace KGySoft.WinForms.Controls
     /// The <see cref="AdvancedRadioButton"/> class offers the following features in addition to <see cref="RadioButton"/>:
     /// <list type="bullet">
     /// <item><description><see cref="ButtonBase.AutoSize"/> property works as expected when radio button is docked</description></item>
-    /// <item><description>Different rendering qualities (see <see cref="RenderingQuality"/>) property.</description></item>
+    /// <item><description>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</description></item>
     /// <item><description>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</description></item>
     /// <item><description>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</description></item>
     /// </list>
@@ -55,6 +54,9 @@ namespace KGySoft.WinForms.Controls
         #region Fields
 
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
+        private readonly FadingPainterInternal fadingPainter;
+
+        private RenderingQuality textRenderingQuality;
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private FlatStyle lastAdapterType;
         private Color disabledForeColor;
@@ -65,7 +67,6 @@ namespace KGySoft.WinForms.Controls
         private bool isPressed;
         private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
-        private FadingPainterInternal fadingPainter;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
         private bool left;
         private bool maskPaint;
@@ -87,6 +88,33 @@ namespace KGySoft.WinForms.Controls
         #region Properties
 
         #region Public Properties
+
+        /// <summary>
+        /// Gets or sets the text rendering quality of the <see cref="AdvancedRadioButton"/>.
+        /// </summary>
+        [Category("AdvancedRadioButton")]
+        [Description("Gets or sets the text rendering quality of the advanced radio button. Has effect only when FlatStyle is not System.")]
+        [DefaultValue(RenderingQuality.SystemDefault)]
+        public RenderingQuality TextRenderingQuality
+        {
+            get => textRenderingQuality;
+            set
+            {
+                if (textRenderingQuality == value)
+                    return;
+
+                if (!Enum<RenderingQuality>.IsDefined(value))
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
+
+                textRenderingQuality = value;
+                Invalidate();
+                if (AutoSize)
+                {
+                    ResetSizeCache();
+                    PerformLayout();
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets disabled fore color.
@@ -262,52 +290,13 @@ namespace KGySoft.WinForms.Controls
 
             using (Graphics g = Graphics.FromHwnd(Handle))
             {
-                g.SetQuality();
+                g.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
                 preferredSize = ((ISupportButtonAdapter)this).Adapter.GetPreferredSizeCore(g, proposedSize, GetAppearance());
             }
 
             preferredSize = LayoutUtils.UnionSizes(preferredSize + Padding.Size, MinimumSize);
             preferredSizeCache[((long)proposedSize.Height << 32) | (uint)proposedSize.Width] = preferredSize;
             return preferredSize;
-
-
-
-
-
-            //Ez most annyiban jó, hogy tördel, de a base.GetPreferredSize nem veszi figyelembe a RenderingQuality-t, ezért rossz méretet adhat
-            //RenderingQuality helyes figyelembe vételéhez lásd az AdvancedCheckBox-ot
-            //if (!AutoSize)
-            //    return base.GetPreferredSize(proposedSize);
-
-            //Size preferredSize;
-            //if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | proposedSize.Width, out preferredSize))
-            //{
-            //    return preferredSize;
-            //}
-
-            //Size bordersAndPadding = base.GetPreferredSize(new Size(Int32.MaxValue, Int32.MaxValue)) - SingleLineSize;
-            //Size proposedTextSize = proposedSize - bordersAndPadding;
-
-            //// 0 or 1 means unbounded
-            //if (proposedTextSize.Width <= 1)
-            //    proposedTextSize.Width = Int32.MaxValue;
-            //if (proposedTextSize.Height <= 1)
-            //    proposedTextSize.Height = Int32.MaxValue;
-
-            //using (Graphics g = Graphics.FromHwnd(Handle))
-            //{
-            //    bool useGdi = base.FlatStyle == FlatStyle.System || !UseCompatibleTextRendering;
-            //    g.SetQuality(renderingQuality, !useGdi);
-            //    TextFormatFlags flags = this.GetFormatFlags();
-            //    preferredSize =
-            //        useGdi
-            //        ? TextRenderer.MeasureText(base.Text, base.Font, proposedTextSize, this.GetFormatFlags())
-            //        : g.MeasureString(base.Text, base.Font, proposedTextSize, flags.ToStringFormat()).Ceiling();
-            //}
-
-            //preferredSize += bordersAndPadding;
-            //preferredSizeCache[((long)proposedSize.Height << 32) | proposedSize.Width] = preferredSize;
-            //return preferredSize;
         }
 
         #endregion
@@ -490,8 +479,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="e">A <see cref="PaintStateEventArgs"/> that contains the event data.</param>
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
-            e.Graphics.SetQuality();
-            e.Graphics.SmoothingMode = SmoothingMode.Default; // preventing 1 pixel width invalid area of ClientRectangle
+            e.Graphics.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
 
             // ButtonBase.OnPaint:
             if (AutoEllipsis)

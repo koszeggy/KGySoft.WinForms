@@ -94,7 +94,7 @@
             this.groupBox1.Controls.Add(this.advancedRadioButton1);
             this.groupBox1.Controls.Add(this.radioButton1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox1.Location = new System.Drawing.Point(0, 15);
+            this.groupBox1.Location = new System.Drawing.Point(0, 27);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(403, 100);
             this.groupBox1.TabIndex = 1;
@@ -124,7 +124,7 @@
             this.groupBox4.Controls.Add(this.advancedRadioButton4);
             this.groupBox4.Controls.Add(this.advancedRadioButton3);
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox4.Location = new System.Drawing.Point(0, 337);
+            this.groupBox4.Location = new System.Drawing.Point(0, 349);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(403, 82);
             this.groupBox4.TabIndex = 3;
@@ -139,6 +139,7 @@
             this.advancedRadioButton8.Size = new System.Drawing.Size(117, 18);
             this.advancedRadioButton8.TabIndex = 5;
             this.advancedRadioButton8.Text = "High Quality, GDI+";
+            this.advancedRadioButton8.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.High;
             this.advancedRadioButton8.UseCompatibleTextRendering = true;
             this.advancedRadioButton8.UseVisualStyleBackColor = true;
             // 
@@ -147,9 +148,9 @@
             this.advancedRadioButton7.AutoSize = true;
             this.advancedRadioButton7.Location = new System.Drawing.Point(165, 37);
             this.advancedRadioButton7.Name = "advancedRadioButton7";
-            this.advancedRadioButton7.Size = new System.Drawing.Size(134, 18);
+            this.advancedRadioButton7.Size = new System.Drawing.Size(129, 18);
             this.advancedRadioButton7.TabIndex = 4;
-            this.advancedRadioButton7.Text = "Medium Quality, GDI+";
+            this.advancedRadioButton7.Text = "Default Quality, GDI+";
             this.advancedRadioButton7.UseCompatibleTextRendering = true;
             this.advancedRadioButton7.UseVisualStyleBackColor = true;
             // 
@@ -161,6 +162,7 @@
             this.advancedRadioButton6.Size = new System.Drawing.Size(114, 18);
             this.advancedRadioButton6.TabIndex = 3;
             this.advancedRadioButton6.Text = "Low Quality, GDI+";
+            this.advancedRadioButton6.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.Low;
             this.advancedRadioButton6.UseCompatibleTextRendering = true;
             this.advancedRadioButton6.UseVisualStyleBackColor = true;
             // 
@@ -172,6 +174,7 @@
             this.advancedRadioButton5.Size = new System.Drawing.Size(107, 17);
             this.advancedRadioButton5.TabIndex = 2;
             this.advancedRadioButton5.Text = "High Quality, GDI";
+            this.advancedRadioButton5.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.High;
             this.advancedRadioButton5.UseVisualStyleBackColor = true;
             // 
             // advancedRadioButton4
@@ -179,9 +182,9 @@
             this.advancedRadioButton4.AutoSize = true;
             this.advancedRadioButton4.Location = new System.Drawing.Point(12, 37);
             this.advancedRadioButton4.Name = "advancedRadioButton4";
-            this.advancedRadioButton4.Size = new System.Drawing.Size(122, 17);
+            this.advancedRadioButton4.Size = new System.Drawing.Size(119, 17);
             this.advancedRadioButton4.TabIndex = 1;
-            this.advancedRadioButton4.Text = "Medium Quality, GDI";
+            this.advancedRadioButton4.Text = "Default Quality, GDI";
             this.advancedRadioButton4.UseVisualStyleBackColor = true;
             // 
             // advancedRadioButton3
@@ -192,13 +195,14 @@
             this.advancedRadioButton3.Size = new System.Drawing.Size(105, 17);
             this.advancedRadioButton3.TabIndex = 0;
             this.advancedRadioButton3.Text = "Low Quality, GDI";
+            this.advancedRadioButton3.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.Low;
             this.advancedRadioButton3.UseVisualStyleBackColor = true;
             // 
             // ucCaptionedContainer1
             // 
             this.ucCaptionedContainer1.Caption = "Fading animations (Vista and above), disabled colors (uncheck to disable)";
             this.ucCaptionedContainer1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.ucCaptionedContainer1.Location = new System.Drawing.Point(0, 115);
+            this.ucCaptionedContainer1.Location = new System.Drawing.Point(0, 127);
             this.ucCaptionedContainer1.Name = "ucCaptionedContainer1";
             // 
             // ucCaptionedContainer1.ContentPanel

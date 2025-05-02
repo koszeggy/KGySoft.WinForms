@@ -285,7 +285,7 @@
             this.groupBox4.Size = new System.Drawing.Size(450, 69);
             this.groupBox4.TabIndex = 4;
             this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "RenderingQuality";
+            this.groupBox4.Text = "TextRenderingQuality";
             // 
             // advancedLabel17
             // 
@@ -296,6 +296,7 @@
             this.advancedLabel17.Size = new System.Drawing.Size(99, 17);
             this.advancedLabel17.TabIndex = 5;
             this.advancedLabel17.Text = "High Quality, GDI+";
+            this.advancedLabel17.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.High;
             this.advancedLabel17.UseCompatibleTextRendering = true;
             // 
             // advancedLabel16
@@ -304,9 +305,9 @@
             this.advancedLabel16.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel16.Location = new System.Drawing.Point(153, 33);
             this.advancedLabel16.Name = "advancedLabel16";
-            this.advancedLabel16.Size = new System.Drawing.Size(116, 17);
+            this.advancedLabel16.Size = new System.Drawing.Size(111, 17);
             this.advancedLabel16.TabIndex = 4;
-            this.advancedLabel16.Text = "Medium Quality, GDI+";
+            this.advancedLabel16.Text = "Default Quality, GDI+";
             this.advancedLabel16.UseCompatibleTextRendering = true;
             // 
             // advancedLabel15
@@ -318,6 +319,7 @@
             this.advancedLabel15.Size = new System.Drawing.Size(96, 17);
             this.advancedLabel15.TabIndex = 3;
             this.advancedLabel15.Text = "Low Quality, GDI+";
+            this.advancedLabel15.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.Low;
             this.advancedLabel15.UseCompatibleTextRendering = true;
             // 
             // advancedLabel14
@@ -326,9 +328,10 @@
             this.advancedLabel14.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel14.Location = new System.Drawing.Point(22, 46);
             this.advancedLabel14.Name = "advancedLabel14";
-            this.advancedLabel14.Size = new System.Drawing.Size(95, 13);
+            this.advancedLabel14.Size = new System.Drawing.Size(89, 13);
             this.advancedLabel14.TabIndex = 2;
             this.advancedLabel14.Text = "High Quality, GDI";
+            this.advancedLabel14.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.High;
             // 
             // advancedLabel13
             // 
@@ -336,9 +339,9 @@
             this.advancedLabel13.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel13.Location = new System.Drawing.Point(22, 33);
             this.advancedLabel13.Name = "advancedLabel13";
-            this.advancedLabel13.Size = new System.Drawing.Size(111, 13);
+            this.advancedLabel13.Size = new System.Drawing.Size(101, 13);
             this.advancedLabel13.TabIndex = 1;
-            this.advancedLabel13.Text = "Medium Quality, GDI";
+            this.advancedLabel13.Text = "Default Quality, GDI";
             // 
             // advancedLabel12
             // 
@@ -349,6 +352,7 @@
             this.advancedLabel12.Size = new System.Drawing.Size(87, 13);
             this.advancedLabel12.TabIndex = 0;
             this.advancedLabel12.Text = "Low Quality, GDI";
+            this.advancedLabel12.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.Low;
             // 
             // groupBox5
             // 
@@ -383,8 +387,8 @@
             this.advancedLabel18.LinkArea = new System.Windows.Forms.LinkArea(48, 9);
             this.advancedLabel18.Location = new System.Drawing.Point(3, 16);
             this.advancedLabel18.Name = "advancedLabel18";
-            this.advancedLabel18.RawText = "An AdvancedLabel may contain hyperlinks such as <a href=\"https://kgysoft.net\">h" +
-    "yperlink</a> or https://kgysoft.net. See ResolveHyperlinks property.";
+            this.advancedLabel18.RawText = "An AdvancedLabel may contain hyperlinks such as <a href=\"https://kgysoft.net\">hyp" +
+    "erlink</a> or https://kgysoft.net. See ResolveHyperlinks property.";
             this.advancedLabel18.ResolveHyperlinks = KGySoft.WinForms.HyperlinkResolveMode.ResolveAll;
             this.advancedLabel18.Size = new System.Drawing.Size(444, 30);
             this.advancedLabel18.TabIndex = 0;

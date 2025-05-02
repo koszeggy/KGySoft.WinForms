@@ -79,7 +79,7 @@
             this.groupBox1.Controls.Add(this.advancedButton1);
             this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox1.Location = new System.Drawing.Point(0, 144);
+            this.groupBox1.Location = new System.Drawing.Point(0, 27);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(407, 117);
             this.groupBox1.TabIndex = 1;
@@ -146,12 +146,12 @@
             this.groupBox2.Controls.Add(this.advancedButton5);
             this.groupBox2.Controls.Add(this.advancedButton4);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox2.Location = new System.Drawing.Point(0, 386);
+            this.groupBox2.Location = new System.Drawing.Point(0, 269);
             this.groupBox2.Name = "groupBox2";
             this.groupBox2.Size = new System.Drawing.Size(407, 110);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "RenderingQuality";
+            this.groupBox2.Text = "TextRenderingQuality";
             // 
             // advancedButton7
             // 
@@ -160,6 +160,7 @@
             this.advancedButton7.Size = new System.Drawing.Size(140, 23);
             this.advancedButton7.TabIndex = 5;
             this.advancedButton7.Text = "High Quality, GDI+";
+            this.advancedButton7.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.High;
             this.advancedButton7.UseCompatibleTextRendering = true;
             this.advancedButton7.UseVisualStyleBackColor = true;
             // 
@@ -169,7 +170,7 @@
             this.advancedButton8.Name = "advancedButton8";
             this.advancedButton8.Size = new System.Drawing.Size(140, 23);
             this.advancedButton8.TabIndex = 4;
-            this.advancedButton8.Text = "Medium Quality, GDI+";
+            this.advancedButton8.Text = "Default Quality, GDI+";
             this.advancedButton8.UseCompatibleTextRendering = true;
             this.advancedButton8.UseVisualStyleBackColor = true;
             // 
@@ -180,6 +181,7 @@
             this.advancedButton9.Size = new System.Drawing.Size(140, 23);
             this.advancedButton9.TabIndex = 3;
             this.advancedButton9.Text = "Low Quality, GDI+";
+            this.advancedButton9.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.Low;
             this.advancedButton9.UseCompatibleTextRendering = true;
             this.advancedButton9.UseVisualStyleBackColor = true;
             // 
@@ -190,6 +192,7 @@
             this.advancedButton6.Size = new System.Drawing.Size(140, 23);
             this.advancedButton6.TabIndex = 2;
             this.advancedButton6.Text = "High Quality, GDI";
+            this.advancedButton6.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.High;
             this.advancedButton6.UseVisualStyleBackColor = true;
             // 
             // advancedButton5
@@ -198,7 +201,7 @@
             this.advancedButton5.Name = "advancedButton5";
             this.advancedButton5.Size = new System.Drawing.Size(140, 23);
             this.advancedButton5.TabIndex = 1;
-            this.advancedButton5.Text = "Medium Quality, GDI";
+            this.advancedButton5.Text = "Default Quality, GDI";
             this.advancedButton5.UseVisualStyleBackColor = true;
             // 
             // advancedButton4
@@ -208,13 +211,14 @@
             this.advancedButton4.Size = new System.Drawing.Size(140, 23);
             this.advancedButton4.TabIndex = 0;
             this.advancedButton4.Text = "Low Quality, GDI";
+            this.advancedButton4.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.Low;
             this.advancedButton4.UseVisualStyleBackColor = true;
             // 
             // ucCaptionedContainer1
             // 
             this.ucCaptionedContainer1.Caption = "Fading animations (Vista and above), disabled colors (uncheck to disable)";
             this.ucCaptionedContainer1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.ucCaptionedContainer1.Location = new System.Drawing.Point(0, 261);
+            this.ucCaptionedContainer1.Location = new System.Drawing.Point(0, 144);
             this.ucCaptionedContainer1.Name = "ucCaptionedContainer1";
             // 
             // ucCaptionedContainer1.ContentPanel

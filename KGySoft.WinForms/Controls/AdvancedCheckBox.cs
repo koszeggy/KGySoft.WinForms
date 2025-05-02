@@ -19,7 +19,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
@@ -40,7 +39,7 @@ namespace KGySoft.WinForms.Controls
     /// The <see cref="AdvancedCheckBox"/> class offers the following features in addition to <see cref="CheckBox"/>:
     /// <list type="bullet">
     /// <item><description><see cref="ButtonBase.AutoSize"/> property works as expected when check box is docked</description></item>
-    /// <item><description>Different rendering qualities (see <see cref="RenderingQuality"/>) property.</description></item>
+    /// <item><description>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</description></item>
     /// <item><description>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</description></item>
     /// <item><description>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</description></item>
     /// </list>
@@ -56,6 +55,9 @@ namespace KGySoft.WinForms.Controls
         #region Fields
 
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
+        private readonly FadingPainterInternal fadingPainter;
+
+        private RenderingQuality textRenderingQuality;
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private FlatStyle lastAdapterType;
         private Color disabledForeColor;
@@ -66,7 +68,6 @@ namespace KGySoft.WinForms.Controls
         private bool isPressed;
         private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
-        private FadingPainterInternal fadingPainter;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
         private bool maskPaint;
 
@@ -86,6 +87,33 @@ namespace KGySoft.WinForms.Controls
         #region Properties
 
         #region Public Properties
+
+        /// <summary>
+        /// Gets or sets the text rendering quality of the <see cref="AdvancedCheckBox"/>.
+        /// </summary>
+        [Category("AdvancedCheckBox")]
+        [Description("Gets or sets the text rendering quality of the advanced check box. Has effect only when FlatStyle is not System.")]
+        [DefaultValue(RenderingQuality.SystemDefault)]
+        public RenderingQuality TextRenderingQuality
+        {
+            get => textRenderingQuality;
+            set
+            {
+                if (textRenderingQuality == value)
+                    return;
+
+                if (!Enum<RenderingQuality>.IsDefined(value))
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
+
+                textRenderingQuality = value;
+                Invalidate();
+                if (AutoSize)
+                {
+                    ResetSizeCache();
+                    PerformLayout();
+                }
+            }
+        }
 
         /// <summary>
         /// Gets or sets disabled fore color.
@@ -262,7 +290,7 @@ namespace KGySoft.WinForms.Controls
 
             using (Graphics g = Graphics.FromHwnd(Handle))
             {
-                g.SetQuality();
+                g.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
                 preferredSize = ((ISupportButtonAdapter)this).Adapter.GetPreferredSizeCore(g, proposedSize, GetAppearance());
             }
 
@@ -448,8 +476,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="e">A <see cref="PaintStateEventArgs"/> that contains the event data.</param>
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
-            e.Graphics.SetQuality();
-            e.Graphics.SmoothingMode = SmoothingMode.Default; // preventing 1 pixel width invalid area of ClientRectangle
+            e.Graphics.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
 
             // ButtonBase.OnPaint:
             if (AutoEllipsis)
@@ -474,7 +501,7 @@ namespace KGySoft.WinForms.Controls
                 PaintState.Invoke(this, e);
 
             // Control.OnPaint:
-            PaintEventHandler handler = (PaintEventHandler)Events[Accessors.PaintEvent];
+            PaintEventHandler? handler = (PaintEventHandler?)Events[Accessors.PaintEvent];
             handler?.Invoke(this, e);
         }
 

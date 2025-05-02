@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Linq;
@@ -46,7 +47,7 @@ namespace KGySoft.WinForms.Controls
     /// The <see cref="AdvancedLabel"/> class offers the following features in addition to <see cref="LinkLabel"/>:
     /// <list type="bullet">
     /// <item><description><see cref="Label.AutoSize"/> property works as expected when label is docked</description></item>
-    /// <item><description>Different rendering qualities (see <see cref="RenderingQuality"/>) property.</description></item>
+    /// <item><description>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</description></item>
     /// <item><description>Advanced border styles.</description></item>
     /// <item><description>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</description></item>
     /// <item><description>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</description></item>
@@ -74,10 +75,13 @@ namespace KGySoft.WinForms.Controls
 
         #region Instance Fields
 
+        private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
+        private readonly FadingPainterInternal fadingPainter;
+
         private AdvancedBorderStyle borderStyle;
         private int borderWidth;
+        private RenderingQuality textRenderingQuality;
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
-        private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
         private Size lastProposedSize;
         private Color disabledForeColor;
         private Color disabledBackColor;
@@ -85,7 +89,6 @@ namespace KGySoft.WinForms.Controls
         private string? rawText;
         private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
-        private FadingPainterInternal fadingPainter;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
 
         #endregion
@@ -160,7 +163,7 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
         [Category("AdvancedLabel")]
         [Description("Gets or sets the border style of the AdvancedLabel.")]
         [DefaultValue(AdvancedBorderStyle.None)]
-        new public AdvancedBorderStyle BorderStyle
+        public new AdvancedBorderStyle BorderStyle
         {
             get => borderStyle;
             set
@@ -191,7 +194,7 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
                         //base.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException("value");
+                        throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
                 }
 
                 ResetSizeCache();
@@ -216,7 +219,8 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
         [Category("AdvancedLabel")]
         [Description(@"Gets or sets text of the label. When ResolveHyperlinks is true, hyperlinks in text like the following will be converted to hyperlinks:
 This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
-        public override string? Text
+        [AllowNull]
+        public override string Text
         {
             get => base.Text;
             set => RawText = value;
@@ -249,6 +253,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         /// <returns>
         /// The <see cref="T:System.Drawing.Font"/> to apply to the text displayed by the control. The default is the value of the <see cref="P:System.Windows.Forms.Control.DefaultFont"/> property.
         /// </returns>
+        [AllowNull]
         public override Font Font
         {
             get => base.Font;
@@ -256,6 +261,37 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             {
                 ResetSizeCache();
                 base.Font = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text rendering quality of the <see cref="AdvancedLabel"/>.
+        /// </summary>
+        [Category("AdvancedLabel")]
+        [Description("Gets or sets the text rendering quality of the advanced label. Has effect only when FlatStyle is not System.")]
+        [DefaultValue(RenderingQuality.SystemDefault)]
+        public RenderingQuality TextRenderingQuality
+        {
+            get => textRenderingQuality;
+            set
+            {
+                if (textRenderingQuality == value)
+                    return;
+
+                if (!Enum<RenderingQuality>.IsDefined(value))
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
+
+                textRenderingQuality = value;
+                Invalidate();
+                if (AutoSize)
+                {
+                    ResetSizeCache();
+                    NCHelper.InvalidateNC(Handle);
+
+                    // bug: Otherwise PerformLayout wouldn't work.
+                    Size = Size.Empty;
+                    PerformLayout();
+                }
             }
         }
 
@@ -383,11 +419,8 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                 lastProposedSize = proposedSize;
             }
 
-            Size preferredSize;
-            if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out preferredSize))
-            {
+            if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out var preferredSize))
                 return preferredSize;
-            }
 
             TextFormatFlags formatFlags = this.GetFormatFlags();
             bool useGdi = base.FlatStyle == FlatStyle.System || !UseCompatibleTextRendering;
@@ -403,7 +436,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
             using (Graphics g = Graphics.FromHwnd(Handle))
             {
-                g.SetQuality();
+                g.SetTextRenderingQuality(textRenderingQuality, !useGdi);
 
                 if (String.IsNullOrEmpty(base.Text))
                 {
@@ -558,7 +591,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
             ControlAppearanceState state = e.State;
-            e.Graphics.SetQuality();
+            e.Graphics.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
 
             try
             {
@@ -569,7 +602,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                         return;
                 }
 
-                Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
+                Rectangle backRect = ClientRectangle;
                 if (state.BackColor != Color.Transparent)
                 {
                     using (Brush b = new SolidBrush(state.BackColor))
@@ -582,7 +615,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                     return;
 
                 // drawing image
-                Image image = Image;
+                Image? image = Image;
                 if (image != null)
                 {
                     Region oldClip = e.Graphics.Clip;
@@ -630,9 +663,9 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         #region Private Methods
 
-        void AdvancedLabel_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
+        void AdvancedLabel_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (e.Link.LinkData is string url)
+            if (e.Link?.LinkData is string url)
             {
                 HyperlinkClickedEventArgs args = new HyperlinkClickedEventArgs(url);
                 OnHyperlinkClicked(args);

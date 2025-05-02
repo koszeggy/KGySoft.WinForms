@@ -88,6 +88,7 @@ namespace KGySoft.WinForms.Controls
         #region Instance Fields
 
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
+        private readonly FadingPainterInternal fadingPainter;
 
         private bool isHovered;
         private bool isMouseDown;
@@ -137,10 +138,10 @@ namespace KGySoft.WinForms.Controls
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private FlatStyle reportedFlatStyle = FlatStyle.Standard;
         private ContentAlignment lastImageAlign;
+        private RenderingQuality textRenderingQuality;
 
         private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
-        private FadingPainterInternal fadingPainter;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
         private Timer? defaultAnimationTimer;
         private bool isAlternativeDefaultImage;
@@ -540,6 +541,33 @@ namespace KGySoft.WinForms.Controls
                 FreeBrushes();
                 if (!Enabled)
                     Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text rendering quality of the <see cref="CommandLinkButton"/>.
+        /// </summary>
+        [Category("CommandLinkButton")]
+        [Description("Gets or sets the rendering text quality of the command link button. Has effect only when FlatStyle is not System.")]
+        [DefaultValue(RenderingQuality.High)]
+        public RenderingQuality TextRenderingQuality
+        {
+            get => textRenderingQuality;
+            set
+            {
+                if (textRenderingQuality == value)
+                    return;
+
+                if (!Enum<RenderingQuality>.IsDefined(value))
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
+
+                textRenderingQuality = value;
+                Invalidate();
+                if (AutoSize)
+                {
+                    ResetSizeCache();
+                    PerformLayout();
+                }
             }
         }
 
@@ -991,6 +1019,7 @@ namespace KGySoft.WinForms.Controls
             base.AutoEllipsis = true;
             base.TextAlign = ContentAlignment.TopLeft;
             base.ImageAlign = lastImageAlign = ContentAlignment.TopLeft;
+            textRenderingQuality = RenderingQuality.High;
             ResetTheme();
             fadingPainter = new FadingPainterInternal(this, "BUTTON");
         }
@@ -1098,7 +1127,7 @@ namespace KGySoft.WinForms.Controls
 
             using Graphics g = Graphics.FromHwnd(Handle);
             bool gdiPlusTextRendering = UseCompatibleTextRendering;
-            g.SetQuality();
+            g.SetTextRenderingQuality(textRenderingQuality, gdiPlusTextRendering);
 
             Size textSize = Size.Empty;
             StringFormat? sf = gdiPlusTextRendering ? formatFlags.ToStringFormat() : null;
@@ -1381,7 +1410,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="e">A <see cref="PaintStateEventArgs"/> that contains the event data.</param>
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
-            e.Graphics.SetQuality();
+            e.Graphics.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
 
             if (!e.State.Visible)
             {
@@ -1566,7 +1595,8 @@ namespace KGySoft.WinForms.Controls
                 textColor = descColor = DisabledForeColor;
 
             bool gdiPlusTextRendering = UseCompatibleTextRendering;
-            e.Graphics.SetQuality();
+            e.Graphics.SetTextRenderingQuality(textRenderingQuality, gdiPlusTextRendering);
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
             // painting background and image
             if (useTheming)

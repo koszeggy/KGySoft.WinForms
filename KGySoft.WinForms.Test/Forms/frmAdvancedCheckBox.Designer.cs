@@ -94,7 +94,7 @@
             this.groupBox1.Controls.Add(this.advancedCheckBox1);
             this.groupBox1.Controls.Add(this.checkBox1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox1.Location = new System.Drawing.Point(0, 15);
+            this.groupBox1.Location = new System.Drawing.Point(0, 27);
             this.groupBox1.Name = "groupBox1";
             this.groupBox1.Size = new System.Drawing.Size(391, 100);
             this.groupBox1.TabIndex = 1;
@@ -124,12 +124,12 @@
             this.groupBox4.Controls.Add(this.advancedCheckBox4);
             this.groupBox4.Controls.Add(this.advancedCheckBox3);
             this.groupBox4.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox4.Location = new System.Drawing.Point(0, 337);
+            this.groupBox4.Location = new System.Drawing.Point(0, 349);
             this.groupBox4.Name = "groupBox4";
             this.groupBox4.Size = new System.Drawing.Size(391, 82);
             this.groupBox4.TabIndex = 3;
             this.groupBox4.TabStop = false;
-            this.groupBox4.Text = "RenderingQuality";
+            this.groupBox4.Text = "TextRenderingQuality";
             // 
             // advancedCheckBox8
             // 
@@ -139,6 +139,7 @@
             this.advancedCheckBox8.Size = new System.Drawing.Size(118, 18);
             this.advancedCheckBox8.TabIndex = 5;
             this.advancedCheckBox8.Text = "High Quality, GDI+";
+            this.advancedCheckBox8.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.High;
             this.advancedCheckBox8.UseCompatibleTextRendering = true;
             this.advancedCheckBox8.UseVisualStyleBackColor = true;
             // 
@@ -147,9 +148,9 @@
             this.advancedCheckBox7.AutoSize = true;
             this.advancedCheckBox7.Location = new System.Drawing.Point(165, 37);
             this.advancedCheckBox7.Name = "advancedCheckBox7";
-            this.advancedCheckBox7.Size = new System.Drawing.Size(135, 18);
+            this.advancedCheckBox7.Size = new System.Drawing.Size(130, 18);
             this.advancedCheckBox7.TabIndex = 4;
-            this.advancedCheckBox7.Text = "Medium Quality, GDI+";
+            this.advancedCheckBox7.Text = "Default Quality, GDI+";
             this.advancedCheckBox7.UseCompatibleTextRendering = true;
             this.advancedCheckBox7.UseVisualStyleBackColor = true;
             // 
@@ -161,6 +162,7 @@
             this.advancedCheckBox6.Size = new System.Drawing.Size(115, 18);
             this.advancedCheckBox6.TabIndex = 3;
             this.advancedCheckBox6.Text = "Low Quality, GDI+";
+            this.advancedCheckBox6.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.Low;
             this.advancedCheckBox6.UseCompatibleTextRendering = true;
             this.advancedCheckBox6.UseVisualStyleBackColor = true;
             // 
@@ -172,6 +174,7 @@
             this.advancedCheckBox5.Size = new System.Drawing.Size(108, 17);
             this.advancedCheckBox5.TabIndex = 2;
             this.advancedCheckBox5.Text = "High Quality, GDI";
+            this.advancedCheckBox5.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.High;
             this.advancedCheckBox5.UseVisualStyleBackColor = true;
             // 
             // advancedCheckBox4
@@ -179,9 +182,9 @@
             this.advancedCheckBox4.AutoSize = true;
             this.advancedCheckBox4.Location = new System.Drawing.Point(12, 37);
             this.advancedCheckBox4.Name = "advancedCheckBox4";
-            this.advancedCheckBox4.Size = new System.Drawing.Size(123, 17);
+            this.advancedCheckBox4.Size = new System.Drawing.Size(120, 17);
             this.advancedCheckBox4.TabIndex = 1;
-            this.advancedCheckBox4.Text = "Medium Quality, GDI";
+            this.advancedCheckBox4.Text = "Default Quality, GDI";
             this.advancedCheckBox4.UseVisualStyleBackColor = true;
             // 
             // advancedCheckBox3
@@ -192,13 +195,14 @@
             this.advancedCheckBox3.Size = new System.Drawing.Size(106, 17);
             this.advancedCheckBox3.TabIndex = 0;
             this.advancedCheckBox3.Text = "Low Quality, GDI";
+            this.advancedCheckBox3.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.Low;
             this.advancedCheckBox3.UseVisualStyleBackColor = true;
             // 
             // ucCaptionedContainer1
             // 
             this.ucCaptionedContainer1.Caption = "Fading animations (Vista and above), disabled colors (uncheck to disable)";
             this.ucCaptionedContainer1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.ucCaptionedContainer1.Location = new System.Drawing.Point(0, 115);
+            this.ucCaptionedContainer1.Location = new System.Drawing.Point(0, 127);
             this.ucCaptionedContainer1.Name = "ucCaptionedContainer1";
             // 
             // ucCaptionedContainer1.ContentPanel

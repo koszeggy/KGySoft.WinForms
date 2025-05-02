@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 
@@ -42,7 +41,7 @@ namespace KGySoft.WinForms.Controls
     /// <list type="bullet">
     /// <item><description>Images are displayed also when <see cref="ButtonBase.FlatStyle"/> property is <see cref="System.Windows.Forms.FlatStyle.System"/>. On a pre-Vista Windows <c>FlatStyle</c> is automatically switched to <see cref="System.Windows.Forms.FlatStyle.Standard"/> at runtime.</description></item>
     /// <item><description>Elevated mode (see <see cref="IsElevated"/> property). The shield icon is rendered also on a pre-Vista Windows.</description></item>
-    /// <item><description>Different rendering qualities (see <see cref="RenderingQuality"/>) property.</description></item>
+    /// <item><description>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</description></item>
     /// <item><description>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</description></item>
     /// <item><description>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</description></item>
     /// </list>
@@ -75,6 +74,7 @@ namespace KGySoft.WinForms.Controls
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private FlatStyle reportedFlatStyle = FlatStyle.Standard;
         private FlatStyle lastAdapterType;
+        private RenderingQuality textRenderingQuality;
         private Color disabledForeColor;
         private Color disabledBackColor;
         private ButtonBaseAdapter? adapter;
@@ -213,6 +213,33 @@ namespace KGySoft.WinForms.Controls
                 base.Image = value;
                 isImageUpToDate = false;
                 CheckImage();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text rendering quality of the <see cref="AdvancedButton"/>.
+        /// </summary>
+        [Category("AdvancedButton")]
+        [Description("Gets or sets the text rendering quality of the button control. Has effect only when FlatStyle is not System.")]
+        [DefaultValue(RenderingQuality.SystemDefault)]
+        public RenderingQuality TextRenderingQuality
+        {
+            get => textRenderingQuality;
+            set
+            {
+                if (textRenderingQuality == value)
+                    return;
+
+                if (!Enum<RenderingQuality>.IsDefined(value))
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
+
+                textRenderingQuality = value;
+                Invalidate();
+                if (AutoSize)
+                {
+                    ResetSizeCache();
+                    PerformLayout();
+                }
             }
         }
 
@@ -432,7 +459,7 @@ namespace KGySoft.WinForms.Controls
 
             using (Graphics g = Graphics.FromHwnd(Handle))
             {
-                g.SetQuality();
+                g.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
                 preferredSize = LayoutUtils.UnionSizes(((ISupportButtonAdapter)this).Adapter.GetPreferredSizeCore(g, proposedConstraints, GetAppearance()) + Padding.Size, MinimumSize);
             }
 
@@ -623,8 +650,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="e">A <see cref="PaintStateEventArgs"/> that contains the event data.</param>
         protected virtual void OnPaintState(PaintStateEventArgs e)
         {
-            e.Graphics.SetQuality();
-            e.Graphics.SmoothingMode = SmoothingMode.Default; // preventing 1 pixel width invalid area of ClientRectangle
+            e.Graphics.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
 
             // ButtonBase.OnPaint:
             if (AutoEllipsis)
