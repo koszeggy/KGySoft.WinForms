@@ -273,7 +273,6 @@ namespace KGySoft.WinForms.Forms
             // cbCheckBox
             // 
             this.cbCheckBox.AutoSize = true;
-            this.cbCheckBox.CheckAlign = System.Drawing.ContentAlignment.TopLeft;
             this.cbCheckBox.Dock = System.Windows.Forms.DockStyle.Top;
             this.cbCheckBox.Location = new System.Drawing.Point(8, 33);
             this.cbCheckBox.Margin = new System.Windows.Forms.Padding(8, 3, 3, 3);
@@ -281,7 +280,6 @@ namespace KGySoft.WinForms.Forms
             this.cbCheckBox.Size = new System.Drawing.Size(163, 17);
             this.cbCheckBox.TabIndex = 1;
             this.cbCheckBox.Text = "cbCheckBox";
-            this.cbCheckBox.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             this.cbCheckBox.UseVisualStyleBackColor = true;
             // 
             // pnlDividerMainBottom

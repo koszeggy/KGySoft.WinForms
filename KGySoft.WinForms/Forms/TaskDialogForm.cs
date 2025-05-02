@@ -205,7 +205,6 @@ namespace KGySoft.WinForms.Forms
         #region Constants
 
         private const string classTaskDialog = "TASKDIALOG";
-        private const string classTextStyle = "TEXTSTYLE";
 
         #endregion
 
@@ -342,30 +341,32 @@ namespace KGySoft.WinForms.Forms
                         if (WindowsUtils.IsVistaOrLater)
                         {
                             // ISSUE: the following throws an exception because only FontProperty.GlyphFont is accepted by VisualStyleRenderer.GetFont
-                            //var renderer = new VisualStyleRenderer(classTextStyle, Constants.TEXT_MAININSTRUCTION, 0);
+                            //var renderer = new VisualStyleRenderer(classTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 0);
                             //using Graphics g = Graphics.FromHwnd(Handle);
                             //mainInstructionsFont = renderer.GetFont(g, (FontProperty)Constants.TMT_FONT);
 
-                            IntPtr hTheme = UxTheme.OpenThemeData(lblMainInstruction.Handle, classTextStyle);
+                            IntPtr hTheme = UxTheme.OpenThemeData(lblMainInstruction.Handle, classTaskDialog);
                             if (hTheme != IntPtr.Zero)
                             {
                                 using Graphics g = Graphics.FromHwnd(lblMainInstruction.Handle);
                                 IntPtr hdc = g.GetHdc();
                                 try
                                 {
-                                    UxTheme.GetThemeFont(hTheme, hdc, Constants.TEXT_MAININSTRUCTION, 0, Constants.TMT_FONT, out LOGFONT logFont);
+                                    UxTheme.GetThemeFont(hTheme, hdc, Constants.TDLG_MAININSTRUCTIONPANE, 0, Constants.TMT_FONT, out LOGFONT logFont);
                                     using Font font = new Font(SystemFonts.MessageBoxFont, FontStyle.Bold);
                                     mainInstructionsFont = Font.FromLogFont(logFont);
                                 }
                                 catch (Exception e) when (!e.IsCritical())
                                 {
-                                    mainInstructionsFont = new Font("Segoe UI", 16);
+                                    mainInstructionsFont = new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
                                 }
                                 finally
                                 {
                                     g.ReleaseHdc(hdc);
                                 }
                             }
+                            else
+                                mainInstructionsFont = new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
                         }
                         else
                         {
@@ -380,7 +381,7 @@ namespace KGySoft.WinForms.Forms
                     }
                 }
 
-                return mainInstructionsFont!;
+                return mainInstructionsFont;
             }
         }
 
@@ -751,7 +752,6 @@ namespace KGySoft.WinForms.Forms
                 AdvancedRadioButton rb = new AdvancedRadioButton
                 {
                     AutoSize = true,
-                    CheckAlign = ContentAlignment.TopLeft,
                     Name = radioButton.Name,
                     Text = radioButton.Text,
                     Checked = !checkedSet && radioButton.Checked,
@@ -1274,7 +1274,7 @@ namespace KGySoft.WinForms.Forms
             mainInstructionsFont = null;
 
             // fonts
-            lblMainInstruction.Font = null!;
+            lblMainInstruction.Font = null!; // must be set to null; otherwise, if the new font is the same as the old one, it may not overwrite the disposed font.
             lblMainInstruction.Font = !String.IsNullOrEmpty(host.MainInstruction) ? MainInstructionsFont : Font;
 
             // colors
