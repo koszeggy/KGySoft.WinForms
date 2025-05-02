@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: RadioButtonStandardAdapter.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System.Drawing;
 using System.Windows.Forms;
@@ -8,7 +23,7 @@ using System.Windows.Forms.VisualStyles;
 
 namespace KGySoft.WinForms.Controls
 {
-    internal class RadioButtonStandardAdapter: RadioButtonBaseAdapter
+    internal class RadioButtonStandardAdapter : RadioButtonBaseAdapter
     {
         #region Constructors
 
@@ -26,41 +41,32 @@ namespace KGySoft.WinForms.Controls
         internal override void PaintDown(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintDown(e);
-            }
             else
-            {
                 PaintUp(e);
-            }
         }
 
         internal override void PaintOver(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintOver(e);
-            }
             else
-            {
                 PaintUp(e);
-            }
         }
 
         internal override void PaintUp(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintUp(e);
-            }
             else
             {
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
                 LayoutData layout = Layout(e.Graphics, state).Layout(e.Graphics);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.buttonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
                 PaintImage(e, layout);
                 DrawCheckBox(e, layout);
+                AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
             }
         }
@@ -69,27 +75,23 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
-        protected override ButtonBaseAdapter CreateButtonAdapter()
-        {
-            return new ButtonStandardAdapter(ButtonInstance);
-        }
+        protected override ButtonBaseAdapter CreateButtonAdapter() => new ButtonStandardAdapter(ButtonInstance);
 
         protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state)
         {
             LayoutOptions options = CommonLayout(state);
-            options.hintTextUp = false;
-            options.dotNetOneButtonCompat = !Application.RenderWithVisualStyles;
+            options.HintTextUp = false;
+            options.DotNetOneButtonCompat = !Application.RenderWithVisualStyles;
             if (Application.RenderWithVisualStyles)
             {
                 //using (Graphics graphics = WindowsFormsUtils.CreateMeasurementGraphics())
                 //{
-                    options.checkSize = RadioButtonRenderer.GetGlyphSize(graphics, (RadioButtonState)state.SystemStateId).Width;
+                options.CheckSize = RadioButtonRenderer.GetGlyphSize(graphics, (RadioButtonState)state.SystemStateId).Width;
                 //}
             }
             else
-            {
-                options.checkSize = (int)(options.checkSize * GetDpiScaleRatio());
-            }
+                options.CheckSize = (int)(options.CheckSize * GetDpiScaleRatio());
+
             return options;
         }
 
@@ -101,11 +103,9 @@ namespace KGySoft.WinForms.Controls
         {
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
-            Rectangle checkBounds = layout.checkBounds;
+            Rectangle checkBounds = layout.CheckBounds;
             if (Application.RenderWithVisualStyles)
-            {
                 RadioButtonRenderer.DrawRadioButton(g, new Point(checkBounds.Left, checkBounds.Top), (RadioButtonState)state.SystemStateId);
-            }
             else
             {
                 checkBounds.X--;

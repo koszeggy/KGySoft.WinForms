@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: RadioButtonPopupAdapter.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System.Drawing;
 using System.Drawing.Drawing2D;
@@ -8,7 +23,7 @@ using System.Windows.Forms;
 
 namespace KGySoft.WinForms.Controls
 {
-    internal class RadioButtonPopupAdapter: RadioButtonFlatAdapter
+    internal class RadioButtonPopupAdapter : RadioButtonFlatAdapter
     {
         #region Constructors
 
@@ -36,9 +51,9 @@ namespace KGySoft.WinForms.Controls
                 backColor = state.BackColor;
 
             using Brush brush = new SolidBrush(backColor);
-            using Pen pen = new Pen(colors.buttonShadow);
-            using Pen pen2 = new Pen(colors.buttonFace);
-            using Pen pen3 = new Pen(colors.highlight);
+            using Pen pen = new Pen(colors.ButtonShadow);
+            using Pen pen2 = new Pen(colors.ButtonFace);
+            using Pen pen3 = new Pen(colors.Highlight);
             bounds.Width--;
             bounds.Height--;
             graphics.DrawPie(pen, bounds, 136f, 88f);
@@ -62,18 +77,17 @@ namespace KGySoft.WinForms.Controls
         internal override void PaintDown(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintDown(e);
-            }
             else
             {
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
                 LayoutData layout = Layout(e.Graphics, state).Layout(e.Graphics);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.buttonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
                 PaintImage(e, layout);
-                DrawCheckBackground3DLite(e, layout.checkBounds, colors.highlight, colors, true);
-                DrawCheckOnly(e, layout, colors.buttonShadow);
+                DrawCheckBackground3DLite(e, layout.CheckBounds, colors.Highlight, colors, true);
+                DrawCheckOnly(e, layout, colors.ButtonShadow);
+                AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
             }
         }
@@ -81,18 +95,17 @@ namespace KGySoft.WinForms.Controls
         internal override void PaintOver(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintOver(e);
-            }
             else
             {
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
                 LayoutData layout = Layout(e.Graphics, state).Layout(e.Graphics);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.buttonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
                 PaintImage(e, layout);
-                DrawCheckBackground3DLite(e, layout.checkBounds, colors.highContrast ? colors.buttonFace : colors.highlight, colors, true);
-                DrawCheckOnly(e, layout, colors.windowText);
+                DrawCheckBackground3DLite(e, layout.CheckBounds, colors.HighContrast ? colors.ButtonFace : colors.Highlight, colors, true);
+                DrawCheckOnly(e, layout, colors.WindowText);
+                AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
             }
         }
@@ -100,18 +113,17 @@ namespace KGySoft.WinForms.Controls
         internal override void PaintUp(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintUp(e);
-            }
             else
             {
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
                 LayoutData layout = Layout(e.Graphics, state).Layout(e.Graphics);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.buttonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
                 PaintImage(e, layout);
-                DrawCheckBackgroundFlat(e, layout.checkBounds, colors.buttonShadow, colors.highContrast ? colors.buttonFace : colors.highlight, true);
-                DrawCheckOnly(e, layout, colors.windowText);
+                DrawCheckBackgroundFlat(e, layout.CheckBounds, colors.ButtonShadow, colors.HighContrast ? colors.ButtonFace : colors.Highlight, true);
+                DrawCheckOnly(e, layout, colors.WindowText);
+                AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
             }
         }
@@ -120,18 +132,13 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
-        protected override ButtonBaseAdapter CreateButtonAdapter()
-        {
-            return new ButtonPopupAdapter(ButtonInstance);
-        }
+        protected override ButtonBaseAdapter CreateButtonAdapter() => new ButtonPopupAdapter(ButtonInstance);
 
         protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state)
         {
             LayoutOptions options = base.Layout(graphics, state);
             if (!state.Pressed && !state.Hovered)
-            {
-                options.shadowedText = true;
-            }
+                options.ShadowedText = true;
             return options;
         }
 

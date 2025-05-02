@@ -1,5 +1,21 @@
-﻿#region Used namespaces
+﻿#region Copyright
 
+///////////////////////////////////////////////////////////////////////////////
+//  File: CheckBoxStandardAdapter.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -8,7 +24,7 @@ using System.Windows.Forms.VisualStyles;
 
 namespace KGySoft.WinForms.Controls
 {
-    internal sealed class CheckBoxStandardAdapter: CheckBoxBaseAdapter
+    internal sealed class CheckBoxStandardAdapter : CheckBoxBaseAdapter
     {
         #region Constructors
 
@@ -24,69 +40,64 @@ namespace KGySoft.WinForms.Controls
         #region Internal Methods
 
         internal override Size GetPreferredSizeCore(Graphics g, Size proposedSize, ControlAppearanceState state)
-        {
-            if (IsButton)
-            {
-                return ButtonAdapter.GetPreferredSizeCore(g, proposedSize, state);
-            }
-
-            return Layout(g, state).GetPreferredSizeCore(g, proposedSize);
-        }
+            => IsButton
+                ? ButtonAdapter.GetPreferredSizeCore(g, proposedSize, state)
+                : Layout(g, state).GetPreferredSizeCore(g, proposedSize);
 
         internal override void PaintDown(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintDown(e);
-            }
             else
-            {
                 PaintUp(e);
-            }
         }
 
         internal override void PaintOver(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintOver(e);
-            }
             else
-            {
                 PaintUp(e);
-            }
         }
 
         internal override void PaintUp(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintUp(e);
-            }
             else
             {
                 Graphics g = e.Graphics;
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(g, state.BackColor, state.ForeColor);
                 LayoutData layout = Layout(g, state).Layout(g);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.buttonFace);
-                int focusWidth = layout.focus.X & 1;
-                if (!Application.RenderWithVisualStyles)
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
+
+                if (!layout.Options.DotNetOneButtonCompat)
+                    layout.TextBounds.Offset(-1, -1);
+
+                layout.ImageBounds.Offset(-1, -1);
+                AdjustFocusRectangle(state, layout);
+
+                if (!String.IsNullOrEmpty(state.Text))
                 {
-                    focusWidth = 1 - focusWidth;
+                    // Minor adjustment to make sure the appearance is exactly the same as Win32 app.
+                    int focusRectFixup = layout.Focus.X & 0x1; // if it's odd, subtract one pixel for fixup.
+                    if (!Application.RenderWithVisualStyles)
+                        focusRectFixup = 1 - focusRectFixup;
+
+                    layout.Focus.Offset(-(focusRectFixup + 1), -2);
+                    layout.Focus.Width = layout.TextBounds.Width + layout.ImageBounds.Width - 1;
+                    layout.Focus.Intersect(layout.TextBounds);
+
+                    if (!layout.Options.TextAlign.AnyLeft()
+                        && layout.Options.UseCompatibleTextRendering
+                        && layout.Options.Font.Italic)
+                    {
+                        // Fixup for GDI+ text rendering.
+                        layout.Focus.Width += 2;
+                    }
                 }
-                if (!layout.options.dotNetOneButtonCompat)
-                {
-                    layout.textBounds.Offset(-1, -1);
-                }
-                layout.imageBounds.Offset(-1, -1);
-                layout.focus.Offset(-(focusWidth + 1), -2);
-                layout.focus.Width = (layout.textBounds.Width + layout.imageBounds.Width) - 1;
-                layout.focus.Intersect(layout.textBounds);
-                if ((!layout.options.textAlign.AnyLeft() && layout.options.useCompatibleTextRendering) && layout.options.font.Italic)
-                {
-                    layout.focus.Width += 2;
-                }
+
                 PaintImage(e, layout);
                 DrawCheckBox(e, layout);
                 PaintField(e, layout, colors, true);
@@ -97,21 +108,18 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
-        protected override ButtonBaseAdapter CreateButtonAdapter()
-        {
-            return new ButtonStandardAdapter(ButtonInstance);
-        }
+        protected override ButtonBaseAdapter CreateButtonAdapter() => new ButtonStandardAdapter(ButtonInstance);
 
         protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state)
         {
             LayoutOptions options = CommonLayout(state);
-            options.checkPaddingSize = 1;
-            options.dotNetOneButtonCompat = !Application.RenderWithVisualStyles;
+            options.CheckPaddingSize = 1;
+            options.DotNetOneButtonCompat = !Application.RenderWithVisualStyles;
             if (Application.RenderWithVisualStyles)
             {
                 //using (Graphics graphics = WindowsFormsUtils.CreateMeasurementGraphics())
                 //{
-                    options.checkSize = CheckBoxRenderer.GetGlyphSize(graphics, (CheckBoxState)state.SystemStateId).Width;
+                options.CheckSize = CheckBoxRenderer.GetGlyphSize(graphics, (CheckBoxState)state.SystemStateId).Width;
                 //}
             }
             else
@@ -119,7 +127,7 @@ namespace KGySoft.WinForms.Controls
                 //options.checkSize = ScaleHelper.IsThreadPerMonitorV2Aware
                 //    ? ButtonInstance.LogicalToDeviceUnits(options.checkSize)
                 //    : (int)(options.checkSize * GetDpiScaleRatio());
-                options.checkSize = ButtonInstance.PerMonitorScale(options.checkSize);
+                options.CheckSize = ButtonInstance.PerMonitorScale(options.CheckSize);
             }
 
             return options;
@@ -133,17 +141,11 @@ namespace KGySoft.WinForms.Controls
         {
             ControlAppearanceState state = e.State;
             if (Application.RenderWithVisualStyles)
-            {
-                CheckBoxRenderer.DrawCheckBox(e.Graphics, new Point(layout.checkBounds.Left, layout.checkBounds.Top), (CheckBoxState)state.SystemStateId);
-            }
+                CheckBoxRenderer.DrawCheckBox(e.Graphics, new Point(layout.CheckBounds.Left, layout.CheckBounds.Top), (CheckBoxState)state.SystemStateId);
             else if (state.CheckState == CheckState.Indeterminate)
-            {
-                ControlPaint.DrawMixedCheckBox(e.Graphics, layout.checkBounds, GetButtonState(state));
-            }
+                ControlPaint.DrawMixedCheckBox(e.Graphics, layout.CheckBounds, GetButtonState(state));
             else
-            {
-                ControlPaint.DrawCheckBox(e.Graphics, layout.checkBounds, GetButtonState(state));
-            }
+                ControlPaint.DrawCheckBox(e.Graphics, layout.CheckBounds, GetButtonState(state));
         }
 
         #endregion

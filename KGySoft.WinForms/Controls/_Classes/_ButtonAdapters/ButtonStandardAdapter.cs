@@ -1,8 +1,24 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ButtonStandardAdapter.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
+
 using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
@@ -39,7 +55,7 @@ namespace KGySoft.WinForms.Controls
 
         private static void Draw3DBorderHighContrastRaised(Graphics g, ref Rectangle bounds, ColorData colors)
         {
-            bool stockColor = colors.buttonFace.ToKnownColor() == SystemColors.Control.ToKnownColor();
+            bool stockColor = colors.ButtonFace.ToKnownColor() == SystemColors.Control.ToKnownColor();
 
             // Draw counter-clock-wise.
             Point p1 = new Point(bounds.X + bounds.Width - 1, bounds.Y);  // upper inner right.
@@ -47,20 +63,20 @@ namespace KGySoft.WinForms.Controls
             Point p3 = new Point(bounds.X, bounds.Y + bounds.Height - 1);  // bottom inner left.
             Point p4 = new Point(bounds.X + bounds.Width - 1, bounds.Y + bounds.Height - 1);  // inner bottom right.
 
-            Pen penTopLeft = null;
-            Pen penBottomRight = null;
-            Pen insetPen = null;
-            Pen bottomRightInsetPen = null;
+            Pen? penTopLeft = null;
+            Pen? penBottomRight = null;
+            Pen? insetPen = null;
+            Pen? bottomRightInsetPen = null;
 
             try
             {
                 // top + left
-                penTopLeft = stockColor ? /*SystemPens.ControlLightLight*/ new Pen(SystemColors.ControlLightLight) : new Pen(colors.highlight);
+                penTopLeft = stockColor ? /*SystemPens.ControlLightLight*/ new Pen(SystemColors.ControlLightLight) : new Pen(colors.Highlight);
                 g.DrawLine(penTopLeft, p1, p2); // top  (right-left)
                 g.DrawLine(penTopLeft, p2, p3); // left (up-down)
 
                 // bottom + right
-                penBottomRight = stockColor ? new Pen(SystemColors.ControlDarkDark) : new Pen(colors.buttonShadowDark);
+                penBottomRight = stockColor ? new Pen(SystemColors.ControlDarkDark) : new Pen(colors.ButtonShadowDark);
 
                 p1.Offset(0, -1); // need to paint last pixel too.
                 g.DrawLine(penBottomRight, p3, p4);  // bottom (left-right)
@@ -68,13 +84,9 @@ namespace KGySoft.WinForms.Controls
 
                 // Draw inset
                 if (stockColor)
-                {
                     insetPen = SystemInformation.HighContrast ? new Pen(SystemColors.ControlLight) : new Pen(SystemColors.Control);
-                }
                 else
-                {
-                    insetPen = SystemInformation.HighContrast ? new Pen(colors.highlight) : new Pen(colors.buttonFace);
-                }
+                    insetPen = SystemInformation.HighContrast ? new Pen(colors.Highlight) : new Pen(colors.ButtonFace);
 
                 p1.Offset(-1, 2);
                 p2.Offset(1, 1);
@@ -87,7 +99,7 @@ namespace KGySoft.WinForms.Controls
 
                 // Bottom + right inset
 
-                bottomRightInsetPen = stockColor ? new Pen(SystemColors.ControlDark) : new Pen(colors.buttonShadow);
+                bottomRightInsetPen = stockColor ? new Pen(SystemColors.ControlDark) : new Pen(colors.ButtonShadow);
                 p1.Offset(0, -1); // need to paint last pixel too.
                 g.DrawLine(bottomRightInsetPen, p3, p4); // bottom (left-right)
                 g.DrawLine(bottomRightInsetPen, p4, p1); // right  (bottom-up)
@@ -95,24 +107,16 @@ namespace KGySoft.WinForms.Controls
             finally
             {
                 if (penTopLeft != null)
-                {
                     penTopLeft.Dispose();
-                }
 
                 if (penBottomRight != null)
-                {
                     penBottomRight.Dispose();
-                }
 
                 if (insetPen != null)
-                {
                     insetPen.Dispose();
-                }
 
                 if (bottomRightInsetPen != null)
-                {
                     bottomRightInsetPen.Dispose();
-                }
             }
         }
 
@@ -126,7 +130,7 @@ namespace KGySoft.WinForms.Controls
             Point p4 = new Point(bounds.X + bounds.Width - 1, bounds.Y + bounds.Height - 1);  // inner bottom right.
 
             // top + left
-            Pen pen = new Pen(colors.buttonShadowDark);
+            Pen pen = new Pen(colors.ButtonShadowDark);
             try
             {
                 g.DrawLine(pen, p1, p2); // top (right-left)
@@ -138,7 +142,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             // bottom + right
-            pen = new Pen(colors.highlight);
+            pen = new Pen(colors.Highlight);
             try
             {
                 p1.Offset(0, -1); // need to paint last pixel too.
@@ -151,8 +155,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             // Draw inset
-
-            pen = new Pen(colors.buttonFace);
+            pen = new Pen(colors.ButtonFace);
 
             p1.Offset(-1, 2);
             p2.Offset(1, 1);
@@ -171,14 +174,9 @@ namespace KGySoft.WinForms.Controls
             }
 
             // bottom + right inset
-            if (colors.buttonFace.ToKnownColor() == SystemColors.Control.ToKnownColor())
-            {
-                pen = new Pen(SystemColors.ControlLight);
-            }
-            else
-            {
-                pen = new Pen(colors.buttonFace);
-            }
+            pen = colors.ButtonFace.ToKnownColor() == SystemColors.Control.ToKnownColor()
+                ? new Pen(SystemColors.ControlLight)
+                : new Pen(colors.ButtonFace);
 
             try
             {
@@ -194,7 +192,7 @@ namespace KGySoft.WinForms.Controls
 
         private static void Draw3DBorderRaised(Graphics g, ref Rectangle bounds, ColorData colors)
         {
-            bool stockColor = colors.buttonFace.ToKnownColor() == SystemColors.Control.ToKnownColor();
+            bool stockColor = colors.ButtonFace.ToKnownColor() == SystemColors.Control.ToKnownColor();
 
             // Draw counter-clock-wise.
             Point p1 = new Point(bounds.X + bounds.Width - 1, bounds.Y);  // upper inner right.
@@ -205,7 +203,7 @@ namespace KGySoft.WinForms.Controls
             // Draw counter-clock-wise.
 
             // top + left
-            Pen pen = stockColor ? new Pen(SystemColors.ControlLightLight) : new Pen(colors.highlight);
+            Pen pen = stockColor ? new Pen(SystemColors.ControlLightLight) : new Pen(colors.Highlight);
 
             try
             {
@@ -218,7 +216,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             // bottom + right
-            pen = stockColor ? new Pen(SystemColors.ControlDarkDark) : new Pen(colors.buttonShadowDark);
+            pen = stockColor ? new Pen(SystemColors.ControlDarkDark) : new Pen(colors.ButtonShadowDark);
 
             try
             {
@@ -237,14 +235,9 @@ namespace KGySoft.WinForms.Controls
             p3.Offset(1, -1);
             p4.Offset(-1, -1);
 
-            if (stockColor)
-            {
-                pen = SystemInformation.HighContrast ? new Pen(SystemColors.ControlLight) : new Pen(SystemColors.Control);
-            }
-            else
-            {
-                pen = new Pen(colors.buttonFace);
-            }
+            pen = stockColor
+                ? SystemInformation.HighContrast ? new Pen(SystemColors.ControlLight) : new Pen(SystemColors.Control)
+                : new Pen(colors.ButtonFace);
 
             // top + left inset
             try
@@ -258,7 +251,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             // Bottom + right inset
-            pen = stockColor ? new Pen(SystemColors.ControlDark) : new Pen(colors.buttonShadow);
+            pen = stockColor ? new Pen(SystemColors.ControlDark) : new Pen(colors.ButtonShadow);
 
             try
             {
@@ -277,24 +270,16 @@ namespace KGySoft.WinForms.Controls
             if (state.BackColor != SystemColors.Control && SystemInformation.HighContrast)
             {
                 if (raised)
-                {
                     Draw3DBorderHighContrastRaised(g, ref bounds, colors);
-                }
                 else
-                {
                     ControlPaint.DrawBorder(g, bounds, ControlPaint.Dark(state.BackColor), ButtonBorderStyle.Solid);
-                }
             }
             else
             {
                 if (raised)
-                {
                     Draw3DBorderRaised(g, ref bounds, colors);
-                }
                 else
-                {
                     Draw3DBorderNormal(g, ref bounds, colors);
-                }
             }
         }
 
@@ -304,29 +289,15 @@ namespace KGySoft.WinForms.Controls
 
         #region Internal Methods
 
-        internal override void PaintDown(PaintStateEventArgs e)
-        {
-            PaintWorker(e, false);
-        }
-
-        internal override void PaintOver(PaintStateEventArgs e)
-        {
-            PaintUp(e);
-        }
-
-        internal override void PaintUp(PaintStateEventArgs e)
-        {
-            PaintWorker(e, true);
-        }
+        internal override void PaintDown(PaintStateEventArgs e) => PaintWorker(e, false);
+        internal override void PaintOver(PaintStateEventArgs e) => PaintUp(e);
+        internal override void PaintUp(PaintStateEventArgs e) => PaintWorker(e, true);
 
         #endregion
 
         #region Protected Methods
 
-        protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state)
-        {
-            return PaintLayout(state, false);
-        }
+        protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state) => PaintLayout(state, false);
 
         #endregion
 
@@ -335,8 +306,8 @@ namespace KGySoft.WinForms.Controls
         private LayoutOptions PaintLayout(ControlAppearanceState state, bool up)
         {
             LayoutOptions options = CommonLayout(state);
-            options.textOffset = !up;
-            options.dotNetOneButtonCompat = !Application.RenderWithVisualStyles;
+            options.TextOffset = !up;
+            options.DotNetOneButtonCompat = !Application.RenderWithVisualStyles;
             return options;
         }
 
@@ -357,13 +328,10 @@ namespace KGySoft.WinForms.Controls
                 if (backColor.A > 0)
                 {
                     if (backColor.A == 0xff)
-                    {
                         backColor = e.Graphics.GetNearestColor(backColor);
-                    }
-                    using (Brush brush = new SolidBrush(backColor))
-                    {
-                        e.Graphics.FillRectangle(brush, bounds);
-                    }
+
+                    using Brush brush = new SolidBrush(backColor);
+                    e.Graphics.FillRectangle(brush, bounds);
                 }
             }
 
@@ -383,9 +351,7 @@ namespace KGySoft.WinForms.Controls
                 : PaintLayout(state, up).Layout(g);
 
             if (renderWithVisualStyles)
-            {
                 PaintThemedButtonBackground(e, ButtonInstance.ClientRectangle, up);
-            }
             else
             {
                 Rectangle clientRectangle = ButtonInstance.ClientRectangle;
@@ -396,38 +362,29 @@ namespace KGySoft.WinForms.Controls
 
                 if (state.CheckState == CheckState.Indeterminate)
                 {
-                    using (Brush brush = CreateDitherBrush(colors.highlight, colors.buttonFace))
-                    {
-                        e.Graphics.FillRectangle(brush, clientRectangle);
-                    }
+                    using Brush brush = CreateDitherBrush(colors.Highlight, colors.ButtonFace);
+                    e.Graphics.FillRectangle(brush, clientRectangle);
                 }
                 else
-                {
-                    PaintButtonBackground(e, clientRectangle, colors.buttonFace);
-                }
+                    PaintButtonBackground(e, clientRectangle, colors.ButtonFace);
             }
+            
             PaintImage(e, layout);
             if (renderWithVisualStyles)
-            {
-                layout.focus.Inflate(1, 1);
-            }
+                layout.Focus.Inflate(1, 1);
             PaintField(e, layout, colors, true);
+            
             if (!renderWithVisualStyles)
             {
                 Rectangle r = ButtonInstance.ClientRectangle;
                 if (state.IsDefault)
-                {
                     r.Inflate(-1, -1);
-                }
-                DrawDefaultBorder(g, r, colors.windowFrame, state.IsDefault);
+                
+                DrawDefaultBorder(g, r, colors.WindowFrame, state.IsDefault);
                 if (up)
-                {
                     Draw3DBorder(g, r, colors, true, state);
-                }
                 else
-                {
-                    ControlPaint.DrawBorder(g, r, colors.buttonShadow, ButtonBorderStyle.Solid);
-                }
+                    ControlPaint.DrawBorder(g, r, colors.ButtonShadow, ButtonBorderStyle.Solid);
             }
         }
 

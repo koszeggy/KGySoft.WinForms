@@ -1,4 +1,21 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ButtonBaseAdapter.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+#region Used Namespaces
 
 using System;
 using System.Collections.Specialized;
@@ -8,6 +25,14 @@ using System.Drawing.Text;
 using System.Windows.Forms;
 
 using KGySoft.WinForms.Reflection;
+
+#endregion
+
+#region Used Aliases
+
+using ContentAlignment = System.Drawing.ContentAlignment;
+
+#endregion
 
 #endregion
 
@@ -23,16 +48,16 @@ namespace KGySoft.WinForms.Controls
         {
             #region Fields
 
-            internal Color buttonFace;
-            internal Color buttonShadow;
-            internal Color buttonShadowDark;
-            internal Color constrastButtonShadow;
-            internal Color windowText;
-            internal Color highlight;
-            internal Color lowHighlight;
-            internal Color lowButtonFace;
-            internal Color windowFrame;
-            internal bool highContrast;
+            internal Color ButtonFace;
+            internal Color ButtonShadow;
+            internal Color ButtonShadowDark;
+            internal Color ContrastButtonShadow;
+            internal Color WindowText;
+            internal Color Highlight;
+            internal Color LowHighlight;
+            internal Color LowButtonFace;
+            internal Color WindowFrame;
+            internal bool HighContrast;
 
             #endregion
 
@@ -43,67 +68,59 @@ namespace KGySoft.WinForms.Controls
             internal static ColorData Calculate(Graphics graphics, Color backColor, Color foreColor)
             {
                 ColorData colors = new ColorData();
-                colors.highContrast = SystemInformation.HighContrast;
+                colors.HighContrast = SystemInformation.HighContrast;
 
-                colors.buttonFace = backColor;
+                colors.ButtonFace = backColor;
 
                 if (backColor == SystemColors.Control)
                 {
-                    colors.buttonShadow = SystemColors.ControlDark;
-                    colors.buttonShadowDark = SystemColors.ControlDarkDark;
-                    colors.highlight = SystemColors.ControlLightLight;
+                    colors.ButtonShadow = SystemColors.ControlDark;
+                    colors.ButtonShadowDark = SystemColors.ControlDarkDark;
+                    colors.Highlight = SystemColors.ControlLightLight;
                 }
                 else
                 {
-                    if (!colors.highContrast)
+                    if (!colors.HighContrast)
                     {
-                        colors.buttonShadow = ControlPaint.Dark(backColor);
-                        colors.buttonShadowDark = ControlPaint.DarkDark(backColor);
-                        colors.highlight = ControlPaint.LightLight(backColor);
+                        colors.ButtonShadow = ControlPaint.Dark(backColor);
+                        colors.ButtonShadowDark = ControlPaint.DarkDark(backColor);
+                        colors.Highlight = ControlPaint.LightLight(backColor);
                     }
                     else
                     {
-                        colors.buttonShadow = ControlPaint.Dark(backColor);
-                        colors.buttonShadowDark = ControlPaint.LightLight(backColor);
-                        colors.highlight = ControlPaint.LightLight(backColor);
+                        colors.ButtonShadow = ControlPaint.Dark(backColor);
+                        colors.ButtonShadowDark = ControlPaint.LightLight(backColor);
+                        colors.Highlight = ControlPaint.LightLight(backColor);
                     }
                 }
 
                 const float lowlight = .1f;
                 float adjust = 1 - lowlight;
 
-                if (colors.buttonFace.GetBrightness() < .5)
-                {
+                if (colors.ButtonFace.GetBrightness() < .5)
                     adjust = 1 + lowlight * 2;
-                }
-                colors.lowButtonFace = Color.FromArgb(Adjust255(adjust, colors.buttonFace.R),
-                    Adjust255(adjust, colors.buttonFace.G),
-                    Adjust255(adjust, colors.buttonFace.B));
+
+                colors.LowButtonFace = Color.FromArgb(Adjust255(adjust, colors.ButtonFace.R),
+                    Adjust255(adjust, colors.ButtonFace.G),
+                    Adjust255(adjust, colors.ButtonFace.B));
 
                 adjust = 1 - lowlight;
-                if (colors.highlight.GetBrightness() < .5)
-                {
+                if (colors.Highlight.GetBrightness() < .5)
                     adjust = 1 + lowlight * 2;
-                }
-                colors.lowHighlight = Color.FromArgb(Adjust255(adjust, colors.highlight.R),
-                    Adjust255(adjust, colors.highlight.G),
-                    Adjust255(adjust, colors.highlight.B));
 
-                if (colors.highContrast && backColor != SystemColors.Control)
-                {
-                    colors.highlight = colors.lowHighlight;
-                }
+                colors.LowHighlight = Color.FromArgb(Adjust255(adjust, colors.Highlight.R),
+                    Adjust255(adjust, colors.Highlight.G),
+                    Adjust255(adjust, colors.Highlight.B));
 
-                colors.windowFrame = foreColor;
+                if (colors.HighContrast && backColor != SystemColors.Control)
+                    colors.Highlight = colors.LowHighlight;
 
-                if (colors.buttonFace.GetBrightness() < .5)
-                {
-                    colors.constrastButtonShadow = colors.lowHighlight;
-                }
+                colors.WindowFrame = foreColor;
+
+                if (colors.ButtonFace.GetBrightness() < .5)
+                    colors.ContrastButtonShadow = colors.LowHighlight;
                 else
-                {
-                    colors.constrastButtonShadow = colors.buttonShadow;
-                }
+                    colors.ContrastButtonShadow = colors.ButtonShadow;
 
                 //if (!enabled && disabledTextDim)
                 //{
@@ -111,7 +128,7 @@ namespace KGySoft.WinForms.Controls
                 //}
                 //else
                 //{
-                colors.windowText = colors.windowFrame;
+                colors.WindowText = colors.WindowFrame;
                 //}
 
                 //IntPtr hdc = this.graphics.GetHdc();
@@ -120,15 +137,15 @@ namespace KGySoft.WinForms.Controls
                 //{
                 //using (WindowsGraphics g = WindowsGraphics.FromHdc(hdc))
                 //    {
-                colors.buttonFace = graphics.GetNearestColor(colors.buttonFace);
-                colors.buttonShadow = graphics.GetNearestColor(colors.buttonShadow);
-                colors.buttonShadowDark = graphics.GetNearestColor(colors.buttonShadowDark);
-                colors.constrastButtonShadow = graphics.GetNearestColor(colors.constrastButtonShadow);
-                colors.windowText = graphics.GetNearestColor(colors.windowText);
-                colors.highlight = graphics.GetNearestColor(colors.highlight);
-                colors.lowHighlight = graphics.GetNearestColor(colors.lowHighlight);
-                colors.lowButtonFace = graphics.GetNearestColor(colors.lowButtonFace);
-                colors.windowFrame = graphics.GetNearestColor(colors.windowFrame);
+                colors.ButtonFace = graphics.GetNearestColor(colors.ButtonFace);
+                colors.ButtonShadow = graphics.GetNearestColor(colors.ButtonShadow);
+                colors.ButtonShadowDark = graphics.GetNearestColor(colors.ButtonShadowDark);
+                colors.ContrastButtonShadow = graphics.GetNearestColor(colors.ContrastButtonShadow);
+                colors.WindowText = graphics.GetNearestColor(colors.WindowText);
+                colors.Highlight = graphics.GetNearestColor(colors.Highlight);
+                colors.LowHighlight = graphics.GetNearestColor(colors.LowHighlight);
+                colors.LowButtonFace = graphics.GetNearestColor(colors.LowButtonFace);
+                colors.WindowFrame = graphics.GetNearestColor(colors.WindowFrame);
                 //}
                 //}
                 //finally
@@ -190,7 +207,7 @@ namespace KGySoft.WinForms.Controls
             private static readonly int combineCheck = BitVector32.CreateMask();
             private static readonly int combineImageText = BitVector32.CreateMask(combineCheck);
             // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
-            private static readonly TextImageRelation[] _imageAlignToRelation = new TextImageRelation[] {
+            private static readonly TextImageRelation[] imageAlignToRelation = new TextImageRelation[] {
                 /* TopLeft = */       TextImageRelation.ImageAboveText | TextImageRelation.ImageBeforeText,
                 /* TopCenter = */     TextImageRelation.ImageAboveText,
                 /* TopRight = */      TextImageRelation.ImageAboveText | TextImageRelation.TextBeforeImage,
@@ -209,46 +226,36 @@ namespace KGySoft.WinForms.Controls
 
             #region Instance Fields
 
-            #region Internal Fields
-
-            internal Rectangle client;
-            internal bool growBorderBy1PxWhenDefault;
-            internal bool isDefault;
-            internal int borderSize;
-            internal int paddingSize;
-            internal bool maxFocus;
-            internal bool focusOddEvenFixup;
-            internal Font font;
-            internal string text;
-            internal Size imageSize;
-            internal int checkSize;
-            internal int checkPaddingSize;
-            internal ContentAlignment checkAlign;
-            internal ContentAlignment imageAlign;
-            internal ContentAlignment textAlign;
-            internal TextImageRelation textImageRelation;
-            internal bool hintTextUp;
-            internal bool textOffset;
-            internal bool shadowedText;
-            internal bool layoutRTL;
-            internal bool verticalText = false;
-            internal bool useCompatibleTextRendering = false;
-            internal bool dotNetOneButtonCompat = true;
-            internal TextFormatFlags gdiTextFormatFlags = TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl;
-            internal StringFormatFlags gdipFormatFlags;
-            internal StringTrimming gdipTrimming;
-            internal HotkeyPrefix gdipHotkeyPrefix;
-            internal StringAlignment gdipAlignment; // horizontal alignment.
-            internal StringAlignment gdipLineAlignment; // vertical alignment.
-            internal Padding padding;
-
-            #endregion
-
-            //#region Private Fields
-
-            //private bool disableWordWrapping;
-
-            //#endregion
+            internal Rectangle Client;
+            internal bool GrowBorderBy1PxWhenDefault;
+            internal bool IsDefault;
+            internal int BorderSize;
+            internal int PaddingSize;
+            internal bool MaxFocus;
+            internal bool FocusOddEvenFixup;
+            internal Font Font = null!;
+            internal string? Text;
+            internal Size ImageSize;
+            internal int CheckSize;
+            internal int CheckPaddingSize;
+            internal ContentAlignment CheckAlign;
+            internal ContentAlignment ImageAlign;
+            internal ContentAlignment TextAlign;
+            internal TextImageRelation TextImageRelation;
+            internal bool HintTextUp;
+            internal bool TextOffset;
+            internal bool ShadowedText;
+            internal bool LayoutRtl;
+            internal bool VerticalText = false;
+            internal bool UseCompatibleTextRendering;
+            internal bool DotNetOneButtonCompat = true;
+            internal TextFormatFlags GdiTextFormatFlags = TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl;
+            internal StringFormatFlags GdipFormatFlags;
+            internal StringTrimming GdipTrimming;
+            internal HotkeyPrefix GdipHotkeyPrefix;
+            internal StringAlignment GdipAlignment; // horizontal alignment.
+            internal StringAlignment GdipLineAlignment; // vertical alignment.
+            internal Padding Padding;
 
             #endregion
 
@@ -268,11 +275,11 @@ namespace KGySoft.WinForms.Controls
                 {
                     StringFormat format = new StringFormat();
 
-                    format.FormatFlags = gdipFormatFlags;
-                    format.Trimming = gdipTrimming;
-                    format.HotkeyPrefix = gdipHotkeyPrefix;
-                    format.Alignment = gdipAlignment;
-                    format.LineAlignment = gdipLineAlignment;
+                    format.FormatFlags = GdipFormatFlags;
+                    format.Trimming = GdipTrimming;
+                    format.HotkeyPrefix = GdipHotkeyPrefix;
+                    format.Alignment = GdipAlignment;
+                    format.LineAlignment = GdipLineAlignment;
 
                     //if (disableWordWrapping)
                     //{
@@ -283,11 +290,11 @@ namespace KGySoft.WinForms.Controls
                 }
                 set
                 {
-                    gdipFormatFlags = value.FormatFlags;
-                    gdipTrimming = value.Trimming;
-                    gdipHotkeyPrefix = value.HotkeyPrefix;
-                    gdipAlignment = value.Alignment;
-                    gdipLineAlignment = value.LineAlignment;
+                    GdipFormatFlags = value.FormatFlags;
+                    GdipTrimming = value.Trimming;
+                    GdipHotkeyPrefix = value.HotkeyPrefix;
+                    GdipAlignment = value.Alignment;
+                    GdipLineAlignment = value.LineAlignment;
                 }
             }
 
@@ -297,44 +304,16 @@ namespace KGySoft.WinForms.Controls
 
             /// <devdoc>
             /// </devdoc>
-            private TextFormatFlags TextFormatFlags
-            {
-                get
-                {
-                    //if (disableWordWrapping)
-                    //{
-                    //    return gdiTextFormatFlags & ~TextFormatFlags.WordBreak;
-                    //}
+            private TextFormatFlags TextFormatFlags =>
+                //if (disableWordWrapping)
+                //{
+                //    return gdiTextFormatFlags & ~TextFormatFlags.WordBreak;
+                //}
+                GdiTextFormatFlags;
 
-                    return gdiTextFormatFlags;
-                }
-            }
-
-            private int FullBorderSize
-            {
-                get
-                {
-                    int result = borderSize;
-                    if (OnePixExtraBorder)
-                    {
-                        borderSize++;
-                    }
-                    return borderSize;
-                }
-            }
-
-            private bool OnePixExtraBorder
-            {
-                get { return growBorderBy1PxWhenDefault && isDefault; }
-            }
-
-            private int FullCheckSize
-            {
-                get
-                {
-                    return checkSize + checkPaddingSize;
-                }
-            }
+            private int FullBorderSize => OnePixExtraBorder ? BorderSize++ : BorderSize;
+            private bool OnePixExtraBorder => GrowBorderBy1PxWhenDefault && IsDefault;
+            private int FullCheckSize => CheckSize + CheckPaddingSize;
 
             #endregion
 
@@ -346,7 +325,7 @@ namespace KGySoft.WinForms.Controls
 
             private static TextImageRelation ImageAlignToRelation(ContentAlignment alignment)
             {
-                return _imageAlignToRelation[LayoutUtils.ContentAlignmentToIndex(alignment)];
+                return imageAlignToRelation[LayoutUtils.ContentAlignmentToIndex(alignment)];
             }
 
             private static TextImageRelation TextAlignToRelation(ContentAlignment alignment)
@@ -358,42 +337,14 @@ namespace KGySoft.WinForms.Controls
 
             #region Instance Methods
 
-            #region Public Methods
-
-#if DEBUG
-            public override string ToString()
-            {
-                return
-                    "{ client = " + client + "\n" +
-                    "OnePixExtraBorder = " + OnePixExtraBorder + "\n" +
-                    "borderSize = " + borderSize + "\n" +
-                    "paddingSize = " + paddingSize + "\n" +
-                    "maxFocus = " + maxFocus + "\n" +
-                    "font = " + font + "\n" +
-                    "text = " + text + "\n" +
-                    "imageSize = " + imageSize + "\n" +
-                    "checkSize = " + checkSize + "\n" +
-                    "checkPaddingSize = " + checkPaddingSize + "\n" +
-                    "checkAlign = " + checkAlign + "\n" +
-                    "imageAlign = " + imageAlign + "\n" +
-                    "textAlign = " + textAlign + "\n" +
-                    "textOffset = " + textOffset + "\n" +
-                    "shadowedText = " + shadowedText + "\n" +
-                    "textImageRelation = " + textImageRelation + "\n" +
-                    "layoutRTL = " + layoutRTL + " }";
-            }
-#endif
-
-            #endregion
-
             #region Internal Methods
 
             internal Size GetPreferredSizeCore(Graphics g, Size proposedSize)
             {
                 // Get space required for border and padding
                 //
-                int linearBorderAndPadding = borderSize * 2 + paddingSize * 2;
-                if (growBorderBy1PxWhenDefault)
+                int linearBorderAndPadding = BorderSize * 2 + PaddingSize * 2;
+                if (GrowBorderBy1PxWhenDefault)
                 {
                     linearBorderAndPadding += 2;
                 }
@@ -408,7 +359,7 @@ namespace KGySoft.WinForms.Controls
                 // Get space required for Image - textImageInset compensated for by expanding image.
                 //
                 Size textImageInsetSize = new Size(textImageInset * 2, textImageInset * 2);
-                Size requiredImageSize = (imageSize != Size.Empty) ? imageSize + textImageInsetSize : Size.Empty;
+                Size requiredImageSize = (ImageSize != Size.Empty) ? ImageSize + textImageInsetSize : Size.Empty;
 
                 // Pack Text into remaning space
                 //
@@ -417,7 +368,7 @@ namespace KGySoft.WinForms.Controls
 
                 Size textSize = Size.Empty;
 
-                if (!string.IsNullOrEmpty(text))
+                if (!string.IsNullOrEmpty(Text))
                 {
                     // When Button.AutoSizeMode is set to GrowOnly TableLayoutPanel expects buttons not to automatically wrap on word break. If
                     // there's enough room for the text to word-wrap then it will happen but the layout would not be adjusted to allow text wrapping.
@@ -436,7 +387,7 @@ namespace KGySoft.WinForms.Controls
 
                 // Combine pieces to get final preferred size
                 //
-                Size requiredSize = Compose(checkSize, imageSize, textSize);
+                Size requiredSize = Compose(checkSize, ImageSize, textSize);
                 requiredSize += bordersAndPadding;
 
                 return requiredSize;
@@ -445,11 +396,11 @@ namespace KGySoft.WinForms.Controls
             internal LayoutData Layout(Graphics g)
             {
                 LayoutData layout = new LayoutData(this);
-                layout.client = client;
+                layout.Client = Client;
 
                 // subtract border size from layout area
                 int fullBorderSize = FullBorderSize;
-                layout.face = Rectangle.Inflate(layout.client, -fullBorderSize, -fullBorderSize);
+                layout.Face = Rectangle.Inflate(layout.Client, -fullBorderSize, -fullBorderSize);
 
                 // checkBounds, checkArea, field
                 //
@@ -460,38 +411,38 @@ namespace KGySoft.WinForms.Controls
 
                 // focus
                 //
-                if (maxFocus)
+                if (MaxFocus)
                 {
-                    layout.focus = layout.field;
-                    layout.focus.Inflate(-1, -1);
+                    layout.Focus = layout.Field;
+                    layout.Focus.Inflate(-1, -1);
 
                     // Adjust for padding.
-                    layout.focus = LayoutUtils.InflateRect(layout.focus, padding);
+                    layout.Focus = LayoutUtils.InflateRect(layout.Focus, Padding);
                 }
                 else
                 {
-                    Rectangle textAdjusted = new Rectangle(layout.textBounds.X - 1, layout.textBounds.Y - 1,
-                        layout.textBounds.Width + 2, layout.textBounds.Height + 3);
-                    if (imageSize != Size.Empty)
+                    Rectangle textAdjusted = new Rectangle(layout.TextBounds.X - 1, layout.TextBounds.Y - 1,
+                            layout.TextBounds.Width + 2, layout.TextBounds.Height + 3);
+                    if (ImageSize != Size.Empty)
                     {
-                        layout.focus = Rectangle.Union(textAdjusted, layout.imageBounds);
+                        layout.Focus = Rectangle.Union(textAdjusted, layout.ImageBounds);
                     }
                     else
                     {
-                        layout.focus = textAdjusted;
+                        layout.Focus = textAdjusted;
                     }
                 }
-                if (focusOddEvenFixup)
+                if (FocusOddEvenFixup)
                 {
-                    if (layout.focus.Height % 2 == 0)
+                    if (layout.Focus.Height % 2 == 0)
                     {
-                        layout.focus.Y++;
-                        layout.focus.Height--;
+                        layout.Focus.Y++;
+                        layout.Focus.Height--;
                     }
-                    if (layout.focus.Width % 2 == 0)
+                    if (layout.Focus.Width % 2 == 0)
                     {
-                        layout.focus.X++;
-                        layout.focus.Width--;
+                        layout.Focus.X++;
+                        layout.Focus.Width--;
                     }
                 }
 
@@ -501,13 +452,12 @@ namespace KGySoft.WinForms.Controls
 
             internal ContentAlignment RtlTranslateContent(ContentAlignment align)
             {
-
-                if (layoutRTL)
+                if (LayoutRtl)
                 {
                     ContentAlignment[][] mapping = new ContentAlignment[3][];
-                    mapping[0] = new ContentAlignment[2] { ContentAlignment.TopLeft, ContentAlignment.TopRight };
-                    mapping[1] = new ContentAlignment[2] { ContentAlignment.MiddleLeft, ContentAlignment.MiddleRight };
-                    mapping[2] = new ContentAlignment[2] { ContentAlignment.BottomLeft, ContentAlignment.BottomRight };
+                    mapping[0] = new[] { ContentAlignment.TopLeft, ContentAlignment.TopRight };
+                    mapping[1] = new[] { ContentAlignment.MiddleLeft, ContentAlignment.MiddleRight };
+                    mapping[2] = new[] { ContentAlignment.BottomLeft, ContentAlignment.BottomRight };
 
                     for (int i = 0; i < 3; ++i)
                     {
@@ -527,43 +477,43 @@ namespace KGySoft.WinForms.Controls
             internal void LayoutTextAndImage(Graphics g, LayoutData layout)
             {
                 // Translate for Rtl applications.  This intentially shadows the member variables.
-                ContentAlignment imageAlign = RtlTranslateContent(this.imageAlign);
-                ContentAlignment textAlign = RtlTranslateContent(this.textAlign);
-                TextImageRelation textImageRelation = RtlTranslateRelation(this.textImageRelation);
+                ContentAlignment imageAlign = RtlTranslateContent(this.ImageAlign);
+                ContentAlignment textAlign = RtlTranslateContent(this.TextAlign);
+                TextImageRelation textImageRelation = RtlTranslateRelation(this.TextImageRelation);
 
                 // Figure out the maximum bounds for text & image
-                Rectangle maxBounds = Rectangle.Inflate(layout.field, -textImageInset, -textImageInset);
+                Rectangle maxBounds = Rectangle.Inflate(layout.Field, -textImageInset, -textImageInset);
                 if (OnePixExtraBorder)
                 {
                     maxBounds.Inflate(1, 1);
                 }
 
                 // Compute the final image and text bounds.
-                if (imageSize == Size.Empty || text == null || text.Length == 0 || textImageRelation == TextImageRelation.Overlay)
+                if (ImageSize == Size.Empty || Text == null || Text.Length == 0 || textImageRelation == TextImageRelation.Overlay)
                 {
                     // Do not worry about text/image overlaying
                     Size textSize = GetTextSize(g, maxBounds.Size);
 
                     // For .NET Framework 1.1 compatibility
-                    Size size = imageSize;
-                    if (layout.options.dotNetOneButtonCompat && imageSize != Size.Empty)
+                    Size size = ImageSize;
+                    if (layout.Options.DotNetOneButtonCompat && ImageSize != Size.Empty)
                     {
                         size = new Size(size.Width + 1, size.Height + 1);
                     }
 
-                    layout.imageBounds = LayoutUtils.Align(size, maxBounds, imageAlign);
-                    layout.textBounds = LayoutUtils.Align(textSize, maxBounds, textAlign);
+                    layout.ImageBounds = LayoutUtils.Align(size, maxBounds, imageAlign);
+                    layout.TextBounds = LayoutUtils.Align(textSize, maxBounds, textAlign);
 
                 }
                 else
                 {
                     // Rearrage text/image to prevent overlay.  Pack text into maxBounds - space reserved for image
-                    Size maxTextSize = LayoutUtils.SubAlignedRegion(maxBounds.Size, imageSize, textImageRelation);
+                    Size maxTextSize = LayoutUtils.SubAlignedRegion(maxBounds.Size, ImageSize, textImageRelation);
                     Size textSize = GetTextSize(g, maxTextSize);
                     Rectangle maxCombinedBounds = maxBounds;
 
                     // Combine text & image into one rectangle that we center within maxBounds.
-                    Size combinedSize = LayoutUtils.AddAlignedRegion(textSize, imageSize, textImageRelation);
+                    Size combinedSize = LayoutUtils.AddAlignedRegion(textSize, ImageSize, textImageRelation);
                     maxCombinedBounds.Size = LayoutUtils.UnionSizes(maxCombinedBounds.Size, combinedSize);
                     Rectangle combinedBounds = LayoutUtils.Align(combinedSize, maxCombinedBounds, ContentAlignment.MiddleCenter);
 
@@ -580,23 +530,23 @@ namespace KGySoft.WinForms.Controls
                     if (imageEdge)
                     {
                         // If imageEdge, just split imageSize off of maxCombinedBounds.
-                        LayoutUtils.SplitRegion(maxCombinedBounds, imageSize, (AnchorStyles)textImageRelation, out layout.imageBounds, out layout.textBounds);
+                        LayoutUtils.SplitRegion(maxCombinedBounds, ImageSize, (AnchorStyles)textImageRelation, out layout.ImageBounds, out layout.TextBounds);
                     }
                     else if (textEdge)
                     {
                         // Else if textEdge, just split textSize off of maxCombinedBounds.
-                        LayoutUtils.SplitRegion(maxCombinedBounds, textSize, (AnchorStyles)LayoutUtils.GetOppositeTextImageRelation(textImageRelation), out layout.textBounds, out layout.imageBounds);
+                        LayoutUtils.SplitRegion(maxCombinedBounds, textSize, (AnchorStyles)LayoutUtils.GetOppositeTextImageRelation(textImageRelation), out layout.TextBounds, out layout.ImageBounds);
                     }
                     else
                     {
                         // Expand the adjacent regions to maxCombinedBounds (centered) and split the rectangle into imageBounds and textBounds.
-                        LayoutUtils.SplitRegion(combinedBounds, imageSize, (AnchorStyles)textImageRelation, out layout.imageBounds, out layout.textBounds);
-                        LayoutUtils.ExpandRegionsToFillBounds(maxCombinedBounds, (AnchorStyles)textImageRelation, ref layout.imageBounds, ref layout.textBounds);
+                        LayoutUtils.SplitRegion(combinedBounds, ImageSize, (AnchorStyles)textImageRelation, out layout.ImageBounds, out layout.TextBounds);
+                        LayoutUtils.ExpandRegionsToFillBounds(maxCombinedBounds, (AnchorStyles)textImageRelation, ref layout.ImageBounds, ref layout.TextBounds);
                     }
 
                     // align text/image within their regions.
-                    layout.imageBounds = LayoutUtils.Align(imageSize, layout.imageBounds, imageAlign);
-                    layout.textBounds = LayoutUtils.Align(textSize, layout.textBounds, textAlign);
+                    layout.ImageBounds = LayoutUtils.Align(ImageSize, layout.ImageBounds, imageAlign);
+                    layout.TextBounds = LayoutUtils.Align(textSize, layout.TextBounds, textAlign);
                 }
 
                 //Don't call "layout.imageBounds = Rectangle.Intersect(layout.imageBounds, maxBounds);"
@@ -609,51 +559,51 @@ namespace KGySoft.WinForms.Controls
                 if (textImageRelation == TextImageRelation.TextBeforeImage || textImageRelation == TextImageRelation.ImageBeforeText)
                 {
                     //adjust the vertical position of textBounds so that the text doesn't fall off the boundary of the button
-                    int textBottom = Math.Min(layout.textBounds.Bottom, layout.field.Bottom);
-                    layout.textBounds.Y = Math.Max(Math.Min(layout.textBounds.Y, layout.field.Y + (layout.field.Height - layout.textBounds.Height) / 2), layout.field.Y);
-                    layout.textBounds.Height = textBottom - layout.textBounds.Y;
+                    int textBottom = Math.Min(layout.TextBounds.Bottom, layout.Field.Bottom);
+                    layout.TextBounds.Y = Math.Max(Math.Min(layout.TextBounds.Y, layout.Field.Y + (layout.Field.Height - layout.TextBounds.Height) / 2), layout.Field.Y);
+                    layout.TextBounds.Height = textBottom - layout.TextBounds.Y;
                 }
                 if (textImageRelation == TextImageRelation.TextAboveImage || textImageRelation == TextImageRelation.ImageAboveText)
                 {
                     //adjust the horizontal position of textBounds so that the text doesn't fall off the boundary of the button
-                    int textRight = Math.Min(layout.textBounds.Right, layout.field.Right);
-                    layout.textBounds.X = Math.Max(Math.Min(layout.textBounds.X, layout.field.X + (layout.field.Width - layout.textBounds.Width) / 2), layout.field.X);
-                    layout.textBounds.Width = textRight - layout.textBounds.X;
+                    int textRight = Math.Min(layout.TextBounds.Right, layout.Field.Right);
+                    layout.TextBounds.X = Math.Max(Math.Min(layout.TextBounds.X, layout.Field.X + (layout.Field.Width - layout.TextBounds.Width) / 2), layout.Field.X);
+                    layout.TextBounds.Width = textRight - layout.TextBounds.X;
                 }
-                if (textImageRelation == TextImageRelation.ImageBeforeText && layout.imageBounds.Size.Width != 0)
+                if (textImageRelation == TextImageRelation.ImageBeforeText && layout.ImageBounds.Size.Width != 0)
                 {
                     //squeezes imageBounds.Width so that text is visible
-                    layout.imageBounds.Width = Math.Max(0, Math.Min(maxBounds.Width - layout.textBounds.Width, layout.imageBounds.Width));
-                    layout.textBounds.X = layout.imageBounds.X + layout.imageBounds.Width;
+                    layout.ImageBounds.Width = Math.Max(0, Math.Min(maxBounds.Width - layout.TextBounds.Width, layout.ImageBounds.Width));
+                    layout.TextBounds.X = layout.ImageBounds.X + layout.ImageBounds.Width;
                 }
-                if (textImageRelation == TextImageRelation.ImageAboveText && layout.imageBounds.Size.Height != 0)
+                if (textImageRelation == TextImageRelation.ImageAboveText && layout.ImageBounds.Size.Height != 0)
                 {
                     //squeezes imageBounds.Height so that the text is visible
-                    layout.imageBounds.Height = Math.Max(0, Math.Min(maxBounds.Height - layout.textBounds.Height, layout.imageBounds.Height));
-                    layout.textBounds.Y = layout.imageBounds.Y + layout.imageBounds.Height;
+                    layout.ImageBounds.Height = Math.Max(0, Math.Min(maxBounds.Height - layout.TextBounds.Height, layout.ImageBounds.Height));
+                    layout.TextBounds.Y = layout.ImageBounds.Y + layout.ImageBounds.Height;
                 }
                 //make sure that textBound is contained in layout.field
-                layout.textBounds = Rectangle.Intersect(layout.textBounds, layout.field);
-                if (hintTextUp)
+                layout.TextBounds = Rectangle.Intersect(layout.TextBounds, layout.Field);
+                if (HintTextUp)
                 {
-                    layout.textBounds.Y--;
+                    layout.TextBounds.Y--;
                 }
-                if (textOffset)
+                if (TextOffset)
                 {
-                    layout.textBounds.Offset(1, 1);
+                    layout.TextBounds.Offset(1, 1);
                 }
 
                 // For .NET Framework 1.1 compatibility.
-                if (layout.options.dotNetOneButtonCompat)
+                if (layout.Options.DotNetOneButtonCompat)
                 {
-                    layout.imageStart = layout.imageBounds.Location;
-                    layout.imageBounds = Rectangle.Intersect(layout.imageBounds, layout.field);
+                    layout.ImageStart = layout.ImageBounds.Location;
+                    layout.ImageBounds = Rectangle.Intersect(layout.ImageBounds, layout.Field);
                 }
                 else if (!Application.RenderWithVisualStyles)
                 {
                     // Not sure why this is here, but we can't remove it, since it might break
                     // ToolStrips on non-themed machines
-                    layout.textBounds.X++;
+                    layout.TextBounds.X++;
                 }
 
                 // clip
@@ -661,24 +611,24 @@ namespace KGySoft.WinForms.Controls
                 int bottom;
                 // If we are using GDI to measure text, then we can get into a situation, where
                 // the proposed height is ignore. In this case, we want to clip it against
-                if (!useCompatibleTextRendering)
+                if (!UseCompatibleTextRendering)
                 {
-                    bottom = Math.Min(layout.textBounds.Bottom, maxBounds.Bottom);
-                    layout.textBounds.Y = Math.Max(layout.textBounds.Y, maxBounds.Y);
+                    bottom = Math.Min(layout.TextBounds.Bottom, maxBounds.Bottom);
+                    layout.TextBounds.Y = Math.Max(layout.TextBounds.Y, maxBounds.Y);
                 }
                 else
                 {
                     // If we are using GDI+ (like .NET Framework 1.1), then use the old code
                     // This ensures that we have pixel-level rendering compatibility
-                    bottom = Math.Min(layout.textBounds.Bottom, layout.field.Bottom);
-                    layout.textBounds.Y = Math.Max(layout.textBounds.Y, layout.field.Y);
+                    bottom = Math.Min(layout.TextBounds.Bottom, layout.Field.Bottom);
+                    layout.TextBounds.Y = Math.Max(layout.TextBounds.Y, layout.Field.Y);
                 }
 
-                layout.textBounds.Height = bottom - layout.textBounds.Y;
+                layout.TextBounds.Height = bottom - layout.TextBounds.Y;
 
                 // Difference from original: the image is shifted just like the text.
-                if (!textOffset)
-                    layout.imageStart.Offset(-1, -1);
+                if (!TextOffset)
+                    layout.ImageStart.Offset(-1, -1);
             }
 
             #endregion
@@ -694,26 +644,25 @@ namespace KGySoft.WinForms.Controls
                     proposedSize.Height = Int32.MaxValue;
 
                 //set the Prefix field of TextFormatFlags
-                proposedSize = LayoutUtils.FlipSizeIf(verticalText, proposedSize);
+                proposedSize = LayoutUtils.FlipSizeIf(VerticalText, proposedSize);
                 Size textSize = Size.Empty;
 
-                if (useCompatibleTextRendering)
-                { // GDI+ text rendering.
+                if (UseCompatibleTextRendering)
+                {
+                    // GDI+ text rendering.
                     //using (Graphics g = WindowsFormsUtils.CreateMeasurementGraphics())
                     //{
-                    using (StringFormat gdipStringFormat = StringFormat)
-                    {
-                        textSize = Size.Ceiling(g.MeasureString(text, font, new SizeF(proposedSize.Width, proposedSize.Height), gdipStringFormat));
-                    }
+                    using StringFormat gdipStringFormat = StringFormat;
+                    textSize = Size.Ceiling(g.MeasureString(Text, Font, new SizeF(proposedSize.Width, proposedSize.Height), gdipStringFormat));
                     //}
                 }
-                else if (!string.IsNullOrEmpty(text))
+                else if (!string.IsNullOrEmpty(Text))
                 { // GDI text rendering (.NET Framework 2.0 feature).
-                    textSize = TextRenderer.MeasureText(g, text, font, proposedSize, TextFormatFlags);
+                    textSize = TextRenderer.MeasureText(g, Text, Font, proposedSize, TextFormatFlags);
                 }
                 //else skip calling MeasureText, it should return 0,0
 
-                return LayoutUtils.FlipSizeIf(verticalText, textSize);
+                return LayoutUtils.FlipSizeIf(VerticalText, textSize);
 
             }
 
@@ -726,12 +675,12 @@ namespace KGySoft.WinForms.Controls
                 Composition hComposition = GetHorizontalComposition();
                 Composition vComposition = GetVerticalComposition();
                 return new Size(
-                    xCompose(hComposition, checkSize.Width, imageSize.Width, textSize.Width),
-                    xCompose(vComposition, checkSize.Height, imageSize.Height, textSize.Height)
-                    );
+                    XCompose(hComposition, checkSize.Width, imageSize.Width, textSize.Width),
+                    XCompose(vComposition, checkSize.Height, imageSize.Height, textSize.Height)
+                );
             }
 
-            private int xCompose(Composition composition, int checkSize, int imageSize, int textSize)
+            private int XCompose(Composition composition, int checkSize, int imageSize, int textSize)
             {
                 switch (composition)
                 {
@@ -754,12 +703,12 @@ namespace KGySoft.WinForms.Controls
                 Composition hComposition = GetHorizontalComposition();
                 Composition vComposition = GetVerticalComposition();
                 return new Size(
-                    xDecompose(hComposition, checkSize.Width, imageSize.Width, proposedSize.Width),
-                    xDecompose(vComposition, checkSize.Height, imageSize.Height, proposedSize.Height)
-                    );
+                    XDecompose(hComposition, checkSize.Width, imageSize.Width, proposedSize.Width),
+                    XDecompose(vComposition, checkSize.Height, imageSize.Height, proposedSize.Height)
+                );
             }
 
-            private int xDecompose(Composition composition, int checkSize, int imageSize, int proposedSize)
+            private int XDecompose(Composition composition, int checkSize, int imageSize, int proposedSize)
             {
                 switch (composition)
                 {
@@ -782,8 +731,8 @@ namespace KGySoft.WinForms.Controls
                 BitVector32 action = new BitVector32();
 
                 // Checks reserve space horizontally if possible, so only AnyLeft/AnyRight prevents combination.
-                action[combineCheck] = checkAlign == ContentAlignment.MiddleCenter || !LayoutUtils.IsHorizontalAlignment(checkAlign);
-                action[combineImageText] = !LayoutUtils.IsHorizontalRelation(textImageRelation);
+                action[combineCheck] = CheckAlign == ContentAlignment.MiddleCenter || !LayoutUtils.IsHorizontalAlignment(CheckAlign);
+                action[combineImageText] = !LayoutUtils.IsHorizontalRelation(TextImageRelation);
                 return (Composition)action.Data;
             }
 
@@ -792,15 +741,15 @@ namespace KGySoft.WinForms.Controls
                 BitVector32 action = new BitVector32();
 
                 // Checks reserve space horizontally if possible, so only Top/Bottom prevents combination.
-                action[combineCheck] = checkAlign == ContentAlignment.MiddleCenter || !LayoutUtils.IsVerticalAlignment(checkAlign);
-                action[combineImageText] = !LayoutUtils.IsVerticalRelation(textImageRelation);
+                action[combineCheck] = CheckAlign == ContentAlignment.MiddleCenter || !LayoutUtils.IsVerticalAlignment(CheckAlign);
+                action[combineImageText] = !LayoutUtils.IsVerticalRelation(TextImageRelation);
                 return (Composition)action.Data;
             }
 
             TextImageRelation RtlTranslateRelation(TextImageRelation relation)
             {
                 // If RTL, we swap ImageBeforeText and TextBeforeImage
-                if (layoutRTL)
+                if (LayoutRtl)
                 {
                     switch (relation)
                     {
@@ -816,37 +765,37 @@ namespace KGySoft.WinForms.Controls
             void CalcCheckmarkRectangle(LayoutData layout)
             {
                 int checkSizeFull = FullCheckSize;
-                layout.checkBounds = new Rectangle(client.X, client.Y, checkSizeFull, checkSizeFull);
+                layout.CheckBounds = new Rectangle(Client.X, Client.Y, checkSizeFull, checkSizeFull);
 
                 // Translate checkAlign for Rtl applications
-                ContentAlignment align = RtlTranslateContent(checkAlign);
+                ContentAlignment align = RtlTranslateContent(CheckAlign);
 
-                Rectangle field = Rectangle.Inflate(layout.face, -paddingSize, -paddingSize);
+                Rectangle field = Rectangle.Inflate(layout.Face, -PaddingSize, -PaddingSize);
 
-                layout.field = field;
+                layout.Field = field;
 
                 if (checkSizeFull > 0)
                 {
                     if (align.AnyRight())
                     {
-                        layout.checkBounds.X = (field.X + field.Width) - layout.checkBounds.Width;
+                        layout.CheckBounds.X = (field.X + field.Width) - layout.CheckBounds.Width;
                     }
                     else if (align.AnyCenter())
                     {
-                        layout.checkBounds.X = field.X + (field.Width - layout.checkBounds.Width) / 2;
+                        layout.CheckBounds.X = field.X + (field.Width - layout.CheckBounds.Width) / 2;
                     }
 
                     if (align.AnyBottom())
                     {
-                        layout.checkBounds.Y = (field.Y + field.Height) - layout.checkBounds.Height;
+                        layout.CheckBounds.Y = (field.Y + field.Height) - layout.CheckBounds.Height;
                     }
                     else if (align.AnyTop())
                     {
-                        layout.checkBounds.Y = field.Y + 2; // + 2: this needs to be aligned to the text (bug 87483)
+                        layout.CheckBounds.Y = field.Y + 2; // + 2: this needs to be aligned to the text (bug 87483)
                     }
                     else
                     {
-                        layout.checkBounds.Y = field.Y + (field.Height - layout.checkBounds.Height) / 2;
+                        layout.CheckBounds.Y = field.Y + (field.Height - layout.CheckBounds.Height) / 2;
                     }
 
                     switch (align)
@@ -854,54 +803,54 @@ namespace KGySoft.WinForms.Controls
                         case ContentAlignment.TopLeft:
                         case ContentAlignment.MiddleLeft:
                         case ContentAlignment.BottomLeft:
-                            layout.checkArea.X = field.X;
-                            layout.checkArea.Width = checkSizeFull + 1;
+                            layout.CheckArea.X = field.X;
+                            layout.CheckArea.Width = checkSizeFull + 1;
 
-                            layout.checkArea.Y = field.Y;
-                            layout.checkArea.Height = field.Height;
+                            layout.CheckArea.Y = field.Y;
+                            layout.CheckArea.Height = field.Height;
 
-                            layout.field.X += checkSizeFull + 1;
-                            layout.field.Width -= checkSizeFull + 1;
+                            layout.Field.X += checkSizeFull + 1;
+                            layout.Field.Width -= checkSizeFull + 1;
                             break;
                         case ContentAlignment.TopRight:
                         case ContentAlignment.MiddleRight:
                         case ContentAlignment.BottomRight:
-                            layout.checkArea.X = field.X + field.Width - checkSizeFull;
-                            layout.checkArea.Width = checkSizeFull + 1;
+                            layout.CheckArea.X = field.X + field.Width - checkSizeFull;
+                            layout.CheckArea.Width = checkSizeFull + 1;
 
-                            layout.checkArea.Y = field.Y;
-                            layout.checkArea.Height = field.Height;
+                            layout.CheckArea.Y = field.Y;
+                            layout.CheckArea.Height = field.Height;
 
-                            layout.field.Width -= checkSizeFull + 1;
+                            layout.Field.Width -= checkSizeFull + 1;
                             break;
                         case ContentAlignment.TopCenter:
-                            layout.checkArea.X = field.X;
-                            layout.checkArea.Width = field.Width;
+                            layout.CheckArea.X = field.X;
+                            layout.CheckArea.Width = field.Width;
 
-                            layout.checkArea.Y = field.Y;
-                            layout.checkArea.Height = checkSizeFull;
+                            layout.CheckArea.Y = field.Y;
+                            layout.CheckArea.Height = checkSizeFull;
 
-                            layout.field.Y += checkSizeFull;
-                            layout.field.Height -= checkSizeFull;
+                            layout.Field.Y += checkSizeFull;
+                            layout.Field.Height -= checkSizeFull;
                             break;
 
                         case ContentAlignment.BottomCenter:
-                            layout.checkArea.X = field.X;
-                            layout.checkArea.Width = field.Width;
+                            layout.CheckArea.X = field.X;
+                            layout.CheckArea.Width = field.Width;
 
-                            layout.checkArea.Y = field.Y + field.Height - checkSizeFull;
-                            layout.checkArea.Height = checkSizeFull;
+                            layout.CheckArea.Y = field.Y + field.Height - checkSizeFull;
+                            layout.CheckArea.Height = checkSizeFull;
 
-                            layout.field.Height -= checkSizeFull;
+                            layout.Field.Height -= checkSizeFull;
                             break;
 
                         case ContentAlignment.MiddleCenter:
-                            layout.checkArea = layout.checkBounds;
+                            layout.CheckArea = layout.CheckBounds;
                             break;
                     }
 
-                    layout.checkBounds.Width -= checkPaddingSize;
-                    layout.checkBounds.Height -= checkPaddingSize;
+                    layout.CheckBounds.Width -= CheckPaddingSize;
+                    layout.CheckBounds.Height -= CheckPaddingSize;
                 }
             }
 
@@ -920,26 +869,22 @@ namespace KGySoft.WinForms.Controls
         {
             #region Fields
 
-            internal Rectangle client;
-            internal Rectangle face;
-            internal Rectangle checkArea;
-            internal Rectangle checkBounds;
-            internal Rectangle textBounds;
-            internal Rectangle field;
-            internal Rectangle focus;
-            internal Rectangle imageBounds;
-            internal Point imageStart;
-            internal LayoutOptions options;
+            internal Rectangle Client;
+            internal Rectangle Face;
+            internal Rectangle CheckArea;
+            internal Rectangle CheckBounds;
+            internal Rectangle TextBounds;
+            internal Rectangle Field;
+            internal Rectangle Focus;
+            internal Rectangle ImageBounds;
+            internal Point ImageStart;
+            internal LayoutOptions Options;
 
             #endregion
 
             #region Constructors
 
-            internal LayoutData(LayoutOptions options)
-            {
-                Debug.Assert(options != null, "must have options");
-                this.options = options;
-            }
+            internal LayoutData(LayoutOptions options) => Options = options;
 
             #endregion
         }
@@ -956,15 +901,9 @@ namespace KGySoft.WinForms.Controls
 
         #region Properties
 
-        protected virtual int ButtonBorderSize
-        {
-            get { return 4; }
-        }
+        protected virtual int ButtonBorderSize => 4;
 
-        protected ButtonBase ButtonInstance
-        {
-            get { return control; }
-        }
+        protected ButtonBase ButtonInstance => control;
 
         #endregion
 
@@ -985,23 +924,19 @@ namespace KGySoft.WinForms.Controls
         {
             // Note: Don't dispose the bitmap here. The texture brush will take ownership
             // of the bitmap. So the bitmap will get disposed by the brush's Dispose().
-            using (Bitmap b = new Bitmap(2, 2))
-            {
-                b.SetPixel(0, 0, color1);
-                b.SetPixel(0, 1, color2);
-                b.SetPixel(1, 1, color1);
-                b.SetPixel(1, 0, color2);
+            using Bitmap b = new Bitmap(2, 2);
+            b.SetPixel(0, 0, color1);
+            b.SetPixel(0, 1, color2);
+            b.SetPixel(1, 1, color1);
+            b.SetPixel(1, 0, color2);
 
-                return new TextureBrush(b);
-            }
+            return new TextureBrush(b);
         }
 
         protected static void DrawDitheredFill(Graphics g, Color color1, Color color2, Rectangle bounds)
         {
-            using (Brush brush = CreateDitherBrush(color1, color2))
-            {
-                g.FillRectangle(brush, bounds);
-            }
+            using Brush brush = CreateDitherBrush(color1, color2);
+            g.FillRectangle(brush, bounds);
         }
 
         /// <summary>
@@ -1016,7 +951,7 @@ namespace KGySoft.WinForms.Controls
             Point p4 = new Point(r.Right - 1, r.Bottom - 1);  // inner bottom right.
 
             // top, left
-            Pen pen = up ? new Pen(colors.highlight) : new Pen(colors.buttonShadow);
+            Pen pen = up ? new Pen(colors.Highlight) : new Pen(colors.ButtonShadow);
 
             try
             {
@@ -1029,7 +964,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             // bottom, right
-            pen = up ? new Pen(colors.buttonShadow) : new Pen(colors.highlight);
+            pen = up ? new Pen(colors.ButtonShadow) : new Pen(colors.Highlight);
 
             try
             {
@@ -1113,40 +1048,38 @@ namespace KGySoft.WinForms.Controls
         internal virtual LayoutOptions CommonLayout(ControlAppearanceState state)
         {
             LayoutOptions layout = new LayoutOptions();
-            layout.client = LayoutUtils.DeflateRect(control.ClientRectangle, control.Padding);
-            layout.padding = control.Padding;
-            layout.growBorderBy1PxWhenDefault = true;
-            layout.isDefault = state.IsDefault;
-            layout.borderSize = 2;
-            layout.paddingSize = 0;
-            layout.maxFocus = true;
-            layout.focusOddEvenFixup = false;
-            layout.font = control.Font;
-            layout.text = state.Text;
-            layout.imageSize = (control.Image == null) ? Size.Empty : control.Image.Size;
-            layout.checkSize = 0;
-            layout.checkPaddingSize = 0;
-            layout.checkAlign = ContentAlignment.TopLeft;
-            layout.imageAlign = control.ImageAlign;
-            layout.textAlign = control.TextAlign;
-            layout.hintTextUp = false;
-            layout.shadowedText = !state.Enabled;
-            layout.layoutRTL = RightToLeft.Yes == control.RightToLeft;
-            layout.textImageRelation = control.TextImageRelation;
-            layout.useCompatibleTextRendering = control.UseCompatibleTextRendering;
+            layout.Client = LayoutUtils.DeflateRect(control.ClientRectangle, control.Padding);
+            layout.Padding = control.Padding;
+            layout.GrowBorderBy1PxWhenDefault = true;
+            layout.IsDefault = state.IsDefault;
+            layout.BorderSize = 2;
+            layout.PaddingSize = 0;
+            layout.MaxFocus = true;
+            layout.FocusOddEvenFixup = false;
+            layout.Font = control.Font;
+            layout.Text = state.Text;
+            layout.ImageSize = (control.Image == null) ? Size.Empty : control.Image.Size;
+            layout.CheckSize = 0;
+            layout.CheckPaddingSize = 0;
+            layout.CheckAlign = ContentAlignment.TopLeft;
+            layout.ImageAlign = control.ImageAlign;
+            layout.TextAlign = control.TextAlign;
+            layout.HintTextUp = false;
+            layout.ShadowedText = !state.Enabled;
+            layout.LayoutRtl = RightToLeft.Yes == control.RightToLeft;
+            layout.TextImageRelation = control.TextImageRelation;
+            layout.UseCompatibleTextRendering = control.UseCompatibleTextRendering;
 
             if (control.FlatStyle != FlatStyle.System)
             {
-                if (layout.useCompatibleTextRendering)
+                if (layout.UseCompatibleTextRendering)
                 {
-                    using (StringFormat format = control.GetFormatFlags().ToStringFormat())
-                    {
-                        layout.StringFormat = format;
-                    }
+                    using StringFormat format = control.GetFormatFlags().ToStringFormat();
+                    layout.StringFormat = format;
                 }
                 else
                 {
-                    layout.gdiTextFormatFlags = control.GetFormatFlags();
+                    layout.GdiTextFormatFlags = control.GetFormatFlags();
                 }
             }
 
@@ -1178,7 +1111,7 @@ namespace KGySoft.WinForms.Controls
         {
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
-            Rectangle maxFocus = layout.focus;
+            Rectangle maxFocus = layout.Focus;
             DrawText(g, layout, colors, state);
             if (drawFocus)
             {
@@ -1191,7 +1124,7 @@ namespace KGySoft.WinForms.Controls
             if (control.Image != null)
             {
                 //setup new clip region & draw
-                DrawImageCore(e.Graphics, control.Image, layout.imageBounds, layout.imageStart, layout, e.State);
+                DrawImageCore(e.Graphics, control.Image, layout.ImageBounds, layout.ImageStart, layout, e.State);
             }
         }
 
@@ -1214,7 +1147,7 @@ namespace KGySoft.WinForms.Controls
         {
             Region oldClip = graphics.Clip;
 
-            if (!layout.options.dotNetOneButtonCompat)
+            if (!layout.Options.DotNetOneButtonCompat)
             {
                 Rectangle bounds = new Rectangle(ButtonBorderSize, ButtonBorderSize, control.Width - (2 * ButtonBorderSize), control.Height - (2 * ButtonBorderSize));
 
@@ -1245,7 +1178,7 @@ namespace KGySoft.WinForms.Controls
 
             finally
             {
-                if (!layout.options.dotNetOneButtonCompat)
+                if (!layout.Options.DotNetOneButtonCompat)
                 {
                     graphics.Clip = oldClip;
                 }
@@ -1257,46 +1190,42 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         void DrawText(Graphics g, LayoutData layout, ColorData colors, ControlAppearanceState state)
         {
-            Rectangle r = layout.textBounds;
-            bool disabledText3D = layout.options.shadowedText;
+            Rectangle r = layout.TextBounds;
+            bool disabledText3D = layout.Options.ShadowedText;
 
             if (control.UseCompatibleTextRendering)
             {
                 // Draw text using GDI+
-                using (StringFormat stringFormat = control.GetFormatFlags().ToStringFormat())
+                using StringFormat stringFormat = control.GetFormatFlags().ToStringFormat();
+                // DrawString doesn't seem to draw where it says it does
+                if (control.TextAlign.AnyCenter())
                 {
-                    // DrawString doesn't seem to draw where it says it does
-                    if (control.TextAlign.AnyCenter())
+                    r.X -= 1;
+                }
+                r.Width += 1;
+
+                if (disabledText3D && !state.Enabled)
+                {
+                    r.Offset(1, 1);
+                    using SolidBrush brush = new SolidBrush(colors.Highlight);
+                    g.DrawString(state.Text, control.Font, brush, r, stringFormat);
+
+                    r.Offset(-1, -1);
+                    brush.Color = state.ForeColor; // here: DisabledForeColor
+                    g.DrawString(state.Text, control.Font, brush, r, stringFormat);
+                }
+                else
+                {
+                    Brush brush;
+
+                    brush = state.ForeColor.IsSystemColor
+                        ? SystemBrushes.FromSystemColor(state.ForeColor)
+                        : new SolidBrush(state.ForeColor);
+                    g.DrawString(state.Text, control.Font, brush, r, stringFormat);
+
+                    if (!state.ForeColor.IsSystemColor)
                     {
-                        r.X -= 1;
-                    }
-                    r.Width += 1;
-
-                    if (disabledText3D && !state.Enabled)
-                    {
-                        r.Offset(1, 1);
-                        using (SolidBrush brush = new SolidBrush(colors.highlight))
-                        {
-                            g.DrawString(state.Text, control.Font, brush, r, stringFormat);
-
-                            r.Offset(-1, -1);
-                            brush.Color = state.ForeColor; // here: DisabledForeColor
-                            g.DrawString(state.Text, control.Font, brush, r, stringFormat);
-                        }
-                    }
-                    else
-                    {
-                        Brush brush;
-
-                        brush = state.ForeColor.IsSystemColor
-                            ? SystemBrushes.FromSystemColor(state.ForeColor)
-                            : new SolidBrush(state.ForeColor);
-                        g.DrawString(state.Text, control.Font, brush, r, stringFormat);
-
-                        if (!state.ForeColor.IsSystemColor)
-                        {
-                            brush.Dispose();
-                        }
+                        brush.Dispose();
                     }
                 }
             }
@@ -1316,7 +1245,7 @@ namespace KGySoft.WinForms.Controls
                     else
                     {
                         r.Offset(1, 1);
-                        TextRenderer.DrawText(g, state.Text, control.Font, r, colors.highlight, formatFlags);
+                        TextRenderer.DrawText(g, state.Text, control.Font, r, colors.Highlight, formatFlags);
 
                         r.Offset(-1, -1);
                         TextRenderer.DrawText(g, state.Text, control.Font, r, disabledColor, formatFlags);

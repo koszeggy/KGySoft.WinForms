@@ -1,5 +1,21 @@
-﻿#region Used namespaces
+﻿#region Copyright
 
+///////////////////////////////////////////////////////////////////////////////
+//  File: RadioButtonBaseAdapter.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
@@ -8,17 +24,11 @@ using System.Windows.Forms;
 
 namespace KGySoft.WinForms.Controls
 {
-    internal abstract class RadioButtonBaseAdapter: CheckableControlBaseAdapter
+    internal abstract class RadioButtonBaseAdapter : CheckableControlBaseAdapter
     {
         #region Properties
 
-        private RadioButton RadioButtonInstance
-        {
-            get
-            {
-                return (RadioButton)ButtonInstance;
-            }
-        }
+        private RadioButton RadioButtonInstance => (RadioButton)ButtonInstance;
 
         #endregion
 
@@ -37,9 +47,6 @@ namespace KGySoft.WinForms.Controls
 
         private static void DrawAndFillEllipse(Graphics graphics, Pen borderPen, Brush fieldBrush, Rectangle bounds)
         {
-            if (graphics == null)
-                return;
-            
             graphics.FillRectangle(fieldBrush, new Rectangle(bounds.X + 2, bounds.Y + 2, 8, 8));
             graphics.FillRectangle(fieldBrush, new Rectangle(bounds.X + 4, bounds.Y + 1, 4, 10));
             graphics.FillRectangle(fieldBrush, new Rectangle(bounds.X + 1, bounds.Y + 4, 10, 4));
@@ -74,7 +81,7 @@ namespace KGySoft.WinForms.Controls
         internal override LayoutOptions CommonLayout(ControlAppearanceState state)
         {
             LayoutOptions options = base.CommonLayout(state);
-            options.checkAlign = RadioButtonInstance.CheckAlign;
+            options.CheckAlign = RadioButtonInstance.CheckAlign;
             return options;
         }
 
@@ -112,9 +119,7 @@ namespace KGySoft.WinForms.Controls
                 bounds.Inflate(-1, -1);
             }
             else
-            {
                 DrawAndFillEllipse(e.Graphics, pen, brush, bounds);
-            }
         }
 
         protected void DrawCheckOnly(PaintStateEventArgs e, LayoutData layout, Color checkColor)
@@ -130,9 +135,9 @@ namespace KGySoft.WinForms.Controls
             // Original code
             if (scale < 1.1f)
             {
-                Rectangle vCross = new Rectangle(layout.checkBounds.X + padding, (layout.checkBounds.Y + padding) - 1, 2, 4);
+                Rectangle vCross = new Rectangle(layout.CheckBounds.X + padding, (layout.CheckBounds.Y + padding) - 1, 2, 4);
                 e.Graphics.FillRectangle(brush, vCross);
-                Rectangle hCross = new Rectangle((layout.checkBounds.X + padding) - 1, layout.checkBounds.Y + padding, 4, 2);
+                Rectangle hCross = new Rectangle((layout.CheckBounds.X + padding) - 1, layout.CheckBounds.Y + padding, 4, 2);
                 e.Graphics.FillRectangle(brush, hCross);
                 return;
             }
@@ -140,12 +145,24 @@ namespace KGySoft.WinForms.Controls
             // This scaled rendering differs from the original because that one is very ugly e.g. at 150%: https://github.com/dotnet/winforms/blob/1c324d074280ab5de6342d973069faa687f2c165/src/System.Windows.Forms/System/Windows/Forms/Controls/Buttons/ButtonInternal/RadioButtonBaseAdapter.cs#L149
             GraphicsState prevState = e.Graphics.Save();
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            Rectangle checkBounds = layout.checkBounds;
+            Rectangle checkBounds = layout.CheckBounds;
             checkBounds.Width--;
             checkBounds.Height--;
             checkBounds.Inflate(-padding, -padding);
             e.Graphics.FillEllipse(brush, checkBounds);
             e.Graphics.Restore(prevState);
+        }
+
+        protected void AdjustFocusRectangle(ControlAppearanceState state, LayoutData layout)
+        {
+            if (String.IsNullOrEmpty(state.Text))
+            {
+                // When a RadioButton has no text, AutoSize sets the size to zero
+                // and thus there's no place around which to draw the focus rectangle.
+                // So, when AutoSize == true we want the focus rectangle to be rendered around the circle area.
+                // Otherwise, it should encircle all the available space next to the box (like it's done in WPF and ComCtl32).
+                layout.Focus = ButtonInstance.AutoSize ? layout.CheckBounds : layout.Field;
+            }
         }
 
         #endregion

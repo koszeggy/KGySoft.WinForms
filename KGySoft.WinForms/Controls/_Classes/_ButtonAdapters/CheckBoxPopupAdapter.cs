@@ -1,5 +1,21 @@
-﻿#region Used namespaces
+﻿#region Copyright
 
+///////////////////////////////////////////////////////////////////////////////
+//  File: CheckBoxPopupAdapter.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -7,7 +23,7 @@ using System.Windows.Forms;
 
 namespace KGySoft.WinForms.Controls
 {
-    internal class CheckBoxPopupAdapter: CheckBoxBaseAdapter
+    internal class CheckBoxPopupAdapter : CheckBoxBaseAdapter
     {
         #region Constructors
 
@@ -26,13 +42,9 @@ namespace KGySoft.WinForms.Controls
         {
             ControlAppearanceState state = e.State;
             if (state.CheckState == CheckState.Indeterminate)
-            {
-                DrawDitheredFill(e.Graphics, colors.buttonFace, checkBackground, bounds);
-            }
+                DrawDitheredFill(e.Graphics, colors.ButtonFace, checkBackground, bounds);
             else
-            {
                 DrawCheckBackground(state.Enabled, state.CheckState, e.Graphics, bounds, checkBackground, disabledColors);
-            }
         }
 
         private static void DrawCheckBackground(bool controlEnabled, CheckState controlCheckState, Graphics g, Rectangle bounds, Color checkBackground, bool disabledColors)
@@ -53,9 +65,8 @@ namespace KGySoft.WinForms.Controls
                 brush = new SolidBrush(Color.FromArgb(red, green, blue));
             }
             else
-            {
                 brush = new SolidBrush(checkBackground);
-            }
+
             try
             {
                 g.FillRectangle(brush, bounds);
@@ -69,21 +80,16 @@ namespace KGySoft.WinForms.Controls
 
         private static void DrawPopupBorder(Graphics g, Rectangle r, ColorData colors)
         {
-            using (Pen pen = new Pen(colors.highlight))
-            {
-                using (Pen pen2 = new Pen(colors.buttonShadow))
-                {
-                    using (Pen pen3 = new Pen(colors.buttonFace))
-                    {
-                        g.DrawLine(pen, r.Right - 1, r.Top, r.Right - 1, r.Bottom - 1);
-                        g.DrawLine(pen, r.Left, r.Bottom - 1, r.Right - 1, r.Bottom - 1);
-                        g.DrawLine(pen2, r.Left, r.Top, r.Left, r.Bottom - 1);
-                        g.DrawLine(pen2, r.Left, r.Top, r.Right - 2, r.Top);
-                        g.DrawLine(pen3, r.Right - 2, r.Top + 1, r.Right - 2, r.Bottom - 2);
-                        g.DrawLine(pen3, r.Left + 1, r.Bottom - 2, r.Right - 2, r.Bottom - 2);
-                    }
-                }
-            }
+            using Pen pen = new Pen(colors.Highlight);
+            using Pen pen2 = new Pen(colors.ButtonShadow);
+            using Pen pen3 = new Pen(colors.ButtonFace);
+            g.DrawLine(pen, r.Right - 1, r.Top, r.Right - 1, r.Bottom - 1);
+            g.DrawLine(pen, r.Left, r.Bottom - 1, r.Right - 1, r.Bottom - 1);
+            g.DrawLine(pen2, r.Left, r.Top, r.Left, r.Bottom - 1);
+            g.DrawLine(pen2, r.Left, r.Top, r.Right - 2, r.Top);
+            g.DrawLine(pen3, r.Right - 2, r.Top + 1, r.Right - 2, r.Bottom - 2);
+            g.DrawLine(pen3, r.Left + 1, r.Bottom - 2, r.Right - 2, r.Bottom - 2);
+
             r.Inflate(-1, -1);
         }
 
@@ -96,20 +102,19 @@ namespace KGySoft.WinForms.Controls
         internal override void PaintDown(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintDown(e);
-            }
             else
             {
                 Graphics g = e.Graphics;
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
                 LayoutData layout = PaintPopupLayout(state, true).Layout(g);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.buttonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
                 PaintImage(e, layout);
-                DrawCheckBackground(e, layout.checkBounds, colors.buttonFace, true, colors);
-                DrawPopupBorder(g, layout.checkBounds, colors);
-                DrawCheckOnly(e, layout, colors, colors.windowText, true, state);
+                DrawCheckBackground(e, layout.CheckBounds, colors.ButtonFace, true, colors);
+                DrawPopupBorder(g, layout.CheckBounds, colors);
+                DrawCheckOnly(e, layout, colors, colors.WindowText, true, state);
+                AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
             }
         }
@@ -118,43 +123,49 @@ namespace KGySoft.WinForms.Controls
         {
             Graphics g = e.Graphics;
             if (IsButton)
-            {
                 ButtonAdapter.PaintOver(e);
-            }
             else
             {
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
                 LayoutData layout = PaintPopupLayout(state, true).Layout(g);
-                Region clip = e.Graphics.Clip;
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.buttonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
                 PaintImage(e, layout);
-                DrawCheckBackground(e, layout.checkBounds, colors.highContrast ? colors.buttonFace : colors.highlight, true, colors);
-                DrawPopupBorder(g, layout.checkBounds, colors);
-                DrawCheckOnly(e, layout, colors, colors.windowText, true, state);
-                e.Graphics.Clip = clip;
-                e.Graphics.ExcludeClip(layout.checkArea);
+                DrawCheckBackground(e, layout.CheckBounds, colors.HighContrast ? colors.ButtonFace : colors.Highlight, true, colors);
+                DrawPopupBorder(g, layout.CheckBounds, colors);
+                DrawCheckOnly(e, layout, colors, colors.WindowText, true, state);
+
+                Region? originalClip = null;
+                if (!String.IsNullOrEmpty(state.Text))
+                {
+                    originalClip = e.Graphics.Clip;
+                    e.Graphics.ExcludeClip(layout.CheckArea);
+                }
+
+                AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
+
+                if (originalClip is not null)
+                    e.Graphics.Clip = originalClip;
             }
         }
 
         internal override void PaintUp(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintUp(e);
-            }
             else
             {
                 Graphics g = e.Graphics;
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
                 LayoutData layout = PaintPopupLayout(state, false).Layout(g);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.buttonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
                 PaintImage(e, layout);
-                DrawCheckBackground(e, layout.checkBounds, colors.highContrast ? colors.buttonFace : colors.highlight, true, colors);
-                DrawFlatBorder(g, layout.checkBounds, colors.buttonShadow);
-                DrawCheckOnly(e, layout, colors, colors.windowText, true, state);
+                DrawCheckBackground(e, layout.CheckBounds, colors.HighContrast ? colors.ButtonFace : colors.Highlight, true, colors);
+                DrawFlatBorder(g, layout.CheckBounds, colors.ButtonShadow);
+                DrawCheckOnly(e, layout, colors, colors.WindowText, true, state);
+                AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
             }
         }
@@ -163,15 +174,8 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
-        protected override ButtonBaseAdapter CreateButtonAdapter()
-        {
-            return new ButtonPopupAdapter(ButtonInstance);
-        }
-
-        protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state)
-        {
-            return PaintPopupLayout(state, true);
-        }
+        protected override ButtonBaseAdapter CreateButtonAdapter() => new ButtonPopupAdapter(ButtonInstance);
+        protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state) => PaintPopupLayout(state, true);
 
         #endregion
 
@@ -180,17 +184,17 @@ namespace KGySoft.WinForms.Controls
         private LayoutOptions PaintPopupLayout(ControlAppearanceState state, bool show3D)
         {
             LayoutOptions options = CommonLayout(state);
-            options.shadowedText = false;
+            options.ShadowedText = false;
             int checkSize = (int)(FlatCheckSize * GetDpiScaleRatio());
-            
+
             if (show3D)
             {
-                options.checkSize = checkSize + 1;
+                options.CheckSize = checkSize + 1;
                 return options;
             }
 
-            options.checkSize = checkSize;
-            options.checkPaddingSize = 1;
+            options.CheckSize = checkSize;
+            options.CheckPaddingSize = 1;
             return options;
         }
 

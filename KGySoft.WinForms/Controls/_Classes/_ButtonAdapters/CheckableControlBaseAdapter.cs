@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: CheckableControlBaseAdapter.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System.Drawing;
 using System.Windows.Forms;
@@ -7,7 +22,7 @@ using System.Windows.Forms;
 
 namespace KGySoft.WinForms.Controls
 {
-    internal abstract class CheckableControlBaseAdapter: ButtonBaseAdapter
+    internal abstract class CheckableControlBaseAdapter : ButtonBaseAdapter
     {
         #region Constants
 
@@ -17,7 +32,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Fields
 
-        private ButtonBaseAdapter buttonAdapter;
+        private ButtonBaseAdapter? buttonAdapter;
 
         #endregion
 
@@ -27,26 +42,15 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                CheckBox checkBox = ButtonInstance as CheckBox;
-                if (checkBox != null)
-                {
+                if (ButtonInstance is CheckBox checkBox)
                     return checkBox.Appearance == Appearance.Button;
-                }
-
-                RadioButton radioButton = ButtonInstance as RadioButton;
-                if (radioButton != null)
-                {
+                if (ButtonInstance is RadioButton radioButton)
                     return radioButton.Appearance == Appearance.Button;
-                }
-
                 return false;
             }
         }
 
-        protected ButtonBaseAdapter ButtonAdapter
-        {
-            get { return buttonAdapter ?? (buttonAdapter = CreateButtonAdapter()); }
-        }
+        protected ButtonBaseAdapter ButtonAdapter => buttonAdapter ??= CreateButtonAdapter();
 
         #endregion
 
@@ -76,12 +80,12 @@ namespace KGySoft.WinForms.Controls
         internal override LayoutOptions CommonLayout(ControlAppearanceState state)
         {
             LayoutOptions options = base.CommonLayout(state);
-            options.growBorderBy1PxWhenDefault = false;
-            options.borderSize = 0;
-            options.paddingSize = 0;
-            options.maxFocus = false;
-            options.focusOddEvenFixup = true;
-            options.checkSize = standardCheckSize;
+            options.GrowBorderBy1PxWhenDefault = false;
+            options.BorderSize = 0;
+            options.PaddingSize = 0;
+            options.MaxFocus = false;
+            options.FocusOddEvenFixup = true;
+            options.CheckSize = standardCheckSize;
             return options;
         }
 
@@ -90,9 +94,7 @@ namespace KGySoft.WinForms.Controls
         internal override Size GetPreferredSizeCore(Graphics g, Size proposedSize, ControlAppearanceState state)
         {
             if (IsButton)
-            {
                 return ButtonAdapter.GetPreferredSizeCore(g, proposedSize, state);
-            }
 
             Size preferredSizeCore = Layout(g, state).GetPreferredSizeCore(g, proposedSize);
             return preferredSizeCore;
@@ -102,43 +104,15 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
-        //protected ControlAppearanceState ToPushButtonAppearance(ControlAppearanceState state)
-        //{
-        //    ControlAppearanceState result = (ControlAppearanceState)state.Clone();
-        //    result.SystemPartId = (int)BUTTONPARTS.BP_PUSHBUTTON;
-        //    PUSHBUTTONSTATES state = PUSHBUTTONSTATES.PBS_NORMAL;
-        //    if (result.Hovered)
-        //    {
-        //        state = PUSHBUTTONSTATES.PBS_HOT;
-        //    }
-        //    else if (!result.Enabled)
-        //    {
-        //        state = PUSHBUTTONSTATES.PBS_DISABLED;
-        //    }
-        //    else if (ButtonInstance.Focused || result.IsDefault)
-        //    {
-        //        state = PUSHBUTTONSTATES.PBS_DEFAULTED;
-        //    }
-
-        //    result.SystemStateId = (int)state;
-        //    return result;
-        //}
-
         protected ButtonState GetButtonState(ControlAppearanceState state)
         {
             ButtonState result = ButtonState.Normal;
             if (state.CheckState != CheckState.Unchecked)
-            {
                 result |= ButtonState.Checked;
-            }
             if (!state.Enabled)
-            {
                 result |= ButtonState.Inactive;
-            }
             if (state.Pressed)
-            {
                 result |= ButtonState.Pushed;
-            }
             return result;
         }
 

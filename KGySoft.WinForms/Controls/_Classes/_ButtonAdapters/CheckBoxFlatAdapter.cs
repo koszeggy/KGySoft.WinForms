@@ -1,130 +1,147 @@
-﻿using System.Drawing;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: CheckBoxFlatAdapter.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System.Drawing;
 using System.Windows.Forms;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
     internal class CheckBoxFlatAdapter : CheckBoxBaseAdapter
     {
-        // Methods
+        #region Constructors
+
         internal CheckBoxFlatAdapter(ButtonBase control)
             : base(control)
         {
         }
 
-        protected override ButtonBaseAdapter CreateButtonAdapter()
-        {
-            return new ButtonFlatAdapter(ButtonInstance);
-        }
+        #endregion
 
-        protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state)
-        {
-            LayoutOptions options = CommonLayout(state);
-            options.checkSize = (int)(FlatCheckSize * GetDpiScaleRatio());
-            options.shadowedText = false;
-            return options;
-        }
+        #region Methods
+
+        #region Internal Methods
 
         internal override void PaintDown(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintDown(e);
-            }
             else
             {
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
                 if (state.Enabled)
-                {
-                    PaintFlatWorker(e, colors.windowText, colors.highlight, colors.windowFrame, colors);
-                }
+                    PaintFlatWorker(e, colors.WindowText, colors.Highlight, colors.WindowFrame, colors);
                 else
-                {
-                    PaintFlatWorker(e, colors.windowText/*disabledForeColor*/, colors.buttonFace/*disabledBackColor*/, colors.buttonShadow, colors);
-                }
+                    PaintFlatWorker(e, colors.WindowText /*disabledForeColor*/, colors.ButtonFace /*disabledBackColor*/, colors.ButtonShadow, colors);
             }
-        }
-
-        private void PaintFlatWorker(PaintStateEventArgs e, Color checkColor, Color checkBackground, Color checkBorder, ColorData colors)
-        {
-            Graphics graphics = e.Graphics;
-            ControlAppearanceState state = e.State;
-            LayoutData layout = Layout(graphics, state).Layout(graphics);
-            PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.buttonFace);
-            PaintImage(e, layout);
-            DrawCheckFlat(e, layout, checkColor, colors.highContrast ? colors.buttonFace : checkBackground, checkBorder, colors, state);
-            PaintField(e, layout, colors, true);
         }
 
         internal override void PaintOver(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintOver(e);
-            }
             else
             {
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+                
                 if (state.Enabled)
-                {
-                    PaintFlatWorker(e, colors.windowText, colors.lowHighlight, colors.windowFrame, colors);
-                }
+                    PaintFlatWorker(e, colors.WindowText, colors.LowHighlight, colors.WindowFrame, colors);
                 else
-                {
-                    PaintFlatWorker(e, colors.windowText/*disabledForeColor*/, colors.buttonFace/*disabledBackColor*/, colors.windowFrame/*disabledForeColor*/, colors);
-                }
+                    PaintFlatWorker(e, colors.WindowText /*disabledForeColor*/, colors.ButtonFace /*disabledBackColor*/, colors.WindowFrame /*disabledForeColor*/, colors);
             }
         }
 
         internal override void PaintUp(PaintStateEventArgs e)
         {
             if (IsButton)
-            {
                 ButtonAdapter.PaintUp(e);
-            }
             else
             {
                 ControlAppearanceState state = e.State;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+
                 if (state.Enabled)
-                {
-                    PaintFlatWorker(e, colors.windowText, colors.highlight, colors.windowFrame, colors);
-                }
+                    PaintFlatWorker(e, colors.WindowText, colors.Highlight, colors.WindowFrame, colors);
                 else
-                {
-                    PaintFlatWorker(e, colors.windowText/*disabledForeColor*/, colors.buttonFace/*disabledBackColor*/, colors.windowFrame/*disabledForeColor*/, colors);
-                }
+                    PaintFlatWorker(e, colors.WindowText /*disabledForeColor*/, colors.ButtonFace /*disabledBackColor*/, colors.WindowFrame /*disabledForeColor*/, colors);
             }
+        }
+
+        #endregion
+
+        #region Protected Methods
+
+        protected override ButtonBaseAdapter CreateButtonAdapter() => new ButtonFlatAdapter(ButtonInstance);
+
+        protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state)
+        {
+            LayoutOptions options = CommonLayout(state);
+            options.CheckSize = (int)(FlatCheckSize * GetDpiScaleRatio());
+            options.ShadowedText = false;
+            return options;
         }
 
         protected void DrawCheckFlat(PaintEventArgs e, LayoutData layout, Color checkColor, Color checkBackground, Color checkBorder, ColorData colors, ControlAppearanceState state)
         {
-            Rectangle checkBounds = layout.checkBounds;
+            Rectangle checkBounds = layout.CheckBounds;
             checkBounds.Width--;
             checkBounds.Height--;
             using (Pen pen = new Pen(checkBorder))
-            {
                 e.Graphics.DrawRectangle(pen, checkBounds);
-            }
+
             checkBounds.Inflate(-1, -1);
             if (state.CheckState == CheckState.Indeterminate)
             {
                 checkBounds.Width++;
                 checkBounds.Height++;
-                DrawDitheredFill(e.Graphics, colors.buttonFace, checkBackground, checkBounds);
+                DrawDitheredFill(e.Graphics, colors.ButtonFace, checkBackground, checkBounds);
             }
             else
             {
-                using (Brush brush = new SolidBrush(checkBackground))
-                {
-                    checkBounds.Width++;
-                    checkBounds.Height++;
-                    e.Graphics.FillRectangle(brush, checkBounds);
-                }
+                using Brush brush = new SolidBrush(checkBackground);
+                checkBounds.Width++;
+                checkBounds.Height++;
+                e.Graphics.FillRectangle(brush, checkBounds);
             }
 
             DrawCheckOnly(e, layout, colors, checkColor, true, state);
         }
+
+        #endregion
+
+        #region Private Methods
+
+        private void PaintFlatWorker(PaintStateEventArgs e, Color checkColor, Color checkBackground, Color checkBorder, ColorData colors)
+        {
+            Graphics graphics = e.Graphics;
+            ControlAppearanceState state = e.State;
+            LayoutData layout = Layout(graphics, state).Layout(graphics);
+            PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
+            PaintImage(e, layout);
+            DrawCheckFlat(e, layout, checkColor, colors.HighContrast ? colors.ButtonFace : checkBackground, checkBorder, colors, state);
+            AdjustFocusRectangle(state, layout);
+            PaintField(e, layout, colors, true);
+        }
+
+        #endregion
+
+        #endregion
     }
 }
