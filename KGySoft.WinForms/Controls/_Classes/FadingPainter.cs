@@ -17,8 +17,8 @@
 
 using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
+
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -83,7 +83,7 @@ namespace KGySoft.WinForms.Controls
             if (!(host is Control))
                 throw new ArgumentException("Host should be a Control class.", "host");
 
-            operating = FadingPainterInternal.IsSupported && UxTheme.BufferedPaintInit() == 0;
+            operating = FadingPainterInternal.IsSupported && UxTheme.BufferedPaintInit();
             State = initialState;
             this.host = host;
             HookEvents();
@@ -195,11 +195,6 @@ namespace KGySoft.WinForms.Controls
                 speed = 0;
 
             // Not fallbacking if speed is 0 because in this case only new state is drawn, using buffer.
-            BP_ANIMATIONPARAMS animParams = new BP_ANIMATIONPARAMS();
-            animParams.cbSize = Marshal.SizeOf(animParams);
-            animParams.style = BP_ANIMATIONSTYLE.BPAS_LINEAR;
-            animParams.dwDuration = speed;
-
             // Previous animations must be stopped. When not stopped and current paint is a change witoug state change,
             // accidentally fading transitions may occur (eg. Elevated state of a (CommandLink)Button).
             if (speed == 0)
@@ -210,13 +205,12 @@ namespace KGySoft.WinForms.Controls
             //Bitmap prevStateImage = new Bitmap(size.Width, size.Height, e.Graphics);
             //Bitmap newStateImage = new Bitmap(size.Width, size.Height, e.Graphics);
 
-            RECT rc = new RECT(Control.ClientRectangle);
             IntPtr hbpAnimation;
             IntPtr hdc = e.Graphics.GetHdc();
             try
             {
                 IntPtr hdcFrom, hdcTo;
-                hbpAnimation = UxTheme.BeginBufferedAnimation(Control.Handle, hdc, ref rc, BP_BUFFERFORMAT.BPBF_COMPATIBLEBITMAP, IntPtr.Zero, ref animParams, out hdcFrom, out hdcTo);
+                hbpAnimation = UxTheme.BeginBufferedAnimation(Control.Handle, hdc, Control.ClientRectangle, speed, out hdcFrom, out hdcTo);
                 if (hbpAnimation != IntPtr.Zero)
                 {
                     //// DEBUG: render to images
@@ -261,7 +255,7 @@ namespace KGySoft.WinForms.Controls
                     }
 
                     State = newState;
-                    UxTheme.EndBufferedAnimation(hbpAnimation, true);
+                    UxTheme.EndBufferedAnimation(hbpAnimation);
                 }
             }
             finally
@@ -327,9 +321,7 @@ namespace KGySoft.WinForms.Controls
 
             // resuming if changing back to Vista theme
             if (!operating && FadingPainterInternal.IsSupported)
-            {
-                operating = UxTheme.BufferedPaintInit() == 0;
-            }
+                operating = UxTheme.BufferedPaintInit();
         }
 
         /// <summary>

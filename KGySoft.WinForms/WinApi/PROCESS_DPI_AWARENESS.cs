@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: BP_BUFFERFORMAT.cs
+//  File: PROCESS_DPI_AWARENESS.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -15,11 +15,10 @@
 
 namespace KGySoft.WinForms.WinApi
 {
-    internal enum BP_BUFFERFORMAT
+    internal enum PROCESS_DPI_AWARENESS
     {
-        BPBF_COMPATIBLEBITMAP,
-        BPBF_DIB,
-        BPBF_TOPDOWNDIB,
-        BPBF_TOPDOWNMONODIB
+        PROCESS_DPI_UNAWARE = 0,
+        PROCESS_SYSTEM_DPI_AWARE = 1,
+        PROCESS_PER_MONITOR_DPI_AWARE = 2
     }
 }

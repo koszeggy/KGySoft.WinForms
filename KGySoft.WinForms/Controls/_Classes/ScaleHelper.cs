@@ -19,6 +19,8 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
+using KGySoft.WinForms.WinApi;
+
 #endregion
 
 namespace KGySoft.WinForms.Controls
@@ -34,16 +36,28 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Fields
+
+        private static readonly PointF DefaultDpi = new(OneHundredPercentLogicalDpi, OneHundredPercentLogicalDpi);
+
+        private static bool? isProcessPerMonitorAware;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
         ///  Returns a boolean to specify if we should enable processing of WM_DPICHANGED and related messages
         /// </summary>
-        internal static bool IsThreadPerMonitorV2Aware => false; // TODO: see https://github.com/dotnet/winforms/blob/main/src/System.Windows.Forms.Primitives/src/System/Windows/Forms/Internals/ScaleHelper.cs
+        internal static bool IsProcessPerMonitorAware
+            // TODO: check if more sophisticated per-thread context check is needed. See https://github.com/dotnet/winforms/blob/dafb8c0cc81fb1a8bb3cc7e344817b3fe55dc287/src/System.Windows.Forms.Primitives/src/System/Windows/Forms/Internals/ScaleHelper.cs#L101
+            => isProcessPerMonitorAware ??= WindowsUtils.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
 
         internal static PointF SystemScale => GetScale(IntPtr.Zero);
 
         internal static PointF SystemDpi => GetDpiForHwnd(IntPtr.Zero);
+
+        internal static bool NeedsScaling => IsProcessPerMonitorAware || SystemDpi != DefaultDpi;
 
         #endregion
 
@@ -71,16 +85,17 @@ namespace KGySoft.WinForms.Controls
             return new PointF(graphics.DpiX / 96f, graphics.DpiY / 96f);
         }
 
+        // TODO: delete, use GetScale instead. But check per-monitor DPI awareness behavior first.
         internal static int PerMonitorScale(this Control control, int value)
         {
             if (control == null)
                 throw new ArgumentNullException(nameof(control));
 
 #if NET47_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-            if (IsThreadPerMonitorV2Aware)
+            if (IsProcessPerMonitorAware)
                 return control.LogicalToDeviceUnits(value);
 #endif
-
+            // TODO: is this OK, or should we use User32.GetDpiForWindow like the LogicalToDeviceUnits method?
             return control.IsHandleCreated
                 ? (int)(value * control.GetScale().X)
                 : (int)(value * SystemScale.X);

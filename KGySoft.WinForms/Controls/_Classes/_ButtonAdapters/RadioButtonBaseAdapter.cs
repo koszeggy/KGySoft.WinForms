@@ -96,7 +96,7 @@ namespace KGySoft.WinForms.Controls
             Color foreColor = borderColor;
             if (!state.Enabled && disabledColors)
             {
-                foreColor = SystemInformation.HighContrast ? SystemColors.WindowFrame : state.ForeColor;
+                foreColor = VisualStyleHelper.HighContrast ? SystemColors.WindowFrame : state.ForeColor;
                 backColor = state.BackColor;
             }
 

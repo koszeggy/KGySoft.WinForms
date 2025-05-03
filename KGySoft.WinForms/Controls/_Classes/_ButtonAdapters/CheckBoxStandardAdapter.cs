@@ -82,7 +82,7 @@ namespace KGySoft.WinForms.Controls
                 {
                     // Minor adjustment to make sure the appearance is exactly the same as Win32 app.
                     int focusRectFixup = layout.Focus.X & 0x1; // if it's odd, subtract one pixel for fixup.
-                    if (!Application.RenderWithVisualStyles)
+                    if (!VisualStyleHelper.RenderWithVisualStyles)
                         focusRectFixup = 1 - focusRectFixup;
 
                     layout.Focus.Offset(-(focusRectFixup + 1), -2);
@@ -114,8 +114,8 @@ namespace KGySoft.WinForms.Controls
         {
             LayoutOptions options = CommonLayout(state);
             options.CheckPaddingSize = 1;
-            options.DotNetOneButtonCompat = !Application.RenderWithVisualStyles;
-            if (Application.RenderWithVisualStyles)
+            options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
+            if (VisualStyleHelper.RenderWithVisualStyles)
             {
                 //using (Graphics graphics = WindowsFormsUtils.CreateMeasurementGraphics())
                 //{
@@ -140,7 +140,7 @@ namespace KGySoft.WinForms.Controls
         private void DrawCheckBox(PaintStateEventArgs e, LayoutData layout)
         {
             ControlAppearanceState state = e.State;
-            if (Application.RenderWithVisualStyles)
+            if (VisualStyleHelper.RenderWithVisualStyles)
                 CheckBoxRenderer.DrawCheckBox(e.Graphics, new Point(layout.CheckBounds.Left, layout.CheckBounds.Top), (CheckBoxState)state.SystemStateId);
             else if (state.CheckState == CheckState.Indeterminate)
                 ControlPaint.DrawMixedCheckBox(e.Graphics, layout.CheckBounds, GetButtonState(state));

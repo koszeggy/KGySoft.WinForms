@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: RECT.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System.Drawing;
 using System.Runtime.InteropServices;
@@ -12,10 +27,10 @@ namespace KGySoft.WinForms.WinApi
     {
         #region Fields
 
-        public int Left;
-        public int Top;
-        public int Right;
-        public int Bottom;
+        internal int Left;
+        internal int Top;
+        internal int Right;
+        internal int Bottom;
 
         #endregion
 
@@ -33,23 +48,25 @@ namespace KGySoft.WinForms.WinApi
         {
             Left = r.Left;
             Top = r.Top;
-            Right = r.Width;
-            Bottom = r.Height;
+            Right = r.Right;
+            Bottom = r.Bottom;
         }
 
         #endregion
 
         #region Methods
 
-        internal static RECT FromXYWH(int x, int y, int width, int height)
-        {
-            return new RECT(x, y, x + width, y + height);
-        }
+        #region Static Methods
 
-        internal Rectangle ToRectangle()
-        {
-            return Rectangle.FromLTRB(Left, Top, Right, Bottom);
-        }
+        internal static RECT FromXYWH(int x, int y, int width, int height) => new(x, y, x + width, y + height);
+
+        #endregion
+
+        #region Instance Methods
+
+        internal Rectangle ToRectangle() => Rectangle.FromLTRB(Left, Top, Right, Bottom);
+
+        #endregion
 
         #endregion
     }

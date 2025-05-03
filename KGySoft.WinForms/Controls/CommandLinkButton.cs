@@ -27,7 +27,6 @@ using System.Drawing.Design;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 
 using KGySoft.ComponentModel;
 using KGySoft.CoreLibraries;
@@ -57,12 +56,6 @@ namespace KGySoft.WinForms.Controls
     [Description("Vista-like CommandLink button that works also in compatibility mode. In Vista and above you may set FlatStyle to System to render the button by the Windows.")]
     public class CommandLinkButton : Button, ISupportsDisabledColor, ISupportsFadingInternal
     {
-        #region Constants
-
-        private const string className = "BUTTON";
-
-        #endregion
-
         #region Fields
 
         #region Static Fields
@@ -689,7 +682,7 @@ namespace KGySoft.WinForms.Controls
                 if (isThemed.HasValue)
                     return isThemed.Value;
 
-                isThemed = Application.RenderWithVisualStyles;
+                isThemed = VisualStyleHelper.RenderWithVisualStyles;
                 return isThemed.Value;
             }
         }
@@ -1072,7 +1065,7 @@ namespace KGySoft.WinForms.Controls
         #region Static Methods
 
         private static Color GetDefaultTextColor(COMMANDLINKSTATES state) =>
-            new VisualStyleRenderer(className, (int)BUTTONPARTS.BP_COMMANDLINK, (int)state).GetColor(ColorProperty.TextColor);
+            VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_COMMANDLINK, (int)state);
 
         #endregion
 
@@ -1165,7 +1158,7 @@ namespace KGySoft.WinForms.Controls
             if (defaultGlyphSize.IsEmpty)
             {
                 defaultGlyphSize = IsNativeVisualStylesRenderingAvailable
-                    ? new VisualStyleRenderer(className, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, 1).GetPartSize(g, ThemeSizeType.Draw)
+                    ? VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, 1, true)
                     : DefaultGlyphNormal.Size;
             }
 
@@ -1509,18 +1502,19 @@ namespace KGySoft.WinForms.Controls
             if (!WindowsUtils.IsVistaOrLater)
                 return;
 
-            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && Application.RenderWithVisualStyles;
+            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles;
 
             if (enabled && (defaultAnimationTimer == null || !defaultAnimationTimer.Enabled))
             {
                 if (defaultAnimationTimer == null)
                 {
                     defaultAnimationTimer = new Timer();
-                    IntPtr hTheme = UxTheme.OpenThemeData(Handle, "BUTTON");
-                    defaultAnimationTimer.Interval = UxTheme.GetThemeTransitionDuration(hTheme, (int)BUTTONPARTS.BP_COMMANDLINK,
-                        (int)COMMANDLINKSTATES.CMDLS_DEFAULTED, 
+                    defaultAnimationTimer.Interval = UxTheme.TryGetThemeTransitionDuration(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_COMMANDLINK,
+                        (int)COMMANDLINKSTATES.CMDLS_DEFAULTED,
                         (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING,
-                        Constants.TMT_TRANSITIONDURATIONS, out int duration) == 0 && duration != 0 ? duration : 1000;
+                        Constants.TMT_TRANSITIONDURATIONS, out int duration) && duration != 0
+                        ? duration
+                        : 1000;
                     defaultAnimationTimer.Tick += defaultAnimationTimer_Tick;
                 }
 
@@ -1680,13 +1674,10 @@ namespace KGySoft.WinForms.Controls
 
             // Native rendering
             if (WindowsUtils.IsVistaOrLater)
-            {
-                VisualStyleRenderer renderer = new VisualStyleRenderer(className, state.SystemPartId, state.SystemStateId);
-                renderer.DrawBackground(e.Graphics, ClientRectangle);
-            }
-            // Compatibility rendering
+                VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, e.Graphics, state.SystemPartId, state.SystemStateId, ClientRectangle);
             else
             {
+                // Compatible rendering
                 if (state.Pressed)
                 {
                     e.Graphics.FillRectangle(
@@ -1786,7 +1777,7 @@ namespace KGySoft.WinForms.Controls
                     backColor = FlatAppearance.MouseDownBackColor;
                 else
                 {
-                    if (SystemInformation.HighContrast)
+                    if (VisualStyleHelper.HighContrast)
                     {
                         if (state.BackColor == SystemColors.Control)
                             backColor = SystemColors.ControlDark;
@@ -1864,7 +1855,7 @@ namespace KGySoft.WinForms.Controls
 
             if (state.Enabled && Focused && ShowFocusCues)
             {
-                Color focusColor = SystemInformation.HighContrast ? SystemColors.WindowText
+                Color focusColor = VisualStyleHelper.HighContrast ? SystemColors.WindowText
                     : (BackColor.GetBrightness() < 0.5f ? ControlPaint.Light(state.BackColor) : ControlPaint.Dark(state.BackColor));
 
                 using (Pen pen = new Pen(focusColor))
@@ -1924,8 +1915,7 @@ namespace KGySoft.WinForms.Controls
 
                 if (!isRightToLeft)
                 {
-                    var renderer = new VisualStyleRenderer(className, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId);
-                    renderer.DrawBackground(e.Graphics, bounds);
+                    VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, bounds);
                     return;
                 }
             }

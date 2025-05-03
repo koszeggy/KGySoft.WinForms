@@ -273,7 +273,7 @@ namespace KGySoft.WinForms
                 return;
 
             Rectangle rectangle = c.ClientRectangle;
-            if (Application.RenderWithVisualStyles)
+            if (VisualStyleHelper.RenderWithVisualStyles)
                 ButtonRenderer.DrawParentBackground(e.Graphics, rectangle, c);
             else
             {

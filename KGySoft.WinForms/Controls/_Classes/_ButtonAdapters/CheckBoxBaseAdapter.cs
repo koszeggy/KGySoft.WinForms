@@ -46,7 +46,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Properties
 
-        private CheckBox CheckBoxInstance => (CheckBox)ButtonInstance;
+        protected AdvancedCheckBox CheckBoxInstance => (AdvancedCheckBox)ButtonInstance;
 
         #endregion
 
@@ -71,7 +71,7 @@ namespace KGySoft.WinForms.Controls
             if (!state.Enabled && disabledColors)
                 checkColor = colors.ButtonShadow;
             else if (state.CheckState == CheckState.Indeterminate && disabledColors)
-                checkColor = SystemInformation.HighContrast ? colors.Highlight : colors.ButtonShadow;
+                checkColor = VisualStyleHelper.HighContrast ? colors.Highlight : colors.ButtonShadow;
             
             Rectangle checkBounds = layout.CheckBounds;
             if (checkBounds.Width == checkSize)

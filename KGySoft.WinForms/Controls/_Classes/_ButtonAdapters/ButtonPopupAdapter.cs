@@ -42,7 +42,7 @@ namespace KGySoft.WinForms.Controls
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
             ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
-            LayoutData layout = PaintPopupLayout(state, false, SystemInformation.HighContrast ? 2 : 1).Layout(g);
+            LayoutData layout = PaintPopupLayout(state, false, VisualStyleHelper.HighContrast ? 2 : 1).Layout(g);
             Rectangle clientRectangle = ButtonInstance.ClientRectangle;
             PaintButtonBackground(e, clientRectangle, colors.ButtonFace);
 
@@ -61,7 +61,7 @@ namespace KGySoft.WinForms.Controls
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
             ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
-            LayoutData layout = PaintPopupLayout(state, state.CheckState == CheckState.Unchecked, SystemInformation.HighContrast ? 2 : 1).Layout(g);
+            LayoutData layout = PaintPopupLayout(state, state.CheckState == CheckState.Unchecked, VisualStyleHelper.HighContrast ? 2 : 1).Layout(g);
             Rectangle clientRectangle = ButtonInstance.ClientRectangle;
             if (state.CheckState == CheckState.Indeterminate)
             {
@@ -76,7 +76,7 @@ namespace KGySoft.WinForms.Controls
             PaintImage(e, layout);
             PaintField(e, layout, colors, true);
             DrawDefaultBorder(g, clientRectangle, colors.HighContrast ? colors.WindowText : colors.ButtonShadow, state.IsDefault);
-            if (SystemInformation.HighContrast)
+            if (VisualStyleHelper.HighContrast)
             {
                 using Pen pen = new Pen(colors.WindowFrame);
                 using Pen pen2 = new Pen(colors.Highlight);
@@ -138,7 +138,7 @@ namespace KGySoft.WinForms.Controls
             options.PaddingSize = 2 - paintedBorder;
             options.HintTextUp = false;
             options.TextOffset = !up;
-            options.ShadowedText = SystemInformation.HighContrast;
+            options.ShadowedText = VisualStyleHelper.HighContrast;
             return options;
         }
 

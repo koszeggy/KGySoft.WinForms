@@ -35,6 +35,7 @@ namespace KGySoft.WinForms.WinApi
         private static bool? isXpOrLater;
         private static bool? isVistaOrLater;
         private static bool? isWin10OrLater;
+        private static bool? isWin81OrLater;
         private static bool? isComCtlV6Available;
         private static Version? windowsVersion;
 
@@ -47,6 +48,9 @@ namespace KGySoft.WinForms.WinApi
 
         internal static bool IsVistaOrLater
             => isVistaOrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 0, 5243);
+
+        internal static bool IsWindows81OrLater
+            => isWin81OrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 3, 9600);
 
         internal static bool IsWindows10OrLater
             => isWin10OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 10240);
@@ -70,7 +74,7 @@ namespace KGySoft.WinForms.WinApi
                 }
 
                 // visual styles are actually used
-                if (Application.RenderWithVisualStyles)
+                if (VisualStyleHelper.RenderWithVisualStyles)
                 {
                     isComCtlV6Available = true;
                     return true;

@@ -58,7 +58,7 @@ namespace KGySoft.WinForms.Controls
             }
             else if (((controlCheckState == CheckState.Indeterminate) && (checkBackground == SystemColors.Window)) && disabledColors)
             {
-                Color color = SystemInformation.HighContrast ? SystemColors.ControlDark : SystemColors.Control;
+                Color color = VisualStyleHelper.HighContrast ? SystemColors.ControlDark : SystemColors.Control;
                 byte red = (byte)((color.R + SystemColors.Window.R) / 2);
                 byte green = (byte)((color.G + SystemColors.Window.G) / 2);
                 byte blue = (byte)((color.B + SystemColors.Window.B) / 2);

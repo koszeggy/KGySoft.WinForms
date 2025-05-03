@@ -1,10 +1,26 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: AdvancedProgressBar.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
+
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.WinForms.WinApi;
@@ -45,25 +61,22 @@ namespace KGySoft.WinForms.Controls
 
         #region Fields
 
+        private readonly Timer animationTimer;
+        private readonly bool initialized;
+
         private AdvancedProgressBarStyle style;
         private ProgressBarState state;
         private int animationOffset = -160;
         private bool isMarquee;
-        private readonly Timer animationTimer;
         private Color foreColor = Color.Empty;
         private Color pausedStateColor = Color.Yellow;
         private Color errorStateColor = Color.Red;
-        private readonly bool initialized;
 
         #endregion
 
         #region Properties
 
         #region Public Properties
-
-        //public bool DisplayBlocks { get; set; } //maybe enum: continuous, whole blocks, partial blocks
-        //[DefaultValue(100)]
-        //[Category("AdvancedProgressBar")]
 
         /// <summary>
         /// Gets or sets the state of the progress bar. On pre-Vista Windows versions, or when <see cref="Application.EnableVisualStyles"/>
@@ -75,11 +88,9 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(ProgressBarState.Normal)]
         public ProgressBarState State
         {
-            get
-            {
+            get =>
                 //return (ProgressBarState)(int)User32.SendMessage(Handle, Constants.PBM_GETSTATE, IntPtr.Zero, IntPtr.Zero) - 1;
-                return state;
-            }
+                state;
             set
             {
                 if (state == value)
@@ -117,7 +128,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AdvancedProgressBarStyle.System)]
         public new AdvancedProgressBarStyle Style
         {
-            get { return style; }
+            get => style;
             set
             {
                 if (style == value)
@@ -142,7 +153,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool IsMarquee
         {
-            get { return isMarquee; }
+            get => isMarquee;
             set
             {
                 if (isMarquee == value)
@@ -160,7 +171,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the interval in milliseconds between two frames of the marquee animation.")]
         public new int MarqueeAnimationSpeed
         {
-            get { return base.MarqueeAnimationSpeed; }
+            get => base.MarqueeAnimationSpeed;
             set
             {
                 if (base.MarqueeAnimationSpeed == value)
@@ -180,7 +191,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public new int Value
         {
-            get { return base.Value; }
+            get => base.Value;
             set
             {
                 base.Value = value;
@@ -226,7 +237,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "Yellow")]
         public Color PausedStateColor
         {
-            get { return pausedStateColor; }
+            get => pausedStateColor;
             set
             {
                 if (pausedStateColor == value)
@@ -247,7 +258,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "Red")]
         public Color ErrorStateColor
         {
-            get { return errorStateColor; }
+            get => errorStateColor;
             set
             {
                 if (errorStateColor == value)
@@ -280,10 +291,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Properties
 
-        private bool IsClassicAppearance
-        {
-            get { return style == AdvancedProgressBarStyle.Classic || !Application.RenderWithVisualStyles; }
-        }
+        private bool IsClassicAppearance => style == AdvancedProgressBarStyle.Classic || !VisualStyleHelper.RenderWithVisualStyles;
 
         private int MarqueeBlockWidth
         {
@@ -300,8 +308,6 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region Construction and Destruction
-
         #region Constructors
 
         /// <summary>
@@ -316,7 +322,9 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region Explicit Disposing
+        #region Methods
+
+        #region Protected Methods
 
         protected override void Dispose(bool disposing)
         {
@@ -326,14 +334,6 @@ namespace KGySoft.WinForms.Controls
             if (disposing)
                 animationTimer.Dispose();
         }
-
-        #endregion
-
-        #endregion
-
-        #region Methods
-
-        #region Protected Methods
 
         protected override void OnHandleCreated(EventArgs e)
         {
@@ -400,7 +400,7 @@ namespace KGySoft.WinForms.Controls
 
         private Color GetDefaultForeColor()
         {
-            if (!Application.RenderWithVisualStyles)
+            if (!VisualStyleHelper.RenderWithVisualStyles)
                 return SystemColors.Highlight;
 
             switch (style)
@@ -429,9 +429,7 @@ namespace KGySoft.WinForms.Controls
                 int speed = base.MarqueeAnimationSpeed;
                 User32.SendMessage(Handle, Constants.PBM_SETMARQUEE, Convert.ToInt32(speed > 0), speed);
                 if (style == AdvancedProgressBarStyle.System)
-                {
                     animationTimer.Enabled = false;
-                }
                 else
                 {
                     if (speed > 0)
@@ -448,9 +446,7 @@ namespace KGySoft.WinForms.Controls
             else
             {
                 if (style == AdvancedProgressBarStyle.System)
-                {
                     animationTimer.Enabled = false;
-                }
                 else
                 {
                     animationTimer.Interval = glowSpeed;
@@ -482,15 +478,13 @@ namespace KGySoft.WinForms.Controls
 
             // frame: when visual styles are disabled, there is already a frame in NC area
             Rectangle rect = ClientRectangle;
-            if (Application.RenderWithVisualStyles)
+            if (VisualStyleHelper.RenderWithVisualStyles)
             {
                 ControlPaint.DrawBorder3D(e.Graphics, rect, Border3DStyle.SunkenOuter);
                 rect.Inflate(-2, -2);
             }
             else
-            {
                 rect.Inflate(-1, -1);
-            }
 
             DrawBar(e.Graphics, GetBarRect(rect));
         }
@@ -501,10 +495,8 @@ namespace KGySoft.WinForms.Controls
                 this.PaintTransparentBackground(e);
             else
             {
-                using (Brush b = new SolidBrush(BackColor))
-                {
-                    e.Graphics.FillRectangle(b, e.ClipRectangle);
-                }
+                using Brush b = new SolidBrush(BackColor);
+                e.Graphics.FillRectangle(b, e.ClipRectangle);
             }
         }
 
@@ -534,26 +526,17 @@ namespace KGySoft.WinForms.Controls
             if (rect.Height <= 0 || rect.Width <= 0)
                 return;
 
-            using (Brush brush = new SolidBrush(GetActualForeColor()))
-            {
-                graphics.FillRectangle(brush, rect);
-            }
+            using Brush brush = new SolidBrush(GetActualForeColor());
+            graphics.FillRectangle(brush, rect);
         }
 
-        private Color GetActualForeColor()
+        private Color GetActualForeColor() => state switch
         {
-            switch (state)
-            {
-                case ProgressBarState.Normal:
-                    return ForeColor;
-                case ProgressBarState.Error:
-                    return ErrorStateColor;
-                case ProgressBarState.Paused:
-                    return PausedStateColor;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-        }
+            ProgressBarState.Normal => ForeColor,
+            ProgressBarState.Error => ErrorStateColor,
+            ProgressBarState.Paused => PausedStateColor,
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
         private void PaintFlatAppearance(PaintEventArgs e)
         {
@@ -565,10 +548,8 @@ namespace KGySoft.WinForms.Controls
             rect.Height--;
             if (BackColor != Color.Transparent)
             {
-                using (Pen pen = new Pen(BackColor.Dark(0.3f)))
-                {
-                    e.Graphics.DrawRectangle(pen, rect);
-                }
+                using Pen pen = new Pen(BackColor.Dark(0.3f));
+                e.Graphics.DrawRectangle(pen, rect);
             }
 
             rect.Height++;
@@ -599,18 +580,14 @@ namespace KGySoft.WinForms.Controls
             rect.Width--;
             rect.Height--;
             using (Pen pen = new Pen(Color.FromArgb(100, Color.White)))
-            {
                 graphics.DrawRoundedRectangle(pen, rect, 2);
-            }
 
             // frame
             rect = ClientRectangle;
             rect.Width--;
             rect.Height--;
             using (Pen pen = new Pen(BackColor.Dark(0.3f)))
-            {
                 graphics.DrawRoundedRectangle(pen, rect, 2);
-            }
         }
 
         private void DrawShinyBackground(Graphics g)
@@ -619,10 +596,8 @@ namespace KGySoft.WinForms.Controls
             rect.Inflate(-1, -1);
             if (rect.Width >= 1 && rect.Height >= 1)
             {
-                using (Brush brush = new SolidBrush(BackColor.Dark(0.1f)))
-                {
-                    g.FillRoundedRectangle(brush, rect, 2);
-                }
+                using Brush brush = new SolidBrush(BackColor.Dark(0.1f));
+                g.FillRoundedRectangle(brush, rect, 2);
             }
 
             rect.Inflate(0, -1);
@@ -691,27 +666,24 @@ namespace KGySoft.WinForms.Controls
             if (rect.Width <= 0 || rect.Height <= 0)
                 return;
 
-            using (LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Transparent, Color.FromArgb(alpha, Color.Black), LinearGradientMode.Horizontal))
+            using LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Transparent, Color.FromArgb(alpha, Color.Black), LinearGradientMode.Horizontal);
+            float p1, p2;
+            if (rect.Width / 2 <= shadowWidth)
+                p1 = p2 = 0.5f;
+            else
             {
-                float p1, p2;
-                if (rect.Width / 2 <= shadowWidth)
-                    p1 = p2 = 0.5f;
-                else
-                {
-                    p1 = 100f / rect.Width * ((float)shadowWidth / 100);
-                    p2 = 1f - p1;
-                }
-
-                Blend blend = new Blend(4)
-                {
-                    Factors = new float[] { 1f, 0.5f, 0.5f, 1f },
-                    Positions = new float[] { 0f, p1, p2, 1f }
-                };
-
-                brush.Blend = blend;
-                g.FillRectangle(brush, rect);
-
+                p1 = 100f / rect.Width * ((float)shadowWidth / 100);
+                p2 = 1f - p1;
             }
+
+            Blend blend = new Blend(4)
+            {
+                Factors = new float[] { 1f, 0.5f, 0.5f, 1f },
+                Positions = new float[] { 0f, p1, p2, 1f }
+            };
+
+            brush.Blend = blend;
+            g.FillRectangle(brush, rect);
             //Rectangle rectShadow = new Rectangle(rect.Location, new Size(Math.Min(rect.Width / 2, shadowWidth), rect.Height));
             //if (rectShadow.Width <= 0 || rectShadow.Height <= 0)
             //    return;
@@ -815,20 +787,18 @@ namespace KGySoft.WinForms.Controls
             try
             {
                 Rectangle rect = new Rectangle(animationOffset, 0, 60, Height);
-                using (LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Transparent, ControlPaint.LightLight(ForeColor), LinearGradientMode.Horizontal))
+                using LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Transparent, ControlPaint.LightLight(ForeColor), LinearGradientMode.Horizontal);
+                Blend blend = new Blend(4)
                 {
-                    Blend blend = new Blend(4)
-                    {
-                        Factors = new float[] { 0f, 0.5f, 0.5f, 0f },
-                        Positions = new float[] { 0f, 0.5f, 0.6f, 1f }
-                    };
+                    Factors = new float[] { 0f, 0.5f, 0.5f, 0f },
+                    Positions = new float[] { 0f, 0.5f, 0.6f, 1f }
+                };
 
-                    brush.Blend = blend;
+                brush.Blend = blend;
 
-                    //Rectangle clip = new Rectangle(1, 2, this.Width - 3, this.Height - 3);
-                    //clip.Width = (int)(Value * 1.0F / (Maximum - Minimum) * this.Width);
-                    g.FillRectangle(brush, rect);
-                }
+                //Rectangle clip = new Rectangle(1, 2, this.Width - 3, this.Height - 3);
+                //clip.Width = (int)(Value * 1.0F / (Maximum - Minimum) * this.Width);
+                g.FillRectangle(brush, rect);
                 //using (LinearGradientBrush lgb = new LinearGradientBrush(rect, Color.White, Color.White, LinearGradientMode.Horizontal))
                 //{
                 //    ColorBlend cb = new ColorBlend(4);
@@ -861,7 +831,7 @@ namespace KGySoft.WinForms.Controls
 
             if (isMarquee)
             {
-                animationOffset += style == AdvancedProgressBarStyle.ThemedShiny && Application.RenderWithVisualStyles ? 6 : 10;
+                animationOffset += style == AdvancedProgressBarStyle.ThemedShiny && VisualStyleHelper.RenderWithVisualStyles ? 6 : 10;
                 if (animationOffset > Width)
                     animationOffset = -MarqueeBlockWidth;
                 return;
@@ -871,6 +841,10 @@ namespace KGySoft.WinForms.Controls
             if (animationOffset > Width - glowPositionDefault)
                 animationOffset = glowPositionDefault;
         }
+
+        #endregion
+
+        #region Event handlers
 
         void animationTimer_Tick(object sender, EventArgs e)
         {

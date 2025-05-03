@@ -20,7 +20,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 
 using KGySoft.Drawing;
 using KGySoft.WinForms.Controls;
@@ -249,7 +248,7 @@ namespace KGySoft.WinForms.Forms
                 }
 
                 Size imageSize;
-                if (Application.RenderWithVisualStyles)
+                if (VisualStyleHelper.RenderWithVisualStyles)
                 {
                     if (WindowsUtils.IsVistaOrLater)
                         PaintNativeButton(g, out imageSize);
@@ -298,14 +297,10 @@ namespace KGySoft.WinForms.Forms
 
             private Size GetImageSize(Graphics g)
             {
-                if (Application.RenderWithVisualStyles)
+                if (VisualStyleHelper.RenderWithVisualStyles)
                 {
                     if (WindowsUtils.IsVistaOrLater)
-                    {
-                        VisualStyleRenderer renderer = new VisualStyleRenderer(classTaskDialog, Constants.TDLG_EXPANDOBUTTON, (int)EXPANDOBUTTONSTATES.TDLGEBS_NORMAL);
-                        return renderer.GetPartSize(g, ThemeSizeType.True);
-                    }
-
+                        return VisualStyleHelper.GetPartSize(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)EXPANDOBUTTONSTATES.TDLGEBS_NORMAL, true);
                     return DefaultImageNormalDown.Size;
                 }
 
@@ -366,9 +361,8 @@ namespace KGySoft.WinForms.Forms
                         state = EXPANDOBUTTONSTATES.TDLGEBS_EXPANDEDNORMAL;
                 }
 
-                VisualStyleRenderer renderer = new VisualStyleRenderer(classTaskDialog, Constants.TDLG_EXPANDOBUTTON, (int)state);
-                imageSize = renderer.GetPartSize(g, ThemeSizeType.True);
-                renderer.DrawBackground(g, new Rectangle(Point.Empty, imageSize));
+                imageSize = GetImageSize(g);
+                VisualStyleHelper.Render(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)state, new Rectangle(Point.Empty, imageSize));
             }
 
             private void PaintThemedButton(Graphics g, out Size imageSize)

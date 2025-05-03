@@ -127,8 +127,8 @@ namespace KGySoft.WinForms.Controls
             ControlAppearanceState state = e.State;
             bool flag = (ButtonInstance.FlatAppearance.BorderSize != 1) || !ButtonInstance.FlatAppearance.BorderColor.IsEmpty;
             ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
-            LayoutData layout = PaintFlatLayout(state, !ButtonInstance.FlatAppearance.CheckedBackColor.IsEmpty || (SystemInformation.HighContrast ? (state.CheckState != CheckState.Indeterminate) : (state.CheckState == CheckState.Unchecked)),
-                (!flag && SystemInformation.HighContrast) && (state.CheckState == CheckState.Checked), ButtonInstance.FlatAppearance.BorderSize).Layout(g);
+            LayoutData layout = PaintFlatLayout(state, !ButtonInstance.FlatAppearance.CheckedBackColor.IsEmpty || (VisualStyleHelper.HighContrast ? (state.CheckState != CheckState.Indeterminate) : (state.CheckState == CheckState.Unchecked)),
+                (!flag && VisualStyleHelper.HighContrast) && (state.CheckState == CheckState.Checked), ButtonInstance.FlatAppearance.BorderSize).Layout(g);
             if (!ButtonInstance.FlatAppearance.BorderColor.IsEmpty)
                 colors.WindowFrame = ButtonInstance.FlatAppearance.BorderColor;
             
@@ -170,7 +170,7 @@ namespace KGySoft.WinForms.Controls
                 else
                     DrawFlatBorder(g, clientRectangle, colors.WindowFrame);
             }
-            else if ((state.CheckState == CheckState.Checked) && SystemInformation.HighContrast)
+            else if ((state.CheckState == CheckState.Checked) && VisualStyleHelper.HighContrast)
             {
                 DrawFlatBorder(g, clientRectangle, colors.WindowFrame);
                 DrawFlatBorder(g, clientRectangle, colors.ButtonShadow);
@@ -184,7 +184,7 @@ namespace KGySoft.WinForms.Controls
         internal override void PaintOver(PaintStateEventArgs e)
         {
             ControlAppearanceState state = e.State;
-            if (SystemInformation.HighContrast)
+            if (VisualStyleHelper.HighContrast)
                 PaintUp(e);
             else
             {
@@ -245,8 +245,8 @@ namespace KGySoft.WinForms.Controls
             bool hasBorder = (ButtonInstance.FlatAppearance.BorderSize != 1) || !ButtonInstance.FlatAppearance.BorderColor.IsEmpty;
             ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
             LayoutData layout = PaintFlatLayout(state,
-                    !ButtonInstance.FlatAppearance.CheckedBackColor.IsEmpty || (SystemInformation.HighContrast ? (state.CheckState != CheckState.Indeterminate) : (state.CheckState == CheckState.Unchecked)),
-                    (!hasBorder && SystemInformation.HighContrast) && (state.CheckState == CheckState.Checked), ButtonInstance.FlatAppearance.BorderSize).Layout(g);
+                    !ButtonInstance.FlatAppearance.CheckedBackColor.IsEmpty || (VisualStyleHelper.HighContrast ? (state.CheckState != CheckState.Indeterminate) : (state.CheckState == CheckState.Unchecked)),
+                    (!hasBorder && VisualStyleHelper.HighContrast) && (state.CheckState == CheckState.Checked), ButtonInstance.FlatAppearance.BorderSize).Layout(g);
             
             if (!ButtonInstance.FlatAppearance.BorderColor.IsEmpty)
                 colors.WindowFrame = ButtonInstance.FlatAppearance.BorderColor;
@@ -297,7 +297,7 @@ namespace KGySoft.WinForms.Controls
                 else
                     DrawFlatBorder(g, clientRectangle, colors.WindowFrame);
             }
-            else if ((state.CheckState == CheckState.Checked) && SystemInformation.HighContrast)
+            else if ((state.CheckState == CheckState.Checked) && VisualStyleHelper.HighContrast)
             {
                 DrawFlatBorder(g, clientRectangle, colors.WindowFrame);
                 DrawFlatBorder(g, clientRectangle, colors.ButtonShadow);
@@ -333,7 +333,7 @@ namespace KGySoft.WinForms.Controls
             options.PaddingSize = check ? 1 : 2;
             options.FocusOddEvenFixup = false;
             options.TextOffset = !up;
-            options.ShadowedText = SystemInformation.HighContrast;
+            options.ShadowedText = VisualStyleHelper.HighContrast;
             return options;
         }
 

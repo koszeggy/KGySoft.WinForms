@@ -68,7 +68,7 @@ namespace KGySoft.WinForms.Controls
             internal static ColorData Calculate(Graphics graphics, Color backColor, Color foreColor)
             {
                 ColorData colors = new ColorData();
-                colors.HighContrast = SystemInformation.HighContrast;
+                colors.HighContrast = VisualStyleHelper.HighContrast;
 
                 colors.ButtonFace = backColor;
 
@@ -599,7 +599,7 @@ namespace KGySoft.WinForms.Controls
                     layout.ImageStart = layout.ImageBounds.Location;
                     layout.ImageBounds = Rectangle.Intersect(layout.ImageBounds, layout.Field);
                 }
-                else if (!Application.RenderWithVisualStyles)
+                else if (!VisualStyleHelper.RenderWithVisualStyles)
                 {
                     // Not sure why this is here, but we can't remove it, since it might break
                     // ToolStrips on non-themed machines
@@ -1237,7 +1237,7 @@ namespace KGySoft.WinForms.Controls
                 if (disabledText3D && !state.Enabled)
                 {
                     Color disabledColor = state.ForeColor; // here: DisabledForeColor
-                    if (Application.RenderWithVisualStyles)
+                    if (VisualStyleHelper.RenderWithVisualStyles)
                     {
                         //don't draw chiseled text if themed as win32 app does.
                         TextRenderer.DrawText(g, state.Text, control.Font, r, disabledColor, formatFlags);

@@ -84,9 +84,9 @@ namespace KGySoft.WinForms.Controls
 
                 // Draw inset
                 if (stockColor)
-                    insetPen = SystemInformation.HighContrast ? new Pen(SystemColors.ControlLight) : new Pen(SystemColors.Control);
+                    insetPen = VisualStyleHelper.HighContrast ? new Pen(SystemColors.ControlLight) : new Pen(SystemColors.Control);
                 else
-                    insetPen = SystemInformation.HighContrast ? new Pen(colors.Highlight) : new Pen(colors.ButtonFace);
+                    insetPen = VisualStyleHelper.HighContrast ? new Pen(colors.Highlight) : new Pen(colors.ButtonFace);
 
                 p1.Offset(-1, 2);
                 p2.Offset(1, 1);
@@ -236,7 +236,7 @@ namespace KGySoft.WinForms.Controls
             p4.Offset(-1, -1);
 
             pen = stockColor
-                ? SystemInformation.HighContrast ? new Pen(SystemColors.ControlLight) : new Pen(SystemColors.Control)
+                ? VisualStyleHelper.HighContrast ? new Pen(SystemColors.ControlLight) : new Pen(SystemColors.Control)
                 : new Pen(colors.ButtonFace);
 
             // top + left inset
@@ -267,7 +267,7 @@ namespace KGySoft.WinForms.Controls
 
         private static void Draw3DBorder(Graphics g, Rectangle bounds, ColorData colors, bool raised, ControlAppearanceState state)
         {
-            if (state.BackColor != SystemColors.Control && SystemInformation.HighContrast)
+            if (state.BackColor != SystemColors.Control && VisualStyleHelper.HighContrast)
             {
                 if (raised)
                     Draw3DBorderHighContrastRaised(g, ref bounds, colors);
@@ -307,7 +307,7 @@ namespace KGySoft.WinForms.Controls
         {
             LayoutOptions options = CommonLayout(state);
             options.TextOffset = !up;
-            options.DotNetOneButtonCompat = !Application.RenderWithVisualStyles;
+            options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
             return options;
         }
 
@@ -335,7 +335,7 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            if (ButtonInstance.BackgroundImage != null && !SystemInformation.HighContrast)
+            if (ButtonInstance.BackgroundImage != null && !VisualStyleHelper.HighContrast)
                 e.Graphics.DrawBackgroundImage(ButtonInstance.BackgroundImage, Color.Transparent, ButtonInstance.BackgroundImageLayout, ButtonInstance.ClientRectangle, bounds, ButtonInstance.DisplayRectangle.Location, ButtonInstance.RightToLeft);
         }
 
@@ -345,7 +345,7 @@ namespace KGySoft.WinForms.Controls
             ControlAppearanceState state = e.State;
             up = up && (state.CheckState == CheckState.Unchecked);
             ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
-            bool renderWithVisualStyles = Application.RenderWithVisualStyles;
+            bool renderWithVisualStyles = VisualStyleHelper.RenderWithVisualStyles;
             LayoutData layout = renderWithVisualStyles
                 ? PaintLayout(state, true).Layout(g)
                 : PaintLayout(state, up).Layout(g);

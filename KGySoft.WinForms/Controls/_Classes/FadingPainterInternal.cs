@@ -18,7 +18,6 @@
 using System;
 using System.Collections.Generic;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 using KGySoft.Drawing;
@@ -58,7 +57,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Properties
 
-        internal static bool IsSupported => WindowsUtils.IsVistaOrLater && Application.RenderWithVisualStyles;
+        internal static bool IsSupported => WindowsUtils.IsVistaOrLater && VisualStyleHelper.RenderWithVisualStyles;
 
         #endregion
 
@@ -188,7 +187,6 @@ namespace KGySoft.WinForms.Controls
                         else
                         {
                             prevStateImage?.Dispose();
-
                             prevStateImage = newStateImage;
                         }
 
@@ -204,18 +202,12 @@ namespace KGySoft.WinForms.Controls
             else
                 lastEnableToggled = default(DateTime);
 
-            // Initializing fading animation
-            BP_ANIMATIONPARAMS animParams = new BP_ANIMATIONPARAMS();
-            animParams.cbSize = Marshal.SizeOf(animParams);
-            animParams.style = BP_ANIMATIONSTYLE.BPAS_LINEAR;
-            animParams.dwDuration = isStandardChangeOnly ? GetSpeed(State, newState) : base.GetSpeed(State, newState);
-
-            RECT rc = new RECT(Control.ClientRectangle);
             IntPtr hbpAnimation;
             IntPtr hdc = e.Graphics.GetHdc();
             try
             {
-                hbpAnimation = UxTheme.BeginBufferedAnimation(Control.Handle, hdc, ref rc, BP_BUFFERFORMAT.BPBF_COMPATIBLEBITMAP, IntPtr.Zero, ref animParams, out IntPtr hdcFrom, out IntPtr hdcTo);
+                int speed = isStandardChangeOnly ? GetSpeed(State, newState) : base.GetSpeed(State, newState);
+                hbpAnimation = UxTheme.BeginBufferedAnimation(Control.Handle, hdc, Control.ClientRectangle, speed, out IntPtr hdcFrom, out IntPtr hdcTo);
                 if (hbpAnimation != IntPtr.Zero)
                 {
                     if (hdcFrom != IntPtr.Zero)
@@ -237,7 +229,7 @@ namespace KGySoft.WinForms.Controls
                     prevStateImage?.Dispose();
                     prevStateImage = newStateImage;
                     State = newState;
-                    UxTheme.EndBufferedAnimation(hbpAnimation, true);
+                    UxTheme.EndBufferedAnimation(hbpAnimation);
                     return;
                 }
             }
@@ -317,14 +309,13 @@ namespace KGySoft.WinForms.Controls
             if (speedCache.TryGetValue(((long)newState.SystemPartId << 32) | (uint)(prevState.SystemStateId << 16) | (uint)newState.SystemStateId, out int speed))
                 return speed;
 
-            IntPtr hTheme = UxTheme.OpenThemeData(Control.Handle, className);
-            int hResult = UxTheme.GetThemeTransitionDuration(hTheme, newState.SystemPartId, prevState.SystemStateId, newState.SystemStateId, Constants.TMT_TRANSITIONDURATIONS, out speed);
-            if (hResult != 0)
+            IntPtr hTheme = UxTheme.OpenThemeDataGlobal(className);
+            if (!UxTheme.TryGetThemeTransitionDuration(hTheme, newState.SystemPartId, prevState.SystemStateId, newState.SystemStateId, Constants.TMT_TRANSITIONDURATIONS, out speed))
                 return base.GetSpeed(prevState, newState);
 
             // if speed is 0, trying other direction (eg. default and default_animating states)
             if (speed == 0)
-                UxTheme.GetThemeTransitionDuration(hTheme, newState.SystemPartId, newState.SystemStateId, prevState.SystemStateId, Constants.TMT_TRANSITIONDURATIONS, out speed);
+                UxTheme.TryGetThemeTransitionDuration(hTheme, newState.SystemPartId, newState.SystemStateId, prevState.SystemStateId, Constants.TMT_TRANSITIONDURATIONS, out speed);
 
             speedCache[((long)newState.SystemPartId << 32) | (uint)(prevState.SystemStateId << 16) | (uint)newState.SystemStateId] = speed;
             return speed;

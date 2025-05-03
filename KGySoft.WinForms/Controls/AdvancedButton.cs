@@ -735,19 +735,15 @@ namespace KGySoft.WinForms.Controls
             if (!WindowsUtils.IsVistaOrLater)
                 return;
 
-            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && Application.RenderWithVisualStyles;
-
+            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles;
             if (enabled && (defaultAnimationTimer == null || !defaultAnimationTimer.Enabled))
             {
                 if (defaultAnimationTimer == null)
                 {
                     defaultAnimationTimer = new Timer();
-                    IntPtr hTheme = UxTheme.OpenThemeData(Handle, "BUTTON");
-                    int duration;
-                    if (UxTheme.GetThemeTransitionDuration(hTheme, (int)BUTTONPARTS.BP_PUSHBUTTON, (int)PUSHBUTTONSTATES.PBS_DEFAULTED, (int)PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING, Constants.TMT_TRANSITIONDURATIONS, out duration) == 0 && duration != 0)
-                        defaultAnimationTimer.Interval = duration;
-                    else
-                        defaultAnimationTimer.Interval = 1000;
+                    defaultAnimationTimer.Interval = UxTheme.TryGetThemeTransitionDuration(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_PUSHBUTTON, (int)PUSHBUTTONSTATES.PBS_DEFAULTED, (int)PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING, Constants.TMT_TRANSITIONDURATIONS, out int duration)
+                        ? duration
+                        : 1000;
                     defaultAnimationTimer.Tick += defaultAnimationTimer_Tick;
                 }
 

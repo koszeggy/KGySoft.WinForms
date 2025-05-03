@@ -81,8 +81,8 @@ namespace KGySoft.WinForms.Controls
         {
             LayoutOptions options = CommonLayout(state);
             options.HintTextUp = false;
-            options.DotNetOneButtonCompat = !Application.RenderWithVisualStyles;
-            if (Application.RenderWithVisualStyles)
+            options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
+            if (VisualStyleHelper.RenderWithVisualStyles)
             {
                 //using (Graphics graphics = WindowsFormsUtils.CreateMeasurementGraphics())
                 //{
@@ -104,7 +104,7 @@ namespace KGySoft.WinForms.Controls
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
             Rectangle checkBounds = layout.CheckBounds;
-            if (Application.RenderWithVisualStyles)
+            if (VisualStyleHelper.RenderWithVisualStyles)
                 RadioButtonRenderer.DrawRadioButton(g, new Point(checkBounds.Left, checkBounds.Top), (RadioButtonState)state.SystemStateId);
             else
             {

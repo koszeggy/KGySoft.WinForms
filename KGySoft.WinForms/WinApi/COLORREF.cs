@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: SIZE.cs
+//  File: COLORREF.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -15,7 +15,6 @@
 
 #region Usings
 
-using System.Drawing;
 using System.Runtime.InteropServices;
 
 #endregion
@@ -23,32 +22,14 @@ using System.Runtime.InteropServices;
 namespace KGySoft.WinForms.WinApi
 {
     [StructLayout(LayoutKind.Sequential)]
-    internal struct SIZE
+    internal struct COLORREF
     {
         #region Fields
 
-        internal int cx;
-        internal int cy;
-
-        #endregion
-
-        #region Constructors
-
-        internal SIZE(int cx, int cy)
-        {
-            this.cx = cx;
-            this.cy = cy;
-        }
-
-        internal SIZE(Size size) : this(size.Width, size.Height)
-        {
-        }
-
-        #endregion
-
-        #region Methods
-
-        internal Size ToSize() => new(cx, cy);
+        internal byte R;
+        internal byte G;
+        internal byte B;
+        internal byte Reserved;
 
         #endregion
     }

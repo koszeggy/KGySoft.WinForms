@@ -47,6 +47,17 @@ namespace KGySoft.WinForms
 
         #endregion
 
+        #region Properties
+
+        #region Visual Styles
+
+        /// <summary>Visual styles are not available.</summary>
+        internal static string NoVisualStyles => Get("VisualStyles_NoVisualStyles");
+
+        #endregion
+
+        #endregion
+
         #region Methods
 
         #region Internal Methods

@@ -44,7 +44,6 @@ using KGySoft.WinForms.WinApi;
 
 #region Used Aliases
 
-using ContentAlignment = System.Drawing.ContentAlignment;
 using TaskDialog = KGySoft.WinForms.Components.TaskDialog;
 using TaskDialogButton = KGySoft.WinForms.Components.TaskDialogButton;
 using TaskDialogControl = KGySoft.WinForms.Components.TaskDialogControl;
@@ -202,12 +201,6 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region Constants
-
-        private const string classTaskDialog = "TASKDIALOG";
-
-        #endregion
-
         #region Fields
 
         #region Static Fields
@@ -336,7 +329,7 @@ namespace KGySoft.WinForms.Forms
             {
                 if (mainInstructionsFont == null)
                 {
-                    if (Application.RenderWithVisualStyles)
+                    if (VisualStyleHelper.RenderWithVisualStyles)
                     {
                         if (WindowsUtils.IsVistaOrLater)
                         {
@@ -345,28 +338,15 @@ namespace KGySoft.WinForms.Forms
                             //using Graphics g = Graphics.FromHwnd(Handle);
                             //mainInstructionsFont = renderer.GetFont(g, (FontProperty)Constants.TMT_FONT);
 
-                            IntPtr hTheme = UxTheme.OpenThemeData(lblMainInstruction.Handle, classTaskDialog);
-                            if (hTheme != IntPtr.Zero)
+                            using Graphics g = Graphics.FromHwnd(lblMainInstruction.Handle);
+                            try
                             {
-                                using Graphics g = Graphics.FromHwnd(lblMainInstruction.Handle);
-                                IntPtr hdc = g.GetHdc();
-                                try
-                                {
-                                    UxTheme.GetThemeFont(hTheme, hdc, Constants.TDLG_MAININSTRUCTIONPANE, 0, Constants.TMT_FONT, out LOGFONT logFont);
-                                    using Font font = new Font(SystemFonts.MessageBoxFont, FontStyle.Bold);
-                                    mainInstructionsFont = Font.FromLogFont(logFont);
-                                }
-                                catch (Exception e) when (!e.IsCritical())
-                                {
-                                    mainInstructionsFont = new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
-                                }
-                                finally
-                                {
-                                    g.ReleaseHdc(hdc);
-                                }
+                                mainInstructionsFont = VisualStyleHelper.GetFont(VisualStyleHelper.TaskDialogTheme, g, Constants.TDLG_MAININSTRUCTIONPANE);
                             }
-                            else
+                            catch (Exception e) when (!e.IsCritical())
+                            {
                                 mainInstructionsFont = new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
+                            }
                         }
                         else
                         {
@@ -392,7 +372,7 @@ namespace KGySoft.WinForms.Forms
                 if (mainInstructionsColor.IsEmpty)
                 {
                     var color = WindowsUtils.IsVistaOrLater
-                        ? new VisualStyleRenderer(classTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 1).GetColor(ColorProperty.TextColor)
+                        ? new VisualStyleRenderer(Constants.ThemeClassTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 1).GetColor(ColorProperty.TextColor)
                         : Color.FromArgb(0, 51, 153);
 
                     // ISSUE: When changing from high contrast to normal theme, the VisualStyleRenderer.GetColor(ColorProperty.TextColor) keeps returning
@@ -1278,7 +1258,7 @@ namespace KGySoft.WinForms.Forms
             lblMainInstruction.Font = !String.IsNullOrEmpty(host.MainInstruction) ? MainInstructionsFont : Font;
 
             // colors
-            bool isThemed = Application.RenderWithVisualStyles;
+            bool isThemed = VisualStyleHelper.RenderWithVisualStyles;
             cacheMainInstructionsColor ??= isThemed; // Not allowing caching the themed fore color if starting with non-themed rendering. See more details in ThemedMainInstructionsColor.
             BackColor = isThemed ? Color.FromArgb(240, 240, 240) : SystemColors.Control;
             pnlMain.BackColor = isThemed ? SystemColors.Window : SystemColors.Control;
@@ -1315,7 +1295,7 @@ namespace KGySoft.WinForms.Forms
             bool hasMainIcon = host.CustomIcon != null || host.Icon != TaskDialogStandardIcons.None;
             pnlMainIcon.Visible = hasMainIcon;
             pnlMain.ColumnStyles[0].Width = hasMainIcon ? 50.Scale(scale.X) : 0;
-            bool requireSpecialHeadColors = !SystemInformation.HighContrast && host.Icon.In(iconsWithColoredHeader);
+            bool requireSpecialHeadColors = !VisualStyleHelper.HighContrast && host.Icon.In(iconsWithColoredHeader);
 
             if (requireSpecialHeadColors)
             {
