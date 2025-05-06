@@ -483,10 +483,10 @@ namespace KGySoft.WinForms.Controls
 
                 // Figure out the maximum bounds for text & image
                 Rectangle maxBounds = Rectangle.Inflate(layout.Field, -textImageInset, -textImageInset);
-                if (OnePixExtraBorder)
-                {
-                    maxBounds.Inflate(1, 1);
-                }
+
+                // Change to original: not altering the maxBounds for thicker borders because it could cause the text and the image to shift one pixel depending on the button is focused.
+                //if (OnePixExtraBorder)
+                //    maxBounds.Inflate(1, 1);
 
                 // Compute the final image and text bounds.
                 if (ImageSize == Size.Empty || Text == null || Text.Length == 0 || textImageRelation == TextImageRelation.Overlay)
@@ -497,9 +497,7 @@ namespace KGySoft.WinForms.Controls
                     // For .NET Framework 1.1 compatibility
                     Size size = ImageSize;
                     if (layout.Options.DotNetOneButtonCompat && ImageSize != Size.Empty)
-                    {
                         size = new Size(size.Width + 1, size.Height + 1);
-                    }
 
                     layout.ImageBounds = LayoutUtils.Align(size, maxBounds, imageAlign);
                     layout.TextBounds = LayoutUtils.Align(textSize, maxBounds, textAlign);

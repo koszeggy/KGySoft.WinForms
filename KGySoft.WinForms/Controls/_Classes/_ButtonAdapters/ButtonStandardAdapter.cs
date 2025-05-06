@@ -307,7 +307,7 @@ namespace KGySoft.WinForms.Controls
         {
             LayoutOptions options = CommonLayout(state);
             options.TextOffset = !up;
-            options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
+            options.GrowBorderBy1PxWhenDefault = options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
             return options;
         }
 
@@ -368,8 +368,6 @@ namespace KGySoft.WinForms.Controls
             }
             
             PaintImage(e, layout);
-            if (renderWithVisualStyles)
-                layout.Focus.Inflate(1, 1);
             PaintField(e, layout, colors, true);
             
             if (!renderWithVisualStyles)

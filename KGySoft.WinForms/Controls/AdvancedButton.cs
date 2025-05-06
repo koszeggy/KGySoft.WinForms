@@ -689,10 +689,16 @@ namespace KGySoft.WinForms.Controls
 
         private ControlAppearanceState GetAppearance()
         {
-            return new ControlAppearanceState((int)BUTTONPARTS.BP_PUSHBUTTON, (int)GetSystemState())
+            int partId = (int)BUTTONPARTS.BP_PUSHBUTTON;
+            int stateId = (int)GetSystemState();
+            Color foreColor = !Enabled ? DisabledForeColor : base.ForeColor;
+            if (lastFlatStyle == FlatStyle.Standard && Enabled && VisualStyleHelper.RenderWithVisualStyles && foreColor == SystemColors.ControlText)
+                foreColor = VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, partId, stateId);
+            return new ControlAppearanceState(partId, stateId)
             {
                 BackColor = Enabled ? BackColor : DisabledBackColor,
-                ForeColor = Enabled ? ForeColor : DisabledForeColor,
+                ForeColor = foreColor,
+                //ForeColor = Enabled ? ForeColor : DisabledForeColor,
                 Enabled = Enabled,
                 Hovered = isHovered,
                 Pressed = isPressed,
@@ -739,7 +745,7 @@ namespace KGySoft.WinForms.Controls
             if (!WindowsUtils.IsVistaOrLater)
                 return;
 
-            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles;
+            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles && !VisualStyleHelper.HighContrast;
             if (enabled && (defaultAnimationTimer == null || !defaultAnimationTimer.Enabled))
             {
                 if (defaultAnimationTimer == null)
