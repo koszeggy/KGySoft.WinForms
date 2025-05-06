@@ -304,7 +304,7 @@ namespace KGySoft.WinForms.Forms
                     return DefaultImageNormalDown.Size;
                 }
 
-                return referenceImageSize.Scale(g.GetScale());
+                return referenceImageSize.Scale(this.GetScale());
             }
 
             private Image ExtractBitmap(Icon icon)
@@ -387,7 +387,7 @@ namespace KGySoft.WinForms.Forms
 
             private void PaintClassicButton(Graphics g, out Size imageSize)
             {
-                imageSize = referenceImageSize.Scale(g.GetScale());
+                imageSize = referenceImageSize.Scale(this.GetScale());
                 Rectangle rect = new Rectangle(Point.Empty, imageSize);
                 ButtonState state = ButtonState.Normal;
                 if (isPressed)

@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: User32.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Runtime.InteropServices;
@@ -7,19 +22,21 @@ using System.Runtime.InteropServices;
 
 namespace KGySoft.WinForms.WinApi
 {
-    static class User32
+    internal static class User32
     {
+        #region Methods
+
         /// <summary>
         /// The GetWindowDC function retrieves the device context (DC) for the entire window, including title bar, menus, and scroll bars.
         /// A window device context permits painting anywhere in a window, because the origin of the device context is the upper-left corner of the window instead of the client area.
-        /// GetWindowDC assigns default attributes to the window device context each time it retrieves the device context. Previous attributes are lost. 
+        /// GetWindowDC assigns default attributes to the window device context each time it retrieves the device context. Previous attributes are lost.
         /// </summary>
         /// <param name="hWnd">Handle to the window with a device context that is to be retrieved. If this value is NULL, GetWindowDC retrieves the device context for the entire screen.</param>
         /// <returns>If the function succeeds, the return value is a handle to a device context for the specified window.
-        /// If the function fails, the return value is NULL, indicating an error or an invalid hWnd parameter. 
+        /// If the function fails, the return value is NULL, indicating an error or an invalid hWnd parameter.
         /// </returns>
         [DllImport("user32.dll")]
-        internal extern static IntPtr GetWindowDC(IntPtr hWnd);
+        internal static extern IntPtr GetWindowDC(IntPtr hWnd);
 
         /// <summary>
         /// The ReleaseDC function releases a device context (DC), freeing it for use by other applications. The effect of the ReleaseDC function depends on the type of DC. It frees only common and window DCs. It has no effect on class or private DCs.
@@ -54,7 +71,7 @@ namespace KGySoft.WinForms.WinApi
         /// <param name="Y">Specifies the new position of the top of the window, in client coordinates.</param>
         /// <param name="cx">Specifies the new width of the window, in pixels.</param>
         /// <param name="cy">Specifies the new height of the window, in pixels.</param>
-        /// <param name="uFlags">Specifies the window sizing and positioning flags. This parameter can be a combination of the following values. 
+        /// <param name="uFlags">Specifies the window sizing and positioning flags. This parameter can be a combination of the following values.
         /// <para>SWP_ASYNCWINDOWPOS:
         /// If the calling thread and the thread that owns the window are attached to different input queues, the system posts the request to the thread that owns the window. This prevents the calling thread from blocking its execution while other threads process the request. </para>
         /// <para>SWP_DEFERERASE:
@@ -197,7 +214,7 @@ namespace KGySoft.WinForms.WinApi
         /// </summary>
         /// <param name="hwnd">[in] Handle to the window to be destroyed.</param>
         /// <returns>If the function succeeds, the return value is nonzero.
-        /// If the function fails, the return value is zero. To get extended error information, call GetLastError. 
+        /// If the function fails, the return value is zero. To get extended error information, call GetLastError.
         /// </returns>
         [DllImport("user32.dll")]
         internal static extern bool DestroyWindow(IntPtr hwnd);
@@ -207,7 +224,7 @@ namespace KGySoft.WinForms.WinApi
         /// </summary>
         /// <param name="hDlg">[in] Handle to the dialog box that contains the control.</param>
         /// <param name="nIDDlgItem">[in] Specifies the identifier of the control to be retrieved.</param>
-        /// <returns>If the function succeeds, the return value is the window handle of the specified control. 
+        /// <returns>If the function succeeds, the return value is the window handle of the specified control.
         /// If the function fails, the return value is NULL, indicating an invalid dialog box handle or a nonexistent control. To get extended error information, call GetLastError.
         /// </returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto)]
@@ -219,20 +236,20 @@ namespace KGySoft.WinForms.WinApi
         /// </summary>
         /// <param name="dwExStyle">[in] Specifies the extended window style of the window being created. This parameter can be one or more of the following values:
         /// WS_EX_ACCEPTFILES: Specifies that a window created with this style accepts drag-drop files.
-        /// WS_EX_APPWINDOW: Forces a top-level window onto the taskbar when the window is visible. 
+        /// WS_EX_APPWINDOW: Forces a top-level window onto the taskbar when the window is visible.
         /// WS_EX_CLIENTEDGE: Specifies that a window has a border with a sunken edge.
         /// WS_EX_COMPOSITED: Windows XP: Paints all descendants of a window in bottom-to-top painting order using double-buffering. This cannot be used if the window has a class style of either CS_OWNDC or CS_CLASSDC.
         /// WS_EX_CONTEXTHELP: Includes a question mark in the title bar of the window. When the user clicks the question mark, the cursor changes to a question mark with a pointer. If the user then clicks a child window, the child receives a WM_HELP message. The child window should pass the message to the parent window procedure, which should call the WinHelp function using the HELP_WM_HELP command. The Help application displays a pop-up window that typically contains help for the child window.
         /// WS_EX_CONTEXTHELP: cannot be used with the WS_MAXIMIZEBOX or WS_MINIMIZEBOX styles.
         /// WS_EX_CONTROLPARENT: The window itself contains child windows that should take part in dialog box navigation. If this style is specified, the dialog manager recurses into children of this window when performing navigation operations such as handling the TAB key, an arrow key, or a keyboard mnemonic.
         /// WS_EX_DLGMODALFRAME: Creates a window that has a double border; the window can, optionally, be created with a title bar by specifying the WS_CAPTION style in the dwStyle parameter.
-        /// WS_EX_LAYERED: Windows 2000/XP: Creates a layered window. Note that this cannot be used for child windows. Also, this cannot be used if the window has a class style of either CS_OWNDC or CS_CLASSDC. 
-        /// WS_EX_LAYOUTRTL: Arabic and Hebrew versions of Windows 98/Me, Windows 2000/XP: Creates a window whose horizontal origin is on the right edge. Increasing horizontal values advance to the left. 
+        /// WS_EX_LAYERED: Windows 2000/XP: Creates a layered window. Note that this cannot be used for child windows. Also, this cannot be used if the window has a class style of either CS_OWNDC or CS_CLASSDC.
+        /// WS_EX_LAYOUTRTL: Arabic and Hebrew versions of Windows 98/Me, Windows 2000/XP: Creates a window whose horizontal origin is on the right edge. Increasing horizontal values advance to the left.
         /// WS_EX_LEFT: Creates a window that has generic left-aligned properties. This is the default.
         /// WS_EX_LEFTSCROLLBAR: If the shell language is Hebrew, Arabic, or another language that supports reading order alignment, the vertical scroll bar (if present) is to the left of the client area. For other languages, the style is ignored.
         /// WS_EX_LTRREADING: The window text is displayed using left-to-right reading-order properties. This is the default.
         /// WS_EX_MDICHILD: Creates a multiple-document interface (MDI) child window.
-        /// WS_EX_NOACTIVATE: Windows 2000/XP: A top-level window created with this style does not become the foreground window when the user clicks it. The system does not bring this window to the foreground when the user minimizes or closes the foreground window. 
+        /// WS_EX_NOACTIVATE: Windows 2000/XP: A top-level window created with this style does not become the foreground window when the user clicks it. The system does not bring this window to the foreground when the user minimizes or closes the foreground window.
         /// To activate the window, use the SetActiveWindow or SetForegroundWindow function.
         /// The window does not appear on the taskbar by default. To force the window to appear on the taskbar, use the WS_EX_APPWINDOW style.
         /// WS_EX_NOINHERITLAYOUT: Windows 2000/XP: A window created with this style does not pass its window layout to its child windows.
@@ -240,11 +257,11 @@ namespace KGySoft.WinForms.WinApi
         /// WS_EX_OVERLAPPEDWINDOW: Combines the WS_EX_CLIENTEDGE and WS_EX_WINDOWEDGE styles.
         /// WS_EX_PALETTEWINDOW: Combines the WS_EX_WINDOWEDGE, WS_EX_TOOLWINDOW, and WS_EX_TOPMOST styles.
         /// WS_EX_RIGHT: The window has generic "right-aligned" properties. This depends on the window class. This style has an effect only if the shell language is Hebrew, Arabic, or another language that supports reading-order alignment; otherwise, the style is ignored.
-        /// Using the WS_EX_RIGHT style for static or edit controls has the same effect as using the SS_RIGHT or ES_RIGHT style, respectively. Using this style with button controls has the same effect as using BS_RIGHT and BS_RIGHTBUTTON styles. 
+        /// Using the WS_EX_RIGHT style for static or edit controls has the same effect as using the SS_RIGHT or ES_RIGHT style, respectively. Using this style with button controls has the same effect as using BS_RIGHT and BS_RIGHTBUTTON styles.
         /// WS_EX_RIGHTSCROLLBAR: Vertical scroll bar (if present) is to the right of the client area. This is the default.
         /// WS_EX_RTLREADING: If the shell language is Hebrew, Arabic, or another language that supports reading-order alignment, the window text is displayed using right-to-left reading-order properties. For other languages, the style is ignored.
         /// WS_EX_STATICEDGE: Creates a window with a three-dimensional border style intended to be used for items that do not accept user input.
-        /// WS_EX_TOOLWINDOW: Creates a tool window; that is, a window intended to be used as a floating toolbar. A tool window has a title bar that is shorter than a normal title bar, and the window title is drawn using a smaller font. A tool window does not appear in the taskbar or in the dialog that appears when the user presses ALT+TAB. If a tool window has a system menu, its icon is not displayed on the title bar. However, you can display the system menu by right-clicking or by typing ALT+SPACE. 
+        /// WS_EX_TOOLWINDOW: Creates a tool window; that is, a window intended to be used as a floating toolbar. A tool window has a title bar that is shorter than a normal title bar, and the window title is drawn using a smaller font. A tool window does not appear in the taskbar or in the dialog that appears when the user presses ALT+TAB. If a tool window has a system menu, its icon is not displayed on the title bar. However, you can display the system menu by right-clicking or by typing ALT+SPACE.
         /// WS_EX_TOPMOST: Specifies that a window created with this style should be placed above all non-topmost windows and should stay above them, even when the window is deactivated. To add or remove this style, use the SetWindowPos function.
         /// WS_EX_TRANSPARENT: Specifies that a window created with this style should not be painted until siblings beneath the window (that were created by the same thread) have been painted. The window appears transparent because the bits of underlying sibling windows have already been painted.
         /// To achieve transparency without these restrictions, use the SetWindowRgn function.
@@ -264,7 +281,7 @@ namespace KGySoft.WinForms.WinApi
         /// <param name="lpWindowName">[in] Pointer to a null-terminated string that specifies the window name. If the window style specifies a title bar, the window title pointed to by lpWindowName is displayed in the title bar. When using CreateWindow to create controls, such as buttons, check boxes, and static controls, use lpWindowName to specify the text of the control. When creating a static control with the SS_ICON style, use lpWindowName to specify the icon name or identifier. To specify an identifier, use the syntax "#num".</param>
         /// <param name="dwStyle">[in] Specifies the style of the window being created. This parameter can be a combination of window styles, plus the control styles.</param>
         /// <param name="x">[in] Specifies the initial horizontal position of the window. For an overlapped or pop-up window, the x parameter is the initial x-coordinate of the window's upper-left corner, in screen coordinates. For a child window, x is the x-coordinate of the upper-left corner of the window relative to the upper-left corner of the parent window's client area. If x is set to CW_USEDEFAULT, the system selects the default position for the window's upper-left corner and ignores the y parameter. CW_USEDEFAULT is valid only for overlapped windows; if it is specified for a pop-up or child window, the x and y parameters are set to zero.</param>
-        /// <param name="y">[in] Specifies the initial vertical position of the window. For an overlapped or pop-up window, the y parameter is the initial y-coordinate of the window's upper-left corner, in screen coordinates. For a child window, y is the initial y-coordinate of the upper-left corner of the child window relative to the upper-left corner of the parent window's client area. For a list box y is the initial y-coordinate of the upper-left corner of the list box's client area relative to the upper-left corner of the parent window's client area. 
+        /// <param name="y">[in] Specifies the initial vertical position of the window. For an overlapped or pop-up window, the y parameter is the initial y-coordinate of the window's upper-left corner, in screen coordinates. For a child window, y is the initial y-coordinate of the upper-left corner of the child window relative to the upper-left corner of the parent window's client area. For a list box y is the initial y-coordinate of the upper-left corner of the list box's client area relative to the upper-left corner of the parent window's client area.
         /// If an overlapped window is created with the WS_VISIBLE style bit set and the x parameter is set to CW_USEDEFAULT, then the y parameter determines how the window is shown. If the y parameter is CW_USEDEFAULT, then the window manager calls ShowWindow with the SW_SHOW flag after the window has been created. If the y parameter is some other value, then the window manager calls ShowWindow with that value as the nCmdShow parameter. </param>
         /// <param name="nWidth">[in] Specifies the width, in device units, of the window. For overlapped windows, nWidth is the window's width, in screen coordinates, or CW_USEDEFAULT. If nWidth is CW_USEDEFAULT, the system selects a default width and height for the window; the default width extends from the initial x-coordinates to the right edge of the screen; the default height extends from the initial y-coordinate to the top of the icon area. CW_USEDEFAULT is valid only for overlapped windows; if CW_USEDEFAULT is specified for a pop-up or child window, the nWidth and nHeight parameter are set to zero.</param>
         /// <param name="nHeight">[in] Specifies the height, in device units, of the window. For overlapped windows, nHeight is the window's height, in screen coordinates. If the nWidth parameter is set to CW_USEDEFAULT, the system ignores nHeight.</param>
@@ -279,7 +296,7 @@ namespace KGySoft.WinForms.WinApi
         internal static extern IntPtr CreateWindowEx(int dwExStyle, string lpClassName, string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
 
         /// <summary>
-        /// The ScreenToClient function converts the screen coordinates of a specified point on the screen to client-area coordinates. 
+        /// The ScreenToClient function converts the screen coordinates of a specified point on the screen to client-area coordinates.
         /// </summary>
         /// <param name="hWnd">[in] Handle to the window whose client area will be used for the conversion.</param>
         /// <param name="lpPoint">[in] Pointer to a POINT structure that specifies the screen coordinates to be converted.</param>
@@ -308,9 +325,6 @@ namespace KGySoft.WinForms.WinApi
         /// <returns>If the function succeeds, the return value is a pointer to the window object having the specified class and window names. If the function fails, the return value is NULL.</returns>
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
-
-        //[DllImport("user32.dll", CharSet = CharSet.Auto)]
-        //public static extern IntPtr GetWindow(IntPtr hWnd, int uCmd);
 
         /// <summary>
         /// Loads a string resource from the executable file associated with a specified module, copies the string into a buffer, and appends a terminating null character.
@@ -351,5 +365,54 @@ namespace KGySoft.WinForms.WinApi
         /// <returns>Nonzero indicates success. Zero indicates failure.</returns>
         [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
         internal static extern bool DrawFrameControl(HandleRef hDC, ref RECT rect, int type, int state);
+
+        /// <summary>
+        /// The current DPI_AWARENESS_CONTEXT for the thread.
+        /// </summary>
+        /// <returns>This method will return the latest DPI_AWARENESS_CONTEXT sent to SetThreadDpiAwarenessContext. If SetThreadDpiAwarenessContext was never called for this thread, then the return value will equal the default DPI_AWARENESS_CONTEXT for the process.</returns>
+        [DllImport("user32.dll")]
+        internal static extern IntPtr GetThreadDpiAwarenessContext();
+
+        /// <summary>
+        /// Determines whether two DPI_AWARENESS_CONTEXT values are identical.
+        /// </summary>
+        /// <param name="dpiContextA">The first value to compare.</param>
+        /// <param name="dpiContextB">The second value to compare.</param>
+        /// <returns>Returns TRUE if the values are equal, otherwise FALSE.</returns>
+        /// <remarks>A DPI_AWARENESS_CONTEXT contains multiple pieces of information. For example, it includes both the current and the inherited DPI_AWARENESS values.
+        /// AreDpiAwarenessContextsEqual ignores informational flags and determines if the values are equal.
+        /// You can't use a direct bitwise comparison because of these informational flags.</remarks>
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool AreDpiAwarenessContextsEqual(IntPtr dpiContextA, IntPtr dpiContextB);
+
+        /// <summary>
+        /// The MonitorFromWindow function retrieves a handle to the display monitor that has the largest area of intersection with the bounding rectangle of a specified window.
+        /// </summary>
+        /// <param name="hwnd">A handle to the window of interest.</param>
+        /// <param name="flags">Determines the function's return value if the window does not intersect any display monitor.
+        /// This parameter can be one of the following values. MONITOR_DEFAULTTONULL (0)/MONITOR_DEFAULTTOPRIMARY (1)/MONITOR_DEFAULTTONEAREST (2).</param>
+        /// <returns>If the point is contained by a display monitor, the return value is an HMONITOR handle to that display monitor.
+        /// If the point is not contained by a display monitor, the return value depends on the value of dwFlags.</returns>
+        [DllImport("user32.dll")]
+        internal static extern IntPtr MonitorFromWindow(IntPtr hwnd, uint flags);
+
+        /// <summary>
+        /// The WindowFromDC function returns a handle to the window associated with the specified display device context (DC). Output functions that use the specified device context draw into this window.
+        /// </summary>
+        /// <param name="hDC">Handle to the device context from which a handle to the associated window is to be retrieved.</param>
+        /// <returns>The return value is a handle to the window associated with the specified DC. If no window is associated with the specified DC, the return value is NULL.</returns>
+        [DllImport("user32.dll")]
+        internal static extern IntPtr WindowFromDC(IntPtr hDC);
+
+        /// <summary>
+        /// Returns the dots per inch (dpi) value for the specified window.
+        /// </summary>
+        /// <param name="hwnd">The window that you want to get information about.</param>
+        /// <returns>The DPI for the window, which depends on the DPI_AWARENESS of the window. See the Remarks section for more information. An invalid hwnd value will result in a return value of 0.</returns>
+        [DllImport("user32.dll")]
+        internal static extern uint GetDpiForWindow(IntPtr hwnd);
+
+        #endregion
     }
 }

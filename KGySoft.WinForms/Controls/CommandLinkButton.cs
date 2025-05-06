@@ -1871,7 +1871,7 @@ namespace KGySoft.WinForms.Controls
         {
             var state = e.State;
             int width = UsesTheming ? 1 : 2;
-            width = Math.Min(HorizontalBasePadding, width.Scale(e.Graphics.GetScale().X));
+            width = Math.Min(HorizontalBasePadding, width.Scale(this.GetScale().X));
             Rectangle rect = ClientRectangle;
             rect.Inflate(-3, -3);
             for (int i = 0; i < width; i++)

@@ -36,42 +36,6 @@ namespace KGySoft.WinForms.Controls
 
         #region Methods
 
-        #region Static Methods
-
-        private static void DrawCheckBackground3DLite(PaintStateEventArgs e, Rectangle bounds, Color checkBackground, ColorData colors, bool disabledColors)
-        {
-            Graphics graphics = e.Graphics;
-            GraphicsState? prevState = graphics.DpiX / ScaleHelper.OneHundredPercentLogicalDpi > 1.1f ? graphics.Save() : null;
-            if (prevState != null)
-                graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
-            ControlAppearanceState state = e.State;
-            Color backColor = checkBackground;
-            if (!state.Enabled && disabledColors)
-                backColor = state.BackColor;
-
-            using Brush brush = new SolidBrush(backColor);
-            using Pen pen = new Pen(colors.ButtonShadow);
-            using Pen pen2 = new Pen(colors.ButtonFace);
-            using Pen pen3 = new Pen(colors.Highlight);
-            bounds.Width--;
-            bounds.Height--;
-            graphics.DrawPie(pen, bounds, 136f, 88f);
-            graphics.DrawPie(pen, bounds, 226f, 88f);
-            graphics.DrawPie(pen3, bounds, 316f, 88f);
-            graphics.DrawPie(pen3, bounds, 46f, 88f);
-            bounds.Inflate(-1, -1);
-            graphics.FillEllipse(brush, bounds);
-            graphics.DrawEllipse(pen2, bounds);
-
-            if (prevState != null)
-                graphics.Restore(prevState);
-        }
-
-        #endregion
-
-        #region Instance Methods
-
         #region Internal Methods
 
         internal override void PaintDown(PaintStateEventArgs e)
@@ -143,6 +107,39 @@ namespace KGySoft.WinForms.Controls
         }
 
         #endregion
+
+        #region Private Methods
+
+        private void DrawCheckBackground3DLite(PaintStateEventArgs e, Rectangle bounds, Color checkBackground, ColorData colors, bool disabledColors)
+        {
+            Graphics graphics = e.Graphics;
+            GraphicsState? prevState = ButtonInstance.GetScale().X > 1.1f ? graphics.Save() : null;
+            if (prevState != null)
+                graphics.SmoothingMode = SmoothingMode.AntiAlias;
+
+            ControlAppearanceState state = e.State;
+            Color backColor = checkBackground;
+            if (!state.Enabled && disabledColors)
+                backColor = state.BackColor;
+
+            using Brush brush = new SolidBrush(backColor);
+            using Pen pen = new Pen(colors.ButtonShadow);
+            using Pen pen2 = new Pen(colors.ButtonFace);
+            using Pen pen3 = new Pen(colors.Highlight);
+            bounds.Width--;
+            bounds.Height--;
+            graphics.DrawPie(pen, bounds, 136f, 88f);
+            graphics.DrawPie(pen, bounds, 226f, 88f);
+            graphics.DrawPie(pen3, bounds, 316f, 88f);
+            graphics.DrawPie(pen3, bounds, 46f, 88f);
+            bounds.Inflate(-1, -1);
+            graphics.FillEllipse(brush, bounds);
+            graphics.DrawEllipse(pen2, bounds);
+
+            if (prevState != null)
+                graphics.Restore(prevState);
+        }
+
 
         #endregion
 

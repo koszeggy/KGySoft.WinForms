@@ -79,7 +79,7 @@ namespace KGySoft.WinForms
             IntPtr hdc = g.GetHdc();
             try
             {
-                if (ScaleHelper.IsProcessPerMonitorAware)
+                if (control.HasNonDefaultScaling())
                     hThemeWindow = UxTheme.OpenThemeDataForWindow(control.Handle, GetClassName(hTheme));
 
                 return UxTheme.GetThemePartSize(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, hdc, part, state,
@@ -99,7 +99,7 @@ namespace KGySoft.WinForms
             IntPtr hdc = g.GetHdc();
             try
             {
-                if (ScaleHelper.NeedsScaling)
+                if (control.HasNonDefaultScaling())
                     hThemeWindow = UxTheme.OpenThemeDataForWindow(control.Handle, GetClassName(hTheme));
 
                 UxTheme.DrawThemeBackground(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, hdc, part, state, bounds);

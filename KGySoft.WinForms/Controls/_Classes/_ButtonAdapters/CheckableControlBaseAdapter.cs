@@ -65,17 +65,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Methods
 
-        #region Static Methods
-
-        internal static float GetDpiScaleRatio(Control? control) => control is not null && control.IsHandleCreated
-            ? control.GetScale().X
-            : ScaleHelper.SystemScale.X;
-
-        #endregion
-
         #region Instance Methods
-
-        #region Internal Methods
 
         internal override LayoutOptions CommonLayout(ControlAppearanceState state)
         {
@@ -89,7 +79,7 @@ namespace KGySoft.WinForms.Controls
             return options;
         }
 
-        internal float GetDpiScaleRatio() => GetDpiScaleRatio(ButtonInstance);
+        internal float GetDpiScaleRatio() => ButtonInstance.GetScale().X;
 
         internal override Size GetPreferredSizeCore(Graphics g, Size proposedSize, ControlAppearanceState state)
         {
@@ -99,8 +89,6 @@ namespace KGySoft.WinForms.Controls
             Size preferredSizeCore = Layout(g, state).GetPreferredSizeCore(g, proposedSize);
             return preferredSizeCore;
         }
-
-        #endregion
 
         #region Protected Methods
 

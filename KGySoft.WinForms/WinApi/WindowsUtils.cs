@@ -35,6 +35,7 @@ namespace KGySoft.WinForms.WinApi
         private static bool? isXpOrLater;
         private static bool? isVistaOrLater;
         private static bool? isWin10OrLater;
+        private static bool? isWin10_1607OrLater;
         private static bool? isWin81OrLater;
         private static bool? isComCtlV6Available;
         private static Version? windowsVersion;
@@ -54,6 +55,12 @@ namespace KGySoft.WinForms.WinApi
 
         internal static bool IsWindows10OrLater
             => isWin10OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 10240);
+
+        /// <summary>
+        ///  Windows 10 Anniversary Update or later. (Redstone 1, build 14393, version 1607)
+        /// </summary>
+        internal static bool IsWindows10_1607OrLater
+            => isWin10_1607OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 14393);
 
         /// <summary>
         /// Gets whether comctl32.dll V6 is available, without loading it explicitly.

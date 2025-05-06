@@ -19,7 +19,6 @@
 
 using System;
 using System.Collections.Specialized;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
@@ -693,7 +692,7 @@ namespace KGySoft.WinForms.Controls
                     case Composition.AllCombined:
                         return Math.Max(Math.Max(checkSize, imageSize), textSize);
                     default:
-                        Debug.Fail("composition", composition.ToString());
+                        Debug.Fail(composition.ToString());
                         return -7107;
                 }
             }
@@ -721,7 +720,7 @@ namespace KGySoft.WinForms.Controls
                     case Composition.AllCombined:
                         return proposedSize;
                     default:
-                        Debug.Fail("composition", composition.ToString());
+                        Debug.Fail(composition.ToString());
                         return -7109;
                 }
             }

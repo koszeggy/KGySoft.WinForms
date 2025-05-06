@@ -36,7 +36,6 @@ namespace KGySoft.WinForms.WinApi
         internal const uint HTERROR = unchecked((uint)-2);
         internal const int HTGROWBOX = 4;
         internal const int HTSIZE = HTGROWBOX;
-        internal const int HTTOP = 12;
 
         internal const int SWP_NOSIZE = 0x0001;
         internal const int SWP_NOMOVE = 0x0002;
@@ -128,6 +127,11 @@ namespace KGySoft.WinForms.WinApi
 
         internal const int PBM_SETMARQUEE = WM_USER + 10;
         internal const int PBM_SETSTATE = WM_USER + 16;
+
+        internal const nint DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE = -3;
+        internal const nint DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = -4;
+
+        internal const uint MONITOR_DEFAULTTONEAREST = 2;
 
         #endregion
     }

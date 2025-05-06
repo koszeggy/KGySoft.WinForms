@@ -124,10 +124,7 @@ namespace KGySoft.WinForms.Controls
             }
             else
             {
-                //options.checkSize = ScaleHelper.IsThreadPerMonitorV2Aware
-                //    ? ButtonInstance.LogicalToDeviceUnits(options.checkSize)
-                //    : (int)(options.checkSize * GetDpiScaleRatio());
-                options.CheckSize = ButtonInstance.PerMonitorScale(options.CheckSize);
+                options.CheckSize = ButtonInstance.ScaleSize(options.CheckSize);
             }
 
             return options;

@@ -42,6 +42,17 @@ namespace KGySoft.WinForms.WinApi
             [DllImport("Shcore.dll")]
             internal static extern int GetProcessDpiAwareness(IntPtr hprocess, out PROCESS_DPI_AWARENESS value);
 
+            /// <summary>
+            /// Queries the dots per inch (dpi) of a display.
+            /// </summary>
+            /// <param name="hMonitor">Handle of the monitor being queried.</param>
+            /// <param name="dpiType">The type of DPI being queried. Possible values are from the MONITOR_DPI_TYPE enumeration.</param>
+            /// <param name="dpiX">The value of the DPI along the X axis. This value always refers to the horizontal edge, even when the screen is rotated.</param>
+            /// <param name="dpiY">The value of the DPI along the Y axis. This value always refers to the vertical edge, even when the screen is rotated.</param>
+            /// <returns>This function returns one of the following values: S_OK/E_INVALIDARG</returns>
+            [DllImport("Shcore.dll")]
+            internal static extern int GetDpiForMonitor(IntPtr hMonitor, MONITOR_DPI_TYPE dpiType, out uint dpiX, out uint dpiY);
+
             #endregion
         }
 
@@ -51,9 +62,6 @@ namespace KGySoft.WinForms.WinApi
 
         #region Methods
 
-        /// <summary>
-        /// Requires Windows 8.1 or later.
-        /// </summary>
         internal static PROCESS_DPI_AWARENESS GetProcessDpiAwareness()
         {
             int hResult = NativeMethods.GetProcessDpiAwareness(IntPtr.Zero, out PROCESS_DPI_AWARENESS value);
@@ -61,6 +69,9 @@ namespace KGySoft.WinForms.WinApi
                 throw new Win32Exception(hResult);
             return value;
         }
+
+        internal static bool TryGetDpiForMonitor(IntPtr hMonitor, MONITOR_DPI_TYPE dpiType, out uint dpiX, out uint dpiY)
+            => NativeMethods.GetDpiForMonitor(hMonitor, dpiType, out dpiX, out dpiY) == Constants.S_OK;
 
         #endregion
     }

@@ -16,7 +16,9 @@
 #region Usings
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 using KGySoft.WinForms.WinApi;
@@ -32,32 +34,36 @@ namespace KGySoft.WinForms.Controls
     {
         #region Constants
 
-        internal const float OneHundredPercentLogicalDpi = 96f;
+        private const float defaultDpi = 96f;
 
         #endregion
 
         #region Fields
 
-        private static readonly PointF DefaultDpi = new(OneHundredPercentLogicalDpi, OneHundredPercentLogicalDpi);
-
-        private static bool? isProcessPerMonitorAware;
+        private static readonly bool isProcessPerMonitorAware = WindowsUtils.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
+        private static readonly Point systemInitialDpi = GetDpiForHdc(IntPtr.Zero);
+        private static readonly PointF systemScale = new PointF(systemInitialDpi.X / defaultDpi, systemInitialDpi.Y / defaultDpi);
 
         #endregion
 
         #region Properties
 
-        /// <summary>
-        ///  Returns a boolean to specify if we should enable processing of WM_DPICHANGED and related messages
-        /// </summary>
-        internal static bool IsProcessPerMonitorAware
-            // TODO: check if more sophisticated per-thread context check is needed. See https://github.com/dotnet/winforms/blob/dafb8c0cc81fb1a8bb3cc7e344817b3fe55dc287/src/System.Windows.Forms.Primitives/src/System/Windows/Forms/Internals/ScaleHelper.cs#L101
-            => isProcessPerMonitorAware ??= WindowsUtils.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
+        private static bool IsThreadPerMonitorAware
+        {
+            get
+            {
+                // Cannot cache the result in a thread static field because a thread's DPI awareness can be changed by SetThreadDpiAwarenessContext
+                if (!isProcessPerMonitorAware)
+                    return false;
 
-        internal static PointF SystemScale => GetScale(IntPtr.Zero);
+                if (!WindowsUtils.IsWindows10_1607OrLater)
+                    return true;
 
-        internal static PointF SystemDpi => GetDpiForHwnd(IntPtr.Zero);
-
-        internal static bool NeedsScaling => IsProcessPerMonitorAware || SystemDpi != DefaultDpi;
+                IntPtr dpiAwareness = User32.GetThreadDpiAwarenessContext();
+                return User32.AreDpiAwarenessContextsEqual(dpiAwareness, Constants.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)
+                    || User32.AreDpiAwarenessContextsEqual(dpiAwareness, Constants.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE);
+            }
+        }
 
         #endregion
 
@@ -65,43 +71,65 @@ namespace KGySoft.WinForms.Controls
 
         #region Internal Methods
 
-        internal static PointF GetScale(IntPtr handle)
-        {
-            var dpi = GetDpiForHwnd(handle);
-            return new PointF(dpi.X / OneHundredPercentLogicalDpi, dpi.Y / OneHundredPercentLogicalDpi);
-        }
+        /// <summary>
+        /// Gets whether the display that the specified control is using has a different DPI than the initial DPI of the primary display.
+        /// </summary>
+        internal static bool HasNonDefaultScaling(this Control control)
+            // Avoiding calling IsThreadPerMonitorAware twice, it's called in the GetDpiForHwnd method anyway
+            => isProcessPerMonitorAware && GetDpi(control) != systemInitialDpi;
 
         internal static PointF GetScale(this Control control)
         {
-            if (control == null)
-                throw new ArgumentNullException(nameof(control));
-            return GetScale(control.Handle);
+            if (control == null!)
+                ThrowNull(nameof(control));
+            
+            if (!isProcessPerMonitorAware)
+                return systemScale;
+
+            Point dpi = GetDpi(control);
+            return new PointF(dpi.X / defaultDpi, dpi.Y / defaultDpi);
         }
 
+        internal static PointF GetScale(IntPtr handle)
+        {
+            if (!isProcessPerMonitorAware)
+                return systemScale;
+            Point dpi = GetDpiForHwnd(handle);
+            return new PointF(dpi.X / defaultDpi, dpi.Y / defaultDpi);
+        }
+
+        /// <summary>
+        /// NOTE: May not work as expected if the <paramref name="graphics"/> is not created for a window (e.g. belongs to a bitmap or a buffered graphics).
+        /// Try to use <see cref="GetScale(Control)"/> instead.
+        /// </summary>
         internal static PointF GetScale(this Graphics graphics)
         {
-            if (graphics == null)
-                throw new ArgumentNullException(nameof(graphics));
-            return new PointF(graphics.DpiX / 96f, graphics.DpiY / 96f);
-        }
+            if (graphics == null!)
+                ThrowNull(nameof(graphics));
 
-        // TODO: delete, use GetScale instead. But check per-monitor DPI awareness behavior first.
-        internal static int PerMonitorScale(this Control control, int value)
-        {
-            if (control == null)
-                throw new ArgumentNullException(nameof(control));
+            if (!isProcessPerMonitorAware)
+                return new PointF(graphics.DpiX / defaultDpi, graphics.DpiY / defaultDpi);
 
-#if NET47_OR_GREATER || NETCOREAPP3_0_OR_GREATER
-            if (IsProcessPerMonitorAware)
-                return control.LogicalToDeviceUnits(value);
-#endif
-            // TODO: is this OK, or should we use User32.GetDpiForWindow like the LogicalToDeviceUnits method?
-            return control.IsHandleCreated
-                ? (int)(value * control.GetScale().X)
-                : (int)(value * SystemScale.X);
+            IntPtr hdc = graphics.GetHdc();
+            try
+            {
+                IntPtr hwnd = User32.WindowFromDC(hdc);
+                if (hwnd != IntPtr.Zero)
+                {
+                    Point dpi = GetDpiForHwnd(hwnd);
+                    return new PointF(dpi.X / defaultDpi, dpi.Y / defaultDpi);
+                }
+            }
+            finally
+            {
+                graphics.ReleaseHdc(hdc);
+            }
+
+            return new PointF(graphics.DpiX / defaultDpi, graphics.DpiY / defaultDpi);
         }
 
         internal static Size ScaleSize(this Control control, Size size) => size.Scale(control.GetScale());
+        internal static int ScaleSize(this Control control, int size) => size.Scale(control.GetScale().X);
 
         internal static SizeF ScaleF(this Size size, PointF scale) =>
             new SizeF(scale.X * size.Width, scale.Y * size.Height);
@@ -116,11 +144,49 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Methods
 
-        private static PointF GetDpiForHwnd(IntPtr handle)
+        private static Point GetDpiForHdc(IntPtr hdc) => new(Gdi32.GetDeviceCaps(hdc, DeviceCaps.LOGPIXELSX), Gdi32.GetDeviceCaps(hdc, DeviceCaps.LOGPIXELSY));
+
+        private static Point GetDpi(Control control)
         {
-            using Graphics screen = Graphics.FromHwnd(handle);
-            return new PointF(screen.DpiX, screen.DpiY);
+            if (!isProcessPerMonitorAware || !control.IsHandleCreated)
+                return systemInitialDpi;
+
+            // NOTE: we could use control.DeviceDpi here on .NET Framework 4.7 or later, but it fails in some cases:
+            // .NET Framework: if app.config is not set to per-monitor DPI aware (even though it's set in the manifest) OR Windows 10 compatibility mode is not set in the manifest
+            // .NET [Core]: it ignores every per-monitor DPI awareness setting, except PerMonitorV2
+            return GetDpiForHwnd(control.Handle);
         }
+
+        private static Point GetDpiForHwnd(IntPtr hwnd)
+        {
+            Debug.Assert(isProcessPerMonitorAware);
+
+            if (IsThreadPerMonitorAware)
+            {
+                // Windows 10 1607 or later
+                if (WindowsUtils.IsWindows10_1607OrLater)
+                {
+                    // NOTE: this always returns a single value, so we assume the same DPI in both dimensions.
+                    var dpi = (int)User32.GetDpiForWindow(hwnd);
+                    if (dpi != 0)
+                        return new Point(dpi, dpi);
+                }
+                else
+                {
+                    // Windows 8.1 or later
+                    IntPtr hMonitor = User32.MonitorFromWindow(hwnd, Constants.MONITOR_DEFAULTTONEAREST);
+                    if (ShCore.TryGetDpiForMonitor(hMonitor, MONITOR_DPI_TYPE.MDT_EFFECTIVE_DPI, out uint dpiX, out uint dpiY))
+                        return new Point((int)dpiX, (int)dpiY);
+                }
+            }
+
+            // Not per-monitor aware, or fallback when the WinAPI calls above fail.
+            return systemInitialDpi;
+        }
+
+        [DoesNotReturn]
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        private static void ThrowNull(string parameterName) => throw new ArgumentNullException(parameterName, PublicResources.ArgumentNull);
 
         #endregion
 
