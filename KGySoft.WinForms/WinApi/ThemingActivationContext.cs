@@ -1,11 +1,23 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ThemingActivationContext.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
-using System.Diagnostics;
-using System.IO;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
-using KGySoft.WinForms.Components;
 
 #endregion
 
@@ -13,10 +25,10 @@ namespace KGySoft.WinForms.WinApi
 {
     /// <summary>
     /// This class makes sure that the correct version of Comctl32.dll will be loaded.
-    /// Needed for <see cref="TaskDialog"/> used on 64-bit machines, where P/Invoke from comctl32
+    /// Needed for <see cref="Components.TaskDialog"/> used on 64-bit machines, where P/Invoke from comctl32
     /// may cause an <see cref="EntryPointNotFoundException"/> without using this context.
     /// </summary>
-    internal sealed class ThemingActivationContext: IDisposable
+    internal sealed class ThemingActivationContext : IDisposable
     {
         #region Fields
 
@@ -29,10 +41,10 @@ namespace KGySoft.WinForms.WinApi
             new IntPtr(2);
 #endif
 
-        private static ACTCTX enableThemingActivationContext;
-        private static Kernel32.ActivationContextSafeHandle activationContext;
-        private static bool? themingContextCreated;
 
+        private static ACTCTX enableThemingActivationContext;
+        private static Kernel32.ActivationContextSafeHandle activationContext = null!;
+        private static bool? themingContextCreated;
 
         #endregion
 
@@ -77,31 +89,11 @@ namespace KGySoft.WinForms.WinApi
 
         #endregion
 
-        #region Explicit Disposing
-
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        private void Dispose(bool disposing)
-        {
-            if (cookie != IntPtr.Zero)
-            {
-                if (Kernel32.DeactivateActCtx(0, cookie))
-                {
-                    // deactivation succeeded...
-                    cookie = IntPtr.Zero;
-                }
-            }
-        }
-
-        #endregion
-
         #endregion
 
         #region Methods
+
+        #region Static Methods
 
         private static bool TryCreateThemingActivationContext()
         {
@@ -120,6 +112,38 @@ namespace KGySoft.WinForms.WinApi
                 return !activationContext.IsInvalid;
             }
         }
+
+        #endregion
+
+        #region Instance Methods
+
+        #region Public Methods
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void Dispose(bool _)
+        {
+            if (cookie != IntPtr.Zero)
+            {
+                if (Kernel32.DeactivateActCtx(0, cookie))
+                {
+                    // deactivation succeeded...
+                    cookie = IntPtr.Zero;
+                }
+            }
+        }
+
+        #endregion
+
+        #endregion
 
         #endregion
     }
