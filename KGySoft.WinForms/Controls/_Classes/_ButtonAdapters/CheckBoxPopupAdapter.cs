@@ -185,7 +185,7 @@ namespace KGySoft.WinForms.Controls
         {
             LayoutOptions options = CommonLayout(state);
             options.ShadowedText = false;
-            int checkSize = (int)(FlatCheckSize * GetDpiScaleRatio());
+            int checkSize = FlatCheckSize.Scale(options.Scale.X);
 
             if (show3D)
             {

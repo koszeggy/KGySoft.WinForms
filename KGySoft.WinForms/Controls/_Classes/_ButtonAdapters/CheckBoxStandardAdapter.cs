@@ -115,17 +115,9 @@ namespace KGySoft.WinForms.Controls
             LayoutOptions options = CommonLayout(state);
             options.CheckPaddingSize = 1;
             options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
-            if (VisualStyleHelper.RenderWithVisualStyles)
-            {
-                //using (Graphics graphics = WindowsFormsUtils.CreateMeasurementGraphics())
-                //{
-                options.CheckSize = CheckBoxRenderer.GetGlyphSize(graphics, (CheckBoxState)state.SystemStateId).Width;
-                //}
-            }
-            else
-            {
-                options.CheckSize = ButtonInstance.ScaleSize(options.CheckSize);
-            }
+            options.CheckSize = VisualStyleHelper.RenderWithVisualStyles
+                ? VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, graphics, state.SystemPartId, state.SystemStateId, false).Width
+                : options.CheckSize.Scale(options.Scale.X);
 
             return options;
         }
@@ -138,7 +130,7 @@ namespace KGySoft.WinForms.Controls
         {
             ControlAppearanceState state = e.State;
             if (VisualStyleHelper.RenderWithVisualStyles)
-                CheckBoxRenderer.DrawCheckBox(e.Graphics, new Point(layout.CheckBounds.Left, layout.CheckBounds.Top), (CheckBoxState)state.SystemStateId);
+                VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
             else if (state.CheckState == CheckState.Indeterminate)
                 ControlPaint.DrawMixedCheckBox(e.Graphics, layout.CheckBounds, GetButtonState(state));
             else

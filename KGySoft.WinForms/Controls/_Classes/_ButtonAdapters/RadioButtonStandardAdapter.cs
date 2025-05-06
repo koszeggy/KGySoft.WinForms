@@ -17,7 +17,6 @@
 
 using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 
 #endregion
 
@@ -82,15 +81,9 @@ namespace KGySoft.WinForms.Controls
             LayoutOptions options = CommonLayout(state);
             options.HintTextUp = false;
             options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
-            if (VisualStyleHelper.RenderWithVisualStyles)
-            {
-                //using (Graphics graphics = WindowsFormsUtils.CreateMeasurementGraphics())
-                //{
-                options.CheckSize = RadioButtonRenderer.GetGlyphSize(graphics, (RadioButtonState)state.SystemStateId).Width;
-                //}
-            }
-            else
-                options.CheckSize = (int)(options.CheckSize * GetDpiScaleRatio());
+            options.CheckSize = VisualStyleHelper.RenderWithVisualStyles
+                ? VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, graphics, state.SystemPartId, state.SystemStateId, false).Width
+                : options.CheckSize.Scale(options.Scale.X);
 
             return options;
         }
@@ -105,7 +98,7 @@ namespace KGySoft.WinForms.Controls
             ControlAppearanceState state = e.State;
             Rectangle checkBounds = layout.CheckBounds;
             if (VisualStyleHelper.RenderWithVisualStyles)
-                RadioButtonRenderer.DrawRadioButton(g, new Point(checkBounds.Left, checkBounds.Top), (RadioButtonState)state.SystemStateId);
+                VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, g, state.SystemPartId, state.SystemStateId, checkBounds);
             else
             {
                 checkBounds.X--;

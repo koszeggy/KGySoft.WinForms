@@ -124,7 +124,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 isElevated = value;
-                if (!isElevated && currentImage.EqualsByContent(SecurityShieldImage))
+                if (!isElevated && ReferenceEquals(currentImage, cachedSecurityShieldImage))
                     base.Image = null;
 
                 isImageUpToDate = false;
@@ -332,10 +332,14 @@ namespace KGySoft.WinForms.Controls
                 Size currentSize = this.ScaleSize(referenceIconSize);
                 if (currentSize != cachedSecurityShieldImageSize || cachedSecurityShieldImage == null)
                 {
+                    if (ReferenceEquals(cachedSecurityShieldImage, currentImage))
+                        isImageUpToDate = false;
                     cachedSecurityShieldImage?.Dispose();
                     using var icon = Icons.SystemShield;
                     cachedSecurityShieldImage = icon.ExtractNearestBitmap(currentSize, PixelFormat.Format32bppArgb);
                     cachedSecurityShieldImageSize = currentSize;
+                    if (!isImageUpToDate)
+                        CheckImage();
                 }
 
                 return cachedSecurityShieldImage;
@@ -767,7 +771,7 @@ namespace KGySoft.WinForms.Controls
             {
                 if (currentImage == base.Image
                     || currentImage == null && base.Image == null
-                    || isElevated && (base.FlatStyle == FlatStyle.System ^ base.Image != null) && currentImage.EqualsByContent(SecurityShieldImage))
+                    || isElevated && (base.FlatStyle == FlatStyle.System ^ base.Image != null) && ReferenceEquals(currentImage, SecurityShieldImage))
                     return false;
             }
 
@@ -872,7 +876,7 @@ namespace KGySoft.WinForms.Controls
         {
             if (currentImage == null)
                 return false;
-            return !isElevated && !currentImage.EqualsByContent(SecurityShieldImage);
+            return !isElevated && ReferenceEquals(currentImage, cachedSecurityShieldImage);
         }
 
         #endregion

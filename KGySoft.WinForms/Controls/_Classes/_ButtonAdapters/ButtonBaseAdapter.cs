@@ -255,6 +255,7 @@ namespace KGySoft.WinForms.Controls
             internal StringAlignment GdipAlignment; // horizontal alignment.
             internal StringAlignment GdipLineAlignment; // vertical alignment.
             internal Padding Padding;
+            internal PointF Scale;
 
             #endregion
 
@@ -1049,6 +1050,7 @@ namespace KGySoft.WinForms.Controls
             LayoutOptions layout = new LayoutOptions();
             layout.Client = LayoutUtils.DeflateRect(control.ClientRectangle, control.Padding);
             layout.Padding = control.Padding;
+            layout.Scale = control.GetScale();
             layout.GrowBorderBy1PxWhenDefault = true;
             layout.IsDefault = state.IsDefault;
             layout.BorderSize = 2;

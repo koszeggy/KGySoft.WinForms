@@ -39,6 +39,16 @@ namespace KGySoft.WinForms.WinApi
         internal static extern IntPtr GetWindowDC(IntPtr hWnd);
 
         /// <summary>
+        /// The GetDC function retrieves a handle to a device context (DC) for the client area of a specified window or for the entire screen.
+        /// You can use the returned handle in subsequent GDI functions to draw in the DC. The device context is an opaque data structure, whose values are used internally by GDI.
+        /// </summary>
+        /// <param name="hWnd">A handle to the window whose DC is to be retrieved. If this value is NULL, GetDC retrieves the DC for the entire screen.</param>
+        /// <returns>If the function succeeds, the return value is a handle to the DC for the specified window's client area.
+        /// If the function fails, the return value is NULL.</returns>
+        [DllImport("user32.dll")]
+        internal static extern IntPtr GetDC(IntPtr hWnd);
+
+        /// <summary>
         /// The ReleaseDC function releases a device context (DC), freeing it for use by other applications. The effect of the ReleaseDC function depends on the type of DC. It frees only common and window DCs. It has no effect on class or private DCs.
         /// </summary>
         /// <param name="hWnd">A handle to the window whose DC is to be released.</param>

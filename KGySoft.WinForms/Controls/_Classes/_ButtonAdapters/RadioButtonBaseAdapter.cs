@@ -89,7 +89,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
-        protected void DrawCheckBackgroundFlat(PaintStateEventArgs e, Rectangle bounds, Color borderColor, Color checkBackground, bool disabledColors)
+        protected void DrawCheckBackgroundFlat(PaintStateEventArgs e, Rectangle bounds, PointF scale, Color borderColor, Color checkBackground, bool disabledColors)
         {
             ControlAppearanceState state = e.State;
             Color backColor = checkBackground;
@@ -100,12 +100,10 @@ namespace KGySoft.WinForms.Controls
                 backColor = state.BackColor;
             }
 
-            float scale = GetDpiScaleRatio();
-
             using Pen pen = new Pen(foreColor);
             using Brush brush = new SolidBrush(backColor);
 
-            if (scale > 1.1f)
+            if (scale.X > 1.1f)
             {
                 // In high DPI mode when we draw an ellipse as three rectangles, the quality of ellipse is poor. Draw
                 // it directly as an ellipse.
@@ -128,12 +126,11 @@ namespace KGySoft.WinForms.Controls
             if (state.CheckState == CheckState.Unchecked)
                 return;
 
-            float scale = GetDpiScaleRatio();
             using Brush brush = new SolidBrush(checkColor);
             int padding = 5;
 
             // Original code
-            if (scale < 1.1f)
+            if (layout.Options.Scale.X < 1.1f)
             {
                 Rectangle vCross = new Rectangle(layout.CheckBounds.X + padding, (layout.CheckBounds.Y + padding) - 1, 2, 4);
                 e.Graphics.FillRectangle(brush, vCross);

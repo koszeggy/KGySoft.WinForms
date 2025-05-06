@@ -97,7 +97,7 @@ namespace KGySoft.WinForms.Controls
         protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state)
         {
             LayoutOptions options = CommonLayout(state);
-            options.CheckSize = (int)(flatCheckSize * GetDpiScaleRatio());
+            options.CheckSize = flatCheckSize.Scale(options.Scale.X);
             options.ShadowedText = false;
             return options;
         }
@@ -119,7 +119,7 @@ namespace KGySoft.WinForms.Controls
 
         private void DrawCheckFlat(PaintStateEventArgs e, LayoutData layout, Color checkColor, Color checkBackground, Color checkBorder)
         {
-            DrawCheckBackgroundFlat(e, layout.CheckBounds, checkBorder, checkBackground, true);
+            DrawCheckBackgroundFlat(e, layout.CheckBounds, layout.Options.Scale, checkBorder, checkBackground, true);
             DrawCheckOnly(e, layout, checkColor);
         }
 

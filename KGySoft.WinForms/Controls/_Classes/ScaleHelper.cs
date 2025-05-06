@@ -41,7 +41,7 @@ namespace KGySoft.WinForms.Controls
         #region Fields
 
         private static readonly bool isProcessPerMonitorAware = WindowsUtils.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
-        private static readonly Point systemInitialDpi = GetDpiForHdc(IntPtr.Zero);
+        private static readonly Point systemInitialDpi = GetDpiForHdc(User32.GetDC(IntPtr.Zero));
         private static readonly PointF systemScale = new PointF(systemInitialDpi.X / defaultDpi, systemInitialDpi.Y / defaultDpi);
 
         #endregion
@@ -129,16 +129,11 @@ namespace KGySoft.WinForms.Controls
         }
 
         internal static Size ScaleSize(this Control control, Size size) => size.Scale(control.GetScale());
-        internal static int ScaleSize(this Control control, int size) => size.Scale(control.GetScale().X);
-
-        internal static SizeF ScaleF(this Size size, PointF scale) =>
-            new SizeF(scale.X * size.Width, scale.Y * size.Height);
-
-        internal static Size Scale(this Size size, PointF scale) =>
-            Size.Round(ScaleF(size, scale));
-
-        internal static int Scale(this int size, float scale) =>
-            (int)Math.Round(size * scale);
+        internal static int ScaleWidth(this Control control, int width) => width.Scale(control.GetScale().X);
+        internal static int ScaleHeight(this Control control, int height) => height.Scale(control.GetScale().Y);
+        internal static SizeF ScaleF(this Size size, PointF scale) => new SizeF(scale.X * size.Width, scale.Y * size.Height);
+        internal static Size Scale(this Size size, PointF scale) => Size.Round(ScaleF(size, scale));
+        internal static int Scale(this int size, float scale) => (int)Math.Round(size * scale);
 
         #endregion
 
@@ -171,9 +166,9 @@ namespace KGySoft.WinForms.Controls
                     if (dpi != 0)
                         return new Point(dpi, dpi);
                 }
+                // Windows 8.1 or later
                 else
                 {
-                    // Windows 8.1 or later
                     IntPtr hMonitor = User32.MonitorFromWindow(hwnd, Constants.MONITOR_DEFAULTTONEAREST);
                     if (ShCore.TryGetDpiForMonitor(hMonitor, MONITOR_DPI_TYPE.MDT_EFFECTIVE_DPI, out uint dpiX, out uint dpiY))
                         return new Point((int)dpiX, (int)dpiY);

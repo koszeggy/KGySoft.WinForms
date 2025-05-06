@@ -79,8 +79,6 @@ namespace KGySoft.WinForms.Controls
             return options;
         }
 
-        internal float GetDpiScaleRatio() => ButtonInstance.GetScale().X;
-
         internal override Size GetPreferredSizeCore(Graphics g, Size proposedSize, ControlAppearanceState state)
         {
             if (IsButton)

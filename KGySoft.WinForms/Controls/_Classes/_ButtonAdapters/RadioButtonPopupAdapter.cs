@@ -49,7 +49,7 @@ namespace KGySoft.WinForms.Controls
                 LayoutData layout = Layout(e.Graphics, state).Layout(e.Graphics);
                 PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
                 PaintImage(e, layout);
-                DrawCheckBackground3DLite(e, layout.CheckBounds, colors.Highlight, colors, true);
+                DrawCheckBackground3DLite(e, layout.CheckBounds, layout.Options.Scale, colors.Highlight, colors, true);
                 DrawCheckOnly(e, layout, colors.ButtonShadow);
                 AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
@@ -67,7 +67,7 @@ namespace KGySoft.WinForms.Controls
                 LayoutData layout = Layout(e.Graphics, state).Layout(e.Graphics);
                 PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
                 PaintImage(e, layout);
-                DrawCheckBackground3DLite(e, layout.CheckBounds, colors.HighContrast ? colors.ButtonFace : colors.Highlight, colors, true);
+                DrawCheckBackground3DLite(e, layout.CheckBounds, layout.Options.Scale, colors.HighContrast ? colors.ButtonFace : colors.Highlight, colors, true);
                 DrawCheckOnly(e, layout, colors.WindowText);
                 AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
@@ -85,7 +85,7 @@ namespace KGySoft.WinForms.Controls
                 LayoutData layout = Layout(e.Graphics, state).Layout(e.Graphics);
                 PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
                 PaintImage(e, layout);
-                DrawCheckBackgroundFlat(e, layout.CheckBounds, colors.ButtonShadow, colors.HighContrast ? colors.ButtonFace : colors.Highlight, true);
+                DrawCheckBackgroundFlat(e, layout.CheckBounds, layout.Options.Scale, colors.ButtonShadow, colors.HighContrast ? colors.ButtonFace : colors.Highlight, true);
                 DrawCheckOnly(e, layout, colors.WindowText);
                 AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
@@ -110,10 +110,10 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Methods
 
-        private void DrawCheckBackground3DLite(PaintStateEventArgs e, Rectangle bounds, Color checkBackground, ColorData colors, bool disabledColors)
+        private void DrawCheckBackground3DLite(PaintStateEventArgs e, Rectangle bounds, PointF scale, Color checkBackground, ColorData colors, bool disabledColors)
         {
             Graphics graphics = e.Graphics;
-            GraphicsState? prevState = ButtonInstance.GetScale().X > 1.1f ? graphics.Save() : null;
+            GraphicsState? prevState = scale.X > 1.1f ? graphics.Save() : null;
             if (prevState != null)
                 graphics.SmoothingMode = SmoothingMode.AntiAlias;
 
@@ -139,7 +139,6 @@ namespace KGySoft.WinForms.Controls
             if (prevState != null)
                 graphics.Restore(prevState);
         }
-
 
         #endregion
 
