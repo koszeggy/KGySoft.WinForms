@@ -44,6 +44,8 @@ namespace KGySoft.WinForms.Controls
     /// <item><description>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</description></item>
     /// <item><description>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</description></item>
     /// <item><description>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</description></item>
+    /// <item><description>Slightly different appearance in some cases (e. g. focus rectangle size and width, image shifts along with text in classic or popup appearance,
+    /// fixed highlight fore color in high contrast mode with visual styles enabled, etc.).</description></item>
     /// </list>
     /// </remarks>
     [ToolboxBitmap(typeof(Button))]
@@ -52,7 +54,8 @@ namespace KGySoft.WinForms.Controls
 - IsElevated property (shield icon)
 - Different rendering qualities
 - Adjustable colors in disabled state
-- Fading animations")]
+- Fading animations
+- Fixed appearance in several cases")]
     public class AdvancedButton : Button, ISupportsDisabledColor, ISupportButtonAdapter, ISupportsFadingInternal
     {
         #region Fields
@@ -698,7 +701,6 @@ namespace KGySoft.WinForms.Controls
             {
                 BackColor = Enabled ? BackColor : DisabledBackColor,
                 ForeColor = foreColor,
-                //ForeColor = Enabled ? ForeColor : DisabledForeColor,
                 Enabled = Enabled,
                 Hovered = isHovered,
                 Pressed = isPressed,

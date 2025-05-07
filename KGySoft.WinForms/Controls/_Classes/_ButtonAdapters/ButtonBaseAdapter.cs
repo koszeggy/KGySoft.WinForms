@@ -15,6 +15,8 @@
 
 #region Usings
 
+using KGySoft.WinForms.WinApi;
+
 #region Used Namespaces
 
 using System;
@@ -163,11 +165,7 @@ namespace KGySoft.WinForms.Controls
             private static int Adjust255(float percentage, int value)
             {
                 int v = (int)(percentage * value);
-                if (v > 255)
-                {
-                    return 255;
-                }
-                return v;
+                return v > 255 ? 255 : v;
             }
 
             #endregion
@@ -226,11 +224,12 @@ namespace KGySoft.WinForms.Controls
             #region Instance Fields
 
             internal Rectangle Client;
-            internal bool GrowBorderBy1PxWhenDefault;
-            internal bool IsDefault;
             internal int BorderSize;
             internal int PaddingSize;
+            internal bool GrowBorderBy1PxWhenDefault;
+            internal bool IsDefault;
             internal bool MaxFocus;
+            internal bool ForceDoubleFocusWidth;
             internal bool FocusOddEvenFixup;
             internal Font Font = null!;
             internal string? Text;
@@ -324,14 +323,10 @@ namespace KGySoft.WinForms.Controls
             #region Static Methods
 
             private static TextImageRelation ImageAlignToRelation(ContentAlignment alignment)
-            {
-                return imageAlignToRelation[LayoutUtils.ContentAlignmentToIndex(alignment)];
-            }
+                => imageAlignToRelation[LayoutUtils.ContentAlignmentToIndex(alignment)];
 
             private static TextImageRelation TextAlignToRelation(ContentAlignment alignment)
-            {
-                return LayoutUtils.GetOppositeTextImageRelation(ImageAlignToRelation(alignment));
-            }
+                => LayoutUtils.GetOppositeTextImageRelation(ImageAlignToRelation(alignment));
 
             #endregion
 
@@ -345,9 +340,7 @@ namespace KGySoft.WinForms.Controls
                 //
                 int linearBorderAndPadding = BorderSize * 2 + PaddingSize * 2;
                 if (GrowBorderBy1PxWhenDefault)
-                {
                     linearBorderAndPadding += 2;
-                }
                 Size bordersAndPadding = new Size(linearBorderAndPadding, linearBorderAndPadding);
                 proposedSize -= bordersAndPadding;
 
@@ -410,7 +403,7 @@ namespace KGySoft.WinForms.Controls
                 LayoutTextAndImage(g, layout);
 
                 // focus
-                //
+                layout.FocusWidth = ForceDoubleFocusWidth || Scale.X >= 1.5f ? 2 : 1;
                 if (MaxFocus)
                 {
                     layout.Focus = layout.Field;
@@ -423,14 +416,9 @@ namespace KGySoft.WinForms.Controls
                 {
                     Rectangle textAdjusted = new Rectangle(layout.TextBounds.X - 1, layout.TextBounds.Y - 1,
                             layout.TextBounds.Width + 2, layout.TextBounds.Height + 3);
-                    if (ImageSize != Size.Empty)
-                    {
-                        layout.Focus = Rectangle.Union(textAdjusted, layout.ImageBounds);
-                    }
-                    else
-                    {
-                        layout.Focus = textAdjusted;
-                    }
+                    layout.Focus = ImageSize != Size.Empty
+                        ? Rectangle.Union(textAdjusted, layout.ImageBounds)
+                        : textAdjusted;
                 }
                 if (FocusOddEvenFixup)
                 {
@@ -462,13 +450,9 @@ namespace KGySoft.WinForms.Controls
                     for (int i = 0; i < 3; ++i)
                     {
                         if (mapping[i][0] == align)
-                        {
                             return mapping[i][1];
-                        }
-                        else if (mapping[i][1] == align)
-                        {
+                        if (mapping[i][1] == align)
                             return mapping[i][0];
-                        }
                     }
                 }
                 return align;
@@ -583,13 +567,9 @@ namespace KGySoft.WinForms.Controls
                 //make sure that textBound is contained in layout.field
                 layout.TextBounds = Rectangle.Intersect(layout.TextBounds, layout.Field);
                 if (HintTextUp)
-                {
                     layout.TextBounds.Y--;
-                }
                 if (TextOffset)
-                {
                     layout.TextBounds.Offset(1, 1);
-                }
 
                 // For .NET Framework 1.1 compatibility.
                 if (layout.Options.DotNetOneButtonCompat)
@@ -775,26 +755,16 @@ namespace KGySoft.WinForms.Controls
                 if (checkSizeFull > 0)
                 {
                     if (align.AnyRight())
-                    {
                         layout.CheckBounds.X = (field.X + field.Width) - layout.CheckBounds.Width;
-                    }
                     else if (align.AnyCenter())
-                    {
                         layout.CheckBounds.X = field.X + (field.Width - layout.CheckBounds.Width) / 2;
-                    }
 
                     if (align.AnyBottom())
-                    {
                         layout.CheckBounds.Y = (field.Y + field.Height) - layout.CheckBounds.Height;
-                    }
                     else if (align.AnyTop())
-                    {
                         layout.CheckBounds.Y = field.Y + 2; // + 2: this needs to be aligned to the text (bug 87483)
-                    }
                     else
-                    {
                         layout.CheckBounds.Y = field.Y + (field.Height - layout.CheckBounds.Height) / 2;
-                    }
 
                     switch (align)
                     {
@@ -876,6 +846,7 @@ namespace KGySoft.WinForms.Controls
             internal Rectangle Focus;
             internal Rectangle ImageBounds;
             internal Point ImageStart;
+            internal int FocusWidth;
             internal LayoutOptions Options;
 
             #endregion
@@ -907,10 +878,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Constructors
 
-        internal ButtonBaseAdapter(ButtonBase control)
-        {
-            this.control = control;
-        }
+        internal ButtonBaseAdapter(ButtonBase control) => this.control = control;
 
         #endregion
 
@@ -976,10 +944,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        protected static void DrawFlatBorder(Graphics g, Rectangle r, Color c)
-        {
-            ControlPaint.DrawBorder(g, r, c, ButtonBorderStyle.Solid);
-        }
+        protected static void DrawFlatBorder(Graphics g, Rectangle r, Color c) => ControlPaint.DrawBorder(g, r, c, ButtonBorderStyle.Solid);
 
         protected static void DrawDefaultBorder(Graphics g, Rectangle r, Color c, bool isDefault)
         {
@@ -987,20 +952,10 @@ namespace KGySoft.WinForms.Controls
             {
                 r.Inflate(1, 1);
 
-                Pen pen;
-                if (c.IsSystemColor)
-                {
-                    pen = SystemPens.FromSystemColor(c);
-                }
-                else
-                {
-                    pen = new Pen(c);
-                }
+                Pen pen = c.IsSystemColor ? SystemPens.FromSystemColor(c) : new Pen(c);
                 g.DrawRectangle(pen, r.X, r.Y, r.Width - 1, r.Height - 1);
                 if (!c.IsSystemColor)
-                {
                     pen.Dispose();
-                }
             }
         }
 
@@ -1019,23 +974,15 @@ namespace KGySoft.WinForms.Controls
             }
 
             if (e.State.Pressed)
-            {
                 PaintDown(e);
-            }
             else if (e.State.Hovered)
-            {
                 PaintOver(e);
-            }
             else
-            {
                 PaintUp(e);
-            }
         }
 
         internal virtual Size GetPreferredSizeCore(Graphics g, Size proposedSize, ControlAppearanceState state)
-        {
-            return Layout(g, state).GetPreferredSizeCore(g, proposedSize);
-        }
+            => Layout(g, state).GetPreferredSizeCore(g, proposedSize);
 
         internal abstract void PaintUp(PaintStateEventArgs e);
 
@@ -1057,7 +1004,7 @@ namespace KGySoft.WinForms.Controls
             layout.FocusOddEvenFixup = false;
             layout.Font = control.Font;
             layout.Text = state.Text;
-            layout.ImageSize = (control.Image == null) ? Size.Empty : control.Image.Size;
+            layout.ImageSize = control.Image?.Size ?? Size.Empty;
             layout.CheckSize = 0;
             layout.CheckPaddingSize = 0;
             layout.CheckAlign = ContentAlignment.TopLeft;
@@ -1077,9 +1024,7 @@ namespace KGySoft.WinForms.Controls
                     layout.StringFormat = format;
                 }
                 else
-                {
                     layout.GdiTextFormatFlags = control.GetFormatFlags();
-                }
             }
 
             return layout;
@@ -1110,12 +1055,9 @@ namespace KGySoft.WinForms.Controls
         {
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
-            Rectangle maxFocus = layout.Focus;
             DrawText(g, layout, colors, state);
             if (drawFocus)
-            {
-                DrawFocus(g, maxFocus, state);
-            }
+                DrawFocus(g, layout, state);
         }
 
         protected void PaintImage(PaintStateEventArgs e, LayoutData layout)
@@ -1134,11 +1076,16 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Draws the focus rectangle if the control has focus.
         /// </summary>
-        void DrawFocus(Graphics g, Rectangle r, ControlAppearanceState state)
+        private void DrawFocus(Graphics g, LayoutData layout, ControlAppearanceState state)
         {
-            if (control.Focused && ((ISupportButtonAdapter)control).ShowFocusCues)
+            if (!control.Focused || !((ISupportButtonAdapter)control).ShowFocusCues)
+                return;
+
+            Rectangle r = layout.Focus;
+            for (int i = 0; i < layout.FocusWidth; i++)
             {
                 ControlPaint.DrawFocusRectangle(g, r, state.ForeColor, state.BackColor);
+                r.Inflate(-1, -1);
             }
         }
 
@@ -1178,9 +1125,7 @@ namespace KGySoft.WinForms.Controls
             finally
             {
                 if (!layout.Options.DotNetOneButtonCompat)
-                {
                     graphics.Clip = oldClip;
-                }
             }
         }
 
@@ -1198,9 +1143,7 @@ namespace KGySoft.WinForms.Controls
                 using StringFormat stringFormat = control.GetFormatFlags().ToStringFormat();
                 // DrawString doesn't seem to draw where it says it does
                 if (control.TextAlign.AnyCenter())
-                {
                     r.X -= 1;
-                }
                 r.Width += 1;
 
                 if (disabledText3D && !state.Enabled)
@@ -1223,9 +1166,7 @@ namespace KGySoft.WinForms.Controls
                     g.DrawString(state.Text, control.Font, brush, r, stringFormat);
 
                     if (!state.ForeColor.IsSystemColor)
-                    {
                         brush.Dispose();
-                    }
                 }
             }
             else
@@ -1251,9 +1192,7 @@ namespace KGySoft.WinForms.Controls
                     }
                 }
                 else
-                {
                     TextRenderer.DrawText(g, state.Text, control.Font, r, state.ForeColor, formatFlags);
-                }
             }
         }
 

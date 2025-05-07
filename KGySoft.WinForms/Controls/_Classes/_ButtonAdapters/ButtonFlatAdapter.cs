@@ -111,6 +111,8 @@ namespace KGySoft.WinForms.Controls
 
         private static void DrawFlatFocus(Graphics g, Rectangle r, Color c)
         {
+            r.Width--;
+            r.Height--;
             using Pen focus = new Pen(c);
             g.DrawRectangle(focus, r);
         }
@@ -192,7 +194,7 @@ namespace KGySoft.WinForms.Controls
                 bool hasBorder = (ButtonInstance.FlatAppearance.BorderSize != 1) || !ButtonInstance.FlatAppearance.BorderColor.IsEmpty;
                 ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
                 LayoutData layout = PaintFlatLayout(state, !ButtonInstance.FlatAppearance.CheckedBackColor.IsEmpty || (state.CheckState == CheckState.Unchecked),
-                        false, ButtonInstance.FlatAppearance.BorderSize).Layout(g);
+                    false, ButtonInstance.FlatAppearance.BorderSize).Layout(g);
                 if (!ButtonInstance.FlatAppearance.BorderColor.IsEmpty)
                     colors.WindowFrame = ButtonInstance.FlatAppearance.BorderColor;
                 Rectangle clientRectangle = ButtonInstance.ClientRectangle;
