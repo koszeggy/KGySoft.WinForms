@@ -56,6 +56,40 @@ namespace KGySoft.WinForms.Controls
     [Description("Vista-like CommandLink button that works also in compatibility mode. In Vista and above you may set FlatStyle to System to render the button by the Windows.")]
     public class CommandLinkButton : Button, ISupportsDisabledColor, ISupportsFadingInternal
     {
+        #region Nested Classes
+
+        private sealed class CustomAppearanceState
+        {
+            #region Fields
+
+            internal string? DescriptionText;
+            internal Color DescriptionColor;
+            internal FadingOptions FadingOptions;
+
+            #endregion
+
+            #region Methods
+
+            public override bool Equals(object? obj)
+            {
+                if (obj is not CustomAppearanceState other)
+                    return false;
+
+                if ((FadingOptions & FadingOptions.TextChange) != FadingOptions.None && DescriptionText != other.DescriptionText)
+                    return false;
+                if ((FadingOptions & FadingOptions.ColorChange) != FadingOptions.None && DescriptionColor != other.DescriptionColor)
+                    return false;
+                return true;
+            }
+
+            // Never used in a dictionary
+            public override int GetHashCode() => 0;
+
+            #endregion
+        }
+
+        #endregion
+
         #region Fields
 
         #region Static Fields
@@ -122,8 +156,8 @@ namespace KGySoft.WinForms.Controls
         private Color disabledBackColor;
         private Color disabledForeColor;
 
-        private FlatStyle lastFlatStyle = FlatStyle.Standard;
-        private FlatStyle reportedFlatStyle = FlatStyle.Standard;
+        private FlatStyle lastFlatStyle = FlatStyle.Standard; // the explicitly set or the detected flat style changed in base
+        private FlatStyle reportedFlatStyle = FlatStyle.Standard; // the flat style that is reported by the control (can be different when base does not support System)
         private ContentAlignment lastImageAlign;
         private RenderingQuality textRenderingQuality;
 
@@ -173,6 +207,11 @@ namespace KGySoft.WinForms.Controls
         private static bool IsNativelySupported => WindowsUtils.IsVistaOrLater && WindowsUtils.IsComCtlV6Available;
 
         private static Font DefaultNonThemedTextFont => defaultNonThemedTextFont ??= new Font(SystemFonts.DialogFont, FontStyle.Bold);
+        private static bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && VisualStyleHelper.RenderWithVisualStyles;
+        private static Color ThemedForeColor => !IsNativeVisualStylesRenderingAvailable ? defaultForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL);
+        private static Color ThemedHoveredColor => !IsNativeVisualStylesRenderingAvailable ? defaultHoveredColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT);
+        private static Color ThemedPressedColor => !IsNativeVisualStylesRenderingAvailable ? defaultPressedColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED);
+        private static Color ThemedDisabledColor => !IsNativeVisualStylesRenderingAvailable ? defaultDisabledColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED);
 
         #endregion
 
@@ -201,8 +240,8 @@ namespace KGySoft.WinForms.Controls
 
                 fadingOptions = value;
 
-                // Including custom change in fading options when TextChange is set, so we can fade also on Description text change
-                if ((value & FadingOptions.TextChange) != FadingOptions.None)
+                // Including custom change in fading options when TextChange or ColorChange is set, so we can fade also on Description text/color changes
+                if ((value & (FadingOptions.TextChange | FadingOptions.ColorChange)) != FadingOptions.None)
                     fadingOptions |= ControlAppearanceState.CustomChange;
 
                 // storing invisible state so when control turns visible it will fade on when enabled
@@ -412,8 +451,8 @@ namespace KGySoft.WinForms.Controls
         public override Color ForeColor
         {
             get => !foreColor.IsEmpty ? foreColor
-                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
-                : ThemedForeColor;
+                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedForeColor
+                : base.ForeColor;
             set
             {
                 if (foreColor == value)
@@ -432,8 +471,8 @@ namespace KGySoft.WinForms.Controls
         public Color DescriptionColor
         {
             get => !descriptionColor.IsEmpty ? descriptionColor
-                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
-                : ThemedForeColor;
+                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedForeColor
+                : base.ForeColor;
             set
             {
                 if (descriptionColor == value)
@@ -451,8 +490,8 @@ namespace KGySoft.WinForms.Controls
         public Color HighlightTextColor
         {
             get => !highlightTextColor.IsEmpty ? highlightTextColor
-                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
-                : ThemedHoveredColor;
+                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedHoveredColor
+                : base.ForeColor;
             set
             {
                 if (highlightTextColor == value)
@@ -471,8 +510,8 @@ namespace KGySoft.WinForms.Controls
         public Color HighlightDescriptionColor
         {
             get => !highlightTextColor.IsEmpty ? highlightTextColor
-                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
-                : ThemedHoveredColor;
+                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedHoveredColor
+                : base.ForeColor;
             set
             {
                 if (highlightDescriptionColor == value)
@@ -491,8 +530,8 @@ namespace KGySoft.WinForms.Controls
         public Color PressedTextColor
         {
             get => !pressedTextColor.IsEmpty ? pressedTextColor
-                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
-                : ThemedPressedColor;
+                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedPressedColor
+                : base.ForeColor;
             set
             {
                 if (pressedTextColor == value)
@@ -511,8 +550,8 @@ namespace KGySoft.WinForms.Controls
         public Color PressedDescriptionColor
         {
             get => !pressedTextColor.IsEmpty ? pressedTextColor
-                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
-                : ThemedPressedColor;
+                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedPressedColor
+                : base.ForeColor;
             set
             {
                 if (pressedDescriptionColor == value)
@@ -531,8 +570,8 @@ namespace KGySoft.WinForms.Controls
         public Color DisabledForeColor
         {
             get => !disabledForeColor.IsEmpty ? disabledForeColor
-                : !VisualStyleHelper.RenderWithVisualStyles ? SystemColors.GrayText
-                : ThemedDisabledColor;
+                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedDisabledColor
+                : SystemColors.GrayText;
             set
             {
                 if (disabledForeColor == value)
@@ -697,8 +736,6 @@ namespace KGySoft.WinForms.Controls
         private bool IsNativeRendering => base.FlatStyle == FlatStyle.System && IsNativelySupported;
 
         private bool IsCustomRendering => base.FlatStyle != FlatStyle.System;
-
-        private bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && VisualStyleHelper.RenderWithVisualStyles;
 
         private Font DefaultTextFont
         {
@@ -900,50 +937,6 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private Color ThemedForeColor
-        {
-            get
-            {
-                if (!IsNativeVisualStylesRenderingAvailable)
-                    return defaultForeColor;
-
-                // ISSUE: When changing from high contrast to normal theme, the VisualStyleRenderer.GetColor(ColorProperty.TextColor) keeps returning
-                // the high contrast SystemColors.ControlText color for a while. Skipping the caching until returning from OnSystemColorsChanged or
-                // invalidating in the first Paint does not help. This is still not optimal, because the appearance can be invalid until the user hovers the button.
-                return GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL);
-            }
-        }
-
-        private Color ThemedHoveredColor
-        {
-            get
-            {
-                if (!IsNativeVisualStylesRenderingAvailable)
-                    return defaultHoveredColor;
-                return GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT);
-            }
-        }
-
-        private Color ThemedPressedColor
-        {
-            get
-            {
-                if (!IsNativeVisualStylesRenderingAvailable)
-                    return defaultPressedColor;
-                return GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED);
-            }
-        }
-
-        private Color ThemedDisabledColor
-        {
-            get
-            {
-                if (!IsNativeVisualStylesRenderingAvailable)
-                    return defaultDisabledColor;
-                return GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED);
-            }
-        }
-
         /// <summary>
         /// The size of every non-text content, including image, borders and padding.
         /// </summary>
@@ -965,7 +958,7 @@ namespace KGySoft.WinForms.Controls
         private Image DefaultGlyphNormal => cachedDefaultGlyphNormal ??= GetScaledDefaultGlyph(Resources.CommandLinkNormal);
         private Image DefaultGlyphHovered => cachedDefaultGlyphHovered ??= GetScaledDefaultGlyph(Resources.CommandLinkHovered);
         private Image DefaultGlyphDisabled => cachedDefaultGlyphDisabled ??= GetScaledDefaultGlyph(Resources.CommandLinkDisabled);
-        
+
         private Size DefaultGlyphSize
         {
             get
@@ -1439,17 +1432,23 @@ namespace KGySoft.WinForms.Controls
 
         private ControlAppearanceState GetAppearance()
         {
+            Color textColor = Enabled ? ForeColor : DisabledForeColor;
             return new ControlAppearanceState((int)BUTTONPARTS.BP_COMMANDLINK, (int)GetSystemState())
             {
                 BackColor = Enabled ? BackColor : DisabledBackColor,
-                ForeColor = Enabled ? ForeColor : DisabledForeColor,
+                ForeColor = textColor,
                 Enabled = Enabled,
                 Hovered = isHovered,
                 Pressed = isPressed,
                 IsDefault = IsDefault,
                 Text = base.Text,
                 Visible = Visible,
-                CustomState = Description
+                CustomState = new CustomAppearanceState
+                {
+                    FadingOptions = fadingOptions,
+                    DescriptionText = Description,
+                    DescriptionColor = textColor
+                }
             };
         }
 
@@ -1557,10 +1556,12 @@ namespace KGySoft.WinForms.Controls
                 img = disabledImage ??= img.ToGrayscale();
 
             bool useTheming = UsesTheming;
+            CustomAppearanceState customState = (CustomAppearanceState)state.CustomState!;
 
-            // setting colors
+            // Setting colors. Note: these must not be differentiated in GetAppearance because they would mean non-standard differences,
+            // which would be rendered as an immediate change if color changes are not included in the fading animations.
             Color textColor = state.ForeColor;
-            Color descColor = DescriptionColor;
+            Color descColor = customState.DescriptionColor;
             if (state.Pressed)
             {
                 textColor = PressedTextColor;
@@ -1598,13 +1599,12 @@ namespace KGySoft.WinForms.Controls
                     : TextRenderer.MeasureText(e.Graphics, state.Text, Font, proposedSize, formatFlags);
 
             Size descSize = Size.Empty;
-            string? descriptionText = state.CustomState as string;
-            if (!String.IsNullOrEmpty(descriptionText) && textSize.Height < proposedSize.Height)
+            if (!String.IsNullOrEmpty(customState.DescriptionText) && textSize.Height < proposedSize.Height)
             {
                 Size size = new Size(proposedSize.Width, proposedSize.Height - textSize.Height);
                 descSize = gdiPlusTextRendering
-                    ? e.Graphics.MeasureString(descriptionText, DescriptionFont, size, sf).ToSize()
-                    : TextRenderer.MeasureText(e.Graphics, descriptionText, DescriptionFont, size, formatFlags);
+                    ? e.Graphics.MeasureString(customState.DescriptionText, DescriptionFont, size, sf).ToSize()
+                    : TextRenderer.MeasureText(e.Graphics, customState.DescriptionText, DescriptionFont, size, formatFlags);
             }
 
             Size combinedSize = new Size(proposedSize.Width, Math.Min(proposedSize.Height, textSize.Height + descSize.Height));
@@ -1628,18 +1628,16 @@ namespace KGySoft.WinForms.Controls
                     TextRenderer.DrawText(e.Graphics, state.Text, Font, rectangle, textColor, formatFlags);
             }
 
-            if (!String.IsNullOrEmpty(descriptionText) && proposedSize.Height > textSize.Height)
+            if (!String.IsNullOrEmpty(customState.DescriptionText) && proposedSize.Height > textSize.Height)
             {
                 Rectangle rectangle = new Rectangle(left + (useTheming ? 2 : 0), top + textSize.Height + (useTheming ? 1 : 2), proposedSize.Width, Math.Min(descSize.Height, proposedSize.Height - textSize.Height));
                 if (gdiPlusTextRendering)
                 {
                     using Brush b = new SolidBrush(descColor);
-                    e.Graphics.DrawString(descriptionText, DescriptionFont, b, rectangle, sf);
+                    e.Graphics.DrawString(customState.DescriptionText, DescriptionFont, b, rectangle, sf);
                 }
                 else
-                {
-                    TextRenderer.DrawText(e.Graphics, descriptionText, DescriptionFont, rectangle, descColor, formatFlags);
-                }
+                    TextRenderer.DrawText(e.Graphics, customState.DescriptionText, DescriptionFont, rectangle, descColor, formatFlags);
             }
         }
 
