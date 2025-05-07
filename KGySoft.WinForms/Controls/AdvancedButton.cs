@@ -781,6 +781,10 @@ namespace KGySoft.WinForms.Controls
                     return false;
             }
 
+            // Resetting System FlatStyle if it was faked and there is no image anymore
+            if (reportedFlatStyle == FlatStyle.System && base.FlatStyle != reportedFlatStyle && base.Image == null && !isElevated)
+                base.FlatStyle = lastFlatStyle = FlatStyle.System;
+
             // Image > Elevated > no image
             if (FlatStyle == FlatStyle.System && WindowsUtils.IsVistaOrLater)
             {
@@ -814,7 +818,7 @@ namespace KGySoft.WinForms.Controls
             {
                 currentImage = SecurityShieldImage;
 
-                if (base.FlatStyle != FlatStyle.System || !WindowsUtils.IsVistaOrLater)
+                if (base.FlatStyle != FlatStyle.System || !WindowsUtils.IsVistaOrLater || !WindowsUtils.IsComCtlV6Available)
                 {
                     base.Image = currentImage;
 
