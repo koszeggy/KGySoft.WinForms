@@ -753,7 +753,10 @@ namespace KGySoft.WinForms.Controls
                 if (defaultAnimationTimer == null)
                 {
                     defaultAnimationTimer = new Timer();
-                    defaultAnimationTimer.Interval = UxTheme.TryGetThemeTransitionDuration(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_PUSHBUTTON, (int)PUSHBUTTONSTATES.PBS_DEFAULTED, (int)PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING, Constants.TMT_TRANSITIONDURATIONS, out int duration)
+                    defaultAnimationTimer.Interval = UxTheme.TryGetThemeTransitionDuration(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_PUSHBUTTON,
+                        (int)PUSHBUTTONSTATES.PBS_DEFAULTED,
+                        (int)PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING,
+                        Constants.TMT_TRANSITIONDURATIONS, out int duration) && duration != 0
                         ? duration
                         : 1000;
                     defaultAnimationTimer.Tick += defaultAnimationTimer_Tick;

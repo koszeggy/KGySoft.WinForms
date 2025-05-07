@@ -89,7 +89,6 @@ namespace KGySoft.WinForms.Controls
         private bool isElevated;
         private bool useDefaultGlyph = true;
         private bool isImageUpToDate = true;
-        private bool? isThemed;
         private string? description;
 
         private Brush? pressedBrush;
@@ -114,11 +113,6 @@ namespace KGySoft.WinForms.Controls
         private Size cachedSecurityShieldImageSize;
         private Size defaultGlyphSize;
 
-        private bool? cacheThemedForeColor;
-        private Color themedForeColor;
-        private Color themedDisabledColor;
-        private Color themedHoveredColor;
-        private Color themedPressedColor;
         private Color foreColor;
         private Color descriptionColor;
         private Color highlightTextColor;
@@ -385,7 +379,7 @@ namespace KGySoft.WinForms.Controls
         public override Color ForeColor
         {
             get => !foreColor.IsEmpty ? foreColor
-                : !IsThemed ? base.ForeColor
+                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
                 : ThemedForeColor;
             set
             {
@@ -405,7 +399,7 @@ namespace KGySoft.WinForms.Controls
         public Color DescriptionColor
         {
             get => !descriptionColor.IsEmpty ? descriptionColor
-                : !IsThemed ? base.ForeColor
+                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
                 : ThemedForeColor;
             set
             {
@@ -424,7 +418,7 @@ namespace KGySoft.WinForms.Controls
         public Color HighlightTextColor
         {
             get => !highlightTextColor.IsEmpty ? highlightTextColor
-                : !IsThemed ? base.ForeColor
+                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
                 : ThemedHoveredColor;
             set
             {
@@ -444,7 +438,7 @@ namespace KGySoft.WinForms.Controls
         public Color HighlightDescriptionColor
         {
             get => !highlightTextColor.IsEmpty ? highlightTextColor
-                : !IsThemed ? base.ForeColor
+                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
                 : ThemedHoveredColor;
             set
             {
@@ -464,7 +458,7 @@ namespace KGySoft.WinForms.Controls
         public Color PressedTextColor
         {
             get => !pressedTextColor.IsEmpty ? pressedTextColor
-                : !IsThemed ? base.ForeColor
+                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
                 : ThemedPressedColor;
             set
             {
@@ -484,7 +478,7 @@ namespace KGySoft.WinForms.Controls
         public Color PressedDescriptionColor
         {
             get => !pressedTextColor.IsEmpty ? pressedTextColor
-                : !IsThemed ? base.ForeColor
+                : !VisualStyleHelper.RenderWithVisualStyles ? base.ForeColor
                 : ThemedPressedColor;
             set
             {
@@ -504,7 +498,7 @@ namespace KGySoft.WinForms.Controls
         public Color DisabledForeColor
         {
             get => !disabledForeColor.IsEmpty ? disabledForeColor
-                : !IsThemed ? SystemColors.GrayText
+                : !VisualStyleHelper.RenderWithVisualStyles ? SystemColors.GrayText
                 : ThemedDisabledColor;
             set
             {
@@ -671,29 +665,13 @@ namespace KGySoft.WinForms.Controls
 
         private bool IsCustomRendering => base.FlatStyle != FlatStyle.System;
 
-        /// <summary>
-        /// Gets whether visual styles are enabled both in the OS and in the application.
-        /// NOTE: it does not mean that native command link rendering is available (use <see cref="IsNativeVisualStylesRenderingAvailable"/> to check that).
-        /// </summary>
-        private bool IsThemed
-        {
-            get
-            {
-                if (isThemed.HasValue)
-                    return isThemed.Value;
-
-                isThemed = VisualStyleHelper.RenderWithVisualStyles;
-                return isThemed.Value;
-            }
-        }
-
-        private bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && IsThemed;
+        private bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && VisualStyleHelper.RenderWithVisualStyles;
 
         private Font DefaultTextFont
         {
             get
             {
-                if (!IsThemed)
+                if (!VisualStyleHelper.RenderWithVisualStyles)
                     return DefaultNonThemedTextFont;
 
                 if (themedFontLarge != null)
@@ -714,7 +692,7 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                if (!IsThemed)
+                if (!VisualStyleHelper.RenderWithVisualStyles)
                     return SystemFonts.DialogFont;
 
                 if (themedFontSmall != null)
@@ -738,7 +716,7 @@ namespace KGySoft.WinForms.Controls
                     return pressedBrush;
 
                 // classic style
-                if (base.FlatStyle == FlatStyle.Popup || (base.FlatStyle == FlatStyle.Standard && !IsThemed))
+                if (base.FlatStyle == FlatStyle.Popup || (base.FlatStyle == FlatStyle.Standard && !VisualStyleHelper.RenderWithVisualStyles))
                 {
                     pressedBrush = new SolidBrush(SystemColors.Control);
                     return pressedBrush;
@@ -775,7 +753,7 @@ namespace KGySoft.WinForms.Controls
                     return hoveredBrush;
 
                 // classic style
-                if (base.FlatStyle == FlatStyle.Popup || (base.FlatStyle == FlatStyle.Standard && !IsThemed))
+                if (base.FlatStyle == FlatStyle.Popup || (base.FlatStyle == FlatStyle.Standard && !VisualStyleHelper.RenderWithVisualStyles))
                 {
                     hoveredBrush = new SolidBrush(SystemColors.Control);
                     return hoveredBrush;
@@ -875,7 +853,7 @@ namespace KGySoft.WinForms.Controls
                     return selectionBorder;
 
                 // classic style
-                if (base.FlatStyle == FlatStyle.Popup || (base.FlatStyle == FlatStyle.Standard && !IsThemed))
+                if (base.FlatStyle == FlatStyle.Popup || (base.FlatStyle == FlatStyle.Standard && !VisualStyleHelper.RenderWithVisualStyles))
                 {
                     selectionBorder = new GraphicsPath();
                     selectionBorder.AddRectangle(new Rectangle(0, 0, Width - 1, Height - 1));
@@ -893,21 +871,13 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                if (themedForeColor.IsEmpty)
-                {
-                    if (!IsNativeVisualStylesRenderingAvailable)
-                        return defaultForeColor;
+                if (!IsNativeVisualStylesRenderingAvailable)
+                    return defaultForeColor;
 
-                    // ISSUE: When changing from high contrast to normal theme, the VisualStyleRenderer.GetColor(ColorProperty.TextColor) keeps returning
-                    // the high contrast SystemColors.ControlText color for a while. Skipping the caching until returning from OnSystemColorsChanged or
-                    // invalidating in the first Paint does not help. This is still not optimal, because the appearance can be invalid until the user hovers the button.
-                    var color = GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL);
-                    if (cacheThemedForeColor != true)
-                        return color;
-                    themedForeColor = color;
-                }
-
-                return themedForeColor;
+                // ISSUE: When changing from high contrast to normal theme, the VisualStyleRenderer.GetColor(ColorProperty.TextColor) keeps returning
+                // the high contrast SystemColors.ControlText color for a while. Skipping the caching until returning from OnSystemColorsChanged or
+                // invalidating in the first Paint does not help. This is still not optimal, because the appearance can be invalid until the user hovers the button.
+                return GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL);
             }
         }
 
@@ -915,14 +885,9 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                if (themedHoveredColor.IsEmpty)
-                {
-                    if (!IsNativeVisualStylesRenderingAvailable)
-                        return defaultHoveredColor;
-                    themedHoveredColor = GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT);
-                }
-
-                return themedHoveredColor;
+                if (!IsNativeVisualStylesRenderingAvailable)
+                    return defaultHoveredColor;
+                return GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT);
             }
         }
 
@@ -930,14 +895,9 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                if (themedPressedColor.IsEmpty)
-                {
-                    if (!IsNativeVisualStylesRenderingAvailable)
-                        return defaultPressedColor;
-                    themedPressedColor = GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED);
-                }
-
-                return themedPressedColor;
+                if (!IsNativeVisualStylesRenderingAvailable)
+                    return defaultPressedColor;
+                return GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED);
             }
         }
 
@@ -945,14 +905,9 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                if (themedDisabledColor.IsEmpty)
-                {
-                    if (!IsNativeVisualStylesRenderingAvailable)
-                        return defaultDisabledColor;
-                    themedDisabledColor = GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED);
-                }
-
-                return themedDisabledColor;
+                if (!IsNativeVisualStylesRenderingAvailable)
+                    return defaultDisabledColor;
+                return GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED);
             }
         }
 
@@ -965,7 +920,7 @@ namespace KGySoft.WinForms.Controls
         private int VerticalPadding => VerticalBasePadding << 1;
         private int VerticalBasePadding => UsesTheming ? 10 : 6;
 
-        private bool UsesTheming => IsThemed && base.FlatStyle == FlatStyle.Standard;
+        private bool UsesTheming => VisualStyleHelper.RenderWithVisualStyles && base.FlatStyle == FlatStyle.Standard;
         private int ImagePadding => UsesTheming ? 5 : 3;
         private int ImageTextMargin => UsesTheming ? 1 : 4;
 
@@ -1173,7 +1128,6 @@ namespace KGySoft.WinForms.Controls
         protected override void OnSystemColorsChanged(EventArgs e)
         {
             base.OnSystemColorsChanged(e);
-            isThemed = null;
             ResetTheme();
             OnFlatStyleChanged(false, false);
             CheckStyles();
@@ -1502,8 +1456,7 @@ namespace KGySoft.WinForms.Controls
             if (!WindowsUtils.IsVistaOrLater)
                 return;
 
-            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles;
-
+            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles && !VisualStyleHelper.HighContrast;
             if (enabled && (defaultAnimationTimer == null || !defaultAnimationTimer.Enabled))
             {
                 if (defaultAnimationTimer == null)
@@ -1697,12 +1650,10 @@ namespace KGySoft.WinForms.Controls
                     // no drawing needed in normal state unless if focused or default
                     if (state.Enabled && (Focused || state.IsDefault))
                     {
-                        using (Pen selectedFramePen = new Pen(!FadingPainterInternal.IsSupported || state.SystemStateId == (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING
+                        using Pen selectedFramePen = new Pen(!FadingPainterInternal.IsSupported || state.SystemStateId == (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING
                             ? selectedFrameColorAlternative
-                            : selectedFrameColor))
-                        {
-                            e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
-                        }
+                            : selectedFrameColor);
+                        e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
                     }
                 }
             }
@@ -1834,20 +1785,16 @@ namespace KGySoft.WinForms.Controls
 
             if (backColor != state.BackColor)
             {
-                using (Brush b = new SolidBrush(backColor))
-                {
-                    backRect.Inflate(-(borderWidth / 2 + 3), -(borderWidth / 2 + 2));
-                    e.Graphics.FillRectangle(b, backRect);
-                }
+                using Brush b = new SolidBrush(backColor);
+                backRect.Inflate(-(borderWidth / 2 + 3), -(borderWidth / 2 + 2));
+                e.Graphics.FillRectangle(b, backRect);
             }
 
             if (borderWidth > 0)
             {
                 // pen is created locally because its width is variable and its color cannot be tracked by events
-                using (Pen pen = new Pen(FlatAppearance.BorderColor == Color.Empty ? SystemColors.ControlText : FlatAppearance.BorderColor, borderWidth))
-                {
-                    e.Graphics.DrawPath(pen, SelectionBorder);
-                }
+                using Pen pen = new Pen(FlatAppearance.BorderColor == Color.Empty ? SystemColors.ControlText : FlatAppearance.BorderColor, borderWidth);
+                e.Graphics.DrawPath(pen, SelectionBorder);
             }
 
             // Image
@@ -1858,12 +1805,10 @@ namespace KGySoft.WinForms.Controls
                 Color focusColor = VisualStyleHelper.HighContrast ? SystemColors.WindowText
                     : (BackColor.GetBrightness() < 0.5f ? ControlPaint.Light(state.BackColor) : ControlPaint.Dark(state.BackColor));
 
-                using (Pen pen = new Pen(focusColor))
-                {
-                    int borderSize = FlatAppearance.BorderSize;
-                    Rectangle rectangle = new Rectangle(ClientRectangle.X + borderSize + 4, ClientRectangle.Y + borderSize + 3, Width - borderSize * 2 - 9, Height - borderSize * 2 - 7);
-                    e.Graphics.DrawRectangle(pen, rectangle);
-                }
+                using Pen pen = new Pen(focusColor);
+                int borderSize = FlatAppearance.BorderSize;
+                Rectangle rectangle = new Rectangle(ClientRectangle.X + borderSize + 4, ClientRectangle.Y + borderSize + 3, Width - borderSize * 2 - 9, Height - borderSize * 2 - 7);
+                e.Graphics.DrawRectangle(pen, rectangle);
             }
         }
 
@@ -2037,11 +1982,8 @@ namespace KGySoft.WinForms.Controls
 
         private void ResetTheme()
         {
-            isThemed = null;
             base.Font = Font;
 
-            // Not allowing caching the themed fore color if starting with non-themed rendering. See more details in ThemedForeColor.
-            cacheThemedForeColor ??= IsThemed;
             cachedDefaultGlyphDisabled?.Dispose();
             cachedDefaultGlyphDisabled = null;
             cachedDefaultGlyphNormal?.Dispose();
@@ -2053,46 +1995,14 @@ namespace KGySoft.WinForms.Controls
 
         private bool ShouldSerializeFont() => textFont != null;
         private bool ShouldSerializeDescriptionFont() => descriptionFont != null;
-
-        private bool ShouldSerializeForeColor()
-        {
-            return foreColor != Color.Empty;
-        }
-
-        private bool ShouldSerializeDescriptionColor()
-        {
-            return descriptionColor != Color.Empty;
-        }
-
-        private bool ShouldSerializeHighlightTextColor()
-        {
-            return highlightTextColor != Color.Empty;
-        }
-
-        private bool ShouldSerializeHighlightDescriptionColor()
-        {
-            return highlightDescriptionColor != Color.Empty;
-        }
-
-        private bool ShouldSerializePressedTextColor()
-        {
-            return pressedTextColor != Color.Empty;
-        }
-
-        private bool ShouldSerializePressedDescriptionColor()
-        {
-            return pressedDescriptionColor != Color.Empty;
-        }
-
-        private bool ShouldSerializeDisabledForeColor()
-        {
-            return disabledForeColor != Color.Empty;
-        }
-
-        private bool ShouldSerializeDisabledBackColor()
-        {
-            return disabledBackColor != Color.Empty;
-        }
+        private bool ShouldSerializeForeColor() => foreColor != Color.Empty;
+        private bool ShouldSerializeDescriptionColor() => descriptionColor != Color.Empty;
+        private bool ShouldSerializeHighlightTextColor() => highlightTextColor != Color.Empty;
+        private bool ShouldSerializeHighlightDescriptionColor() => highlightDescriptionColor != Color.Empty;
+        private bool ShouldSerializePressedTextColor() => pressedTextColor != Color.Empty;
+        private bool ShouldSerializePressedDescriptionColor() => pressedDescriptionColor != Color.Empty;
+        private bool ShouldSerializeDisabledForeColor() => disabledForeColor != Color.Empty;
+        private bool ShouldSerializeDisabledBackColor() => disabledBackColor != Color.Empty;
 
         private void FreeBrushes()
         {
@@ -2155,7 +2065,7 @@ namespace KGySoft.WinForms.Controls
         {
             try
             {
-                Size desiredSize = this.ScaleSize(IsThemed ? referenceThemedGlyphSize : referenceNonThemedGlyphSize);
+                Size desiredSize = this.ScaleSize(VisualStyleHelper.RenderWithVisualStyles ? referenceThemedGlyphSize : referenceNonThemedGlyphSize);
                 Bitmap scaledDefaultGlyph = icon.ExtractNearestBitmap(desiredSize, PixelFormat.Format32bppArgb);
                 if (scaledDefaultGlyph.Width >= desiredSize.Width || desiredSize.Width < scaledDefaultGlyph.Width * 1.25f)
                     return scaledDefaultGlyph;
