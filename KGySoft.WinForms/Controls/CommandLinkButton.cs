@@ -181,6 +181,39 @@ namespace KGySoft.WinForms.Controls
         #region Public Properties
 
         /// <summary>
+        /// Gets or sets fading options of the control.
+        /// </summary>
+        [Category("CommandLinkButton")]
+        [DefaultValue(FadingOptions.StandardEffects)]
+        [Description("Gets or sets fading options of the control.")]
+        [TypeConverter(typeof(FlagsEnumConverter))]
+        public FadingOptions FadingAnimationOptions
+        {
+            // publicly not including CustomChange, but it is returned by the explicit implementation of ISupportsFadingInternal
+            get => fadingOptions & ~ControlAppearanceState.CustomChange;
+            set
+            {
+                if (fadingOptions == value)
+                    return;
+
+                if (!Enum<FadingOptions>.AllFlagsDefined(value))
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
+
+                fadingOptions = value;
+
+                // Including custom change in fading options when TextChange is set, so we can fade also on Description text change
+                if ((value & FadingOptions.TextChange) != FadingOptions.None)
+                    fadingOptions |= ControlAppearanceState.CustomChange;
+
+                // storing invisible state so when control turns visible it will fade on when enabled
+                if (!Visible && (fadingOptions & (FadingOptions.Appearing | FadingOptions.AnyChange)) != FadingOptions.None)
+                    fadingPainter.State = GetAppearance();
+
+                Invalidate();
+            }
+        }
+
+        /// <summary>
         /// Gets or sets whether an elevated shield icon should be displayed.
         /// </summary>
         [Category("CommandLinkButton")]
@@ -1317,7 +1350,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnVisibleChanged(EventArgs e)
         {
-            // storing invisible state so when control turns visible it will fading when enabled
+            // storing invisible state so when control turns visible it will fade on when enabled
             if (!Visible && (fadingOptions & (FadingOptions.Appearing | FadingOptions.AnyChange)) != FadingOptions.None)
                 fadingPainter.State = GetAppearance();
 
@@ -1565,12 +1598,13 @@ namespace KGySoft.WinForms.Controls
                     : TextRenderer.MeasureText(e.Graphics, state.Text, Font, proposedSize, formatFlags);
 
             Size descSize = Size.Empty;
-            if (!String.IsNullOrEmpty(description) && textSize.Height < proposedSize.Height)
+            string? descriptionText = state.CustomState as string;
+            if (!String.IsNullOrEmpty(descriptionText) && textSize.Height < proposedSize.Height)
             {
                 Size size = new Size(proposedSize.Width, proposedSize.Height - textSize.Height);
                 descSize = gdiPlusTextRendering
-                    ? e.Graphics.MeasureString(description, DescriptionFont, size, sf).ToSize()
-                    : TextRenderer.MeasureText(e.Graphics, description, DescriptionFont, size, formatFlags);
+                    ? e.Graphics.MeasureString(descriptionText, DescriptionFont, size, sf).ToSize()
+                    : TextRenderer.MeasureText(e.Graphics, descriptionText, DescriptionFont, size, formatFlags);
             }
 
             Size combinedSize = new Size(proposedSize.Width, Math.Min(proposedSize.Height, textSize.Height + descSize.Height));
@@ -1594,17 +1628,17 @@ namespace KGySoft.WinForms.Controls
                     TextRenderer.DrawText(e.Graphics, state.Text, Font, rectangle, textColor, formatFlags);
             }
 
-            if (!String.IsNullOrEmpty(description) && proposedSize.Height > textSize.Height)
+            if (!String.IsNullOrEmpty(descriptionText) && proposedSize.Height > textSize.Height)
             {
                 Rectangle rectangle = new Rectangle(left + (useTheming ? 2 : 0), top + textSize.Height + (useTheming ? 1 : 2), proposedSize.Width, Math.Min(descSize.Height, proposedSize.Height - textSize.Height));
                 if (gdiPlusTextRendering)
                 {
                     using Brush b = new SolidBrush(descColor);
-                    e.Graphics.DrawString(description, DescriptionFont, b, rectangle, sf);
+                    e.Graphics.DrawString(descriptionText, DescriptionFont, b, rectangle, sf);
                 }
                 else
                 {
-                    TextRenderer.DrawText(e.Graphics, description, DescriptionFont, rectangle, descColor, formatFlags);
+                    TextRenderer.DrawText(e.Graphics, descriptionText, DescriptionFont, rectangle, descColor, formatFlags);
                 }
             }
         }
@@ -2122,33 +2156,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        /// <summary>
-        /// Gets or sets fading options of the control.
-        /// </summary>
-        [Category("CommandLinkButton")]
-        [DefaultValue(FadingOptions.StandardEffects)]
-        [Description("Gets or sets fading options of the control.")]
-        [TypeConverter(typeof(FlagsEnumConverter))]
-        public FadingOptions FadingAnimationOptions
-        {
-            get => fadingOptions;
-            set
-            {
-                if (fadingOptions == value)
-                    return;
-
-                if (!Enum<FadingOptions>.AllFlagsDefined(value))
-                    throw new ArgumentOutOfRangeException("value");
-
-                fadingOptions = value;
-
-                // storing invisible state so when control turns visible it will fading when enabled
-                if (!Visible && (fadingOptions & (FadingOptions.Appearing | FadingOptions.AnyChange)) != FadingOptions.None)
-                    fadingPainter.State = GetAppearance();
-
-                Invalidate();
-            }
-        }
+        FadingOptions ISupportsFadingInternal.FadingAnimationOptions => fadingOptions;
 
         /// <summary>
         /// Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.

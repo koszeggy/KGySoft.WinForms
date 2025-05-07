@@ -1,5 +1,24 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: FadingOptions.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.ComponentModel;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
@@ -21,24 +40,6 @@ namespace KGySoft.WinForms.Controls
         [Description("Indicates that standard fading animations (enabling, hovering, clicking, etc.) are enabled for the control. Speed of these effects are retrieved from the system.")]
         StandardEffects = 1,
 
-        ///// <summary>
-        ///// Indicates that enabling/disabling the control should be performed by a fading effect.
-        ///// </summary>
-        //[Description("Indicates that enabling/disabling the control should be performed by a fading effect.")]
-        //Enabling = 1,
-
-        ///// <summary>
-        ///// Indicates that hovering the control should be performed by a fading effect.
-        ///// </summary>
-        //[Description("Indicates that hovering the control should be performed by a fading effect.")]
-        //Hovering = 1 << 1,
-
-        ///// <summary>
-        ///// Indicates pressing the left mouse button should be performed by a fading effect.
-        ///// </summary>
-        //[Description("Indicates pressing the left mouse button should be performed by a fading effect.")]
-        //MouseDown = 1 << 2,
-
         /// <summary>
         /// Indicates that text change should be performed by a fading effect.
         /// </summary>
@@ -47,7 +48,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Indicates that a fading effect should be performed when Visibility of the control is turned on.
-        /// <note>When the cotrols turns invisible, it is performed without fading to avoid security problems.</note>
+        /// <note>When the control turns invisible, it is performed without fading to avoid security problems.</note>
         /// </summary>
         [Description("Indicates that a fading effect should be performed when the inivisible control appears. When the cotrols turns invisible, it is performed without fading to avoid security problems.")]
         Appearing = 1 << 4,
@@ -64,10 +65,5 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Description("Indicates that any kind of visual change should be performed by a fading effect, except size changes.")]
         AnyChange = 1 << 31,
-
-        ///// <summary>
-        ///// Represents standard effects (<see cref="Enabling"/>, <see cref="Hovering"/>, <see cref="MouseDown"/>)
-        ///// </summary>
-        //StandardEffects = Enabling | Hovering | MouseDown
     }
 }

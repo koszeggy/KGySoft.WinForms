@@ -192,7 +192,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             if ((options & CustomChange) != FadingOptions.None &&
-                (CustomState != other.CustomState))
+                !Equals(CustomState, other.CustomState))
             {
                 return false;
             }
