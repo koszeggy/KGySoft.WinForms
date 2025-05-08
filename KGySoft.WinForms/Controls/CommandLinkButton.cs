@@ -1869,10 +1869,11 @@ namespace KGySoft.WinForms.Controls
                 bool isSimpleArrow = WindowsUtils.IsWindows10OrLater;
                 bool isRightToLeft = RightToLeft == RightToLeft.Yes;
                 bool isCustomColorArrow = isSimpleArrow
-                    && (!state.Enabled && DisabledForeColor != ThemedDisabledColor
-                    || state.Enabled && (ForeColor != ThemedForeColor || HighlightTextColor != ThemedHoveredColor || PressedTextColor != ThemedPressedColor));
+                    && (VisualStyleHelper.HighContrast // high contrast with visual styles in Windows 10 or later: always drawing the arrow manually so it matches the theme colors
+                        || !state.Enabled && DisabledForeColor != ThemedDisabledColor
+                        || state.Enabled && (ForeColor != ThemedForeColor || HighlightTextColor != ThemedHoveredColor || PressedTextColor != ThemedPressedColor));
 
-                // only Windows 8 and later: manually drawing the glyph if it has custom colors or is mirrored
+                // only Windows 10 and later: manually drawing the glyph if it has custom colors or is mirrored, and also in high contrast mode
                 if (isSimpleArrow && (isRightToLeft || isCustomColorArrow))
                 {
                     var color = !state.Enabled ? DisabledForeColor
