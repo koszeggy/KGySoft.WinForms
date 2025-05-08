@@ -28,7 +28,7 @@ namespace KGySoft.WinForms.Controls
     {
         #region Properties
 
-        private RadioButton RadioButtonInstance => (RadioButton)ButtonInstance;
+        protected AdvancedRadioButton RadioButtonInstance => (AdvancedRadioButton)ButtonInstance;
 
         #endregion
 
@@ -103,14 +103,15 @@ namespace KGySoft.WinForms.Controls
             using Pen pen = new Pen(foreColor);
             using Brush brush = new SolidBrush(backColor);
 
-            if (scale.X > 1.1f)
+            if (scale.X > 1.1f || RadioButtonInstance.VisualsRenderingQuality == RenderingQuality.High)
             {
                 // In high DPI mode when we draw an ellipse as three rectangles, the quality of ellipse is poor. Draw
                 // it directly as an ellipse.
                 bounds.Width--;
                 bounds.Height--;
                 GraphicsState prevState = e.Graphics.Save();
-                e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                if (RadioButtonInstance.VisualsRenderingQuality == RenderingQuality.High)
+                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
                 e.Graphics.FillEllipse(brush, bounds);
                 e.Graphics.DrawEllipse(pen, bounds);
                 e.Graphics.Restore(prevState);
@@ -127,19 +128,22 @@ namespace KGySoft.WinForms.Controls
                 return;
 
             using Brush brush = new SolidBrush(checkColor);
-            int padding = 5;
+            PointF scale = layout.Options.Scale;
 
             // Original code
-            if (layout.Options.Scale.X < 1.1f)
+            if (RadioButtonInstance.VisualsRenderingQuality != RenderingQuality.High || scale.X <= 1.1f)
             {
-                Rectangle vCross = new Rectangle(layout.CheckBounds.X + padding, (layout.CheckBounds.Y + padding) - 1, 2, 4);
+                Size scaledSize = new Size(2, 4).Scale(scale);
+                Point middle = new Point(layout.CheckBounds.X + layout.CheckBounds.Width / 2, layout.CheckBounds.Y + layout.CheckBounds.Height / 2);
+                Rectangle vCross = new Rectangle(middle.X - scaledSize.Width / 2, middle.Y - scaledSize.Height / 2, scaledSize.Width, scaledSize.Height);
                 e.Graphics.FillRectangle(brush, vCross);
-                Rectangle hCross = new Rectangle((layout.CheckBounds.X + padding) - 1, layout.CheckBounds.Y + padding, 4, 2);
+                Rectangle hCross = new Rectangle(middle.X - scaledSize.Height / 2, middle.Y - scaledSize.Width / 2, scaledSize.Height, scaledSize.Width);
                 e.Graphics.FillRectangle(brush, hCross);
                 return;
             }
 
             // This scaled rendering differs from the original because that one is very ugly e.g. at 150%: https://github.com/dotnet/winforms/blob/1c324d074280ab5de6342d973069faa687f2c165/src/System.Windows.Forms/System/Windows/Forms/Controls/Buttons/ButtonInternal/RadioButtonBaseAdapter.cs#L149
+            int padding = 5;
             GraphicsState prevState = e.Graphics.Save();
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             Rectangle checkBounds = layout.CheckBounds;

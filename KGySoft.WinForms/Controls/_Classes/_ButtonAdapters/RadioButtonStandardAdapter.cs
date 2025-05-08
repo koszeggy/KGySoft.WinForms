@@ -98,7 +98,16 @@ namespace KGySoft.WinForms.Controls
             ControlAppearanceState state = e.State;
             Rectangle checkBounds = layout.CheckBounds;
             if (VisualStyleHelper.RenderWithVisualStyles)
-                VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, g, state.SystemPartId, state.SystemStateId, checkBounds);
+            {
+                if (RadioButtonInstance.VisualsRenderingQuality == RenderingQuality.High
+                    && layout.Options.Scale.X > 1f // just to omit querying part size at 100% DPI
+                    && layout.Options.CheckSize != VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, true).Width)
+                {
+                    VisualStyleHelper.RenderScaled(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
+                }
+                else
+                    VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, g, state.SystemPartId, state.SystemStateId, checkBounds);
+            }
             else
             {
                 checkBounds.X--;

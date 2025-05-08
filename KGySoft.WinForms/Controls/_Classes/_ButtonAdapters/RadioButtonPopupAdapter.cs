@@ -113,9 +113,12 @@ namespace KGySoft.WinForms.Controls
         private void DrawCheckBackground3DLite(PaintStateEventArgs e, Rectangle bounds, PointF scale, Color checkBackground, ColorData colors, bool disabledColors)
         {
             Graphics graphics = e.Graphics;
-            GraphicsState? prevState = scale.X > 1.1f ? graphics.Save() : null;
-            if (prevState != null)
+            GraphicsState? prevState = null;
+            if (RadioButtonInstance.VisualsRenderingQuality == RenderingQuality.High)
+            {
+                prevState = graphics.Save();
                 graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            }
 
             ControlAppearanceState state = e.State;
             Color backColor = checkBackground;

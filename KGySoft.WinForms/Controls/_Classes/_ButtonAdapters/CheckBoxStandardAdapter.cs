@@ -18,7 +18,6 @@
 using System;
 using System.Drawing;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 
 #endregion
 
@@ -130,7 +129,16 @@ namespace KGySoft.WinForms.Controls
         {
             ControlAppearanceState state = e.State;
             if (VisualStyleHelper.RenderWithVisualStyles)
-                VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
+            {
+                if (CheckBoxInstance.VisualsRenderingQuality == RenderingQuality.High
+                    && layout.Options.Scale.X > 1f // just to omit querying part size at 100% DPI
+                    && layout.Options.CheckSize != VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, true).Width)
+                {
+                    VisualStyleHelper.RenderScaled(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
+                }
+                else
+                    VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
+            }
             else if (state.CheckState == CheckState.Indeterminate)
                 ControlPaint.DrawMixedCheckBox(e.Graphics, layout.CheckBounds, GetButtonState(state));
             else

@@ -38,7 +38,7 @@ namespace KGySoft.WinForms.Controls
     /// The <see cref="AdvancedRadioButton"/> class offers the following features in addition to <see cref="RadioButton"/>:
     /// <list type="bullet">
     /// <item><description><see cref="ButtonBase.AutoSize"/> property works as expected when radio button is docked</description></item>
-    /// <item><description>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</description></item>
+    /// <item><description>Different rendering qualities (see <see cref="TextRenderingQuality"/> and <see cref="VisualsRenderingQuality"/>) properties.</description></item>
     /// <item><description>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</description></item>
     /// <item><description>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</description></item>
     /// </list>
@@ -57,6 +57,7 @@ namespace KGySoft.WinForms.Controls
         private readonly FadingPainterInternal fadingPainter;
 
         private RenderingQuality textRenderingQuality;
+        private RenderingQuality visualsRenderingQuality = RenderingQuality.High;
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private FlatStyle lastAdapterType;
         private Color disabledForeColor;
@@ -113,6 +114,28 @@ namespace KGySoft.WinForms.Controls
                     ResetSizeCache();
                     PerformLayout();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the rendering quality of the <see cref="AdvancedRadioButton"/> visuals.
+        /// </summary>
+        [Category("AdvancedRadioButton")]
+        [Description("Gets or sets the rendering quality of the advanced radio button visuals. Has effect only in high DPI mode.")]
+        [DefaultValue(RenderingQuality.High)]
+        public RenderingQuality VisualsRenderingQuality
+        {
+            get => visualsRenderingQuality;
+            set
+            {
+                if (visualsRenderingQuality == value)
+                    return;
+
+                if (!Enum<RenderingQuality>.IsDefined(value))
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
+
+                visualsRenderingQuality = value;
+                Invalidate();
             }
         }
 
