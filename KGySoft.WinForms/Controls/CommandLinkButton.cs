@@ -1847,7 +1847,7 @@ namespace KGySoft.WinForms.Controls
         private void DrawFocusRectangle(PaintStateEventArgs e)
         {
             var state = e.State;
-            int width = UsesTheming ? 1 : 2;
+            int width = WindowsUtils.IsWindows10OrLater || this.GetScale().X >= 1.5f ? 2 : 1;
             width = Math.Min(HorizontalBasePadding, this.ScaleWidth(width));
             Rectangle rect = ClientRectangle;
             rect.Inflate(-3, -3);
