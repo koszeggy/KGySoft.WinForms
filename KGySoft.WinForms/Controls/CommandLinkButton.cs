@@ -160,6 +160,7 @@ namespace KGySoft.WinForms.Controls
         private FlatStyle reportedFlatStyle = FlatStyle.Standard; // the flat style that is reported by the control (can be different when base does not support System)
         private ContentAlignment lastImageAlign;
         private RenderingQuality textRenderingQuality;
+        private RenderingQuality visualsRenderingQuality = RenderingQuality.High;
 
         private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
@@ -627,6 +628,28 @@ namespace KGySoft.WinForms.Controls
                     ResetSizeCache();
                     PerformLayout();
                 }
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the rendering quality of the <see cref="CommandLinkButton"/> visuals.
+        /// </summary>
+        [Category("CommandLinkButton")]
+        [Description("Gets or sets the rendering quality of the command link button visuals. Affects the default glyph rendering in high DPI mode.")]
+        [DefaultValue(RenderingQuality.High)]
+        public RenderingQuality VisualsRenderingQuality
+        {
+            get => visualsRenderingQuality;
+            set
+            {
+                if (visualsRenderingQuality == value)
+                    return;
+
+                if (!Enum<RenderingQuality>.IsDefined(value))
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
+
+                visualsRenderingQuality = value;
+                Invalidate();
             }
         }
 
@@ -1139,7 +1162,7 @@ namespace KGySoft.WinForms.Controls
             if (defaultGlyphSize.IsEmpty)
             {
                 defaultGlyphSize = IsNativeVisualStylesRenderingAvailable
-                    ? VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, 1, true)
+                    ? VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, 1, false)
                     : DefaultGlyphNormal.Size;
             }
 
@@ -1542,45 +1565,17 @@ namespace KGySoft.WinForms.Controls
                 PerformLayout();
         }
 
-        private void ResetSizeCache()
-        {
-            preferredSizeCache.Clear();
-        }
+        private void ResetSizeCache() => preferredSizeCache.Clear();
 
         private void DoPaint(PaintStateEventArgs e)
         {
             // Choosing image
             Image? img = base.Image;
-            ControlAppearanceState state = e.State;
-            if (img != null && !state.Enabled)
+            if (img != null && !e.State.Enabled)
                 img = disabledImage ??= img.ToGrayscale();
 
-            bool useTheming = UsesTheming;
-            CustomAppearanceState customState = (CustomAppearanceState)state.CustomState!;
-
-            // Setting colors. Note: these must not be differentiated in GetAppearance because they would mean non-standard differences,
-            // which would be rendered as an immediate change if color changes are not included in the fading animations.
-            Color textColor = state.ForeColor;
-            Color descColor = customState.DescriptionColor;
-            if (state.Pressed)
-            {
-                textColor = PressedTextColor;
-                descColor = PressedDescriptionColor;
-            }
-            else if (state.Hovered)
-            {
-                textColor = HighlightTextColor;
-                descColor = HighlightDescriptionColor;
-            }
-            else if (!state.Enabled)
-                textColor = descColor = DisabledForeColor;
-
-            bool gdiPlusTextRendering = UseCompatibleTextRendering;
-            e.Graphics.SetTextRenderingQuality(textRenderingQuality, gdiPlusTextRendering);
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-
             // painting background and image
-            if (useTheming)
+            if (UsesTheming)
                 PaintThemedAppearance(e, img);
             else if (base.FlatStyle == FlatStyle.Flat)
                 PaintFlatAppearance(e, img);
@@ -1588,69 +1583,18 @@ namespace KGySoft.WinForms.Controls
                 PaintClassicAppearance(e, img);
 
             // drawing text
-            TextFormatFlags formatFlags = this.GetFormatFlags();
-            StringFormat? sf = gdiPlusTextRendering ? formatFlags.ToStringFormat() : null;
-
-            Size proposedSize = Size - BordersAndPadding;
-            Size textSize = Size.Empty;
-            if (!String.IsNullOrEmpty(state.Text))
-                textSize = gdiPlusTextRendering
-                    ? e.Graphics.MeasureString(state.Text, Font, proposedSize, sf).ToSize()
-                    : TextRenderer.MeasureText(e.Graphics, state.Text, Font, proposedSize, formatFlags);
-
-            Size descSize = Size.Empty;
-            if (!String.IsNullOrEmpty(customState.DescriptionText) && textSize.Height < proposedSize.Height)
-            {
-                Size size = new Size(proposedSize.Width, proposedSize.Height - textSize.Height);
-                descSize = gdiPlusTextRendering
-                    ? e.Graphics.MeasureString(customState.DescriptionText, DescriptionFont, size, sf).ToSize()
-                    : TextRenderer.MeasureText(e.Graphics, customState.DescriptionText, DescriptionFont, size, formatFlags);
-            }
-
-            Size combinedSize = new Size(proposedSize.Width, Math.Min(proposedSize.Height, textSize.Height + descSize.Height));
-            int offset = !useTheming && state.Pressed && base.FlatStyle != FlatStyle.Flat ? 1 : 0;
-            int left = HorizontalBasePadding + (RtlTranslateContent(ImageAlign).AnyLeft() ? ImagePadding + ImageSize.Width + ImageTextMargin : 0) + offset;
-            int top = VerticalBasePadding + offset;
-            if ((formatFlags & TextFormatFlags.Bottom) != 0)
-                top += Math.Max(proposedSize.Height - combinedSize.Height, 0);
-            else if (((formatFlags & TextFormatFlags.VerticalCenter) != 0))
-                top += Math.Max(proposedSize.Height / 2 - combinedSize.Height / 2, 0);
-
-            if (!String.IsNullOrEmpty(Text))
-            {
-                Rectangle rectangle = new Rectangle(left + (useTheming ? 1 : 0), top, proposedSize.Width, Math.Min(textSize.Height, proposedSize.Height));
-                if (gdiPlusTextRendering)
-                {
-                    using Brush b = new SolidBrush(textColor);
-                    e.Graphics.DrawString(state.Text, Font, b, rectangle, sf);
-                }
-                else
-                    TextRenderer.DrawText(e.Graphics, state.Text, Font, rectangle, textColor, formatFlags);
-            }
-
-            if (!String.IsNullOrEmpty(customState.DescriptionText) && proposedSize.Height > textSize.Height)
-            {
-                Rectangle rectangle = new Rectangle(left + (useTheming ? 2 : 0), top + textSize.Height + (useTheming ? 1 : 2), proposedSize.Width, Math.Min(descSize.Height, proposedSize.Height - textSize.Height));
-                if (gdiPlusTextRendering)
-                {
-                    using Brush b = new SolidBrush(descColor);
-                    e.Graphics.DrawString(customState.DescriptionText, DescriptionFont, b, rectangle, sf);
-                }
-                else
-                    TextRenderer.DrawText(e.Graphics, customState.DescriptionText, DescriptionFont, rectangle, descColor, formatFlags);
-            }
+            DrawText(e);
         }
 
         private void PaintThemedAppearance(PaintStateEventArgs e, Image? image)
         {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             ControlAppearanceState state = e.State;
             Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
 
             // painting the background (underlying part of the parent control)
             if (Parent != null)
-            {
                 this.PaintTransparentBackground(e);
-            }
             else
             {
                 using Brush b = new SolidBrush(state.BackColor);
@@ -1699,7 +1643,6 @@ namespace KGySoft.WinForms.Controls
 
         private void PaintClassicAppearance(PaintStateEventArgs e, Image? image)
         {
-            e.Graphics.SmoothingMode = SmoothingMode.Default;
             ControlAppearanceState state = e.State;
             Rectangle backRect = ClientRectangle;
 
@@ -1745,6 +1688,7 @@ namespace KGySoft.WinForms.Controls
 
         private void PaintFlatAppearance(PaintStateEventArgs e, Image? image)
         {
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             ControlAppearanceState state = e.State;
             Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
             int borderWidth = FlatAppearance.BorderSize;
@@ -1868,14 +1812,22 @@ namespace KGySoft.WinForms.Controls
             {
                 bool isSimpleArrow = WindowsUtils.IsWindows10OrLater;
                 bool isRightToLeft = RightToLeft == RightToLeft.Yes;
-                bool isCustomColorArrow = isSimpleArrow
+                bool isNonNativeSize = bounds.Size != VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, true);
+                bool isCustomDrawnArrow = isSimpleArrow
                     && (VisualStyleHelper.HighContrast // high contrast with visual styles in Windows 10 or later: always drawing the arrow manually so it matches the theme colors
+                        || isNonNativeSize
                         || !state.Enabled && DisabledForeColor != ThemedDisabledColor
                         || state.Enabled && (ForeColor != ThemedForeColor || HighlightTextColor != ThemedHoveredColor || PressedTextColor != ThemedPressedColor));
 
-                // only Windows 10 and later: manually drawing the glyph if it has custom colors or is mirrored, and also in high contrast mode
-                if (isSimpleArrow && (isRightToLeft || isCustomColorArrow))
+                // only Windows 10 and later: manually drawing the glyph if
+                // - it has custom colors
+                // - in RTL mode
+                // - in high contrast mode
+                // - if the size is not the same as the default size
+                if (isSimpleArrow && (isRightToLeft || isCustomDrawnArrow))
                 {
+                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+                    e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
                     var color = !state.Enabled ? DisabledForeColor
                         : state.Pressed ? PressedTextColor
                         : state.Hovered ? HighlightTextColor
@@ -1891,14 +1843,18 @@ namespace KGySoft.WinForms.Controls
                     return;
                 }
 
+                // drawing the default glyph natively
                 if (!isRightToLeft)
                 {
-                    VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, bounds);
+                    if (isNonNativeSize && visualsRenderingQuality == RenderingQuality.High)
+                        VisualStyleHelper.RenderScaled(VisualStyleHelper.ButtonTheme, this, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, bounds);
+                    else
+                        VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, bounds);
                     return;
                 }
             }
 
-            var img = image;
+            Image? img = image;
             bool dispose = false;
             if (img == null)
             {
@@ -1921,9 +1877,100 @@ namespace KGySoft.WinForms.Controls
             }
 
             if (img != null)
+            {
+                GraphicsState? gState = null;
+                if (visualsRenderingQuality == RenderingQuality.High && img.Size != bounds.Size)
+                {
+                    gState = e.Graphics.Save();
+                    e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                    e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
+                }
+
                 e.Graphics.DrawImage(img, bounds);
+                if (gState != null)
+                    e.Graphics.Restore(gState);
+            }
+
             if (dispose)
                 img!.Dispose();
+        }
+
+        private void DrawText(PaintStateEventArgs e)
+        {
+            ControlAppearanceState state = e.State;
+            CustomAppearanceState customState = (CustomAppearanceState)state.CustomState!;
+            e.Graphics.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
+
+            // Setting colors. Note: these must not be differentiated in GetAppearance because they would mean non-standard differences,
+            // which would be rendered as an immediate change if color changes are not included in the fading animations.
+            Color textColor = state.ForeColor;
+            Color descColor = customState.DescriptionColor;
+            if (state.Pressed)
+            {
+                textColor = PressedTextColor;
+                descColor = PressedDescriptionColor;
+            }
+            else if (state.Hovered)
+            {
+                textColor = HighlightTextColor;
+                descColor = HighlightDescriptionColor;
+            }
+            else if (!state.Enabled)
+                textColor = descColor = DisabledForeColor;
+
+            var useTheming = UsesTheming;
+            TextFormatFlags formatFlags = this.GetFormatFlags();
+            bool gdiPlusTextRendering = UseCompatibleTextRendering;
+            StringFormat? sf = gdiPlusTextRendering ? formatFlags.ToStringFormat() : null;
+
+            Size proposedSize = Size - BordersAndPadding;
+            Size textSize = Size.Empty;
+            if (!String.IsNullOrEmpty(state.Text))
+                textSize = gdiPlusTextRendering
+                    ? e.Graphics.MeasureString(state.Text, Font, proposedSize, sf).ToSize()
+                    : TextRenderer.MeasureText(e.Graphics, state.Text, Font, proposedSize, formatFlags);
+
+            Size descSize = Size.Empty;
+            if (!String.IsNullOrEmpty(customState.DescriptionText) && textSize.Height < proposedSize.Height)
+            {
+                Size size = new Size(proposedSize.Width, proposedSize.Height - textSize.Height);
+                descSize = gdiPlusTextRendering
+                    ? e.Graphics.MeasureString(customState.DescriptionText, DescriptionFont, size, sf).ToSize()
+                    : TextRenderer.MeasureText(e.Graphics, customState.DescriptionText, DescriptionFont, size, formatFlags);
+            }
+
+            Size combinedSize = new Size(proposedSize.Width, Math.Min(proposedSize.Height, textSize.Height + descSize.Height));
+            int offset = !useTheming && state.Pressed && base.FlatStyle != FlatStyle.Flat ? 1 : 0;
+            int left = HorizontalBasePadding + (RtlTranslateContent(ImageAlign).AnyLeft() ? ImagePadding + ImageSize.Width + ImageTextMargin : 0) + offset;
+            int top = VerticalBasePadding + offset;
+            if ((formatFlags & TextFormatFlags.Bottom) != 0)
+                top += Math.Max(proposedSize.Height - combinedSize.Height, 0);
+            else if (((formatFlags & TextFormatFlags.VerticalCenter) != 0))
+                top += Math.Max(proposedSize.Height / 2 - combinedSize.Height / 2, 0);
+
+            if (!String.IsNullOrEmpty(Text))
+            {
+                Rectangle rectangle = new Rectangle(left + (useTheming ? 1 : 0), top, proposedSize.Width, Math.Min(textSize.Height, proposedSize.Height));
+                if (gdiPlusTextRendering)
+                {
+                    using Brush b = new SolidBrush(textColor);
+                    e.Graphics.DrawString(state.Text, Font, b, rectangle, sf);
+                }
+                else
+                    TextRenderer.DrawText(e.Graphics, state.Text, Font, rectangle, textColor, formatFlags);
+            }
+
+            if (!String.IsNullOrEmpty(customState.DescriptionText) && proposedSize.Height > textSize.Height)
+            {
+                Rectangle rectangle = new Rectangle(left + (useTheming ? 2 : 0), top + textSize.Height + (useTheming ? 1 : 2), proposedSize.Width, Math.Min(descSize.Height, proposedSize.Height - textSize.Height));
+                if (gdiPlusTextRendering)
+                {
+                    using Brush b = new SolidBrush(descColor);
+                    e.Graphics.DrawString(customState.DescriptionText, DescriptionFont, b, rectangle, sf);
+                }
+                else
+                    TextRenderer.DrawText(e.Graphics, customState.DescriptionText, DescriptionFont, rectangle, descColor, formatFlags);
+            }
         }
 
         private Rectangle GetImageBounds(PaintStateEventArgs e)
