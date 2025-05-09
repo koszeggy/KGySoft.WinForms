@@ -649,6 +649,7 @@ namespace KGySoft.WinForms.Controls
                     throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 visualsRenderingQuality = value;
+                ResetGlyphCache();
                 Invalidate();
             }
         }
@@ -1877,19 +1878,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             if (img != null)
-            {
-                GraphicsState? gState = null;
-                if (visualsRenderingQuality == RenderingQuality.High && img.Size != bounds.Size)
-                {
-                    gState = e.Graphics.Save();
-                    e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                    e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
-                }
-
                 e.Graphics.DrawImage(img, bounds);
-                if (gState != null)
-                    e.Graphics.Restore(gState);
-            }
 
             if (dispose)
                 img!.Dispose();
@@ -2063,14 +2052,18 @@ namespace KGySoft.WinForms.Controls
         private void ResetTheme()
         {
             base.Font = Font;
+            ResetGlyphCache();
+            defaultGlyphSize = Size.Empty;
+        }
 
+        private void ResetGlyphCache()
+        {
             cachedDefaultGlyphDisabled?.Dispose();
             cachedDefaultGlyphDisabled = null;
             cachedDefaultGlyphNormal?.Dispose();
             cachedDefaultGlyphNormal = null;
             cachedDefaultGlyphHovered?.Dispose();
             cachedDefaultGlyphHovered = null;
-            defaultGlyphSize = Size.Empty;
         }
 
         private bool ShouldSerializeFont() => textFont != null;
@@ -2150,7 +2143,9 @@ namespace KGySoft.WinForms.Controls
                 if (scaledDefaultGlyph.Width >= desiredSize.Width || desiredSize.Width < scaledDefaultGlyph.Width * 1.25f)
                     return scaledDefaultGlyph;
 
-                var resizedDefaultGlyph = scaledDefaultGlyph.Resize(desiredSize);
+                var resizedDefaultGlyph = visualsRenderingQuality == RenderingQuality.High
+                    ? scaledDefaultGlyph.Resize(desiredSize)
+                    : scaledDefaultGlyph.Resize(desiredSize, ScalingMode.NearestNeighbor);
                 scaledDefaultGlyph.Dispose();
                 return resizedDefaultGlyph;
             }
