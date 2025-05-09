@@ -239,11 +239,15 @@ namespace KGySoft.WinForms.WinApi
                 ThrowError(hResult);
         }
 
-        internal static Color GetThemeColor(IntPtr hTheme, int part, int state, int prop)
+        internal static Color GetThemeColor(IntPtr hTheme, int part, int state, int prop, Color defaultColor)
         {
             int hResult = NativeMethods.GetThemeColor(hTheme, part, state, prop, out COLORREF color);
+
+            // May occur when element is not defined in the current theme.
+            // For example, text color for radio buttons and checkboxes may available in high contrast mode only.
             if (hResult != Constants.S_OK)
-                ThrowError(hResult);
+                return defaultColor;
+
             return Color.FromArgb(color.R, color.G, color.B);
         }
 

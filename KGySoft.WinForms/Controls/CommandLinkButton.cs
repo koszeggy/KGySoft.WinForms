@@ -209,10 +209,10 @@ namespace KGySoft.WinForms.Controls
 
         private static Font DefaultNonThemedTextFont => defaultNonThemedTextFont ??= new Font(SystemFonts.DialogFont, FontStyle.Bold);
         private static bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && VisualStyleHelper.RenderWithVisualStyles;
-        private static Color ThemedForeColor => !IsNativeVisualStylesRenderingAvailable ? defaultForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL);
-        private static Color ThemedHoveredColor => !IsNativeVisualStylesRenderingAvailable ? defaultHoveredColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT);
-        private static Color ThemedPressedColor => !IsNativeVisualStylesRenderingAvailable ? defaultPressedColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED);
-        private static Color ThemedDisabledColor => !IsNativeVisualStylesRenderingAvailable ? defaultDisabledColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED);
+        private static Color ThemedForeColor => !IsNativeVisualStylesRenderingAvailable ? defaultForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL, defaultForeColor);
+        private static Color ThemedHoveredColor => !IsNativeVisualStylesRenderingAvailable ? defaultHoveredColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT, defaultHoveredColor);
+        private static Color ThemedPressedColor => !IsNativeVisualStylesRenderingAvailable ? defaultPressedColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED, defaultPressedColor);
+        private static Color ThemedDisabledColor => !IsNativeVisualStylesRenderingAvailable ? defaultDisabledColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED, defaultDisabledColor);
 
         #endregion
 
@@ -1069,8 +1069,8 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Methods
 
-        private static Color GetDefaultTextColor(COMMANDLINKSTATES state) =>
-            VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_COMMANDLINK, (int)state);
+        private static Color GetDefaultTextColor(COMMANDLINKSTATES state, Color defaultColor) =>
+            VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_COMMANDLINK, (int)state, defaultColor);
 
         #endregion
 

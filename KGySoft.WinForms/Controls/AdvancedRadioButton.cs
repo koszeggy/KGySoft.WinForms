@@ -582,12 +582,13 @@ namespace KGySoft.WinForms.Controls
         {
             int partId = (int)(Appearance == Appearance.Normal ? BUTTONPARTS.BP_RADIOBUTTON : BUTTONPARTS.BP_PUSHBUTTON);
             int stateId = GetSystemState();
-            Color foreColor = !Enabled ? DisabledForeColor : base.ForeColor;
-            if (lastFlatStyle == FlatStyle.Standard && Enabled && VisualStyleHelper.RenderWithVisualStyles && foreColor == SystemColors.ControlText)
-                foreColor = VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, partId, stateId);
+            bool isEnabled = Enabled;
+            Color foreColor = !isEnabled ? DisabledForeColor : base.ForeColor;
+            if (lastFlatStyle == FlatStyle.Standard && isEnabled && VisualStyleHelper.RenderWithVisualStyles && foreColor == SystemColors.ControlText)
+                foreColor = VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, partId, stateId, foreColor);
             return new ControlAppearanceState(partId, stateId)
             {
-                BackColor = Enabled ? BackColor : DisabledBackColor,
+                BackColor = isEnabled ? BackColor : DisabledBackColor,
                 ForeColor = foreColor,
                 Enabled = Enabled,
                 Hovered = isHovered,

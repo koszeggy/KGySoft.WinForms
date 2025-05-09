@@ -694,12 +694,13 @@ namespace KGySoft.WinForms.Controls
         {
             int partId = (int)BUTTONPARTS.BP_PUSHBUTTON;
             int stateId = (int)GetSystemState();
-            Color foreColor = !Enabled ? DisabledForeColor : base.ForeColor;
-            if (lastFlatStyle == FlatStyle.Standard && Enabled && VisualStyleHelper.RenderWithVisualStyles && foreColor == SystemColors.ControlText)
-                foreColor = VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, partId, stateId);
+            bool isEnabled = Enabled;
+            Color foreColor = !isEnabled ? DisabledForeColor : base.ForeColor;
+            if (lastFlatStyle == FlatStyle.Standard && isEnabled && VisualStyleHelper.RenderWithVisualStyles && foreColor == SystemColors.ControlText)
+                foreColor = VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, partId, stateId, foreColor);
             return new ControlAppearanceState(partId, stateId)
             {
-                BackColor = Enabled ? BackColor : DisabledBackColor,
+                BackColor = isEnabled ? BackColor : DisabledBackColor,
                 ForeColor = foreColor,
                 Enabled = Enabled,
                 Hovered = isHovered,
@@ -872,20 +873,9 @@ namespace KGySoft.WinForms.Controls
                 PerformLayout();
         }
 
-        private void ResetSizeCache()
-        {
-            preferredSizeCache.Clear();
-        }
-
-        private bool ShouldSerializeDisabledBackColor()
-        {
-            return disabledBackColor != Color.Empty;
-        }
-
-        private bool ShouldSerializeDisabledForeColor()
-        {
-            return disabledForeColor != Color.Empty;
-        }
+        private void ResetSizeCache() => preferredSizeCache.Clear();
+        private bool ShouldSerializeDisabledBackColor() => disabledBackColor != Color.Empty;
+        private bool ShouldSerializeDisabledForeColor() => disabledForeColor != Color.Empty;
 
         private bool ShouldSerializeImage()
         {
