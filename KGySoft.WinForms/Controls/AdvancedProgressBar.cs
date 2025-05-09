@@ -291,7 +291,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Properties
 
-        private bool IsClassicAppearance => style == AdvancedProgressBarStyle.Classic || !VisualStyleHelper.RenderWithVisualStyles;
+        private bool IsClassicAppearance => style == AdvancedProgressBarStyle.Classic || !VisualStyleHelper.RenderWithVisualStyles || VisualStyleHelper.HighContrast;
 
         private int MarqueeBlockWidth
         {
