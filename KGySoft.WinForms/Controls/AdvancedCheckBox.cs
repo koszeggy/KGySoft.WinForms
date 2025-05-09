@@ -561,10 +561,15 @@ namespace KGySoft.WinForms.Controls
 
         private ControlAppearanceState GetAppearance()
         {
-            return new ControlAppearanceState((int)(Appearance == Appearance.Normal ? BUTTONPARTS.BP_CHECKBOX : BUTTONPARTS.BP_PUSHBUTTON), GetSystemState())
+            int partId = (int)(Appearance == Appearance.Normal ? BUTTONPARTS.BP_CHECKBOX : BUTTONPARTS.BP_PUSHBUTTON);
+            int stateId = GetSystemState();
+            Color foreColor = !Enabled ? DisabledForeColor : base.ForeColor;
+            if (lastFlatStyle == FlatStyle.Standard && Enabled && VisualStyleHelper.RenderWithVisualStyles && foreColor == SystemColors.ControlText)
+                foreColor = VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, partId, stateId);
+            return new ControlAppearanceState(partId, stateId)
             {
                 BackColor = Enabled ? BackColor : DisabledBackColor,
-                ForeColor = Enabled ? ForeColor : DisabledForeColor,
+                ForeColor = foreColor,
                 Enabled = Enabled,
                 Hovered = isHovered,
                 Pressed = isPressed,
