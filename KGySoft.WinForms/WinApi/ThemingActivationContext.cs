@@ -133,10 +133,17 @@ namespace KGySoft.WinForms.WinApi
         {
             if (cookie != IntPtr.Zero)
             {
-                if (Kernel32.DeactivateActCtx(0, cookie))
+                try
                 {
-                    // deactivation succeeded...
-                    cookie = IntPtr.Zero;
+                    if (Kernel32.DeactivateActCtx(0, cookie))
+                    {
+                        // deactivation succeeded...
+                        cookie = IntPtr.Zero;
+                    }
+                }
+                catch (Exception e) when (!e.IsCritical())
+                {
+                    // sometimes throws a System.Runtime.InteropServices.SEHException
                 }
             }
         }
