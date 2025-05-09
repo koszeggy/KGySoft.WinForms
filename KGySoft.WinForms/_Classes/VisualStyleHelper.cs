@@ -198,95 +198,91 @@ namespace KGySoft.WinForms
 
             var (hTheme, part, state) = key;
             Size realSize = UxTheme.GetThemePartSize(hTheme, IntPtr.Zero, part, state, (int)ThemeSizeType.True);
-            using Bitmap bmpBlack = new Bitmap(realSize.Width, realSize.Height);
-            using (var g = Graphics.FromImage(bmpBlack))
-            {
-                g.Clear(Color.Black);
-                var hdc = g.GetHdc();
-                try
-                {
-                    UxTheme.DrawThemeBackground(hTheme, hdc, part, state, new Rectangle(Point.Empty, realSize));
-                }
-                finally
-                {
-                    g.ReleaseHdc(hdc);
-                }
-            }
-
-            using Bitmap bmpWhite = new Bitmap(realSize.Width, realSize.Height);
-            using (var g = Graphics.FromImage(bmpWhite))
-            {
-                g.Clear(Color.White);
-                var hdc = g.GetHdc();
-                try
-                {
-                    UxTheme.DrawThemeBackground(hTheme, hdc, part, state, new Rectangle(Point.Empty, realSize));
-                }
-                finally
-                {
-                    g.ReleaseHdc(hdc);
-                }
-            }
-
+            using Bitmap bmpBlack = PaintIntoBitmap(Color.Black);
+            using Bitmap bmpWhite = PaintIntoBitmap(Color.White);
             return ReconstructWithAlpha(bmpBlack, bmpWhite);
+
+            #region Local Methods
+
+            Bitmap PaintIntoBitmap(Color backColor)
+            {
+                // Using just the hdc of g would cause black alpha-blended pixels, but using BufferedGraphics solves the problem
+                var bitmap = new Bitmap(realSize.Width, realSize.Height, PixelFormat.Format32bppRgb);
+                using var g = Graphics.FromImage(bitmap);
+                using BufferedGraphicsContext context = new BufferedGraphicsContext();
+                using BufferedGraphics bg = context.Allocate(g, new Rectangle(Point.Empty, realSize));
+                bg.Graphics.Clear(backColor);
+                var hdc = bg.Graphics.GetHdc();
+                try
+                {
+                    UxTheme.DrawThemeBackground(hTheme, hdc, part, state, new Rectangle(Point.Empty, realSize));
+                }
+                finally
+                {
+                    bg.Graphics.ReleaseHdc(hdc);
+                }
+
+                bg.Render(g);
+                return bitmap;
+            }
+
+            #endregion
         }
 
         private static Bitmap ReconstructWithAlpha(Bitmap blackBg, Bitmap whiteBg)
         {
-            using var bmpDataWhite = whiteBg.GetReadableBitmapData();
-            using var bmpDataBlack = blackBg.GetReadableBitmapData();
+            using IReadableBitmapData bmpDataWhite = whiteBg.GetReadableBitmapData();
+            using IReadableBitmapData bmpDataBlack = blackBg.GetReadableBitmapData();
             int width = bmpDataWhite.Width;
             int height = bmpDataWhite.Height;
             Bitmap result = new Bitmap(width, height, PixelFormat.Format32bppArgb);
-            using var bmpDataResult = result.GetWritableBitmapData();
+            using IWritableBitmapData bmpDataResult = result.GetWritableBitmapData();
 
-            for (int y = 0; y < height; y++)
+            const uint black = 0xFF000000;
+            const uint white = 0xFFFFFFFF;
+            var rowBlack = bmpDataBlack.FirstRow;
+            var rowWhite = bmpDataWhite.FirstRow;
+            var rowResult = bmpDataResult.FirstRow;
+            do
             {
                 for (int x = 0; x < width; x++)
                 {
-                    Color32 colorOnWhite = bmpDataWhite.GetColor32(x, y);
-                    Color32 colorOnBlack = bmpDataBlack.GetColor32(x, y);
+                    Color32 colorOnWhite = rowWhite[x];
+                    Color32 colorOnBlack = rowBlack[x];
 
                     // colors are the same: no transparency
                     if (colorOnBlack == colorOnWhite)
                     {
-                        bmpDataResult.SetColor32(x, y, colorOnWhite);
+                        rowResult[x] = colorOnWhite;
                         continue;
                     }
 
-                    // colors equal to background: full transparency
-                    if (colorOnBlack.ToArgb() == Color.Black.ToArgb() && colorOnWhite.ToArgb() == Color.White.ToArgb())
-                    {
-                        bmpDataResult.SetColor32(x, y, default);
+                    // colors equal to background: full transparency (no need to set the color, it's already transparent)
+                    if (colorOnBlack.ToArgbUInt32() == black && colorOnWhite.ToArgbUInt32() == white)
                         continue;
-                    }
 
                     // colors are different: calculate original color with alpha
-                    bmpDataResult.SetColor32(x, y, RestoreAlphaColor(colorOnBlack, colorOnWhite));
+                    rowResult[x] = RestoreAlphaColor(colorOnBlack, colorOnWhite);
                 }
-            }
+            } while (rowBlack.MoveNextRow() && rowWhite.MoveNextRow() && rowResult.MoveNextRow());
 
             return result;
         }
 
         private static Color32 RestoreAlphaColor(Color32 cb, Color32 cw)
         {
-            static int Clamp(int value) => value < 0 ? 0 : (value > 255 ? 255 : value);
+            float alphaR = 1f - (cw.R - cb.R) / 255f;
+            float alphaG = 1f - (cw.G - cb.G) / 255f;
+            float alphaB = 1f - (cw.B - cb.B) / 255f;
+            float alpha = (alphaR + alphaG + alphaB) / 3f;
+            if (alpha == 0f)
+                return default; // fully transparent
 
-            int alphaR = (cw.R == cb.R) ? 255 : (255 * cb.R) / Math.Max(1, cw.R - cb.R);
-            int alphaG = (cw.G == cb.G) ? 255 : (255 * cb.G) / Math.Max(1, cw.G - cb.G);
-            int alphaB = (cw.B == cb.B) ? 255 : (255 * cb.B) / Math.Max(1, cw.B - cb.B);
-
-            int alpha = Clamp((alphaR + alphaG + alphaB) / 3);
-
-            if (alpha == 0)
-                return Color.Empty;
-
-            int r = Clamp((cb.R * 255) / alpha);
-            int g = Clamp((cb.G * 255) / alpha);
-            int b = Clamp((cb.B * 255) / alpha);
-
-            return Color.FromArgb(alpha, r, g, b);
+            int r = (int)(cb.R / alpha);
+            int g = (int)(cb.G / alpha);
+            int b = (int)(cb.B / alpha);
+            int a = (int)(alpha * 255);
+            return new Color32((byte)a, (byte)r, (byte)g, (byte)b);
         }
 
         #endregion
