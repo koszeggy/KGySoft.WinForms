@@ -63,6 +63,8 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_CLEAR = 0x0303;
         internal const int WM_UNDO = 0x0304;
         internal const int WM_USER = 0x0400;
+        internal const int WM_DPICHANGED_BEFOREPARENT = 0x02E2;
+        internal const int WM_DPICHANGED_AFTERPARENT = 0x02E3;
 
         internal const int ICON_SMALL = 0;
         internal const int ICON_BIG = 1;

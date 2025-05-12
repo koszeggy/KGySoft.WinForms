@@ -73,9 +73,9 @@ namespace KGySoft.WinForms.Controls
 
         private bool isElevated;
         private bool isImageUpToDate = true;
-        private Image? currentImage;
-        private FlatStyle lastFlatStyle = FlatStyle.Standard;
-        private FlatStyle reportedFlatStyle = FlatStyle.Standard;
+        private Image? currentImage; // the actual displayed image, including the shield icon when base.Image is null
+        private FlatStyle lastFlatStyle = FlatStyle.Standard; // the explicitly set or the detected flat style changed in base
+        private FlatStyle reportedFlatStyle = FlatStyle.Standard; // the flat style that is reported by the control (can be different when base does not support System)
         private FlatStyle lastAdapterType;
         private RenderingQuality textRenderingQuality;
         private Color disabledForeColor;
@@ -92,6 +92,7 @@ namespace KGySoft.WinForms.Controls
         private bool isAlternativeDefaultImage;
         private Bitmap? cachedSecurityShieldImage;
         private Size cachedSecurityShieldImageSize;
+        private PointF lastScale;
 
         #endregion
 
@@ -335,14 +336,19 @@ namespace KGySoft.WinForms.Controls
                 Size currentSize = this.ScaleSize(referenceIconSize);
                 if (currentSize != cachedSecurityShieldImageSize || cachedSecurityShieldImage == null)
                 {
-                    if (ReferenceEquals(cachedSecurityShieldImage, currentImage))
+                    if (cachedSecurityShieldImage != null && ReferenceEquals(cachedSecurityShieldImage, currentImage))
+                    {
                         isImageUpToDate = false;
+                        if (ReferenceEquals(cachedSecurityShieldImage, base.Image))
+                            base.Image = null;
+                    }
+
                     cachedSecurityShieldImage?.Dispose();
                     using var icon = Icons.SystemShield;
                     cachedSecurityShieldImage = icon.ExtractNearestBitmap(currentSize, PixelFormat.Format32bppArgb);
                     cachedSecurityShieldImageSize = currentSize;
                     if (!isImageUpToDate)
-                        CheckImage();
+                        Invalidate();
                 }
 
                 return cachedSecurityShieldImage;
@@ -484,6 +490,13 @@ namespace KGySoft.WinForms.Controls
         #region Protected Methods
 
         /// <inheritdoc />
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            CheckDpiChange();
+        }
+
+        /// <inheritdoc />
         protected override void OnSystemColorsChanged(EventArgs e)
         {
             // Needed to react Theme changes (classic to non-classic and vice versa)
@@ -494,15 +507,9 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
-            if (base.FlatStyle != FlatStyle.System)
-            {
-                base.WndProc(ref m);
-                return;
-            }
-
             switch (m.Msg)
             {
-                case Constants.WM_PAINT:
+                case Constants.WM_PAINT when base.FlatStyle == FlatStyle.System:
                     // Image and FlatStyle are not overridable properties so in case of native rendering reacting their change here.
                     // (On custom rendering, image change is handled in OnPaint)
                     if (base.FlatStyle != lastFlatStyle)
@@ -515,6 +522,21 @@ namespace KGySoft.WinForms.Controls
                         PerformLayout();
 
                     base.WndProc(ref m);
+                    return;
+
+                // Non-System FlatStyle with elevated icon: invalidating the icon
+                case Constants.WM_DPICHANGED_BEFOREPARENT when isElevated && base.FlatStyle != FlatStyle.System && ReferenceEquals(base.Image, cachedSecurityShieldImage):
+                    base.WndProc(ref m);
+                    isImageUpToDate = false;
+                    base.Image = null; // it will be updated in CheckImage
+                    Invalidate();
+                    return;
+
+                // System FlatStyle: the WM_DPICHANGED_AFTERPARENT resets the elevated icon, but we want to prevent if an image is set
+                case Constants.WM_DPICHANGED_AFTERPARENT when isElevated && base.FlatStyle == FlatStyle.System && base.Image != null:
+                    base.WndProc(ref m);
+                    isImageUpToDate = false;
+                    Invalidate();
                     return;
             }
 
@@ -552,6 +574,12 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
+        }
+
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+            CheckDpiChange();
         }
 
         /// <inheritdoc />
@@ -778,6 +806,9 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private bool CheckImage()
         {
+            if (!IsHandleCreated)
+                return true;
+
             // if image is up-to-date checking consistency only (to handle setting base.Image)
             if (isImageUpToDate)
             {
@@ -882,6 +913,23 @@ namespace KGySoft.WinForms.Controls
             if (currentImage == null)
                 return false;
             return !isElevated && ReferenceEquals(currentImage, cachedSecurityShieldImage);
+        }
+
+        private void CheckDpiChange()
+        {
+            PointF scale = this.GetScale();
+            if (scale == lastScale)
+                return;
+
+            lastScale = scale;
+            if (isElevated)
+            {
+                base.Image = null;
+                isImageUpToDate = false;
+                Invalidate();
+            }
+
+            ResetSizeCache();
         }
 
         #endregion
