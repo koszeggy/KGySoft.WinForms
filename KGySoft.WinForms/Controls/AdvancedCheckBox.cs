@@ -29,7 +29,6 @@ using KGySoft.WinForms.WinApi;
 
 #endregion
 
-
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>

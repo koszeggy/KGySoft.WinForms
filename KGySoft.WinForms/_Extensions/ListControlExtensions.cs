@@ -1,4 +1,21 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ListControlExtensions.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -6,84 +23,35 @@ using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Windows.Forms;
+
 using KGySoft.Collections;
 using KGySoft.CoreLibraries;
-using KGySoft.Libraries;
 using KGySoft.Libraries.Language;
 using KGySoft.Reflection;
+
+#endregion
 
 namespace KGySoft.WinForms
 {
     /// <summary>
     /// Extension methods for <see cref="ListControl"/> class.
     /// </summary>
-    [Obsolete("This class will be completely removed. Localization can be done in Form/UserControl.ApplyResources, extra items must be provided by Model or VM")]
+    [Obsolete("This class is obsoleted along with the SelectionPlusItem enumeration. Auto translation does not work anymore, extra items must be provided by Model or VM")]
     public static class ListControlExtensions
     {
+        #region Methods
+
+        #region Public Methods
+
         /// <summary>
-        /// Gets whether the there is no selected item in the list control (<see cref="ListControl.SelectedValue"/> or is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
+        /// Gets whether the there is no selected item in the list control (<see cref="ListControl.SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
         /// </summary>
         public static bool IsEmpty(this ListControl control)
         {
             IConvertible convertible;
-            return control.SelectedValue == null || control.SelectedValue == DBNull.Value 
+            return control.SelectedValue == null || control.SelectedValue == DBNull.Value
                 || ((convertible = control.SelectedValue as IConvertible) != null && convertible.ToInt32(CultureInfo.InvariantCulture) == ControlExtensions.NotSelectedValue);
         }
-
-        /// <summary>
-        /// Allows DBNull for non display/value columns.
-        /// </summary>
-        private static void SetAllowDBNull(DataTable dt, DataColumn colDisplay, DataColumn colValue)
-        {
-            if (dt.Columns.Count <= 2)
-                return;
-
-            foreach (DataColumn column in dt.Columns)
-            {
-                if (column.In(colDisplay, colValue))
-                    continue;
-                if (!column.AllowDBNull)
-                    column.AllowDBNull = true;
-            }
-        }
-
-        private static void BindControl(ListControl control, object dataSource, string valueMember, string displayMember)
-        {
-            ListBox lst = null;
-            ComboBox cmb = control as ComboBox;
-            if (cmb != null)
-                cmb.BeginUpdate();
-            else
-            {
-                lst = control as ListBox;
-                if (lst != null)
-                    lst.BeginUpdate();
-            }
-            try
-            {
-                control.DisplayMember = displayMember;
-                control.ValueMember = valueMember;
-                control.DataSource = dataSource;
-            }
-            finally
-            {
-                if (cmb != null)
-                    cmb.EndUpdate();
-                else if (lst != null)
-                    lst.EndUpdate();
-            }
-        }
-
-        private static object ChangeType(Type type, object value)
-        {
-            if (type == value.GetType())
-                return value;
-            if (type.IsEnum)
-                return Enum.ToObject(type, value);
-            return Convert.ChangeType(value, type);
-        }
-
-        #region Binding to DataTable
 
         /// <summary>
         /// Binds the list control to a <see cref="DataTable"/>.
@@ -201,10 +169,6 @@ namespace KGySoft.WinForms
             LoadFrom(control, dataTable, valueMember, displayMember, false, null, false, SelectionPlusItems.None);
         }
 
-        #endregion
-
-        #region Binding to Enum
-
         /// <summary>
         /// Binds list control box to the values of an <see cref="Enum"/>.
         /// </summary>
@@ -306,10 +270,6 @@ namespace KGySoft.WinForms
             LoadFrom(control, enumType, null, false, null, false, SelectionPlusItems.None);
         }
 
-        #endregion
-
-        #region Binding to IEnumerable
-
         /// <summary>
         /// Binds the list control to a <paramref name="collection"/>.
         /// </summary>
@@ -350,9 +310,9 @@ namespace KGySoft.WinForms
 
             // adding items and translating
             List<KeyValuePair<object, string>> result = new List<KeyValuePair<object, string>>(
-                from item in collection
-                let displayValue = (Reflector.GetProperty(item, propDisplay) ?? String.Empty).ToString()
-                select new KeyValuePair<object, string>(
+                    from item in collection
+                    let displayValue = (Reflector.GetProperty(item, propDisplay) ?? String.Empty).ToString()
+                    select new KeyValuePair<object, string>(
                     Reflector.GetProperty(item, propValue),
                     !translateNames ? displayValue : Language.Translate(displayValue + (!String.IsNullOrEmpty(distinctionPostfix) ? Language.DistinctionSeparator + distinctionPostfix : String.Empty))));
 
@@ -412,6 +372,65 @@ namespace KGySoft.WinForms
         {
             LoadFrom(control, collection, valueMember, displayMember, false, null, false, SelectionPlusItems.None);
         }
+
+        #endregion
+
+        #region Private Methods
+
+        /// <summary>
+        /// Allows DBNull for non display/value columns.
+        /// </summary>
+        private static void SetAllowDBNull(DataTable dt, DataColumn colDisplay, DataColumn colValue)
+        {
+            if (dt.Columns.Count <= 2)
+                return;
+
+            foreach (DataColumn column in dt.Columns)
+            {
+                if (column.In(colDisplay, colValue))
+                    continue;
+                if (!column.AllowDBNull)
+                    column.AllowDBNull = true;
+            }
+        }
+
+        private static void BindControl(ListControl control, object dataSource, string valueMember, string displayMember)
+        {
+            ListBox lst = null;
+            ComboBox cmb = control as ComboBox;
+            if (cmb != null)
+                cmb.BeginUpdate();
+            else
+            {
+                lst = control as ListBox;
+                if (lst != null)
+                    lst.BeginUpdate();
+            }
+            try
+            {
+                control.DisplayMember = displayMember;
+                control.ValueMember = valueMember;
+                control.DataSource = dataSource;
+            }
+            finally
+            {
+                if (cmb != null)
+                    cmb.EndUpdate();
+                else if (lst != null)
+                    lst.EndUpdate();
+            }
+        }
+
+        private static object ChangeType(Type type, object value)
+        {
+            if (type == value.GetType())
+                return value;
+            if (type.IsEnum)
+                return Enum.ToObject(type, value);
+            return Convert.ChangeType(value, type);
+        }
+
+        #endregion
 
         #endregion
     }

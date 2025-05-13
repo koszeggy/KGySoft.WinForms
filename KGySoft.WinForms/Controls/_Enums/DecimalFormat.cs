@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: HyperlinkResolveMode.cs
+//  File: DecimalFormat.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -13,26 +13,21 @@
 
 #endregion
 
-namespace KGySoft.WinForms
+namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents hyperlink resolve modes
+    /// Possible formats of the <see cref="DecimalTextBox"/> control.
     /// </summary>
-    public enum HyperlinkResolveMode
+    public enum DecimalFormat
     {
         /// <summary>
-        /// Hyperlinks are not resolved.
+        /// Represents fixed size formatting.
         /// </summary>
-        None,
+        Fixed,
 
         /// <summary>
-        /// Only explicit hyperlinks are resolved, such as <c><example>&gt;a href="http://kgysoft.try.hu"&lt;link&gt;/a&lt;</example></c>
+        /// Represents general number formatting.
         /// </summary>
-        ResolveHrefsOnly,
-
-        /// <summary>
-        /// Every URLs are resolved in text.
-        /// </summary>
-        ResolveAll
+        Number
     }
 }

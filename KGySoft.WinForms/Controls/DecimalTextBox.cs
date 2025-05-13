@@ -1,159 +1,76 @@
-﻿/*******************************************
- * DecimalTextBox - KGy
- * 
- * Fícsörök:
- * - Disabled módú színezhet?ség (mivel AdvancedTextBox-ból származik)
- * - Value (decimal) property
- * - Integer, Float, Text, Object típusú Value overloadok (AsInteger, AsText, AsObject, stb)
- * - Szorzó karakterek (t = ezer; m = millió; y = milliárd) támogatása
- * - Beállítható értékhatárok
- * - Blank állapot (kikapcsolható); hozzá BlankText (default: "", de lehet pl. "0" vagy "(Blank)")
- * - DecimalFormat (Number: ezres elválasztókkal való megjelenítés; Fixed: fixpontos, formázatlan)
- * - DecimalDigits: tizedesek száma, negatív érték esetén kerekítés adott jegyre
- */
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: DecimalTextBox.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Globalization;
 using System.Threading;
 using System.Windows.Forms;
+
 using KGySoft.CoreLibraries;
 using KGySoft.WinForms.WinApi;
 
+#endregion
+
 namespace KGySoft.WinForms.Controls
 {
-
-    #region namespace szintű típusok (enum, struct)
-
-    /// <summary>
-    /// Possible formats of <see cref="DecimalTextBox"/> control.
-    /// </summary>
-    public enum DecimalFormat
-    {
-        /// <summary>
-        /// Represents fixed size formatting.
-        /// </summary>
-        Fixed,
-
-        /// <summary>
-        /// Represents general number formatting.
-        /// </summary>
-        Number
-    }
-
-    /// <summary>
-    /// Represents possible ranges of <see cref="DecimalTextBox"/> control.
-    /// </summary>
-    public enum DecimalRange
-    {
-        /// <summary>
-        /// Any value is accepted.
-        /// </summary>
-        Any,
-
-        /// <summary>
-        /// Positive values are accepted, excluding zero value.
-        /// </summary>
-        Positive,
-
-        /// <summary>
-        /// Negative values are accepted, excluding zero value.
-        /// </summary>
-        Negative,
-
-        /// <summary>
-        /// Positive values are accepted, including zero value.
-        /// </summary>
-        PositiveNull,
-
-        /// <summary>
-        /// Negative values are accepted, including zero value.
-        /// </summary>
-        NegativeNull,
-
-        /// <summary>
-        /// Accepted values are controlled by <see cref="DecimalTextBox.RangeMinValue"/> and <see cref="DecimalTextBox.RangeMaxValue"/> properties.
-        /// </summary>
-        MinMax
-    }
-
-    /// <summary>
-    /// Controls <see cref="DecimalTextBox.Value"/> in <see cref="DecimalTextBox.Blank"/> state.
-    /// </summary>
-    public enum DecimalValueOnBlank
-    {
-        /// <summary>
-        /// Indicates that <see cref="DecimalTextBox.Value"/> should return zero in <see cref="DecimalTextBox.Blank"/> state
-        /// </summary>
-        Zero,
-
-        /// <summary>
-        /// Indicates that <see cref="DecimalTextBox.Value"/> should return the internally stored value in <see cref="DecimalTextBox.Blank"/> state
-        /// </summary>
-        Value,
-
-        /// <summary>
-        /// Indicates that <see cref="DecimalTextBox.Value"/> should return lower limit minus one or <see cref="Decimal.MinValue"/> in <see cref="DecimalTextBox.Blank"/> state.
-        /// </summary>
-        LowerLimitMinusOne,
-
-        /// <summary>
-        /// Indicates that <see cref="DecimalTextBox.Value"/> should return upper limit plus one or <see cref="Decimal.MaxValue"/> in <see cref="DecimalTextBox.Blank"/> state.
-        /// </summary>
-        UpperLimitPlusOne,
-
-        /// <summary>
-        /// Indicates that <see cref="DecimalTextBox.Value"/> should return <see cref="Int32.MinValue"/> in <see cref="DecimalTextBox.Blank"/> state.
-        /// </summary>
-        MinInt,
-
-        /// <summary>
-        /// Indicates that <see cref="DecimalTextBox.Value"/> should return <see cref="Int32.MaxValue"/> in <see cref="DecimalTextBox.Blank"/> state.
-        /// </summary>
-        MaxInt,
-
-        /// <summary>
-        /// Indicates that <see cref="DecimalTextBox.Value"/> should return <see cref="Decimal.MinValue"/> in <see cref="DecimalTextBox.Blank"/> state.
-        /// </summary>
-        MinDecimal,
-
-        /// <summary>
-        /// Indicates that <see cref="DecimalTextBox.Value"/> should return <see cref="Decimal.MaxValue"/> in <see cref="DecimalTextBox.Blank"/> state.
-        /// </summary>
-        MaxDecimal
-    }
-
-    #endregion
-
-    // TODO: + ne csak BS, hanem Del esetén is visszaváltson Blank-re (olyan, mintha KeyUp-ban ez nem detektálódna, úgyhogy talán TextChanged-be kéne tenni)
-    //       + Blank módban ne csak a paste, hanem Cut (del/backspace) letiltása is megtörténjen
-    //       - A szorzók opcionálisak (és esetleg konfigurálhatóak) legyenek
-    //       - ThousandSeparator, DecimalSeparator, NegativeSign jöhessen Language-b?l, CurrentCulture-b?l (mint most, csak ne szálból), vagy lehessen custom
-    //         -> TODO: összes Decimal.Parse-ban Language/CurrentCulture...
+    // TODO: features into remarks:
+    // - Coloring in disabled mode (by the base AdvancedTextBox)
+    // - Value (decimal) property
+    // - multiplier characters (t = thousand; m = million; y = billion (yard)) support
+    // - Settable value limits
+    // - Blank state (can be set only if BlankEnabled is true)
+    // - DecimalFormat
+    // - DecimalDigits: number of decimal digits, negative value means rounding
     /// <summary>
     /// A text box to edit decimal values.
     /// </summary>
-    public class DecimalTextBox: AdvancedTextBox
+    public class DecimalTextBox : AdvancedTextBox
     {
-        #region Osztályon belüli típusok
+        #region Nested structs
+
+        #region DecimalMinMax struct
 
         private struct DecimalMinMax
         {
+            #region Fields
+
             private decimal minValue;
             private decimal maxValue;
 
+            #endregion
+
+            #region Properties
+
             internal decimal MinValue
             {
-                get { return minValue; }
-                set { minValue = value; }
+                get => minValue;
+                set => minValue = value;
             }
 
             internal decimal MaxValue
             {
-                get { return maxValue; }
-                set { maxValue = value; }
+                get => maxValue;
+                set => maxValue = value;
             }
+
+            #endregion
+
+            #region Constructors
 
             internal DecimalMinMax(decimal min, decimal max)
             {
@@ -161,29 +78,35 @@ namespace KGySoft.WinForms.Controls
                 maxValue = max;
             }
 
-            public override string ToString()
-            {
-                return string.Format("{0}; {1}", minValue, maxValue);
-            }
+            #endregion
+
+            #region Methods
+
+            public override string ToString() => $"{minValue}; {maxValue}";
+
+            #endregion
         }
 
         #endregion
 
-        #region Objektumváltozók
+        #endregion
 
-        private char[] multipliers = { 'y', 'm', 't' };
-        private decimal value = 0; // a tárolt érték
-        private DecimalFormat format = DecimalFormat.Number; // a formátum
-        private sbyte decimalDigits = 0; // tizedesek száma
-        private bool focused = false;  // mert az igazi fókusz még a Leave-kor igaz
-        private bool blank = true;     // a "semmilyen érték" beállítása
-        private string blankText = ""; // a "semmilyen érték" szövege
-        private bool blankEnabled = true; // engedett-e a "semmilyen érték" állapot
-        private char thousandSeparator = '\0'; // hogy ne kelljen mindig a CultureInfo-t kreálni
-        private char decimalSeparator = '\0';
-        private char negativeSign = '\0';
-        private DecimalRange range = DecimalRange.Any; // megengedett tartomány (megsértése esetén Blank lesz vagy ha az nem engedett, hiba dobódik)
-        private DecimalMinMax rangeMinMax = new DecimalMinMax(0, 0); // megengedett minimum / maximum érték (csak MinMax Range esetén)
+        #region Fields
+
+        private readonly char[] multipliers = { 'y', 'm', 't' };
+        private readonly char thousandSeparator; // TODO: remove cache or reset on system preferences change
+        private readonly char decimalSeparator;
+        private readonly char negativeSign;
+
+        private decimal value;
+        private DecimalFormat format = DecimalFormat.Number;
+        private sbyte decimalDigits; // decimals after the decimal separator
+        private bool focused;  // because the real Focused is still true in the Leave event
+        private bool blank = true;
+        private string blankText = "";
+        private bool blankEnabled = true;
+        private DecimalRange range = DecimalRange.Any; // when violated, going to Blank, or exception
+        private DecimalMinMax rangeMinMax = new DecimalMinMax(0, 0);
         private HorizontalAlignment align = HorizontalAlignment.Right;
         private DecimalValueOnBlank valueOnBlank = DecimalValueOnBlank.Zero;
         private bool changeValueOnTextChange;
@@ -191,7 +114,27 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region DecimalTextBox property-k
+        #region Events
+
+        /// <summary>
+        /// Occurs when <see cref="Value"/> has been changed.
+        /// </summary>
+        [Category("DecimalTextBox")]
+        [Description("Occurs when Value has been changed.")]
+        public event EventHandler? ValueChanged;
+
+        /// <summary>
+        /// Occurs when <see cref="Blank"/> has been changed.
+        /// </summary>
+        [Category("DecimalTextBox")]
+        [Description("Occurs when Blank has been changed.")]
+        public event EventHandler? BlankChanged;
+
+        #endregion
+
+        #region Properties
+
+        #region Public Properties
 
         /// <summary>
         /// Gets or sets whether the <see cref="DecimalTextBox"/> is in blank state.
@@ -202,14 +145,14 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool Blank
         {
-            get { return blank; }
+            get => blank;
             set
             {
                 bool refresh = false;
 
                 if (blank != value && (blankEnabled || !value))
                 {
-                    // ha not blank beállítás van, lehet, hogy korrigálni kell a value-t
+                    // when turning off blank, making sure Value is in range
                     bool blankOld = blank;
                     blank = value;
                     if (!value)
@@ -232,9 +175,9 @@ namespace KGySoft.WinForms.Controls
                     else refresh = true;
                     if (refresh)
                         RefreshValue();
-                    OnBlankChanged(new EventArgs());
+                    OnBlankChanged(EventArgs.Empty);
                     if (blankOld != blank && this.value != BlankValue)
-                        OnValueChanged(new EventArgs());
+                        OnValueChanged(EventArgs.Empty);
 
                 }
                 else if (blank && Text != blankText)
@@ -252,7 +195,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue("")]
         public string BlankText
         {
-            get { return blankText; }
+            get => blankText;
             set
             {
                 blankText = value;
@@ -266,11 +209,11 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("DecimalTextBox")]
         [Description("Gets or sets whether Blank state can be enabled. " +
-            "When true, then the DecimalTextBox will be automatically blank if Value is out of range.")]
+                    "When true, then the DecimalTextBox will be automatically blank if Value is out of range.")]
         [DefaultValue(true)]
         public bool BlankEnabled
         {
-            get { return blankEnabled; }
+            get => blankEnabled;
             set
             {
                 blankEnabled = value;
@@ -291,8 +234,8 @@ namespace KGySoft.WinForms.Controls
         [RefreshProperties(RefreshProperties.All)]
         public DecimalValueOnBlank ValueOnBlank
         {
-            get { return valueOnBlank; }
-            set { valueOnBlank = value; }
+            get => valueOnBlank;
+            set => valueOnBlank = value;
         }
 
         /// <summary>
@@ -303,7 +246,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(DecimalFormat), "Number")]
         public DecimalFormat Format
         {
-            get { return format; }
+            get => format;
             set
             {
                 format = value;
@@ -320,7 +263,7 @@ namespace KGySoft.WinForms.Controls
         [RefreshProperties(RefreshProperties.All)]
         public sbyte DecimalDigits
         {
-            get { return decimalDigits; }
+            get => decimalDigits;
             set
             {
                 decimalDigits = value;
@@ -331,7 +274,7 @@ namespace KGySoft.WinForms.Controls
                 }
                 if (!blank)
                 {
-                    // mert lehet, hogy tizedes csökkentéskor változik az érték
+                    // because the value may change when decreasing the decimal digits
                     SetValue(this.value, false);
                 }
             }
@@ -343,11 +286,11 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("DecimalTextBox")]
         [Description("Gets or sets the the valid range of Value. " +
-            "If Value violates newly set range, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+                    "If Value violates newly set range, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
         [DefaultValue(typeof(DecimalRange), "Any")]
         public DecimalRange Range
         {
-            get { return range; }
+            get => range;
             set
             {
                 range = value;
@@ -364,15 +307,12 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("DecimalTextBox")]
         [Description("Gets or sets accepted minimum Value. " +
-            "If Value violates newly set minimum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+                    "If Value violates newly set minimum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
         [DefaultValue(typeof(decimal), "0")]
         [RefreshProperties(RefreshProperties.All)]
         public decimal RangeMinValue
         {
-            get
-            {
-                return rangeMinMax.MinValue;
-            }
+            get => rangeMinMax.MinValue;
             set
             {
                 decimal rounded = RoundTo(value, -decimalDigits);
@@ -389,15 +329,12 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("DecimalTextBox")]
         [Description("Gets or sets accepted maximum Value. " +
-            "If Value violates newly set maximum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+                    "If Value violates newly set maximum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
         [DefaultValue(typeof(decimal), "0")]
         [RefreshProperties(RefreshProperties.All)]
         public decimal RangeMaxValue
         {
-            get
-            {
-                return rangeMinMax.MaxValue;
-            }
+            get => rangeMinMax.MaxValue;
             set
             {
                 decimal rounded = RoundTo(value, -decimalDigits);
@@ -417,8 +354,8 @@ namespace KGySoft.WinForms.Controls
         [RefreshProperties(RefreshProperties.All)]
         public decimal Value
         {
-            get { return !blank ? value : BlankValue; }
-            set { SetValue(value, true); }
+            get => !blank ? value : BlankValue;
+            set => SetValue(value, true);
         }
 
         /// <summary>
@@ -428,8 +365,8 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public override string Text
         {
-            get { return base.Text; }
-            set { SetText(value); }
+            get => base.Text;
+            set => SetText(value);
         }
 
         /// <summary>
@@ -437,10 +374,10 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Description("Gets or sets text align.")]
         [Category("DecimalTextBox")]
-        [DefaultValue(typeof(HorizontalAlignment), "Right")] // csak az alapértelmezés miatt van felülbírálva
+        [DefaultValue(typeof(HorizontalAlignment), "Right")]
         public new HorizontalAlignment TextAlign
         {
-            get { return align; }
+            get => align;
             set
             {
                 align = value;
@@ -457,9 +394,13 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool ChangeValueOnTextChange
         {
-            get { return changeValueOnTextChange; }
-            set { changeValueOnTextChange = value; }
+            get => changeValueOnTextChange;
+            set => changeValueOnTextChange = value;
         }
+
+        #endregion
+
+        #region Private Properties
 
         /// <summary>
         /// Gets value in blank state.
@@ -520,55 +461,16 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region DecimalTextBox-ban definiált események
-
-        /// <summary>
-        /// Occurs when <see cref="Value"/> has been changed.
-        /// </summary>
-        [Category("DecimalTextBox")]
-        [Description("Occurs when Value has been changed.")]
-        public event EventHandler ValueChanged;
-
-        /// <summary>
-        /// Occurs when <see cref="Blank"/> has been changed.
-        /// </summary>
-        [Category("DecimalTextBox")]
-        [Description("Occurs when Blank has been changed.")]
-        public event EventHandler BlankChanged;
-
-        /// <summary>
-        /// Invokes <see cref="ValueChanged"/> event.
-        /// </summary>
-        protected void OnValueChanged(EventArgs e)
-        {
-            if (ValueChanged != null)
-                ValueChanged(this, e);
-        }
-
-        /// <summary>
-        /// Invokes <see cref="BlankChanged"/> event.
-        /// </summary>
-        protected void OnBlankChanged(EventArgs e)
-        {
-            if (BlankChanged != null)
-                BlankChanged(this, e);
-        }
-
         #endregion
 
-        #region DecimalTextBox Konstruktor és metódusok
+        #region Constructors
 
         /// <summary>
         /// Creates a new instance of <see cref="DecimalTextBox"/> control.
         /// </summary>
         public DecimalTextBox()
         {
-            this.Enter += new EventHandler(DecimalTextBox_Enter);
-            this.Leave += new System.EventHandler(this.DecimalTextBox_Leave);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.DecimalTextBox_KeyPress);
-            this.Validating += new System.ComponentModel.CancelEventHandler(this.DecimalTextBox_Validating);
-            this.TextChanged += new EventHandler(DecimalTextBox_TextChanged);
-            TextAlign = System.Windows.Forms.HorizontalAlignment.Right;
+            TextAlign = HorizontalAlignment.Right;
             if (!DesignMode)
             {
                 thousandSeparator = Thread.CurrentThread.CurrentCulture.NumberFormat.NumberGroupSeparator[0];
@@ -577,11 +479,167 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        #endregion
+
+        #region Methods
+
+        #region Protected Methods
+
+        protected override void OnEnter(EventArgs e)
+        {
+            base.OnEnter(e);
+            if (ReadOnly)
+                return;
+            focused = true;
+            RefreshValue();
+        }
+
+        protected override void OnLeave(EventArgs e)
+        {
+            base.OnLeave(e);
+            if (ReadOnly)
+                return;
+            focused = false;
+            if (IsValid(Text, true))
+                SetText(Text); // Setting the new value. Validation is needed because Leave executes before Validate
+            else if (blankEnabled && string.IsNullOrEmpty(Text))
+                Blank = true;  // and if it's invalid while not blank, Validating does not allow to leave the control
+        }
+
+        protected override void OnKeyPress(KeyPressEventArgs e)
+        {
+            base.OnKeyPress(e);
+
+            // validating key press
+            if (ReadOnly)
+                return;
+
+            // invalidating: thousands separator (or space)...
+            if (e.KeyChar == thousandSeparator || e.KeyChar == ' '
+                // ...negative sign not at the first position...
+                || (!blank && e.KeyChar == negativeSign && Text.IndexOf(negativeSign) >= 0)
+                //  ...when the result would not be valid (IsValid allows multiplier at the last position)
+                || (!blank && !char.IsControl(e.KeyChar) &&
+                    !IsValid(Text.Substring(0, SelectionStart) + e.KeyChar + Text.Substring(SelectionStart + SelectionLength), false)))
+                e.KeyChar = '\0';
+
+            // valid char in Blank: turning off blank mode
+            else if (blank && !char.IsControl(e.KeyChar))
+            {
+                if (IsValid(e.KeyChar.ToString(), false))
+                {
+                    BlankOff();
+                }
+                else e.KeyChar = '\0';
+            }
+
+            // applying multipliers
+            if (e.KeyChar.ToString().ToLower().IndexOfAny(multipliers) >= 0)
+            {
+                ApplyText(e.KeyChar.ToString(), true);
+                SelectionStart = Text.Length;
+                e.KeyChar = '\0';
+            }
+        }
+
+        protected override void OnValidating(CancelEventArgs e)
+        {
+            base.OnValidating(e);
+            if (ReadOnly || blank)
+                return;
+            if (!IsValid(Text, true))
+            {
+                e.Cancel = true;
+            }
+        }
+
+        protected override void OnTextChanged(EventArgs e)
+        {
+            base.OnTextChanged(e);
+            if (textChanging)
+                return;
+
+            // Switching to Blank if needed
+            if (!blank && blankEnabled && Text.Length == 0)
+            {
+                Blank = true;
+                return;
+            }
+
+            // changing Value property for any Text change if ChangeValueOnTextChange is true
+            if (!changeValueOnTextChange || ReadOnly)
+                return;
+            textChanging = true;
+            try
+            {
+                if (!Blank && IsValid(Text, true))
+                {
+                    // TODO: Parse by Language/CurrentCulture...
+                    SetValue(Decimal.Parse(Text), false);
+                }
+            }
+            finally
+            {
+                textChanging = false;
+            }
+        }
+
+        /// <summary>
+        /// Invokes <see cref="ValueChanged"/> event.
+        /// </summary>
+        protected void OnValueChanged(EventArgs e) => ValueChanged?.Invoke(this, e);
+
+        /// <summary>
+        /// Invokes <see cref="BlankChanged"/> event.
+        /// </summary>
+        protected void OnBlankChanged(EventArgs e) => BlankChanged?.Invoke(this, e);
+
+        /// <summary>
+        /// Suppressing keys in Blank mode. Further checks are in KeyPress where key can be checked as char.
+        /// </summary>
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+
+            if (blank && e.KeyCode.In(Keys.Delete, Keys.Back))
+            {
+                e.Handled = true;
+                e.SuppressKeyPress = true;
+            }
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            // pasting attempt from clipboard
+            if (m.Msg == Constants.WM_PASTE) // WM_PASTE
+            {
+                if (!Clipboard.ContainsText())
+                    return;
+
+                string text = blank ? Clipboard.GetText()
+                        : (Text.Substring(0, SelectionStart) + Clipboard.GetText() + Text.Substring(SelectionStart + SelectionLength));
+
+                if (IsValid(text, false))
+                {
+                    int selstart = blank ? 0 : SelectionStart;
+                    ApplyText(Clipboard.GetText(), !blank);
+                    SelectionStart = selstart + Clipboard.GetText().Length;
+                }
+            }
+            // suppressing editing in Blank mode
+            else if (blank && m.Msg.In(Constants.WM_CUT, Constants.WM_CLEAR))
+                return;
+            else base.WndProc(ref m);
+        }
+
+        #endregion
+
+        #region Private Methods
+
         private void AdjustAlignment()
         {
-            // Itt csinálhatnánk meg, hogy pl. a Blank állapot mindig balra alignolt legyen, de aztánk kiszedtem. Mindenestre a lehet?ség adott
+            // We could align the text to the left in blank mode here. It has been removed.
 
-            // Blank esetén balra igazított a BlankText
             //if (blank)
             //    base.TextAlign = HorizontalAlignment.Left;
             //else
@@ -609,15 +667,17 @@ namespace KGySoft.WinForms.Controls
         /// <param name="alert">When true exception will be thrown if BlankEnabled is false and value violates range</param>
         private void SetValue(decimal value, bool alert)
         {
-            decimal rounded = RoundTo(value, -decimalDigits); // azért kell, hogy az ábrázolt érték valóban egyezzen az adott tizedesjeggyel való megjelenítettel
+            decimal rounded = RoundTo(value, -decimalDigits);
             Blank = false;
-            if (!CheckRange(rounded, alert)) return;
+            if (!CheckRange(rounded, alert))
+                return;
             if (this.value != rounded)
             {
                 this.value = rounded;
-                OnValueChanged(new EventArgs());
+                OnValueChanged(EventArgs.Empty);
             }
-            else this.value = rounded; // mert bár az 1,0 és az 1,00 egyenlő, tárolásban eltérnek, és ez kell a tervezési idejű frissítéshez            
+            else
+                this.value = rounded; // because e.g. 1 and 1.0 are different, though they equal
             if (!textChanging)
                 RefreshValue();
         }
@@ -658,12 +718,12 @@ namespace KGySoft.WinForms.Controls
         private bool IsValid(string s, bool strong)
         {
             decimal d = 0;
-            bool Result = (!strong && (s == "-" || s == ""
-                || s[s.Length - 1].ToString().ToLower().IndexOfAny(multipliers) >= 0))
-                || decimal.TryParse(s, out d);
-            if (Result && strong)
-                Result = CheckRange(d, false);
-            return Result;
+            bool result = (!strong && (s == "-" || s == ""
+                            || s[s.Length - 1].ToString().ToLower().IndexOfAny(multipliers) >= 0))
+                    || decimal.TryParse(s, out d);
+            if (result && strong)
+                result = CheckRange(d, false);
+            return result;
         }
 
         /// <summary>
@@ -671,42 +731,39 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private bool CheckRange(decimal value, bool alert)
         {
-            bool Result;
+            bool result;
             decimal scale = decimalDigits < 0 ? Convert.ToDecimal(Math.Pow(10, -decimalDigits)) : 1;
 
             if (blank) return true;
 
-            switch (range)
+            result = range switch
             {
-                case DecimalRange.Negative: Result = value <= -scale; break;
-                case DecimalRange.NegativeNull: Result = value <= 0; break;
-                case DecimalRange.Positive: Result = value >= scale; break;
-                case DecimalRange.PositiveNull: Result = value >= 0; break;
-                case DecimalRange.MinMax: Result = value >= rangeMinMax.MinValue && value <= rangeMinMax.MaxValue; break;
-                default: Result = true; break;
-            }
-            if (Result) return true;
+                DecimalRange.Negative => value <= -scale,
+                DecimalRange.NegativeNull => value <= 0,
+                DecimalRange.Positive => value >= scale,
+                DecimalRange.PositiveNull => value >= 0,
+                DecimalRange.MinMax => value >= rangeMinMax.MinValue && value <= rangeMinMax.MaxValue,
+                _ => true
+            };
+
+            if (result)
+                return true;
             if (!blankEnabled)
             {
-                // ha nem lehet blank-ot állítani, korrigáljuk az értéket,
-                // (direkt a property-t állítjuk), és exception-t dobunk
-
-                switch (range)
+                // if blank is not enabled, then we may need to correct the Value
+                Value = range switch
                 {
-                    case DecimalRange.Negative: Value = -1 * scale; break;
-                    case DecimalRange.Positive: Value = 1 * scale; break;
-                    case DecimalRange.MinMax:
-                        if (value < rangeMinMax.MinValue)
-                            Value = rangeMinMax.MinValue;
-                        else Value = rangeMinMax.MaxValue;
-                        break;
-                    default: Value = 0; break;
-                }
+                    DecimalRange.Negative => -1 * scale,
+                    DecimalRange.Positive => 1 * scale,
+                    DecimalRange.MinMax => value < rangeMinMax.MinValue ? rangeMinMax.MinValue : rangeMinMax.MaxValue,
+                    _ => 0
+                };
 
                 if (alert)
                     throw new OverflowException("Value \"" + value + "\" violates current Range");
             }
-            else Blank = true;
+            else
+                Blank = true;
 
             return false;
         }
@@ -720,7 +777,7 @@ namespace KGySoft.WinForms.Controls
                 return;
 
             blank = false;
-            OnBlankChanged(new EventArgs());
+            OnBlankChanged(EventArgs.Empty);
 
             textChanging = true;
             try
@@ -748,7 +805,7 @@ namespace KGySoft.WinForms.Controls
             }
             else
             {
-                string text = value.Trim().ToLower();
+                string text = value.Trim().ToLowerInvariant();
                 char mult = text[text.Length - 1];
 
                 if (mult.ToString().IndexOfAny(multipliers) >= 0)
@@ -789,7 +846,7 @@ namespace KGySoft.WinForms.Controls
             {
                 text = Text.Substring(0, SelectionStart) +
                     text + Text.Substring(SelectionStart +
-                    SelectionLength);
+                            SelectionLength);
             }
 
             BlankOff();
@@ -800,7 +857,7 @@ namespace KGySoft.WinForms.Controls
             text = text.ToLower();
             if (text[text.Length - 1].ToString().IndexOfAny(multipliers) >= 0)
             {
-                decimal num = 0;
+                decimal num;
                 decimal.TryParse(text.Substring(0, text.Length - 1), out num);
                 try
                 {
@@ -814,8 +871,8 @@ namespace KGySoft.WinForms.Controls
                 }
                 catch
                 {
-                    // itt lenyeljük, mert ez csak szerkesztéskor van - ilyenkor egyszerűen nincs felszorzás
-                    // Text-nek való értékadáskor már dobnánk hibát
+                    // During editing we can suppress the exception - in this case simply there is no multiplication.
+                    // (When setting Text, we would throw though)
                 }
                 text = num.ToString(CultureInfo.CurrentCulture);
                 while (text.IndexOf(decimalSeparator) >= 0 && text[text.Length - 1].In(decimalSeparator, '0'))
@@ -827,138 +884,6 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region DecimalTextBox-ban lekezelt események
-
-        private void DecimalTextBox_Enter(object sender, EventArgs e)
-        {
-            if (ReadOnly) return;
-            focused = true;
-            RefreshValue();
-        }
-
-        private void DecimalTextBox_Leave(object sender, EventArgs e)
-        {
-            if (ReadOnly) return;
-            focused = false;
-            if (IsValid(Text, true))
-                SetText(Text); // Ez beállítja az új értéket. A validálás azért kell, mert a Leave a Validate el?tt is lefut
-            else if (blankEnabled && string.IsNullOrEmpty(Text))
-                Blank = true;  // ha meg nem üres és úgy érvénytelen, a Validating majd visszarántja a fókuszt
-        }
-
-        void DecimalTextBox_TextChanged(object sender, EventArgs e)
-        {
-            if (textChanging)
-                return;
-
-            // Switching to Blank if needed
-            if (!blank && blankEnabled && Text.Length == 0)
-            {
-                Blank = true;
-                return;
-            }
-
-            // changing Value property for any Text change if ChangeValueOnTextChange is true
-            if (!changeValueOnTextChange || ReadOnly)
-                return;
-            textChanging = true;
-            try
-            {
-                if (!Blank && IsValid(Text, true))
-                {
-                    // TODO: Parse by Language/CurrentCulture...
-                    SetValue(Decimal.Parse(Text), false);
-                }
-            }
-            finally
-            {
-                textChanging = false;
-            }
-        }
-
-        private void DecimalTextBox_Validating(object sender, CancelEventArgs e)
-        {
-            if (ReadOnly || blank) return;
-            if (!IsValid(Text, true))
-            {
-                e.Cancel = true;
-            }
-        }
-
-        /// <summary>
-        /// Suppressing keys in Blank mode. Further checks are in KeyPress where key can be chacked as char.
-        /// </summary>
-        protected override void OnKeyDown(KeyEventArgs e)
-        {
-            base.OnKeyDown(e);
-
-            if (blank && e.KeyCode.In(Keys.Delete, Keys.Back))
-            {
-                e.Handled = true;
-                e.SuppressKeyPress = true;
-            }
-        }
-
-        private void DecimalTextBox_KeyPress(object sender, KeyPressEventArgs e)
-        {
-            // beírás ellen?rzés
-            if (ReadOnly)
-                return;
-
-            // érvénytelenítés: ha ezres elválasztó szóköz...
-            if (e.KeyChar == thousandSeparator || e.KeyChar == ' '
-                // ...vagy mínusz jel nem az els? helyen...
-                || (!blank && e.KeyChar == negativeSign && Text.IndexOf(negativeSign) >= 0)
-                //  ...vagy az eredmény nem lenne érvényes szám (IsValid enged utolsó karakteren szorzó értéket)
-                || (!blank && !char.IsControl(e.KeyChar) &&
-                    !IsValid(Text.Substring(0, SelectionStart) + e.KeyChar + Text.Substring(SelectionStart + SelectionLength), false)))
-                e.KeyChar = '\0';
-
-            // ha blank állapotban érvényes billt nyomtunk, váltani kell
-            else if (blank && !char.IsControl(e.KeyChar))
-            {
-                if (IsValid(e.KeyChar.ToString(), false))
-                {
-                    BlankOff();
-                }
-                else e.KeyChar = '\0';
-            }
-
-            // szorzók alkalmazása
-            if (e.KeyChar.ToString().ToLower().IndexOfAny(multipliers) >= 0)
-            {
-                ApplyText(e.KeyChar.ToString(), true);
-                SelectionStart = Text.Length;
-                e.KeyChar = '\0';
-            }
-        }
-
-        [DebuggerStepThrough]
-        protected override void WndProc(ref Message m)
-        {
-            // vágólapról történ? beillesztés ellen?rzése
-            if (m.Msg == Constants.WM_PASTE) // WM_PASTE
-            {
-                if (!Clipboard.ContainsText())
-                    return;
-
-                string text = blank ? Clipboard.GetText()
-                    : (Text.Substring(0, SelectionStart) + Clipboard.GetText() + Text.Substring(SelectionStart + SelectionLength));
-
-                if (IsValid(text, false))
-                {
-                    int selstart = blank ? 0 : SelectionStart;
-                    ApplyText(Clipboard.GetText(), !blank);
-                    SelectionStart = selstart + Clipboard.GetText().Length;
-                }
-            }
-            // suppressing editing in Blank mode
-            else if (blank && m.Msg.In(Constants.WM_CUT, Constants.WM_CLEAR))
-                return;
-            else base.WndProc(ref m);
-        }
-
         #endregion
-
     }
 }

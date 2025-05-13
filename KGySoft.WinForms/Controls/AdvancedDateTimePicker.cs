@@ -1,35 +1,38 @@
-/*******************************************
- * AdvancedDateTimePicker - KGy
- * 
- * Eredend? problémák:
- * - A felirat színe Enabled = false-ra mindenképpen szürkül
- * - Egyáltalán nincs háttérszín állítási lehet?ség
- * - Nincs el?térszín állítási lehet?ség (ezt nem is akarom megcsinálni, majd inkább egy rendes dátumválasztót írunk MaskEdit-b?l)
- * 
- * Megoldás:
- * - DisabledBackColor: Háttérszín letiltott állapotban
- * - DisabledForeColor: Felirat színe letiltott állapotban
- * - BackColor: Háttérszín engedélyezett állapotban
- */
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: AdvancedDateTimePicker.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
 
+#endregion
+
 namespace KGySoft.WinForms.Controls
 {
-    // TODO: valamiért a BackColor-ra nem reagál, hiába lesz Gold modified állapotban (legalábbis Win7 alatt) - custom kirajzolás?
-    // TODO: colorok mint gombnál
     /// <summary>
     /// Represents a date-time picker that supports coloring in disabled state.
     /// Its <see cref="Value"/> property is redefined so it returns <see cref="DateTime.MaxValue"/> if <see cref="DateTimePicker.Checked"/> is <see langword="false"/>&#160;and
     /// instead of throwing exception when invalid date is assigned to it, it simpy changes <see cref="DateTimePicker.Checked"/> false (if checkbox is visible), or just ignores the value.
     /// </summary>
+    [Description("A date-time picker with custom colors (no custom enabled fore color so far though), and improved Value")]
     public class AdvancedDateTimePicker : DateTimePicker, ISupportsDisabledColor
     {
-        #region Objektumváltozók
+        #region Fields
 
         private Color disabledBackColor = SystemColors.Control;
         private Color disabledForeColor = SystemColors.ControlDarkDark;
@@ -37,36 +40,14 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region Konstruktorok
-
-        /// <summary>
-        /// Creates a new <see cref="AdvancedDateTimePicker"/> instance.
-        /// </summary>
-        public AdvancedDateTimePicker()
-        {
-            EnabledChanged += new EventHandler(AdvancedDateTimePicker_EnabledChanged);
-        }
-
-        #endregion
-
-        #region Lekezelt események
-
-        void AdvancedDateTimePicker_EnabledChanged(object sender, EventArgs e)
-        {
-            SetStyle(ControlStyles.UserPaint, !Enabled);
-            Invalidate();
-        }
-
-        #endregion
-
-        #region Property-k
+        #region Properties
 
         /// <summary>
         /// Gets or sets the date/time value assigned to the control.
         /// </summary>
         /// <value>Returns <see cref="DateTime.MaxValue"/> if <see cref="DateTimePicker.ShowCheckBox"/> is <see langword="true"/>&#160;and <see cref="DateTimePicker.Checked"/> is false.</value>
         [Bindable(BindableSupport.Default, BindingDirection.TwoWay)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)] // ne mentse a mai dátumot mindig a designerbe
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         public new DateTime Value
         {
@@ -98,7 +79,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "ControlDarkDark")]
         public Color DisabledForeColor
         {
-            get { return disabledForeColor; }
+            get => disabledForeColor;
             set
             {
                 disabledForeColor = value;
@@ -114,7 +95,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "Control")]
         public Color DisabledBackColor
         {
-            get { return disabledBackColor; }
+            get => disabledBackColor;
             set
             {
                 disabledBackColor = value;
@@ -122,25 +103,45 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        #endregion
-
-        #region Override-olt property-k, metódusok
-
         /// <summary>
         /// Gets or sets a value indicating the background color of the control.
         /// </summary>
         [Browsable(true)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         [DefaultValue(typeof(Color), "Window")]
-        public override Color BackColor // ez a property benne volna az ?sben, csak a DateTimePickerb?l ki van szedve
+        public override Color BackColor // hidden in the base DateTimePicker
         {
-            get { return backColor; }
+            get => backColor;
             set
             {
                 backColor = value;
                 //base.BackColor = value;
                 Invalidate();
             }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates a new <see cref="AdvancedDateTimePicker"/> instance.
+        /// </summary>
+        public AdvancedDateTimePicker()
+        {
+        }
+
+        #endregion
+
+        #region Methods
+
+        #region Protected Methods
+
+        protected override void OnEnabledChanged(EventArgs e)
+        {
+            base.OnEnabledChanged(e);
+            SetStyle(ControlStyles.UserPaint, !Enabled);
+            Invalidate();
         }
 
         protected override void OnPaint(PaintEventArgs e)
@@ -167,7 +168,6 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        [DebuggerStepThrough]
         protected override void WndProc(ref Message m)
         {
             // Így tudjuk a BackColor-ral kiszínezni az engedélyezett controlt
@@ -182,6 +182,8 @@ namespace KGySoft.WinForms.Controls
             }
             base.WndProc(ref m);
         }
+
+        #endregion
 
         #endregion
     }

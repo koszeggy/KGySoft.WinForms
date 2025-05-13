@@ -316,13 +316,44 @@ namespace KGySoft.WinForms.Controls
         public AdvancedProgressBar()
         {
             animationTimer = new Timer();
-            animationTimer.Tick += new EventHandler(animationTimer_Tick);
+            animationTimer.Tick += animationTimer_Tick;
             initialized = true;
         }
 
         #endregion
 
         #region Methods
+
+        #region Static Methods
+
+        private static void DrawShadows(Graphics g, Rectangle rect, int shadowWidth, int alpha)
+        {
+            if (rect.Width <= 0 || rect.Height <= 0)
+                return;
+
+            using LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Transparent, Color.FromArgb(alpha, Color.Black), LinearGradientMode.Horizontal);
+            float p1, p2;
+            if (rect.Width / 2 <= shadowWidth)
+                p1 = p2 = 0.5f;
+            else
+            {
+                p1 = 100f / rect.Width * ((float)shadowWidth / 100);
+                p2 = 1f - p1;
+            }
+
+            Blend blend = new Blend(4)
+            {
+                Factors = new float[] { 1f, 0.5f, 0.5f, 1f },
+                Positions = new float[] { 0f, p1, p2, 1f }
+            };
+
+            brush.Blend = blend;
+            g.FillRectangle(brush, rect);
+        }
+
+        #endregion
+
+        #region Instance Methods
 
         #region Protected Methods
 
@@ -661,77 +692,6 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private void DrawShadows(Graphics g, Rectangle rect, int shadowWidth, int alpha)
-        {
-            if (rect.Width <= 0 || rect.Height <= 0)
-                return;
-
-            using LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Transparent, Color.FromArgb(alpha, Color.Black), LinearGradientMode.Horizontal);
-            float p1, p2;
-            if (rect.Width / 2 <= shadowWidth)
-                p1 = p2 = 0.5f;
-            else
-            {
-                p1 = 100f / rect.Width * ((float)shadowWidth / 100);
-                p2 = 1f - p1;
-            }
-
-            Blend blend = new Blend(4)
-            {
-                Factors = new float[] { 1f, 0.5f, 0.5f, 1f },
-                Positions = new float[] { 0f, p1, p2, 1f }
-            };
-
-            brush.Blend = blend;
-            g.FillRectangle(brush, rect);
-            //Rectangle rectShadow = new Rectangle(rect.Location, new Size(Math.Min(rect.Width / 2, shadowWidth), rect.Height));
-            //if (rectShadow.Width <= 0 || rectShadow.Height <= 0)
-            //    return;
-
-            //using (LinearGradientBrush brush = new LinearGradientBrush(rectShadow, Color.FromArgb(alpha, Color.Black), Color.Transparent, LinearGradientMode.Horizontal))
-            //{
-            //    Blend colorBlend = new Blend(3)
-            //        {
-            //            Factors = new float[] { 1f, 0f, 1f },
-            //            Positions = new float[] { 0f, 0.2f, 1F }
-            //        };
-
-            //    brush.Blend = colorBlend;
-            //    rectShadow.X--;
-            //    g.FillRectangle(brush, rectShadow);
-            //}
-
-            //// TODO: a másik oldalt is sima blenddel, pozícióra figyelni (kilóg az árnyék?)
-            //// TODO: a közepét is árnyékolni, és akkor lehet lime, sárga meg piros hasonló eredményért
-            ////using (LinearGradientBrush brush = new LinearGradientBrush(rectShadow, Color.Black, Color.Black, LinearGradientMode.Horizontal))
-            ////{
-            ////    ColorBlend colorBlend = new ColorBlend(3)
-            ////        {
-            ////            Colors = new Color[] { Color.Transparent, Color.FromArgb(alpha, 0, 0, 0), Color.Transparent },
-            ////            Positions = new float[] { 0.0F, 0.2F, 1.0F }
-            ////        };
-
-            ////    brush.InterpolationColors = colorBlend;
-            ////    rectShadow.X--;
-            ////    g.FillRectangle(brush, rectShadow);
-            ////}
-
-            ////Rectangle rectRight = new Rectangle(rect.Width - 3, rect.Top, 15, rect.Height);
-            ////rr.X = (int)(Value * 1.0F / (Maximum - Minimum) * this.Width) - 14;
-            //rectShadow.X = rect.Right - rectShadow.Width + 1;
-            //using (LinearGradientBrush brush = new LinearGradientBrush(rectShadow, Color.Black, Color.Black, LinearGradientMode.Horizontal))
-            //{
-            //    ColorBlend colorBlend = new ColorBlend(3)
-            //        {
-            //            Colors = new Color[] { Color.Transparent, Color.FromArgb(alpha, 0, 0, 0), Color.Transparent },
-            //            Positions = new float[] { 0.0F, 0.8F, 1.0F }
-            //        };
-
-            //    brush.InterpolationColors = colorBlend;
-            //    g.FillRectangle(brush, rectShadow);
-            //}
-        }
-
         private void DrawHighlight(Graphics g, Rectangle clipRect, Color highlightColor)
         {
             int height = (Height - 2) / 2;
@@ -846,11 +806,13 @@ namespace KGySoft.WinForms.Controls
 
         #region Event handlers
 
-        void animationTimer_Tick(object sender, EventArgs e)
+        void animationTimer_Tick(object? sender, EventArgs e)
         {
             AdvanceAnimation();
             Invalidate();
         }
+
+        #endregion
 
         #endregion
 

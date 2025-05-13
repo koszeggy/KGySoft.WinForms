@@ -334,7 +334,7 @@ namespace KGySoft.WinForms.WinApi
         /// <param name="lpszWindow">Pointer to a null-terminated string that specifies the window name (the window's title). If this parameter is NULL, all window names match.</param>
         /// <returns>If the function succeeds, the return value is a pointer to the window object having the specified class and window names. If the function fails, the return value is NULL.</returns>
         [DllImport("user32.dll", SetLastError = true)]
-        internal static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string lpszWindow);
+        internal static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string? lpszWindow);
 
         /// <summary>
         /// Loads a string resource from the executable file associated with a specified module, copies the string into a buffer, and appends a terminating null character.

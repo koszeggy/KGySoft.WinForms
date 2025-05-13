@@ -1,25 +1,66 @@
-﻿using System.Drawing;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: AdvancedPanelDesigner.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
 
+#endregion
+
 namespace KGySoft.WinForms.Controls.Design
 {
-    sealed class AdvancedPanelDesigner: ScrollableControlDesigner
+    internal sealed class AdvancedPanelDesigner : ScrollableControlDesigner
     {
-        // Methods
-        public AdvancedPanelDesigner()
+        #region Properties
+
+        private Pen BorderPen => new((Control.BackColor.GetBrightness() < 0.5) ? ControlPaint.Light(Control.BackColor) : ControlPaint.Dark(Control.BackColor)) { DashStyle = DashStyle.Dash };
+
+        #endregion
+
+        #region Constructors
+
+        public AdvancedPanelDesigner() => AutoResizeHandles = true;
+
+        #endregion
+
+        #region Methods
+
+        #region Protected Methods
+
+        protected override void OnPaintAdornments(PaintEventArgs pe)
         {
-            base.AutoResizeHandles = true;
+            AdvancedPanel component = (AdvancedPanel)Component;
+            if (component.BorderStyle == AdvancedBorderStyle.None)
+                DrawBorder(pe.Graphics);
+            base.OnPaintAdornments(pe);
         }
+
+        #endregion
+
+        #region Private Methods
 
         private void DrawBorder(Graphics graphics)
         {
-            AdvancedPanel component = (AdvancedPanel)base.Component;
+            AdvancedPanel component = (AdvancedPanel)Component;
             if ((component != null) && component.Visible)
             {
-                Pen borderPen = this.BorderPen;
-                Rectangle clientRectangle = this.Control.ClientRectangle;
+                Pen borderPen = BorderPen;
+                Rectangle clientRectangle = Control.ClientRectangle;
                 clientRectangle.Width--;
                 clientRectangle.Height--;
                 graphics.DrawRectangle(borderPen, clientRectangle);
@@ -27,24 +68,8 @@ namespace KGySoft.WinForms.Controls.Design
             }
         }
 
-        protected override void OnPaintAdornments(PaintEventArgs pe)
-        {
-            AdvancedPanel component = (AdvancedPanel)base.Component;
-            if (component.BorderStyle == AdvancedBorderStyle.None)
-            {
-                this.DrawBorder(pe.Graphics);
-            }
-            base.OnPaintAdornments(pe);
-        }
+        #endregion
 
-        // Properties
-        private Pen BorderPen
-        {
-            get
-            {
-                return new Pen((this.Control.BackColor.GetBrightness() < 0.5) ? ControlPaint.Light(this.Control.BackColor) : ControlPaint.Dark(this.Control.BackColor)) { DashStyle = DashStyle.Dash };
-            }
-        }
-
+        #endregion
     }
 }

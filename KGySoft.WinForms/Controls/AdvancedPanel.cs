@@ -1,8 +1,28 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: AdvancedPanel.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.ComponentModel;
 using System.Windows.Forms;
+
 using KGySoft.WinForms.Controls.Design;
 using KGySoft.WinForms.WinApi;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
@@ -10,12 +30,11 @@ namespace KGySoft.WinForms.Controls
     /// Represents an advanced panel with much more flexible <see cref="BorderStyle"/> than original <see cref="Panel"/>
     /// </summary>
     [Designer(typeof(AdvancedPanelDesigner))]
-    public class AdvancedPanel: Panel
+    public class AdvancedPanel : Panel
     {
         #region Fields
 
         private AdvancedBorderStyle borderStyle = AdvancedBorderStyle.Raised;
-
         private int borderWidth = 1;
 
         #endregion
@@ -28,9 +47,9 @@ namespace KGySoft.WinForms.Controls
         [Category("AdvancedPanel")]
         [Description("Gets or sets the border style of the AdvancedPanel.")]
         [DefaultValue(typeof(AdvancedBorderStyle), "Raised")]
-        new public AdvancedBorderStyle BorderStyle
+        public new AdvancedBorderStyle BorderStyle
         {
-            get { return borderStyle; }
+            get => borderStyle;
             set
             {
                 if (borderStyle != value)
@@ -66,8 +85,6 @@ namespace KGySoft.WinForms.Controls
 
         #region Methods
 
-        #region Protected Methods
-
         protected override void WndProc(ref Message m)
         {
             switch (m.Msg)
@@ -91,8 +108,6 @@ namespace KGySoft.WinForms.Controls
             base.OnSizeChanged(e);
             NCHelper.InvalidateNC(Handle);
         }
-
-        #endregion
 
         #endregion
     }

@@ -1,86 +1,70 @@
-/*******************************************
- * AdvancedTextBox - KGy
- * 
- * Problems with original TextBox:
- * - If BackColor is not set, setting ReadOnly makes control gray, but does not turn gray if BackColor is set before
- * - Disabling the control makes the text gray and it is impossible to change it.
- * 
- * Solution:
- * - EnabledBackColor: Color in case of Enabled and not ReadOnly
- * - DisabledBackColor: Color in case of ReadOnly or not Enabled
- * - DisabledForeColor: Text color in disabled state
- * 
- * Other features:
- * - TextChangeOnLeave event: Fires on leave when content differs from the content at getting focused
- */
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: AdvancedTextBox.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Windows.Forms;
+
 using KGySoft.WinForms.WinApi;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
-    // TODO: disabled colorok mint button esetén
+    /*******************************************
+     * AdvancedTextBox - TODO: into remarks
+     *
+     * Problems with original TextBox:
+     * - If BackColor is not set, setting ReadOnly makes control gray, but does not turn gray if BackColor is set before
+     * - Disabling the control makes the text gray and it is impossible to change it.
+     *
+     * Solution:
+     * - DisabledBackColor: Color in case of ReadOnly or not Enabled
+     * - DisabledForeColor: Text color in disabled state
+     *
+     * Other features:
+     * - TextChangeOnLeave event: Fires on leave when content differs from the content at getting focused
+     */
+
     /// <summary>
     /// Advanced version of <see cref="TextBox"/> control that supports customized coloring even in disabled state
     /// and has a <see cref="TextChangedOnLeave"/> event.
     /// </summary>
-    public class AdvancedTextBox: TextBox, ISupportsDisabledColor
+    public class AdvancedTextBox : TextBox, ISupportsDisabledColor
     {
         #region Fields
 
         private Color disabledBackColor = SystemColors.Control;
         private Color disabledForeColor = SystemColors.ControlDarkDark;
-
         private Color enabledBackColor = SystemColors.Window;
         private Color enabledForeColor = SystemColors.WindowText;
-
         private string origValue = String.Empty; // content at getting focused
 
         #endregion
 
-        #region Constructor
+        #region Events
 
-        ///<summary>
-        /// Creates a new instance of <see cref="AdvancedTextBox"/>.
-        ///</summary>
-        public AdvancedTextBox()
-        {
-            EnabledChanged += new EventHandler(AdvancedTextBox_Enabled_ReadOnly_Changed);
-            ReadOnlyChanged += new EventHandler(AdvancedTextBox_Enabled_ReadOnly_Changed);
-            Enter += new EventHandler(AdvancedTextBox_Enter);
-            Leave += new EventHandler(AdvancedTextBox_Leave);
-        }
-
-        #endregion
-
-        #region Handled events
-
-        void AdvancedTextBox_Enabled_ReadOnly_Changed(object sender, EventArgs e)
-        {
-            SetStyle(ControlStyles.UserPaint, !Enabled);
-            if (Enabled)
-            {
-                Font font = Font;
-                Font = null;
-                Font = font;  // without these font text may change to weird style when control is re-enabled.
-            }
-            ResetColor();
-        }
-
-        void AdvancedTextBox_Enter(object sender, EventArgs e)
-        {
-            origValue = Text;
-        }
-
-        void AdvancedTextBox_Leave(object sender, EventArgs e)
-        {
-            if (origValue != Text)
-                OnTextChangedOnLeave(e);
-        }
+        /// <summary>
+        /// Occurs on leaving the control when content is different from the original one when the control was focused.
+        /// </summary>
+        [Category("AdvancedTextBox")]
+        [Description("Occurs on leaving the control when content is different from the original one when the control was focused.")]
+        public event EventHandler? TextChangedOnLeave;
 
         #endregion
 
@@ -93,11 +77,7 @@ namespace KGySoft.WinForms.Controls
         [Browsable(false)]
         public override Color BackColor
         {
-            [DebuggerStepThrough]
-            get
-            {
-                return base.BackColor;
-            }
+            get => base.BackColor;
             set
             {
                 if (ReadOnly || !Enabled)
@@ -114,11 +94,7 @@ namespace KGySoft.WinForms.Controls
         [Browsable(false)]
         public override Color ForeColor
         {
-            [DebuggerStepThrough]
-            get
-            {
-                return base.ForeColor;
-            }
+            get => base.ForeColor;
             set
             {
                 if (!Enabled)
@@ -136,7 +112,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "WindowText")]
         public Color EnabledForeColor
         {
-            get { return enabledForeColor; }
+            get => enabledForeColor;
             set
             {
                 enabledForeColor = value;
@@ -152,7 +128,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "Window")]
         public Color EnabledBackColor
         {
-            get { return enabledBackColor; }
+            get => enabledBackColor;
             set
             {
                 enabledBackColor = value;
@@ -168,7 +144,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "Control")]
         public Color DisabledBackColor
         {
-            get { return disabledBackColor; }
+            get => disabledBackColor;
             set
             {
                 disabledBackColor = value;
@@ -184,7 +160,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "ControlDarkDark")]
         public Color DisabledForeColor
         {
-            get { return disabledForeColor; }
+            get => disabledForeColor;
             set
             {
                 disabledForeColor = value;
@@ -194,29 +170,56 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region New events of AdvancedTextBox
+        #region Constructors
 
-        /// <summary>
-        /// Occurs on leaving the control when content is different from the original one when the control was focused.
-        /// </summary>
-        [Category("AdvancedTextBox")]
-        [Description("Occurs on leaving the control when content is different from the original one when the control was focused.")]
-        public event EventHandler TextChangedOnLeave;
-
-        /// <summary>
-        /// Triggers TextChangedOnLeave event
-        /// </summary>
-        protected virtual void OnTextChangedOnLeave(EventArgs e)
+        ///<summary>
+        /// Creates a new instance of <see cref="AdvancedTextBox"/>.
+        ///</summary>
+        public AdvancedTextBox()
         {
-            if (TextChangedOnLeave != null)
-                TextChangedOnLeave(this, e);
         }
 
         #endregion
 
-        #region Overridden Methods
+        #region Methods
 
-        [DebuggerStepThrough]
+        #region Protected Methods
+
+        /// <inheritdoc/>
+        protected override void OnEnabledChanged(EventArgs e)
+        {
+            base.OnEnabledChanged(e);
+            ResetEnabledAndReadOnly();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnReadOnlyChanged(EventArgs e)
+        {
+            base.OnReadOnlyChanged(e);
+            ResetEnabledAndReadOnly();
+        }
+
+        /// <inheritdoc/>
+        protected override void OnEnter(EventArgs e)
+        {
+            base.OnEnter(e);
+            origValue = Text;
+        }
+
+        /// <inheritdoc/>
+        protected override void OnLeave(EventArgs e)
+        {
+            base.OnLeave(e);
+            if (origValue != Text)
+                OnTextChangedOnLeave(e);
+        }
+
+        /// <summary>
+        /// Triggers TextChangedOnLeave event
+        /// </summary>
+        protected virtual void OnTextChangedOnLeave(EventArgs e) => TextChangedOnLeave?.Invoke(this, e);
+
+        /// <inheritdoc/>
         protected override void OnPaint(PaintEventArgs e)
         {
             // Painting with disabled colors
@@ -245,7 +248,7 @@ namespace KGySoft.WinForms.Controls
 
                 //if (this.IsRightToLeft())
                 //    flags |= TextFormatFlags.RightToLeft | TextFormatFlags.Right;
-                
+
                 using (Brush b = new SolidBrush(disabledBackColor))
                 {
                     e.Graphics.FillRectangle(b, ClientRectangle);
@@ -265,6 +268,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Prevents consuming Enter by the parent form/control if this.<see cref="TextBox.Multiline"/> is enabled.
         /// </summary>
+        /// <inheritdoc/>
         protected override bool IsInputKey(Keys keyData)
         {
             return (((((keyData & Keys.KeyCode) == Keys.Return) && this.Multiline) && ((keyData & Keys.Alt) == Keys.None)) || base.IsInputKey(keyData));
@@ -272,7 +276,21 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region Private methods
+        #region Private Methods
+
+        private void ResetEnabledAndReadOnly()
+        {
+            SetStyle(ControlStyles.UserPaint, !Enabled);
+            if (Enabled)
+            {
+                // without these font text may change to weird style when control is re-enabled.
+                Font font = Font;
+                Font = null!;
+                Font = font;
+            }
+
+            ResetColor();
+        }
 
         private int GetFirstVisibleLine()
         {
@@ -297,6 +315,8 @@ namespace KGySoft.WinForms.Controls
 
             Invalidate();
         }
+
+        #endregion
 
         #endregion
     }
