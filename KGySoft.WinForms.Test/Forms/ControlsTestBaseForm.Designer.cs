@@ -28,11 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
+            this.components = new System.ComponentModel.Container();
             this.pnlTestArea = new System.Windows.Forms.Panel();
             this.lblInstuction = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.grdProperties = new System.Windows.Forms.PropertyGrid();
             this.splitter1 = new System.Windows.Forms.Splitter();
+            this.cmsGridMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.miResetValue = new System.Windows.Forms.ToolStripMenuItem();
             this.pnlTestArea.SuspendLayout();
+            this.cmsGridMenu.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlTestArea
@@ -62,6 +66,7 @@
             // 
             // grdProperties
             // 
+            this.grdProperties.ContextMenuStrip = this.cmsGridMenu;
             this.grdProperties.Dock = System.Windows.Forms.DockStyle.Right;
             this.grdProperties.Location = new System.Drawing.Point(67, 0);
             this.grdProperties.Name = "grdProperties";
@@ -77,6 +82,20 @@
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
             // 
+            // cmsGridMenu
+            // 
+            this.cmsGridMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miResetValue});
+            this.cmsGridMenu.Name = "cmsGridMenu";
+            this.cmsGridMenu.Size = new System.Drawing.Size(181, 48);
+            // 
+            // miResetValue
+            // 
+            this.miResetValue.Name = "miResetValue";
+            this.miResetValue.Size = new System.Drawing.Size(180, 22);
+            this.miResetValue.Text = "Reset Value";
+            this.miResetValue.Click += new System.EventHandler(this.miResetValue_Click);
+            // 
             // ControlsTestBaseForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -86,11 +105,13 @@
             this.Controls.Add(this.splitter1);
             this.Controls.Add(this.grdProperties);
             this.Name = "ControlsTestBaseForm";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "ControlsTestBaseForm";
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ControlsTestBaseForm_FormClosing);
             this.Load += new System.EventHandler(this.ControlsTestBaseForm_Load);
             this.pnlTestArea.ResumeLayout(false);
             this.pnlTestArea.PerformLayout();
+            this.cmsGridMenu.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -101,5 +122,7 @@
         protected System.Windows.Forms.Panel pnlTestArea;
         private System.Windows.Forms.Splitter splitter1;
         protected KGySoft.WinForms.Controls.AdvancedLabel lblInstuction;
+        private System.Windows.Forms.ContextMenuStrip cmsGridMenu;
+        private System.Windows.Forms.ToolStripMenuItem miResetValue;
     }
 }
