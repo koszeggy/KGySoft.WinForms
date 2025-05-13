@@ -1509,7 +1509,7 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckDefaultAnimation()
         {
-            if (!WindowsUtils.IsVistaOrLater)
+            if (!WindowsUtils.IsVistaOrLater || !VisualStyleHelper.HasDefaultAnimation((int)BUTTONPARTS.BP_COMMANDLINK, (int)COMMANDLINKSTATES.CMDLS_DEFAULTED, (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING))
                 return;
 
             bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles && !VisualStyleHelper.HighContrast;

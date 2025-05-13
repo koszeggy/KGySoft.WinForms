@@ -355,7 +355,6 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-
         #endregion
 
         #region Explicitly Implemented Interface Properties
@@ -524,13 +523,13 @@ namespace KGySoft.WinForms.Controls
                     base.WndProc(ref m);
                     return;
 
-                // Non-System FlatStyle with elevated icon: invalidating the icon
-                case Constants.WM_DPICHANGED_BEFOREPARENT when isElevated && base.FlatStyle != FlatStyle.System && ReferenceEquals(base.Image, cachedSecurityShieldImage):
-                    base.WndProc(ref m);
-                    isImageUpToDate = false;
-                    base.Image = null; // it will be updated in CheckImage
-                    Invalidate();
-                    return;
+                //// Non-System FlatStyle with elevated icon: invalidating the icon
+                //case Constants.WM_DPICHANGED_BEFOREPARENT when isElevated && base.FlatStyle != FlatStyle.System && ReferenceEquals(base.Image, cachedSecurityShieldImage):
+                //    base.WndProc(ref m);
+                //    isImageUpToDate = false;
+                //    base.Image = null; // it will be updated in CheckImage
+                //    Invalidate();
+                //    return;
 
                 // System FlatStyle: the WM_DPICHANGED_AFTERPARENT resets the elevated icon, but we want to prevent if an image is set
                 case Constants.WM_DPICHANGED_AFTERPARENT when isElevated && base.FlatStyle == FlatStyle.System && base.Image != null:
@@ -773,7 +772,7 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckDefaultAnimation()
         {
-            if (!WindowsUtils.IsVistaOrLater)
+            if (!WindowsUtils.IsVistaOrLater || !VisualStyleHelper.HasDefaultAnimation((int)BUTTONPARTS.BP_PUSHBUTTON, (int)PUSHBUTTONSTATES.PBS_DEFAULTED, (int)PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING))
                 return;
 
             bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles && !VisualStyleHelper.HighContrast;
@@ -812,7 +811,7 @@ namespace KGySoft.WinForms.Controls
             // if image is up-to-date checking consistency only (to handle setting base.Image)
             if (isImageUpToDate)
             {
-                if (currentImage == base.Image
+                if (!isElevated && currentImage == base.Image
                     || currentImage == null && base.Image == null
                     || isElevated && (base.FlatStyle == FlatStyle.System ^ base.Image != null) && ReferenceEquals(currentImage, SecurityShieldImage))
                     return false;

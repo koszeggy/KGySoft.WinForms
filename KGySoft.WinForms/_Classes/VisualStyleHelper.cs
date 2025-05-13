@@ -47,7 +47,10 @@ namespace KGySoft.WinForms
         private static bool? visualStylesAvailable;
         private static bool? highContrast;
 
-        private static Cache<(IntPtr, int, int), Bitmap> themeBitmapsCache = CreateCache();
+        // No need to use thread-safe caches here, because they are always read from the UI thread.
+        // UserPreferenceChanged can be raised from any thread though (hence volatile), but it is not a problem if we always create a new instance when clearing the caches.
+        private static volatile Cache<(IntPtr, int, int), Bitmap> themeBitmapsCache = CreateBitmapsCache();
+        private static volatile Cache<(int, int, int), bool> hasDefaultAnimationCache = CreateHasDefaultAnimationCache();
 
         #endregion
 
@@ -80,13 +83,13 @@ namespace KGySoft.WinForms
 
         #region Internal Methods
 
-        internal static Size GetPartSize(IntPtr hTheme, Control control, Graphics g, int part, int state, bool actualSize)
+        internal static Size GetPartSize(IntPtr hTheme, Control? control, Graphics g, int part, int state, bool actualSize)
         {
             IntPtr hThemeWindow = IntPtr.Zero;
             IntPtr hdc = g.GetHdc();
             try
             {
-                if (control.HasNonDefaultScaling())
+                if (control?.HasNonDefaultScaling() == true)
                     hThemeWindow = UxTheme.OpenThemeDataForWindow(control.Handle, GetClassName(hTheme));
 
                 return UxTheme.GetThemePartSize(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, hdc, part, state,
@@ -175,19 +178,25 @@ namespace KGySoft.WinForms
             highContrast = null;
 
             var oldCache = themeBitmapsCache;
-            themeBitmapsCache = CreateCache();
+            themeBitmapsCache = CreateBitmapsCache();
             foreach (Bitmap bitmap in oldCache.Values)
                 bitmap.Dispose();
+
+            hasDefaultAnimationCache = CreateHasDefaultAnimationCache();
         }
+
+        internal static bool HasDefaultAnimation(int part, int state1, int state2) => hasDefaultAnimationCache[(part, state1, state2)];
 
         #endregion
 
         #region Private Methods
 
-        private static Cache<(IntPtr, int, int), Bitmap> CreateCache() => new Cache<(IntPtr ThemeHandle, int PartId, int StateId), Bitmap>(GetThemeBitmap, 32)
+        private static Cache<(IntPtr, int, int), Bitmap> CreateBitmapsCache() => new Cache<(IntPtr ThemeHandle, int PartId, int StateId), Bitmap>(GetThemeBitmap, 32)
         {
             DisposeDroppedValues = true
         };
+
+        private static Cache<(int, int, int), bool> CreateHasDefaultAnimationCache() => new(GetHasDefaultAnimation, 2);
 
         private static string GetClassName(IntPtr hTheme) => hTheme == buttonThemeHandle ? Constants.ThemeClassButton
             : hTheme == taskDialogThemeHandle ? Constants.ThemeClassTaskDialog
@@ -196,38 +205,45 @@ namespace KGySoft.WinForms
         private static Bitmap GetThemeBitmap((IntPtr ThemeHandle, int PartId, int StateId) key)
         {
             // Cannot use UxTheme.GetThemeBitmap (see the issues there) so as a workaround, drawing into a black and a white bitmap, and restoring alpha.
-
             var (hTheme, part, state) = key;
             Size realSize = UxTheme.GetThemePartSize(hTheme, IntPtr.Zero, part, state, (int)ThemeSizeType.True);
-            using Bitmap bmpBlack = PaintIntoBitmap(Color.Black);
-            using Bitmap bmpWhite = PaintIntoBitmap(Color.White);
+            using Bitmap bmpBlack = PaintIntoBitmap(hTheme, part, state, Color.Black, realSize);
+            using Bitmap bmpWhite = PaintIntoBitmap(hTheme, part, state, Color.White, realSize);
             return ReconstructWithAlpha(bmpBlack, bmpWhite);
+        }
 
-            #region Local Methods
-
-            Bitmap PaintIntoBitmap(Color backColor)
+        private static Bitmap PaintIntoBitmap(IntPtr hTheme, int part, int state, Color backColor, Size size)
+        {
+            // Using just the hdc of g would cause black alpha-blended pixels, but using BufferedGraphics solves the problem
+            var bitmap = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppRgb);
+            using var g = Graphics.FromImage(bitmap);
+            using BufferedGraphicsContext context = new BufferedGraphicsContext();
+            using BufferedGraphics bg = context.Allocate(g, new Rectangle(Point.Empty, size));
+            bg.Graphics.Clear(backColor);
+            var hdc = bg.Graphics.GetHdc();
+            try
             {
-                // Using just the hdc of g would cause black alpha-blended pixels, but using BufferedGraphics solves the problem
-                var bitmap = new Bitmap(realSize.Width, realSize.Height, PixelFormat.Format32bppRgb);
-                using var g = Graphics.FromImage(bitmap);
-                using BufferedGraphicsContext context = new BufferedGraphicsContext();
-                using BufferedGraphics bg = context.Allocate(g, new Rectangle(Point.Empty, realSize));
-                bg.Graphics.Clear(backColor);
-                var hdc = bg.Graphics.GetHdc();
-                try
-                {
-                    UxTheme.DrawThemeBackground(hTheme, hdc, part, state, new Rectangle(Point.Empty, realSize));
-                }
-                finally
-                {
-                    bg.Graphics.ReleaseHdc(hdc);
-                }
-
-                bg.Render(g);
-                return bitmap;
+                UxTheme.DrawThemeBackground(hTheme, hdc, part, state, new Rectangle(Point.Empty, size));
+            }
+            finally
+            {
+                bg.Graphics.ReleaseHdc(hdc);
             }
 
-            #endregion
+            bg.Render(g);
+            return bitmap;
+        }
+
+        private static bool GetHasDefaultAnimation((int PartId, int StateId1, int StateId2) key)
+        {
+            // DPI does not matter here, because the animation is the same for all DPIs
+            Size size;
+            using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))
+                size = GetPartSize(ButtonTheme, null, g, key.PartId, key.StateId1, true);
+
+            using Bitmap bmp1 = PaintIntoBitmap(ButtonTheme, key.PartId, key.StateId1, Color.White, size);
+            using Bitmap bmp2 = PaintIntoBitmap(ButtonTheme, key.PartId, key.StateId2, Color.White, size);
+            return !bmp1.EqualsByContent(bmp2);
         }
 
         private static Bitmap ReconstructWithAlpha(Bitmap blackBg, Bitmap whiteBg)
