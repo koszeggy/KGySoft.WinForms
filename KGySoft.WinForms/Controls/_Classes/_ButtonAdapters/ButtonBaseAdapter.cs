@@ -15,8 +15,6 @@
 
 #region Usings
 
-using KGySoft.WinForms.WinApi;
-
 #region Used Namespaces
 
 using System;
