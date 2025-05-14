@@ -299,6 +299,12 @@ namespace KGySoft.WinForms.Controls
             get => readOnly ? origCompleteMode : base.AutoCompleteMode;
             set
             {
+                // When handle is created, we hook the inner text box, which accidentally stops auto complete from working.
+                // Re-setting auto complete mode after handle creation does not work from code: it throws a NullReferenceException from the ComboBox.SetAutoComplete method.
+                // So another workaround if we make sure that the handle is created (and the hook is already set) before setting the AutoCompleteMode property.
+                if (!DesignMode && !IsHandleCreated)
+                    CreateHandle();
+
                 if (readOnly)
                     origCompleteMode = value;
                 else
