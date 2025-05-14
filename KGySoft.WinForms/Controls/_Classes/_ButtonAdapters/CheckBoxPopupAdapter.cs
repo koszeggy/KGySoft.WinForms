@@ -50,39 +50,27 @@ namespace KGySoft.WinForms.Controls
         private static void DrawCheckBackground(bool controlEnabled, CheckState controlCheckState, Graphics g, Rectangle bounds, Color checkBackground, bool disabledColors)
         {
             Brush brush;
-            bool toDispose = true;
             if (!controlEnabled && disabledColors)
-            {
                 brush = SystemBrushes.Control;
-                toDispose = false;
-            }
             else if (((controlCheckState == CheckState.Indeterminate) && (checkBackground == SystemColors.Window)) && disabledColors)
             {
                 Color color = VisualStyleHelper.HighContrast ? SystemColors.ControlDark : SystemColors.Control;
                 byte red = (byte)((color.R + SystemColors.Window.R) / 2);
                 byte green = (byte)((color.G + SystemColors.Window.G) / 2);
                 byte blue = (byte)((color.B + SystemColors.Window.B) / 2);
-                brush = new SolidBrush(Color.FromArgb(red, green, blue));
+                brush = Color.FromArgb(red, green, blue).GetBrush();
             }
             else
-                brush = new SolidBrush(checkBackground);
+                brush = checkBackground.GetBrush();
 
-            try
-            {
-                g.FillRectangle(brush, bounds);
-            }
-            finally
-            {
-                if (toDispose)
-                    brush.Dispose();
-            }
+            g.FillRectangle(brush, bounds);
         }
 
         private static void DrawPopupBorder(Graphics g, Rectangle r, ColorData colors)
         {
-            using Pen pen = new Pen(colors.Highlight);
-            using Pen pen2 = new Pen(colors.ButtonShadow);
-            using Pen pen3 = new Pen(colors.ButtonFace);
+            Pen pen = colors.Highlight.GetPen();
+            Pen pen2 = colors.ButtonShadow.GetPen();
+            Pen pen3 = colors.ButtonFace.GetPen();
             g.DrawLine(pen, r.Right - 1, r.Top, r.Right - 1, r.Bottom - 1);
             g.DrawLine(pen, r.Left, r.Bottom - 1, r.Right - 1, r.Bottom - 1);
             g.DrawLine(pen2, r.Left, r.Top, r.Left, r.Bottom - 1);

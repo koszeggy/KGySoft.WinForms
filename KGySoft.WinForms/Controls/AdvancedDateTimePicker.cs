@@ -153,13 +153,13 @@ namespace KGySoft.WinForms.Controls
 
             if (Enabled)
             {
-                brFore = new SolidBrush(ForeColor);
-                brBack = new SolidBrush(backColor);
+                brFore = ForeColor.GetBrush();
+                brBack = backColor.GetBrush();
             }
             else
             {
-                brFore = new SolidBrush(disabledForeColor);
-                brBack = new SolidBrush(disabledBackColor);
+                brFore = disabledForeColor.GetBrush();
+                brBack = disabledBackColor.GetBrush();
             }
             e.Graphics.FillRectangle(brBack, ClientRectangle);
             if (Checked)
@@ -170,13 +170,11 @@ namespace KGySoft.WinForms.Controls
 
         protected override void WndProc(ref Message m)
         {
-            // Így tudjuk a BackColor-ral kiszínezni az engedélyezett controlt
+            // That's how we can fill the enabled control with BackColor
             if (m.Msg == 0x14 && Enabled) // WM_ERASEBKGND
             {
-                using (Graphics g = Graphics.FromHdc(m.WParam))
-                {
-                    g.FillRectangle(new SolidBrush(backColor), ClientRectangle);
-                }
+                using Graphics g = Graphics.FromHdc(m.WParam);
+                g.FillRectangle(backColor.GetBrush(), ClientRectangle);
                 return;
 
             }

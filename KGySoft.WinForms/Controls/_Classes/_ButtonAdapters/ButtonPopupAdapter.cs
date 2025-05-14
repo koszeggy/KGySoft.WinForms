@@ -78,9 +78,9 @@ namespace KGySoft.WinForms.Controls
             DrawDefaultBorder(g, clientRectangle, colors.HighContrast ? colors.WindowText : colors.ButtonShadow, state.IsDefault);
             if (VisualStyleHelper.HighContrast)
             {
-                using Pen pen = new Pen(colors.WindowFrame);
-                using Pen pen2 = new Pen(colors.Highlight);
-                using Pen pen3 = new Pen(colors.ButtonShadow);
+                Pen pen = colors.WindowFrame.GetPen();
+                Pen pen2 = colors.Highlight.GetPen();
+                Pen pen3 = colors.ButtonShadow.GetPen();
                 g.DrawLine(pen, (clientRectangle.Left + 1), (clientRectangle.Top + 1), (clientRectangle.Right - 2), (clientRectangle.Top + 1));
                 g.DrawLine(pen, (clientRectangle.Left + 1), (clientRectangle.Top + 1), (clientRectangle.Left + 1), (clientRectangle.Bottom - 2));
                 g.DrawLine(pen, clientRectangle.Left, clientRectangle.Bottom - 1, clientRectangle.Right, clientRectangle.Bottom - 1);

@@ -125,10 +125,10 @@ namespace KGySoft.WinForms.Controls
             if (!state.Enabled && disabledColors)
                 backColor = state.BackColor;
 
-            using Brush brush = new SolidBrush(backColor);
-            using Pen pen = new Pen(colors.ButtonShadow);
-            using Pen pen2 = new Pen(colors.ButtonFace);
-            using Pen pen3 = new Pen(colors.Highlight);
+            Brush brush = backColor.GetBrush();
+            Pen pen = colors.ButtonShadow.GetPen();
+            Pen pen2 = colors.ButtonFace.GetPen();
+            Pen pen3 = colors.Highlight.GetPen();
             bounds.Width--;
             bounds.Height--;
             graphics.DrawPie(pen, bounds, 136f, 88f);

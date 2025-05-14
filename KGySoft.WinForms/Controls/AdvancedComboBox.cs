@@ -768,7 +768,6 @@ namespace KGySoft.WinForms.Controls
             if (e.Index >= 0)
             {
                 string label = GetItemText(Items[e.Index]);
-                bool dispose = true;
 
                 Brush brFore;
                 Brush brBack;
@@ -781,24 +780,18 @@ namespace KGySoft.WinForms.Controls
                 // Non focused list item
                 if ((int)(e.State & DrawItemState.Selected) == 0)
                 {
-                    brFore = new SolidBrush(ForeColor);
-                    brBack = new SolidBrush(BackColor);
+                    brFore = ForeColor.GetBrush();
+                    brBack = BackColor.GetBrush();
                 }
                 // Focused list item
                 else
                 {
                     brFore = SystemBrushes.HighlightText;
                     brBack = SystemBrushes.Highlight;
-                    dispose = false;
                 }
                 e.Graphics.FillRectangle(brBack, e.Bounds);
                 e.Graphics.DrawString(label, e.Font, brFore, e.Bounds.Left - 2, e.Bounds.Top);
                 e.DrawFocusRectangle();
-                if (dispose)
-                {
-                    brFore.Dispose();
-                    brBack.Dispose();
-                }
             }
             // drawing the unselected control in dropdownlist mode
             else
@@ -857,8 +850,7 @@ namespace KGySoft.WinForms.Controls
                         bounds.X += 16;
                 }
 
-                using (Brush b = new SolidBrush(disabledBackColor))
-                    g.FillRectangle(b, bounds);
+                g.FillRectangle(disabledBackColor.GetBrush(), bounds);
 
                 // drawing text
                 bounds.Width += 6;

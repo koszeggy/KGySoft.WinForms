@@ -60,10 +60,7 @@ namespace KGySoft.WinForms.Controls
                     switch (borderStyle)
                     {
                         case AdvancedBorderStyle.FixedSingle:
-                            using (Pen pen = new Pen(SystemColors.WindowFrame))
-                            {
-                                g.DrawRectangle(pen, 0, 0, size.Width - 1, size.Height - 1);
-                            }
+                            g.DrawRectangle(SystemPens.WindowFrame, 0, 0, size.Width - 1, size.Height - 1);
                             break;
                         case AdvancedBorderStyle.Raised:
                         case AdvancedBorderStyle.Flat:

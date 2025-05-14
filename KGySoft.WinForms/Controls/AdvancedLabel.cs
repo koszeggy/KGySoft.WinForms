@@ -604,12 +604,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
                 Rectangle backRect = ClientRectangle;
                 if (state.BackColor != Color.Transparent)
-                {
-                    using (Brush b = new SolidBrush(state.BackColor))
-                    {
-                        e.Graphics.FillRectangle(b, backRect);
-                    }
-                }
+                    e.Graphics.FillRectangle(state.BackColor.GetBrush(), backRect);
 
                 if (!state.Visible)
                     return;
@@ -641,21 +636,13 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                 Rectangle rect = new Rectangle(ClientRectangle.X + Padding.Left, ClientRectangle.Y + Padding.Top, ClientRectangle.Width - Padding.Horizontal, ClientRectangle.Height - Padding.Vertical);
                 TextFormatFlags formatFlags = this.GetFormatFlags();
                 if (UseCompatibleTextRendering)
-                {
-                    using (Brush b = new SolidBrush(state.ForeColor))
-                    {
-                        e.Graphics.DrawString(state.Text, Font, b, rect, formatFlags.ToStringFormat());
-                    }
-                }
+                    e.Graphics.DrawString(state.Text, Font, state.ForeColor.GetBrush(), rect, formatFlags.ToStringFormat());
                 else
-                {
                     TextRenderer.DrawText(e.Graphics, state.Text, Font, rect, state.ForeColor, image == null ? state.BackColor : Color.Transparent, formatFlags);
-                }
             }
             finally
             {
-                if (PaintState != null)
-                    PaintState.Invoke(this, e);
+                PaintState?.Invoke(this, e);
             }
         }
 

@@ -915,31 +915,15 @@ namespace KGySoft.WinForms.Controls
             Point p4 = new Point(r.Right - 1, r.Bottom - 1);  // inner bottom right.
 
             // top, left
-            Pen pen = up ? new Pen(colors.Highlight) : new Pen(colors.ButtonShadow);
-
-            try
-            {
-                g.DrawLine(pen, p1, p2); // top (right-left)
-                g.DrawLine(pen, p2, p3); // left (top-down)
-            }
-            finally
-            {
-                pen.Dispose();
-            }
+            Pen pen = (up ? colors.Highlight : colors.ButtonShadow).GetPen();
+            g.DrawLine(pen, p1, p2); // top (right-left)
+            g.DrawLine(pen, p2, p3); // left (top-down)
 
             // bottom, right
-            pen = up ? new Pen(colors.ButtonShadow) : new Pen(colors.Highlight);
-
-            try
-            {
-                p1.Offset(0, -1); // need to paint last pixel too.
-                g.DrawLine(pen, p3, p4); // bottom (left-right)
-                g.DrawLine(pen, p4, p1); // right(bottom-up)
-            }
-            finally
-            {
-                pen.Dispose();
-            }
+            pen = (up ? colors.ButtonShadow : colors.Highlight).GetPen();
+            p1.Offset(0, -1); // need to paint last pixel too.
+            g.DrawLine(pen, p3, p4); // bottom (left-right)
+            g.DrawLine(pen, p4, p1); // right(bottom-up)
         }
 
         protected static void DrawFlatBorder(Graphics g, Rectangle r, Color c) => ControlPaint.DrawBorder(g, r, c, ButtonBorderStyle.Solid);
@@ -949,11 +933,7 @@ namespace KGySoft.WinForms.Controls
             if (isDefault)
             {
                 r.Inflate(1, 1);
-
-                Pen pen = c.IsSystemColor ? SystemPens.FromSystemColor(c) : new Pen(c);
-                g.DrawRectangle(pen, r.X, r.Y, r.Width - 1, r.Height - 1);
-                if (!c.IsSystemColor)
-                    pen.Dispose();
+                g.DrawRectangle(c.GetPen(), r.X, r.Y, r.Width - 1, r.Height - 1);
             }
         }
 
@@ -1035,19 +1015,7 @@ namespace KGySoft.WinForms.Controls
         protected abstract LayoutOptions Layout(Graphics graphics, ControlAppearanceState state);
 
         protected void PaintButtonBackground(PaintEventArgs e, Rectangle bounds, Color backColor)
-        {
-            bool isSystemColor = backColor.IsSystemColor;
-            Brush brush = isSystemColor ? SystemBrushes.FromSystemColor(backColor) : new SolidBrush(backColor);
-            try
-            {
-                e.Graphics.FillRectangle(brush, bounds);
-            }
-            finally
-            {
-                if (!isSystemColor)
-                    brush.Dispose();
-            }
-        }
+            => e.Graphics.FillRectangle(backColor.GetBrush(), bounds);
 
         protected void PaintField(PaintStateEventArgs e, LayoutData layout, ColorData colors, bool drawFocus)
         {
@@ -1147,25 +1115,13 @@ namespace KGySoft.WinForms.Controls
                 if (disabledText3D && !state.Enabled)
                 {
                     r.Offset(1, 1);
-                    using SolidBrush brush = new SolidBrush(colors.Highlight);
-                    g.DrawString(state.Text, control.Font, brush, r, stringFormat);
+                    g.DrawString(state.Text, control.Font, colors.Highlight.GetBrush(), r, stringFormat);
 
                     r.Offset(-1, -1);
-                    brush.Color = state.ForeColor; // here: DisabledForeColor
-                    g.DrawString(state.Text, control.Font, brush, r, stringFormat);
+                    g.DrawString(state.Text, control.Font, state.ForeColor.GetBrush(), r, stringFormat);
                 }
                 else
-                {
-                    Brush brush;
-
-                    brush = state.ForeColor.IsSystemColor
-                        ? SystemBrushes.FromSystemColor(state.ForeColor)
-                        : new SolidBrush(state.ForeColor);
-                    g.DrawString(state.Text, control.Font, brush, r, stringFormat);
-
-                    if (!state.ForeColor.IsSystemColor)
-                        brush.Dispose();
-                }
+                    g.DrawString(state.Text, control.Font, state.ForeColor.GetBrush(), r, stringFormat);
             }
             else
             {

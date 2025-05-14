@@ -72,49 +72,28 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private static void DrawFlatBorderWithSize(Graphics g, Rectangle r, Color c, int size)
         {
-            bool stockBorder = c.IsSystemColor;
-            SolidBrush brush;
+            Brush brush = c.GetBrush();
 
-            if (size > 1)
-                brush = new SolidBrush(c);
-            else
-            {
-                if (stockBorder)
-                    brush = (SolidBrush)SystemBrushes.FromSystemColor(c);
-                else
-                    brush = new SolidBrush(c);
-            }
+            size = Math.Min(size, Math.Min(r.Width, r.Height));
 
-            try
-            {
-                size = Math.Min(size, Math.Min(r.Width, r.Height));
-                // ...truncate pen width to button size, to avoid overflow if border size is huge!
+            //Left Border
+            g.FillRectangle(brush, r.X, r.Y, size, r.Height);
 
-                //Left Border
-                g.FillRectangle(brush, r.X, r.Y, size, r.Height);
+            //Right Border
+            g.FillRectangle(brush, (r.X + r.Width - size), r.Y, size, r.Height);
 
-                //Right Border
-                g.FillRectangle(brush, (r.X + r.Width - size), r.Y, size, r.Height);
+            //Top Border
+            g.FillRectangle(brush, (r.X + size), r.Y, (r.Width - size * 2), size);
 
-                //Top Border
-                g.FillRectangle(brush, (r.X + size), r.Y, (r.Width - size * 2), size);
-
-                //Bottom Border
-                g.FillRectangle(brush, (r.X + size), (r.Y + r.Height - size), (r.Width - size * 2), size);
-            }
-            finally
-            {
-                if (!stockBorder)
-                    brush.Dispose();
-            }
+            //Bottom Border
+            g.FillRectangle(brush, (r.X + size), (r.Y + r.Height - size), (r.Width - size * 2), size);
         }
 
         private static void DrawFlatFocus(Graphics g, Rectangle r, Color c)
         {
             r.Width--;
             r.Height--;
-            using Pen focus = new Pen(c);
-            g.DrawRectangle(focus, r);
+            g.DrawRectangle(c.GetPen(), r);
         }
 
         #endregion

@@ -242,10 +242,7 @@ namespace KGySoft.WinForms.Forms
             protected override void OnPaintState(PaintStateEventArgs e)
             {
                 Graphics g = e.Graphics;
-                using (Brush b = new SolidBrush(BackColor))
-                {
-                    g.FillRectangle(b, ClientRectangle);
-                }
+                g.FillRectangle(BackColor.GetBrush(), ClientRectangle);
 
                 Size imageSize;
                 if (VisualStyleHelper.RenderWithVisualStyles)

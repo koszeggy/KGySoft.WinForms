@@ -127,9 +127,6 @@ namespace KGySoft.WinForms.Controls
 
         private Brush? pressedBrush;
         private Brush? hoveredBrush;
-        private Pen? hoveredFrameOuterPen;
-        private Pen? hoveredFrameInnerPen;
-        private Pen? pressedFramePen;
         private GraphicsPath? outerBorder;
         private GraphicsPath? innerBorder;
         private GraphicsPath? selectionBorder;
@@ -812,6 +809,7 @@ namespace KGySoft.WinForms.Controls
                 // classic style
                 if (base.FlatStyle == FlatStyle.Popup || (base.FlatStyle == FlatStyle.Standard && !VisualStyleHelper.RenderWithVisualStyles))
                 {
+                    // cannot just return SystemBrushes.Control or a cached brush because it will be disposed
                     pressedBrush = new SolidBrush(SystemColors.Control);
                     return pressedBrush;
                 }
@@ -849,6 +847,7 @@ namespace KGySoft.WinForms.Controls
                 // classic style
                 if (base.FlatStyle == FlatStyle.Popup || (base.FlatStyle == FlatStyle.Standard && !VisualStyleHelper.RenderWithVisualStyles))
                 {
+                    // cannot just return SystemBrushes.Control or a cached brush because it will be disposed
                     hoveredBrush = new SolidBrush(SystemColors.Control);
                     return hoveredBrush;
                 }
@@ -872,42 +871,6 @@ namespace KGySoft.WinForms.Controls
                     }
                 };
                 return hoveredBrush;
-            }
-        }
-
-        private Pen HoveredFrameOuterPen
-        {
-            get
-            {
-                if (hoveredFrameOuterPen != null)
-                    return hoveredFrameOuterPen;
-
-                // themed mode
-                return hoveredFrameOuterPen = new Pen(Color.FromArgb(128, 160, 160, 160), 1f);
-            }
-        }
-
-        private Pen HoveredFrameInnerPen
-        {
-            get
-            {
-                if (hoveredFrameInnerPen != null)
-                    return hoveredFrameInnerPen;
-
-                // themed mode
-                return hoveredFrameInnerPen = new Pen(Color.FromArgb(128, 255, 255, 255), 1f);
-            }
-        }
-
-        private Pen PressedFramePen
-        {
-            get
-            {
-                if (pressedFramePen != null)
-                    return pressedFramePen;
-
-                // themed mode
-                return pressedFramePen = new Pen(Color.FromArgb(128, 128, 128, 128), 1f);
             }
         }
 
@@ -1035,7 +998,6 @@ namespace KGySoft.WinForms.Controls
             if (disposing)
             {
                 FreeBrushes();
-                FreePens();
                 FreeRegions();
 
                 fadingPainter.Dispose();
@@ -1559,7 +1521,6 @@ namespace KGySoft.WinForms.Controls
 
             ResetSizeCache();
             FreeBrushes();
-            FreePens();
             FreeRegions();
             Invalidate();
             if (AutoSize)
@@ -1597,10 +1558,7 @@ namespace KGySoft.WinForms.Controls
             if (Parent != null)
                 this.PaintTransparentBackground(e);
             else
-            {
-                using Brush b = new SolidBrush(state.BackColor);
-                e.Graphics.FillRectangle(b, backRect);
-            }
+                e.Graphics.FillRectangle(state.BackColor.GetBrush(), backRect);
 
             // Native rendering
             if (WindowsUtils.IsVistaOrLater)
@@ -1614,22 +1572,22 @@ namespace KGySoft.WinForms.Controls
                         PressedBrush,
                         new Rectangle(
                             ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width - 1, ClientRectangle.Height - 1));
-                    e.Graphics.DrawPath(PressedFramePen, OuterBorder);
+                    e.Graphics.DrawPath(Color.FromArgb(128, 128, 128, 128).GetPen(), OuterBorder);
                 }
                 else if (state.Hovered)
                 {
                     e.Graphics.FillRectangle(HoveredBrush, new Rectangle(1, 1, Width - 2, Height - 2));
-                    e.Graphics.DrawPath(HoveredFrameInnerPen, InnerBorder);
-                    e.Graphics.DrawPath(HoveredFrameOuterPen, OuterBorder);
+                    e.Graphics.DrawPath(Color.FromArgb(128, 255, 255, 255).GetPen(), InnerBorder);
+                    e.Graphics.DrawPath(Color.FromArgb(128, 160, 160, 160).GetPen(), OuterBorder);
                 }
                 else // normal state
                 {
                     // no drawing needed in normal state unless if focused or default
                     if (state.Enabled && (Focused || state.IsDefault))
                     {
-                        using Pen selectedFramePen = new Pen(!FadingPainterInternal.IsSupported || state.SystemStateId == (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING
+                        Pen selectedFramePen = (!FadingPainterInternal.IsSupported || state.SystemStateId == (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING
                             ? selectedFrameColorAlternative
-                            : selectedFrameColor);
+                            : selectedFrameColor).GetPen();
                         e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
                     }
                 }
@@ -1648,36 +1606,28 @@ namespace KGySoft.WinForms.Controls
             Rectangle backRect = ClientRectangle;
 
             // Background
-            using (Pen selectedFramePen = new Pen(SystemColors.WindowFrame, 1f))
+            Pen selectedFramePen = SystemPens.WindowFrame;
+            if (state.Pressed)
             {
-                if (state.Pressed)
-                {
-                    e.Graphics.FillRectangle(PressedBrush, backRect);
+                e.Graphics.FillRectangle(PressedBrush, backRect);
+                e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
+                backRect.Inflate(-1, -1);
+                ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.SunkenOuter);
+            }
+            else if (state.Hovered)
+            {
+                e.Graphics.FillRectangle(HoveredBrush, backRect);
+                ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.Raised);
+
+                // with classic state selection is drawn even if button is hovered
+                if (state.Enabled && (Focused || state.IsDefault))
                     e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
-                    backRect.Inflate(-1, -1);
-                    ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.SunkenOuter);
-                }
-                else if (state.Hovered)
-                {
-                    e.Graphics.FillRectangle(HoveredBrush, backRect);
-                    ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.Raised);
-
-                    // with classic state selection is drawn even if button is hovered
-                    if (state.Enabled && (Focused || state.IsDefault))
-                        e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
-                }
-                else // normal state
-                {
-                    using (Brush b = new SolidBrush(state.BackColor))
-                    {
-                        e.Graphics.FillRectangle(b, backRect);
-                    }
-
-                    if (state.Enabled && (Focused || state.IsDefault))
-                    {
-                        e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
-                    }
-                }
+            }
+            else // normal state
+            {
+                e.Graphics.FillRectangle(state.BackColor.GetBrush(), backRect);
+                if (state.Enabled && (Focused || state.IsDefault))
+                    e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
             }
 
             // Image
@@ -1755,16 +1705,11 @@ namespace KGySoft.WinForms.Controls
                     borderWidth++;
             }
 
-            using (Brush b = new SolidBrush(state.BackColor))
-            {
-                e.Graphics.FillRectangle(b, backRect);
-            }
-
+            e.Graphics.FillRectangle(state.BackColor.GetBrush(), backRect);
             if (backColor != state.BackColor)
             {
-                using Brush b = new SolidBrush(backColor);
                 backRect.Inflate(-(borderWidth / 2 + 3), -(borderWidth / 2 + 2));
-                e.Graphics.FillRectangle(b, backRect);
+                e.Graphics.FillRectangle(backColor.GetBrush(), backRect);
             }
 
             if (borderWidth > 0)
@@ -1782,10 +1727,9 @@ namespace KGySoft.WinForms.Controls
                 Color focusColor = VisualStyleHelper.HighContrast ? SystemColors.WindowText
                     : (BackColor.GetBrightness() < 0.5f ? ControlPaint.Light(state.BackColor) : ControlPaint.Dark(state.BackColor));
 
-                using Pen pen = new Pen(focusColor);
                 int borderSize = FlatAppearance.BorderSize;
                 Rectangle rectangle = new Rectangle(ClientRectangle.X + borderSize + 4, ClientRectangle.Y + borderSize + 3, Width - borderSize * 2 - 9, Height - borderSize * 2 - 7);
-                e.Graphics.DrawRectangle(pen, rectangle);
+                e.Graphics.DrawRectangle(focusColor.GetPen(), rectangle);
             }
         }
 
@@ -1941,10 +1885,7 @@ namespace KGySoft.WinForms.Controls
             {
                 Rectangle rectangle = new Rectangle(left + (useTheming ? 1 : 0), top, proposedSize.Width, Math.Min(textSize.Height, proposedSize.Height));
                 if (gdiPlusTextRendering)
-                {
-                    using Brush b = new SolidBrush(textColor);
-                    e.Graphics.DrawString(state.Text, Font, b, rectangle, sf);
-                }
+                    e.Graphics.DrawString(state.Text, Font, textColor.GetBrush(), rectangle, sf);
                 else
                     TextRenderer.DrawText(e.Graphics, state.Text, Font, rectangle, textColor, formatFlags);
             }
@@ -1953,10 +1894,7 @@ namespace KGySoft.WinForms.Controls
             {
                 Rectangle rectangle = new Rectangle(left + (useTheming ? 2 : 0), top + textSize.Height + (useTheming ? 1 : 2), proposedSize.Width, Math.Min(descSize.Height, proposedSize.Height - textSize.Height));
                 if (gdiPlusTextRendering)
-                {
-                    using Brush b = new SolidBrush(descColor);
-                    e.Graphics.DrawString(customState.DescriptionText, DescriptionFont, b, rectangle, sf);
-                }
+                    e.Graphics.DrawString(customState.DescriptionText, DescriptionFont, descColor.GetBrush(), rectangle, sf);
                 else
                     TextRenderer.DrawText(e.Graphics, customState.DescriptionText, DescriptionFont, rectangle, descColor, formatFlags);
             }
@@ -2089,27 +2027,6 @@ namespace KGySoft.WinForms.Controls
             {
                 hoveredBrush.Dispose();
                 hoveredBrush = null;
-            }
-        }
-
-        private void FreePens()
-        {
-            if (hoveredFrameOuterPen != null)
-            {
-                hoveredFrameOuterPen.Dispose();
-                hoveredFrameOuterPen = null;
-            }
-
-            if (hoveredFrameInnerPen != null)
-            {
-                hoveredFrameInnerPen.Dispose();
-                hoveredFrameInnerPen = null;
-            }
-
-            if (pressedFramePen != null)
-            {
-                pressedFramePen.Dispose();
-                pressedFramePen = null;
             }
         }
 

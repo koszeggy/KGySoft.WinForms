@@ -103,8 +103,7 @@ namespace KGySoft.WinForms.Controls
             Rectangle checkBounds = layout.CheckBounds;
             checkBounds.Width--;
             checkBounds.Height--;
-            using (Pen pen = new Pen(checkBorder))
-                e.Graphics.DrawRectangle(pen, checkBounds);
+            e.Graphics.DrawRectangle(checkBorder.GetPen(), checkBounds);
 
             checkBounds.Inflate(-1, -1);
             if (state.CheckState == CheckState.Indeterminate)
@@ -115,10 +114,9 @@ namespace KGySoft.WinForms.Controls
             }
             else
             {
-                using Brush brush = new SolidBrush(checkBackground);
                 checkBounds.Width++;
                 checkBounds.Height++;
-                e.Graphics.FillRectangle(brush, checkBounds);
+                e.Graphics.FillRectangle(checkBackground.GetBrush(), checkBounds);
             }
 
             DrawCheckOnly(e, layout, colors, checkColor, true, state);

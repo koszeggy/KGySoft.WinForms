@@ -526,8 +526,7 @@ namespace KGySoft.WinForms.Controls
                 this.PaintTransparentBackground(e);
             else
             {
-                using Brush b = new SolidBrush(BackColor);
-                e.Graphics.FillRectangle(b, e.ClipRectangle);
+                e.Graphics.FillRectangle(BackColor.GetBrush(), e.ClipRectangle);
             }
         }
 
@@ -557,8 +556,7 @@ namespace KGySoft.WinForms.Controls
             if (rect.Height <= 0 || rect.Width <= 0)
                 return;
 
-            using Brush brush = new SolidBrush(GetActualForeColor());
-            graphics.FillRectangle(brush, rect);
+            graphics.FillRectangle(GetActualForeColor().GetBrush(), rect);
         }
 
         private Color GetActualForeColor() => state switch
@@ -578,10 +576,7 @@ namespace KGySoft.WinForms.Controls
             rect.Width--;
             rect.Height--;
             if (BackColor != Color.Transparent)
-            {
-                using Pen pen = new Pen(BackColor.Dark(0.3f));
-                e.Graphics.DrawRectangle(pen, rect);
-            }
+                e.Graphics.DrawRectangle(BackColor.Dark(0.3f).GetPen(), rect);
 
             rect.Height++;
             rect.Width++;
@@ -610,15 +605,13 @@ namespace KGySoft.WinForms.Controls
             rect.Inflate(-1, -1);
             rect.Width--;
             rect.Height--;
-            using (Pen pen = new Pen(Color.FromArgb(100, Color.White)))
-                graphics.DrawRoundedRectangle(pen, rect, 2);
+            graphics.DrawRoundedRectangle(Color.FromArgb(100, Color.White).GetPen(), rect, 2);
 
             // frame
             rect = ClientRectangle;
             rect.Width--;
             rect.Height--;
-            using (Pen pen = new Pen(BackColor.Dark(0.3f)))
-                graphics.DrawRoundedRectangle(pen, rect, 2);
+            graphics.DrawRoundedRectangle(BackColor.Dark(0.3f).GetPen(), rect, 2);
         }
 
         private void DrawShinyBackground(Graphics g)
@@ -626,10 +619,7 @@ namespace KGySoft.WinForms.Controls
             Rectangle rect = this.ClientRectangle;
             rect.Inflate(-1, -1);
             if (rect.Width >= 1 && rect.Height >= 1)
-            {
-                using Brush brush = new SolidBrush(BackColor.Dark(0.1f));
-                g.FillRoundedRectangle(brush, rect, 2);
-            }
+                g.FillRoundedRectangle(BackColor.Dark(0.1f).GetBrush(), rect, 2);
 
             rect.Inflate(0, -1);
             DrawShadows(g, rect, 10, 40);

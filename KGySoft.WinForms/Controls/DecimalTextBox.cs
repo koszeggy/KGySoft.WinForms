@@ -282,11 +282,11 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the the valid range of <see cref="Value"/>.
-        /// If <see cref="Value"/> violates newly set range, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <see langword="false"/>.
+        /// If <see cref="Value"/> violates newly set range, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrected if <see cref="BlankEnabled"/> is <see langword="false"/>.
         /// </summary>
         [Category("DecimalTextBox")]
         [Description("Gets or sets the the valid range of Value. " +
-                    "If Value violates newly set range, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+                    "If Value violates newly set range, then Blank will be set or Value will be corrected if BlankEnabled is false.")]
         [DefaultValue(typeof(DecimalRange), "Any")]
         public DecimalRange Range
         {
@@ -303,11 +303,11 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets accepted minimum <see cref="Value"/>.
-        /// If <see cref="Value"/> violates newly set minimum value, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <see langword="false"/>.
+        /// If <see cref="Value"/> violates newly set minimum value, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrected if <see cref="BlankEnabled"/> is <see langword="false"/>.
         /// </summary>
         [Category("DecimalTextBox")]
         [Description("Gets or sets accepted minimum Value. " +
-                    "If Value violates newly set minimum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+                    "If Value violates newly set minimum value, then Blank will be set or Value will be corrected if BlankEnabled is false.")]
         [DefaultValue(typeof(decimal), "0")]
         [RefreshProperties(RefreshProperties.All)]
         public decimal RangeMinValue
@@ -325,11 +325,11 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets accepted maximum <see cref="Value"/>.
-        /// If <see cref="Value"/> violates newly set maximum value, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <see langword="false"/>.
+        /// If <see cref="Value"/> violates newly set maximum value, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrected if <see cref="BlankEnabled"/> is <see langword="false"/>.
         /// </summary>
         [Category("DecimalTextBox")]
         [Description("Gets or sets accepted maximum Value. " +
-                    "If Value violates newly set maximum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+                    "If Value violates newly set maximum value, then Blank will be set or Value will be corrected if BlankEnabled is false.")]
         [DefaultValue(typeof(decimal), "0")]
         [RefreshProperties(RefreshProperties.All)]
         public decimal RangeMaxValue

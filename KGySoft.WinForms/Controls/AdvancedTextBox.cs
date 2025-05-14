@@ -249,10 +249,8 @@ namespace KGySoft.WinForms.Controls
                 //if (this.IsRightToLeft())
                 //    flags |= TextFormatFlags.RightToLeft | TextFormatFlags.Right;
 
-                using (Brush b = new SolidBrush(disabledBackColor))
-                {
-                    e.Graphics.FillRectangle(b, ClientRectangle);
-                }
+                e.Graphics.FillRectangle(disabledBackColor.GetBrush(), ClientRectangle);
+
                 // TODO: Adjust rectangle size to DPI (this +5 width is good for 96 DPI but 120 DPI requires +6)
                 Rectangle rectangle = new Rectangle(new Point(-2, 1), new Size(ClientRectangle.Width + 5, ClientRectangle.Height - 2));
                 TextFormatFlags flags = this.GetFormatFlags();

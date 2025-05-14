@@ -100,9 +100,6 @@ namespace KGySoft.WinForms.Controls
                 backColor = state.BackColor;
             }
 
-            using Pen pen = new Pen(foreColor);
-            using Brush brush = new SolidBrush(backColor);
-
             if (scale.X > 1.1f || RadioButtonInstance.VisualsRenderingQuality == RenderingQuality.High)
             {
                 // In high DPI mode when we draw an ellipse as three rectangles, the quality of ellipse is poor. Draw
@@ -112,13 +109,13 @@ namespace KGySoft.WinForms.Controls
                 GraphicsState prevState = e.Graphics.Save();
                 if (RadioButtonInstance.VisualsRenderingQuality == RenderingQuality.High)
                     e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                e.Graphics.FillEllipse(brush, bounds);
-                e.Graphics.DrawEllipse(pen, bounds);
+                e.Graphics.FillEllipse(backColor.GetBrush(), bounds);
+                e.Graphics.DrawEllipse(foreColor.GetPen(), bounds);
                 e.Graphics.Restore(prevState);
                 bounds.Inflate(-1, -1);
             }
             else
-                DrawAndFillEllipse(e.Graphics, pen, brush, bounds);
+                DrawAndFillEllipse(e.Graphics, foreColor.GetPen(), backColor.GetBrush(), bounds);
         }
 
         protected void DrawCheckOnly(PaintStateEventArgs e, LayoutData layout, Color checkColor)
@@ -126,8 +123,7 @@ namespace KGySoft.WinForms.Controls
             ControlAppearanceState state = e.State;
             if (state.CheckState == CheckState.Unchecked)
                 return;
-
-            using Brush brush = new SolidBrush(checkColor);
+            Brush brush = checkColor.GetBrush();
             PointF scale = layout.Options.Scale;
 
             // Original code

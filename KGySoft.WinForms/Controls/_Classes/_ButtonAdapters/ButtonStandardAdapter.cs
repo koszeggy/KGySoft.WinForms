@@ -63,61 +63,36 @@ namespace KGySoft.WinForms.Controls
             Point p3 = new Point(bounds.X, bounds.Y + bounds.Height - 1);  // bottom inner left.
             Point p4 = new Point(bounds.X + bounds.Width - 1, bounds.Y + bounds.Height - 1);  // inner bottom right.
 
-            Pen? penTopLeft = null;
-            Pen? penBottomRight = null;
-            Pen? insetPen = null;
-            Pen? bottomRightInsetPen = null;
+            Pen penTopLeft = (stockColor ? SystemColors.ControlLightLight : colors.Highlight).GetPen();
+            Pen penBottomRight = (stockColor ? SystemColors.ControlDarkDark : colors.ButtonShadowDark).GetPen();
+            Pen insetPen = stockColor
+                ? (VisualStyleHelper.HighContrast ? SystemColors.ControlLight : SystemColors.Control).GetPen()
+                : (VisualStyleHelper.HighContrast ? colors.Highlight : colors.ButtonFace).GetPen();
+            Pen bottomRightInsetPen = (stockColor ? SystemColors.ControlDark : colors.ButtonShadow).GetPen();
 
-            try
-            {
-                // top + left
-                penTopLeft = stockColor ? /*SystemPens.ControlLightLight*/ new Pen(SystemColors.ControlLightLight) : new Pen(colors.Highlight);
-                g.DrawLine(penTopLeft, p1, p2); // top  (right-left)
-                g.DrawLine(penTopLeft, p2, p3); // left (up-down)
+            // top + left
+            g.DrawLine(penTopLeft, p1, p2); // top  (right-left)
+            g.DrawLine(penTopLeft, p2, p3); // left (up-down)
 
-                // bottom + right
-                penBottomRight = stockColor ? new Pen(SystemColors.ControlDarkDark) : new Pen(colors.ButtonShadowDark);
+            // bottom + right
+            p1.Offset(0, -1); // need to paint last pixel too.
+            g.DrawLine(penBottomRight, p3, p4);  // bottom (left-right)
+            g.DrawLine(penBottomRight, p4, p1);  // right  (bottom-up )
 
-                p1.Offset(0, -1); // need to paint last pixel too.
-                g.DrawLine(penBottomRight, p3, p4);  // bottom (left-right)
-                g.DrawLine(penBottomRight, p4, p1);  // right  (bottom-up )
+            // Draw inset
+            p1.Offset(-1, 2);
+            p2.Offset(1, 1);
+            p3.Offset(1, -1);
+            p4.Offset(-1, -1);
 
-                // Draw inset
-                if (stockColor)
-                    insetPen = VisualStyleHelper.HighContrast ? new Pen(SystemColors.ControlLight) : new Pen(SystemColors.Control);
-                else
-                    insetPen = VisualStyleHelper.HighContrast ? new Pen(colors.Highlight) : new Pen(colors.ButtonFace);
+            // top + left inset
+            g.DrawLine(insetPen, p1, p2); // top (right-left)
+            g.DrawLine(insetPen, p2, p3); // left( up-down)
 
-                p1.Offset(-1, 2);
-                p2.Offset(1, 1);
-                p3.Offset(1, -1);
-                p4.Offset(-1, -1);
-
-                // top + left inset
-                g.DrawLine(insetPen, p1, p2); // top (right-left)
-                g.DrawLine(insetPen, p2, p3); // left( up-down)
-
-                // Bottom + right inset
-
-                bottomRightInsetPen = stockColor ? new Pen(SystemColors.ControlDark) : new Pen(colors.ButtonShadow);
-                p1.Offset(0, -1); // need to paint last pixel too.
-                g.DrawLine(bottomRightInsetPen, p3, p4); // bottom (left-right)
-                g.DrawLine(bottomRightInsetPen, p4, p1); // right  (bottom-up)
-            }
-            finally
-            {
-                if (penTopLeft != null)
-                    penTopLeft.Dispose();
-
-                if (penBottomRight != null)
-                    penBottomRight.Dispose();
-
-                if (insetPen != null)
-                    insetPen.Dispose();
-
-                if (bottomRightInsetPen != null)
-                    bottomRightInsetPen.Dispose();
-            }
+            // Bottom + right inset
+            p1.Offset(0, -1); // need to paint last pixel too.
+            g.DrawLine(bottomRightInsetPen, p3, p4); // bottom (left-right)
+            g.DrawLine(bottomRightInsetPen, p4, p1); // right  (bottom-up)
         }
 
         private static void Draw3DBorderNormal(Graphics g, ref Rectangle bounds, ColorData colors)
@@ -130,64 +105,35 @@ namespace KGySoft.WinForms.Controls
             Point p4 = new Point(bounds.X + bounds.Width - 1, bounds.Y + bounds.Height - 1);  // inner bottom right.
 
             // top + left
-            Pen pen = new Pen(colors.ButtonShadowDark);
-            try
-            {
-                g.DrawLine(pen, p1, p2); // top (right-left)
-                g.DrawLine(pen, p2, p3); // left(up-down)
-            }
-            finally
-            {
-                pen.Dispose();
-            }
+            Pen pen = colors.ButtonShadowDark.GetPen();
+            g.DrawLine(pen, p1, p2); // top (right-left)
+            g.DrawLine(pen, p2, p3); // left(up-down)
 
             // bottom + right
-            pen = new Pen(colors.Highlight);
-            try
-            {
-                p1.Offset(0, -1); // need to paint last pixel too.
-                g.DrawLine(pen, p3, p4); // bottom(left-right)
-                g.DrawLine(pen, p4, p1); // right (bottom-up)
-            }
-            finally
-            {
-                pen.Dispose();
-            }
+            pen = colors.Highlight.GetPen();
+            p1.Offset(0, -1); // need to paint last pixel too.
+            g.DrawLine(pen, p3, p4); // bottom(left-right)
+            g.DrawLine(pen, p4, p1); // right (bottom-up)
 
             // Draw inset
-            pen = new Pen(colors.ButtonFace);
-
+            pen = colors.ButtonFace.GetPen();
             p1.Offset(-1, 2);
             p2.Offset(1, 1);
             p3.Offset(1, -1);
             p4.Offset(-1, -1);
 
             // top + left inset
-            try
-            {
-                g.DrawLine(pen, p1, p2); // top (right-left)
-                g.DrawLine(pen, p2, p3); // left(up-down)
-            }
-            finally
-            {
-                pen.Dispose();
-            }
+            g.DrawLine(pen, p1, p2); // top (right-left)
+            g.DrawLine(pen, p2, p3); // left(up-down)
 
             // bottom + right inset
             pen = colors.ButtonFace.ToKnownColor() == SystemColors.Control.ToKnownColor()
-                ? new Pen(SystemColors.ControlLight)
-                : new Pen(colors.ButtonFace);
+                ? SystemPens.ControlLight
+                : colors.ButtonFace.GetPen();
 
-            try
-            {
-                p1.Offset(0, -1); // need to paint last pixel too.
-                g.DrawLine(pen, p3, p4); // bottom(left-right)
-                g.DrawLine(pen, p4, p1); // right (bottom-up)
-            }
-            finally
-            {
-                pen.Dispose();
-            }
+            p1.Offset(0, -1); // need to paint last pixel too.
+            g.DrawLine(pen, p3, p4); // bottom(left-right)
+            g.DrawLine(pen, p4, p1); // right (bottom-up)
         }
 
         private static void Draw3DBorderRaised(Graphics g, ref Rectangle bounds, ColorData colors)
@@ -203,31 +149,15 @@ namespace KGySoft.WinForms.Controls
             // Draw counter-clock-wise.
 
             // top + left
-            Pen pen = stockColor ? new Pen(SystemColors.ControlLightLight) : new Pen(colors.Highlight);
-
-            try
-            {
-                g.DrawLine(pen, p1, p2);   // top (right-left)
-                g.DrawLine(pen, p2, p3);   // left(up-down)
-            }
-            finally
-            {
-                pen.Dispose();
-            }
+            Pen pen = (stockColor ? SystemColors.ControlLightLight : colors.Highlight).GetPen();
+            g.DrawLine(pen, p1, p2);   // top (right-left)
+            g.DrawLine(pen, p2, p3);   // left(up-down)
 
             // bottom + right
-            pen = stockColor ? new Pen(SystemColors.ControlDarkDark) : new Pen(colors.ButtonShadowDark);
-
-            try
-            {
-                p1.Offset(0, -1); // need to paint last pixel too.
-                g.DrawLine(pen, p3, p4);    // bottom(left-right)
-                g.DrawLine(pen, p4, p1);    // right (bottom-up)
-            }
-            finally
-            {
-                pen.Dispose();
-            }
+            pen = (stockColor ? SystemColors.ControlDarkDark : colors.ButtonShadowDark).GetPen();
+            p1.Offset(0, -1); // need to paint last pixel too.
+            g.DrawLine(pen, p3, p4);    // bottom(left-right)
+            g.DrawLine(pen, p4, p1);    // right (bottom-up)
 
             // Draw inset
             p1.Offset(-1, 2);
@@ -235,34 +165,19 @@ namespace KGySoft.WinForms.Controls
             p3.Offset(1, -1);
             p4.Offset(-1, -1);
 
-            pen = stockColor
-                ? VisualStyleHelper.HighContrast ? new Pen(SystemColors.ControlLight) : new Pen(SystemColors.Control)
-                : new Pen(colors.ButtonFace);
+            pen = (stockColor
+                ? VisualStyleHelper.HighContrast ? SystemColors.ControlLight : SystemColors.Control
+                : colors.ButtonFace).GetPen();
 
             // top + left inset
-            try
-            {
-                g.DrawLine(pen, p1, p2); // top (right-left)
-                g.DrawLine(pen, p2, p3); // left(up-down)
-            }
-            finally
-            {
-                pen.Dispose();
-            }
+            g.DrawLine(pen, p1, p2); // top (right-left)
+            g.DrawLine(pen, p2, p3); // left(up-down)
 
             // Bottom + right inset
-            pen = stockColor ? new Pen(SystemColors.ControlDark) : new Pen(colors.ButtonShadow);
-
-            try
-            {
-                p1.Offset(0, -1); // need to paint last pixel too.
-                g.DrawLine(pen, p3, p4);  // bottom(left-right)
-                g.DrawLine(pen, p4, p1);  // right (bottom-up)
-            }
-            finally
-            {
-                pen.Dispose();
-            }
+            pen = (stockColor ? SystemColors.ControlDark : colors.ButtonShadow).GetPen();
+            p1.Offset(0, -1); // need to paint last pixel too.
+            g.DrawLine(pen, p3, p4);  // bottom(left-right)
+            g.DrawLine(pen, p4, p1);  // right (bottom-up)
         }
 
         private static void Draw3DBorder(Graphics g, Rectangle bounds, ColorData colors, bool raised, ControlAppearanceState state)
@@ -329,8 +244,7 @@ namespace KGySoft.WinForms.Controls
                     if (backColor.A == 0xff)
                         backColor = e.Graphics.GetNearestColor(backColor);
 
-                    using Brush brush = new SolidBrush(backColor);
-                    e.Graphics.FillRectangle(brush, bounds);
+                    e.Graphics.FillRectangle(backColor.GetBrush(), bounds);
                 }
             }
 
