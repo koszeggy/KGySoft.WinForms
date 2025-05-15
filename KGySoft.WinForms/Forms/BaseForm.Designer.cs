@@ -34,9 +34,7 @@ namespace KGySoft.WinForms.Forms
             this.Name = "BaseForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "BaseForm";
-            this.Load += new System.EventHandler(this.BaseForm_Load);
             this.ResumeLayout(false);
-            this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(BaseForm_FormClosed);
 		}
 
 		#endregion

@@ -1,20 +1,35 @@
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: BaseForm.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
 using System;
-using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Reflection;
 using System.Windows.Forms;
+
 using KGySoft.ComponentModel;
 using KGySoft.Libraries.Language;
-using KGySoft.Reflection;
 using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
+#endregion
+
 namespace KGySoft.WinForms.Forms
 {
-    // TODO: rename: AdvancedForm
-    // TODO: Glass
-    // TODO: enlist all of the fatures, including bugfixes
     /// <summary>
     /// A base form that provides tooltips for its controls and makes possible to
     /// translate form content. Supports showing forms as child forms of an MDI application.
@@ -25,10 +40,10 @@ namespace KGySoft.WinForms.Forms
 
         private bool translateControls;
         private bool suspended;
-        private BaseForm callerMdiForm;
+        private BaseForm? callerMdiForm;
         private bool resumeCaller;
         private bool isTranslated;
-        private MdiClient mdiClient;
+        private MdiClient? mdiClient;
         private readonly CommandBindingsCollection commandBindings = new WinformsCommandBindingsCollection();
 
         #endregion
@@ -40,24 +55,24 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         [Category("BaseForm")]
         [Description("Occurs when an MDI child showed by a ShowMdiChild call is closed.")]
-        public event FormClosedEventHandler CalledMdiChildClosed;
+        public event FormClosedEventHandler? CalledMdiChildClosed;
 
         /// <summary>
         /// Occurs when MDI area of the form has to be repainted. <see cref="Form.IsMdiContainer"/> must be true to access this event.
         /// </summary>
         [Category("BaseForm")]
         [Description("Occurs when MDI area of the form has to be repainted. IsMdiContainer must be true to access this event.")]
-        public event PaintEventHandler PaintMdiClientArea
+        public event PaintEventHandler? PaintMdiClientArea
         {
             add
             {
-                MdiClient mdiClient = GetMdiClient();
-                mdiClient.Paint += value;
+                MdiClient client = GetMdiClient();
+                client.Paint += value;
             }
             remove
             {
-                MdiClient mdiClient = GetMdiClient();
-                mdiClient.Paint -= value;
+                MdiClient client = GetMdiClient();
+                client.Paint -= value;
             }
         }
 
@@ -66,14 +81,14 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         [Category("BaseForm")]
         [Description("Occurs when an MDI Child window called by ShowMdiChild suspends the caller instance.")]
-        public event EventHandler Suspended;
+        public event EventHandler? Suspended;
 
         /// <summary>
         /// Occurs when the MDI Child window called by <see cref="ShowMdiChild"/> that suspended the caller instance is closed.
         /// </summary>
         [Category("BaseForm")]
         [Description("Occurs when the MDI Child window called by ShowMdiChild that suspended the caller instance is closed.")]
-        public event EventHandler Resumed;
+        public event EventHandler? Resumed;
 
         #endregion
 
@@ -83,21 +98,19 @@ namespace KGySoft.WinForms.Forms
         /// Gets or sets whether the form should translate its controls.
         /// </summary>
         [Category("BaseForm")]
-        [DefaultValue(false),]
-        [Description("Gets or sets whether the form should translate its controls.")]
+        [DefaultValue(false)]
+        [Description("[OBSOLETE]Gets or sets whether the form should translate its controls.")]
+        [Obsolete("Old auto-translation does not work anymore, it just removes the possible translation postfixes.")]
         public bool TranslateControls
         {
-            get { return translateControls; }
-            set { translateControls = value; }
+            get => translateControls;
+            set => translateControls = value;
         }
 
         /// <summary>
         /// Gets whether the form is suspended by a called MDI child.
         /// </summary>
-        public bool IsSuspended
-        {
-            get { return suspended; }
-        }
+        public bool IsSuspended => suspended;
 
         /// <summary>
         /// Gets the command bindings of this form. The <see cref="O:KGySoft.ComponentModel.CommandBindingsCollection.Add">Add</see> methods also add
@@ -177,6 +190,32 @@ namespace KGySoft.WinForms.Forms
 
         #region Protected methods
 
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            // translating only at first load (WinForms bug: despite the documentation, by ShowDialog Load occurs multiple times)
+            if (!isTranslated)
+                PerformTranslate(this);
+            isTranslated = true;
+#pragma warning restore CS0618 // Type or member is obsolete
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            if (callerMdiForm != null)
+            {
+                callerMdiForm.OnCalledMdiChildClosed(this, e);
+
+                if (callerMdiForm.suspended && resumeCaller)
+                    callerMdiForm.Resume();
+
+                callerMdiForm = null;
+            }
+        }
+
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
@@ -196,6 +235,7 @@ namespace KGySoft.WinForms.Forms
         /// Translates controls and tooltips of given control.
         /// </summary>
         /// <param name="control"></param>
+        [Obsolete("Translation does not works anymore, it just removes the possible postfixes.")]
         protected void PerformTranslate(Control control)
         {
             if (translateControls)
@@ -207,8 +247,10 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 if (control.HasChildren)
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
                     foreach (Control c in control.Controls)
-                        PerformTranslate(c);
+                        PerformTranslate(c!);
+#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
             }
         }
 
@@ -288,6 +330,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
+        [Obsolete]
         private void TranslateToolTip(Control control)
         {
             if (BaseToolTip.CanExtend(control) && BaseToolTip.GetToolTip(control).Length > 0)
@@ -301,17 +344,15 @@ namespace KGySoft.WinForms.Forms
 
             if (!IsMdiContainer)
                 throw new InvalidOperationException("Form must be an MDI container. Set IsMdiContainer before accessing this member!");
-            MdiClient result = null;
-            foreach (Control child in Controls)
+            MdiClient? result = null;
+            foreach (Control? child in Controls)
             {
                 result = child as MdiClient;
                 if (result != null)
                     break;
             }
-            if (result == null)
-                throw new InvalidOperationException("MDI Client area not found");
 
-            mdiClient = result;
+            mdiClient = result ?? throw new InvalidOperationException("MDI Client area not found");
             return result;
         }
 
@@ -320,13 +361,14 @@ namespace KGySoft.WinForms.Forms
         /// Bugfix: When size grip is visible, and form is above and left of the primary monitor, form cannot be dragged anymore due to forced diagonal resizing.
         /// In .NET 5 I already fixed this in WinForms: https://github.com/dotnet/winforms/pull/2032
         /// </summary>
+        [SuppressMessage("ReSharper", "InconsistentNaming")]
         private void WmNCHitTest(ref Message m)
         {
             if (this.IsGripVisible())
             {
                 // Here is the bug in original code: LParam contains two shorts. Without the cast negative values are positive ints
-                int x = (short)((nint)m.LParam & 0xffff);
-                int y = (short)(((nint)m.LParam >> 16) & 0xffff);
+                int x = m.LParam.SignedLOWORD();
+                int y = m.LParam.SignedHIWORD();
                 POINT pt = new POINT(x, y);
                 User32.ScreenToClient(Handle, ref pt);
                 Size clientSize = ClientSize;
@@ -348,31 +390,6 @@ namespace KGySoft.WinForms.Forms
             }
         }
 #endif
-
-        #endregion
-
-        #region Handled events
-
-        private void BaseForm_Load(object sender, EventArgs e)
-        {
-            // translating only at first load (WinForms bug: despite of documentation, by ShowDialog Load occurs multiple times)
-            if (!isTranslated)
-                PerformTranslate(this);
-            isTranslated = true;
-        }
-
-        void BaseForm_FormClosed(object sender, FormClosedEventArgs e)
-        {
-            if (callerMdiForm != null)
-            {
-                callerMdiForm.OnCalledMdiChildClosed(this, e);
-
-                if (callerMdiForm.suspended && resumeCaller)
-                    callerMdiForm.Resume();
-
-                callerMdiForm = null;
-            }
-        }
 
         #endregion
     }
