@@ -36,7 +36,7 @@ namespace KGySoft.WinForms
     /// <summary>
     /// Extension methods for <see cref="ListControl"/> class.
     /// </summary>
-    [Obsolete("This class is obsoleted along with the SelectionPlusItem enumeration. Auto translation does not work anymore, extra items must be provided by Model or VM")]
+    [Obsolete("This class is obsoleted along with the SelectionPlusItem enumeration. Auto translation does not work anymore, extra items such as All/None should be provided by a view model")]
     public static class ListControlExtensions
     {
         #region Methods

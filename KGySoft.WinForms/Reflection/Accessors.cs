@@ -1,9 +1,25 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: Accessors.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 #if NETFRAMEWORK || NETCOREAPP3_0
 using System.Collections.Specialized;
 #endif
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -12,6 +28,8 @@ using System.Windows.Forms;
 using KGySoft.Collections;
 using KGySoft.CoreLibraries;
 using KGySoft.Reflection;
+
+#endregion
 
 namespace KGySoft.WinForms.Reflection
 {
@@ -135,6 +153,16 @@ namespace KGySoft.WinForms.Reflection
 
         #endregion
 
+        #region ComboBox
+
+        internal static void SetMouseEvents(this ComboBox comboBox)
+        {
+            SetFieldValue(comboBox, "mouseEvents", true, false);
+            SetFieldValue(comboBox, "mousePressed", true, false);
+        }
+
+        #endregion
+
         #region Error Provider
 
         internal static void UnwireEvents(this ErrorProvider errorProvider, BindingManagerBase listManager)
@@ -241,6 +269,8 @@ namespace KGySoft.WinForms.Reflection
 
         private static FieldAccessor? GetField(Type type, Type? fieldType, string? fieldNamePattern)
         {
+            #region Local Methods
+
             // Fields are meant to be used for non-visible members either by type or name pattern (or both)
             FieldAccessor? GetFieldAccessor((Type DeclaringType, Type? FieldType, string? FieldNamePattern) key)
             {
@@ -257,6 +287,8 @@ namespace KGySoft.WinForms.Reflection
 
                 return null;
             }
+
+            #endregion
 
             if (fields == null)
                 Interlocked.CompareExchange(ref fields, ThreadSafeCacheFactory.Create<(Type, Type?, string?), FieldAccessor?>(GetFieldAccessor, cacheOptions), null);
@@ -296,10 +328,11 @@ namespace KGySoft.WinForms.Reflection
             return field == null ? defaultValue : (T)field.Get(instance)!;
         }
 
-        private static void SetFieldValue(object instance, string fieldNamePattern, object? value, bool throwIfMissing = true)
+        private static void SetFieldValue<TInstance, TValue>(TInstance instance, string fieldNamePattern, TValue value, bool throwIfMissing = true)
+            where TInstance : class
         {
             Type type = instance.GetType();
-            FieldAccessor? field = GetField(type, null, fieldNamePattern);
+            FieldAccessor? field = GetField(type, typeof(TValue), fieldNamePattern);
             if (field == null)
             {
                 if (throwIfMissing)
@@ -307,7 +340,8 @@ namespace KGySoft.WinForms.Reflection
                 return;
             }
 
-            field.Set(instance, value);
+            field.SetInstanceValue(instance, value);
+
         }
 
         #endregion

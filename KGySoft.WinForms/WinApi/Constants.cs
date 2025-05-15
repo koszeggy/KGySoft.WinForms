@@ -58,6 +58,8 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_SETFONT = 0x0030;
         internal const int WM_GETFONT = 0x0031;
         internal const int WM_NOTIFY = 0x004E;
+        internal const int WM_LBUTTONDOWN = 0x0201;
+        internal const int WM_LBUTTONDBLCLK = 0x0203;
         internal const int WM_CUT = 0x0300;
         internal const int WM_PASTE = 0x0302;
         internal const int WM_CLEAR = 0x0303;

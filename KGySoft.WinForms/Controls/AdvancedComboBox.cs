@@ -22,7 +22,6 @@ using System.Data;
 using System.Drawing;
 using System.Windows.Forms;
 
-using KGySoft.CoreLibraries;
 using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
@@ -38,10 +37,10 @@ namespace KGySoft.WinForms.Controls
     [ToolboxBitmap(typeof(ComboBox))]
     [Description(@"A combo box with the following additional features:
 - Disabled colors
-- ReadOnly propert and ReadOnlyChanged event
+- ReadOnly property and ReadOnlyChanged event
 - TextChangedOnLeave
 - LoadFrom methods
-- Working auto complete in Simple mode")]
+- Auto complete works in Simple mode")]
     public class AdvancedComboBox : ComboBox, ISupportsDisabledColor, IListControl, IReadOnlyCapable
     {
         #region Nested classes
@@ -59,10 +58,7 @@ namespace KGySoft.WinForms.Controls
 
             #region Constructors
 
-            public InnerEditorWindow(AdvancedComboBox parent)
-            {
-                this.parent = parent;
-            }
+            internal InnerEditorWindow(AdvancedComboBox parent) => this.parent = parent;
 
             #endregion
 
@@ -128,8 +124,6 @@ namespace KGySoft.WinForms.Controls
         private bool systemDrawDropDownListMode = true;
         private bool readOnly;
         private InnerEditorWindow? hook;
-        private bool virtualEnabledChanging;
-        private bool selfEnabled = true;
         private Control? parent;
         private string? textOnFocus;
         private bool textAndFontChanging;
@@ -164,11 +158,11 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public override string Text
         {
-            get => !base.Enabled ? textSaved : base.Text;
+            get => !Enabled ? textSaved : base.Text;
             set
             {
                 base.Text = value;
-                if (!base.Enabled)
+                if (!Enabled)
                 {
                     indexSaved = -1;
                     textSaved = value;
@@ -187,7 +181,7 @@ namespace KGySoft.WinForms.Controls
             get => base.BackColor;
             set
             {
-                if (ReadOnly || !base.Enabled)
+                if (ReadOnly || !Enabled)
                     DisabledBackColor = value;
                 else
                     EnabledBackColor = value;
@@ -204,7 +198,7 @@ namespace KGySoft.WinForms.Controls
             get => base.ForeColor;
             set
             {
-                if (!base.Enabled)
+                if (!Enabled)
                     DisabledForeColor = value;
                 else
                     EnabledForeColor = value;
@@ -244,50 +238,6 @@ namespace KGySoft.WinForms.Controls
 
                     base.DropDownStyle = value;
                 }
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets a value indicating whether the control can respond to user interaction.
-        /// </summary>
-        public new bool Enabled
-        {
-            get
-            {
-                // readonly dropdown list: actually disabled so returning combination of resultant and logically self enabled
-                if (readOnly && style == ComboBoxStyle.DropDownList)
-                {
-                    if (Parent == null || Parent.Enabled)
-                        return selfEnabled;
-                    return Parent.Enabled;
-                }
-
-                // any other: regular enabled
-                return base.Enabled;
-            }
-            set
-            {
-                selfEnabled = value;
-
-                // disabling
-                if (!value)
-                {
-                    base.Enabled = false;
-
-                    // if just logical status was changed, then invalidating to trigger repaint
-                    if (readOnly && style == ComboBoxStyle.DropDownList)
-                        Invalidate();
-                }
-                // real enabling
-                else if (!(readOnly && style == ComboBoxStyle.DropDownList))
-                {
-                    base.Enabled = true; // if parent is disabled, resultant enabled remains false
-                    AdjustDrawMode();
-                    ResetColor();
-                }
-                // only logical enabling in ReadOnly and DropDownList mode: repainting in disabled state with enabled color
-                else
-                    Invalidate();
             }
         }
 
@@ -424,9 +374,6 @@ namespace KGySoft.WinForms.Controls
             {
                 if (readOnly != value)
                 {
-                    // getting the logical enabled state before setting read-only flag
-                    bool virtualEnabled = this.Enabled;
-
                     if (value)
                     {
                         origCompleteSource = base.AutoCompleteSource;
@@ -447,29 +394,12 @@ namespace KGySoft.WinForms.Controls
                     }
 
                     readOnly = value;
-                    if (virtualEnabled)
+                    if (Enabled)
                     {
-                        if (style == ComboBoxStyle.DropDownList)
-                        {
-                            virtualEnabledChanging = true;
-                            try
-                            {
-                                bool realEnabled = !readOnly;
-
-                                if (GetSelfEnabled() != realEnabled)
-                                    base.Enabled = realEnabled;
-                                else
-                                    Invalidate();
-                            }
-                            finally
-                            {
-                                virtualEnabledChanging = false;
-                            }
-                        }
-
                         AdjustDrawMode();
                         ResetColor();
                     }
+
                     OnReadOnlyChanged(EventArgs.Empty);
                 }
             }
@@ -518,32 +448,11 @@ namespace KGySoft.WinForms.Controls
         protected override void OnEnabledChanged(EventArgs e)
         {
             base.OnEnabledChanged(e);
-
-            // obtaining self enabled state because Enabled can be changed by parent or base.Enabled. Suppressing change in case of virtual change.
-            if (!virtualEnabledChanging)
-                selfEnabled = GetSelfEnabled();
-
-            // control has been enabled by base.Enabled but physically it should be disabled in read-only DropDownList mode
-            if (!virtualEnabledChanging && selfEnabled && readOnly && style == ComboBoxStyle.DropDownList)
-            {
-                //setting virtualEnabledChanging for next EnabledChange will preserve selfEnabled true
-                virtualEnabledChanging = true;
-                try
-                {
-                    base.Enabled = false;
-                    return;
-                }
-                finally
-                {
-                    virtualEnabledChanging = false;
-                }
-            }
-
             styleChanging = true;
             try
             {
-                // real enabling (virtual one is handled above)
-                if (base.Enabled)
+                // enabling
+                if (Enabled)
                 {
                     // restoring style
                     base.DropDownStyle = style;
@@ -638,15 +547,10 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
         {
+            // Hooking inner text box to capture WM_PASTE and others.
+            // The base.OnHandleCreated creates the inner native window for Simple and DropDown modes only.
             base.OnHandleCreated(e);
-
-            // hooking inner text box to capture WM_PASTE and others
-            IntPtr lhWnd = User32.FindWindowEx(Handle, IntPtr.Zero, "EDIT", null);
-            if (lhWnd != IntPtr.Zero)
-            {
-                hook = new InnerEditorWindow(this);
-                hook.AssignHandle(lhWnd);
-            }
+            InitHook();
         }
 
         /// <inheritdoc />
@@ -721,8 +625,8 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnKeyDown(e);
 
-            // suppressing deleting and up/left (selecting item from list) because these cannot be suppressed in KeyPress
-            if (readOnly && e.KeyCode.In(Keys.Delete, Keys.Back, Keys.Up, Keys.Down))
+            // suppressing deleting and navigation (selecting item from list) because these cannot be suppressed in KeyPress
+            if (readOnly && e.KeyCode is Keys.Delete or Keys.Back or Keys.Up or Keys.Down or Keys.Space or Keys.Right or Keys.Left or Keys.PageDown or Keys.PageUp or Keys.Home or Keys.End)
             {
                 e.Handled = true;
                 e.SuppressKeyPress = true;
@@ -806,7 +710,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
-            if (!base.Enabled)
+            if (!Enabled)
             {
                 Graphics g = e.Graphics;
 
@@ -876,12 +780,9 @@ namespace KGySoft.WinForms.Controls
 
             base.OnDropDownStyleChanged(e);
 
-            bool virtualEnabled = Enabled;
             style = base.DropDownStyle;
-            AdjustEnabledByReadOnly(virtualEnabled);
-
             AdjustDrawMode();
-            if (!base.Enabled)
+            if (!Enabled)
             {
                 styleChanging = true;
                 try
@@ -922,12 +823,26 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            // bug: ComboBox.WndProc does not see WM_PASTE and other messages so they are captured in InnerEditorWindow
+            // NOTE: ComboBox.WndProc does not see WM_PASTE and other messages so they are captured in InnerEditorWindow
             switch (m.Msg)
             {
-                // suppressing dropping list down in DropDown mode (in DropDownList mode there is no COMMAND message)
+                // Suppressing dropping list down in DropDown mode
+                // (in DropDownList mode there is no COMMAND message but WM_COMMAND + WM_REFLECT,
+                // but that cannot be prevented this way so using WM_LBUTTONDOWN/WM_LBUTTONDBLCLK instead)
                 case Constants.WM_COMMAND:
                     return;
+
+                // Suppressing dropping list down in DropDownList mode
+                case Constants.WM_LBUTTONDOWN or Constants.WM_LBUTTONDBLCLK:
+                    if (!Focused)
+                        Focus();
+                    OnMouseDown(new MouseEventArgs(MouseButtons.Left, m.Msg is Constants.WM_LBUTTONDOWN ? 1 : 2, m.LParam.SignedLOWORD(), m.LParam.SignedHIWORD(), 0));
+
+                    // This is required to raise the Click event when the mouse button is released
+                    this.SetMouseEvents();
+                    Capture = true;
+                    return;
+
                 default:
                     base.WndProc(ref m);
                     return;
@@ -938,18 +853,29 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Methods
 
+        private void InitHook()
+        {
+            // hooking inner text box to capture WM_PASTE and others
+            IntPtr lhWnd = User32.FindWindowEx(Handle, IntPtr.Zero, "EDIT", null);
+            if (lhWnd != IntPtr.Zero)
+            {
+                hook = new InnerEditorWindow(this);
+                hook.AssignHandle(lhWnd);
+            }
+        }
+
         private void SetPaintMode()
         {
             if (DesignMode)
                 return;
-            bool userPaint = !base.Enabled && (style != ComboBoxStyle.DropDownList || SelectedIndex >= 0);
+            bool userPaint = !Enabled && (style != ComboBoxStyle.DropDownList || SelectedIndex >= 0);
             SetStyle(ControlStyles.UserPaint, userPaint);
             Invalidate();
         }
 
         private void AdjustDrawMode()
         {
-            bool customDraw = !base.Enabled || style != ComboBoxStyle.DropDownList || !systemDrawDropDownListMode;
+            bool customDraw = !Enabled || style != ComboBoxStyle.DropDownList || !systemDrawDropDownListMode;
             DrawMode drawMode = customDraw ? DrawMode.OwnerDrawFixed : DrawMode.Normal;
             if (base.DrawMode != drawMode)
                 base.DrawMode = drawMode;
@@ -959,27 +885,27 @@ namespace KGySoft.WinForms.Controls
         {
             bool backColorChanged = false;
             // BackColor when control is Enabled and not ReadOnly
-            if (base.Enabled && !ReadOnly && base.BackColor != enabledBackColor)
+            if (Enabled && !ReadOnly && base.BackColor != enabledBackColor)
             {
                 base.BackColor = enabledBackColor;
                 backColorChanged = true;
             }
             // BackColor when control is not Enabled or is ReadOnly
-            else if ((base.Enabled && ReadOnly || !base.Enabled) && base.BackColor != disabledBackColor)
+            else if ((Enabled && ReadOnly || !Enabled) && base.BackColor != disabledBackColor)
             {
                 base.BackColor = disabledBackColor;
                 backColorChanged = true;
             }
 
             // ForeColor in Enabled state (also ReadOnly)
-            if (base.Enabled && base.ForeColor != enabledForeColor)
+            if (Enabled && base.ForeColor != enabledForeColor)
                 base.ForeColor = enabledForeColor;
             // ForeColor in disabled state (ReadOnly state is indifferent)
-            else if (!base.Enabled && base.ForeColor != disabledForeColor)
+            else if (!Enabled && base.ForeColor != disabledForeColor)
                 base.ForeColor = disabledForeColor;
 
             // workaround: changing back color of a Simple combobox causes to display a few pixels high dropdown listbox with 0 elements
-            if (base.Enabled && backColorChanged && style == ComboBoxStyle.Simple)
+            if (Enabled && backColorChanged && style == ComboBoxStyle.Simple)
                 FixSimpleAppearance();
 
             Invalidate();
@@ -987,7 +913,7 @@ namespace KGySoft.WinForms.Controls
 
         private void FixSimpleAppearance()
         {
-            Debug.Assert(base.Enabled && style == ComboBoxStyle.Simple, "Appearance fixing is needless");
+            Debug.Assert(Enabled && style == ComboBoxStyle.Simple, "Appearance fixing is needless");
 
             styleChanging = true;
             try
@@ -1000,47 +926,6 @@ namespace KGySoft.WinForms.Controls
                 styleChanging = false;
             }
         }
-
-        private void AdjustEnabledByReadOnly(bool virtualEnabled)
-        {
-            // dropdown list mode
-            if (style == ComboBoxStyle.DropDownList)
-            {
-                virtualEnabledChanging = true;
-                try
-                {
-                    bool newEnabled = !readOnly && virtualEnabled;
-
-                    if (base.Enabled != newEnabled)
-                        base.Enabled = newEnabled;
-                    else if (!base.Enabled)
-                        Invalidate();
-                }
-                finally
-                {
-                    virtualEnabledChanging = false;
-                }
-            }
-            // logical and real enabled are different (changiing style from dropdown list to something other in readonly mode)
-            else if (virtualEnabled != base.Enabled)
-            {
-                virtualEnabledChanging = true;
-                try
-                {
-                    base.Enabled = virtualEnabled;
-                    ResetColor();
-                }
-                finally
-                {
-                    virtualEnabledChanging = false;
-                }
-            }
-            // logical and real enabled are the same (both disabled) but recoloring could be needed
-            else
-                Invalidate();
-        }
-
-        private bool GetSelfEnabled() => (this.GetControlState() & 4) != 0;
 
         #endregion
 
@@ -1058,11 +943,11 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region IListControl Members
-#pragma warning disable CS0618 // Type or member is obsolete
 
         /// <summary>
         /// Gets whether the there is no selected item in the combo box (<see cref="ComboBox.SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
         /// </summary>
+        [Obsolete("This property reflects the special value represented by the obsoleted SelectionPlusItems and should not be used")]
         public bool IsEmpty => this.IsEmpty();
 
         /// <summary>
@@ -1076,6 +961,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the value column must have a data type that is convertible to signed integer type.</param>
+        [Obsolete("LoadFrom methods are obsolete. Names are not auto-translated anymore and SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom(DataTable dataTable, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, dataTable, valueMember, displayMember, translateNames, distinctionPostfix, sortByDisplayedValues, plusItems);
 
@@ -1087,6 +973,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the value column must have a data type that is convertible to signed integer type.</param>
+        [Obsolete("LoadFrom methods are obsolete. SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom(DataTable dataTable, string valueMember, string displayMember, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, dataTable, valueMember, displayMember, plusItems);
 
@@ -1096,6 +983,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="dataTable">The data source table.</param>
         /// <param name="displayMember">Column name to display in the combo box.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
+        [Obsolete("LoadFrom methods are obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom(DataTable dataTable, string valueMember, string displayMember)
             => ListControlExtensions.LoadFrom(this, dataTable, valueMember, displayMember);
 
@@ -1109,6 +997,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
+        [Obsolete("LoadFrom methods are obsolete. Names are not auto-translated anymore and SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom(Type enumType, Type valueMemberType, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, enumType, valueMemberType, translateNames, distinctionPostfix, sortByDisplayedValues, plusItems);
 
@@ -1119,6 +1008,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
+        [Obsolete("LoadFrom methods are obsolete. SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom(Type enumType, Type valueMemberType, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, enumType, valueMemberType, plusItems);
 
@@ -1127,6 +1017,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
         /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
+        [Obsolete("LoadFrom methods are obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom(Type enumType, Type valueMemberType)
             => ListControlExtensions.LoadFrom(this, enumType, valueMemberType);
 
@@ -1134,6 +1025,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
+        [Obsolete("LoadFrom methods are obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom(Type enumType) => ListControlExtensions.LoadFrom(this, enumType);
 
         /// <summary>
@@ -1147,6 +1039,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
+        [Obsolete("LoadFrom methods are obsolete. Names are not auto-translated anymore and SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, collection, valueMember, displayMember, translateNames, distinctionPostfix, sortByDisplayedValues, plusItems);
 
@@ -1158,6 +1051,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
+        [Obsolete("LoadFrom methods are obsolete. SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, collection, valueMember, displayMember, plusItems);
 
@@ -1167,10 +1061,10 @@ namespace KGySoft.WinForms.Controls
         /// <param name="collection">The source collection.</param>
         /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
+        [Obsolete("LoadFrom methods are obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember)
             => ListControlExtensions.LoadFrom(this, collection, valueMember, displayMember);
 
-#pragma warning restore CS0618 // Type or member is obsolete
         #endregion
     }
 }
