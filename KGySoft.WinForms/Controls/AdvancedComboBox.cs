@@ -626,7 +626,8 @@ namespace KGySoft.WinForms.Controls
             base.OnKeyDown(e);
 
             // suppressing deleting and navigation (selecting item from list) because these cannot be suppressed in KeyPress
-            if (readOnly && e.KeyCode is Keys.Delete or Keys.Back or Keys.Up or Keys.Down or Keys.Space or Keys.Right or Keys.Left or Keys.PageDown or Keys.PageUp or Keys.Home or Keys.End)
+            if (readOnly && (e.KeyCode is Keys.Delete or Keys.Back or Keys.Up or Keys.Down or Keys.PageUp or Keys.PageDown
+                || base.DropDownStyle == ComboBoxStyle.DropDownList && e.KeyCode is Keys.Space or Keys.Right or Keys.Left or Keys.Home or Keys.End))
             {
                 e.Handled = true;
                 e.SuppressKeyPress = true;
@@ -826,13 +827,7 @@ namespace KGySoft.WinForms.Controls
             // NOTE: ComboBox.WndProc does not see WM_PASTE and other messages so they are captured in InnerEditorWindow
             switch (m.Msg)
             {
-                // Suppressing dropping list down in DropDown mode
-                // (in DropDownList mode there is no COMMAND message but WM_COMMAND + WM_REFLECT,
-                // but that cannot be prevented this way so using WM_LBUTTONDOWN/WM_LBUTTONDBLCLK instead)
-                case Constants.WM_COMMAND:
-                    return;
-
-                // Suppressing dropping list down in DropDownList mode
+                // Suppressing dropping list down
                 case Constants.WM_LBUTTONDOWN or Constants.WM_LBUTTONDBLCLK:
                     if (!Focused)
                         Focus();

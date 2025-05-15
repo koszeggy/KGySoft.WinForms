@@ -53,7 +53,6 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_NCHITTEST = 0x0084;
         internal const int WM_NCPAINT = 0x0085;
         internal const int WM_INITDIALOG = 0x110;
-        internal const int WM_COMMAND = 0x111;
         internal const int WM_TIMER = 0x113;
         internal const int WM_SETFONT = 0x0030;
         internal const int WM_GETFONT = 0x0031;
