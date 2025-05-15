@@ -76,8 +76,8 @@ namespace KGySoft.WinForms
         /// <summary>Static field "{0}" not found on type "{1}".</summary>
         internal static string AccessorsStaticFieldDoesNotExist(string? fieldName, Type type) => Get("Accessors_StaticFieldDoesNotExistFormat", fieldName, type);
 
-        /// <summary>Instance method "{0}" not found on type "{1}".</summary>
-        internal static string AccessorsInstanceMethodDoesNotExist(string? methodName, Type type) => Get("Accessors_InstanceMethodDoesNotExistFormat", methodName, type);
+        /// <summary>Method "{0}" was not found on type "{1}".</summary>
+        internal static string AccessorsMethodDoesNotExist(string? methodName, Type type) => Get("Accessors_InstanceDoesNotExistFormat", methodName, type);
 
         #endregion
 

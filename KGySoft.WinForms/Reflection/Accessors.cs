@@ -36,20 +36,68 @@ namespace KGySoft.WinForms.Reflection
     // ReSharper disable InconsistentNaming
     internal static class Accessors
     {
+        #region Nested Types
+
+        /// <summary>
+        /// A value-compared variable-length tuple of types
+        /// </summary>
+        private readonly struct TypesKey : IEquatable<TypesKey>
+        {
+            #region Properties
+
+            internal Type[] Types { get; }
+
+            #endregion
+
+            #region Constructors
+
+            internal TypesKey(Type[] types) => Types = types;
+
+            #endregion
+
+            #region Methods
+
+            public override bool Equals(object? obj) => obj is TypesKey key && Equals(key);
+
+            public bool Equals(TypesKey other)
+            {
+                if (Types.Length != other.Types.Length)
+                    return false;
+                for (int i = 0; i < Types.Length; i++)
+                {
+                    if (!ReferenceEquals(Types[i], other.Types[i]))
+                        return false;
+                }
+
+                return true;
+            }
+
+            public override int GetHashCode()
+            {
+                var result = 13;
+
+                // ReSharper disable once ForCanBeConvertedToForeach - performance
+                for (int i = 0; i < Types.Length; i++)
+                    result = result * 397 + Types[i].GetHashCode();
+
+                return result;
+            }
+
+            public override string ToString() => $"({Types.Select(t => t.GetName(TypeNameKind.ShortName)).Join(", ")})";
+
+            #endregion
+        }
+
+        #endregion
+
         #region Fields
 
         private static readonly LockFreeCacheOptions cacheOptions = new LockFreeCacheOptions { ThresholdCapacity = 128, HashingStrategy = HashingStrategy.And, MergeInterval = TimeSpan.FromSeconds(1) };
 
         private static IThreadSafeCacheAccessor<(Type DeclaringType, Type? FieldType, string? FieldNamePattern), FieldAccessor?>? fields;
         private static IThreadSafeCacheAccessor<(Type DeclaringType, string PropertyName), PropertyAccessor?>? properties;
-        private static IThreadSafeCacheAccessor<(Type DeclaringType, string MethodName), MethodAccessor?>? methods;
-
-        // not from methods because these are not unique
-        private static MethodAccessor? methodControl_PaintBackground;
-        private static MethodAccessor? methodButtonBase_Animate;
-        private static MethodAccessor? methodControlPaint_DrawImageDisabled;
-        private static MethodAccessor? methodControlPaint_DrawBackgroundImage;
-        private static MethodAccessor? methodControlPaint_DrawImageColorized;
+        private static IThreadSafeCacheAccessor<(Type DeclaringType, string MethodName), MethodAccessor?>? methodsByName;
+        private static IThreadSafeCacheAccessor<(Type DeclaringType, string MethodName, TypesKey ParameterTypes), MethodAccessor?>? methodsByTypes;
 
         #endregion
 
@@ -116,21 +164,18 @@ namespace KGySoft.WinForms.Reflection
         }
 
         internal static ContentAlignment RtlTranslateContent(this Control control, ContentAlignment alignment)
-            => (ContentAlignment)GetMethod(typeof(Control), "RtlTranslateContent")!.Invoke(control, alignment)!;
+            => (ContentAlignment)InvokeMethod(control, "RtlTranslateContent", alignment)!;
 
         internal static bool ShowKeyboardCues(this Control control) => (bool)GetPropertyValue(control, "ShowKeyboardCues")!;
 
         internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset)
-        {
-            methodControl_PaintBackground ??= MethodAccessor.GetAccessor(typeof(Control).GetMethod("PaintBackground", BindingFlags.Instance | BindingFlags.NonPublic, null, new[] {typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point)}, null)!);
-            methodControl_PaintBackground.Invoke(c, e, rectangle, backColor, scrollOffset);
-        }
+            => TryInvokeMethod(c, "PaintBackground", [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point)], e, rectangle, backColor, scrollOffset);
 
-        internal static void OnPaint(this Control control, PaintEventArgs e) => GetMethod(typeof(Control), "OnPaint")!.Invoke(control, e);
+        internal static void OnPaint(this Control control, PaintEventArgs e) => InvokeMethod(control, "OnPaint", e);
 
         internal static void SetDoubleBuffered(this Control control, bool value) => GetProperty(typeof(Control), "DoubleBuffered")!.Set(control, value);
         internal static void SetStyle(this Control control, ControlStyles flags, bool value)
-            => GetMethod(typeof(Control), "SetStyle")!.Invoke(control, flags, value);
+            => GetMethodByName(typeof(Control), "SetStyle")!.Invoke(control, flags, value);
 
         #endregion
 
@@ -138,11 +183,7 @@ namespace KGySoft.WinForms.Reflection
 
         internal static void SetShowToolTip(this ButtonBase instance, bool value) => GetProperty(typeof(ButtonBase), "ShowToolTip")!.Set(instance, value);
 
-        internal static void Animate(this ButtonBase instance)
-        {
-            methodButtonBase_Animate ??= MethodAccessor.GetAccessor(typeof(ButtonBase).GetMethod("Animate", BindingFlags.Instance | BindingFlags.NonPublic, null, Type.EmptyTypes, null)!);
-            methodButtonBase_Animate.Invoke(instance);
-        }
+        internal static void Animate(this ButtonBase instance) => TryInvokeMethod(instance, "Animate", []);
 
         #endregion
 
@@ -166,35 +207,19 @@ namespace KGySoft.WinForms.Reflection
         #region Error Provider
 
         internal static void UnwireEvents(this ErrorProvider errorProvider, BindingManagerBase listManager)
-            => InvokeMethod(errorProvider, "UnwireEvents", listManager);
+            => TryInvokeMethod(errorProvider, "UnwireEvents", listManager);
 
         #endregion
 
         #region ControlPaint
 
-        internal static void DrawImageDisabled(this Graphics graphics, Image image, Rectangle imageBounds, Color background, bool unscaledImage)
-        {
-            methodControlPaint_DrawImageDisabled ??= MethodAccessor.GetAccessor(typeof(ControlPaint)
-                .GetMethod("DrawImageDisabled", BindingFlags.Static | BindingFlags.NonPublic, null, 
-                    new[] {typeof(Graphics), typeof(Image), typeof(Rectangle), typeof(Color), typeof(bool)}, null)!);
-            methodControlPaint_DrawImageDisabled.Invoke(null, graphics, image, imageBounds, background, unscaledImage);
-        }
-
         internal static void DrawBackgroundImage(this Graphics g, Image backgroundImage, Color backColor, ImageLayout backgroundImageLayout, Rectangle bounds, Rectangle clipRect, Point scrollOffset, RightToLeft rightToLeft)
-        {
-            methodControlPaint_DrawBackgroundImage ??= MethodAccessor.GetAccessor(typeof(ControlPaint)
-                .GetMethod("DrawBackgroundImage", BindingFlags.Static | BindingFlags.NonPublic, null,
-                    new[] {typeof(Graphics), typeof(Image), typeof(Color), typeof(ImageLayout), typeof(Rectangle), typeof(Rectangle), typeof(Point), typeof(RightToLeft)}, null)!);
-            methodControlPaint_DrawBackgroundImage.Invoke(null, g, backgroundImage, backColor, backgroundImageLayout, bounds, clipRect, scrollOffset, rightToLeft);
-        }
+            => TryInvokeMethod(typeof(ControlPaint), "DrawBackgroundImage", [typeof(Graphics), typeof(Image), typeof(Color), typeof(ImageLayout), typeof(Rectangle), typeof(Rectangle), typeof(Point), typeof(RightToLeft)],
+                g, backgroundImage, backColor, backgroundImageLayout, bounds, clipRect, scrollOffset, rightToLeft);
 
         internal static void DrawImageColorized(this Graphics graphics, Image image, Rectangle destination, Color replaceBlack)
-        {
-            methodControlPaint_DrawImageColorized ??= MethodAccessor.GetAccessor(typeof(ControlPaint)
-                .GetMethod("DrawImageColorized", BindingFlags.Static | BindingFlags.NonPublic, null,
-                    new[] {typeof(Graphics), typeof(Image), typeof(Rectangle), typeof(Color)}, null)!);
-            methodControlPaint_DrawImageColorized.Invoke(null, graphics, image, destination, replaceBlack);
-        }
+            => TryInvokeMethod(typeof(ControlPaint), "DrawImageColorized", [typeof(Graphics), typeof(Image), typeof(Rectangle), typeof(Color)],
+                graphics, image, destination, replaceBlack);
 
         #endregion
 
@@ -245,26 +270,75 @@ namespace KGySoft.WinForms.Reflection
             return property.Get(null);
         }
 
-        private static MethodAccessor? GetMethod(Type type, string methodName)
+        private static MethodAccessor? GetMethodByName(Type type, string methodName)
         {
             static MethodAccessor? GetMethodAccessor((Type DeclaringType, string MethodName) key)
             {
-                // Properties are meant to be used for visible members so always exact names are searched
                 MethodInfo? method = key.DeclaringType.GetMethod(key.MethodName, BindingFlags.Instance | BindingFlags.NonPublic);
                 return method == null ? null : MethodAccessor.GetAccessor(method);
             }
 
-            if (methods == null)
-                Interlocked.CompareExchange(ref methods, ThreadSafeCacheFactory.Create<(Type, string), MethodAccessor?>(GetMethodAccessor, cacheOptions), null);
-            return methods[(type, methodName)];
+            if (methodsByName == null)
+                Interlocked.CompareExchange(ref methodsByName, ThreadSafeCacheFactory.Create<(Type, string), MethodAccessor?>(GetMethodAccessor, cacheOptions), null);
+            return methodsByName[(type, methodName)];
         }
 
-        private static object? InvokeMethod(object instance, string methodName, params object[] parameters)
+        private static MethodAccessor? GetMethodByTypes(Type type, string methodName, TypesKey parameterTypes)
         {
-            var method = GetMethod(instance.GetType(), methodName);
+            #region Local Methods
+            
+            static MethodAccessor? GetMethodAccessor((Type DeclaringType, string MethodName, TypesKey ParameterTypes) key)
+            {
+                for (Type? t = key.DeclaringType; t != typeof(object); t = t.BaseType)
+                {
+                    MethodInfo[] methods = t!.GetMember(key.MethodName, MemberTypes.Method, BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
+                        .Cast<MethodInfo>()
+                        .Where(m => !m.IsGenericMethodDefinition && m.GetParameters().Length == key.ParameterTypes.Types.Length)
+                        .ToArray();
+
+                    foreach (MethodInfo mi in methods)
+                    {
+                        if (!mi.GetParameters().Select(p => p.ParameterType).SequenceEqual(key.ParameterTypes.Types))
+                            continue;
+
+                        return MethodAccessor.GetAccessor(mi);
+                    }
+                }
+
+                return null;
+            }
+
+            #endregion
+
+            if (methodsByTypes == null)
+                Interlocked.CompareExchange(ref methodsByTypes, ThreadSafeCacheFactory.Create<(Type, string, TypesKey), MethodAccessor?>(GetMethodAccessor, null, cacheOptions), null);
+            return methodsByTypes[(type, methodName, parameterTypes)];
+        }
+
+        private static object? TryInvokeMethod(object instance, string methodName, params object?[] parameters)
+        {
+            var method = GetMethodByName(instance.GetType(), methodName);
+            return method?.Invoke(instance, parameters);
+        }
+
+        private static object? InvokeMethod(object instance, string methodName, params object?[] parameters)
+        {
+            var method = GetMethodByName(instance.GetType(), methodName);
             if (method == null)
-                throw new InvalidOperationException(Res.AccessorsInstanceMethodDoesNotExist(methodName, instance.GetType()));
+                throw new InvalidOperationException(Res.AccessorsMethodDoesNotExist(methodName, instance.GetType()));
             return method.Invoke(instance, parameters);
+        }
+
+        private static object? TryInvokeMethod(object instance, string methodName, Type[] parameterTypes, params object?[] parameters)
+        {
+            var method = GetMethodByTypes(instance.GetType(), methodName, new TypesKey(parameterTypes));
+            return method?.Invoke(instance, parameters);
+        }
+
+        private static object? TryInvokeMethod(Type type, string methodName, Type[] parameterTypes, params object?[] parameters)
+        {
+            var method = GetMethodByTypes(type, methodName, new TypesKey(parameterTypes));
+            return method?.Invoke(null, parameters);
         }
 
         private static FieldAccessor? GetField(Type type, Type? fieldType, string? fieldNamePattern)

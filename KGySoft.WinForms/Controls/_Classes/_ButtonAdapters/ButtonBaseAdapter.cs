@@ -23,7 +23,7 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
 
-using KGySoft.WinForms.Reflection;
+using KGySoft.Drawing;
 
 #endregion
 
@@ -1082,8 +1082,12 @@ namespace KGySoft.WinForms.Controls
             try
             {
                 if (!state.Enabled)
-                    // need to specify width and height
-                    graphics.DrawImageDisabled(image, imageBounds, state.BackColor, true);
+                {
+                    // this always creates a new bitmap, but this is what happens also in the original ControlPaint.DrawImageDisabled
+                    // when the internal overload is called with unscaledImage = true
+                    using var disabledImage = image.ToGrayscale();
+                    graphics.DrawImage(disabledImage, imageBounds.X, imageBounds.Y, disabledImage.Width, disabledImage.Height);
+                }
                 else
                     graphics.DrawImage(image, imageBounds.X, imageBounds.Y, image.Width, image.Height);
             }

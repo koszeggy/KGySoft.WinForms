@@ -113,7 +113,7 @@
   <data name="Accessors_StaticFieldDoesNotExistFormat" xml:space="preserve">
     <value>Static field "{0}" not found on type "{1}".</value>
   </data>
-  <data name="Accessors_InstanceMethodDoesNotExistFormat" xml:space="preserve">
-    <value>Instance method "{0}" not found on type "{1}".</value>
+  <data name="Accessors_MethodDoesNotExistFormat" xml:space="preserve">
+    <value>Method "{0}" was not found on type "{1}".</value>
   </data>
 </root>
