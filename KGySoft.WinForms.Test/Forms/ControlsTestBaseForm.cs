@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Drawing.Design;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -7,6 +8,14 @@ namespace KGySoft.WinForms.Test.Forms
 {
     internal partial class ControlsTestBaseForm : Form
     {
+        [DefaultValue("Click the items to see their properties")]
+        [Editor("System.ComponentModel.Design.MultilineStringEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
+        public string InstructionsText
+        {
+            get => lblInstuction.Text;
+            set => lblInstuction.Text = value;
+        }
+
         public ControlsTestBaseForm()
         {
             InitializeComponent();

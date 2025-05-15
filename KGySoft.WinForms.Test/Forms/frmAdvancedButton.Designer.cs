@@ -62,7 +62,6 @@
             this.pnlTestArea.Controls.Add(this.ucCaptionedContainer1);
             this.pnlTestArea.Controls.Add(this.groupBox1);
             this.pnlTestArea.Size = new System.Drawing.Size(407, 519);
-            this.pnlTestArea.Controls.SetChildIndex(this.lblInstuction, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox1, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.ucCaptionedContainer1, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox2, 0);

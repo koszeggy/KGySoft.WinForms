@@ -28,30 +28,279 @@
         /// </summary>
         private void InitializeComponent()
         {
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvancedComboBox));
+            this.comboBox1 = new System.Windows.Forms.ComboBox();
+            this.gbComboBox = new System.Windows.Forms.GroupBox();
+            this.advancedComboBox7 = new KGySoft.WinForms.Controls.AdvancedComboBox();
+            this.advancedComboBox8 = new KGySoft.WinForms.Controls.AdvancedComboBox();
+            this.label4 = new System.Windows.Forms.Label();
+            this.advancedComboBox4 = new KGySoft.WinForms.Controls.AdvancedComboBox();
+            this.advancedComboBox5 = new KGySoft.WinForms.Controls.AdvancedComboBox();
+            this.advancedComboBox6 = new KGySoft.WinForms.Controls.AdvancedComboBox();
+            this.label3 = new System.Windows.Forms.Label();
+            this.advancedComboBox3 = new KGySoft.WinForms.Controls.AdvancedComboBox();
+            this.label2 = new System.Windows.Forms.Label();
+            this.comboBox3 = new System.Windows.Forms.ComboBox();
+            this.advancedComboBox2 = new KGySoft.WinForms.Controls.AdvancedComboBox();
+            this.label1 = new System.Windows.Forms.Label();
+            this.comboBox2 = new System.Windows.Forms.ComboBox();
+            this.advancedComboBox1 = new KGySoft.WinForms.Controls.AdvancedComboBox();
+            this.label7 = new System.Windows.Forms.Label();
+            this.label6 = new System.Windows.Forms.Label();
+            this.label5 = new System.Windows.Forms.Label();
             this.pnlTestArea.SuspendLayout();
+            this.gbComboBox.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlTestArea
             // 
-            this.pnlTestArea.Size = new System.Drawing.Size(390, 356);
+            this.pnlTestArea.Controls.Add(this.gbComboBox);
+            this.pnlTestArea.Size = new System.Drawing.Size(493, 356);
             // 
-            // lblInstuction
+            // comboBox1
             // 
-            this.lblInstuction.Size = new System.Drawing.Size(390, 15);
+            this.comboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.comboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.Simple;
+            this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.Location = new System.Drawing.Point(84, 38);
+            this.comboBox1.Name = "comboBox1";
+            this.comboBox1.Size = new System.Drawing.Size(121, 21);
+            this.comboBox1.TabIndex = 3;
+            // 
+            // gbComboBox
+            // 
+            this.gbComboBox.Controls.Add(this.advancedComboBox7);
+            this.gbComboBox.Controls.Add(this.advancedComboBox8);
+            this.gbComboBox.Controls.Add(this.label4);
+            this.gbComboBox.Controls.Add(this.advancedComboBox4);
+            this.gbComboBox.Controls.Add(this.advancedComboBox5);
+            this.gbComboBox.Controls.Add(this.advancedComboBox6);
+            this.gbComboBox.Controls.Add(this.label3);
+            this.gbComboBox.Controls.Add(this.advancedComboBox3);
+            this.gbComboBox.Controls.Add(this.label2);
+            this.gbComboBox.Controls.Add(this.comboBox3);
+            this.gbComboBox.Controls.Add(this.advancedComboBox2);
+            this.gbComboBox.Controls.Add(this.label1);
+            this.gbComboBox.Controls.Add(this.comboBox2);
+            this.gbComboBox.Controls.Add(this.advancedComboBox1);
+            this.gbComboBox.Controls.Add(this.label7);
+            this.gbComboBox.Controls.Add(this.label6);
+            this.gbComboBox.Controls.Add(this.label5);
+            this.gbComboBox.Controls.Add(this.comboBox1);
+            this.gbComboBox.Dock = System.Windows.Forms.DockStyle.Top;
+            this.gbComboBox.Location = new System.Drawing.Point(0, 0);
+            this.gbComboBox.Name = "gbComboBox";
+            this.gbComboBox.Size = new System.Drawing.Size(493, 161);
+            this.gbComboBox.TabIndex = 0;
+            this.gbComboBox.TabStop = false;
+            this.gbComboBox.Text = "ComboBox";
+            // 
+            // advancedComboBox7
+            // 
+            this.advancedComboBox7.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.advancedComboBox7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.advancedComboBox7.FormattingEnabled = true;
+            this.advancedComboBox7.Location = new System.Drawing.Point(355, 119);
+            this.advancedComboBox7.Name = "advancedComboBox7";
+            this.advancedComboBox7.ReadOnly = true;
+            this.advancedComboBox7.Size = new System.Drawing.Size(121, 21);
+            this.advancedComboBox7.SystemDrawDropDownListMode = false;
+            this.advancedComboBox7.TabIndex = 18;
+            // 
+            // advancedComboBox8
+            // 
+            this.advancedComboBox8.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.advancedComboBox8.FormattingEnabled = true;
+            this.advancedComboBox8.Location = new System.Drawing.Point(220, 119);
+            this.advancedComboBox8.Name = "advancedComboBox8";
+            this.advancedComboBox8.Size = new System.Drawing.Size(121, 21);
+            this.advancedComboBox8.SystemDrawDropDownListMode = false;
+            this.advancedComboBox8.TabIndex = 17;
+            // 
+            // label4
+            // 
+            this.label4.AutoSize = true;
+            this.label4.Location = new System.Drawing.Point(6, 122);
+            this.label4.Name = "label4";
+            this.label4.Size = new System.Drawing.Size(142, 13);
+            this.label4.TabIndex = 15;
+            this.label4.Text = "DropDownList as DropDown";
+            // 
+            // advancedComboBox4
+            // 
+            this.advancedComboBox4.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.advancedComboBox4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.advancedComboBox4.FormattingEnabled = true;
+            this.advancedComboBox4.Location = new System.Drawing.Point(355, 92);
+            this.advancedComboBox4.Name = "advancedComboBox4";
+            this.advancedComboBox4.ReadOnly = true;
+            this.advancedComboBox4.Size = new System.Drawing.Size(121, 21);
+            this.advancedComboBox4.TabIndex = 13;
+            // 
+            // advancedComboBox5
+            // 
+            this.advancedComboBox5.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
+            this.advancedComboBox5.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.advancedComboBox5.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.advancedComboBox5.FormattingEnabled = true;
+            this.advancedComboBox5.Location = new System.Drawing.Point(355, 65);
+            this.advancedComboBox5.Name = "advancedComboBox5";
+            this.advancedComboBox5.ReadOnly = true;
+            this.advancedComboBox5.Size = new System.Drawing.Size(121, 21);
+            this.advancedComboBox5.TabIndex = 9;
+            // 
+            // advancedComboBox6
+            // 
+            this.advancedComboBox6.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.advancedComboBox6.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.advancedComboBox6.DropDownStyle = System.Windows.Forms.ComboBoxStyle.Simple;
+            this.advancedComboBox6.FormattingEnabled = true;
+            this.advancedComboBox6.Location = new System.Drawing.Point(355, 38);
+            this.advancedComboBox6.Name = "advancedComboBox6";
+            this.advancedComboBox6.ReadOnly = true;
+            this.advancedComboBox6.Size = new System.Drawing.Size(121, 21);
+            this.advancedComboBox6.TabIndex = 5;
+            // 
+            // label3
+            // 
+            this.label3.AutoSize = true;
+            this.label3.Location = new System.Drawing.Point(352, 16);
+            this.label3.Name = "label3";
+            this.label3.Size = new System.Drawing.Size(54, 13);
+            this.label3.TabIndex = 14;
+            this.label3.Text = "ReadOnly";
+            // 
+            // advancedComboBox3
+            // 
+            this.advancedComboBox3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.advancedComboBox3.FormattingEnabled = true;
+            this.advancedComboBox3.Location = new System.Drawing.Point(220, 92);
+            this.advancedComboBox3.Name = "advancedComboBox3";
+            this.advancedComboBox3.Size = new System.Drawing.Size(121, 21);
+            this.advancedComboBox3.TabIndex = 12;
+            // 
+            // label2
+            // 
+            this.label2.AutoSize = true;
+            this.label2.Location = new System.Drawing.Point(6, 95);
+            this.label2.Name = "label2";
+            this.label2.Size = new System.Drawing.Size(74, 13);
+            this.label2.TabIndex = 10;
+            this.label2.Text = "DropDownList";
+            // 
+            // comboBox3
+            // 
+            this.comboBox3.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
+            this.comboBox3.FormattingEnabled = true;
+            this.comboBox3.Location = new System.Drawing.Point(84, 92);
+            this.comboBox3.Name = "comboBox3";
+            this.comboBox3.Size = new System.Drawing.Size(121, 21);
+            this.comboBox3.TabIndex = 11;
+            // 
+            // advancedComboBox2
+            // 
+            this.advancedComboBox2.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Append;
+            this.advancedComboBox2.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.advancedComboBox2.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.advancedComboBox2.FormattingEnabled = true;
+            this.advancedComboBox2.Location = new System.Drawing.Point(220, 65);
+            this.advancedComboBox2.Name = "advancedComboBox2";
+            this.advancedComboBox2.Size = new System.Drawing.Size(121, 21);
+            this.advancedComboBox2.TabIndex = 8;
+            // 
+            // label1
+            // 
+            this.label1.AutoSize = true;
+            this.label1.Location = new System.Drawing.Point(6, 68);
+            this.label1.Name = "label1";
+            this.label1.Size = new System.Drawing.Size(58, 13);
+            this.label1.TabIndex = 6;
+            this.label1.Text = "DropDown";
+            // 
+            // comboBox2
+            // 
+            this.comboBox2.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.SuggestAppend;
+            this.comboBox2.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.comboBox2.FormattingEnabled = true;
+            this.comboBox2.Location = new System.Drawing.Point(84, 65);
+            this.comboBox2.Name = "comboBox2";
+            this.comboBox2.Size = new System.Drawing.Size(121, 21);
+            this.comboBox2.TabIndex = 7;
+            // 
+            // advancedComboBox1
+            // 
+            this.advancedComboBox1.AutoCompleteMode = System.Windows.Forms.AutoCompleteMode.Suggest;
+            this.advancedComboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
+            this.advancedComboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.Simple;
+            this.advancedComboBox1.FormattingEnabled = true;
+            this.advancedComboBox1.Location = new System.Drawing.Point(220, 38);
+            this.advancedComboBox1.Name = "advancedComboBox1";
+            this.advancedComboBox1.Size = new System.Drawing.Size(121, 21);
+            this.advancedComboBox1.TabIndex = 4;
+            // 
+            // label7
+            // 
+            this.label7.AutoSize = true;
+            this.label7.Location = new System.Drawing.Point(6, 41);
+            this.label7.Name = "label7";
+            this.label7.Size = new System.Drawing.Size(38, 13);
+            this.label7.TabIndex = 2;
+            this.label7.Text = "Simple";
+            // 
+            // label6
+            // 
+            this.label6.AutoSize = true;
+            this.label6.Location = new System.Drawing.Point(217, 16);
+            this.label6.Name = "label6";
+            this.label6.Size = new System.Drawing.Size(107, 13);
+            this.label6.TabIndex = 1;
+            this.label6.Text = "AdvancedComboBox";
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(81, 16);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(95, 13);
+            this.label5.TabIndex = 0;
+            this.label5.Text = "System ComboBox";
             // 
             // frmAdvancedComboBox
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(608, 356);
+            this.ClientSize = new System.Drawing.Size(711, 356);
+            this.InstructionsText = resources.GetString("$this.InstructionsText");
             this.Name = "frmAdvancedComboBox";
             this.Text = "frmAdvancedComboBox";
             this.pnlTestArea.ResumeLayout(false);
             this.pnlTestArea.PerformLayout();
+            this.gbComboBox.ResumeLayout(false);
+            this.gbComboBox.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
+        private System.Windows.Forms.ComboBox comboBox1;
+        private System.Windows.Forms.GroupBox gbComboBox;
+        private Controls.AdvancedComboBox advancedComboBox1;
+        private System.Windows.Forms.Label label7;
+        private System.Windows.Forms.Label label6;
+        private System.Windows.Forms.Label label5;
+        private Controls.AdvancedComboBox advancedComboBox3;
+        private System.Windows.Forms.Label label2;
+        private System.Windows.Forms.ComboBox comboBox3;
+        private Controls.AdvancedComboBox advancedComboBox2;
+        private System.Windows.Forms.Label label1;
+        private System.Windows.Forms.ComboBox comboBox2;
+        private Controls.AdvancedComboBox advancedComboBox4;
+        private Controls.AdvancedComboBox advancedComboBox5;
+        private Controls.AdvancedComboBox advancedComboBox6;
+        private System.Windows.Forms.Label label3;
+        private Controls.AdvancedComboBox advancedComboBox7;
+        private Controls.AdvancedComboBox advancedComboBox8;
+        private System.Windows.Forms.Label label4;
     }
 }

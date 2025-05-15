@@ -118,8 +118,8 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="$this.InstructionsText" xml:space="preserve">
-    <value>AdvancedComboBox allows custom colors in disabled mode and supports proper ReadOnly mode. Select the parent GroupBox and set its Enabled to test disabled colors.
+    <value>AdvancedTextBox allows custom colors in disabled mode. Clink on the group box and change the Enabled property to check the disabled rendering
 
-It also fixes Suggest AutoAppendMode in Simple mode, where selecting an item clears the text in the original ComboBox</value>
+DecimalTextBox is derived from AdvancedTextBox and allows decimal input only. Ranges and number of decimals can be specified. When enabled, invalid input sends the control in blank mode. Supports multiplier characters at the last position.</value>
   </data>
 </root>
