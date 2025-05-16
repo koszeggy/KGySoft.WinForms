@@ -45,10 +45,12 @@ namespace KGySoft.WinForms.Controls
     {
         #region Nested classes
 
+        #region InnerEditWindow class
+
         /// <summary>
-        /// Hooks WndProc of the inner editor window to deny WM_PASTE
+        /// Hooks WndProc of the inner editor window to deny WM_PASTE in ReadOnly mode.
         /// </summary>
-        private sealed class InnerEditorWindow : NativeWindow
+        private sealed class InnerEditWindow : NativeWindow
         {
             #region Fields
 
@@ -58,7 +60,7 @@ namespace KGySoft.WinForms.Controls
 
             #region Constructors
 
-            internal InnerEditorWindow(AdvancedComboBox parent) => this.parent = parent;
+            internal InnerEditWindow(AdvancedComboBox parent) => this.parent = parent;
 
             #endregion
 
@@ -99,6 +101,7 @@ namespace KGySoft.WinForms.Controls
                     case Constants.WM_PASTE:
                     case Constants.WM_UNDO:
                         return;
+
                     default:
                         base.WndProc(ref m);
                         return;
@@ -107,6 +110,48 @@ namespace KGySoft.WinForms.Controls
 
             #endregion
         }
+
+        #endregion
+
+        #region InnerListBoxWindow class
+
+        /// <summary>
+        /// Hooks WndProc of the inner editor window to deny WM_PASTE in ReadOnly mode.
+        /// </summary>
+        private sealed class InnerListBoxWindow : NativeWindow
+        {
+            #region Fields
+
+            private readonly AdvancedComboBox parent;
+
+            #endregion
+
+            #region Constructors
+
+            internal InnerListBoxWindow(AdvancedComboBox parent) => this.parent = parent;
+
+            #endregion
+
+            #region Methods
+
+            protected override void WndProc(ref Message m)
+            {
+                switch (m.Msg)
+                {
+                    case Constants.WM_LBUTTONDOWN or Constants.WM_LBUTTONDBLCLK when parent.readOnly:
+                        parent.ProcessReadOnlyMouseDown(ref m);
+                        return;
+
+                    default:
+                        base.WndProc(ref m);
+                        return;
+                }
+            }
+
+            #endregion
+        }
+
+        #endregion
 
         #endregion
 
@@ -123,8 +168,8 @@ namespace KGySoft.WinForms.Controls
         private Bitmap? bmpSaved;
         private bool systemDrawDropDownListMode = true;
         private bool readOnly;
-        private InnerEditorWindow? hook;
-        private Control? parent;
+        private InnerEditWindow? nativeEditorChild;
+        private InnerListBoxWindow? nativeListBoxChild;
         private string? textOnFocus;
         private bool textAndFontChanging;
         private AutoCompleteSource origCompleteSource = AutoCompleteSource.None;
@@ -249,10 +294,10 @@ namespace KGySoft.WinForms.Controls
             get => readOnly ? origCompleteMode : base.AutoCompleteMode;
             set
             {
-                // When handle is created, we hook the inner text box, which accidentally stops auto complete from working.
+                // When handle is created, we hook the inner text box, which accidentally stops auto complete from working in Simple mode.
                 // Re-setting auto complete mode after handle creation does not work from code: it throws a NullReferenceException from the ComboBox.SetAutoComplete method.
                 // So another workaround if we make sure that the handle is created (and the hook is already set) before setting the AutoCompleteMode property.
-                if (!DesignMode && !IsHandleCreated)
+                if (!DesignMode && !IsHandleCreated && base.DropDownStyle == ComboBoxStyle.Simple)
                     CreateHandle();
 
                 if (readOnly)
@@ -550,31 +595,14 @@ namespace KGySoft.WinForms.Controls
             // Hooking inner text box to capture WM_PASTE and others.
             // The base.OnHandleCreated creates the inner native window for Simple and DropDown modes only.
             base.OnHandleCreated(e);
-            InitHook();
+            InitHooks();
         }
 
         /// <inheritdoc />
         protected override void OnHandleDestroyed(EventArgs e)
         {
             base.OnHandleDestroyed(e);
-            if (hook != null)
-            {
-                hook.ReleaseHandle();
-                hook = null;
-            }
-        }
-
-        /// <inheritdoc />
-        protected override void OnParentChanged(EventArgs e)
-        {
-            base.OnParentChanged(e);
-            if (parent != null)
-                parent.EnabledChanged -= parent_EnabledChanged;
-            if (!IsDisposed)
-            {
-                parent = Parent;
-                parent.EnabledChanged += parent_EnabledChanged;
-            }
+            ReleaseHooks();
         }
 
         /// <inheritdoc />
@@ -648,18 +676,11 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
-            if (parent != null)
-            {
-                parent.EnabledChanged -= parent_EnabledChanged;
-                parent = null;
-            }
+            ReleaseHooks();
 
             base.Dispose(disposing);
             if (disposing)
-            {
-                if (bmpSaved != null)
-                    bmpSaved.Dispose();
-            }
+                bmpSaved?.Dispose();
             bmpSaved = null;
         }
 
@@ -795,8 +816,6 @@ namespace KGySoft.WinForms.Controls
                     styleChanging = false;
                 }
             }
-            else if (style == ComboBoxStyle.Simple)
-                FixSimpleAppearance();
 
             SetPaintMode();
         }
@@ -818,24 +837,12 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected override void WndProc(ref Message m)
         {
-            if (!ReadOnly)
-            {
-                base.WndProc(ref m);
-                return;
-            }
-
             // NOTE: ComboBox.WndProc does not see WM_PASTE and other messages so they are captured in InnerEditorWindow
             switch (m.Msg)
             {
                 // Suppressing dropping list down
-                case Constants.WM_LBUTTONDOWN or Constants.WM_LBUTTONDBLCLK:
-                    if (!Focused)
-                        Focus();
-                    OnMouseDown(new MouseEventArgs(MouseButtons.Left, m.Msg is Constants.WM_LBUTTONDOWN ? 1 : 2, m.LParam.SignedLOWORD(), m.LParam.SignedHIWORD(), 0));
-
-                    // This is required to raise the Click event when the mouse button is released
-                    this.SetMouseEvents();
-                    Capture = true;
+                case Constants.WM_LBUTTONDOWN or Constants.WM_LBUTTONDBLCLK when ReadOnly:
+                    ProcessReadOnlyMouseDown(ref m);
                     return;
 
                 default:
@@ -848,15 +855,48 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Methods
 
-        private void InitHook()
+        private void InitHooks()
         {
-            // hooking inner text box to capture WM_PASTE and others
-            IntPtr lhWnd = User32.FindWindowEx(Handle, IntPtr.Zero, "EDIT", null);
-            if (lhWnd != IntPtr.Zero)
+            if (base.DropDownStyle == ComboBoxStyle.Simple)
             {
-                hook = new InnerEditorWindow(this);
-                hook.AssignHandle(lhWnd);
+                // Hooking inner list box the same way as the base class does. In Simple mode the first child is the list box.
+                IntPtr hwnd = User32.GetWindow(Handle, Constants.GW_CHILD);
+                if (hwnd != IntPtr.Zero)
+                {
+                    nativeListBoxChild = new InnerListBoxWindow(this);
+                    nativeListBoxChild.AssignHandle(hwnd);
+                }
             }
+
+            if (base.DropDownStyle != ComboBoxStyle.DropDownList)
+            {
+                // hooking inner text box to capture WM_PASTE and others
+                IntPtr lhWnd = User32.FindWindowEx(Handle, IntPtr.Zero, "EDIT", null);
+                if (lhWnd != IntPtr.Zero)
+                {
+                    nativeEditorChild = new InnerEditWindow(this);
+                    nativeEditorChild.AssignHandle(lhWnd);
+                }
+            }
+        }
+
+        private void ReleaseHooks()
+        {
+            nativeListBoxChild?.ReleaseHandle();
+            nativeListBoxChild = null;
+            nativeEditorChild?.ReleaseHandle();
+            nativeEditorChild = null;
+        }
+
+        private void ProcessReadOnlyMouseDown(ref Message m)
+        {
+            if (!Focused)
+                Focus();
+            OnMouseDown(new MouseEventArgs(MouseButtons.Left, m.Msg is Constants.WM_LBUTTONDOWN ? 1 : 2, m.LParam.SignedLOWORD(), m.LParam.SignedHIWORD(), 0));
+
+            // This is required to raise the Click event when the mouse button is released
+            this.SetMouseEvents();
+            Capture = true;
         }
 
         private void SetPaintMode()
@@ -878,58 +918,22 @@ namespace KGySoft.WinForms.Controls
 
         private void ResetColor()
         {
-            bool backColorChanged = false;
             // BackColor when control is Enabled and not ReadOnly
             if (Enabled && !ReadOnly && base.BackColor != enabledBackColor)
-            {
                 base.BackColor = enabledBackColor;
-                backColorChanged = true;
-            }
+
             // BackColor when control is not Enabled or is ReadOnly
             else if ((Enabled && ReadOnly || !Enabled) && base.BackColor != disabledBackColor)
-            {
                 base.BackColor = disabledBackColor;
-                backColorChanged = true;
-            }
 
             // ForeColor in Enabled state (also ReadOnly)
             if (Enabled && base.ForeColor != enabledForeColor)
                 base.ForeColor = enabledForeColor;
+
             // ForeColor in disabled state (ReadOnly state is indifferent)
             else if (!Enabled && base.ForeColor != disabledForeColor)
                 base.ForeColor = disabledForeColor;
 
-            // workaround: changing back color of a Simple combobox causes to display a few pixels high dropdown listbox with 0 elements
-            if (Enabled && backColorChanged && style == ComboBoxStyle.Simple)
-                FixSimpleAppearance();
-
-            Invalidate();
-        }
-
-        private void FixSimpleAppearance()
-        {
-            Debug.Assert(Enabled && style == ComboBoxStyle.Simple, "Appearance fixing is needless");
-
-            styleChanging = true;
-            try
-            {
-                base.DropDownStyle = ComboBoxStyle.DropDown;
-                base.DropDownStyle = ComboBoxStyle.Simple;
-            }
-            finally
-            {
-                styleChanging = false;
-            }
-        }
-
-        #endregion
-
-        #region Event handlers
-
-        void parent_EnabledChanged(object? sender, EventArgs e)
-        {
-            // Assuring recoloring also in virtual enabled change:
-            // changing Parent.Enabled while control is ReadOnly in DropDownList mode
             Invalidate();
         }
 

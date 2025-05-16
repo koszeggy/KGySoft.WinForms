@@ -50,7 +50,9 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_PAINT = 0x000F;
         internal const int WM_SETICON = 0x0080;
         internal const int WM_NCCALCSIZE = 0x0083;
+#if NETFRAMEWORK || NETCOREAPP3_0
         internal const int WM_NCHITTEST = 0x0084;
+#endif
         internal const int WM_NCPAINT = 0x0085;
         internal const int WM_INITDIALOG = 0x110;
         internal const int WM_TIMER = 0x113;
@@ -135,6 +137,8 @@ namespace KGySoft.WinForms.WinApi
         internal const nint DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 = -4;
 
         internal const uint MONITOR_DEFAULTTONEAREST = 2;
+
+        internal const uint GW_CHILD = 5;
 
         #endregion
     }

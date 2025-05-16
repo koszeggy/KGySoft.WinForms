@@ -337,6 +337,15 @@ namespace KGySoft.WinForms.WinApi
         internal static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string? lpszWindow);
 
         /// <summary>
+        /// Retrieves a handle to a window that has the specified relationship (Z-Order or owner) to the specified window.
+        /// </summary>
+        /// <param name="hwnd">A handle to a window. The window handle retrieved is relative to this window, based on the value of the uCmd parameter.</param>
+        /// <param name="uCmd">The relationship between the specified window and the window whose handle is to be retrieved.</param>
+        /// <returns>If the function succeeds, the return value is a window handle. If no window exists with the specified relationship to the specified window, the return value is NULL. To get extended error information, call GetLastError.</returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern IntPtr GetWindow(IntPtr hwnd, uint uCmd);
+
+        /// <summary>
         /// Loads a string resource from the executable file associated with a specified module, copies the string into a buffer, and appends a terminating null character.
         /// </summary>
         /// <param name="hInstance">A handle to an instance of the module whose executable file contains the string resource. To get the handle to the application itself, call the <see cref="Kernel32.GetModuleHandle"/> function with NULL.</param>
