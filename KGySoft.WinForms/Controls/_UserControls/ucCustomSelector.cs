@@ -22,7 +22,7 @@ namespace KGySoft.WinForms.Controls
     /// </summary>
     [DefaultBindingProperty("Value")]
     [ToolboxItem(true)]
-    public partial class ucCustomSelector: ucCaptionedBase, IListControl
+    public partial class ucCustomSelector: ucCaptionedBase
     {
         #region Fields
 

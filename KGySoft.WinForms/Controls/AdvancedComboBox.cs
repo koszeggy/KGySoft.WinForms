@@ -41,7 +41,7 @@ namespace KGySoft.WinForms.Controls
 - TextChangedOnLeave
 - LoadFrom methods
 - Auto complete works in Simple mode")]
-    public class AdvancedComboBox : ComboBox, ISupportsDisabledColor, IListControl, IReadOnlyCapable
+    public class AdvancedComboBox : ComboBox, ISupportsDisabledColor, IReadOnlyCapable
     {
         #region Nested classes
 

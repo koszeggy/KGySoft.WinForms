@@ -12,7 +12,7 @@ namespace KGySoft.WinForms.Controls
     /// </summary>
     [DefaultBindingProperty("SelectedValue")]
     [ToolboxItem(true)]
-    public partial class ucCombo: ucCaptionedBase, IListControl
+    public partial class ucCombo: ucCaptionedBase
     {
         #region Constructor, Dispose
 
