@@ -42,8 +42,11 @@ namespace KGySoft.WinForms
     {
         #region Fields
 
+        // If a new theme is added, adjust the GetClassName method as well
         private static IntPtr buttonThemeHandle;
         private static IntPtr taskDialogThemeHandle;
+        private static IntPtr comboBoxThemeHandle;
+
         private static bool? visualStylesAvailable;
         private static bool? highContrast;
 
@@ -67,6 +70,10 @@ namespace KGySoft.WinForms
         internal static IntPtr TaskDialogTheme => taskDialogThemeHandle != IntPtr.Zero
             ? taskDialogThemeHandle
             : taskDialogThemeHandle = UxTheme.OpenThemeDataGlobal(Constants.ThemeClassTaskDialog);
+
+        internal static IntPtr ComboBoxTheme => comboBoxThemeHandle != IntPtr.Zero
+            ? comboBoxThemeHandle
+            : comboBoxThemeHandle = UxTheme.OpenThemeDataGlobal(Constants.ThemeClassComboBox);
 
         #endregion
 
@@ -200,6 +207,7 @@ namespace KGySoft.WinForms
 
         private static string GetClassName(IntPtr hTheme) => hTheme == buttonThemeHandle ? Constants.ThemeClassButton
             : hTheme == taskDialogThemeHandle ? Constants.ThemeClassTaskDialog
+            : hTheme == comboBoxThemeHandle ? Constants.ThemeClassComboBox
             : String.Empty; // Not throwing here for performance reasons so the method can be inlined. The exception will be thrown by UxTheme
 
         private static Bitmap GetThemeBitmap((IntPtr ThemeHandle, int PartId, int StateId) key)

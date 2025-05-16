@@ -432,6 +432,17 @@ namespace KGySoft.WinForms.WinApi
         [DllImport("user32.dll")]
         internal static extern uint GetDpiForWindow(IntPtr hwnd);
 
+        /// <summary>
+        /// Retrieves the coordinates of a window's client area. The client coordinates specify the upper-left and lower-right corners of the client area.
+        /// Because client coordinates are relative to the upper-left corner of a window's client area, the coordinates of the upper-left corner are (0,0).
+        /// </summary>
+        /// <param name="hwnd">A handle to the window whose client coordinates are to be retrieved.</param>
+        /// <param name="lpRect">A pointer to a RECT structure that receives the client coordinates. The left and top members are zero. The right and bottom members contain the width and height of the window.</param>
+        /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call GetLastError.</returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool GetClientRect(IntPtr hwnd, out RECT lpRect);
+
         #endregion
     }
 }

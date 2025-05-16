@@ -48,7 +48,7 @@ namespace KGySoft.WinForms.Controls
         #region InnerEditWindow class
 
         /// <summary>
-        /// Hooks WndProc of the inner editor window to deny WM_PASTE in ReadOnly mode.
+        /// Hooks WndProc of the inner editor window to deny WM_PASTE in ReadOnly mode and implement custom WM_PAINT.
         /// </summary>
         private sealed class InnerEditWindow : NativeWindow
         {
@@ -68,12 +68,11 @@ namespace KGySoft.WinForms.Controls
 
             protected override void WndProc(ref Message m)
             {
-                if (!parent.readOnly)
+                switch (m.Msg)
                 {
                     // workaround: AutoComplete clears text in Simple mode
                     // Note: WM_SETTEXT is visible also in ComboBox.WndProc but solves only Append/SuggestAppend mode. Here Suggest mode is solved, too
-                    if (!parent.clearingText && m.Msg == Constants.WM_SETTEXT && parent.style == ComboBoxStyle.Simple && parent.AutoCompleteMode != AutoCompleteMode.None)
-                    {
+                    case Constants.WM_SETTEXT when parent is { readOnly: false, clearingText: false, DropDownStyle: ComboBoxStyle.Simple, AutoCompleteMode: not AutoCompleteMode.None }:
                         string origText = parent.Text;
                         int selectionStart = parent.SelectionStart;
                         int selectionLength = parent.SelectionLength;
@@ -85,21 +84,21 @@ namespace KGySoft.WinForms.Controls
                             parent.SelectionLength = selectionLength;
                         }
                         return;
-                    }
 
-                    base.WndProc(ref m);
-                    return;
-                }
+                    // Suppressing cut, paste, clear and undo in ReadOnly mode
+                    case Constants.WM_CUT or Constants.WM_CLEAR or Constants.WM_PASTE or Constants.WM_UNDO when parent.readOnly:
+                        return;
 
-                // *** read-only mode processings below ***
+                    // Special handling for disabled painting
+                    case Constants.WM_PAINT when !parent.Enabled:
+                        base.WndProc(ref m);
+                        var bounds = User32.GetClientRect(Handle, out var rect) ? rect.ToRectangle() : Rectangle.Empty;
+                        if (!bounds.IsEmpty)
+                        {
+                            using var g = Graphics.FromHwnd(Handle);
+                            parent.DrawDisabledTextBox(g, bounds);
+                        }
 
-                // suppressing editing in ReadOnly mode
-                switch (m.Msg)
-                {
-                    case Constants.WM_CUT:
-                    case Constants.WM_CLEAR:
-                    case Constants.WM_PASTE:
-                    case Constants.WM_UNDO:
                         return;
 
                     default:
@@ -116,7 +115,7 @@ namespace KGySoft.WinForms.Controls
         #region InnerListBoxWindow class
 
         /// <summary>
-        /// Hooks WndProc of the inner editor window to deny WM_PASTE in ReadOnly mode.
+        /// Hooks WndProc of the inner editor window to prevent selection change for mouse clicks.
         /// </summary>
         private sealed class InnerListBoxWindow : NativeWindow
         {
@@ -161,11 +160,6 @@ namespace KGySoft.WinForms.Controls
         private Color disabledForeColor = SystemColors.ControlDarkDark;
         private Color enabledBackColor = SystemColors.Window;
         private Color enabledForeColor = SystemColors.WindowText;
-        private ComboBoxStyle style = ComboBoxStyle.DropDown;
-        private bool styleChanging;
-        private string textSaved = String.Empty;
-        private int indexSaved = -1;
-        private Bitmap? bmpSaved;
         private bool systemDrawDropDownListMode = true;
         private bool readOnly;
         private InnerEditWindow? nativeEditorChild;
@@ -197,24 +191,6 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Properties
-
-        /// <summary>
-        /// Gets or sets the text associated with this control.
-        /// </summary>
-        public override string Text
-        {
-            get => !Enabled ? textSaved : base.Text;
-            set
-            {
-                base.Text = value;
-                if (!Enabled)
-                {
-                    indexSaved = -1;
-                    textSaved = value;
-                    SetPaintMode();
-                }
-            }
-        }
 
         /// <summary>
         /// Gets or sets the background color of the control in current state.
@@ -262,31 +238,6 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets a value specifying the style of the combo box.
-        /// </summary>
-        [RefreshProperties(RefreshProperties.Repaint)]
-        [Description("Gets or sets a value specifying the style of the combo box.")]
-        [DefaultValue(ComboBoxStyle.DropDown)]
-        public new ComboBoxStyle DropDownStyle
-        {
-            get => style;
-            set
-            {
-                if (style != value)
-                {
-                    if (base.DropDownStyle == ComboBoxStyle.DropDownList && value == ComboBoxStyle.DropDownList)
-                    {
-                        styleChanging = true;
-                        base.DropDownStyle = ComboBoxStyle.DropDown;
-                        styleChanging = false;
-                    }
-
-                    base.DropDownStyle = value;
-                }
-            }
-        }
-
-        /// <summary>
         /// Gets or sets an option that controls how automatic completion works for the inner combo box.
         /// </summary>
         public new AutoCompleteMode AutoCompleteMode
@@ -297,7 +248,7 @@ namespace KGySoft.WinForms.Controls
                 // When handle is created, we hook the inner text box, which accidentally stops auto complete from working in Simple mode.
                 // Re-setting auto complete mode after handle creation does not work from code: it throws a NullReferenceException from the ComboBox.SetAutoComplete method.
                 // So another workaround if we make sure that the handle is created (and the hook is already set) before setting the AutoCompleteMode property.
-                if (!DesignMode && !IsHandleCreated && base.DropDownStyle == ComboBoxStyle.Simple)
+                if (!DesignMode && !IsHandleCreated && DropDownStyle == ComboBoxStyle.Simple)
                     CreateHandle();
 
                 if (readOnly)
@@ -417,36 +368,34 @@ namespace KGySoft.WinForms.Controls
             get => readOnly;
             set
             {
-                if (readOnly != value)
+                if (readOnly == value)
+                    return;
+
+                var style = DropDownStyle;
+                if (value)
                 {
-                    if (value)
+                    origCompleteSource = base.AutoCompleteSource;
+                    origCompleteMode = base.AutoCompleteMode;
+                    if (style != ComboBoxStyle.DropDownList)
                     {
-                        origCompleteSource = base.AutoCompleteSource;
-                        origCompleteMode = base.AutoCompleteMode;
-                        if (style != ComboBoxStyle.DropDownList)
-                        {
-                            base.AutoCompleteMode = AutoCompleteMode.None;
-                            base.AutoCompleteSource = AutoCompleteSource.None;
-                        }
+                        base.AutoCompleteMode = AutoCompleteMode.None;
+                        base.AutoCompleteSource = AutoCompleteSource.None;
                     }
-                    else if (style != ComboBoxStyle.DropDownList)
-                    {
-                        if (base.DropDownStyle != ComboBoxStyle.DropDownList)
-                        {
-                            base.AutoCompleteMode = origCompleteMode;
-                            base.AutoCompleteSource = origCompleteSource;
-                        }
-                    }
-
-                    readOnly = value;
-                    if (Enabled)
-                    {
-                        AdjustDrawMode();
-                        ResetColor();
-                    }
-
-                    OnReadOnlyChanged(EventArgs.Empty);
                 }
+                else if (style != ComboBoxStyle.DropDownList)
+                {
+                    if (DropDownStyle != ComboBoxStyle.DropDownList)
+                    {
+                        base.AutoCompleteMode = origCompleteMode;
+                        base.AutoCompleteSource = origCompleteSource;
+                    }
+                }
+
+                readOnly = value;
+                if (Enabled)
+                    ResetColor();
+
+                OnReadOnlyChanged(EventArgs.Empty);
             }
         }
 
@@ -459,7 +408,6 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public AdvancedComboBox()
         {
-            SetPaintMode();
         }
 
         #endregion
@@ -469,7 +417,7 @@ namespace KGySoft.WinForms.Controls
         #region Public Methods
 
         /// <summary>
-        /// Clears <see cref="Text"/> property. If <see cref="AutoCompleteMode"/> property is set on a simple mode combo box, then
+        /// Clears <see cref="ComboBox.Text"/> property. If <see cref="AutoCompleteMode"/> property is set on a simple mode combo box, then
         /// use this method to clear text instead of setting empty string to Text property.
         /// </summary>
         public void Clear()
@@ -493,100 +441,43 @@ namespace KGySoft.WinForms.Controls
         protected override void OnEnabledChanged(EventArgs e)
         {
             base.OnEnabledChanged(e);
-            styleChanging = true;
-            try
+            var style = DropDownStyle;
+
+            // enabling
+            if (Enabled)
             {
-                // enabling
-                if (Enabled)
+                textAndFontChanging = true;
+                try
                 {
-                    // restoring style
-                    base.DropDownStyle = style;
-                    SetPaintMode();
-
-                    textAndFontChanging = true;
-                    try
-                    {
-                        // resetting font must be before restoring text because "Font = font;" may select an item!
-
-                        // Without these lines font would be replaced to some bold one after Enabled off->on
-                        Font font = Font;
-                        // ReSharper disable AssignNullToNotNullAttribute
-                        Font = null;
-                        // ReSharper restore AssignNullToNotNullAttribute
-                        Font = font;
-
-                        // without this text might remain selected even if not focused
-                        if (!Focused && style != ComboBoxStyle.DropDownList)
-                            SelectionLength = 0;
-
-                        // restoring last selected item (strictly after resetting font!)
-                        if (indexSaved >= 0)
-                        {
-                            if (indexSaved < Items.Count)
-                                SelectedIndex = indexSaved;
-                        }
-                        else if (style != ComboBoxStyle.DropDownList)
-                            base.Text = textSaved;
-                    }
-                    finally
-                    {
-                        textAndFontChanging = false;
-                    }
-
-                    // if readonly was changed in disabled style original auto complete should be restored here
-                    if (!readOnly && origCompleteSource != AutoCompleteSource.None && base.DropDownStyle != ComboBoxStyle.DropDownList
-                        && (base.AutoCompleteSource != origCompleteSource || base.AutoCompleteMode != origCompleteMode))
-                    {
-                        base.AutoCompleteMode = origCompleteMode;
-                        base.AutoCompleteSource = origCompleteSource;
-                    }
-
-                    // if readonly was changed while control was disabled, this adjust is needed
-                    AdjustDrawMode();
-                    ResetColor();
+                    // without this text might remain selected even if not focused
+                    if (!Focused && style != ComboBoxStyle.DropDownList)
+                        SelectionLength = 0;
                 }
-                // disabling
-                else
+                finally
                 {
-                    // saving current style/index/text/auto complete
-                    style = base.DropDownStyle;
-                    indexSaved = SelectedIndex;
-                    textSaved = base.Text;
-                    if (!readOnly)
-                    {
-                        origCompleteMode = base.AutoCompleteMode;
-                        origCompleteSource = base.AutoCompleteSource;
-                    }
-                    // OnPaint works only in DropDownList mode. But Text/index may be lost that's why they were saved.
-                    base.DropDownStyle = ComboBoxStyle.DropDownList;
+                    textAndFontChanging = false;
+                }
 
-                    SetPaintMode();
+                // if readonly was changed in disabled style original auto complete should be restored here
+                if (!readOnly && origCompleteSource != AutoCompleteSource.None && DropDownStyle != ComboBoxStyle.DropDownList
+                    && (base.AutoCompleteSource != origCompleteSource || base.AutoCompleteMode != origCompleteMode))
+                {
+                    base.AutoCompleteMode = origCompleteMode;
+                    base.AutoCompleteSource = origCompleteSource;
                 }
             }
-            finally
+            // disabling
+            else
             {
-                styleChanging = false;
+                // saving current auto complete
+                if (!readOnly)
+                {
+                    origCompleteMode = base.AutoCompleteMode;
+                    origCompleteSource = base.AutoCompleteSource;
+                }
             }
-        }
 
-        /// <inheritdoc />
-        protected override void OnSelectedIndexChanged(EventArgs e)
-        {
-            base.OnSelectedIndexChanged(e);
-            if (styleChanging)
-                return;
-            SetPaintMode();
-        }
-
-        /// <inheritdoc />
-        protected override void OnSystemColorsChanged(EventArgs e)
-        {
-            base.OnSystemColorsChanged(e);
-            if (bmpSaved != null)
-            {
-                bmpSaved.Dispose();
-                bmpSaved = null;
-            }
+            ResetColor();
         }
 
         /// <inheritdoc />
@@ -655,7 +546,7 @@ namespace KGySoft.WinForms.Controls
 
             // suppressing deleting and navigation (selecting item from list) because these cannot be suppressed in KeyPress
             if (readOnly && (e.KeyCode is Keys.Delete or Keys.Back or Keys.Up or Keys.Down or Keys.PageUp or Keys.PageDown
-                || base.DropDownStyle == ComboBoxStyle.DropDownList && e.KeyCode is Keys.Space or Keys.Right or Keys.Left or Keys.Home or Keys.End))
+                || DropDownStyle == ComboBoxStyle.DropDownList && e.KeyCode is Keys.Space or Keys.Right or Keys.Left or Keys.Home or Keys.End))
             {
                 e.Handled = true;
                 e.SuppressKeyPress = true;
@@ -677,11 +568,7 @@ namespace KGySoft.WinForms.Controls
         protected override void Dispose(bool disposing)
         {
             ReleaseHooks();
-
             base.Dispose(disposing);
-            if (disposing)
-                bmpSaved?.Dispose();
-            bmpSaved = null;
         }
 
         /// <summary>
@@ -693,143 +580,46 @@ namespace KGySoft.WinForms.Controls
             // drawing an item in the dropdown area
             if (e.Index >= 0)
             {
-                string label = GetItemText(Items[e.Index]);
+                string? text = GetItemText(Items[e.Index]);
 
-                Brush brFore;
-                Brush brBack;
-                //// Disabled combo (dropdownlist mode)
-                //if ((int)(e.State & DrawItemState.Disabled) > 0)
-                //{
-                //    brFore = new SolidBrush(disabledForeColor);
-                //    brBack = new SolidBrush(disabledBackColor);
-                //} else
-                // Non focused list item
-                if ((int)(e.State & DrawItemState.Selected) == 0)
+                Color foreColor;
+                Color backColor;
+
+                // Selected list item
+                if ((int)(e.State & DrawItemState.Selected) != 0)
                 {
-                    brFore = ForeColor.GetBrush();
-                    brBack = BackColor.GetBrush();
+                    foreColor = SystemColors.HighlightText;
+                    backColor = SystemColors.Highlight;
                 }
-                // Focused list item
+                // Disabled item (Single mode ListBox item)
+                else if ((int)(e.State & DrawItemState.Disabled) != 0)
+                {
+                    foreColor = disabledForeColor;
+                    backColor = disabledBackColor;
+                }
+                // Non-selected list item
                 else
                 {
-                    brFore = SystemBrushes.HighlightText;
-                    brBack = SystemBrushes.Highlight;
+                    foreColor = ForeColor;
+                    backColor = BackColor;
                 }
-                e.Graphics.FillRectangle(brBack, e.Bounds);
-                e.Graphics.DrawString(label, e.Font, brFore, e.Bounds.Left - 2, e.Bounds.Top);
+
+                e.Graphics.FillRectangle(backColor.GetBrush(), e.Bounds);
+                TextRenderer.DrawText(e.Graphics, text, e.Font, e.Bounds, foreColor, backColor, this.GetFormatFlags());
                 e.DrawFocusRectangle();
             }
-            // drawing the unselected control in dropdownlist mode
             else
-            {
-                base.OnDrawItem(e);
-            }
-        }
+                e.DrawBackground();
 
-        /// <summary>
-        /// Drawing appearance in disabled mode (works only in DropDownList mode)
-        /// </summary>
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            base.OnPaint(e);
-            if (!Enabled)
-            {
-                Graphics g = e.Graphics;
-
-                ////This would be an elegant solution but actually would be very ugly (while colors cannot be affected):
-                //// drawing textbox with text
-                //Rectangle rectangle = ClientRectangle;
-                //if (style != ComboBoxStyle.Simple)
-                //    rectangle.Width -= 16;
-                //ComboBoxRenderer.DrawTextBox(g, rectangle, textSaved, Font,  System.Windows.Forms.VisualStyles.ComboBoxState.Disabled);
-                //// drawing button
-                //if (style != ComboBoxStyle.Simple)
-                //    ComboBoxRenderer.DrawDropDownButton(g, new Rectangle(ClientRectangle.Width - 16, 0, 16, ClientRectangle.Height), System.Windows.Forms.VisualStyles.ComboBoxState.Disabled);
-
-                Rectangle bounds = ClientRectangle;
-
-                // saving the disabled image of the control (this saves a dropdownlist appearance)
-                if (bmpSaved == null)
-                {
-                    if (Width <= 0 || Height <= 0)
-                        return;
-
-                    SetStyle(ControlStyles.UserPaint, false);
-                    bmpSaved = new Bitmap(bounds.Width, bounds.Height);
-                    DrawToBitmap(bmpSaved, bounds);
-                    SetStyle(ControlStyles.UserPaint, true);
-                }
-
-                // drawing background
-                g.DrawImage(bmpSaved, 0, 0);
-
-                // filling with disabled background
-                bounds.X += 2;
-                bounds.Y += 2;
-                bounds.Width -= 4;
-                bounds.Height -= 4;
-                bool ltr = RightToLeft == RightToLeft.Yes;
-                if (style != ComboBoxStyle.Simple)
-                {
-                    bounds.Width -= 16; // assuming that dropdown button is 16 px wide
-                    if (ltr)
-                        bounds.X += 16;
-                }
-
-                g.FillRectangle(disabledBackColor.GetBrush(), bounds);
-
-                // drawing text
-                bounds.Width += 6;
-                if (style == ComboBoxStyle.DropDownList)
-                    bounds.X -= 1;
-                else
-                {
-                    bounds.X -= 2;
-                    bounds.Y -= 1;
-                }
-                TextFormatFlags flags = TextFormatFlags.VerticalCenter | TextFormatFlags.Left | TextFormatFlags.SingleLine | TextFormatFlags.ExpandTabs | TextFormatFlags.NoPrefix;
-                if (ltr)
-                    flags |= TextFormatFlags.RightToLeft | TextFormatFlags.Right;
-                TextRenderer.DrawText(g, textSaved, Font, bounds, Enabled ? enabledForeColor : disabledForeColor, flags);
-            }
+            // Invoking the DrawItem event
+            base.OnDrawItem(e);
         }
 
         /// <inheritdoc />
         protected override void OnDropDownStyleChanged(EventArgs e)
         {
-            if (styleChanging)
-                return;
-
             base.OnDropDownStyleChanged(e);
-
-            style = base.DropDownStyle;
             AdjustDrawMode();
-            if (!Enabled)
-            {
-                styleChanging = true;
-                try
-                {
-                    base.DropDownStyle = ComboBoxStyle.DropDownList;
-                }
-                finally
-                {
-                    styleChanging = false;
-                }
-            }
-
-            SetPaintMode();
-        }
-
-        /// <inheritdoc />
-        protected override void OnSizeChanged(EventArgs e)
-        {
-            base.OnSizeChanged(e);
-            if (bmpSaved != null)
-            {
-                bmpSaved.Dispose();
-                bmpSaved = null;
-            }
-            Invalidate();
         }
 
         /// <summary>
@@ -845,6 +635,21 @@ namespace KGySoft.WinForms.Controls
                     ProcessReadOnlyMouseDown(ref m);
                     return;
 
+                case Constants.WM_PAINT when !Enabled:
+                    base.WndProc(ref m);
+
+                    if (systemDrawDropDownListMode && (DropDownStyle == ComboBoxStyle.DropDownList || nativeEditorChild == null))
+                    {
+                        var bounds = User32.GetClientRect(Handle, out var rect) ? rect.ToRectangle() : Rectangle.Empty;
+                        if (!bounds.IsEmpty)
+                        {
+                            using var g = Graphics.FromHwnd(Handle);
+                            DrawDisabledTextBox(g, bounds);
+                        }
+                    }
+
+                    return;
+
                 default:
                     base.WndProc(ref m);
                     return;
@@ -857,7 +662,7 @@ namespace KGySoft.WinForms.Controls
 
         private void InitHooks()
         {
-            if (base.DropDownStyle == ComboBoxStyle.Simple)
+            if (DropDownStyle == ComboBoxStyle.Simple)
             {
                 // Hooking inner list box the same way as the base class does. In Simple mode the first child is the list box.
                 IntPtr hwnd = User32.GetWindow(Handle, Constants.GW_CHILD);
@@ -868,7 +673,7 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            if (base.DropDownStyle != ComboBoxStyle.DropDownList)
+            if (DropDownStyle != ComboBoxStyle.DropDownList)
             {
                 // hooking inner text box to capture WM_PASTE and others
                 IntPtr lhWnd = User32.FindWindowEx(Handle, IntPtr.Zero, "EDIT", null);
@@ -899,18 +704,9 @@ namespace KGySoft.WinForms.Controls
             Capture = true;
         }
 
-        private void SetPaintMode()
-        {
-            if (DesignMode)
-                return;
-            bool userPaint = !Enabled && (style != ComboBoxStyle.DropDownList || SelectedIndex >= 0);
-            SetStyle(ControlStyles.UserPaint, userPaint);
-            Invalidate();
-        }
-
         private void AdjustDrawMode()
         {
-            bool customDraw = !Enabled || style != ComboBoxStyle.DropDownList || !systemDrawDropDownListMode;
+            bool customDraw = DropDownStyle == ComboBoxStyle.Simple || !systemDrawDropDownListMode;
             DrawMode drawMode = customDraw ? DrawMode.OwnerDrawFixed : DrawMode.Normal;
             if (base.DrawMode != drawMode)
                 base.DrawMode = drawMode;
@@ -935,6 +731,57 @@ namespace KGySoft.WinForms.Controls
                 base.ForeColor = disabledForeColor;
 
             Invalidate();
+        }
+
+        private void DrawDisabledTextBox(Graphics g, Rectangle bounds)
+        {
+            var style = DropDownStyle;
+
+            var clientRect = bounds;
+            bool rtl = RightToLeft == RightToLeft.Yes;
+            bool visualStyles = VisualStyleHelper.RenderWithVisualStyles;
+            if (style == ComboBoxStyle.DropDownList)
+            {
+                bounds.X += visualStyles || !rtl ? 2 : 4;
+                bounds.Y += 2;
+                bounds.Width -= visualStyles || !rtl ? 5 : 6;
+                bounds.Height -= 4;
+                bounds.Width -= 17; // assuming that dropdown button is 17 px wide
+                if (rtl)
+                    bounds.X += 17;
+            }
+            else
+            {
+                bounds.X -= 3;
+                bounds.Width += 7;
+            }
+
+            // System DropDownList mode: not clearing with background color but drawing the disabled background by visual styles
+            if (style == ComboBoxStyle.DropDownList && systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles
+                && FlatStyle is FlatStyle.System or FlatStyle.Standard)
+            {
+                VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_READONLY, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, clientRect);
+
+                var part = rtl ? COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;
+                var buttonSize = new Size(17, 21); // TODO: scale
+                var dropDownButtonBounds = new Rectangle(Point.Empty, buttonSize);
+                if (!rtl)
+                    dropDownButtonBounds.X = clientRect.Right - buttonSize.Width;
+                VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)part, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, dropDownButtonBounds);
+            }
+            else
+                g.FillRectangle(disabledBackColor.GetBrush(), bounds);
+
+            if (style == ComboBoxStyle.DropDownList)
+            {
+                bounds.X -= visualStyles
+                    ? !rtl ? 1 : 0
+                    : !rtl ? 1 : 2;
+                bounds.Y += 2;
+                bounds.Width += 5;
+            }
+
+            TextRenderer.DrawText(g, base.Text, Font, bounds, disabledForeColor, this.GetFormatFlags());
         }
 
         #endregion
