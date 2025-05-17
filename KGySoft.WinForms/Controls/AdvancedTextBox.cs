@@ -39,6 +39,7 @@ namespace KGySoft.WinForms.Controls
      *
      * Other features:
      * - TextChangeOnLeave event: Fires on leave when content differs from the content at getting focused
+     * - If Multiline is true and the control is not ReadOnly, not allowing processing Enter by the parent form/control
      */
 
     /// <summary>
@@ -49,11 +50,27 @@ namespace KGySoft.WinForms.Controls
     {
         #region Fields
 
-        private Color disabledBackColor = SystemColors.Control;
-        private Color disabledForeColor = SystemColors.ControlDarkDark;
-        private Color enabledBackColor = SystemColors.Window;
-        private Color enabledForeColor = SystemColors.WindowText;
+        #region Static Fields
+
+        private static readonly Color defaultEnabledBackColor = SystemColors.Window;
+        private static readonly Color defaultEnabledForeColor = SystemColors.WindowText;
+        private static readonly Color defaultDisabledOrReadOnlyBackColor = SystemColors.Control;
+        private static readonly Color defaultDisabledForeColor = SystemColors.GrayText;
+        private static readonly Color defaultReadOnlyForeColor = SystemColors.ControlText;
+
+        #endregion
+
+        #region Instance Fields
+
+        // NOTE: Unlike in ButtonBase descendants, we always set the base enabled back (and fore) colors (see ResetColors) because we don't have a reimplemented adapter here,
+        // so the base drawing routines still rely on them. Setting them even with default colors is not a problem because this control never inherits colors from the parent control.
+        private Color enabledBackColor;
+        private Color enabledForeColor;
+        private Color disabledBackColor;
+        private Color disabledForeColor;
         private string origValue = String.Empty; // content at getting focused
+
+        #endregion
 
         #endregion
 
@@ -71,7 +88,7 @@ namespace KGySoft.WinForms.Controls
         #region Properties
 
         /// <summary>
-        /// Gets or sets the background color of the control in current state.
+        /// Gets or sets the background color of the control in the current state.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
@@ -80,15 +97,15 @@ namespace KGySoft.WinForms.Controls
             get => base.BackColor;
             set
             {
-                if (ReadOnly || !Enabled)
-                    DisabledBackColor = value;
-                else
+                if (!ReadOnly && Enabled)
                     EnabledBackColor = value;
+                else
+                    DisabledBackColor = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets the foreground color of the control in current state.
+        /// Gets or sets the foreground color of the control in the current state.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
@@ -97,74 +114,80 @@ namespace KGySoft.WinForms.Controls
             get => base.ForeColor;
             set
             {
-                if (!Enabled)
-                    DisabledForeColor = value;
-                else
+                if (Enabled)
                     EnabledForeColor = value;
+                else
+                    DisabledForeColor = value;
             }
         }
 
         /// <summary>
-        /// ForeColor when control is Enabled.
+        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/> and not <see cref="TextBox.ReadOnly"/>.
         /// </summary>
         [Category("AdvancedTextBox")]
-        [Description("ForeColor when control is Enabled.")]
-        [DefaultValue(typeof(Color), "WindowText")]
-        public Color EnabledForeColor
-        {
-            get => enabledForeColor;
-            set
-            {
-                enabledForeColor = value;
-                ResetColor();
-            }
-        }
-
-        /// <summary>
-        /// BackColor when control is Enabled and not ReadOnly.
-        /// </summary>
-        [Category("AdvancedTextBox")]
-        [Description("BackColor when control is Enabled and not ReadOnly.")]
-        [DefaultValue(typeof(Color), "Window")]
+        [Description("Determines the background color when the control is Enabled and not ReadOnly.")]
         public Color EnabledBackColor
         {
-            get => enabledBackColor;
+            get => !enabledBackColor.IsEmpty ? enabledBackColor : defaultEnabledBackColor;
             set
             {
+                if (enabledBackColor == value)
+                    return;
                 enabledBackColor = value;
-                ResetColor();
+                ResetColors();
             }
         }
 
         /// <summary>
-        /// BackColor when control is not Enabled or is ReadOnly.
+        /// Gets or sets the text color when the control is <see cref="Control.Enabled"/>.
         /// </summary>
         [Category("AdvancedTextBox")]
-        [Description("BackColor when control is not Enabled or is ReadOnly.")]
-        [DefaultValue(typeof(Color), "Control")]
+        [Description("Determines the text color when the control is Enabled.")]
+        public Color EnabledForeColor
+        {
+            get => !enabledForeColor.IsEmpty ? enabledForeColor
+                : ReadOnly ? defaultReadOnlyForeColor
+                : defaultEnabledForeColor;
+            set
+            {
+                if (enabledForeColor == value)
+                    return;
+                enabledForeColor = value;
+                ResetColors();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/> or is <see cref="TextBox.ReadOnly"/>.
+        /// </summary>
+        [Category("AdvancedTextBox")]
+        [Description("Determines the background when the control is not Enabled or is ReadOnly.")]
         public Color DisabledBackColor
         {
-            get => disabledBackColor;
+            get => !disabledBackColor.IsEmpty ? disabledBackColor : defaultDisabledOrReadOnlyBackColor;
             set
             {
+                if (disabledBackColor == value)
+                    return;
                 disabledBackColor = value;
-                ResetColor();
+                ResetColors();
             }
         }
 
         /// <summary>
-        /// ForeColor when control is not Enabled.
+        /// Gets or sets the text color when the control is not <see cref="Control.Enabled"/>.
         /// </summary>
         [Category("AdvancedTextBox")]
-        [Description("ForeColor when control is not Enabled.")]
-        [DefaultValue(typeof(Color), "ControlDarkDark")]
+        [Description("Determines the text color when the control is not Enabled.")]
         public Color DisabledForeColor
         {
-            get => disabledForeColor;
+            get => !disabledForeColor.IsEmpty ? disabledForeColor : defaultDisabledForeColor;
             set
             {
+                if (disabledForeColor == value)
+                    return;
                 disabledForeColor = value;
-                ResetColor();
+                ResetColors();
             }
         }
 
@@ -225,52 +248,22 @@ namespace KGySoft.WinForms.Controls
             // Painting with disabled colors
             if (!Enabled)
             {
-                //TextFormatFlags flags = TextFormatFlags.TextBoxControl | TextFormatFlags.ExpandTabs | TextFormatFlags.NoPrefix;
-
-                //if (!Multiline)
-                //    flags |= TextFormatFlags.SingleLine;
-
-                //if (WordWrap)
-                //    flags |= TextFormatFlags.WordBreak;
-
-                //switch (TextAlign)
-                //{
-                //    case HorizontalAlignment.Center:
-                //        flags |= TextFormatFlags.HorizontalCenter;
-                //        break;
-                //    case HorizontalAlignment.Left:
-                //        flags |= TextFormatFlags.Left;
-                //        break;
-                //    case HorizontalAlignment.Right:
-                //        flags |= TextFormatFlags.Right;
-                //        break;
-                //}
-
-                //if (this.IsRightToLeft())
-                //    flags |= TextFormatFlags.RightToLeft | TextFormatFlags.Right;
-
-                e.Graphics.FillRectangle(disabledBackColor.GetBrush(), ClientRectangle);
+                e.Graphics.FillRectangle(BackColor.GetBrush(), ClientRectangle);
 
                 // TODO: Adjust rectangle size to DPI (this +5 width is good for 96 DPI but 120 DPI requires +6)
                 Rectangle rectangle = new Rectangle(new Point(-2, 1), new Size(ClientRectangle.Width + 5, ClientRectangle.Height - 2));
                 TextFormatFlags flags = this.GetFormatFlags();
                 if (!UseSystemPasswordChar)
-                    TextRenderer.DrawText(e.Graphics, Text.Substring(GetFirstCharIndexFromLine(GetFirstVisibleLine())), Font, rectangle, disabledForeColor, flags);
+                    TextRenderer.DrawText(e.Graphics, Text.Substring(GetFirstCharIndexFromLine(GetFirstVisibleLine())), Font, rectangle, ForeColor, flags);
                 else
-                    TextRenderer.DrawText(e.Graphics, new string(PasswordChar, Text.Length), Font, rectangle, disabledForeColor, flags);
+                    TextRenderer.DrawText(e.Graphics, new string(PasswordChar, Text.Length), Font, rectangle, ForeColor, flags);
             }
             else
                 base.OnPaint(e);
         }
 
-        /// <summary>
-        /// Prevents consuming Enter by the parent form/control if this.<see cref="TextBox.Multiline"/> is enabled.
-        /// </summary>
-        /// <inheritdoc/>
         protected override bool IsInputKey(Keys keyData)
-        {
-            return (((((keyData & Keys.KeyCode) == Keys.Return) && this.Multiline) && ((keyData & Keys.Alt) == Keys.None)) || base.IsInputKey(keyData));
-        }
+            => ((keyData & Keys.KeyCode) == Keys.Return && !ReadOnly && Multiline && (keyData & Keys.Alt) == Keys.None) || base.IsInputKey(keyData);
 
         #endregion
 
@@ -287,32 +280,33 @@ namespace KGySoft.WinForms.Controls
                 Font = font;
             }
 
-            ResetColor();
+            ResetColors();
         }
 
-        private int GetFirstVisibleLine()
+        private int GetFirstVisibleLine() => User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, 0, 0).ToInt32();
+
+        private void ResetColors()
         {
-            return User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, 0, 0).ToInt32();
+            bool enabled = Enabled;
+            bool readOnly = ReadOnly;
+            Color baseBackColor = base.BackColor;
+            Color baseForeColor = base.ForeColor;
+
+            if (enabled && !readOnly && EnabledBackColor is Color enabledBgColor && enabledBgColor != baseBackColor)
+                base.BackColor = enabledBgColor;
+            else if ((readOnly || !enabled) && DisabledBackColor is Color disabledBgColor && disabledBgColor != baseBackColor)
+                base.BackColor = disabledBgColor;
+
+            if (enabled && EnabledForeColor is Color enabledFgColor && enabledFgColor != baseForeColor)
+                base.ForeColor = enabledFgColor;
+            else if (!enabled && DisabledForeColor is Color disabledFgColor && disabledFgColor != baseForeColor)
+                base.ForeColor = disabledFgColor;
         }
 
-        private void ResetColor()
-        {
-            // BackColor when control is Enabled and not ReadOnly
-            if (Enabled && !ReadOnly && base.BackColor != enabledBackColor)
-                base.BackColor = enabledBackColor;
-            // BackColor when control is not Enabled or is ReadOnly
-            else if ((Enabled && ReadOnly || !Enabled) && base.BackColor != disabledBackColor)
-                base.BackColor = disabledBackColor;
-
-            // ForeColor in Enabled state (also ReadOnly)
-            if (Enabled && base.ForeColor != enabledForeColor)
-                base.ForeColor = enabledForeColor;
-            // ForeColor in disabled state (ReadOnly state is indifferent)
-            else if (!Enabled && base.ForeColor != disabledForeColor)
-                base.ForeColor = disabledForeColor;
-
-            Invalidate();
-        }
+        private bool ShouldSerializeEnabledBackColor() => !enabledBackColor.IsEmpty;
+        private bool ShouldSerializeEnabledForeColor() => !enabledForeColor.IsEmpty;
+        private bool ShouldSerializeDisabledBackColor() => !disabledBackColor.IsEmpty;
+        private bool ShouldSerializeDisabledForeColor() => !disabledForeColor.IsEmpty;
 
         #endregion
 

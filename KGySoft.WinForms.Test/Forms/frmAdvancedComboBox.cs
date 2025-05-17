@@ -4,7 +4,6 @@
     {
         public frmAdvancedComboBox()
         {
-            // NOTE: the designer in VS2022 keeps changing the Simple ComboBox heights to 150. Just reset it to 21 when this happens.
             InitializeComponent();
             lblInstuction.SendToBack();
 

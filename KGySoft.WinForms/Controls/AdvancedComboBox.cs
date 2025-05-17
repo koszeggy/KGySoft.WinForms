@@ -156,10 +156,25 @@ namespace KGySoft.WinForms.Controls
 
         #region Fields
 
-        private Color disabledBackColor = SystemColors.Control;
-        private Color disabledForeColor = SystemColors.ControlDarkDark;
-        private Color enabledBackColor = SystemColors.Window;
-        private Color enabledForeColor = SystemColors.WindowText;
+        #region Static Fields
+
+        private static readonly Color defaultEnabledBackColor = SystemColors.Window;
+        private static readonly Color defaultEnabledForeColor = SystemColors.WindowText;
+        private static readonly Color defaultDisabledOrReadOnlyBackColor = SystemColors.Control;
+        private static readonly Color defaultDisabledForeColor = SystemColors.GrayText;
+        private static readonly Color defaultReadOnlyForeColor = SystemColors.ControlText;
+
+        #endregion
+
+        #region Instance Fields
+
+        // NOTE: Unlike in ButtonBase descendants, we always set the base enabled back (and fore) colors (see ResetColors) because we don't have a reimplemented adapter here,
+        // so the base drawing routines still rely on them. Setting them even with default colors is not a problem because this control never inherits colors from the parent control.
+        private Color enabledBackColor;
+        private Color enabledForeColor;
+        private Color disabledBackColor;
+        private Color disabledForeColor;
+        private FlatStyle lastFlatStyle = FlatStyle.Standard; // would not be needed if there was an overridable OnFlatStyleChanged method
         private bool systemDrawDropDownListMode = true;
         private bool readOnly;
         private InnerEditWindow? nativeEditorChild;
@@ -169,6 +184,8 @@ namespace KGySoft.WinForms.Controls
         private AutoCompleteSource origCompleteSource = AutoCompleteSource.None;
         private AutoCompleteMode origCompleteMode = AutoCompleteMode.None;
         private bool clearingText;
+
+        #endregion
 
         #endregion
 
@@ -192,8 +209,16 @@ namespace KGySoft.WinForms.Controls
 
         #region Properties
 
+        #region Static Properties
+
+        private static Color ThemedDisabledDropDownListColor => VisualStyleHelper.RenderWithVisualStyles ? GetDefaultTextColor(COMBOBOXSTYLESTATES.CBXS_DISABLED, defaultDisabledForeColor) : defaultDisabledForeColor;
+
+        #endregion
+
+        #region Instance Properties
+
         /// <summary>
-        /// Gets or sets the background color of the control in current state.
+        /// Gets or sets the background color of the control in the current state.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
@@ -202,15 +227,15 @@ namespace KGySoft.WinForms.Controls
             get => base.BackColor;
             set
             {
-                if (ReadOnly || !Enabled)
-                    DisabledBackColor = value;
-                else
+                if (!ReadOnly && Enabled)
                     EnabledBackColor = value;
+                else
+                    DisabledBackColor = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets the foreground color of the control in current state.
+        /// Gets or sets the foreground color of the control in the current state.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
@@ -219,10 +244,101 @@ namespace KGySoft.WinForms.Controls
             get => base.ForeColor;
             set
             {
-                if (!Enabled)
-                    DisabledForeColor = value;
-                else
+                if (Enabled)
                     EnabledForeColor = value;
+                else
+                    DisabledForeColor = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/> and not <see cref="ReadOnly"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>If visual styles are enabled, <see cref="ComboBox.DropDownStyle"/> is <see cref="ComboBoxStyle.DropDownList"/>,
+        /// <see cref="ComboBox.FlatStyle"/> is <see cref="FlatStyle.System"/> or <see cref="FlatStyle.Standard"/>,
+        /// and <see cref="SystemDrawDropDownListMode"/> is <see langword="true"/>, then this property is ignored.</para>
+        /// </remarks>
+        [Category("AdvancedComboBox")]
+        [Description("Determines the background color when the control is Enabled and not ReadOnly. "
+            + "Has no effect with visual styles enabled when DropDownStyle is DropDownList, FlatStyle is System or Standard, and SystemDrawDropDownListMode is true.")]
+        public Color EnabledBackColor
+        {
+            get => !enabledBackColor.IsEmpty ? enabledBackColor : defaultEnabledBackColor;
+            set
+            {
+                if (enabledBackColor == value)
+                    return;
+                enabledBackColor = value;
+                ResetColors();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text color when the control is <see cref="Control.Enabled"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>If visual styles are enabled, <see cref="ComboBox.DropDownStyle"/> is <see cref="ComboBoxStyle.DropDownList"/>,
+        /// <see cref="ComboBox.FlatStyle"/> is <see cref="FlatStyle.System"/> or <see cref="FlatStyle.Standard"/>,
+        /// and <see cref="SystemDrawDropDownListMode"/> is <see langword="true"/>, then this property is ignored.</para>
+        /// </remarks>
+        [Category("AdvancedComboBox")]
+        [Description("Determines the text color when the control is Enabled. "
+            + "Has no effect with visual styles enabled when DropDownStyle is DropDownList, FlatStyle is System or Standard, and SystemDrawDropDownListMode is true.")]
+        public Color EnabledForeColor
+        {
+            get => !enabledForeColor.IsEmpty ? enabledForeColor
+                : ReadOnly ? defaultReadOnlyForeColor
+                : defaultEnabledForeColor;
+            set
+            {
+                if (enabledForeColor == value)
+                    return;
+                enabledForeColor = value;
+                ResetColors();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/> or is <see cref="ReadOnly"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>If visual styles are enabled, <see cref="ComboBox.DropDownStyle"/> is <see cref="ComboBoxStyle.DropDownList"/>,
+        /// <see cref="ComboBox.FlatStyle"/> is <see cref="FlatStyle.System"/> or <see cref="FlatStyle.Standard"/>,
+        /// and <see cref="SystemDrawDropDownListMode"/> is <see langword="true"/>, then this property is ignored.</para>
+        /// </remarks>
+        [Category("AdvancedComboBox")]
+        [Description("Determines the background when the control is not Enabled or is ReadOnly. "
+            + "Has no effect with visual styles enabled when DropDownStyle is DropDownList, FlatStyle is System or Standard, and SystemDrawDropDownListMode is true.")]
+        public Color DisabledBackColor
+        {
+            get => !disabledBackColor.IsEmpty ? disabledBackColor : defaultDisabledOrReadOnlyBackColor;
+            set
+            {
+                if (disabledBackColor == value)
+                    return;
+                disabledBackColor = value;
+                ResetColors();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text color when the control is not <see cref="Control.Enabled"/>.
+        /// </summary>
+        [Category("AdvancedComboBox")]
+        [Description("Determines the text color when the control is not Enabled.")]
+        public Color DisabledForeColor
+        {
+            get => !disabledForeColor.IsEmpty ? disabledForeColor
+                : VisualStyleHelper.RenderWithVisualStyles && SystemDrawDropDownListMode
+                    && DropDownStyle is ComboBoxStyle.DropDownList && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedDisabledDropDownListColor
+                : defaultDisabledForeColor;
+            set
+            {
+                if (disabledForeColor == value)
+                    return;
+                disabledForeColor = value;
+                ResetColors();
             }
         }
 
@@ -274,78 +390,14 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// ForeColor when control is Enabled.
+        /// Gets or sets whether the combo box should have the default system appearance <see cref="ComboBoxStyle.DropDownList"/> mode.
+        /// If this property is <see langword="false"/>, then drop-down list appearance will look similar to the <see cref="ComboBoxStyle.DropDown"/> mode
+        /// even on Windows Vista and newer platforms.
         /// </summary>
         [Category("AdvancedComboBox")]
-        [Description("ForeColor when control is Enabled.")]
-        [DefaultValue(typeof(Color), "WindowText")]
-        public Color EnabledForeColor
-        {
-            get => enabledForeColor;
-            set
-            {
-                enabledForeColor = value;
-                ResetColor();
-            }
-        }
-
-        /// <summary>
-        /// BackColor when control is Enabled and not ReadOnly.
-        /// </summary>
-        [Category("AdvancedComboBox")]
-        [Description("BackColor when control is Enabled and not ReadOnly.")]
-        [DefaultValue(typeof(Color), "Window")]
-        public Color EnabledBackColor
-        {
-            get => enabledBackColor;
-            set
-            {
-                enabledBackColor = value;
-                ResetColor();
-            }
-        }
-
-        /// <summary>
-        /// BackColor when control is not Enabled or is ReadOnly.
-        /// </summary>
-        [Category("AdvancedComboBox")]
-        [Description("BackColor when control is not Enabled or is ReadOnly.")]
-        [DefaultValue(typeof(Color), "Control")]
-        public Color DisabledBackColor
-        {
-            get => disabledBackColor;
-            set
-            {
-                disabledBackColor = value;
-                ResetColor();
-            }
-        }
-
-        /// <summary>
-        /// ForeColor when control is not Enabled.
-        /// </summary>
-        [Category("AdvancedComboBox")]
-        [Description("ForeColor when control is not Enabled.")]
-        [DefaultValue(typeof(Color), "ControlDarkDark")]
-        public Color DisabledForeColor
-        {
-            get => disabledForeColor;
-            set
-            {
-                disabledForeColor = value;
-                ResetColor();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets whether the enabled combo box should be drawn by the system in <see cref="ComboBoxStyle.DropDownList"/> mode.
-        /// If this property is <see langword="false"/>, then drop-down list appearance will be the same as in case of <see cref="ComboBoxStyle.DropDown"/> mode
-        /// even with Windows Vista/Windows 7 themes.
-        /// </summary>
-        [Category("AdvancedComboBox")]
-        [Description("Gets or sets whether the enabled combo box should be drawn by the system in DropDownList mode. " +
-                    "If this property is false, then drop-down list appearance will be the same as in case of DropDown mode " +
-                    "even with Windows Vista/Windows 7 themes.")]
+        [Description("Determines whether the combo box should have the default system appearance in DropDownList mode. " +
+                    "If this property is false, then drop-down list appearance will look similar to the DropDown mode " +
+                    "even on Windows Vista and newer platforms.")]
         [DefaultValue(true)]
         public bool SystemDrawDropDownListMode
         {
@@ -354,6 +406,7 @@ namespace KGySoft.WinForms.Controls
             {
                 systemDrawDropDownListMode = value;
                 AdjustDrawMode();
+                ResetColors(); // because DisabledForeColor depends on this property
             }
         }
 
@@ -393,11 +446,13 @@ namespace KGySoft.WinForms.Controls
 
                 readOnly = value;
                 if (Enabled)
-                    ResetColor();
+                    ResetColors();
 
                 OnReadOnlyChanged(EventArgs.Empty);
             }
         }
+
+        #endregion
 
         #endregion
 
@@ -413,6 +468,15 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Methods
+
+        #region Static Methods
+
+        private static Color GetDefaultTextColor(COMBOBOXSTYLESTATES state, Color defaultColor) =>
+            VisualStyleHelper.GetTextColor(VisualStyleHelper.ComboBoxTheme, (int)COMBOBOXPARTS.CP_READONLY, (int)state, defaultColor);
+
+        #endregion
+
+        #region Instance Methods
 
         #region Public Methods
 
@@ -477,7 +541,7 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            ResetColor();
+            ResetColors();
         }
 
         /// <inheritdoc />
@@ -509,6 +573,13 @@ namespace KGySoft.WinForms.Controls
             base.OnLeave(e);
             if (textOnFocus != Text)
                 OnTextChangedOnLeave(e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnSystemColorsChanged(EventArgs e)
+        {
+            base.OnSystemColorsChanged(e);
+            ResetColors(); // can be relevant when switching between high contrast and normal mode
         }
 
         /// <summary>
@@ -591,13 +662,7 @@ namespace KGySoft.WinForms.Controls
                     foreColor = SystemColors.HighlightText;
                     backColor = SystemColors.Highlight;
                 }
-                // Disabled item (Single mode ListBox item)
-                else if ((int)(e.State & DrawItemState.Disabled) != 0)
-                {
-                    foreColor = disabledForeColor;
-                    backColor = disabledBackColor;
-                }
-                // Non-selected list item
+                // Non-selected list item (with correct Enabled/Disabled/ReadOnly colors)
                 else
                 {
                     foreColor = ForeColor;
@@ -620,6 +685,7 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnDropDownStyleChanged(e);
             AdjustDrawMode();
+            ResetColors(); // because DisabledForeColor depends on this property
         }
 
         /// <summary>
@@ -636,6 +702,16 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 case Constants.WM_PAINT when !Enabled:
+                    // As there is no overridable OnFlatStyleChanged we detect FlatStyle change here.
+                    // This is required because DisabledForeColor depends on FlatStyle.
+                    var flatStyle = FlatStyle;
+                    if (lastFlatStyle != flatStyle)
+                    {
+                        lastFlatStyle = flatStyle;
+                        if (ResetColors())
+                            return; // invalidation occurred, so there will be a new paint message
+                    }
+
                     base.WndProc(ref m);
 
                     if (systemDrawDropDownListMode && (DropDownStyle == ComboBoxStyle.DropDownList || nativeEditorChild == null))
@@ -712,26 +788,42 @@ namespace KGySoft.WinForms.Controls
                 base.DrawMode = drawMode;
         }
 
-        private void ResetColor()
+        private bool ResetColors()
         {
-            // BackColor when control is Enabled and not ReadOnly
-            if (Enabled && !ReadOnly && base.BackColor != enabledBackColor)
-                base.BackColor = enabledBackColor;
+            bool enabled = Enabled;
+            Color baseBackColor = base.BackColor;
+            Color baseForeColor = base.ForeColor;
+            bool changed = false;
 
-            // BackColor when control is not Enabled or is ReadOnly
-            else if ((Enabled && ReadOnly || !Enabled) && base.BackColor != disabledBackColor)
-                base.BackColor = disabledBackColor;
+            if (enabled && !readOnly && EnabledBackColor is Color enabledBgColor && enabledBgColor != baseBackColor)
+            {
+                base.BackColor = enabledBgColor;
+                changed = true;
+            }
+            else if ((readOnly || !enabled) && DisabledBackColor is Color disabledBgColor && disabledBgColor != baseBackColor)
+            {
+                base.BackColor = disabledBgColor;
+                changed = true;
+            }
 
-            // ForeColor in Enabled state (also ReadOnly)
-            if (Enabled && base.ForeColor != enabledForeColor)
-                base.ForeColor = enabledForeColor;
+            if (enabled && EnabledForeColor is Color enabledFgColor && enabledFgColor != baseForeColor)
+            {
+                base.ForeColor = enabledFgColor;
+                changed = true;
+            }
+            else if (!enabled && DisabledForeColor is Color disabledFgColor && disabledFgColor != baseForeColor)
+            {
+                base.ForeColor = disabledFgColor;
+                changed = true;
+            }
 
-            // ForeColor in disabled state (ReadOnly state is indifferent)
-            else if (!Enabled && base.ForeColor != disabledForeColor)
-                base.ForeColor = disabledForeColor;
-
-            Invalidate();
+            return changed;
         }
+
+        private bool ShouldSerializeEnabledBackColor() => !enabledBackColor.IsEmpty;
+        private bool ShouldSerializeEnabledForeColor() => !enabledForeColor.IsEmpty;
+        private bool ShouldSerializeDisabledBackColor() => !disabledBackColor.IsEmpty;
+        private bool ShouldSerializeDisabledForeColor() => !disabledForeColor.IsEmpty;
 
         private void DrawDisabledTextBox(Graphics g, Rectangle bounds)
         {
@@ -770,7 +862,7 @@ namespace KGySoft.WinForms.Controls
                 VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)part, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, dropDownButtonBounds);
             }
             else
-                g.FillRectangle(disabledBackColor.GetBrush(), bounds);
+                g.FillRectangle(BackColor.GetBrush(), bounds);
 
             if (style == ComboBoxStyle.DropDownList)
             {
@@ -781,8 +873,10 @@ namespace KGySoft.WinForms.Controls
                 bounds.Width += 5;
             }
 
-            TextRenderer.DrawText(g, base.Text, Font, bounds, disabledForeColor, this.GetFormatFlags());
+            TextRenderer.DrawText(g, base.Text, Font, bounds, ForeColor, this.GetFormatFlags());
         }
+
+        #endregion
 
         #endregion
 
