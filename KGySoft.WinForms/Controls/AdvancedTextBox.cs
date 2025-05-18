@@ -245,21 +245,25 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc/>
         protected override void OnPaint(PaintEventArgs e)
         {
-            // Painting with disabled colors
-            if (!Enabled)
+            if (Enabled)
             {
-                e.Graphics.FillRectangle(BackColor.GetBrush(), ClientRectangle);
-
-                // TODO: Adjust rectangle size to DPI (this +5 width is good for 96 DPI but 120 DPI requires +6)
-                Rectangle rectangle = new Rectangle(new Point(-2, 1), new Size(ClientRectangle.Width + 5, ClientRectangle.Height - 2));
-                TextFormatFlags flags = this.GetFormatFlags();
-                if (!UseSystemPasswordChar)
-                    TextRenderer.DrawText(e.Graphics, Text.Substring(GetFirstCharIndexFromLine(GetFirstVisibleLine())), Font, rectangle, ForeColor, flags);
-                else
-                    TextRenderer.DrawText(e.Graphics, new string(PasswordChar, Text.Length), Font, rectangle, ForeColor, flags);
-            }
-            else
                 base.OnPaint(e);
+                return;
+            }
+
+            // Painting with disabled colors
+            var clientRect = ClientRectangle;
+            e.Graphics.FillRectangle(BackColor.GetBrush(), clientRect);
+
+            // TODO: Adjust rectangle size to DPI (this +5 width is good for 96 DPI but 120 DPI requires +6)
+            Rectangle textRect = Multiline
+                ? new Rectangle(clientRect.X + 1, clientRect.Y + 1, clientRect.Width - 1, clientRect.Height - 1)
+                : new Rectangle(new Point(-2, 1), new Size(clientRect.Width + 5, clientRect.Height - 2));
+            TextFormatFlags flags = this.GetFormatFlags();
+            if (!UseSystemPasswordChar)
+                TextRenderer.DrawText(e.Graphics, Text.Substring(GetFirstCharIndexFromLine(GetFirstVisibleLine())), Font, textRect, ForeColor, flags);
+            else
+                TextRenderer.DrawText(e.Graphics, new string(PasswordChar, Text.Length), Font, textRect, ForeColor, flags);
         }
 
         protected override bool IsInputKey(Keys keyData)
