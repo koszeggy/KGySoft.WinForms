@@ -1,13 +1,42 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ControlsTestBaseForm.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Drawing.Design;
 using System.Linq;
 using System.Windows.Forms;
+
+#endregion
 
 namespace KGySoft.WinForms.Test.Forms
 {
     internal partial class ControlsTestBaseForm : Form
     {
+        #region Constants
+
+        private const int WM_MOUSEACTIVATE = 0x0021;
+        private const int WM_LBUTTONDOWN = 0x201;
+
+        #endregion
+
+        #region Properties
+
         [DefaultValue("Click the items to see their properties")]
         [Editor("System.ComponentModel.Design.MultilineStringEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public string InstructionsText
@@ -16,42 +45,51 @@ namespace KGySoft.WinForms.Test.Forms
             set => lblInstuction.Text = value;
         }
 
+        #endregion
+
+        #region Constructors
+
         public ControlsTestBaseForm()
         {
             InitializeComponent();
         }
 
-        private void ControlsTestBaseForm_Load(object sender, EventArgs e)
-        {
-            Subscribe(this, true);
-        }
+        #endregion
 
-        private void Subscribe(Control parentControl, bool add)
+        #region Methods
+
+        #region Protected Methods
+
+        protected override void WndProc(ref Message m)
         {
-            foreach (Control control in parentControl.Controls)
+            static Control FindControl(Control parent, Point cursorPosition)
             {
-                if (control == grdProperties)
-                    continue;
+                if (!parent.HasChildren)
+                    return parent;
 
-                if (add)
-                    control.Click += new EventHandler(control_Click);
-                else
-                    control.Click -= control_Click;
+                Control? child = parent.GetChildAtPoint(parent.PointToClient(cursorPosition), GetChildAtPointSkip.Invisible);
+                if (child == null)
+                    return parent;
 
-                if (control.HasChildren)
-                    Subscribe(control, add);
+                return FindControl(child, cursorPosition);
             }
+
+            switch (m.Msg)
+            {
+                case WM_LBUTTONDOWN: // when clicking over the disabled pnlTestArea (so the form gets the mouse down event)
+                case WM_MOUSEACTIVATE when (m.LParam.ToInt32() >> 16) == WM_LBUTTONDOWN: // when clicking over a child control, even disabled ones
+                    Control child = FindControl(this, Cursor.Position);
+                    if (child != null && child != grdProperties && !grdProperties.Contains(child) && grdProperties.SelectedObject != child)
+                        grdProperties.SelectedObject = child;
+                    break;
+            }
+
+            base.WndProc(ref m);
         }
 
-        void control_Click(object sender, EventArgs e)
-        {
-            grdProperties.SelectedObject = sender;
-        }
+        #endregion
 
-        private void ControlsTestBaseForm_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            Subscribe(pnlTestArea, false);
-        }
+        #region Event handlers
 
         private void miResetValue_Click(object sender, EventArgs e)
         {
@@ -82,5 +120,9 @@ namespace KGySoft.WinForms.Test.Forms
             // Select the property again to refresh the grid
             grdProperties.SelectedGridItem.Select();
         }
+
+        #endregion
+
+        #endregion
     }
 }

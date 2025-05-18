@@ -107,8 +107,6 @@
             this.Name = "ControlsTestBaseForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "ControlsTestBaseForm";
-            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.ControlsTestBaseForm_FormClosing);
-            this.Load += new System.EventHandler(this.ControlsTestBaseForm_Load);
             this.pnlTestArea.ResumeLayout(false);
             this.pnlTestArea.PerformLayout();
             this.cmsGridMenu.ResumeLayout(false);
