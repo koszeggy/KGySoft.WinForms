@@ -218,10 +218,10 @@ namespace KGySoft.WinForms.Controls
         #region Instance Properties
 
         /// <summary>
-        /// Gets or sets the background color of the control in the current state.
+        /// Gets or sets the background color of the control in the current <see cref="Control.Enabled"/> and <see cref="ReadOnly"/> state.
         /// </summary>
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        [Browsable(false)]
+        [Description("The background color in the current Enabled/ReadOnly state. This property always sets EnabledBackColor or DisabledBackColor.\r\n\r\n"
+            + "Please note that in the WinForms designer a control never actually turns disabled.")]
         public override Color BackColor
         {
             get => base.BackColor;
@@ -237,8 +237,8 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the foreground color of the control in the current state.
         /// </summary>
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        [Browsable(false)]
+        [Description("The text color in the current Enabled state. This property always sets EnabledForeColor or DisabledForeColor.\r\n\r\n"
+            + "Please note that in the WinForms designer a control never actually turns disabled.")]
         public override Color ForeColor
         {
             get => base.ForeColor;
@@ -820,6 +820,8 @@ namespace KGySoft.WinForms.Controls
             return changed;
         }
 
+        private bool ShouldSerializeBackColor() => false;
+        private bool ShouldSerializeForeColor() => false;
         private bool ShouldSerializeEnabledBackColor() => !enabledBackColor.IsEmpty;
         private bool ShouldSerializeEnabledForeColor() => !enabledForeColor.IsEmpty;
         private bool ShouldSerializeDisabledBackColor() => !disabledBackColor.IsEmpty;
