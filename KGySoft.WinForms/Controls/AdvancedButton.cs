@@ -62,6 +62,8 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Fields
 
+        private static readonly Color defaultEnabledForeColor = SystemColors.ControlText;
+        private static readonly Color defaultDisabledForeColor = SystemColors.GrayText;
         private static readonly string nbsp = '\u00A0'.ToString(null);
         private static readonly Size referenceIconSize = new Size(16, 16);
 
@@ -70,6 +72,7 @@ namespace KGySoft.WinForms.Controls
         #region Instance Fields
 
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
+        private readonly FadingPainterInternal fadingPainter;
 
         private bool isElevated;
         private bool isImageUpToDate = true;
@@ -78,15 +81,20 @@ namespace KGySoft.WinForms.Controls
         private FlatStyle reportedFlatStyle = FlatStyle.Standard; // the flat style that is reported by the control (can be different when base does not support System)
         private FlatStyle lastAdapterType;
         private RenderingQuality textRenderingQuality;
-        private Color disabledForeColor;
+
+        // NOTE: Unlike in AdvancedTextBox and AdvancedComboBox, we never set the base colors, because we handle all non-System drawings in the reimplemented adapters.
+        // We only need to invoke OnBackColorChanged and OnForeColorChanged when the overriding colors are changed.
+        private Color enabledBackColor;
+        private Color enabledForeColor;
         private Color disabledBackColor;
+        private Color disabledForeColor;
+
         private ButtonBaseAdapter? adapter;
         private bool isHovered;
         private bool isMouseDown;
         private bool isPressed;
         private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
-        private FadingPainterInternal fadingPainter;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
         private Timer? defaultAnimationTimer;
         private bool isAlternativeDefaultImage;
@@ -261,60 +269,112 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets disabled fore color.
+        /// Gets or sets the background color of the control in the current <see cref="Control.Enabled"/> state.
         /// </summary>
-        [Category("AdvancedButton")]
-        [Description("Gets or sets disabled fore color.")]
-        public Color DisabledForeColor
+        [Description("The background color in the current Enabled state. This property always sets EnabledBackColor or DisabledBackColor.\r\n\r\n"
+            + "Please note that in the WinForms designer a control never actually turns disabled.")]
+        public override Color BackColor
         {
-            get => disabledForeColor != Color.Empty ? disabledForeColor : ControlPaint.DarkDark(BackColor);
+            get => Enabled ? EnabledBackColor : DisabledBackColor;
             set
             {
-                if (disabledForeColor == value)
-                    return;
-
-                disabledForeColor = value;
-                if (!Enabled)
-                    Invalidate();
+                if (Enabled)
+                    EnabledBackColor = value;
+                else
+                    DisabledBackColor = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets disabled back color.
+        /// Gets or sets the foreground color of the control in the current <see cref="Control.Enabled"/> state.
+        /// </summary>
+        [Description("The text color in the current Enabled state. This property always sets EnabledForeColor or DisabledForeColor.\r\n\r\n"
+            + "Please note that in the WinForms designer a control never actually turns disabled.")]
+        public override Color ForeColor
+        {
+            get => Enabled ? EnabledForeColor : DisabledForeColor;
+            set
+            {
+                if (Enabled)
+                    EnabledForeColor = value;
+                else
+                    DisabledForeColor = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/>.
         /// </summary>
         [Category("AdvancedButton")]
-        [Description("Gets or sets disabled back color.")]
+        [Description("Determines the background color when the control is Enabled.")]
+        public Color EnabledBackColor
+        {
+            get => !enabledBackColor.IsEmpty ? enabledBackColor : base.BackColor;
+            set
+            {
+                if (enabledBackColor == value)
+                    return;
+                enabledBackColor = value;
+                if (!enabledBackColor.IsEmpty)
+                    UseVisualStyleBackColor = false;
+                if (Enabled)
+                    OnBackColorChanged(EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text color when the control is <see cref="Control.Enabled"/>.
+        /// </summary>
+        [Category("AdvancedButton")]
+        [Description("Determines the text color when the control is Enabled.")]
+        public Color EnabledForeColor
+        {
+            get => !enabledForeColor.IsEmpty ? enabledForeColor : base.ForeColor;
+            set
+            {
+                if (enabledForeColor == value)
+                    return;
+                enabledForeColor = value;
+                if (Enabled)
+                    OnForeColorChanged(EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/>.
+        /// </summary>
+        [Category("AdvancedButton")]
+        [Description("Determines the disabled background color.")]
         public Color DisabledBackColor
         {
-            get => disabledBackColor != Color.Empty ? disabledBackColor : BackColor;
+            get => !disabledBackColor.IsEmpty ? disabledBackColor : base.BackColor;
             set
             {
                 if (disabledBackColor == value)
                     return;
-
                 disabledBackColor = value;
-                if (disabledBackColor != Color.Empty)
+                if (!disabledBackColor.IsEmpty)
                     UseVisualStyleBackColor = false;
-
                 if (!Enabled)
-                    Invalidate();
+                    OnBackColorChanged(EventArgs.Empty);
             }
         }
 
         /// <summary>
-        /// Gets or sets the background color of the control.
+        /// Gets or sets the text color when the control is not <see cref="Control.Enabled"/>.
         /// </summary>
-        /// <returns>
-        /// A <see cref="T:System.Drawing.Color"/> value representing the background color.
-        /// </returns>
-        public override Color BackColor
+        [Category("AdvancedButton")]
+        [Description("Determines the disabled text color.")]
+        public Color DisabledForeColor
         {
-            get => base.BackColor;
+            get => !disabledForeColor.IsEmpty ? disabledForeColor : defaultDisabledForeColor;
             set
             {
-                base.BackColor = value;
-                if (UseVisualStyleBackColor && disabledBackColor != Color.Empty)
-                    UseVisualStyleBackColor = false;
+                if (disabledForeColor == value)
+                    return;
+                disabledForeColor = value;
+                if (!Enabled)
+                    OnForeColorChanged(EventArgs.Empty);
             }
         }
 
@@ -398,7 +458,7 @@ namespace KGySoft.WinForms.Controls
         {
             base.TextImageRelation = TextImageRelation.ImageBeforeText;
             CheckStyles();
-            fadingPainter = new FadingPainterInternal(this, "BUTTON");
+            fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton);
         }
 
         #endregion
@@ -722,12 +782,17 @@ namespace KGySoft.WinForms.Controls
             int partId = (int)BUTTONPARTS.BP_PUSHBUTTON;
             int stateId = (int)GetSystemState();
             bool isEnabled = Enabled;
-            Color foreColor = !isEnabled ? DisabledForeColor : base.ForeColor;
-            if (lastFlatStyle == FlatStyle.Standard && isEnabled && VisualStyleHelper.RenderWithVisualStyles && foreColor == SystemColors.ControlText)
+            Color foreColor = ForeColor;
+            if (lastFlatStyle == FlatStyle.Standard && VisualStyleHelper.RenderWithVisualStyles
+                && (isEnabled && foreColor == defaultEnabledForeColor || !isEnabled && foreColor == defaultDisabledForeColor))
+            {
                 foreColor = VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, partId, stateId, foreColor);
+            }
+
+            //VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedDisabledColor
             return new ControlAppearanceState(partId, stateId)
             {
-                BackColor = isEnabled ? BackColor : DisabledBackColor,
+                BackColor = BackColor,
                 ForeColor = foreColor,
                 Enabled = Enabled,
                 Hovered = isHovered,
@@ -904,8 +969,13 @@ namespace KGySoft.WinForms.Controls
         }
 
         private void ResetSizeCache() => preferredSizeCache.Clear();
-        private bool ShouldSerializeDisabledBackColor() => disabledBackColor != Color.Empty;
-        private bool ShouldSerializeDisabledForeColor() => disabledForeColor != Color.Empty;
+
+        private bool ShouldSerializeBackColor() => false;
+        private bool ShouldSerializeForeColor() => false;
+        private bool ShouldSerializeEnabledBackColor() => !enabledBackColor.IsEmpty;
+        private bool ShouldSerializeEnabledForeColor() => !enabledForeColor.IsEmpty;
+        private bool ShouldSerializeDisabledBackColor() => !disabledBackColor.IsEmpty;
+        private bool ShouldSerializeDisabledForeColor() => !disabledForeColor.IsEmpty;
 
         private bool ShouldSerializeImage()
         {

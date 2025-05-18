@@ -83,8 +83,14 @@ namespace KGySoft.WinForms.Controls
         private RenderingQuality textRenderingQuality;
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private Size lastProposedSize;
-        private Color disabledForeColor;
+
+        // NOTE: Unlike in AdvancedTextBox and AdvancedComboBox, we never set the base colors, because we handle all non-System drawings in the reimplemented OnPaint.
+        // We only need to invoke OnBackColorChanged and OnForeColorChanged when the overriding colors are changed.
+        private Color enabledBackColor;
+        private Color enabledForeColor;
         private Color disabledBackColor;
+        private Color disabledForeColor;
+        
         private HyperlinkResolveMode resolveHyperlinks;
         private string? rawText;
         private bool fadingAnimationsEnabled = true;
@@ -150,7 +156,7 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
                     return;
 
                 if (!Enum<HyperlinkResolveMode>.IsDefined(value))
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 resolveHyperlinks = value;
                 ResetHyperlinkText();
@@ -296,40 +302,108 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         }
 
         /// <summary>
-        /// Gets or sets disabled fore color.
+        /// Gets or sets the background color of the control in the current <see cref="Control.Enabled"/> state.
         /// </summary>
-        [Category("AdvancedLabel")]
-        [Description("Gets or sets disabled fore color.")]
-        public Color DisabledForeColor
+        [Description("The background color in the current Enabled state. This property always sets EnabledBackColor or DisabledBackColor.\r\n\r\n"
+            + "Please note that in the WinForms designer a control never actually turns disabled.")]
+        public override Color BackColor
         {
-            get => disabledForeColor != Color.Empty ? disabledForeColor : ControlPaint.DarkDark(BackColor);
+            get => Enabled ? EnabledBackColor : DisabledBackColor;
             set
             {
-                if (disabledForeColor == value)
-                    return;
-
-                disabledForeColor = value;
-                if (!Enabled)
-                    Invalidate();
+                if (Enabled)
+                    EnabledBackColor = value;
+                else
+                    DisabledBackColor = value;
             }
         }
 
         /// <summary>
-        /// Gets or sets disabled back color.
+        /// Gets or sets the foreground color of the control in the current <see cref="Control.Enabled"/> state.
+        /// </summary>
+        [Description("The text color in the current Enabled state. This property always sets EnabledForeColor or DisabledForeColor.\r\n\r\n"
+            + "Please note that in the WinForms designer a control never actually turns disabled.")]
+        public override Color ForeColor
+        {
+            get => Enabled ? EnabledForeColor : DisabledForeColor;
+            set
+            {
+                if (Enabled)
+                    EnabledForeColor = value;
+                else
+                    DisabledForeColor = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/>.
         /// </summary>
         [Category("AdvancedLabel")]
-        [Description("Gets or sets disabled back color.")]
+        [Description("Determines the background color when the control is Enabled.")]
+        public Color EnabledBackColor
+        {
+            get => !enabledBackColor.IsEmpty ? enabledBackColor : base.BackColor;
+            set
+            {
+                if (enabledBackColor == value)
+                    return;
+                enabledBackColor = value;
+                if (Enabled)
+                    OnBackColorChanged(EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text color when the control is <see cref="Control.Enabled"/>.
+        /// </summary>
+        [Category("AdvancedLabel")]
+        [Description("Determines the text color when the control is Enabled.")]
+        public Color EnabledForeColor
+        {
+            get => !enabledForeColor.IsEmpty ? enabledForeColor : base.ForeColor;
+            set
+            {
+                if (enabledForeColor == value)
+                    return;
+                enabledForeColor = value;
+                if (Enabled)
+                    OnForeColorChanged(EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/>.
+        /// </summary>
+        [Category("AdvancedLabel")]
+        [Description("Determines the disabled background color.")]
         public Color DisabledBackColor
         {
-            get => disabledBackColor != Color.Empty ? disabledBackColor : BackColor;
+            get => !disabledBackColor.IsEmpty ? disabledBackColor : base.BackColor;
             set
             {
                 if (disabledBackColor == value)
                     return;
-
                 disabledBackColor = value;
                 if (!Enabled)
-                    Invalidate();
+                    OnBackColorChanged(EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text color when the control is not <see cref="Control.Enabled"/>.
+        /// </summary>
+        [Category("AdvancedLabel")]
+        [Description("Determines the disabled text color.")]
+        public Color DisabledForeColor
+        {
+            get => !disabledForeColor.IsEmpty ? disabledForeColor : SystemColors.GrayText;
+            set
+            {
+                if (disabledForeColor == value)
+                    return;
+                disabledForeColor = value;
+                if (!Enabled)
+                    OnForeColorChanged(EventArgs.Empty);
             }
         }
 
@@ -375,7 +449,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         public AdvancedLabel()
         {
             LinkClicked += AdvancedLabel_LinkClicked;
-            fadingPainter = new FadingPainterInternal(this, "BUTTON"); // using button timings for enabling/disabling
+            fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton); // using button timings for enabling/disabling
             CheckStyles();
         }
 
@@ -505,7 +579,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
-            // adjusting flatstyle if needed (in System mode this is in WndProc)
+            // adjusting FlatStyle if needed (in System mode this is in WndProc)
             if (base.FlatStyle != lastFlatStyle)
             {
                 lastFlatStyle = base.FlatStyle;
@@ -659,25 +733,15 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             }
         }
 
-        private bool ShouldSerializeText()
-        {
-            return resolveHyperlinks == HyperlinkResolveMode.None;
-        }
+        private bool ShouldSerializeText() => resolveHyperlinks == HyperlinkResolveMode.None;
+        private bool ShouldSerializeRawText() => !ShouldSerializeText();
 
-        private bool ShouldSerializeRawText()
-        {
-            return !ShouldSerializeText();
-        }
-
-        private bool ShouldSerializeDisabledBackColor()
-        {
-            return disabledBackColor != Color.Empty;
-        }
-
-        private bool ShouldSerializeDisabledForeColor()
-        {
-            return disabledForeColor != Color.Empty;
-        }
+        private bool ShouldSerializeBackColor() => false;
+        private bool ShouldSerializeForeColor() => false;
+        private bool ShouldSerializeEnabledBackColor() => !enabledBackColor.IsEmpty;
+        private bool ShouldSerializeEnabledForeColor() => !enabledForeColor.IsEmpty;
+        private bool ShouldSerializeDisabledBackColor() => !disabledBackColor.IsEmpty;
+        private bool ShouldSerializeDisabledForeColor() => !disabledForeColor.IsEmpty;
 
         private void ResetHyperlinkText()
         {
@@ -772,10 +836,11 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         private ControlAppearanceState GetAppearance()
         {
+            // PUSHBUTTON: Using button timings for enabled/disabled fading animations
             return new ControlAppearanceState((int)BUTTONPARTS.BP_PUSHBUTTON, (int)(Enabled ? PUSHBUTTONSTATES.PBS_NORMAL : PUSHBUTTONSTATES.PBS_DISABLED))
             {
-                BackColor = Enabled ? BackColor : DisabledBackColor,
-                ForeColor = Enabled ? ForeColor : DisabledForeColor,
+                BackColor = BackColor,
+                ForeColor = ForeColor,
                 Enabled = Enabled,
                 Text = base.Text,
                 Visible = Visible,
@@ -850,7 +915,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                     return;
 
                 if (!Enum<FadingOptions>.AllFlagsDefined(value))
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 fadingOptions = value;
 
@@ -877,7 +942,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                     return;
 
                 if (fadingAnimationDefaultSpeed < 0)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 fadingAnimationDefaultSpeed = value;
             }

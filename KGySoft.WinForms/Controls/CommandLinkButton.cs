@@ -94,8 +94,9 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Fields
 
-        private static readonly Color defaultForeColor = Color.FromArgb(21, 28, 85); // + focusedColor
-        private static readonly Color defaultDisabledColor = Color.FromArgb(126, 133, 156);
+        private static readonly Color defaultDisabledForeColor = SystemColors.GrayText;
+        private static readonly Color defaultEnabledThemedForeColor = Color.FromArgb(21, 28, 85);
+        private static readonly Color defaultDisabledThemedForeColor = Color.FromArgb(126, 133, 156);
         private static readonly Color defaultHoveredColor = Color.FromArgb(7, 74, 229);
         private static readonly Color defaultPressedColor = Color.FromArgb(6, 32, 115);
         private static readonly Color pressedBackColor = Color.FromArgb(96, 230, 230, 230);
@@ -144,14 +145,17 @@ namespace KGySoft.WinForms.Controls
         private Size cachedSecurityShieldImageSize;
         private Size defaultGlyphSize;
 
-        private Color foreColor;
+        // NOTE: Unlike in AdvancedTextBox and AdvancedComboBox, we never set the base colors, because we handle all non-System drawings in the reimplemented adapters.
+        // We only need to invoke OnBackColorChanged and OnForeColorChanged when the overriding colors are changed.
+        private Color enabledBackColor;
+        private Color enabledForeColor;
+        private Color disabledBackColor;
+        private Color disabledForeColor;
         private Color descriptionColor;
         private Color highlightTextColor;
         private Color highlightDescriptionColor;
         private Color pressedTextColor;
         private Color pressedDescriptionColor;
-        private Color disabledBackColor;
-        private Color disabledForeColor;
 
         private FlatStyle lastFlatStyle = FlatStyle.Standard; // the explicitly set or the detected flat style changed in base
         private FlatStyle reportedFlatStyle = FlatStyle.Standard; // the flat style that is reported by the control (can be different when base does not support System)
@@ -206,10 +210,10 @@ namespace KGySoft.WinForms.Controls
 
         private static Font DefaultNonThemedTextFont => defaultNonThemedTextFont ??= new Font(SystemFonts.DialogFont, FontStyle.Bold);
         private static bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && VisualStyleHelper.RenderWithVisualStyles;
-        private static Color ThemedForeColor => !IsNativeVisualStylesRenderingAvailable ? defaultForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL, defaultForeColor);
+        private static Color ThemedForeColor => !IsNativeVisualStylesRenderingAvailable ? defaultEnabledThemedForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL, defaultEnabledThemedForeColor);
         private static Color ThemedHoveredColor => !IsNativeVisualStylesRenderingAvailable ? defaultHoveredColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT, defaultHoveredColor);
         private static Color ThemedPressedColor => !IsNativeVisualStylesRenderingAvailable ? defaultPressedColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED, defaultPressedColor);
-        private static Color ThemedDisabledColor => !IsNativeVisualStylesRenderingAvailable ? defaultDisabledColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED, defaultDisabledColor);
+        private static Color ThemedDisabledColor => !IsNativeVisualStylesRenderingAvailable ? defaultDisabledThemedForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED, defaultDisabledThemedForeColor);
 
         #endregion
 
@@ -443,21 +447,112 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the text color of the command link button.
+        /// Gets or sets the background color of the control in the current <see cref="Control.Enabled"/> state.
         /// </summary>
-        [Description("Gets or sets the text color of the command link button. Has effect only when FlatStyle is not System.")]
+        [Description("The background color in the current Enabled state. This property always sets EnabledBackColor or DisabledBackColor.\r\n\r\n"
+            + "Please note that in the WinForms designer a control never actually turns disabled.")]
+        public override Color BackColor
+        {
+            get => Enabled ? EnabledBackColor : DisabledBackColor;
+            set
+            {
+                if (Enabled)
+                    EnabledBackColor = value;
+                else
+                    DisabledBackColor = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the foreground color of the control in the current <see cref="Control.Enabled"/> state.
+        /// </summary>
+        [Description("The text color in the current Enabled state. This property always sets EnabledForeColor or DisabledForeColor.\r\n\r\n"
+            + "Please note that in the WinForms designer a control never actually turns disabled.")]
         public override Color ForeColor
         {
-            get => !foreColor.IsEmpty ? foreColor
+            get => Enabled ? EnabledForeColor : DisabledForeColor;
+            set
+            {
+                if (Enabled)
+                    EnabledForeColor = value;
+                else
+                    DisabledForeColor = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/>.
+        /// </summary>
+        [Category("CommandLinkButton")]
+        [Description("Determines the background color when the control is Enabled.")]
+        public Color EnabledBackColor
+        {
+            get => !enabledBackColor.IsEmpty ? enabledBackColor : base.BackColor;
+            set
+            {
+                if (enabledBackColor == value)
+                    return;
+                enabledBackColor = value;
+                if (Enabled)
+                    OnBackColorChanged(EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text color when the control is <see cref="Control.Enabled"/>.
+        /// </summary>
+        [Category("CommandLinkButton")]
+        [Description("Determines the text color when the control is Enabled.")]
+        public Color EnabledForeColor
+        {
+            get => !enabledForeColor.IsEmpty ? enabledForeColor
                 : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedForeColor
                 : base.ForeColor;
             set
             {
-                if (foreColor == value)
+                if (enabledForeColor == value)
                     return;
+                enabledForeColor = value;
+                if (Enabled)
+                    OnForeColorChanged(EventArgs.Empty);
+            }
+        }
 
-                base.ForeColor = foreColor = value;
-                Invalidate(); // in Windows XP invalidating is explicitly needed
+        /// <summary>
+        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/>.
+        /// </summary>
+        [Category("CommandLinkButton")]
+        [Description("Determines the disabled background color. Has effect only when FlatStyle is Popup or Flat, or when visual styles are not enabled and FlatStyle is Standard.")]
+        public Color DisabledBackColor
+        {
+            get => !disabledBackColor.IsEmpty ? disabledBackColor : base.BackColor;
+            set
+            {
+                if (disabledBackColor == value)
+                    return;
+                disabledBackColor = value;
+                if (!Enabled)
+                    OnBackColorChanged(EventArgs.Empty);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the text color when the control is not <see cref="Control.Enabled"/>.
+        /// </summary>
+        [Category("CommandLinkButton")]
+        [Description("Determines the disabled text color. Has effect only when FlatStyle is not System.")]
+        public Color DisabledForeColor
+        {
+            get => !disabledForeColor.IsEmpty ? disabledForeColor
+                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedDisabledColor
+                : defaultDisabledForeColor;
+            set
+            {
+                if (disabledForeColor == value)
+                    return;
+                disabledForeColor = value;
+                if (!Enabled)
+                    OnForeColorChanged(EventArgs.Empty);
             }
         }
 
@@ -468,9 +563,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the description color of the command link button. Has effect only when FlatStyle is not System.")]
         public Color DescriptionColor
         {
-            get => !descriptionColor.IsEmpty ? descriptionColor
-                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedForeColor
-                : base.ForeColor;
+            get => !descriptionColor.IsEmpty ? descriptionColor : EnabledForeColor;
             set
             {
                 if (descriptionColor == value)
@@ -494,9 +587,9 @@ namespace KGySoft.WinForms.Controls
             {
                 if (highlightTextColor == value)
                     return;
-
                 highlightTextColor = value;
-                Invalidate();
+                if (isHovered)
+                    Invalidate();
             }
         }
 
@@ -507,16 +600,14 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the highlighted description color of the command link button. Has effect only when FlatStyle is not System.")]
         public Color HighlightDescriptionColor
         {
-            get => !highlightTextColor.IsEmpty ? highlightTextColor
-                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedHoveredColor
-                : base.ForeColor;
+            get => !highlightTextColor.IsEmpty ? highlightTextColor : HighlightTextColor;
             set
             {
                 if (highlightDescriptionColor == value)
                     return;
-
                 highlightDescriptionColor = value;
-                Invalidate();
+                if (isHovered)
+                    Invalidate();
             }
         }
 
@@ -534,9 +625,9 @@ namespace KGySoft.WinForms.Controls
             {
                 if (pressedTextColor == value)
                     return;
-
                 pressedTextColor = value;
-                Invalidate();
+                if (isPressed)
+                    Invalidate();
             }
         }
 
@@ -547,56 +638,13 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the pressed description color of the command link button. Has effect only when FlatStyle is not System.")]
         public Color PressedDescriptionColor
         {
-            get => !pressedTextColor.IsEmpty ? pressedTextColor
-                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedPressedColor
-                : base.ForeColor;
+            get => !pressedTextColor.IsEmpty ? pressedTextColor : PressedTextColor;
             set
             {
                 if (pressedDescriptionColor == value)
                     return;
-
                 pressedDescriptionColor = value;
-                Invalidate();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets disabled fore color.
-        /// </summary>
-        [Category("CommandLinkButton")]
-        [Description("Gets or sets disabled fore color. Has effect only when FlatStyle is not System.")]
-        public Color DisabledForeColor
-        {
-            get => !disabledForeColor.IsEmpty ? disabledForeColor
-                : VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedDisabledColor
-                : SystemColors.GrayText;
-            set
-            {
-                if (disabledForeColor == value)
-                    return;
-
-                disabledForeColor = value;
-                if (!Enabled)
-                    Invalidate();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets disabled back color.
-        /// </summary>
-        [Category("CommandLinkButton")]
-        [Description("Gets or sets disabled back color. Has effect only when FlatStyle is Popup or Flat, or when visual styles are not enabled and FlatStyle is Standard.")]
-        public Color DisabledBackColor
-        {
-            get => disabledBackColor != Color.Empty ? disabledBackColor : BackColor;
-            set
-            {
-                if (value == disabledBackColor)
-                    return;
-
-                disabledBackColor = value;
-                FreeBrushes();
-                if (!Enabled)
+                if (isPressed)
                     Invalidate();
             }
         }
@@ -806,14 +854,6 @@ namespace KGySoft.WinForms.Controls
                 if (pressedBrush != null)
                     return pressedBrush;
 
-                // classic style
-                if (base.FlatStyle == FlatStyle.Popup || (base.FlatStyle == FlatStyle.Standard && !VisualStyleHelper.RenderWithVisualStyles))
-                {
-                    // cannot just return SystemBrushes.Control or a cached brush because it will be disposed
-                    pressedBrush = new SolidBrush(SystemColors.Control);
-                    return pressedBrush;
-                }
-
                 // standard style
                 float p1, p2;
                 if (Height <= 6)
@@ -843,14 +883,6 @@ namespace KGySoft.WinForms.Controls
             {
                 if (hoveredBrush != null)
                     return hoveredBrush;
-
-                // classic style
-                if (base.FlatStyle == FlatStyle.Popup || (base.FlatStyle == FlatStyle.Standard && !VisualStyleHelper.RenderWithVisualStyles))
-                {
-                    // cannot just return SystemBrushes.Control or a cached brush because it will be disposed
-                    hoveredBrush = new SolidBrush(SystemColors.Control);
-                    return hoveredBrush;
-                }
 
                 // Standard mode
                 float p1, p2;
@@ -982,7 +1014,7 @@ namespace KGySoft.WinForms.Controls
             base.ImageAlign = lastImageAlign = ContentAlignment.TopLeft;
             textRenderingQuality = RenderingQuality.High;
             ResetTheme();
-            fadingPainter = new FadingPainterInternal(this, "BUTTON");
+            fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton);
         }
 
         #endregion
@@ -1152,37 +1184,8 @@ namespace KGySoft.WinForms.Controls
         {
             if (base.FlatStyle != FlatStyle.System && WindowsUtils.IsVistaOrLater)
             {
-                // Problem: When toggling Enabled, a GETTEXT arrives. The base.WndProc returns the Text only, so description flickers (invisible for a moment)
-                // Problem 2: When including description like below, the description part will be so as large as the text
-                // Fix: See CreateParams
-                //switch (m.Msg)
-                //{
-                //    case Constants.WM_GETTEXT:
-                //    case Constants.WM_GETTEXTLENGTH:
-                //        string text = Text;
-                //        int length = text.Length;
-                //        if (!String.IsNullOrEmpty(description))
-                //        {
-                //            length += Environment.NewLine.Length + description.Length;
-                //        }
-
-                //        m.Result = new IntPtr(length);
-                //        if (m.Msg == Constants.WM_GETTEXT)
-                //        {
-                //            if (!String.IsNullOrEmpty(description))
-                //            {
-                //                text += Environment.NewLine + description;
-                //            }
-
-                //            Marshal.Copy(text.ToCharArray(), 0, m.LParam, text.Length);
-                //        }
-
-                //        return;
-
-                //    default:
                 base.WndProc(ref m);
                 return;
-                //}
             }
 
             switch (m.Msg)
@@ -1218,7 +1221,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
-            // adjusting flatstyle if needed (in System mode this is in WndProc)
+            // adjusting FlatStyle if needed (in System mode this is in WndProc)
             bool invalidated = false;
             if (base.FlatStyle != lastFlatStyle)
             {
@@ -1418,11 +1421,10 @@ namespace KGySoft.WinForms.Controls
 
         private ControlAppearanceState GetAppearance()
         {
-            Color textColor = Enabled ? ForeColor : DisabledForeColor;
             return new ControlAppearanceState((int)BUTTONPARTS.BP_COMMANDLINK, (int)GetSystemState())
             {
-                BackColor = Enabled ? BackColor : DisabledBackColor,
-                ForeColor = textColor,
+                BackColor = BackColor,
+                ForeColor = ForeColor,
                 Enabled = Enabled,
                 Hovered = isHovered,
                 Pressed = isPressed,
@@ -1433,7 +1435,7 @@ namespace KGySoft.WinForms.Controls
                 {
                     FadingOptions = fadingOptions,
                     DescriptionText = Description,
-                    DescriptionColor = textColor
+                    DescriptionColor = Enabled ? DescriptionColor : DisabledForeColor
                 }
             };
         }
@@ -1552,31 +1554,28 @@ namespace KGySoft.WinForms.Controls
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             ControlAppearanceState state = e.State;
-            Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
+            Rectangle clientRectangle = ClientRectangle;
 
             // painting the background (underlying part of the parent control)
             if (Parent != null)
                 this.PaintTransparentBackground(e);
             else
-                e.Graphics.FillRectangle(state.BackColor.GetBrush(), backRect);
+                e.Graphics.FillRectangle(state.BackColor.GetBrush(), new Rectangle(clientRectangle.X - 1, clientRectangle.Y - 1, clientRectangle.Width + 1, clientRectangle.Height + 1));
 
             // Native rendering
             if (WindowsUtils.IsVistaOrLater)
-                VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, e.Graphics, state.SystemPartId, state.SystemStateId, ClientRectangle);
+                VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, e.Graphics, state.SystemPartId, state.SystemStateId, clientRectangle);
             else
             {
-                // Compatible rendering
+                // Compatible rendering (Windows XP - mimicking the Vista appearance)
                 if (state.Pressed)
                 {
-                    e.Graphics.FillRectangle(
-                        PressedBrush,
-                        new Rectangle(
-                            ClientRectangle.X, ClientRectangle.Y, ClientRectangle.Width - 1, ClientRectangle.Height - 1));
+                    e.Graphics.FillRectangle(PressedBrush, new Rectangle(clientRectangle.X, clientRectangle.Y, clientRectangle.Width - 1, clientRectangle.Height - 1));
                     e.Graphics.DrawPath(Color.FromArgb(128, 128, 128, 128).GetPen(), OuterBorder);
                 }
                 else if (state.Hovered)
                 {
-                    e.Graphics.FillRectangle(HoveredBrush, new Rectangle(1, 1, Width - 2, Height - 2));
+                    e.Graphics.FillRectangle(HoveredBrush, new Rectangle(1, 1, clientRectangle.Width - 2, clientRectangle.Height - 2));
                     e.Graphics.DrawPath(Color.FromArgb(128, 255, 255, 255).GetPen(), InnerBorder);
                     e.Graphics.DrawPath(Color.FromArgb(128, 160, 160, 160).GetPen(), OuterBorder);
                 }
@@ -1607,16 +1606,16 @@ namespace KGySoft.WinForms.Controls
 
             // Background
             Pen selectedFramePen = SystemPens.WindowFrame;
+            e.Graphics.FillRectangle(state.BackColor.GetBrush(), backRect);
+
             if (state.Pressed)
             {
-                e.Graphics.FillRectangle(PressedBrush, backRect);
                 e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
                 backRect.Inflate(-1, -1);
                 ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.SunkenOuter);
             }
             else if (state.Hovered)
             {
-                e.Graphics.FillRectangle(HoveredBrush, backRect);
                 ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.Raised);
 
                 // with classic state selection is drawn even if button is hovered
@@ -1625,7 +1624,6 @@ namespace KGySoft.WinForms.Controls
             }
             else // normal state
             {
-                e.Graphics.FillRectangle(state.BackColor.GetBrush(), backRect);
                 if (state.Enabled && (Focused || state.IsDefault))
                     e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
             }
@@ -1651,7 +1649,7 @@ namespace KGySoft.WinForms.Controls
                 if (borderWidth != 0)
                     borderWidth++;
 
-                if (FlatAppearance.MouseDownBackColor != Color.Empty)
+                if (!FlatAppearance.MouseDownBackColor.IsEmpty)
                     backColor = FlatAppearance.MouseDownBackColor;
                 else
                 {
@@ -1682,7 +1680,7 @@ namespace KGySoft.WinForms.Controls
                 if (borderWidth != 0 && Focused)
                     borderWidth++;
 
-                if (FlatAppearance.MouseOverBackColor != Color.Empty)
+                if (!FlatAppearance.MouseOverBackColor.IsEmpty)
                     backColor = FlatAppearance.MouseOverBackColor;
                 else
                 {
@@ -1715,7 +1713,7 @@ namespace KGySoft.WinForms.Controls
             if (borderWidth > 0)
             {
                 // pen is created locally because its width is variable and its color cannot be tracked by events
-                using Pen pen = new Pen(FlatAppearance.BorderColor == Color.Empty ? SystemColors.ControlText : FlatAppearance.BorderColor, borderWidth);
+                using Pen pen = new Pen(FlatAppearance.BorderColor.IsEmpty ? SystemColors.ControlText : FlatAppearance.BorderColor, borderWidth);
                 e.Graphics.DrawPath(pen, SelectionBorder);
             }
 
@@ -1848,8 +1846,6 @@ namespace KGySoft.WinForms.Controls
                 textColor = HighlightTextColor;
                 descColor = HighlightDescriptionColor;
             }
-            else if (!state.Enabled)
-                textColor = descColor = DisabledForeColor;
 
             var useTheming = UsesTheming;
             TextFormatFlags formatFlags = this.GetFormatFlags();
@@ -2004,16 +2000,19 @@ namespace KGySoft.WinForms.Controls
             cachedDefaultGlyphHovered = null;
         }
 
+        private bool ShouldSerializeBackColor() => false;
+        private bool ShouldSerializeForeColor() => false;
+        private bool ShouldSerializeEnabledBackColor() => !enabledBackColor.IsEmpty;
+        private bool ShouldSerializeEnabledForeColor() => !enabledForeColor.IsEmpty;
+        private bool ShouldSerializeDisabledBackColor() => !disabledBackColor.IsEmpty;
+        private bool ShouldSerializeDisabledForeColor() => !disabledForeColor.IsEmpty;
         private bool ShouldSerializeFont() => textFont != null;
         private bool ShouldSerializeDescriptionFont() => descriptionFont != null;
-        private bool ShouldSerializeForeColor() => foreColor != Color.Empty;
-        private bool ShouldSerializeDescriptionColor() => descriptionColor != Color.Empty;
-        private bool ShouldSerializeHighlightTextColor() => highlightTextColor != Color.Empty;
-        private bool ShouldSerializeHighlightDescriptionColor() => highlightDescriptionColor != Color.Empty;
-        private bool ShouldSerializePressedTextColor() => pressedTextColor != Color.Empty;
-        private bool ShouldSerializePressedDescriptionColor() => pressedDescriptionColor != Color.Empty;
-        private bool ShouldSerializeDisabledForeColor() => disabledForeColor != Color.Empty;
-        private bool ShouldSerializeDisabledBackColor() => disabledBackColor != Color.Empty;
+        private bool ShouldSerializeDescriptionColor() => !descriptionColor.IsEmpty;
+        private bool ShouldSerializeHighlightTextColor() => !highlightTextColor.IsEmpty;
+        private bool ShouldSerializeHighlightDescriptionColor() => !highlightDescriptionColor.IsEmpty;
+        private bool ShouldSerializePressedTextColor() => !pressedTextColor.IsEmpty;
+        private bool ShouldSerializePressedDescriptionColor() => !pressedDescriptionColor.IsEmpty;
 
         private void FreeBrushes()
         {

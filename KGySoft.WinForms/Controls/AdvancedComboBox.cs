@@ -211,7 +211,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Properties
 
-        private static Color ThemedDisabledDropDownListColor => VisualStyleHelper.RenderWithVisualStyles ? GetDefaultTextColor(COMBOBOXSTYLESTATES.CBXS_DISABLED, defaultDisabledForeColor) : defaultDisabledForeColor;
+        private static Color ThemedDisabledDropDownListColor => VisualStyleHelper.GetTextColor(VisualStyleHelper.ComboBoxTheme, (int)COMBOBOXPARTS.CP_READONLY, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, defaultDisabledForeColor);
 
         #endregion
 
@@ -468,15 +468,6 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Methods
-
-        #region Static Methods
-
-        private static Color GetDefaultTextColor(COMBOBOXSTYLESTATES state, Color defaultColor) =>
-            VisualStyleHelper.GetTextColor(VisualStyleHelper.ComboBoxTheme, (int)COMBOBOXPARTS.CP_READONLY, (int)state, defaultColor);
-
-        #endregion
-
-        #region Instance Methods
 
         #region Public Methods
 
@@ -877,8 +868,6 @@ namespace KGySoft.WinForms.Controls
 
             TextRenderer.DrawText(g, base.Text, Font, bounds, ForeColor, this.GetFormatFlags());
         }
-
-        #endregion
 
         #endregion
 
