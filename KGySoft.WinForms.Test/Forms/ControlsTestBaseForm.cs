@@ -93,7 +93,7 @@ namespace KGySoft.WinForms.Test.Forms
 
         private void miResetValue_Click(object sender, EventArgs e)
         {
-            var selectedObject = grdProperties.SelectedObject;
+            object selectedObject = grdProperties.SelectedObject;
             if (selectedObject == null)
                 return;
 
@@ -101,7 +101,7 @@ namespace KGySoft.WinForms.Test.Forms
             if (descriptor == null)
                 return;
 
-            if (descriptor.CanResetValue(selectedObject) == true)
+            if (descriptor.CanResetValue(selectedObject))
             {
                 descriptor.ResetValue(selectedObject);
                 return;
@@ -111,14 +111,12 @@ namespace KGySoft.WinForms.Test.Forms
                 return;
 
             // If the property is not resettable (e.g. Image), we set it to its default value
-            var defaultValue = descriptor.Attributes.OfType<DefaultValueAttribute>().FirstOrDefault() is DefaultValueAttribute d ? d.Value
+            object defaultValue = descriptor.Attributes.OfType<DefaultValueAttribute>().FirstOrDefault() is DefaultValueAttribute d ? d.Value
                 : descriptor.PropertyType.IsValueType ? Activator.CreateInstance(descriptor.PropertyType)
                 : null;
 
             descriptor.SetValue(selectedObject, defaultValue);
-
-            // Select the property again to refresh the grid
-            grdProperties.SelectedGridItem.Select();
+            grdProperties.Refresh();
         }
 
         #endregion
