@@ -62,7 +62,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Instance Fields
 
-        // NOTE: Unlike in ButtonBase descendants, we always set the base enabled back (and fore) colors (see ResetColors) because we don't have a reimplemented adapter here,
+        // NOTE: Unlike in ButtonBase descendants, we always set the base back and fore colors (see ResetColors) because we don't have a reimplemented adapter here,
         // so the base drawing routines still rely on them. Setting them even with default colors is not a problem because this control never inherits colors from the parent control.
         private Color enabledBackColor;
         private Color enabledForeColor;

@@ -45,10 +45,11 @@ namespace KGySoft.WinForms.WinApi
         internal const int SWP_FRAMECHANGED = 0x0020;  // The frame changed: send
         internal const int SWP_DRAWFRAME = SWP_FRAMECHANGED;
 
-        internal const int WM_DESTROY = 0x2;
+        internal const int WM_DESTROY = 2;
         internal const int WM_SIZE = 5;
-        internal const int WM_SETTEXT = 0xc;
+        internal const int WM_SETTEXT = 0x000C;
         internal const int WM_PAINT = 0x000F;
+        internal const int WM_ERASEBKGND = 0x0014;
         internal const int WM_SETICON = 0x0080;
         internal const int WM_NCCALCSIZE = 0x0083;
 #if NETFRAMEWORK || NETCOREAPP3_0

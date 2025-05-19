@@ -138,47 +138,36 @@ namespace KGySoft.WinForms
             bool wordBreak = false;
             ContentAlignment? contentAlignment = null;
             HorizontalAlignment? horizontalAlignment = null;
+            bool isRtl = c.RightToLeft == RightToLeft.Yes;
 
-            TextBoxBase textBox = c as TextBoxBase;
-            if (textBox != null)
+            switch (c)
             {
-                flags |= TextFormatFlags.ExpandTabs;
-                wordBreak = textBox.Multiline;
-
-                TextBox tb = textBox as TextBox;
-                if (tb != null)
-                    horizontalAlignment = tb.TextAlign;
-                else
-                {
-                    MaskedTextBox mtb = textBox as MaskedTextBox;
-                    if (mtb != null)
+                case TextBoxBase textBox:
+                    flags |= TextFormatFlags.ExpandTabs;
+                    wordBreak = textBox.Multiline;
+                    if (textBox is TextBox tb)
+                        horizontalAlignment = tb.TextAlign;
+                    else if (textBox is MaskedTextBox mtb)
                         horizontalAlignment = mtb.TextAlign;
-                }
-            }
-            else
-            {
-                ButtonBase button = c as ButtonBase;
-                if (button != null)
-                {
+
+                    break;
+                case ButtonBase button:
                     contentAlignment = button.TextAlign;
                     wordBreak = true;
                     showEllipsis = button.AutoEllipsis;
                     useMnemonic = button.UseMnemonic;
-                }
-                else
-                {
-                    Label label = c as Label;
-                    if (label != null)
-                    {
-                        contentAlignment = label.TextAlign;
-                        wordBreak = true;
-                        showEllipsis = label.AutoEllipsis;
-                        useMnemonic = label.UseMnemonic;
-                    }
-                }
+                    break;
+                case Label label:
+                    contentAlignment = label.TextAlign;
+                    wordBreak = true;
+                    showEllipsis = label.AutoEllipsis;
+                    useMnemonic = label.UseMnemonic;
+                    break;
+                case DateTimePicker dtp:
+                    contentAlignment = ContentAlignment.MiddleLeft;
+                    isRtl &= dtp.RightToLeftLayout;
+                    break;
             }
-
-            bool isRtl = c.RightToLeft == RightToLeft.Yes;
 
             if (contentAlignment.HasValue)
             {
@@ -215,9 +204,7 @@ namespace KGySoft.WinForms
                 }
             }
             else
-            {
                 flags |= isRtl ? TextFormatFlags.Right : TextFormatFlags.Left;
-            }
 
             if (wordBreak)
                 flags |= TextFormatFlags.WordBreak;
@@ -230,8 +217,7 @@ namespace KGySoft.WinForms
                 flags |= TextFormatFlags.RightToLeft;
             if (!useMnemonic)
                 flags |= TextFormatFlags.NoPrefix;
-            ISupportButtonAdapter adapter = c as ISupportButtonAdapter;
-            if (adapter != null && !adapter.ShowKeyboardCues || !c.ShowKeyboardCues())
+            if (c is ISupportButtonAdapter adapter && !adapter.ShowKeyboardCues || !c.ShowKeyboardCues())
                 flags |= TextFormatFlags.HidePrefix;
 
             return flags;
