@@ -242,7 +242,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets whetther translation of this control is enabled or not.
+        /// Gets or sets whether translation of this control is enabled or not.
         /// </summary>
         [Category("ucBase")]
         [Description("Gets or sets whether translation of this control is enabled or not.")]
@@ -301,7 +301,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Clearing the content of <see cref="MainControl"/>.
-        /// <remarks>Must override! When override, call base.Clear()!</remarks>
+        /// <remarks>Must override! When overridden, call base.Clear()!</remarks>
         /// </summary>
         public virtual void Clear()
         {
@@ -320,7 +320,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Restores the earlier saved value.
-        /// <remarks>Do not use this feature if the control is binded to a business object that can do this, too!</remarks>
+        /// <remarks>Do not use this feature if the control is bound to a business object that can do this, too!</remarks>
         /// </summary>
         public void RestoreSavedValue()
         {
@@ -361,36 +361,35 @@ namespace KGySoft.WinForms.Controls
             // BackColor when control is Enabled and not ReadOnly
             if (Enabled && MainControl.Enabled && !ReadOnly)
             {
-                if (!IsModified && MainControl.BackColor != colorEnabled)
-                    MainControl.BackColor = colorEnabled;
-                else if (IsModified && MainControl.BackColor != colorModified)
+                if (IsModified && MainControl.BackColor != colorModified)
                     MainControl.BackColor = colorModified;
+                else if (MainControl is ISupportsDisabledColor sdc && sdc.EnabledBackColor != colorEnabled)
+                    sdc.EnabledBackColor = colorEnabled;
+                else if (MainControl.BackColor != colorEnabled)
+                    MainControl.BackColor = colorEnabled;
             }
             // BackColor when control is not Enabled or is ReadOnly
             else if ((!Enabled || !MainControl.Enabled || ReadOnly))
             {
-                ISupportsDisabledColor dcc = MainControl as ISupportsDisabledColor;
-                if (dcc != null)
-                {
-                    if (dcc.DisabledBackColor != colorDisabled)
-                        dcc.DisabledBackColor = colorDisabled;
-                }
+                if (MainControl is ISupportsDisabledColor sdc && sdc.DisabledBackColor != colorDisabled)
+                    sdc.DisabledBackColor = colorDisabled;
                 else if (MainControl.BackColor != colorDisabled)
                     MainControl.BackColor = colorDisabled;
             }
 
             // TextColor in Enabled state (also ReadOnly)
-            if (Enabled && MainControl.Enabled && MainControl.ForeColor != colorControlTextEnabled)
-                MainControl.ForeColor = colorControlTextEnabled;
+            if (Enabled && MainControl.Enabled)
+            {
+                if (MainControl is ISupportsDisabledColor sdc && sdc.EnabledForeColor != colorControlTextEnabled)
+                    sdc.EnabledForeColor = colorControlTextEnabled;
+                else if (MainControl.ForeColor != colorControlTextEnabled)
+                    MainControl.ForeColor = colorControlTextEnabled;
+            }
             // TextColor in disabled state (ReadOnly state is indifferent)
             else if (!Enabled || !MainControl.Enabled)
             {
-                ISupportsDisabledColor dcc = MainControl as ISupportsDisabledColor;
-                if (dcc != null)
-                {
-                    if (dcc.DisabledForeColor != colorControlTextDisabled)
-                        dcc.DisabledForeColor = colorControlTextDisabled;
-                }
+                if (MainControl is ISupportsDisabledColor sdc && sdc.DisabledForeColor != colorControlTextDisabled)
+                    sdc.DisabledForeColor = colorControlTextDisabled;
                 else if (MainControl.ForeColor != colorControlTextDisabled)
                     MainControl.ForeColor = colorControlTextDisabled;
             }

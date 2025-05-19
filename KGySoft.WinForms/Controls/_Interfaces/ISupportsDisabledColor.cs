@@ -1,22 +1,53 @@
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ISupportsDisabledColor.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
 using System.Drawing;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents disabled color capability.
+    /// Represents separated enabled/disabled color capability.
     /// </summary>
     internal interface ISupportsDisabledColor
     {
-        // az összes implementációban empty legyen a default, a shouldserialize adja vissza, hogy a field nem empty,
-        // és ha a field empty, a disabledback = back, disabledfore = back.darkdark
+        #region Properties
+
         /// <summary>
-        /// Gets or sets disabled fore color.
+        /// Gets or sets enabled back color.
         /// </summary>
-        Color DisabledForeColor { get; set; }
+        Color EnabledBackColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets enabled fore color.
+        /// </summary>
+        Color EnabledForeColor { get; set; }
 
         /// <summary>
         /// Gets or sets disabled back color.
         /// </summary>
         Color DisabledBackColor { get; set; }
+
+        /// <summary>
+        /// Gets or sets disabled fore color.
+        /// </summary>
+        Color DisabledForeColor { get; set; }
+
+        #endregion
     }
 }
