@@ -1,20 +1,40 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: LanguageWinForms.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
 using System.Windows.Forms;
+
 using KGySoft.Libraries.Language;
+
+#endregion
 
 namespace KGySoft.WinForms
 {
-
     /// <summary>
-    /// A class that extends <see cref="Language"/> class with Winfows Forms routines
+    /// A class that extends <see cref="Language"/> class with Windows Forms routines.
     /// </summary>
-    [Obsolete]
+    [Obsolete("Do not use this class. See the details at the obsoleted Language class.")]
     public static class LanguageWinForms
     {
+        #region Methods
+
+        #region Public Methods
+
         /// <summary>
         /// Translates the control along with its children controls.
         /// </summary>
@@ -147,6 +167,10 @@ namespace KGySoft.WinForms
             return true;
         }
 
+        #endregion
+
+        #region Private Methods
+
         private static void TranslateMenuItems(ToolStripMenuItem menuItems)
         {
             if (Language.IsObjectLocalizable(menuItems))
@@ -166,5 +190,9 @@ namespace KGySoft.WinForms
                 }
             }
         }
+
+        #endregion
+
+        #endregion
     }
 }

@@ -1,17 +1,30 @@
-﻿// TODO: replace resource write/reader and remove Windows.Forms reference
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Globalization;
-using System.IO;
-using System.Resources;
-using System.ComponentModel;
-using System.Reflection;
-using System.Diagnostics;
-using KGySoft.Resources;
-using ResXResourceReader = System.Resources.ResXResourceReader;
-using ResXResourceWriter = System.Resources.ResXResourceWriter;
+﻿#region Copyright
 
+///////////////////////////////////////////////////////////////////////////////
+//  File: Language.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
+using System.ComponentModel;
+using System.Globalization;
+using System.Text;
+
+#endregion
+
+#pragma warning disable CS1574 // the documentation contains types that are not available in every target
+
+// ReSharper disable once CheckNamespace - compatibility with the old Language class
 namespace KGySoft.Libraries.Language
 {
     /// <summary>
@@ -19,17 +32,24 @@ namespace KGySoft.Libraries.Language
     /// Resources are stored in .resx files, which can be both read and created on-the-fly.
     /// Dynamic expansion of dictionaries are supported, including create new dictionaries for new languages.
     /// </summary>
+    /// <remarks>
+    /// <note type="warning">This class has been obsoleted. The way it worked was really non-professional:
+    /// instead of looking up real keys from resources, it took the original untranslated terms and used them as keys to look them up
+    /// in localized resources. To avoid conflicts, it supported so-called "distinction postfixes". Though it worked from
+    /// .resx files, the system-provided culture hierarchy was omitted, only neutral (non-specific) cultures were supported.
+    /// To overcome all these issues and still use .resx-based dynamically generated localizations use the
+    /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note>
+    /// </remarks>
     /// <seealso cref="Translate(string)"/>
     /// <seealso cref="Translate(string,object[])"/>
     /// <seealso cref="DistinctionSeparator"/>
-    /// <seealso cref="ActiveLanguage"/>
     /// <seealso cref="ICustomTranslated"/>
-    [Obsolete("Use Res instead")]
+    [Obsolete("Use DynamicResourceManager from KGySoft.CoreLibraries instead")]
     public static class Language
     {
         #region Constants
 
-        private const string UntranslatedPrefix = "!T!: ";
+        //private const string UntranslatedPrefix = "!T!: ";
 
         /// <summary>
         /// Indicates a distinction part of the string that will be removed on translation.
@@ -46,9 +66,11 @@ namespace KGySoft.Libraries.Language
         /// Translates the given invariant text to the currently set <see cref="ActiveLanguage"/>.
         /// </summary>
         /// <param name="text">The text to translate.</param>
+        /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possible distinction postfixes. Use the
+        /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
         public static string Translate(string text)
         {
-            if (text == null)
+            if (text == null!)
                 return String.Empty;
 
             if (text.Trim().Length == 0)
@@ -91,31 +113,37 @@ namespace KGySoft.Libraries.Language
         /// <param name="text">Invariant text with placeholders.</param>
         /// <param name="args">Arguments for placeholders.</param>
         /// <returns></returns>
+        /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possible distinction postfixes. Use the
+        /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
         public static string Translate(string text, params object[] args)
         {
             return String.Format(LanguageSettings.FormattingLanguage, Translate(text), args);
         }
 
-        ///// <summary>
-        ///// Translates the invariant text containing placeholders to the currently
-        ///// set <see cref="ActiveLanguage"/> using the given culture.
-        ///// </summary>
-        ///// <param name="formattingCulture">Culture for formatting arguments.</param>
-        ///// <param name="text">Invariant text with placeholders.</param>
-        ///// <param name="args">Arguments for placeholders.</param>
-        ///// <returns></returns>
-        //public static string Translate(CultureInfo formattingCulture, string text, params object[] args)
-        //{
-        //    return String.Format(formattingCulture, Translate(text), args);
-        //}
+        /// <summary>
+        /// Translates the invariant text containing placeholders to the currently
+        /// set <see cref="ActiveLanguage"/> using the given culture.
+        /// </summary>
+        /// <param name="formattingCulture">Culture for formatting arguments.</param>
+        /// <param name="text">Invariant text with placeholders.</param>
+        /// <param name="args">Arguments for placeholders.</param>
+        /// <returns></returns>
+        /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possible distinction postfixes. Use the
+        /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
+        public static string Translate(CultureInfo formattingCulture, string text, params object[] args)
+        {
+            return String.Format(formattingCulture, Translate(text), args);
+        }
 
-        ///// <summary>
-        ///// Saves the dictionary if <see cref="ActiveLanguage"/> is not the invariant culture.
-        ///// </summary>
-        //public static void SaveDictionary()
-        //{
-        //    SaveDictionary(Assembly.GetCallingAssembly());
-        //}
+        /// <summary>
+        /// Saves the dictionary if <see cref="ActiveLanguage"/> is not the invariant culture.
+        /// </summary>
+        /// <remarks><note type="warning">This method doesn't do anything anymore. Use the
+        /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
+        public static void SaveDictionary()
+        {
+            //SaveDictionary(Assembly.GetCallingAssembly());
+        }
 
         /// <summary>
         /// Makes translation enabled or disabled for given objects.
@@ -124,7 +152,7 @@ namespace KGySoft.Libraries.Language
         /// <param name="translationEnabled">True if translation is enabled for the object, otherwise, false.</param>
         /// <remarks>
         /// <note>
-        /// "Unmarking" objects is not neccessary because this method does not keep any reference of the marked objects.
+        /// "Unmarking" objects is not necessary because this method does not keep any reference of the marked objects.
         /// In other words, using this method does not disturb garbage collection and causes no memory leak.
         /// </note>
         /// </remarks>
@@ -137,9 +165,9 @@ namespace KGySoft.Libraries.Language
         }
 
         /// <summary>
-        /// Gets whether an object is localizable. By default an object is localizable.
+        /// Gets whether an object is localizable. By default, an object is localizable.
         /// This can be changed either by making a type not localizable with <see cref="LocalizableAttribute"/>
-        /// or by <see cref="MarkLocalizable"/> method wich works also at runtime.
+        /// or by <see cref="MarkLocalizable"/> method, which works also at runtime.
         /// </summary>
         public static bool IsObjectLocalizable(object obj)
         {
@@ -168,45 +196,45 @@ namespace KGySoft.Libraries.Language
             return TypeDescriptor.GetProperties(obj)[propertyName].IsLocalizable;
         }
 
-        ///// <summary>
-        ///// Formats captions:
-        ///// <para>- Capitalizes first letter</para>
-        ///// <para>- Inserts spaces before capitals except in case of multiple capitals</para>
-        ///// </summary>
-        ///// <example>
-        ///// For example:
-        ///// <para>"columnHeader" -> "Column Header"</para>
-        ///// <para>"KGySOFTLibraries" -> "KGy SOFT Libraries"</para>
-        ///// </example>
-        //public static string FormatCaption(string caption)
-        //{
-        //    if (string.IsNullOrEmpty(caption))
-        //        return string.Empty;
+        /// <summary>
+        /// Formats captions:
+        /// <para>- Capitalizes first letter</para>
+        /// <para>- Inserts spaces before capitals except in case of multiple capitals</para>
+        /// </summary>
+        /// <example>
+        /// For example:
+        /// <para>"columnHeader" -> "Column Header"</para>
+        /// <para>"KGySOFTLibraries" -> "KGy SOFT Libraries"</para>
+        /// </example>
+        public static string FormatCaption(string caption)
+        {
+            if (string.IsNullOrEmpty(caption))
+                return string.Empty;
 
-        //    StringBuilder ret = new StringBuilder(caption);
-        //    int i = 1;
-        //    while (i < ret.Length)
-        //    {
-        //        char prev = ret[i - 1];
-        //        char act = ret[i];
+            StringBuilder ret = new StringBuilder(caption);
+            int i = 1;
+            while (i < ret.Length)
+            {
+                char prev = ret[i - 1];
+                char act = ret[i];
 
-        //        if (Char.IsUpper(act) && Char.IsLower(prev))
-        //        {
-        //            ret.Insert(i, ' ');
-        //            i++;
-        //        }
-        //        i++;
-        //    }
-        //    // Capitalize first char
-        //    if (!Char.IsUpper(ret[0]))
-        //    {
-        //        ret.Insert(0, Char.ToUpperInvariant(ret[0]));
-        //        ret.Remove(1, 1);
-        //    }
-        //    //// Eliminate doubled spaces
-        //    //ret.Replace("  ", " ");
-        //    return ret.ToString();
-        //}
+                if (Char.IsUpper(act) && Char.IsLower(prev))
+                {
+                    ret.Insert(i, ' ');
+                    i++;
+                }
+                i++;
+            }
+            // Capitalize first char
+            if (!Char.IsUpper(ret[0]))
+            {
+                ret.Insert(0, Char.ToUpperInvariant(ret[0]));
+                ret.Remove(1, 1);
+            }
+            //// Eliminate doubled spaces
+            //ret.Replace("  ", " ");
+            return ret.ToString();
+        }
 
         #endregion
 

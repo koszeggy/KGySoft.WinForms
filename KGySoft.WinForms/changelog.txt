@@ -9,13 +9,27 @@
 ! v5.0.0:
 ~~~~~~~~~
 
-* Assembly changes:
-===================
-+ Targeting also .NET 3.0.
+! KGySoft.Libraries.Language namespace
+======================================
+! Every type in this namespace has been marked as obsolete. This is a legacy namespace from the old
+  KGySoft.Language.dll dependency. the old translation mechanism doesn't translate anything anymore, just removes
+  the possible distinction postfixes if present. To localize your application in a similar way with auto-generated
+  resources, use the DynamicResourceManager class from the KGySoft.CoreLibraries package. See more details:
+  DynamicResourceManager class: https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm
+  Application example: https://github.com/koszeggy/KGySoft.Drawing.Tools#localization
 
-! KGySoft.Language namespace - TODO
-============================
-! The namespace has been removed
+! Language class: It has been made obsolete. See the note above.
+! ICustomTranslated interface: It has been made obsolete. See the note above.
+
+! KGySoft.WinForms namespace:
+=============================
+! DataGridViewTextAndImageColumn class: Removed, it was already obsolete.
+! DataGridViewTextAndImageCell class: Removed, it was already obsolete.
+
+! KGySoft.WinForms.Controls namespace:
+======================================
+! CommandLinkButton class:
+  ! Different reported preferred size when FlatStyle is not System.
 
 
 ~~~~~~~~~
