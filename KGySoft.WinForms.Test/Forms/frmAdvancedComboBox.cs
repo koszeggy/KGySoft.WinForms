@@ -5,7 +5,6 @@
         public frmAdvancedComboBox()
         {
             InitializeComponent();
-            lblInstuction.SendToBack();
 
             var items = new[]
             {

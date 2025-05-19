@@ -62,6 +62,8 @@ namespace KGySoft.WinForms.Test.Forms
 
         protected override void WndProc(ref Message m)
         {
+            #region Local Methods
+
             static Control FindControl(Control parent, Point cursorPosition)
             {
                 if (!parent.HasChildren)
@@ -72,6 +74,14 @@ namespace KGySoft.WinForms.Test.Forms
                     return parent;
 
                 return FindControl(child, cursorPosition);
+            }
+
+            #endregion
+
+            if (DesignMode)
+            {
+                base.WndProc(ref m);
+                return;
             }
 
             switch (m.Msg)
@@ -85,6 +95,12 @@ namespace KGySoft.WinForms.Test.Forms
             }
 
             base.WndProc(ref m);
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            base.OnLoad(e);
+            lblInstuction.SendToBack();
         }
 
         #endregion

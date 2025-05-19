@@ -50,6 +50,7 @@ namespace KGySoft.WinForms.Test
                 td.Buttons.Add(new TaskDialogButton("CommandLinkButton"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedTextBox"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedComboBox"));
+                td.Buttons.Add(new TaskDialogButton("AdvancedDateTimePicker"));
                 td.Buttons.Add(new TaskDialogButton("FadingDemo", "Custom fading control demo"));
 
                 foreach (TaskDialogButton button in td.Buttons)

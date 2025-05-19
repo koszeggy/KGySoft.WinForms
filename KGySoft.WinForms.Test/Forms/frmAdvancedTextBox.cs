@@ -6,11 +6,9 @@ namespace KGySoft.WinForms.Test.Forms
 {
     internal partial class frmAdvancedTextBox : ControlsTestBaseForm
     {
-
         public frmAdvancedTextBox()
         {
             InitializeComponent();
-            lblInstuction.SendToBack();
 
             var bindingDecimalToText = new Binding(nameof(txtValue.Text), decimalTextBox1, nameof(decimalTextBox1.Value), true);
             bindingDecimalToText.Parse += (sender, e) =>
