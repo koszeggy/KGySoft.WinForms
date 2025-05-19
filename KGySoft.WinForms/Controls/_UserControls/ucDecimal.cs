@@ -1,6 +1,26 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ucDecimal.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Forms;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
@@ -8,20 +28,44 @@ namespace KGySoft.WinForms.Controls
     /// Unified user control version of <see cref="DecimalTextBox"/>.
     /// </summary>
     [ToolboxItem(true)]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucDecimal : ucTextBase
     {
+        #region Events
 
-        #region Kötelezően override-olt property-k
-
-        protected override Control MainControl
+        /// <summary>
+        /// Occurs when <see cref="Value"/> has been changed.
+        /// </summary>
+        [Category("ucDecimal")]
+        [Description("Occurs when Value has been changed.")]
+        public event EventHandler ValueChanged
         {
-            get { return decimalControl; }
+            add { decimalControl.ValueChanged += value; }
+            remove { decimalControl.ValueChanged -= value; }
         }
+
+        /// <summary>
+        /// Occurs when <see cref="Blank"/> has been changed.
+        /// </summary>
+        [Category("ucDecimal")]
+        [Description("Occurs when Blank has been changed.")]
+        public event EventHandler BlankChanged
+        {
+            add { decimalControl.BlankChanged += value; }
+            remove { decimalControl.BlankChanged -= value; }
+        }
+
+        #endregion
+
+        #region Properties
+
+        #region Public Properties
 
         /// <summary>
         /// Gets the inner <see cref="DecimalTextBox"/>.
         /// </summary>
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)] // ne állítsuk át, inkább vezessük ki, amit szükségessé válik
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         public new DecimalTextBox TextBox
         {
@@ -43,10 +87,6 @@ namespace KGySoft.WinForms.Controls
                     Text = (value == null ? null : value.ToString());
             }
         }
-
-        #endregion
-
-        #region ucDecimal property-k
 
         /// <summary>
         /// Gets or sets whether the <see cref="DecimalTextBox"/> is in blank state.
@@ -79,7 +119,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets whether Blank state can be enabled. " +
-            "When true, then the DecimalTextBox will be automatically blank if Value is out of range.")]
+                    "When true, then the DecimalTextBox will be automatically blank if Value is out of range.")]
         [DefaultValue(true)]
         public bool BlankEnabled
         {
@@ -131,7 +171,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets the the valid range of Value. " +
-            "If Value violates newly set range, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+                    "If Value violates newly set range, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
         [DefaultValue(typeof(DecimalRange), "Any")]
         public DecimalRange Range
         {
@@ -145,7 +185,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets accepted minimum Value. " +
-            "If Value violates newly set minimum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+                    "If Value violates newly set minimum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
         [DefaultValue(typeof(decimal), "0")]
         [RefreshProperties(RefreshProperties.All)]
         public decimal RangeMinValue
@@ -160,7 +200,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets accepted maximum Value. " +
-            "If Value violates newly set maximum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+                    "If Value violates newly set maximum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
         [DefaultValue(typeof(decimal), "0")]
         [RefreshProperties(RefreshProperties.All)]
         public decimal RangeMaxValue
@@ -221,33 +261,18 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region ucDecimal-ban definiált események
+        #region Protected Properties
 
-        /// <summary>
-        /// Occurs when <see cref="Value"/> has been changed.
-        /// </summary>
-        [Category("ucDecimal")]
-        [Description("Occurs when Value has been changed.")]
-        public event EventHandler ValueChanged
+        protected override Control MainControl
         {
-            add { decimalControl.ValueChanged += value; }
-            remove { decimalControl.ValueChanged -= value; }
-        }
-
-        /// <summary>
-        /// Occurs when <see cref="Blank"/> has been changed.
-        /// </summary>
-        [Category("ucDecimal")]
-        [Description("Occurs when Blank has been changed.")]
-        public event EventHandler BlankChanged
-        {
-            add { decimalControl.BlankChanged += value; }
-            remove { decimalControl.BlankChanged -= value; }
+            get { return decimalControl; }
         }
 
         #endregion
 
-        #region ucDecimal Konstruktor és metódusok
+        #endregion
+
+        #region Constructors
 
         /// <summary>
         /// Creates a new instance of <see cref="ucDecimal"/> control.
@@ -255,7 +280,7 @@ namespace KGySoft.WinForms.Controls
         public ucDecimal()
         {
             InitializeComponent();
-            // todooooo: ValueChanged-re ResetColor!!!!
+            // todooooo: ResetColor on ValueChanged!!!!
         }
 
         #endregion

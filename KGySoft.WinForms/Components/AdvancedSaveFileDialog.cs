@@ -1,16 +1,32 @@
-#region Used namespaces
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: AdvancedSaveFileDialog.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
+
 using KGySoft.WinForms.WinApi;
 
 #endregion
 
 namespace KGySoft.WinForms.Components
 {
-    // TODO: Ez is alkalmazkodjon a Windows verzióhoz, lásd Windows API Code Pack 1.1 CustomCommonFileDialogsDemo
+    // TODO: Use current Windows appearance, see Windows API Code Pack 1.1 CustomCommonFileDialogsDemo
     /// <summary>
     /// Windows save file dialog that can host a custom control and can raise events.
     /// </summary>
@@ -368,8 +384,8 @@ namespace KGySoft.WinForms.Components
                         // winapi combo:
                         //EncodingType = (int)User32.SendMessage(m_ComboHandle, Constants.CB_GETCURSEL, IntPtr.Zero, IntPtr.Zero);
 
-                        // saját control:
-                        //m_EncodingType = (EncodingType)_box.SelectedIndex;
+                        // WinForms combo:
+                        //m_EncodingType = (EncodingType)cmbEncoding.SelectedIndex;
                     }
                     // file type changed
                     else if (nmhdr.Code == Constants.CDN_TYPECHANGE)
@@ -409,11 +425,11 @@ namespace KGySoft.WinForms.Components
                         RECT fileComboRect = new RECT();
                         User32.GetWindowRect(fileComboWindow, ref fileComboRect);
 
-                        //// winapi combo:
+                        //// winapi control:
                         //FindScreenToClient(parent, ref aboveRect);
                         //User32.SetWindowPos(m_ComboHandle, IntPtr.Zero, 0, 0, aboveRect.Right - aboveRect.Left, aboveRect.Bottom - aboveRect.Top, Constants.SWP_NOMOVE);
 
-                        // saját control:
+                        // WinForms control:
                         CustomControl.Width = fileComboRect.Right - fileComboRect.Left;
                     }
                     break;

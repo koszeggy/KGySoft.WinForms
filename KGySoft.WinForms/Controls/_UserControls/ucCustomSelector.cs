@@ -1,18 +1,38 @@
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ucCustomSelector.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Linq;
 using System.Windows.Forms;
+
 using KGySoft.ComponentModel;
 using KGySoft.CoreLibraries;
 using KGySoft.Libraries.Language;
 using KGySoft.Reflection;
 using KGySoft.WinForms.Forms;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
@@ -22,6 +42,8 @@ namespace KGySoft.WinForms.Controls
     /// </summary>
     [DefaultBindingProperty("Value")]
     [ToolboxItem(true)]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucCustomSelector: ucCaptionedBase
     {
         #region Fields
@@ -1065,7 +1087,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Returns the text based on <see cref="Value"/>.
         /// In <see cref="ucCustomSelector"/>&#160;<see cref="GetTextByValue"/> returns only texts for special values
-        /// or when <see cref="DataSource"/> is not <see langword="null"/>&#160;and <paramref name="value"/> can be found in <see cref="ValueMember"/> of data source.
+        /// or when <see cref="DataSource"/> is not <see langword="null"/> and <paramref name="value"/> can be found in <see cref="ValueMember"/> of data source.
         /// Otherwise, returns with the ToString of <see cref="Value"/>.
         /// Override this method to calculate texts for other values.
         /// </summary>
@@ -1643,7 +1665,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="displayMember">Column name to display in the the combo box.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, the displayed column must contain string values.</param>
-        /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/>&#160;to omit distinction.</param>
+        /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the value column must have a data type that is convertible to signed integer type.</param>
@@ -1682,7 +1704,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
         /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
         /// <param name="translateNames">Indicates whether the displayed enum field names should be translated.</param>
-        /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/>&#160;to omit distinction.</param>
+        /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
@@ -1729,7 +1751,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="displayMember">Property name to display in the the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, <paramref name="displayMember"/> must be writable and should refer to a <see cref="string"/> property.</param>
-        /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/>&#160;to omit distinction.</param>
+        /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>

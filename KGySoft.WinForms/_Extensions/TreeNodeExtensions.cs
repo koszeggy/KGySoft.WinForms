@@ -1,8 +1,23 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: TreeNodeExtensions.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
 using System.Windows.Forms;
+
+#endregion
 
 namespace KGySoft.WinForms
 {
@@ -11,12 +26,16 @@ namespace KGySoft.WinForms
     /// </summary>
     public static class TreeNodeExtensions
     {
+        #region Methods
+
+        #region Public Methods
+
         /// <summary>
         /// Obtaining next node by depth search
         /// </summary>
         /// <param name="tn">Start node</param>
         /// <returns>Next node or null of next node not found.</returns>
-        public static TreeNode NextNodeDepth(this TreeNode tn)
+        public static TreeNode? NextNodeDepth(this TreeNode? tn)
         {
             return NextNodeDepth(tn, null);
         }
@@ -27,17 +46,21 @@ namespace KGySoft.WinForms
         /// <param name="tn">Start node</param>
         /// <param name="searchRoot">Root node above which searching is not performed</param>
         /// <returns>Next node or null of next node not found.</returns>
-        public static TreeNode NextNodeDepthFromRoot(this TreeNode tn, TreeNode searchRoot)
+        public static TreeNode? NextNodeDepthFromRoot(this TreeNode? tn, TreeNode? searchRoot)
         {
             return NextNodeDepth(tn, searchRoot);
         }
+
+        #endregion
+
+        #region Private Methods
 
         /// <summary>
         /// Obtaining next node by depth search
         /// </summary>
         /// <param name="tn">Current node</param>
         /// <param name="searchRoot">Search root node</param>
-        private static TreeNode NextNodeDepth(TreeNode tn, TreeNode searchRoot)
+        private static TreeNode? NextNodeDepth(TreeNode? tn, TreeNode? searchRoot)
         {
             if (tn == null)
                 return null;
@@ -60,5 +83,9 @@ namespace KGySoft.WinForms
             // no more elements
             return null;
         }
+
+        #endregion
+
+        #endregion
     }
 }

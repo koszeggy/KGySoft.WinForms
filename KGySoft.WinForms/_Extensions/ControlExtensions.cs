@@ -35,14 +35,14 @@ namespace KGySoft.WinForms
     {
         #region Constants
 
-        public const int NotSelectedValue = 0;
-        public const int AllSelectedValue = NotSelectedValue - 1;
-        public const int NoneSelectedValue = NotSelectedValue - 2;
-        public const int UndefinedValue = Int32.MaxValue;
-        public const string NotSelectedText = " (Not selected)";
-        public const string AllSelectedText = " (All)";
-        public const string NoneSelectedText = " (None)";
-        public const string UndefinedText = " (Undefined)";
+        [Obsolete("SelectionPlusItems-related functionality")]public const int NotSelectedValue = 0;
+        [Obsolete("SelectionPlusItems-related functionality")]public const int AllSelectedValue = NotSelectedValue - 1;
+        [Obsolete("SelectionPlusItems-related functionality")]public const int NoneSelectedValue = NotSelectedValue - 2;
+        [Obsolete("SelectionPlusItems-related functionality")]public const int UndefinedValue = Int32.MaxValue;
+        [Obsolete("SelectionPlusItems-related functionality")]public const string NotSelectedText = " (Not selected)";
+        [Obsolete("SelectionPlusItems-related functionality")]public const string AllSelectedText = " (All)";
+        [Obsolete("SelectionPlusItems-related functionality")]public const string NoneSelectedText = " (None)";
+        [Obsolete("SelectionPlusItems-related functionality")]public const string UndefinedText = " (Undefined)";
 
         #endregion
 
@@ -53,6 +53,7 @@ namespace KGySoft.WinForms
         /// <summary>
         /// Stores values of all controls derived from <see cref="ucBase"/> to mark modified controls.
         /// </summary>
+        [Obsolete("ucBase-related functionality.")]
         public static void StoreValues(this Control control)
         {
             if (control is ucBase)
@@ -66,6 +67,7 @@ namespace KGySoft.WinForms
         /// <summary>
         /// Clears stored values of all controls derived from <see cref="ucBase"/> to unmark modified controls.
         /// </summary>
+        [Obsolete("ucBase-related functionality.")]
         public static void ClearStoredValues(this Control control)
         {
             if (control is ucBase)
@@ -231,7 +233,7 @@ namespace KGySoft.WinForms
         public static void SetDoubleBuffered(this Control control, bool useDoubleBuffering)
         {
             if (control == null)
-                throw new ArgumentNullException("control");
+                throw new ArgumentNullException(nameof(control));
             Accessors.SetDoubleBuffered(control, useDoubleBuffering);
         }
 
@@ -244,7 +246,7 @@ namespace KGySoft.WinForms
         public static void SetStyle(this Control control, ControlStyles flags, bool value)
         {
             if (control == null)
-                throw new ArgumentNullException("control");
+                throw new ArgumentNullException(nameof(control));
             Accessors.SetStyle(control, flags, value);
         }
 

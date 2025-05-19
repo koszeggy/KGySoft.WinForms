@@ -105,7 +105,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Occurs when a link is clicked.
-        /// To handle clicked links automatically, set <see cref="AutoHandleUrls"/>&#160;<see langword="true"/>, and if this event is subsribed, set <see cref="HyperlinkClickedEventArgs.Handled"/>&#160;<see langword="false"/>&#160;in the event handler.
+        /// To handle clicked links automatically, set <see cref="AutoHandleUrls"/>&#160;<see langword="true"/>, and if this event is subscribed, set <see cref="HyperlinkClickedEventArgs.Handled"/> <see langword="false"/> in the event handler.
         /// </summary>
         [Description("Occurs when a link is clicked. To handle clicked links automatically, set AutoHandleUrls true, and if this event is subsribed, set HyperlinkClickedEventArgs.Handled false in the event handler.")]
         [Category("AdvancedLabel")]
@@ -124,7 +124,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether clicked links should be handled automatically or when <see cref="HyperlinkClickedEventArgs.Handled"/> is set to <see langword="false"/>.
-        /// <note type="caution">Caution: Setting this property to <see langword="true"/>&#160;may cause security issues. Use only in secure circumstances!</note>
+        /// <note type="caution">Caution: Setting this property to <see langword="true"/> may cause security issues. Use only in secure circumstances!</note>
         /// </summary>
         [Category("AdvancedLabel")]
         [DefaultValue(false)]

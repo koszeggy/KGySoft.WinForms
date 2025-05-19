@@ -1,8 +1,26 @@
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: RelevantControlValues.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+using System;
+
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// <see cref="ucCustomSelector.RelevantControlValue"/>
     /// </summary>
+    [Obsolete("This type is used by the obsoleted ucCustomSelector and is not recommended to use it anymore.")]
     public enum RelevantControlValues
     {
         Value,

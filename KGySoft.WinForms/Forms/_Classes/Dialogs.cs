@@ -1,6 +1,26 @@
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: Dialogs.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
 using System;
 using System.Windows.Forms;
+
 using KGySoft.Libraries.Language;
+
+#endregion
 
 namespace KGySoft.WinForms.Forms
 {
@@ -9,9 +29,12 @@ namespace KGySoft.WinForms.Forms
     /// </summary>
     public static class Dialogs
     {
+        #region Properties
+
         /// <summary>
         /// Gets or sets whether the <see cref="AdvancedMessageDialog"/> is used for showing messages.
         /// </summary>
+        [Obsolete("AdvancedMessageDialog has been obsoleted, it's not recommended to use it anymore.")]
         public static bool UseAdvancedDialogs { get; set; }
 
         // TODO: remove this and apply overloads
@@ -20,7 +43,9 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         public static IWin32Window DialogsOwner { get; set; }
 
-        #region Message dialog routines
+        #endregion
+
+        #region Methods
 
         /// <summary>
         /// Information message
@@ -214,10 +239,6 @@ namespace KGySoft.WinForms.Forms
                 }
             }
         }
-
-        #endregion
-
-        #region Input dialog routines
 
         /// <summary>
         /// Displays an input dialog.

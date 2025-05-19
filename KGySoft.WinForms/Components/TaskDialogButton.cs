@@ -69,7 +69,7 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Occurs when the task dialog button is clicked.
         /// If not subscribed, <see cref="TaskDialog"/> will be closed when the button is clicked.
-        /// Otherwise, <see cref="HandledEventArgs.Handled"/> property should be set to <see langword="false"/>&#160;to let the system close the window.
+        /// Otherwise, <see cref="HandledEventArgs.Handled"/> property should be set to <see langword="false"/> to let the system close the window.
         /// </summary>
         public event EventHandler<HandledEventArgs> Click
         {

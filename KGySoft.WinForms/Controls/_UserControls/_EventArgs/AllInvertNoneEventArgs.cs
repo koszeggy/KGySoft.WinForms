@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: SizeFExtensions.cs
+//  File: AllInvertNoneEventArgs.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -16,19 +16,34 @@
 #region Usings
 
 using System;
-using System.Drawing;
 
 #endregion
 
-namespace KGySoft.WinForms
+namespace KGySoft.WinForms.Controls
 {
-    internal static class SizeFExtensions
+    [Obsolete("This class belongs to the obsoleted ucAllInvertNone class")]
+    public class AllInvertNoneEventArgs : EventArgs
     {
-        #region Methods
+        #region Fields
 
-        internal static Size Ceiling(this SizeF sizeF)
+        InvertButtonTypes buttonType;
+
+        #endregion
+
+        #region Properties
+
+        public InvertButtonTypes ButtonType
         {
-            return new Size((int)Math.Ceiling(sizeF.Width), (int)Math.Ceiling(sizeF.Height));
+            get { return buttonType; }
+        }
+
+        #endregion
+
+        #region Constructors
+
+        public AllInvertNoneEventArgs(InvertButtonTypes buttonType)
+        {
+            this.buttonType = buttonType;
         }
 
         #endregion

@@ -25,11 +25,17 @@
 =============================
 ! DataGridViewTextAndImageColumn class: Removed, it was already obsolete.
 ! DataGridViewTextAndImageCell class: Removed, it was already obsolete.
++ New WinFormsCommandBindingsCollection class
 
 ! KGySoft.WinForms.Controls namespace:
 ======================================
 ! CommandLinkButton class:
   ! Different reported preferred size when FlatStyle is not System.
+
++ KGySoft.WinForms.Forms namespace:
+===================================
++ BaseForm class:
+  + New CommandBindings property
 
 
 ~~~~~~~~~
@@ -52,6 +58,8 @@
   ! KGySoft.WinForms.Forms
 ! Completely removed types:
   ! ComboUtils (it was obsolete already in v3.5.2.0)
+  ! WaitForm
+  ! ...
 
 ! KGySoft.Controls.Interop namespace:
 =====================================

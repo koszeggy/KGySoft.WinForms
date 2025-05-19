@@ -1,0 +1,112 @@
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: WinFormsPropertyCommandStateUpdater.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
+using System.ComponentModel;
+using System.Linq;
+using System.Reflection;
+using System.Windows.Forms;
+
+using KGySoft.Reflection;
+
+#endregion
+
+// ReSharper disable once CheckNamespace
+namespace KGySoft.ComponentModel
+{
+    /// <summary>
+    /// Provides special handling for ToolTipText: tries to find the associated <see cref="ToolTip"/> component.
+    /// </summary>
+    internal class WinFormsPropertyCommandStateUpdater : ICommandStateUpdater
+    {
+        #region Constants
+
+        private const string ToolTipTextProperty = "ToolTipText";
+
+        #endregion
+
+        #region Fields
+
+        private static readonly WinFormsPropertyCommandStateUpdater instance = new WinFormsPropertyCommandStateUpdater();
+
+        #endregion
+
+        #region Properties
+
+        internal static ICommandStateUpdater Updater => instance;
+
+        #endregion
+
+        #region Constructors
+
+        private WinFormsPropertyCommandStateUpdater()
+        {
+        }
+
+        #endregion
+
+        #region Methods
+
+        #region Static Methods
+
+        private static ToolTip? GetToolTip(Control ctrl)
+        {
+            for (Control c = ctrl; c != null; c = c.Parent)
+            {
+                var containerFields = c.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(f => typeof(IContainer).IsAssignableFrom(f.FieldType));
+                foreach (var containerField in containerFields)
+                {
+                    var container = (IContainer?)Reflector.GetField(c, containerField);
+                    var toolTip = container?.Components?.OfType<ToolTip>().FirstOrDefault();
+                    if (toolTip != null)
+                        return toolTip;
+                }
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        #region Instance Methods
+
+        #region Public Methods
+
+        public bool TryUpdateState(object commandSource, string stateName, object? value)
+        {
+            if (stateName != ToolTipTextProperty || value is not string text || commandSource is not Control control)
+                return false;
+
+            GetToolTip(control)?.SetToolTip(control, text);
+            return true;
+        }
+
+        #endregion
+
+        #region Explicitly Implemented Interface Methods
+
+        void IDisposable.Dispose()
+        {
+        }
+
+        #endregion
+
+        #endregion
+
+        #endregion
+    }
+}

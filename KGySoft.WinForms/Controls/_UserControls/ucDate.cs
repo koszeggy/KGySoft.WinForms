@@ -1,35 +1,47 @@
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ucDate.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Forms;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
-    // TODO: ha a színek nem látszanak/m?ködnek, az ?ssel konform módon megoldani
-
     /// <summary>
     /// Unified user control version of <see cref="AdvancedDateTimePicker"/>.
     /// </summary>
     [DefaultBindingProperty("Value")]
-    [ToolboxItem(true)]    
-    public partial class ucDate: ucCaptionedBase
+    [ToolboxItem(true)]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
+    public partial class ucDate : ucCaptionedBase
     {
-        /// <summary>
-        /// Creates a new <see cref="ucDate"/> instance.
-        /// </summary>
-        public ucDate()
-        {
-            InitializeComponent();
-            this.dtpDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpDate.EnabledChanged += new System.EventHandler(this.dtpDate_EnabledChanged);
-            this.dtpDate.ValueChanged += new System.EventHandler(this.dtpDate_ValueChanged);
-            dtpDate.Value = DateTime.Now;
-        }
+        #region Properties
+
+        #region Public Properties
 
         /// <summary>
         /// Gets or sets the date/time value assigned to the control.
         /// </summary>
         [Bindable(BindableSupport.Default, BindingDirection.TwoWay)]
-        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)] // ne mentse a mai dátumot mindig a designerbe
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         public DateTime Value
         {
@@ -109,15 +121,6 @@ namespace KGySoft.WinForms.Controls
             get { return dtpDate; }
         }
 
-        public override void Clear()
-        {
-            if (dtpDate.ShowCheckBox)
-                dtpDate.Checked = false;
-
-            dtpDate.Value = System.DateTime.Now;
-            ResetColor();
-        }
-
         /// <summary>
         /// Gets or sets whether the control is read-only.
         /// </summary>
@@ -149,6 +152,10 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        #endregion
+
+        #region Protected Properties
+
         /// <summary>
         /// Returns the main inner control of the user control.
         /// </summary>
@@ -156,6 +163,43 @@ namespace KGySoft.WinForms.Controls
         {
             get { return dtpDate; }
         }
+
+        #endregion
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates a new <see cref="ucDate"/> instance.
+        /// </summary>
+        public ucDate()
+        {
+            InitializeComponent();
+            this.dtpDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
+            this.dtpDate.EnabledChanged += new System.EventHandler(this.dtpDate_EnabledChanged);
+            this.dtpDate.ValueChanged += new System.EventHandler(this.dtpDate_ValueChanged);
+            dtpDate.Value = DateTime.Now;
+        }
+
+        #endregion
+
+        #region Methods
+
+        #region Public Methods
+
+        public override void Clear()
+        {
+            if (dtpDate.ShowCheckBox)
+                dtpDate.Checked = false;
+
+            dtpDate.Value = System.DateTime.Now;
+            ResetColor();
+        }
+
+        #endregion
+
+        #region Event handlers
 
         private void dtpDate_EnabledChanged(object sender, EventArgs e)
         {
@@ -166,5 +210,9 @@ namespace KGySoft.WinForms.Controls
         {
             ResetColor();
         }
+
+        #endregion
+
+        #endregion
     }
 }

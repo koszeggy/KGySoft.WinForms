@@ -1,12 +1,31 @@
-// If you want to see ucCaptionedBase derived classes in design time, then remove comment in next line:
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ucCaptionedBase.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
+
 using KGySoft.CoreLibraries;
 using KGySoft.Libraries.Language;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
@@ -14,8 +33,23 @@ namespace KGySoft.WinForms.Controls
     /// Base class of user controls that may have captions (on a groupbox or label)
     /// and content can be disabled by a checkbox (if <see cref="Orientation"/> is groupboxed).
     /// </summary>
-    public partial class ucCaptionedBase: ucBase
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
+    public partial class ucCaptionedBase : ucBase
     {
+        #region Enumerations
+
+        public enum Orientation
+        {
+            GroupBoxed,
+            CaptionLeft,
+            CaptionRight,
+            CaptionTop,
+            CaptionBottom,
+            NoCaption
+        }
+
+        #endregion
 
         #region Fields
 
@@ -27,7 +61,26 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Events
+
+        /// <summary>
+        /// Occurs when the value of the ckeckbox (that can be enabled by <see cref="ShowCheckBox"/> when <see cref="Orientation"/> is GroupBoxed) has been changed.
+        /// </summary>
+        [
+            Category("ucCaptionedBase"),
+            Description("Occurs when the value of the ckeckbox (that can be enabled by ShowCheckBox when Orientation is GroupBoxed) has been changed.")
+        ]
+        public event EventHandler CheckedChanged
+        {
+            add { chkCheckBox.CheckedChanged += value; }
+            remove { chkCheckBox.CheckedChanged -= value; }
+        }
+
+        #endregion
+
         #region Properties
+
+        #region Public Properties
 
         /// <summary>
         /// The inner GroupBox.
@@ -237,6 +290,10 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        #endregion
+
+        #region Internal Properties
+
         internal virtual Panel ContentPanel
         {
             get { return pnlContent; }
@@ -244,24 +301,9 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region Events
-
-        /// <summary>
-        /// Occurs when the value of the ckeckbox (that can be enabled by <see cref="ShowCheckBox"/> when <see cref="Orientation"/> is GroupBoxed) has been changed.
-        /// </summary>
-        [
-            Category("ucCaptionedBase"),
-            Description("Occurs when the value of the ckeckbox (that can be enabled by ShowCheckBox when Orientation is GroupBoxed) has been changed.")
-        ]
-        public event EventHandler CheckedChanged
-        {
-            add { chkCheckBox.CheckedChanged += value; }
-            remove { chkCheckBox.CheckedChanged -= value; }
-        }
-
         #endregion
 
-        #region Constructor, methods
+        #region Constructors
 
         public ucCaptionedBase()
         {
@@ -276,7 +318,13 @@ namespace KGySoft.WinForms.Controls
             Language.MarkLocalizable(false, lblCaption, groupBox, pnlContent);
         }
 
-        /// <summary> 
+        #endregion
+
+        #region Methods
+
+        #region Protected Methods
+
+        /// <summary>
         /// Clean up any resources being used.
         /// </summary>
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
@@ -290,6 +338,29 @@ namespace KGySoft.WinForms.Controls
             chkCheckBox.CheckedChanged -= chkCheckBox_CheckedChanged;
             base.Dispose(disposing);
         }
+
+        /// <summary>
+        /// Translating content in a way which prevents storing Caption text with leading spaces if check box is visible
+        /// </summary>
+        protected override void TranslateContent(ref bool translationFinished)
+        {
+            RefreshCaption(Language.Translate(Caption));
+
+            // translating children of pnlContent
+            if (pnlContent.HasChildren)
+            {
+                foreach (Control control in pnlContent.Controls)
+                {
+                    LanguageWinForms.TranslateControls(control);
+                }
+            }
+
+            translationFinished = true;
+        }
+
+        #endregion
+
+        #region Private Methods
 
         private void RefreshCaption(string value)
         {
@@ -360,28 +431,9 @@ namespace KGySoft.WinForms.Controls
             RefreshCaption(Caption);
         }
 
-        /// <summary>
-        /// Translating content in a way which prevents storing Caption text with leading spaces if check box is visible
-        /// </summary>
-        protected override void TranslateContent(ref bool translationFinished)
-        {
-            RefreshCaption(Language.Translate(Caption));
-
-            // translating children of pnlContent
-            if (pnlContent.HasChildren)
-            {
-                foreach (Control control in pnlContent.Controls)
-                {
-                    LanguageWinForms.TranslateControls(control);
-                }
-            }
-
-            translationFinished = true;
-        }
-
         #endregion
 
-        #region Handled events
+        #region Event handlers
 
         private void chkCheckBox_CheckedChanged(object sender, EventArgs e)
         {
@@ -398,19 +450,6 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region Nested types
-
-        public enum Orientation
-        {
-            GroupBoxed,
-            CaptionLeft,
-            CaptionRight,
-            CaptionTop,
-            CaptionBottom,
-            NoCaption
-        }
-
         #endregion
-
     }
 }

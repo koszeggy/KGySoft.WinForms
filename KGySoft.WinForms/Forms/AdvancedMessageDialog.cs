@@ -1,4 +1,21 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: AdvancedMessageDialog.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
@@ -6,78 +23,21 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
+
 using KGySoft.Drawing;
 using KGySoft.Libraries.Language;
 
+#endregion
+
 namespace KGySoft.WinForms.Forms
 {
-
-    #region Típusok
-
-    public enum AdvancedDialogTypes
-    {
-        Information,
-        Confirmation,
-        Warning,
-        Error,
-        Exception,
-        CustomImage
-    }
-
-    public enum ButtonTypes
-    {
-        // Standard gomb típusok DialogResult visszatéréshez
-        OK,
-        YesNo,
-        YesNoCancel,
-        OKCancel,
-        RetryCancel,
-        AbortRetryIgnore,
-
-        // Gomb típusok speciális m?veletekhez
-        Closewin,                   // ajtó ikonos ablakbezárás, DialogResult.None visszatérés
-        ClosewinSendreport,         // --"-- + hibalog küldés gomb
-        ClosewinSendreportCloseapp  // --"-- + alkalmazás bezárás gomb
-    }
-
-    #endregion
-
     /// <summary>
     /// Provides error and other message dialogs.
     /// </summary>
+    [Obsolete("Use KGySoft.WinForms.Components.TaskDialog instead.")]
     public sealed partial class AdvancedMessageDialog : BaseForm
     {
-        #region Public static events
-
-        // <summary>
-        // Ha saját projektben külön is akarunk kezdeni valamit az elkapott hibákkal (pl. adatbázisba log),
-        // akkor állítsunk rá egy tetsz?leges rutint. Alapértelmezés: null
-        // </summary>
-        //public static Action<Exception> CustomErrorHandler = null;
-
-        /// <summary>
-        /// Report sender event. When assigned, report sender button will be visible when requested.
-        /// </summary>
-        public static event EventHandler<ReportSenderEventArgs> ReportSender;
-
-        /// <summary>
-        /// Occurs before the application terminated if user chooses closing apllication.
-        /// </summary>
-        public static event EventHandler BeforeKillApplication;
-
-        // <summary>
-        // Elkapott hiba esetén legyen-e EMail-es hibaküldési lehet?ség. Alapértelmezés: false
-        // </summary>
-        //public static bool EnableSendingReport = false;
-
-        // <summary>
-        // Legyen-e log és screenshot mentés (lásd <see cref="ErrorHandling.ErrorLogDirectory"/>)
-        // </summary>
-        //public static bool CaptureScreenShotOnException = false;
-
-        #endregion
-
-        #region Objektumváltozók, típusok
+        #region Constants
 
         private const string TextOk = "&OK__Dialogs";
         private const string TextYes = "&Yes__Dialogs";
@@ -87,24 +47,27 @@ namespace KGySoft.WinForms.Forms
         private const string TextRetry = "&Retry__Dialogs";
         private const string TextIgnore = "&Ignore__Dialogs";
 
-        private string screenshot = String.Empty; // Képerny?mentés útvonala
-        private Exception exception = null; // Az elkapott hiba (csak a megfelel? Execute esetén)
+        #endregion
+
+        #region Fields
+
+        private string screenshot = String.Empty; // path of the screenshot
+        private Exception exception = null; // the exception to be reported (only for the appropriate Execute method)
         private bool detailsVisible;
 
         #endregion
 
-        #region Konstruktor
+        #region Events
 
         /// <summary>
-        /// Creates a new instance of AdvancedMessageDialog
+        /// Report sender event. When assigned, report sender button will be visible when requested.
         /// </summary>
-        public AdvancedMessageDialog()
-        {
-            InitializeComponent();
-            //btnCloseApp.Image = Images.Delete;
-            //btnIgnore.Image = Images.Exit;
-            //btnSendReport.Image = Images.Mail;
-        }
+        public static event EventHandler<ReportSenderEventArgs> ReportSender;
+
+        /// <summary>
+        /// Occurs before the application terminated if user chooses closing application.
+        /// </summary>
+        public static event EventHandler BeforeKillApplication;
 
         #endregion
 
@@ -141,10 +104,97 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region Publikus metódusok hibakezeléshez
+        #region Constructors
 
         /// <summary>
-        /// Message dialog for catched exceptions.
+        /// Creates a new instance of AdvancedMessageDialog
+        /// </summary>
+        public AdvancedMessageDialog()
+        {
+            InitializeComponent();
+            //btnCloseApp.Image = Images.Delete;
+            //btnIgnore.Image = Images.Exit;
+            //btnSendReport.Image = Images.Mail;
+        }
+
+        #endregion
+
+        #region Methods
+
+        #region Static Methods
+
+        private static string ErrorToFile(string filename, string logMessage)
+        {
+            try
+            {
+                if (!String.IsNullOrEmpty(ErrorLogDirectory) && !Path.IsPathRooted(filename))
+                {
+                    filename = Path.Combine(ErrorLogDirectory, filename);
+                }
+                filename += ".log";
+                string dir = Path.GetDirectoryName(Path.GetFullPath(filename));
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                using (StreamWriter sw = new StreamWriter(filename, true))
+                {
+                    sw.WriteLine(logMessage);
+                    return Path.GetFullPath(filename);
+                }
+            }
+            catch
+            {
+                // suppressing any error
+                return String.Empty;
+            }
+        }
+
+        /// <summary>
+        /// Screenshot saving into file. Does not throw exception, on error returns empty string.
+        /// </summary>
+        /// <param name="filename">Filename without extension.</param>
+        /// <returns>Path or empty string if there was no save.</returns>
+        private static string Screenshot(string filename)
+        {
+            try
+            {
+                if (!String.IsNullOrEmpty(ErrorLogDirectory) && !Path.IsPathRooted(filename))
+                {
+                    filename = Path.Combine(ErrorLogDirectory, filename);
+                }
+                filename += ".png";
+                string dir = Path.GetDirectoryName(Path.GetFullPath(filename));
+                if (!Directory.Exists(dir))
+                {
+                    Directory.CreateDirectory(dir);
+                }
+
+                Application.DoEvents();
+                Thread.Sleep(100);
+                Application.DoEvents();
+                using (Image screenshot = KGySoft.WinForms.Screenshot.CaptureScreenshot())
+                {
+                    screenshot.Save(filename, ImageFormat.Png);
+
+                    return Path.GetFullPath(filename);
+                }
+            }
+            catch
+            {
+                return String.Empty;
+            }
+        }
+
+        #endregion
+
+        #region Instance Methods
+
+        #region Public Methods
+
+        /// <summary>
+        /// Message dialog for caught exceptions.
         /// </summary>
         /// <param name="e">Exception</param>
         /// <param name="caption">Caption</param>
@@ -187,14 +237,13 @@ namespace KGySoft.WinForms.Forms
             }
             catch (Exception ex)
             {
-                // hiba a hibakezel?ben... na, ez gáz. De ha van saját beállítva, azt meghívjuk. Csak az ne dobjon további hibát...
                 //if (CustomErrorHandler != null)
                 //    CustomErrorHandler(ex);
             }
         }
 
         /// <summary>
-        /// Message dialog for catched exceptions with a default caption.
+        /// Message dialog for caught exceptions with a default caption.
         /// Saves log and screenshot if directory is set in <see cref="ErrorHandling.ErrorLogDirectory"/>.
         /// </summary>
         /// <param name="e">Exception</param>
@@ -202,10 +251,6 @@ namespace KGySoft.WinForms.Forms
         {
             Execute(e, Language.Translate("Unhandled error caught__Dialogs"), "fatalerror");
         }
-
-        #endregion
-
-        #region DialogResult visszatérésű publikus metódusok általános típusú üzenetablakozáshoz
 
         /// <summary>
         /// Message dialog for any kind of message.
@@ -256,7 +301,7 @@ namespace KGySoft.WinForms.Forms
                             pbImage.Image = icon.ExtractNearestBitmap(pbImage.Size, PixelFormat.Format32bppArgb, false);
                         break;
                     case AdvancedDialogTypes.CustomImage:
-                        // nincs kép beállítás; a kép az Execute előtt állítható be (Image)
+                        // the image can be set before calling Execute
                         break;
                 }
 
@@ -283,7 +328,6 @@ namespace KGySoft.WinForms.Forms
             }
             catch (Exception ex)
             {
-                // ha hiba volt a hibakezel? formban (ami elég nagy gáz lenne), még az esetleges egyéni hibakezel?t meghívjuk
                 //if (CustomErrorHandler != null)
                 //    CustomErrorHandler(ex);
                 return DialogResult.None;
@@ -370,7 +414,7 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region Private metódusok
+        #region Private Methods
 
         private void ResetDetails(bool enableDetails)
         {
@@ -393,70 +437,6 @@ namespace KGySoft.WinForms.Forms
             pnlDetails.Visible = visible;
             pnlDetails.BringToFront();
             detailsVisible = visible;
-        }
-
-        private static string ErrorToFile(string filename, string logMessage)
-        {
-            try
-            {
-                if (!String.IsNullOrEmpty(ErrorLogDirectory) && !Path.IsPathRooted(filename))
-                {
-                    filename = Path.Combine(ErrorLogDirectory, filename);
-                }
-                filename += ".log";
-                string dir = Path.GetDirectoryName(Path.GetFullPath(filename));
-                if (!Directory.Exists(dir))
-                {
-                    Directory.CreateDirectory(dir);
-                }
-
-                using (StreamWriter sw = new StreamWriter(filename, true))
-                {
-                    sw.WriteLine(logMessage);
-                    return Path.GetFullPath(filename);
-                }
-            }
-            catch
-            {
-                // suppressing any error
-                return String.Empty;
-            }
-        }
-
-        /// <summary>
-        /// Screenshot saving into file. Does not throw exception, on error returns empty string.
-        /// </summary>
-        /// <param name="filename">Filename without extension.</param>
-        /// <returns>Path or empty string if there was no save.</returns>
-        private static string Screenshot(string filename)
-        {
-            try
-            {
-                if (!String.IsNullOrEmpty(ErrorLogDirectory) && !Path.IsPathRooted(filename))
-                {
-                    filename = Path.Combine(ErrorLogDirectory, filename);
-                }
-                filename += ".png";
-                string dir = Path.GetDirectoryName(Path.GetFullPath(filename));
-                if (!Directory.Exists(dir))
-                {
-                    Directory.CreateDirectory(dir);
-                }
-
-                Application.DoEvents();
-                Thread.Sleep(100);
-                Application.DoEvents();
-                using (Image screenshot = KGySoft.WinForms.Screenshot.CaptureScreenshot())
-                {
-                    screenshot.Save(filename, ImageFormat.Png);
-
-                    return Path.GetFullPath(filename);
-                }
-            }
-            catch
-            {
-                return String.Empty;
-            }
         }
 
         private void SetButtons(ButtonTypes buttons)
@@ -595,10 +575,6 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        #endregion
-
-        #region Event invokers
-
         private void OnSendReport(ReportSenderEventArgs e)
         {
             if (ReportSender != null)
@@ -607,7 +583,7 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region Handled events
+        #region Event handlers
 
         private void btnDetails_Click(object sender, EventArgs e)
         {
@@ -651,6 +627,9 @@ namespace KGySoft.WinForms.Forms
         }
 
         #endregion
+
+        #endregion
+
+        #endregion
     }
 }
-

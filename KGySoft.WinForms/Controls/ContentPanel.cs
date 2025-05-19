@@ -1,8 +1,27 @@
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ContentPanel.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
@@ -11,6 +30,7 @@ namespace KGySoft.WinForms.Controls
 	/// </summary>
 	[ToolboxItem(false)]
     [Designer(typeof(ScrollableControlDesigner))]
+	[Obsolete("Used by the obsoleted ucCaptionedContainer")]
     public sealed class ContentPanel: Panel
 	{
 		#region Overridden events
@@ -292,7 +312,7 @@ namespace KGySoft.WinForms.Controls
 		/// Creates a new <see cref="ContentPanel"/> instance that will replace the original
 		/// <see cref="Panel"/> given in <paramref name="panelToClone"/> parameter. An original
 		/// panel is required because that can be placed in designer while content panel does
-		/// not saves its properties.
+		/// not save its properties.
 		/// </summary>
 		/// <param name="panelToClone"></param>
 		public ContentPanel(Panel panelToClone)

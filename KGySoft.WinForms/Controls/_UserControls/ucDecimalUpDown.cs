@@ -1,31 +1,48 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ucDecimalUpDown.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Forms;
+
+#endregion
 
 namespace KGySoft.WinForms.Controls
 {
-    // todoooooooo: belső advanced control, mint ucDecimal. ucTextBase-ből származzon
     /// <summary>
     /// Unified user control version of <see cref="NumericUpDown"/>.
     /// </summary>
     [ToolboxItem(true)]
-    public partial class ucDecimalUpDown: ucCaptionedBase
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
+    public partial class ucDecimalUpDown : ucCaptionedBase
     {
-        /// <summary>
-        /// Creates a new <see cref="ucDecimalUpDown"/> instance.
-        /// </summary>
-        public ucDecimalUpDown()
-        {
-            InitializeComponent();
-        }
- 
+        #region Properties
+
+        #region Public Properties
+
         /// <summary>
         /// Gets the inner control.
         /// </summary>
         [
-        Category("ucDecimalUpDown"),
-        DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
-        Description("Belso textbox")
+            Category("ucDecimalUpDown"),
+            DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
+            Description("Belso textbox")
         ]
         public NumericUpDown NumericUpDown
         {
@@ -48,7 +65,6 @@ namespace KGySoft.WinForms.Controls
                 ResetColor();
             }
         }
-
 
         /// <summary>
         /// Gets or sets the minimum allowed value for the up-down control.
@@ -80,7 +96,6 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-
         /// <summary>
         /// Gets or sets the ReadOnly state of the inner content.
         /// </summary>
@@ -98,25 +113,6 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Clears the content of the inner control.
-        /// </summary>
-        public override void Clear()
-        {
-            nudValue.Text = String.Empty;
-        }
-
-        /// <summary>
-        /// Returns the main inner control of the user control.
-        /// </summary>
-        protected override Control MainControl
-        {
-            get
-            {
-                return nudValue;
-            }
-        }
-
-        /// <summary>
         /// Gets or sets the associated value of the control.
         /// </summary>
         public override object ControlValue
@@ -130,5 +126,48 @@ namespace KGySoft.WinForms.Controls
                 Value = Convert.ToDecimal(value);
             }
         }
+
+        #endregion
+
+        #region Protected Properties
+
+        /// <summary>
+        /// Returns the main inner control of the user control.
+        /// </summary>
+        protected override Control MainControl
+        {
+            get
+            {
+                return nudValue;
+            }
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates a new <see cref="ucDecimalUpDown"/> instance.
+        /// </summary>
+        public ucDecimalUpDown()
+        {
+            InitializeComponent();
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        /// Clears the content of the inner control.
+        /// </summary>
+        public override void Clear()
+        {
+            nudValue.Text = String.Empty;
+        }
+
+        #endregion
     }
 }

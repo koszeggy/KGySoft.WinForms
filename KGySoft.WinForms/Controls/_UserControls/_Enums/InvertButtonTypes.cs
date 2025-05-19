@@ -1,7 +1,7 @@
-#region Copyright
+﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: SelectorButtons.cs
+//  File: InvertButtonTypes.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -21,19 +21,9 @@ using System;
 
 namespace KGySoft.WinForms.Controls
 {
-    /// <summary>
-    /// Buttons that can be appeared in a <see cref="ucCustomSelector"/>
-    /// </summary>
-    [Flags]
-    [Obsolete("This type is used by the obsoleted ucCustomSelector and is not recommended to use it anymore.")]
-    public enum SelectorButtons
+    [Obsolete("This type belongs to the obsoleted ucAllInvertNone class")]
+    public enum InvertButtonTypes
     {
-        None = 0,
-        ClearSelection = 1 << 0,
-        SelectAll = 1 << 1,
-        SelectNone = 1 << 2,
-        Browse = 1 << 3,
-        Editor = 1 << 4,
-        New = 1 << 5
+        All, Invert, None
     }
 }

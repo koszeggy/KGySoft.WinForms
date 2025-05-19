@@ -1,28 +1,56 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ucBase.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Windows.Forms;
+
 using KGySoft.ComponentModel;
 using KGySoft.Libraries.Language;
 
+#endregion
+
+
 namespace KGySoft.WinForms.Controls
 {
-    // Leszármaztatott controlban a következőket kell a működéséhez beállítani:
-    // - MainControl csak olvasható property felülírása
-    // - ReadOnly és belső control Enabled változásnál ResetColor hívás
-    // - Belső control Value változásnál (mind szerkesztés közben mind külső módosításnál) ResetColor hívás, ha AutoSaveValue van
-
     /// <summary>
     /// Base class of custom user controls.
     /// </summary>
+    /// <remarks>
+    /// <para>When deriving from this control, the following steps must be done:
+    /// <list>
+    /// <item>Override <see cref="MainControl"/>, <see cref="ControlValue"/> and <see cref="ReadOnly"/> properties.</item>
+    /// <item>Override <see cref="Clear"/>.</item>
+    /// <item>When the <see cref="Control.Enabled"/> or <c>ReadOnly</c> properties of the inner control changes, call <see cref="ResetColor"/>.</item>
+    /// <item>When <see cref="AutoSaveValue"/> is <see langword="true"/>, call <see cref="ResetColor"/> when the effective value of <see cref="MainControl"/> changes.</item>
+    /// </list></para>
+    /// </remarks>
     [ToolboxItem(false)]
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [Obsolete("This class and its descendants are not recommended to use anymore. They may not be maintained or can be even removed in the future.")]
     public partial class ucBase: UserControl, ICustomTranslated, IReadOnlyCapable
     {
         #region Fields
 
         private string toolTipText = String.Empty;
-        private object savedValue = null;
+        private object? savedValue;
         private Color colorEnabled = SystemColors.Window;
         private Color colorDisabled = SystemColors.Control;
         private Color colorModified = Color.Gold;
@@ -30,8 +58,7 @@ namespace KGySoft.WinForms.Controls
         private Color colorControlTextDisabled = SystemColors.ControlDarkDark;
         private bool autoSaveValue = true;
         private bool translationEnabled = true;
-        private TypeDescriptionProvider localizableProvider;
-        private readonly CommandBindingsCollection commandBindings = new WinformsCommandBindingsCollection();
+        private readonly CommandBindingsCollection commandBindings = new WinFormsCommandBindingsCollection();
 
         #endregion
 
@@ -410,7 +437,6 @@ namespace KGySoft.WinForms.Controls
         /// <remarks>Will not be called when <see cref="TranslationEnabled"/> is false.</remarks>
         /// </summary>
         /// <param name="translationFinished">If returns true in overridden methods, no further translation will be performed on child elements.</param>
-        /// </returns>
         protected virtual void TranslateContent(ref bool translationFinished)
         {
         }

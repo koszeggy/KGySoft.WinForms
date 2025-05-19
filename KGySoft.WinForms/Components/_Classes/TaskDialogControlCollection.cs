@@ -1,4 +1,19 @@
-﻿#region Used namespaces
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: TaskDialogControlCollection.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
 
 using System;
 using System.Collections.ObjectModel;
@@ -26,7 +41,7 @@ namespace KGySoft.WinForms.Components
         /// Gets an item of the <see cref="TaskDialogControlCollection{T}"/> by name.
         /// </summary>
         /// <param name="name">Name of the control</param>
-        /// <returns>A <see cref="TaskDialogControl"/> instance with the searched name or <see langword="null"/>&#160;if no control found with such name.</returns>
+        /// <returns>A <see cref="TaskDialogControl"/> instance with the searched name or <see langword="null"/> if no control found with such name.</returns>
         public T this[string name]
         {
             get

@@ -44,7 +44,7 @@ namespace KGySoft.WinForms.Forms
         private bool resumeCaller;
         private bool isTranslated;
         private MdiClient? mdiClient;
-        private readonly CommandBindingsCollection commandBindings = new WinformsCommandBindingsCollection();
+        private readonly CommandBindingsCollection commandBindings = new WinFormsCommandBindingsCollection();
 
         #endregion
 
@@ -179,7 +179,7 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Invalidates the MDI client area. Applicable only if the <see cref="Form.IsMdiContainer"/> is <see langword="true"/>&#160;for this form.
+        /// Invalidates the MDI client area. Applicable only if the <see cref="Form.IsMdiContainer"/> is <see langword="true"/> for this form.
         /// </summary>
         public void InvalidateMdiClientArea()
         {

@@ -1,12 +1,34 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ReportSenderEventArgs.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
+
+#endregion
 
 namespace KGySoft.WinForms.Forms
 {
     ///<summary>
     /// Arguments for <see cref="AdvancedMessageDialog.ReportSender"/> event.
     ///</summary>
-    public sealed class ReportSenderEventArgs: EventArgs
+    [Obsolete("This type is used by the obsoleted AdvancedMessageDialog")]
+    public sealed class ReportSenderEventArgs : EventArgs
     {
+        #region Properties
+
         /// <summary>
         /// Summary message from the sender <see cref="AdvancedMessageDialog"/>.
         /// </summary>
@@ -28,6 +50,10 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         public bool CloseMessageDialog { get; set; }
 
+        #endregion
+
+        #region Constructors
+
         internal ReportSenderEventArgs(string message, string details, string path)
         {
             Message = message;
@@ -35,5 +61,7 @@ namespace KGySoft.WinForms.Forms
             ScreenshotPath = path;
             CloseMessageDialog = true;
         }
+
+        #endregion
     }
 }
