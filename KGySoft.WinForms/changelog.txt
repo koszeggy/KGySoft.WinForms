@@ -31,6 +31,8 @@
 + WinFormsCommandBindingsCollection class:
   + New SupportCrossThreadStateUpdates property: to allow updating command binding states (e.g. Enabled) from
     background threads.
++ The ExpandablePropertiesConverter class has been extracted from the RecursivelyEditableTypeDescriptor class
+  and has been made public.
 
 * KGySoft.WinForms.Components namespace:
 ========================================
