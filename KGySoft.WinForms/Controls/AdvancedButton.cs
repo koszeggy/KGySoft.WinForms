@@ -98,7 +98,7 @@ namespace KGySoft.WinForms.Controls
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
         private Timer? defaultAnimationTimer;
         private bool isAlternativeDefaultImage;
-        private Bitmap? cachedSecurityShieldImage;
+        private Bitmap? cachedSecurityShieldImage; // an instance from IconsCache, should not be disposed
         private Size cachedSecurityShieldImageSize;
         private PointF lastScale;
 
@@ -403,9 +403,8 @@ namespace KGySoft.WinForms.Controls
                             base.Image = null;
                     }
 
-                    cachedSecurityShieldImage?.Dispose();
                     using var icon = Icons.SystemShield;
-                    cachedSecurityShieldImage = icon.ExtractNearestBitmap(currentSize, PixelFormat.Format32bppArgb);
+                    cachedSecurityShieldImage = icon.GetCachedBitmap(nameof(Icons.SystemShield), currentSize);
                     cachedSecurityShieldImageSize = currentSize;
                     if (!isImageUpToDate)
                         Invalidate();
@@ -473,7 +472,6 @@ namespace KGySoft.WinForms.Controls
                 fadingPainter.Dispose();
                 defaultAnimationTimer?.Dispose();
                 defaultAnimationTimer = null;
-                cachedSecurityShieldImage?.Dispose();
                 cachedSecurityShieldImage = null;
             }
 

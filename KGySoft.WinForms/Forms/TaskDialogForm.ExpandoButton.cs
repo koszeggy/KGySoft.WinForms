@@ -21,7 +21,6 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 
-using KGySoft.Drawing;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.WinApi;
 
@@ -55,6 +54,8 @@ namespace KGySoft.WinForms.Forms
             private bool isExpanded;
             private string? textExpanded;
             private string? textCollapsed;
+
+            // these must not be disposed, they are just references to statically cached images
             private Image? cachedDefaultImageNormalDown;
             private Image? cachedDefaultImageHoveredDown;
             private Image? cachedDefaultImagePressedDown;
@@ -147,12 +148,12 @@ namespace KGySoft.WinForms.Forms
 
             #region Private Properties
 
-            private Image DefaultImageNormalDown => cachedDefaultImageNormalDown ??= ExtractBitmap(Resources.ExpandoNormalDown);
-            private Image DefaultImageHoveredDown => cachedDefaultImageHoveredDown ??= ExtractBitmap(Resources.ExpandoHoveredDown);
-            private Image DefaultImagePressedDown => cachedDefaultImagePressedDown ??= ExtractBitmap(Resources.ExpandoPressedDown);
-            private Image DefaultImageNormalUp => cachedDefaultImageNormalUp ??= ExtractBitmap(Resources.ExpandoNormalUp);
-            private Image DefaultImageHoveredUp => cachedDefaultImageHoveredUp ??= ExtractBitmap(Resources.ExpandoHoveredUp);
-            private Image DefaultImagePressedUp => cachedDefaultImagePressedUp ??= ExtractBitmap(Resources.ExpandoPressedUp);
+            private Image DefaultImageNormalDown => cachedDefaultImageNormalDown ??= ExtractBitmap(Resources.ExpandoNormalDown, nameof(Resources.ExpandoNormalDown));
+            private Image DefaultImageHoveredDown => cachedDefaultImageHoveredDown ??= ExtractBitmap(Resources.ExpandoHoveredDown, nameof(Resources.ExpandoHoveredDown));
+            private Image DefaultImagePressedDown => cachedDefaultImagePressedDown ??= ExtractBitmap(Resources.ExpandoPressedDown, nameof(Resources.ExpandoPressedDown));
+            private Image DefaultImageNormalUp => cachedDefaultImageNormalUp ??= ExtractBitmap(Resources.ExpandoNormalUp, nameof(Resources.ExpandoNormalUp));
+            private Image DefaultImageHoveredUp => cachedDefaultImageHoveredUp ??= ExtractBitmap(Resources.ExpandoHoveredUp, nameof(Resources.ExpandoHoveredUp));
+            private Image DefaultImagePressedUp => cachedDefaultImagePressedUp ??= ExtractBitmap(Resources.ExpandoPressedUp, nameof(Resources.ExpandoPressedUp));
 
             #endregion
 
@@ -177,12 +178,6 @@ namespace KGySoft.WinForms.Forms
 
             internal void ResetTheme()
             {
-                cachedDefaultImageNormalDown?.Dispose();
-                cachedDefaultImageHoveredDown?.Dispose();
-                cachedDefaultImagePressedDown?.Dispose();
-                cachedDefaultImageNormalUp?.Dispose();
-                cachedDefaultImageHoveredUp?.Dispose();
-                cachedDefaultImagePressedUp?.Dispose();
                 cachedDefaultImageNormalDown = null;
                 cachedDefaultImageHoveredDown = null;
                 cachedDefaultImagePressedDown = null;
@@ -266,20 +261,6 @@ namespace KGySoft.WinForms.Forms
                 }
             }
 
-            protected override void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    cachedDefaultImageNormalDown?.Dispose();
-                    cachedDefaultImageHoveredDown?.Dispose();
-                    cachedDefaultImagePressedDown?.Dispose();
-                    cachedDefaultImageNormalUp?.Dispose();
-                    cachedDefaultImageHoveredUp?.Dispose();
-                    cachedDefaultImagePressedUp?.Dispose();
-                }
-                base.Dispose(disposing);
-            }
-
             #endregion
 
             #region Private Methods
@@ -304,18 +285,12 @@ namespace KGySoft.WinForms.Forms
                 return referenceImageSize.Scale(this.GetScale());
             }
 
-            private Image ExtractBitmap(Icon icon)
+            private Image ExtractBitmap(Icon icon, string name)
             {
                 try
                 {
                     Size desiredSize = this.ScaleSize(referenceImageSize);
-                    Bitmap scaledDefaultGlyph = icon.ExtractNearestBitmap(desiredSize, PixelFormat.Format32bppArgb);
-                    if (scaledDefaultGlyph.Width >= desiredSize.Width || desiredSize.Width < scaledDefaultGlyph.Width * 1.25f)
-                        return scaledDefaultGlyph;
-
-                    var resizedDefaultGlyph = scaledDefaultGlyph.Resize(desiredSize);
-                    scaledDefaultGlyph.Dispose();
-                    return resizedDefaultGlyph;
+                    return icon.GetCachedBitmap(name, desiredSize);
                 }
                 finally
                 {

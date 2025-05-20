@@ -136,9 +136,9 @@ namespace KGySoft.WinForms.Controls
         private Font? textFont;
         private Font? descriptionFont;
         private Image? currentImage;
-        private Image? disabledImage;
+
+        // these must not be disposed, they are just references to statically cached images
         private Image? cachedSecurityShieldImage;
-        private Image? cachedSecurityShieldImageGray;
         private Image? cachedDefaultGlyphNormal;
         private Image? cachedDefaultGlyphHovered;
         private Image? cachedDefaultGlyphDisabled;
@@ -777,25 +777,12 @@ namespace KGySoft.WinForms.Controls
                 Size currentSize = this.ScaleSize(referenceElevatedIconSize);
                 if (currentSize != cachedSecurityShieldImageSize || cachedSecurityShieldImage == null)
                 {
-                    cachedSecurityShieldImage?.Dispose();
                     using var icon = Icons.SystemShield;
-                    cachedSecurityShieldImage = icon.ExtractNearestBitmap(currentSize, PixelFormat.Format32bppArgb);
+                    cachedSecurityShieldImage = icon.GetCachedBitmap(nameof(Icons.SystemShield), currentSize);
                     cachedSecurityShieldImageSize = currentSize;
                 }
 
                 return cachedSecurityShieldImage;
-            }
-        }
-
-        private Image SecurityShieldGray
-        {
-            get
-            {
-                if (cachedSecurityShieldImageGray != null)
-                    return cachedSecurityShieldImageGray;
-
-                cachedSecurityShieldImageGray = SecurityShieldImage.ToGrayscale();
-                return cachedSecurityShieldImageGray;
             }
         }
 
@@ -974,9 +961,9 @@ namespace KGySoft.WinForms.Controls
             : useDefaultGlyph ? DefaultGlyphSize
             : new Size(1, 1);
 
-        private Image DefaultGlyphNormal => cachedDefaultGlyphNormal ??= GetScaledDefaultGlyph(Resources.CommandLinkNormal);
-        private Image DefaultGlyphHovered => cachedDefaultGlyphHovered ??= GetScaledDefaultGlyph(Resources.CommandLinkHovered);
-        private Image DefaultGlyphDisabled => cachedDefaultGlyphDisabled ??= GetScaledDefaultGlyph(Resources.CommandLinkDisabled);
+        private Image DefaultGlyphNormal => cachedDefaultGlyphNormal ??= GetScaledDefaultGlyph(Resources.CommandLinkNormal, nameof(Resources.CommandLinkNormal));
+        private Image DefaultGlyphHovered => cachedDefaultGlyphHovered ??= GetScaledDefaultGlyph(Resources.CommandLinkHovered, nameof(Resources.CommandLinkHovered));
+        private Image DefaultGlyphDisabled => cachedDefaultGlyphDisabled ??= GetScaledDefaultGlyph(Resources.CommandLinkDisabled, nameof(Resources.CommandLinkDisabled));
 
         private Size DefaultGlyphSize
         {
@@ -1038,17 +1025,9 @@ namespace KGySoft.WinForms.Controls
                 themedFontSmall?.Dispose();
                 themedFontSmall = null;
                 currentImage = null;
-                disabledImage?.Dispose();
-                disabledImage = null;
-                cachedSecurityShieldImage?.Dispose();
                 cachedSecurityShieldImage = null;
-                cachedSecurityShieldImageGray?.Dispose();
-                cachedSecurityShieldImageGray = null;
-                cachedDefaultGlyphDisabled?.Dispose();
                 cachedDefaultGlyphDisabled = null;
-                cachedDefaultGlyphNormal?.Dispose();
                 cachedDefaultGlyphNormal = null;
-                cachedDefaultGlyphHovered?.Dispose();
                 cachedDefaultGlyphHovered = null;
             }
 
@@ -1252,7 +1231,7 @@ namespace KGySoft.WinForms.Controls
             catch (Exception ex) when (!ex.IsCritical())
             {
                 // May occur in Windows 7 when switching from Aero to classic or high contrast theme,
-                // that visual styles are turned off in the middle of the painting session.
+                // when visual styles are turned off in the middle of the painting session.
                 ResetTheme();
                 Invalidate();
             }
@@ -1535,8 +1514,6 @@ namespace KGySoft.WinForms.Controls
         {
             // Choosing image
             Image? img = base.Image;
-            if (img != null && !e.State.Enabled)
-                img = disabledImage ??= img.ToGrayscale();
 
             // painting background and image
             if (UsesTheming)
@@ -1799,12 +1776,14 @@ namespace KGySoft.WinForms.Controls
 
             Image? img = image;
             bool dispose = false;
+            bool asDisabled = !state.Enabled;
             if (img == null)
             {
                 if (isElevated)
-                    img = state.Enabled ? SecurityShieldImage : SecurityShieldGray;
+                    img = SecurityShieldImage;
                 else if (useDefaultGlyph)
                 {
+                    asDisabled = false; // we have specific disabled image
                     img = !state.Enabled ? DefaultGlyphDisabled
                         : state.Hovered && !state.Pressed ? DefaultGlyphHovered
                         : DefaultGlyphNormal;
@@ -1820,7 +1799,12 @@ namespace KGySoft.WinForms.Controls
             }
 
             if (img != null)
-                e.Graphics.DrawImage(img, bounds);
+            {
+                if (asDisabled)
+                    e.Graphics.DrawImageGrayscale(img, bounds);
+                else
+                    e.Graphics.DrawImage(img, bounds);
+            }
 
             if (dispose)
                 img!.Dispose();
@@ -1939,13 +1923,6 @@ namespace KGySoft.WinForms.Controls
                     return false;
             }
 
-            // Image > Elevated > default glyph > no glyph
-            if (disabledImage != null)
-            {
-                disabledImage.Dispose();
-                disabledImage = null;
-            }
-
             Invalidate();
             ResetSizeCache();
             lastImageAlign = ImageAlign;
@@ -1992,11 +1969,8 @@ namespace KGySoft.WinForms.Controls
 
         private void ResetGlyphCache()
         {
-            cachedDefaultGlyphDisabled?.Dispose();
             cachedDefaultGlyphDisabled = null;
-            cachedDefaultGlyphNormal?.Dispose();
             cachedDefaultGlyphNormal = null;
-            cachedDefaultGlyphHovered?.Dispose();
             cachedDefaultGlyphHovered = null;
         }
 
@@ -2050,20 +2024,14 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private Bitmap GetScaledDefaultGlyph(Icon icon)
+        private Bitmap GetScaledDefaultGlyph(Icon icon, string name)
         {
             try
             {
                 Size desiredSize = this.ScaleSize(VisualStyleHelper.RenderWithVisualStyles ? referenceThemedGlyphSize : referenceNonThemedGlyphSize);
-                Bitmap scaledDefaultGlyph = icon.ExtractNearestBitmap(desiredSize, PixelFormat.Format32bppArgb);
-                if (scaledDefaultGlyph.Width >= desiredSize.Width || desiredSize.Width < scaledDefaultGlyph.Width * 1.25f)
-                    return scaledDefaultGlyph;
-
-                var resizedDefaultGlyph = visualsRenderingQuality == RenderingQuality.High
-                    ? scaledDefaultGlyph.Resize(desiredSize)
-                    : scaledDefaultGlyph.Resize(desiredSize, ScalingMode.NearestNeighbor);
-                scaledDefaultGlyph.Dispose();
-                return resizedDefaultGlyph;
+                return visualsRenderingQuality == RenderingQuality.High
+                    ? icon.GetCachedBitmap(name, desiredSize)
+                    : icon.GetCachedBitmap(name, desiredSize, ScalingMode.NearestNeighbor);
             }
             finally
             {

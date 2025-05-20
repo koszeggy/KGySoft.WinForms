@@ -23,8 +23,6 @@ using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
 
-using KGySoft.Drawing;
-
 #endregion
 
 #region Used Aliases
@@ -325,6 +323,42 @@ namespace KGySoft.WinForms.Controls
 
             private static TextImageRelation TextAlignToRelation(ContentAlignment alignment)
                 => LayoutUtils.GetOppositeTextImageRelation(ImageAlignToRelation(alignment));
+
+            private static int XCompose(Composition composition, int checkSize, int imageSize, int textSize)
+            {
+                switch (composition)
+                {
+                    case Composition.NoneCombined:
+                        return checkSize + imageSize + textSize;
+                    case Composition.CheckCombined:
+                        return Math.Max(checkSize, imageSize + textSize);
+                    case Composition.TextImageCombined:
+                        return Math.Max(imageSize, textSize) + checkSize;
+                    case Composition.AllCombined:
+                        return Math.Max(Math.Max(checkSize, imageSize), textSize);
+                    default:
+                        Debug.Fail(composition.ToString());
+                        return -7107;
+                }
+            }
+
+            private static int XDecompose(Composition composition, int checkSize, int imageSize, int proposedSize)
+            {
+                switch (composition)
+                {
+                    case Composition.NoneCombined:
+                        return proposedSize - (checkSize + imageSize);
+                    case Composition.CheckCombined:
+                        return proposedSize - imageSize;
+                    case Composition.TextImageCombined:
+                        return proposedSize - checkSize;
+                    case Composition.AllCombined:
+                        return proposedSize;
+                    default:
+                        Debug.Fail(composition.ToString());
+                        return -7109;
+                }
+            }
 
             #endregion
 
@@ -656,24 +690,6 @@ namespace KGySoft.WinForms.Controls
                 );
             }
 
-            private int XCompose(Composition composition, int checkSize, int imageSize, int textSize)
-            {
-                switch (composition)
-                {
-                    case Composition.NoneCombined:
-                        return checkSize + imageSize + textSize;
-                    case Composition.CheckCombined:
-                        return Math.Max(checkSize, imageSize + textSize);
-                    case Composition.TextImageCombined:
-                        return Math.Max(imageSize, textSize) + checkSize;
-                    case Composition.AllCombined:
-                        return Math.Max(Math.Max(checkSize, imageSize), textSize);
-                    default:
-                        Debug.Fail(composition.ToString());
-                        return -7107;
-                }
-            }
-
             private Size Decompose(Size checkSize, Size imageSize, Size proposedSize)
             {
                 Composition hComposition = GetHorizontalComposition();
@@ -682,24 +698,6 @@ namespace KGySoft.WinForms.Controls
                     XDecompose(hComposition, checkSize.Width, imageSize.Width, proposedSize.Width),
                     XDecompose(vComposition, checkSize.Height, imageSize.Height, proposedSize.Height)
                 );
-            }
-
-            private int XDecompose(Composition composition, int checkSize, int imageSize, int proposedSize)
-            {
-                switch (composition)
-                {
-                    case Composition.NoneCombined:
-                        return proposedSize - (checkSize + imageSize);
-                    case Composition.CheckCombined:
-                        return proposedSize - imageSize;
-                    case Composition.TextImageCombined:
-                        return proposedSize - checkSize;
-                    case Composition.AllCombined:
-                        return proposedSize;
-                    default:
-                        Debug.Fail(composition.ToString());
-                        return -7109;
-                }
             }
 
             private Composition GetHorizontalComposition()
@@ -1085,8 +1083,7 @@ namespace KGySoft.WinForms.Controls
                 {
                     // this always creates a new bitmap, but this is what happens also in the original ControlPaint.DrawImageDisabled
                     // when the internal overload is called with unscaledImage = true
-                    using var disabledImage = image.ToGrayscale();
-                    graphics.DrawImage(disabledImage, imageBounds.X, imageBounds.Y, disabledImage.Width, disabledImage.Height);
+                    graphics.DrawImageGrayscale(image, new Rectangle(imageBounds.X, imageBounds.Y, image.Width, image.Height));
                 }
                 else
                     graphics.DrawImage(image, imageBounds.X, imageBounds.Y, image.Width, image.Height);
