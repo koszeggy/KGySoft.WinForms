@@ -564,6 +564,16 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <inheritdoc />
+        protected override void OnEnabledChanged(EventArgs e)
+        {
+            base.OnEnabledChanged(e);
+            if (EnabledBackColor != DisabledBackColor)
+                OnBackColorChanged(EventArgs.Empty);
+            if (EnabledForeColor != DisabledForeColor)
+                OnForeColorChanged(EventArgs.Empty);
+        }
+
+        /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
             switch (m.Msg)

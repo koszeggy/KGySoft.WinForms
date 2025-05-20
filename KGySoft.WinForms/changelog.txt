@@ -12,9 +12,9 @@
 ! KGySoft.Libraries.Language namespace
 ======================================
 ! Every type in this namespace has been marked as obsolete. This is a legacy namespace from the old
-  KGySoft.Language.dll dependency. the old translation mechanism doesn't translate anything anymore, just removes
+  KGySoft.Language.dll dependency. The old translation mechanism doesn't translate anything anymore, just removes
   the possible distinction postfixes if present. To localize your application in a similar way with auto-generated
-  resources, use the DynamicResourceManager class from the KGySoft.CoreLibraries package. See more details:
+  resources, use the DynamicResourceManager class from the KGySoft.CoreLibraries package. For more details see:
   DynamicResourceManager class: https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm
   Application example: https://github.com/koszeggy/KGySoft.Drawing.Tools#localization
 
@@ -25,12 +25,108 @@
 =============================
 ! DataGridViewTextAndImageColumn class: Removed, it was already obsolete.
 ! DataGridViewTextAndImageCell class: Removed, it was already obsolete.
-+ New WinFormsCommandBindingsCollection class
+
+* KGySoft.WinForms.Components namespace:
+========================================
+* TaskDialog class:
+  + Supporting high DPI
+  - Fixing widths
+  - Native mode: fixing some rare exception cases during Dispose
+  - Compatibility mode: improving expando button image quality
 
 ! KGySoft.WinForms.Controls namespace:
 ======================================
+! AdvancedButton class:
+  ! Changing Standard classic (when there are no visual styles) and Popup FlatStyle rendering with images: just like
+    the text, the image is also shifted when the button is pressed. This is how the native rendering also works.
+  ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark (when FlatStyle is Popup or Flat,
+    or visual styles are not available).
+  ! BackColor/ForeColor: when the control is not Enabled, they get/set the disabled colors. The Changed events are
+    raised also when the Enabled state changes and the enabled/disabled colors are different.
+  + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
+    DisabledForeColor properties.
+  + Making the overridden ForeColor/BackColor properties visible in the designer.
+  + Supporting High DPI
+  + New TextRenderingQuality property: brings back the functionality of the removed RenderingQuality property,
+    but only for the text.
+  + Focus rectangle width is OS and DPI dependent.
+  - Fixing appearance in high contrast mode with visual styles (Windows 10 and above). This issue presents in the
+    original Button class as well. Classified as a fix rather than a breaking change as the issue is visual only.
+! AdvancedCheckBox class:
+  ! Rendering change with Button appearance - see AdvancedButton.
+  ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark (when FlatStyle is Popup or Flat,
+    or visual styles are not available).
+  ! BackColor/ForeColor: when the control is not Enabled, they get/set the disabled colors. The Changed events are
+    raised also when the Enabled state changes and the enabled/disabled colors are different.
+  + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
+    DisabledForeColor properties.
+  + Making the overridden ForeColor/BackColor properties visible in the designer.
+  + Supporting High DPI
+  + New TextRenderingQuality property: brings back the functionality of the removed RenderingQuality property,
+    but only for the text.
+  + New VisualsRenderingQuality property: affects the quality of the check box when no proper size is available by
+    the visual style renderer on the current DPI.
+  + Focus rectangle width is OS and DPI dependent.
+! AdvancedRadioButton class:
+  ! Rendering change with Button appearance - see AdvancedButton.
+  ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark (when FlatStyle is Popup or Flat,
+    or visual styles are not available).
+  ! BackColor/ForeColor: when the control is not Enabled, they get/set the disabled colors. The Changed events are
+    raised also when the Enabled state changes and the enabled/disabled colors are different.
+  + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
+    DisabledForeColor properties.
+  + Making the overridden ForeColor/BackColor properties visible in the designer.
+  + Supporting High DPI
+  + New TextRenderingQuality property: brings back the functionality of the removed RenderingQuality property,
+    but only for the text.
+  + New VisualsRenderingQuality property: affects the quality of the check area when no proper size is available by
+    the visual style renderer on the current DPI.
+  + Focus rectangle width is OS and DPI dependent.
+! AdvancedLabel class:
+  ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark
+  ! BackColor/ForeColor: when the control is not Enabled, they get/set the disabled colors. The Changed events are
+    raised also when the Enabled state changes and the enabled/disabled colors are different.
+  + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
+    DisabledForeColor properties.
+  + Making the overridden ForeColor/BackColor properties visible in the designer.
+! AdvancedProgressBar class:
+  ! In high contrast mode rendering with the classic style only, no matter what the Style property is.
 ! CommandLinkButton class:
   ! Different reported preferred size when FlatStyle is not System.
+  ! When available, using the visual style renderer for the arrow glyph in non-System FlatStyles.
+  ! The themed colors are taken from the visual style renderer.
+  ! Allowing custom default arrow glyph color (Windows 10 and above)
+  ! Not using visual style colors in Popup/Flat mode.
+  ! The BackColor/ForeColor properties really reflect the actual colors of the control in the current Enabled state.
+  + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
+    DisabledForeColor properties.
+  + Making the overridden ForeColor/BackColor properties visible in the designer.
+  + Supporting High DPI, adding more resolutions for the arrow glyph when visual styles are not available.
+  + New TextRenderingQuality property: brings back the functionality of the removed RenderingQuality property,
+    but only for the text.
+  + New VisualsRenderingQuality property: affects the quality of the arrow glyph on some specific DPI settings,
+    or when no visual style renderer is available.
+  + When FadingOptions.Text is enabled, using buffered animation also for Description changes
+  + When FadingOptions.Color is enabled, using buffered animation also for the description color changes.
+  - Improving high contrast appearance
+  - Fixing colors and fonts when changing back and forth between high contrast mode and visual style themes
+  - Fixing top image alignment
+! AdvancedComboBox class:
+  ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark
+  + Making overridden ForeColor/BackColor properties visible in the designer.
+  - Fixing AutoCompleteMode if it was already set in the designer.
+  - Fixing ReadOnly mode in Simple style: if the list box area was visible, it was possible to change the selection.
+  - Fixing ReadOnly mode in DropDownList style: up to now it was faked by disabling the control.
+! AdvancedTextBox class:
+  ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark
+  + Making overridden ForeColor/BackColor properties visible in the designer.
+  - Fixing Multiline rendering position in disabled mode
+! AdvancedDateTimePicker:
+  ! Custom rendering even in Enabled mode when the control is not in focus.
+  + New EnabledBackColor/EnabledForeColor properties: they allow custom enabled colors when the control is not in
+    focus. When the control is in focus, only custom background color is supported with no visual styles available.
+  + Making overridden ForeColor/BackColor properties visible in the designer.
+  + Improving disabled rendering
 
 + KGySoft.WinForms.Forms namespace:
 ===================================
@@ -48,6 +144,10 @@
 * Making the package freely available to public
 + Targeting also .NET Core 3.0.
 
++ KGySoft.ComponentModel namespace:
+===================================
++ New WinFormsCommandBindingsCollection class
+
 ! KGySoft.Controls namespace:
 =============================
 ! The namespace has been removed and its content have been moved to:
@@ -58,6 +158,7 @@
   ! KGySoft.WinForms.Forms
 ! Completely removed types:
   ! ComboUtils (it was obsolete already in v3.5.2.0)
+  ! Unicode
   ! WaitForm
   ! ...
 
@@ -65,9 +166,11 @@
 =====================================
 ! The namespace has been removed and its AdvancedWinformsHost WPF control does not belong to this assembly anymore.
 
-! KGySoft.WinForms namespace:
++ KGySoft.WinForms namespace:
 =============================
-...
++ BaseForm class:
+  + New CommandBindings property
+  ...
 
 - KGySoft.WinForms.Components namespace:
 ========================================

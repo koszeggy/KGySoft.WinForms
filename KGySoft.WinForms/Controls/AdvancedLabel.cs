@@ -577,6 +577,23 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         }
 
         /// <inheritdoc />
+        protected override void OnSystemColorsChanged(EventArgs e)
+        {
+            base.OnSystemColorsChanged(e);
+            CheckStyles();
+        }
+
+        /// <inheritdoc />
+        protected override void OnEnabledChanged(EventArgs e)
+        {
+            base.OnEnabledChanged(e);
+            if (EnabledBackColor != DisabledBackColor)
+                OnBackColorChanged(EventArgs.Empty);
+            if (EnabledForeColor != DisabledForeColor)
+                OnForeColorChanged(EventArgs.Empty);
+        }
+
+        /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
             // adjusting FlatStyle if needed (in System mode this is in WndProc)
