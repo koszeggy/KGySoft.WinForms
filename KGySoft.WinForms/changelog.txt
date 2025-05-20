@@ -26,6 +26,12 @@
 ! DataGridViewTextAndImageColumn class: Removed, it was already obsolete.
 ! DataGridViewTextAndImageCell class: Removed, it was already obsolete.
 
++ KGySoft.ComponentModel namespace:
+===================================
++ WinFormsCommandBindingsCollection class:
+  + New SupportCrossThreadStateUpdates property: to allow updating command binding states (e.g. Enabled) from
+    background threads.
+
 * KGySoft.WinForms.Components namespace:
 ========================================
 * TaskDialog class:

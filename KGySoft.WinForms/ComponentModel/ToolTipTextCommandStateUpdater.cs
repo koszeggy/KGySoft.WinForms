@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: WinFormsPropertyCommandStateUpdater.cs
+//  File: ToolTipTextCommandStateUpdater.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -31,7 +31,7 @@ namespace KGySoft.ComponentModel
     /// <summary>
     /// Provides special handling for ToolTipText: tries to find the associated <see cref="ToolTip"/> component.
     /// </summary>
-    internal class WinFormsPropertyCommandStateUpdater : ICommandStateUpdater
+    internal class ToolTipTextCommandStateUpdater : ICommandStateUpdater
     {
         #region Constants
 
@@ -41,7 +41,7 @@ namespace KGySoft.ComponentModel
 
         #region Fields
 
-        private static readonly WinFormsPropertyCommandStateUpdater instance = new WinFormsPropertyCommandStateUpdater();
+        private static readonly ToolTipTextCommandStateUpdater instance = new ToolTipTextCommandStateUpdater();
 
         #endregion
 
@@ -53,7 +53,7 @@ namespace KGySoft.ComponentModel
 
         #region Constructors
 
-        private WinFormsPropertyCommandStateUpdater()
+        private ToolTipTextCommandStateUpdater()
         {
         }
 
