@@ -75,8 +75,10 @@ namespace KGySoft.ComponentModel
                 Func<bool> setState = () => Reflector.TrySetProperty(commandSource, stateName, value);
                 return commandSource switch
                 {
-                    Control control => control.InvokeRequired ? control.Invoke(setState) : setState.Invoke(),
-                    ToolStripItem item => item.Owner?.InvokeRequired == true ? item.Owner.Invoke(setState) : setState.Invoke(),
+                    // ReSharper disable RedundantCast
+                    Control control => control.InvokeRequired ? (bool)control.Invoke(setState) : setState.Invoke(),
+                    ToolStripItem item => item.Owner?.InvokeRequired == true ? (bool)item.Owner.Invoke(setState) : setState.Invoke(),
+                    // ReSharper restore RedundantCast
                     _ => false
                 };
             }
