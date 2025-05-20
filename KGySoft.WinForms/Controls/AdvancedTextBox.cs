@@ -287,7 +287,7 @@ namespace KGySoft.WinForms.Controls
             ResetColors();
         }
 
-        private int GetFirstVisibleLine() => User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, 0, 0).ToInt32();
+        private int GetFirstVisibleLine() => User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, IntPtr.Zero, IntPtr.Zero).ToInt32();
 
         private void ResetColors()
         {

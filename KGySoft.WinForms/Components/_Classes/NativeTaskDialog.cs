@@ -19,7 +19,6 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
@@ -192,6 +191,16 @@ namespace KGySoft.WinForms.Components
             }
 
             Marshal.FreeHGlobal(buttonsArray);
+        }
+
+        private static bool IsBackgroundDifferent(TaskDialogStandardIcons icon1, TaskDialogStandardIcons icon2)
+        {
+            if (icon1 == icon2)
+            {
+                return false;
+            }
+
+            return !(icon1.In(whiteBackgroundIcons) && icon2.In(whiteBackgroundIcons));
         }
 
         #endregion
@@ -513,13 +522,13 @@ namespace KGySoft.WinForms.Components
                 // Custom and (Security)Question: setting the good quality 16x16 icon as form icon (native dialog would not handle it nicely).
                 if (host.FormIcon != null)
                 {
-                    User32.SendMessage(dialogHandle, Constants.WM_SETICON, new IntPtr(Constants.ICON_BIG), host.FormIcon.Handle);
-                    User32.SendMessage(dialogHandle, Constants.WM_SETICON, new IntPtr(Constants.ICON_SMALL), host.FormIcon.ExtractNearestIcon(new Size(16, 16), PixelFormat.Format32bppArgb).Handle);
+                    User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_BIG, host.FormIcon.Handle);
+                    User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_SMALL, host.FormIcon.ExtractNearestIcon(new Size(16, 16), PixelFormat.Format32bppArgb).Handle);
                 }
 
                 // only when initializing, otherwise, will be changed by UpdateStandardIcon
                 else if (host.Icon != TaskDialogStandardIcons.None && !isFirstCreate) // on first init this is redundant but when icon has been changed from custom to standard, NAVIGATE does not update title icon
-                    User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, Constants.TDI_MAIN, (int)host.Icon);
+                    User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, Constants.TDI_MAIN, (IntPtr)host.Icon);
             }
 
             // Progress bar
@@ -574,17 +583,17 @@ namespace KGySoft.WinForms.Components
                 return;
             }
 
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE, button.Id, button.IsElevated ? 1 : 0);
+            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_BUTTON_ELEVATION_REQUIRED_STATE, new IntPtr(button.Id), new IntPtr(button.IsElevated ? 1 : 0));
         }
 
         private void UpdateButtonEnabled(TaskDialogButton button)
         {
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_ENABLE_BUTTON, button.Id, button.Enabled ? 1 : 0);
+            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_ENABLE_BUTTON, new IntPtr(button.Id), new IntPtr(button.Enabled ? 1 : 0));
         }
 
         private void UpdateRadioButtonEnabled(TaskDialogRadioButton radioButton)
         {
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_ENABLE_RADIO_BUTTON, radioButton.Id, radioButton.Enabled ? 1 : 0);
+            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_ENABLE_RADIO_BUTTON, new IntPtr(radioButton.Id), new IntPtr(radioButton.Enabled ? 1 : 0));
         }
 
         private void UpdateText(TASKDIALOG_ELEMENTS element, string? text)
@@ -613,7 +622,7 @@ namespace KGySoft.WinForms.Components
             User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_ELEMENT_TEXT, (IntPtr)element, ptrText);
         }
 
-        private void UpdateStandardIcon(int element, TaskDialogStandardIcons icon)
+        private void UpdateStandardIcon(IntPtr element, TaskDialogStandardIcons icon)
         {
             if (element == Constants.TDI_FOOTER && String.IsNullOrEmpty(host.FooterText))
                 return;
@@ -646,10 +655,10 @@ namespace KGySoft.WinForms.Components
             else
                 config.hFooterIcon = (IntPtr)icon;
 
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, element, (int)icon);
+            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, element, (IntPtr)icon);
         }
 
-        private void UpdateCustomIcon(int element, Icon? icon)
+        private void UpdateCustomIcon(IntPtr element, Icon? icon)
         {
             if (element == Constants.TDI_FOOTER && String.IsNullOrEmpty(host.FooterText))
                 return;
@@ -669,11 +678,11 @@ namespace KGySoft.WinForms.Components
             else
                 config.hFooterIcon = iconHandle = host.FooterIcon != TaskDialogStandardIcons.None ? host.EmulatedStandardFooterIcon!.Handle : icon?.Handle ?? IntPtr.Zero;
 
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, (IntPtr)element, iconHandle);
+            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, element, iconHandle);
             if (element == Constants.TDI_MAIN && host.FormIcon != null)
             {
-                User32.SendMessage(dialogHandle, Constants.WM_SETICON, new IntPtr(Constants.ICON_BIG), host.FormIcon.Handle);
-                User32.SendMessage(dialogHandle, Constants.WM_SETICON, new IntPtr(Constants.ICON_SMALL), host.FormIcon.ExtractNearestIcon(new Size(16, 16), PixelFormat.Format32bppArgb).Handle);
+                User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_BIG, host.FormIcon.Handle);
+                User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_SMALL, host.FormIcon.ExtractNearestIcon(new Size(16, 16), PixelFormat.Format32bppArgb).Handle);
             }
         }
 
@@ -686,7 +695,7 @@ namespace KGySoft.WinForms.Components
                 return;
             }
 
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_MARQUEE_PROGRESS_BAR, style == TaskDialogProgressBarStyle.Marquee ? 1 : 0, 0);
+            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_MARQUEE_PROGRESS_BAR, new IntPtr(style == TaskDialogProgressBarStyle.Marquee ? 1 : 0), IntPtr.Zero);
             if (style == TaskDialogProgressBarStyle.Regular)
             {
                 UpdateProgressBarState(host.ProgressBarState);
@@ -707,25 +716,25 @@ namespace KGySoft.WinForms.Components
             }
             else
             {
-                User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_STATE, (int)state + 1, 0);
+                User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_STATE, (nint)state + 1, IntPtr.Zero);
             }
         }
 
         private void UpdateProgressBarRange(int minimum, int maximum)
         {
             // actually no real 32-bit int is supported as minimum/maximum natively...
-            int range = (((short)maximum & 0xFFFF) << 16) | ((short)minimum & 0xFFFF);
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_RANGE, 0, range);
+            nint range = (((short)maximum & 0xFFFF) << 16) | ((short)minimum & 0xFFFF);
+            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_RANGE, IntPtr.Zero, range);
         }
 
         private void UpdateProgressBarValue(int value)
         {
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_POS, value, 0);
+            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_POS, new IntPtr(value), IntPtr.Zero);
 
             // if state is non-normal, value has to be set twice
             if (host.ProgressBarState != ProgressBarState.Normal)
             {
-                User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_POS, value, 0);
+                User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_POS, new IntPtr(value), IntPtr.Zero);
             }
         }
 
@@ -736,24 +745,14 @@ namespace KGySoft.WinForms.Components
                 return;
             }
 
-            bool isRunning = host.ProgressBarState == ProgressBarState.Normal && value > 0;
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_MARQUEE, Convert.ToInt32(isRunning), value);
+            IntPtr isRunning = host.ProgressBarState == ProgressBarState.Normal && value > 0 ? new IntPtr(1) : IntPtr.Zero;
+            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_MARQUEE, isRunning, new IntPtr(value));
         }
 
         private void DoClose(TaskDialogResult result)
         {
             dialogState = TaskDialogStatus.Closing;
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_BUTTON, (int)result, 0);
-        }
-
-        private bool IsBackgroundDifferent(TaskDialogStandardIcons icon1, TaskDialogStandardIcons icon2)
-        {
-            if (icon1 == icon2)
-            {
-                return false;
-            }
-
-            return !(icon1.In(whiteBackgroundIcons) && icon2.In(whiteBackgroundIcons));
+            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_BUTTON, (nint)result, IntPtr.Zero);
         }
 
         private void ReallocateDialog()
@@ -939,7 +938,7 @@ namespace KGySoft.WinForms.Components
                     return;
 
                 case TaskDialog.PropertyCheckBoxChecked:
-                    User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_VERIFICATION, host.CheckBoxChecked ? 1 : 0, 0);
+                    User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_VERIFICATION, new IntPtr(host.CheckBoxChecked ? 1 : 0), IntPtr.Zero);
                     return;
 
                 case TaskDialog.PropertyIcon:
@@ -1089,7 +1088,7 @@ namespace KGySoft.WinForms.Components
                             // if not raised from callback (so not the user actually clicked), but set by Checked property, then checking the actual radio button
                             if (!isRadioButtonClicked)
                             {
-                                User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_RADIO_BUTTON, radioButton.Id, 0);
+                                User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_RADIO_BUTTON, new IntPtr(radioButton.Id), IntPtr.Zero);
                             }
                             return;
 

@@ -71,8 +71,8 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_DPICHANGED_BEFOREPARENT = 0x02E2;
         internal const int WM_DPICHANGED_AFTERPARENT = 0x02E3;
 
-        internal const int ICON_SMALL = 0;
-        internal const int ICON_BIG = 1;
+        internal const nint ICON_SMALL = 0;
+        internal const nint ICON_BIG = 1;
 
         internal const int EM_GETFIRSTVISIBLELINE = 0x00CE;
 
@@ -111,8 +111,8 @@ namespace KGySoft.WinForms.WinApi
 
         internal const int ACTCTX_FLAG_ASSEMBLY_RESOURCE_NAME_VALID = 0x008;
 
-        internal const int TDI_MAIN = 0;
-        internal const int TDI_FOOTER = 1;
+        internal const nint TDI_MAIN = 0;
+        internal const nint TDI_FOOTER = 1;
 
         internal const int BS_COMMANDLINK = 0x0000000E;
 

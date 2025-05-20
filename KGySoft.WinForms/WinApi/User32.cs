@@ -195,25 +195,6 @@ namespace KGySoft.WinForms.WinApi
         internal static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, string? lParam);
 
         /// <summary>
-        /// The SendMessage function sends the specified message to a window or windows.
-        /// It calls the window procedure for the specified window and does not return until the window procedure has processed the message.
-        /// To send a message and return immediately, use the SendMessageCallback or SendNotifyMessage function.
-        /// To post a message to a thread's message queue and return immediately, use the PostMessage or PostThreadMessage function.
-        /// </summary>
-        /// <param name="hWnd">[in] Handle to the window whose window procedure will receive the message.
-        /// If this parameter is HWND_BROADCAST, the message is sent to all top-level windows in the system,
-        /// including disabled or invisible unowned windows, overlapped windows, and pop-up windows; but the message is not sent to child windows.
-        /// Microsoft Windows Vista and later: Message sending is subject to User Interface Privilege Isolation (UIPI).
-        /// The thread of a process can send messages only to message queues of threads in processes of lesser or equal integrity level.
-        /// </param>
-        /// <param name="Msg">[in] Specifies the message to be sent.</param>
-        /// <param name="wParam">[in] Specifies additional message-specific information.</param>
-        /// <param name="lParam">[in] Specifies additional message-specific information.</param>
-        /// <returns>The return value specifies the result of the message processing; it depends on the message sent.</returns>
-        [DllImport("user32.dll")]
-        internal static extern IntPtr SendMessage(IntPtr hWnd, int Msg, int wParam, int lParam);
-
-        /// <summary>
         /// The DestroyWindow function destroys the specified window.
         /// The function sends WM_DESTROY and WM_NCDESTROY messages to the window to deactivate it and remove the keyboard focus from it.
         /// The function also destroys the window's menu, flushes the thread message queue, destroys timers, removes clipboard ownership,
