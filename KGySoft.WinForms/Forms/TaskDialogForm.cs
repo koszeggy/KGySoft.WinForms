@@ -23,7 +23,6 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Media;
@@ -209,6 +208,9 @@ namespace KGySoft.WinForms.Forms
         private static readonly Cache<SystemTextIds, string> systemTextCache = new Cache<SystemTextIds, string>(GetSystemText, 6, EnumComparer<SystemTextIds>.Comparer);
         
         private static readonly TaskDialogStandardIcons[] iconsWithColoredHeader = new[] { TaskDialogStandardIcons.SecuritySuccess, TaskDialogStandardIcons.SecurityWarning, TaskDialogStandardIcons.SecurityError, TaskDialogStandardIcons.SecurityShieldGray, TaskDialogStandardIcons.SecurityShieldBlue, TaskDialogStandardIcons.SecurityQuestion };
+        private static readonly Size mainIconReferenceSize = new Size(32, 32);
+        private static readonly Size footerIconReferenceSize = new Size(16, 16);
+
 
         #endregion
 
@@ -1373,7 +1375,8 @@ namespace KGySoft.WinForms.Forms
 
             if (pbMainIcon.Image != null)
                 pbMainIcon.Image.Dispose();
-            pbMainIcon.Image = icon.ExtractNearestBitmap(pbMainIcon.Size, PixelFormat.Format32bppArgb, false);
+            using (var resizedIcon = icon.Resize(mainIconReferenceSize.Scale(scale)))
+                pbMainIcon.Image = resizedIcon.ExtractBitmap(0);
 
             // Bug: cannot dispose previous icon because DefaultIcon can be disposed, too. It is internal so I cannot check it.
             //if (Icon != DefaultIcon)
@@ -1454,7 +1457,8 @@ namespace KGySoft.WinForms.Forms
 
             using (icon)
             {
-                pbFooterIcon.Image = icon.ExtractNearestBitmap(pbFooterIcon.Size, PixelFormat.Format32bppArgb, false);
+                using var resizedIcon = icon.Resize(footerIconReferenceSize.Scale(scale));
+                pbFooterIcon.Image = resizedIcon.ExtractBitmap(0);
             }
         }
 

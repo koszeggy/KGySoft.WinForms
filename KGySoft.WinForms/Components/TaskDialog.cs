@@ -1093,17 +1093,8 @@ namespace KGySoft.WinForms.Components
                 return;
             }
 
-            // Creating a local copy. Note that Icon.Size may report anything so trying to extract the requested size first.
-            value = newValue.ExtractNearestIcon(new Size(requiredSize, requiredSize), PixelFormat.Format32bppArgb);
-            if (value.Width == requiredSize)
-                return;
-
-            // in case no success, resizing the nearest icon
-            using (Bitmap bmp = value.ToAlphaBitmap())
-            {
-                value.Dispose();
-                value = bmp.ToIcon(requiredSize, true);
-            }
+            // This always creates a new instance, even if the size is the same.
+            value = newValue.Resize(new Size(requiredSize, requiredSize));
         }
 
         #endregion

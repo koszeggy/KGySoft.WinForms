@@ -209,7 +209,8 @@ namespace KGySoft.WinForms.Forms
 
             using (Icon icon = Icons.Shield)
             {
-                pbImage.Image = icon.ExtractNearestBitmap(pbImage.Size, PixelFormat.Format32bppArgb, false);
+                using var resizedIcon = icon.Resize(pbImage.Size);
+                pbImage.Image = resizedIcon.ExtractBitmap(0);
             }
 
             btnSendReport.Visible = ReportSender != null;
@@ -273,36 +274,35 @@ namespace KGySoft.WinForms.Forms
                 txtMessage.Text = message ?? String.Empty;
                 txtDetails.Text = details ?? String.Empty;
                 btnDetails.Visible = txtDetails.Text.Length > 0;
+                Icon? icon = null;
 
                 switch (dialogType)
                 {
                     case AdvancedDialogTypes.Information:
-                        using (Icon icon = Icons.Information)
-                        using (Bitmap bmp256 = icon.ExtractBitmap(0, false))
-                            pbImage.Image = bmp256.Resize(new Size(128, 128), true);
+                        icon = Icons.Information;
                         break;
                     case AdvancedDialogTypes.Confirmation:
-                        using (Icon icon = Icons.Question)
-                        using (Bitmap bmp256 = icon.ExtractBitmap(0, false))
-                            pbImage.Image = bmp256.Resize(new Size(128, 128), true);
+                        icon = Icons.Question;
                         break;
                     case AdvancedDialogTypes.Warning:
-                        using (Icon icon = Icons.Warning)
-                        using (Bitmap bmp256 = icon.ExtractBitmap(0, false))
-                            pbImage.Image = bmp256.Resize(new Size(128, 128), true);
+                        icon = Icons.Warning;
                         break;
                     case AdvancedDialogTypes.Error:
-                        using (Icon icon = Icons.Error)
-                        using (Bitmap bmp256 = icon.ExtractBitmap(0, false))
-                            pbImage.Image = bmp256.Resize(new Size(128, 128), true);
+                        icon = Icons.Error;
                         break;
                     case AdvancedDialogTypes.Exception:
-                        using (Icon icon = Icons.Shield) // it has 128x128 size
-                            pbImage.Image = icon.ExtractNearestBitmap(pbImage.Size, PixelFormat.Format32bppArgb, false);
+                        icon = Icons.Shield;
                         break;
                     case AdvancedDialogTypes.CustomImage:
                         // the image can be set before calling Execute
                         break;
+                }
+
+                if (icon != null)
+                {
+                    using var resizedIcon = icon.Resize(pbImage.Size); // 128x128 on 100% DPI
+                    pbImage.Image = resizedIcon.ExtractBitmap(0);
+                    icon.Dispose();
                 }
 
                 SetButtons(buttons);

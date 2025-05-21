@@ -212,7 +212,7 @@ namespace KGySoft.WinForms.Forms
             this.pbMainIcon.Location = new System.Drawing.Point(8, 9);
             this.pbMainIcon.Name = "pbMainIcon";
             this.pbMainIcon.Size = new System.Drawing.Size(32, 32);
-            this.pbMainIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbMainIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbMainIcon.TabIndex = 0;
             this.pbMainIcon.TabStop = false;
             // 
@@ -338,7 +338,7 @@ namespace KGySoft.WinForms.Forms
             this.pbFooterIcon.Location = new System.Drawing.Point(8, 4);
             this.pbFooterIcon.Name = "pbFooterIcon";
             this.pbFooterIcon.Size = new System.Drawing.Size(16, 16);
-            this.pbFooterIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.pbFooterIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbFooterIcon.TabIndex = 0;
             this.pbFooterIcon.TabStop = false;
             // 

@@ -20,12 +20,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
-
 using KGySoft.WinForms.WinApi;
 
 #endregion
 
-namespace KGySoft.WinForms.Controls
+namespace KGySoft.WinForms
 {
     /// <summary>
     ///  Helper class for scaling.

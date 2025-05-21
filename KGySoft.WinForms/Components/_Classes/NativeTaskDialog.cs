@@ -20,7 +20,6 @@ using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Linq;
 using System.Media;
 using System.Runtime.InteropServices;
@@ -53,6 +52,7 @@ namespace KGySoft.WinForms.Components
         #region Static Fields
 
         private static readonly TaskDialogStandardIcons[] whiteBackgroundIcons = new[] { TaskDialogStandardIcons.None, TaskDialogStandardIcons.Information, TaskDialogStandardIcons.Warning, TaskDialogStandardIcons.Error, TaskDialogStandardIcons.SecurityShield };
+        private static readonly Size smallIconReferenceSize = new Size(16, 16);
 
         #endregion
 
@@ -523,7 +523,7 @@ namespace KGySoft.WinForms.Components
                 if (host.FormIcon != null)
                 {
                     User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_BIG, host.FormIcon.Handle);
-                    User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_SMALL, host.FormIcon.ExtractNearestIcon(new Size(16, 16), PixelFormat.Format32bppArgb).Handle);
+                    User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_SMALL, host.FormIcon.Resize(smallIconReferenceSize.Scale(ScaleHelper.GetScale(dialogHandle))).Handle);
                 }
 
                 // only when initializing, otherwise, will be changed by UpdateStandardIcon
@@ -682,7 +682,7 @@ namespace KGySoft.WinForms.Components
             if (element == Constants.TDI_MAIN && host.FormIcon != null)
             {
                 User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_BIG, host.FormIcon.Handle);
-                User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_SMALL, host.FormIcon.ExtractNearestIcon(new Size(16, 16), PixelFormat.Format32bppArgb).Handle);
+                User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_SMALL, host.FormIcon.Resize(smallIconReferenceSize.Scale(ScaleHelper.GetScale(dialogHandle))).Handle);
             }
         }
 
