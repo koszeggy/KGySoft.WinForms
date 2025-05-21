@@ -58,6 +58,8 @@ namespace KGySoft.WinForms.Components
 
         #region Instance Fields
 
+        private readonly TaskDialogCallbackProc callback;
+
         private TaskDialogStatus dialogState = TaskDialogStatus.Initializing;
         private TaskDialog host = null!;
         private IntPtr ownerHandle;
@@ -70,6 +72,7 @@ namespace KGySoft.WinForms.Components
         private bool isReallocatePending;
         private bool isCheckedChanging;
         private bool isRadioButtonClicked;
+        private bool isEverReallocated;
 
         #endregion
 
@@ -93,6 +96,11 @@ namespace KGySoft.WinForms.Components
         #endregion
 
         #region Construction and Destruction
+
+        internal NativeTaskDialog()
+        {
+            callback = ProcessDialogMessages;
+        }
 
         ~NativeTaskDialog()
         {
@@ -230,7 +238,7 @@ namespace KGySoft.WinForms.Components
             config.pszCollapsedControlText = host.ShowDetailsText;
             config.hFooterIcon = (IntPtr)host.FooterIcon; // overridden if custom
             config.pszFooter = host.FooterText;
-            config.pfCallback = ProcessDialogMessages;
+            config.pfCallback = callback;
             config.cxWidth = (uint)host.Width;
 
             // setting custom main icon
@@ -663,8 +671,10 @@ namespace KGySoft.WinForms.Components
             if (element == Constants.TDI_FOOTER && String.IsNullOrEmpty(host.FooterText))
                 return;
 
-            // Recreating, if standard icon was used
-            if (((element == Constants.TDI_MAIN) && (config.dwFlags & TASKDIALOG_FLAGS.TDF_USE_HICON_MAIN) == 0) // standard current main icon
+            // Recreating, if standard icon was used, or when the dialog was previously reallocated.
+            // Otherwise, an AccessViolationException or ExecutionEngineException may occur when sending the TDM_UPDATE_ICON message.
+            if (isEverReallocated
+                || ((element == Constants.TDI_MAIN) && (config.dwFlags & TASKDIALOG_FLAGS.TDF_USE_HICON_MAIN) == 0) // standard current main icon
                 || ((element == Constants.TDI_FOOTER) && (config.dwFlags & TASKDIALOG_FLAGS.TDF_USE_HICON_FOOTER) == 0)) // standard current footer icon
             {
                 ReallocateDialog();
@@ -770,6 +780,7 @@ namespace KGySoft.WinForms.Components
             }
 
             isReallocatePending = false;
+            isEverReallocated = true;
 
             FreeUpdatedTexts();
             FreeButtons(config.pButtons, config.cButtons);
