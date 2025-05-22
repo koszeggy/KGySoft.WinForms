@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
@@ -99,7 +98,6 @@ namespace KGySoft.WinForms.Controls
         private Timer? defaultAnimationTimer;
         private bool isAlternativeDefaultImage;
         private Bitmap? cachedSecurityShieldImage; // an instance from IconsCache, should not be disposed
-        private Size cachedSecurityShieldImageSize;
         private PointF lastScale;
 
         #endregion
@@ -393,21 +391,11 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                Size currentSize = this.ScaleSize(referenceIconSize);
-                if (currentSize != cachedSecurityShieldImageSize || cachedSecurityShieldImage == null)
+                if (cachedSecurityShieldImage == null)
                 {
-                    if (cachedSecurityShieldImage != null && ReferenceEquals(cachedSecurityShieldImage, currentImage))
-                    {
-                        isImageUpToDate = false;
-                        if (ReferenceEquals(cachedSecurityShieldImage, base.Image))
-                            base.Image = null;
-                    }
-
+                    Size size = this.ScaleSize(referenceIconSize);
                     using var icon = Icons.SystemShield;
-                    cachedSecurityShieldImage = icon.GetCachedBitmap(nameof(Icons.SystemShield), currentSize);
-                    cachedSecurityShieldImageSize = currentSize;
-                    if (!isImageUpToDate)
-                        Invalidate();
+                    cachedSecurityShieldImage = icon.GetCachedBitmap(nameof(Icons.SystemShield), size);
                 }
 
                 return cachedSecurityShieldImage;
@@ -591,19 +579,23 @@ namespace KGySoft.WinForms.Controls
                     base.WndProc(ref m);
                     return;
 
-                //// Non-System FlatStyle with elevated icon: invalidating the icon
-                //case Constants.WM_DPICHANGED_BEFOREPARENT when isElevated && base.FlatStyle != FlatStyle.System && ReferenceEquals(base.Image, cachedSecurityShieldImage):
-                //    base.WndProc(ref m);
-                //    isImageUpToDate = false;
-                //    base.Image = null; // it will be updated in CheckImage
-                //    Invalidate();
-                //    return;
-
-                // System FlatStyle: the WM_DPICHANGED_AFTERPARENT resets the elevated icon, but we want to prevent if an image is set
-                case Constants.WM_DPICHANGED_AFTERPARENT when isElevated && base.FlatStyle == FlatStyle.System && base.Image != null:
+                // Known issue: Security shield icon size is not updated with non-V2 awareness
+                case Constants.WM_DPICHANGED_AFTERPARENT when isElevated && base.FlatStyle == FlatStyle.System:
                     base.WndProc(ref m);
-                    isImageUpToDate = false;
-                    Invalidate();
+
+                    // System FlatStyle: the WM_DPICHANGED_AFTERPARENT resets the elevated icon, but we want to prevent that if an image is set
+                    if (base.Image != null)
+                    {
+                        isImageUpToDate = false;
+                        Invalidate();
+                    }
+#if NETFRAMEWORK
+                    // .NET Framework: The Elevated icon size is not updated, so we need to recreate the handle
+                    // Would not be needed for .NET Framework 4.7+ when app.config awareness is also set to V2.
+                    else if (Created)
+                        RecreateHandle();
+#endif
+
                     return;
             }
 
@@ -622,6 +614,7 @@ namespace KGySoft.WinForms.Controls
                 invalidated = true;
             }
 
+            CheckDpiChange();
             if (CheckImage() && AutoSize)
             {
                 PerformLayout();
@@ -643,6 +636,7 @@ namespace KGySoft.WinForms.Controls
         {
         }
 
+        /// <inheritdoc />
         protected override void OnParentChanged(EventArgs e)
         {
             base.OnParentChanged(e);
@@ -1003,6 +997,7 @@ namespace KGySoft.WinForms.Controls
             {
                 base.Image = null;
                 isImageUpToDate = false;
+                cachedSecurityShieldImage = null;
                 Invalidate();
             }
 
