@@ -34,6 +34,15 @@ namespace KGySoft.WinForms.WinApi
         [DllImport("gdi32.dll")]
         internal static extern int GetDeviceCaps(IntPtr hdc, DeviceCaps nIndex);
 
+        /// <summary>
+        /// The GetStockObject function retrieves a handle to one of the stock pens, brushes, fonts, or palettes.
+        /// </summary>
+        /// <param name="i">The type of stock object.</param>
+        /// <returns>If the function succeeds, the return value is a handle to the requested logical object. If the function fails, the return value is NULL.</returns>
+        [DllImport("Gdi32.dll", SetLastError = true)]
+        public static extern IntPtr GetStockObject(int i);
+
+
         #endregion
     }
 }

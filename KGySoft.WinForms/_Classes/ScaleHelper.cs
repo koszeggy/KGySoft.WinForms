@@ -20,6 +20,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
+using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -27,10 +28,106 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms
 {
     /// <summary>
-    ///  Helper class for scaling.
+    ///  Helper class for high DPI scaling.
     /// </summary>
-    internal static class ScaleHelper
+    public static class ScaleHelper
     {
+        #region FormDpiChangeNotifier class
+
+        private sealed class FormDpiChangeNotifier : NativeWindow, IDisposable
+        {
+            #region Fields
+
+            private readonly Control childControl;
+
+            private Form? parentForm;
+
+            #endregion
+
+            #region Constructors
+
+            internal FormDpiChangeNotifier(Control host)
+            {
+                childControl = host;
+                host.ParentChanged += Host_ParentChanged;
+                host.Disposed += Host_Disposed;
+                ResetParent();
+            }
+
+            #endregion
+
+            #region Methods
+
+            #region Public Methods
+
+            public void Dispose()
+            {
+                ReleaseHandle();
+                childControl.ParentChanged -= Host_ParentChanged;
+                childControl.Disposed -= Host_Disposed;
+            }
+
+            #endregion
+
+            #region Protected Methods
+
+            protected override void WndProc(ref Message m)
+            {
+                if (m.Msg == Constants.WM_DPICHANGED)
+                {
+                    if (childControl is IPerMonitorDpiAware dpiAwareControl)
+                        dpiAwareControl.ParentFormDpiChanged();
+                    else
+                        childControl.Invalidate();
+                }
+
+                base.WndProc(ref m);
+            }
+
+            #endregion
+
+            #region Private Methods
+
+            private void Host_ParentChanged(object? sender, EventArgs e) => ResetParent();
+
+            private void ResetParent()
+            {
+                Form? newForm = childControl.FindForm();
+                if (parentForm != null)
+                {
+                    ReleaseHandle();
+                    parentForm.HandleCreated -= ParentForm_HandleCreated;
+                }
+
+                if (newForm != null)
+                {
+                    parentForm = newForm;
+                    parentForm.HandleCreated += ParentForm_HandleCreated;
+                    if (parentForm.IsHandleCreated)
+                        AssignHandle(parentForm.Handle);
+                }
+            }
+
+            #endregion
+
+            #region Event handlers
+
+            private void ParentForm_HandleCreated(object? sender, EventArgs e)
+            {
+                ReleaseHandle();
+                if (sender is Form form)
+                    AssignHandle(form.Handle);
+            }
+
+            private void Host_Disposed(object? sender, EventArgs e) => Dispose();
+
+            #endregion
+
+            #endregion
+        }
+
+        #endregion
+
         #region Constants
 
         private const float defaultDpi = 96f;
@@ -42,12 +139,23 @@ namespace KGySoft.WinForms
         private static readonly bool isProcessPerMonitorAware = WindowsUtils.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
         private static readonly Point systemInitialDpi = GetDpiForHdc(User32.GetDC(IntPtr.Zero));
         private static readonly PointF systemScale = new PointF(systemInitialDpi.X / defaultDpi, systemInitialDpi.Y / defaultDpi);
+        private static readonly PointF defaultScale = new PointF(1f, 1f);
+
+#if NETFRAMEWORK
+        private static Font? defaultFont;
+#endif
 
         #endregion
 
         #region Properties
 
-        private static bool IsThreadPerMonitorAware
+        #region Public Properties
+
+        public static PointF SystemScale => systemScale;
+
+        public static bool IsProcessPerMonitorAware => isProcessPerMonitorAware;
+
+        public static bool IsThreadPerMonitorAware
         {
             get
             {
@@ -64,6 +172,71 @@ namespace KGySoft.WinForms
             }
         }
 
+        public static int PerMonitorAwarenessVersion
+        {
+            get
+            {
+                if (!isProcessPerMonitorAware)
+                    return 0;
+                if (!WindowsUtils.IsWindows10_1607OrLater)
+                    return 1;
+
+                IntPtr dpiAwareness = User32.GetThreadDpiAwarenessContext();
+                if (User32.AreDpiAwarenessContextsEqual(dpiAwareness, Constants.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2))
+                    return 2;
+                if (User32.AreDpiAwarenessContextsEqual(dpiAwareness, Constants.DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE))
+                    return 1;
+                return 0;
+            }
+        }
+
+#if NETFRAMEWORK
+        public static Font DefaultFont
+        {
+            get
+            {
+                if (defaultFont == null)
+                {
+                    if (IsDefaultSystemScale)
+                        defaultFont = Control.DefaultFont;
+                    else
+                    {
+                        try
+                        {
+                            // Providing a workaround in .NET Framework for the case when the default font is not scaled correctly.
+                            // This occurs when SystemFonts.DefaultFont returns the stock font DEFAULT_GUI_FONT, whose PointSize is smaller on higher DPIs.
+                            // This is not always the case, e.g. with Arabic or Japanese locales the default font has a constant size in Points.
+                            IntPtr stockFont = Gdi32.GetStockObject(Constants.DEFAULT_GUI_FONT);
+                            using Font defaultGuiFont = Font.FromHfont(stockFont);
+                            Font defaultControlFont = Control.DefaultFont;
+
+                            defaultFont = Equals(defaultGuiFont.FontFamily, defaultControlFont.FontFamily) && defaultGuiFont.SizeInPoints.Equals(defaultControlFont.SizeInPoints)
+                                ? new Font(defaultGuiFont.FontFamily, defaultGuiFont.Size / defaultDpi * 72f, defaultGuiFont.Style, GraphicsUnit.Point, defaultGuiFont.GdiCharSet, defaultGuiFont.GdiVerticalFont)
+                                : defaultControlFont;
+                        }
+                        catch (Exception)
+                        {
+                            defaultFont = Control.DefaultFont;
+                        }
+                    }
+                }
+
+                return defaultFont;
+            }
+        }
+
+#else
+        public static Font DefaultFont => Control.DefaultFont;
+#endif
+
+        #endregion
+
+        #region Internal Properties
+
+        internal static bool IsDefaultSystemScale => systemScale == defaultScale;
+
+        #endregion
+
         #endregion
 
         #region Methods
@@ -73,11 +246,11 @@ namespace KGySoft.WinForms
         /// <summary>
         /// Gets whether the display that the specified control is using has a different DPI than the initial DPI of the primary display.
         /// </summary>
-        internal static bool HasNonDefaultScaling(this Control control)
+        public static bool HasNonDefaultScaling(this Control control)
             // Avoiding calling IsThreadPerMonitorAware twice, it's called in the GetDpiForHwnd method anyway
             => isProcessPerMonitorAware && GetDpi(control) != systemInitialDpi;
 
-        internal static PointF GetScale(this Control control)
+        public static PointF GetScale(this Control control)
         {
             if (control == null!)
                 ThrowNull(nameof(control));
@@ -89,7 +262,7 @@ namespace KGySoft.WinForms
             return new PointF(dpi.X / defaultDpi, dpi.Y / defaultDpi);
         }
 
-        internal static PointF GetScale(IntPtr handle)
+        public static PointF GetScale(IntPtr handle)
         {
             if (!isProcessPerMonitorAware)
                 return systemScale;
@@ -101,7 +274,7 @@ namespace KGySoft.WinForms
         /// NOTE: May not work as expected if the <paramref name="graphics"/> is not created for a window (e.g. belongs to a bitmap or a buffered graphics).
         /// Try to use <see cref="GetScale(Control)"/> instead.
         /// </summary>
-        internal static PointF GetScale(this Graphics graphics)
+        public static PointF GetScale(this Graphics graphics)
         {
             if (graphics == null!)
                 ThrowNull(nameof(graphics));
@@ -127,12 +300,60 @@ namespace KGySoft.WinForms
             return new PointF(graphics.DpiX / defaultDpi, graphics.DpiY / defaultDpi);
         }
 
-        internal static Size ScaleSize(this Control control, Size size) => size.Scale(control.GetScale());
-        internal static int ScaleWidth(this Control control, int width) => width.Scale(control.GetScale().X);
-        internal static int ScaleHeight(this Control control, int height) => height.Scale(control.GetScale().Y);
-        internal static SizeF ScaleF(this Size size, PointF scale) => new SizeF(scale.X * size.Width, scale.Y * size.Height);
-        internal static Size Scale(this Size size, PointF scale) => Size.Round(ScaleF(size, scale));
-        internal static int Scale(this int size, float scale) => (int)Math.Round(size * scale);
+        public static Size ScaleSize(this Control control, Size size) => size.Scale(control.GetScale());
+        public static int ScaleWidth(this Control control, int width) => width.Scale(control.GetScale().X);
+        public static int ScaleHeight(this Control control, int height) => height.Scale(control.GetScale().Y);
+        public static SizeF ScaleF(this Size size, PointF scale) => new SizeF(scale.X * size.Width, scale.Y * size.Height);
+        public static Size Scale(this Size size, PointF scale) => Size.Round(ScaleF(size, scale));
+        public static int Scale(this int size, float scale) => (int)Math.Round(size * scale);
+
+        public static Font ScaleFont(this Control control, Font font) => font.ScaleFontTo(control.GetScale());
+
+        public static Font ScaleFontTo(this Font font, PointF scale)
+        {
+            if (scale == systemScale)
+                return font;
+
+            float ratio = scale.Y / systemScale.Y;
+            return new Font(font.FontFamily, font.SizeInPoints * ratio, font.Style, GraphicsUnit.Point, font.GdiCharSet, font.GdiVerticalFont);
+        }
+
+        public static Font ScaleFontFrom(this Font font, PointF scale)
+        {
+            if (scale == systemScale)
+                return font;
+
+            float ratio =  systemScale.Y / scale.Y;
+            return new Font(font.FontFamily, font.SizeInPoints * ratio, font.Style, GraphicsUnit.Point, font.GdiCharSet, font.GdiVerticalFont);
+        }
+
+        public static Font GetFontOrDefault(Font? font)
+        {
+            if (font == null)
+                return DefaultFont;
+
+#if NETFRAMEWORK
+            // NOTE: this is a workaround for the case when the default font is not scaled correctly.
+            // It is important to compare to Control.DefaultFont and not SystemFonts.DefaultFont, because the latter always returns a new instance.
+            if (ReferenceEquals(font, Control.DefaultFont))
+                return DefaultFont;
+#endif
+            return font;
+        }
+
+        #region Internal Methods
+
+        internal static void RegisterPerMonitorAwarenessNotifications(this Control control)
+        {
+            // Registering the notifier is required only for V1 awareness level. V2 provides direct notifications for the controls.
+            if (PerMonitorAwarenessVersion != 1)
+                return;
+
+            // No need to store a reference - the notifier will be disposed when the control is disposed.
+            var _ = new FormDpiChangeNotifier(control);
+        }
+
+        #endregion
 
         #endregion
 

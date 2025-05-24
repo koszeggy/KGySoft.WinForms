@@ -25,6 +25,7 @@
 =============================
 ! DataGridViewTextAndImageColumn class: Removed, it was already obsolete.
 ! DataGridViewTextAndImageCell class: Removed, it was already obsolete.
++ New ScaleHelper class
 
 + KGySoft.ComponentModel namespace:
 ===================================
