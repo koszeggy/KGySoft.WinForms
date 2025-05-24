@@ -1,0 +1,186 @@
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: ScalingFont.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
+using System.Drawing;
+
+#endregion
+
+namespace KGySoft.WinForms.Controls
+{
+    internal sealed class ScalingFont : IDisposable
+    {
+        #region Fields
+
+        private PointF scale;
+        private Font systemScaleFont;
+        private Font scaledFont;
+        private bool disposeSystemScaleFont;
+        private bool disposeScaledFont;
+
+        #endregion
+
+        #region Properties
+
+        internal Font Font => scaledFont;
+
+        #endregion
+
+        #region Constructors
+
+        internal ScalingFont(Font font, PointF scale)
+        {
+            this.scale = scale;
+            bool dispose = false;
+            if (font.Unit is not GraphicsUnit.Point)
+            {
+                dispose = true;
+                font = CloneWithPoints(font);
+            }
+
+            // initializing with system scale
+            if (scale == ScaleHelper.SystemScale)
+            {
+                disposeSystemScaleFont = dispose;
+                scaledFont = systemScaleFont = font;
+                return;
+            }
+
+            // initializing with a custom scale
+            scaledFont = font;
+            disposeScaledFont = dispose;
+            systemScaleFont = font.ScaleFontFrom(scale);
+            disposeSystemScaleFont = true;
+        }
+
+        #endregion
+
+        #region Methods
+
+        #region Static Methods
+
+        private static Font CloneWithPoints(Font font)
+        {
+            try
+            {
+                return new Font(font.FontFamily, font.SizeInPoints, font.Style, GraphicsUnit.Point, font.GdiCharSet, font.GdiVerticalFont);
+            }
+            catch (ArgumentException)
+            {
+                // Font.SizeInPoints (and Font.Height) may throw an exception if the font is already disposed.
+                // Font.Size does not throw, though this way we reinterpret the font size in Points without an actual conversion.
+                return new Font(font.FontFamily, font.Size, font.Style);
+            }
+        }
+
+        #endregion
+
+        #region Instance Methods
+
+        #region Public Methods
+
+        public void Dispose()
+        {
+            if (disposeSystemScaleFont)
+                systemScaleFont.Dispose();
+            if (disposeScaledFont)
+                scaledFont.Dispose();
+        }
+
+        #endregion
+
+        #region Internal Methods
+
+        internal void Scale(PointF newScale)
+        {
+            if (newScale == scale)
+                return;
+
+            if (disposeScaledFont)
+                scaledFont.Dispose();
+            scale = newScale;
+
+            if (scale == ScaleHelper.SystemScale)
+            {
+                scaledFont = systemScaleFont;
+                disposeScaledFont = false;
+                return;
+            }
+
+            scaledFont = systemScaleFont.ScaleFontTo(scale);
+            disposeScaledFont = true;
+        }
+
+        internal void Reset()
+        {
+            var newSystemFont = CloneWithPoints(systemScaleFont);
+            var newScaledFont = CloneWithPoints(scaledFont);
+            if (disposeSystemScaleFont)
+                systemScaleFont.Dispose();
+            if (disposeScaledFont)
+                scaledFont.Dispose();
+
+            systemScaleFont = newSystemFont;
+            scaledFont = newScaledFont;
+        }
+
+        internal void ResetFrom(Font newFont, PointF newScale)
+        {
+            if (ReferenceEquals(newFont, scaledFont) && scale == newScale)
+                return;
+
+            if (disposeScaledFont)
+                scaledFont.Dispose();
+            if (newFont.Unit is not GraphicsUnit.Point)
+            {
+                scaledFont = CloneWithPoints(newFont);
+                disposeScaledFont = true;
+            }
+            else
+            {
+                scaledFont = newFont;
+                disposeScaledFont = false;
+            }
+
+            scale = newScale;
+
+            // reset with system scale
+            if (scale == ScaleHelper.SystemScale)
+            {
+                if (ReferenceEquals(systemScaleFont, scaledFont))
+                    return;
+                if (disposeSystemScaleFont)
+                    systemScaleFont.Dispose();
+                disposeSystemScaleFont = disposeScaledFont;
+                systemScaleFont = scaledFont;
+                return;
+            }
+
+            // reset with a custom scale
+            if (disposeSystemScaleFont)
+                systemScaleFont.Dispose();
+            systemScaleFont = scaledFont.ScaleFontFrom(scale);
+            disposeSystemScaleFont = true;
+        }
+
+        #endregion
+
+        #endregion
+
+        #endregion
+    }
+}

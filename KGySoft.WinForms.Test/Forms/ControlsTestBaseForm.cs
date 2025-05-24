@@ -52,6 +52,8 @@ namespace KGySoft.WinForms.Test.Forms
         public ControlsTestBaseForm()
         {
             InitializeComponent();
+            if (LicenseManager.UsageMode != LicenseUsageMode.Designtime && SystemFonts.MessageBoxFont is Font font)
+                base.Font = font;
         }
 
         #endregion

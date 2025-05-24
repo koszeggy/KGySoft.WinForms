@@ -59,6 +59,8 @@
   + New TextRenderingQuality property: brings back the functionality of the removed RenderingQuality property,
     but only for the text.
   + Focus rectangle width is OS and DPI dependent.
+  + New AutoScaleFont property to allow automatic scaling of the font when the DPI changes even on platforms where
+    this is not supported by default.
   - Fixing appearance in high contrast mode with visual styles (Windows 10 and above). This issue presents in the
     original Button class as well. Classified as a fix rather than a breaking change as the issue is visual only.
 ! AdvancedCheckBox class:
