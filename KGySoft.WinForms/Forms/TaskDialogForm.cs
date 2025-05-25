@@ -269,6 +269,7 @@ namespace KGySoft.WinForms.Forms
             lblDetailsFooter.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
             lblFooter.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
             HelpRequested += TaskDialogForm_HelpRequested;
+            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
             if (SystemFonts.MessageBoxFont is Font font)
                 Font = font;
         }
@@ -309,6 +310,7 @@ namespace KGySoft.WinForms.Forms
             lblDetailsFooter.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
             lblFooter.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
             HelpRequested -= TaskDialogForm_HelpRequested;
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
 
             if (disposing)
             {
@@ -442,16 +444,6 @@ namespace KGySoft.WinForms.Forms
             if (dialogState == TaskDialogStatus.Showing)
                 isRecreatingDialog = true;
             base.OnHandleDestroyed(e);
-        }
-
-        protected override void OnSystemColorsChanged(EventArgs e)
-        {
-            base.OnSystemColorsChanged(e);
-            PointF scale = this.GetScale();
-            Configuration cfg = GetConfiguration();
-            ResetTheme();
-            ResetWidths(cfg, scale);
-            ResetHeights(cfg);
         }
 
         #endregion
@@ -1929,6 +1921,15 @@ namespace KGySoft.WinForms.Forms
         private void TaskDialogForm_HyperlinkClicked(object? sender, HyperlinkClickedEventArgs e) => host.OnHyperlinkClicked(e);
 
         private void TaskDialogForm_HelpRequested(object? sender, HelpEventArgs hlpevent) => host.OnHelpRequested();
+
+        private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e)
+        {
+            PointF scale = this.GetScale();
+            Configuration cfg = GetConfiguration();
+            ResetTheme();
+            ResetWidths(cfg, scale);
+            ResetHeights(cfg);
+        }
 
         // ReSharper restore InconsistentNaming
         #endregion

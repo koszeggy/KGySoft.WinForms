@@ -1104,7 +1104,7 @@ namespace KGySoft.WinForms.Controls
                 currentImage = base.Image;
                 if (base.FlatStyle == FlatStyle.System)
                 {
-                    if (!WindowsUtils.IsVistaOrLater || !WindowsUtils.IsComCtlV6Available)
+                    if (!WindowsUtils.IsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
                     {
                         base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
                         return true;
@@ -1123,11 +1123,11 @@ namespace KGySoft.WinForms.Controls
             {
                 currentImage = SecurityShieldImage;
 
-                if (base.FlatStyle != FlatStyle.System || !WindowsUtils.IsVistaOrLater || !WindowsUtils.IsComCtlV6Available)
+                if (base.FlatStyle != FlatStyle.System || !WindowsUtils.IsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
                 {
                     base.Image = currentImage;
 
-                    if (!WindowsUtils.IsVistaOrLater || !WindowsUtils.IsComCtlV6Available)
+                    if (!WindowsUtils.IsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
                     {
                         base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
                         return true;
@@ -1151,7 +1151,7 @@ namespace KGySoft.WinForms.Controls
             CheckDefaultAnimation();
 
             // Images are supported only in Vista and above in System mode when Application.EnableVisualStyles was called
-            if (base.FlatStyle == FlatStyle.System && (base.Image != null || isElevated) && (!WindowsUtils.IsVistaOrLater || !WindowsUtils.IsComCtlV6Available))
+            if (base.FlatStyle == FlatStyle.System && (base.Image != null || isElevated) && (!WindowsUtils.IsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles))
             {
                 // note: this will not change the reported FlatStyle in designer
                 base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
@@ -1271,7 +1271,7 @@ namespace KGySoft.WinForms.Controls
             Invalidate();
         }
 
-        private void VisualStyleHelper_VisualStylesChanged(object sender, EventArgs e) => CheckStyles();
+        private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e) => CheckStyles();
 
         // ReSharper restore InconsistentNaming
         #endregion

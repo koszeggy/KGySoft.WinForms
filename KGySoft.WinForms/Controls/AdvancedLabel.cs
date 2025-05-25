@@ -736,7 +736,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         #region Event Handlers
 
-        private void VisualStyleHelper_VisualStylesChanged(object sender, EventArgs e) => CheckStyles();
+        private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e) => CheckStyles();
 
         #endregion
 

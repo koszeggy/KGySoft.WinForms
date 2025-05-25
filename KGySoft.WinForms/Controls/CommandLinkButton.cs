@@ -206,7 +206,7 @@ namespace KGySoft.WinForms.Controls
         /// That is on Windows Vista or later, when Application.EnableVisualStyles() was called.
         /// NOTE: it does not mean that visual styles are actually used (use <see cref="IsNativeVisualStylesRenderingAvailable"/> to check that).
         /// </summary>
-        private static bool IsNativelySupported => WindowsUtils.IsVistaOrLater && WindowsUtils.IsComCtlV6Available;
+        private static bool IsNativelySupported => WindowsUtils.IsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles;
 
         private static Font DefaultNonThemedTextFont => defaultNonThemedTextFont ??= new Font(ScaleHelper.DialogFont, FontStyle.Bold);
         private static bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && VisualStyleHelper.RenderWithVisualStyles;
@@ -2362,7 +2362,7 @@ namespace KGySoft.WinForms.Controls
             Invalidate();
         }
 
-        private void VisualStyleHelper_VisualStylesChanged(object sender, EventArgs e) => ResetTheme();
+        private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e) => ResetTheme();
 
         // ReSharper restore InconsistentNaming
         #endregion

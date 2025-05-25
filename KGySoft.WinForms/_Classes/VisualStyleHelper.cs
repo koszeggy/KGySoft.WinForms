@@ -26,6 +26,7 @@ using KGySoft.Collections;
 using KGySoft.Drawing;
 using KGySoft.Drawing.Imaging;
 using KGySoft.WinForms.Controls;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
 using Microsoft.Win32;
@@ -49,6 +50,7 @@ namespace KGySoft.WinForms
 
         private static bool? visualStylesAvailable;
         private static bool? highContrast;
+        private static bool? isComCtlV6Available;
 
         // No need to use thread-safe caches here, because they are always read from the UI thread.
         // UserPreferenceChanged can be raised from any thread though (hence volatile), but it is not a problem if we always create a new instance when clearing the caches.
@@ -76,6 +78,39 @@ namespace KGySoft.WinForms
         ///       to make sure the delegate of the event subscription is always called in sync with the update of this property.
         /// </summary>
         internal static bool RenderWithVisualStyles => visualStylesAvailable ??= Application.RenderWithVisualStyles;
+
+        /// <summary>
+        /// Gets whether comctl32.dll V6 is available, without loading it explicitly.
+        /// After all tells, whether <see cref="Application.EnableVisualStyles"/> was already called in the current application.
+        /// </summary>
+        internal static bool InitializedWithVisualStyles
+        {
+            get
+            {
+                if (isComCtlV6Available.HasValue)
+                    return isComCtlV6Available.Value;
+
+                // pre-XP: no visual styles
+                if (!WindowsUtils.IsWindowsXpOrLater)
+                {
+                    isComCtlV6Available = false;
+                    return false;
+                }
+
+                // visual styles are actually used
+                if (VisualStyleHelper.RenderWithVisualStyles)
+                {
+                    isComCtlV6Available = true;
+                    return true;
+                }
+
+                // Here EnableVisualStyles was either called but classic theme is used (true result) or visual styles were not enabled at all (false result)
+                // We could use the Comctl32ActivationContext and get the dll version of comctl32, but then V6 would be loaded accidentally, causing that controls
+                // begin to use visual styles in non-System mode.
+                isComCtlV6Available = Accessors.ComCtlSupportsVisualStyles;
+                return isComCtlV6Available.Value;
+            }
+        }
 
         internal static bool HighContrast => highContrast ??= SystemInformation.HighContrast;
 

@@ -18,8 +18,6 @@
 using System;
 using System.Windows.Forms;
 
-using KGySoft.WinForms.Reflection;
-
 #if !NETCOREAPP
 using Microsoft.Win32;
 #endif
@@ -37,7 +35,6 @@ namespace KGySoft.WinForms.WinApi
         private static bool? isWin10OrLater;
         private static bool? isWin10_1607OrLater;
         private static bool? isWin81OrLater;
-        private static bool? isComCtlV6Available;
         private static Version? windowsVersion;
 
         #endregion
@@ -61,39 +58,6 @@ namespace KGySoft.WinForms.WinApi
         /// </summary>
         internal static bool IsWindows10_1607OrLater
             => isWin10_1607OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 14393);
-
-        /// <summary>
-        /// Gets whether comctl32.dll V6 is available, without loading it explicitly.
-        /// After all tells, whether <see cref="Application.EnableVisualStyles"/> was already called in this current application.
-        /// </summary>
-        internal static bool IsComCtlV6Available
-        {
-            get
-            {
-                if (isComCtlV6Available.HasValue)
-                    return isComCtlV6Available.Value;
-
-                // pre-XP: no visual styles
-                if (!IsWindowsXpOrLater)
-                {
-                    isComCtlV6Available = false;
-                    return false;
-                }
-
-                // visual styles are actually used
-                if (VisualStyleHelper.RenderWithVisualStyles)
-                {
-                    isComCtlV6Available = true;
-                    return true;
-                }
-
-                // Here EnableVisualStyles was either called but classic theme is used (true result) or visual styles were not enabled at all (false result)
-                // We could use the Comctl32ActivationContext and get the dll version of comctl32, but then V6 would be loaded accidentaly, causing that controls
-                // begin to use visual styles in non-System mode.
-                isComCtlV6Available = Accessors.ComCtlSupportsVisualStyles;
-                return isComCtlV6Available.Value;
-            }
-        }
 
         #endregion
 

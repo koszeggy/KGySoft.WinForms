@@ -868,7 +868,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Event Handlers
 
-        private void VisualStyleHelper_VisualStylesChanged(object sender, EventArgs e) => ResetColors(); // because DisabledForeColor may depend on visual styles
+        private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e) => ResetColors(); // because DisabledForeColor may depend on visual styles
 
         #endregion
 
