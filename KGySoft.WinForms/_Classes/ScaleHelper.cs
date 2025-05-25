@@ -141,9 +141,8 @@ namespace KGySoft.WinForms
         private static readonly PointF systemScale = new PointF(systemInitialDpi.X / defaultDpi, systemInitialDpi.Y / defaultDpi);
         private static readonly PointF defaultScale = new PointF(1f, 1f);
 
-#if NETFRAMEWORK
         private static Font? defaultFont;
-#endif
+        private static Font? dialogFont;
 
         #endregion
 
@@ -190,8 +189,12 @@ namespace KGySoft.WinForms
             }
         }
 
+        #endregion
+
+        #region Internal Properties
+
 #if NETFRAMEWORK
-        public static Font DefaultFont
+        internal static Font DefaultFont
         {
             get
             {
@@ -226,12 +229,9 @@ namespace KGySoft.WinForms
         }
 
 #else
-        public static Font DefaultFont => Control.DefaultFont;
+        internal static Font DefaultFont => defaultFont ??= Control.DefaultFont;
 #endif
-
-        #endregion
-
-        #region Internal Properties
+        internal static Font DialogFont => dialogFont ??= SystemFonts.DialogFont;
 
         internal static bool IsDefaultSystemScale => systemScale == defaultScale;
 
@@ -306,26 +306,6 @@ namespace KGySoft.WinForms
         public static SizeF ScaleF(this Size size, PointF scale) => new SizeF(scale.X * size.Width, scale.Y * size.Height);
         public static Size Scale(this Size size, PointF scale) => Size.Round(ScaleF(size, scale));
         public static int Scale(this int size, float scale) => (int)Math.Round(size * scale);
-
-        public static Font ScaleFont(this Control control, Font font) => font.ScaleFontTo(control.GetScale());
-
-        public static Font ScaleFontTo(this Font font, PointF scale)
-        {
-            if (scale == systemScale)
-                return font;
-
-            float ratio = scale.Y / systemScale.Y;
-            return new Font(font.FontFamily, font.SizeInPoints * ratio, font.Style, GraphicsUnit.Point, font.GdiCharSet, font.GdiVerticalFont);
-        }
-
-        public static Font ScaleFontFrom(this Font font, PointF scale)
-        {
-            if (scale == systemScale)
-                return font;
-
-            float ratio =  systemScale.Y / scale.Y;
-            return new Font(font.FontFamily, font.SizeInPoints * ratio, font.Style, GraphicsUnit.Point, font.GdiCharSet, font.GdiVerticalFont);
-        }
 
         public static Font GetFontOrDefault(Font? font)
         {

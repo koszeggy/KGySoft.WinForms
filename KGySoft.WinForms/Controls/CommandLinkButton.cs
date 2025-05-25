@@ -15,8 +15,6 @@
 
 #region Usings
 
-#region Used Namespaces
-
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -25,7 +23,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Design;
 using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
@@ -36,25 +33,21 @@ using KGySoft.WinForms.WinApi;
 
 #endregion
 
-#region Used Aliases
-
-using ContentAlignment = System.Drawing.ContentAlignment;
-
-#endregion
-
-#endregion
-
 namespace KGySoft.WinForms.Controls
 {
+    #region Usings
+
     using Resources = Properties.Resources;
 
+    #endregion
+
     /// <summary>
-    /// Represents a command link button. Works also in compatibility mode in a pre-Vista Windows.
-    /// To force system rendering set <see cref="FlatStyle"/> to <see cref="System.Windows.Forms.FlatStyle.System"/> (only in case of Windows Vista and above).
+    /// Represents a command link button. Works also on Windows XP in compatibility mode. Supports flat styles, elevated mode, high contrast mode,
+    /// custom colors even in disabled mode and even for the default glyph (on Windows 10 and above), buffered animations and more.
     /// </summary>
     [ToolboxBitmap(typeof(CommandLinkButton), "Resources.Toolbox.CommandLinkButton.png")]
-    [Description("Vista-like CommandLink button that works also in compatibility mode. In Vista and above you may set FlatStyle to System to render the button by the Windows.")]
-    public class CommandLinkButton : Button, ISupportsDisabledColor, ISupportsFadingInternal
+    [Description("Vista-like CommandLink button that works also in compatibility mode. On Vista and above you can set FlatStyle to System to render the button by the Windows.")]
+    public class CommandLinkButton : Button, ISupportsDisabledColor, ISupportsFadingInternal, IPerMonitorDpiAware
     {
         #region Nested Classes
 
@@ -118,12 +111,17 @@ namespace KGySoft.WinForms.Controls
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
         private readonly FadingPainterInternal fadingPainter;
 
+        // Unlike in AdvancedButton, we always have default fonts, even when AutoScaleFont is not set, because the fonts are not inherited from the parent.
+        private readonly ScalingFont defaultTextFont;
+        private readonly ScalingFont defaultDescriptionFont;
+
         private bool isHovered;
         private bool isMouseDown;
         private bool isPressed;
         private bool isElevated;
         private bool useDefaultGlyph = true;
         private bool isImageUpToDate = true;
+        private bool dpiChanging;
         private string? description;
 
         private Brush? pressedBrush;
@@ -133,8 +131,8 @@ namespace KGySoft.WinForms.Controls
         private GraphicsPath? selectionBorder;
         private Font? themedFontLarge;
         private Font? themedFontSmall;
-        private Font? textFont;
-        private Font? descriptionFont;
+        private ScalingFont? textFont;
+        private ScalingFont? descriptionFont;
         private Image? currentImage;
 
         // these must not be disposed, they are just references to statically cached images
@@ -142,8 +140,8 @@ namespace KGySoft.WinForms.Controls
         private Image? cachedDefaultGlyphNormal;
         private Image? cachedDefaultGlyphHovered;
         private Image? cachedDefaultGlyphDisabled;
-        private Size cachedSecurityShieldImageSize;
         private Size defaultGlyphSize;
+        private PointF lastScale;
 
         // NOTE: Unlike in AdvancedTextBox and AdvancedComboBox, we never set the base colors, because we handle all non-System drawings in the reimplemented adapters.
         // We only need to invoke OnBackColorChanged and OnForeColorChanged when the overriding colors are changed.
@@ -163,11 +161,13 @@ namespace KGySoft.WinForms.Controls
         private RenderingQuality textRenderingQuality;
         private RenderingQuality visualsRenderingQuality = RenderingQuality.High;
 
-        private bool fadingAnimationsEnabled = true;
-        private int fadingAnimationDefaultSpeed = 500;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
+        private int fadingAnimationDefaultSpeed = 500;
         private Timer? defaultAnimationTimer;
+        private bool fadingAnimationsEnabled = true;
         private bool isAlternativeDefaultImage;
+        private bool suppressFontChanged;
+        private bool autoScaleFont = true;
 
         #endregion
 
@@ -208,7 +208,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private static bool IsNativelySupported => WindowsUtils.IsVistaOrLater && WindowsUtils.IsComCtlV6Available;
 
-        private static Font DefaultNonThemedTextFont => defaultNonThemedTextFont ??= new Font(SystemFonts.DialogFont, FontStyle.Bold);
+        private static Font DefaultNonThemedTextFont => defaultNonThemedTextFont ??= new Font(ScaleHelper.DialogFont, FontStyle.Bold);
         private static bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && VisualStyleHelper.RenderWithVisualStyles;
         private static Color ThemedForeColor => !IsNativeVisualStylesRenderingAvailable ? defaultEnabledThemedForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL, defaultEnabledThemedForeColor);
         private static Color ThemedHoveredColor => !IsNativeVisualStylesRenderingAvailable ? defaultHoveredColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT, defaultHoveredColor);
@@ -220,6 +220,26 @@ namespace KGySoft.WinForms.Controls
         #region Instance Properties
 
         #region Public Properties
+
+        /// <summary>
+        /// Gets or sets whether fading animations are enabled for the control.
+        /// Animations work in Windows Vista and above, with non-classic themes.
+        /// </summary>
+        [Category("CommandLinkButton")]
+        [DefaultValue(true)]
+        [Description("Gets or sets whether fading animations are enabled for the control. Animations work in Windows Vista and above, with non-classic themes.")]
+        public bool FadingAnimationsEnabled
+        {
+            get => fadingAnimationsEnabled;
+            set
+            {
+                if (fadingAnimationsEnabled == value)
+                    return;
+
+                fadingAnimationsEnabled = value;
+                CheckStyles();
+            }
+        }
 
         /// <summary>
         /// Gets or sets fading options of the control.
@@ -251,6 +271,27 @@ namespace KGySoft.WinForms.Controls
                     fadingPainter.State = GetAppearance();
 
                 Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
+        /// </summary>
+        [Category("CommandLinkButton")]
+        [DefaultValue(500)]
+        [Description("Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
+        public int FadingAnimationDefaultSpeed
+        {
+            get => fadingAnimationDefaultSpeed;
+            set
+            {
+                if (fadingAnimationDefaultSpeed == value)
+                    return;
+
+                if (fadingAnimationDefaultSpeed < 0)
+                    throw new ArgumentOutOfRangeException("value");
+
+                fadingAnimationDefaultSpeed = value;
             }
         }
 
@@ -399,12 +440,67 @@ namespace KGySoft.WinForms.Controls
 
                 description = value;
                 ResetSizeCache();
-                if (IsNativeRendering)
-                    User32.SendMessage(Handle, Constants.BCM_SETNOTE, IntPtr.Zero, description);
+                ResetNativeDescription();
 
                 Invalidate();
                 if (base.AutoSize)
                     PerformLayout();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether <see cref="Font"/> and <see cref="DescriptionFont"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// <br/>Default value: <see langword="true"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>When <see langword="true"/>, <see cref="Font"/> and <see cref="DescriptionFont"/>
+        /// are automatically scaled to the current DPI of the corresponding display on every executing platform.</para>
+        /// <para>When <see langword="false"/>, the <see cref="Font"/> may or may not be scaled, depending on the default behavior of the executing platform, and <see cref="DescriptionFont"/> is never scaled.</para>
+        /// <note>Please note that this property affects the font only. The default glyph and the elevated icon (see the <see cref="IsElevated"/> property) are always scaled with V2 awareness,
+        /// whereas scaling the size (when <see cref="AutoSize"/> is <see langword="false"/>) and location always depends on the executing platform behavior.</note>
+        /// </remarks>
+        [Category("CommandLinkButton")]
+        [DefaultValue(true)]
+        [Description("True to auto scale Font and DescriptionFont when DPI changes; False to rely on the default behavior of the current executing platform, "
+            + "which scales Font on the newer .NET versions only and never scales DescriptionFont.")]
+        public bool AutoScaleFont
+        {
+            get => autoScaleFont;
+            set
+            {
+                if (autoScaleFont == value)
+                    return;
+
+                autoScaleFont = value;
+                PointF scale = value ? this.GetScale() : ScaleHelper.SystemScale;
+                textFont?.ResetFrom(textFont.Font, scale);
+                descriptionFont?.ResetFrom(descriptionFont.Font, scale);
+
+                if (!value)
+                    return;
+
+                // resetting the default fonts if no explicit fonts are set
+                bool changed = false;
+                if (textFont == null)
+                {
+                    defaultTextFont.Scale(scale);
+                    SetFont(defaultTextFont.Font);
+                    changed = true;
+                }
+
+                if (descriptionFont == null)
+                {
+                    defaultDescriptionFont.Scale(scale);
+                    changed = true;
+                }
+
+                if (changed)
+                {
+                    Invalidate();
+                    ResetSizeCache();
+                    if (AutoSize)
+                        PerformLayout();
+                }
             }
         }
 
@@ -416,14 +512,38 @@ namespace KGySoft.WinForms.Controls
         [AllowNull]
         public override Font Font
         {
-            get => textFont ?? DefaultTextFont;
+            get => (textFont ?? defaultTextFont).Font;
             set
             {
-                if (ReferenceEquals(base.Font, value))
+                if (ReferenceEquals(textFont?.Font, value))
                     return;
                 ResetSizeCache();
-                textFont = value;
-                base.Font = value ?? DefaultTextFont;
+
+                // Workaround for .NET Framework 4.7+ behavior when V2 awareness is set both in the app.config and the manifest file:
+                // The base WM_DPICHANGED_BEFOREPARENT handling sets the Font property, in which case we want to avoid setting textFont if it was null.
+                // .NET Core 3.0+ behaves differently: sets the Font only in base and even calls OnFontChanged but does not set the derived property.
+                if (dpiChanging && AutoScaleFont)
+                    return;
+
+                PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
+
+                // resetting the default font
+                if (value is null)
+                {
+                    textFont?.Dispose();
+                    textFont = null;
+                    defaultTextFont.Scale(scale);
+                }
+                // setting a font explicitly
+                else
+                {
+                    if (textFont == null)
+                        textFont = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
+                    else
+                        textFont.ResetFrom(ScaleHelper.GetFontOrDefault(value), scale);
+                }
+
+                SetFont((textFont ?? defaultTextFont).Font);
             }
         }
 
@@ -435,11 +555,31 @@ namespace KGySoft.WinForms.Controls
         [AllowNull]
         public Font DescriptionFont
         {
-            get => descriptionFont ?? DefaultDescriptionFont;
+            get => (descriptionFont ?? defaultDescriptionFont).Font;
             set
             {
+                if (ReferenceEquals(descriptionFont?.Font, value))
+                    return;
+
                 ResetSizeCache();
-                descriptionFont = value;
+                PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
+
+                // resetting the default font
+                if (value is null)
+                {
+                    descriptionFont?.Dispose();
+                    descriptionFont = null;
+                    defaultDescriptionFont.Scale(scale);
+                }
+                // setting a font explicitly
+                else
+                {
+                    if (descriptionFont == null)
+                        descriptionFont = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
+                    else
+                        descriptionFont.ResetFrom(ScaleHelper.GetFontOrDefault(value), scale);
+                }
+
                 Invalidate();
                 if (AutoSize)
                     PerformLayout();
@@ -774,12 +914,11 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                Size currentSize = this.ScaleSize(referenceElevatedIconSize);
-                if (currentSize != cachedSecurityShieldImageSize || cachedSecurityShieldImage == null)
+                if (cachedSecurityShieldImage == null)
                 {
+                    Size size = this.ScaleSize(referenceElevatedIconSize);
                     using var icon = Icons.SystemShield;
-                    cachedSecurityShieldImage = icon.GetCachedBitmap(nameof(Icons.SystemShield), currentSize);
-                    cachedSecurityShieldImageSize = currentSize;
+                    cachedSecurityShieldImage = icon.GetCachedBitmap(nameof(Icons.SystemShield), size);
                 }
 
                 return cachedSecurityShieldImage;
@@ -819,7 +958,7 @@ namespace KGySoft.WinForms.Controls
             get
             {
                 if (!VisualStyleHelper.RenderWithVisualStyles)
-                    return SystemFonts.DialogFont;
+                    return ScaleHelper.DialogFont;
 
                 if (themedFontSmall != null)
                     return themedFontSmall;
@@ -969,10 +1108,20 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                if (defaultGlyphSize.IsEmpty)
+                if (defaultGlyphSize == Size.Empty)
                 {
-                    using var g = Graphics.FromHwnd(Handle);
-                    defaultGlyphSize = GetDefaultGlyphSize(g);
+                    if (IsNativeVisualStylesRenderingAvailable)
+                    {
+                        if (ScaleHelper.PerMonitorAwarenessVersion == 1)
+                            defaultGlyphSize = this.ScaleSize(referenceThemedGlyphSize);
+                        else
+                        {
+                            using Graphics g = Graphics.FromHwnd(Handle);
+                            defaultGlyphSize = VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, 1, false);
+                        }
+                    }
+                    else
+                        defaultGlyphSize = DefaultGlyphNormal.Size;
                 }
 
                 return defaultGlyphSize;
@@ -981,11 +1130,15 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #endregion
+        #region Explicitly Implemented Interface Properties
+
+        ControlAppearanceState ISupportsFading<ControlAppearanceState>.State => GetAppearance();
 
         #endregion
 
-        #region Construction and Destruction
+        #endregion
+
+        #endregion
 
         #region Constructors
 
@@ -1000,41 +1153,12 @@ namespace KGySoft.WinForms.Controls
             base.TextAlign = ContentAlignment.TopLeft;
             base.ImageAlign = lastImageAlign = ContentAlignment.TopLeft;
             textRenderingQuality = RenderingQuality.High;
-            ResetTheme();
+            CheckStyles();
             fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton);
+            defaultTextFont = new ScalingFont(DefaultTextFont, ScaleHelper.SystemScale);
+            defaultDescriptionFont = new ScalingFont(DefaultDescriptionFont, ScaleHelper.SystemScale);
+            this.RegisterPerMonitorAwarenessNotifications();
         }
-
-        #endregion
-
-        #region Explicit Disposing
-
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-            textFont = null; // disposed by owner, if needed
-            descriptionFont = null; // disposed by owner, if needed
-
-            if (disposing)
-            {
-                FreeBrushes();
-                FreeRegions();
-
-                fadingPainter.Dispose();
-                themedFontLarge?.Dispose();
-                themedFontLarge = null;
-                themedFontSmall?.Dispose();
-                themedFontSmall = null;
-                currentImage = null;
-                cachedSecurityShieldImage = null;
-                cachedDefaultGlyphDisabled = null;
-                cachedDefaultGlyphNormal = null;
-                cachedDefaultGlyphHovered = null;
-            }
-
-            base.Dispose(disposing);
-        }
-
-        #endregion
 
         #endregion
 
@@ -1130,19 +1254,6 @@ namespace KGySoft.WinForms.Controls
             return preferredSize;
         }
 
-        private Size GetDefaultGlyphSize(Graphics g)
-        {
-            // TODO: invalidate on DPI change
-            if (defaultGlyphSize.IsEmpty)
-            {
-                defaultGlyphSize = IsNativeVisualStylesRenderingAvailable
-                    ? VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, 1, false)
-                    : DefaultGlyphNormal.Size;
-            }
-
-            return defaultGlyphSize;
-        }
-
         #endregion
 
         #region Protected Methods
@@ -1151,7 +1262,23 @@ namespace KGySoft.WinForms.Controls
         protected override void OnSystemColorsChanged(EventArgs e)
         {
             base.OnSystemColorsChanged(e);
-            ResetTheme();
+            ResetCaches();
+
+            // When no explicit fonts are set, here we don't care about AutoScaleFont and always reset the correctly sized default fonts.
+            // This is like assuming that the parent control has the correctly sized fonts, even though we don't actually rely on parent font.
+            PointF scale = this.GetScale();
+            if (textFont == null)
+            {
+                defaultTextFont.ResetFrom(DefaultTextFont, ScaleHelper.SystemScale);
+                defaultTextFont.Scale(scale);
+            }
+
+            if (descriptionFont == null)
+            {
+                defaultDescriptionFont.ResetFrom(DefaultDescriptionFont, ScaleHelper.SystemScale);
+                defaultDescriptionFont.Scale(scale);
+            }
+
             OnFlatStyleChanged(false, false);
             CheckStyles();
             if (AutoSize)
@@ -1161,15 +1288,9 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
-            if (base.FlatStyle != FlatStyle.System && WindowsUtils.IsVistaOrLater)
-            {
-                base.WndProc(ref m);
-                return;
-            }
-
             switch (m.Msg)
             {
-                case Constants.WM_PAINT:
+                case Constants.WM_PAINT when base.FlatStyle == FlatStyle.System:
                     // Image and FlatStyle are not overridable properties so in case of native rendering reacting their change here.
                     // (On custom rendering, image change is handled in OnPaint)
                     if (base.FlatStyle != lastFlatStyle)
@@ -1180,10 +1301,34 @@ namespace KGySoft.WinForms.Controls
                         OnFlatStyleChanged(true, recreateHandle);
                     }
 
+                    CheckDpiChange();
                     if (CheckImage() && AutoSize)
                         PerformLayout();
 
                     base.WndProc(ref m);
+                    return;
+
+                case Constants.WM_DPICHANGED_BEFOREPARENT:
+                    dpiChanging = true;
+                    base.WndProc(ref m);
+                    return;
+
+                // Known issue: Security shield icon size is not updated with non-V2 awareness
+                case Constants.WM_DPICHANGED_AFTERPARENT:
+                    base.WndProc(ref m);
+                    dpiChanging = false;
+#if NETFRAMEWORK
+                    if (IsNativeRendering)
+                    {
+                        // .NET Framework: Font, Glyph and Elevated icon size is not updated on DPI change, so we need to recreate the handle
+                        // Note: Would not be needed for .NET Framework 4.7+ when V2 awareness is set both in the app.config and the manifest
+                        if (Created)
+                            RecreateHandle();
+                        isImageUpToDate = false;
+                    }
+#endif
+
+                    CheckDpiChange();
                     return;
             }
 
@@ -1195,6 +1340,8 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnHandleCreated(e);
             CheckStyles();
+            ResetNativeDescription();
+            CheckDpiChange();
         }
 
         /// <inheritdoc />
@@ -1211,6 +1358,7 @@ namespace KGySoft.WinForms.Controls
                 invalidated = true;
             }
 
+            CheckDpiChange();
             if (CheckImage() && AutoSize)
             {
                 PerformLayout();
@@ -1232,7 +1380,8 @@ namespace KGySoft.WinForms.Controls
             {
                 // May occur in Windows 7 when switching from Aero to classic or high contrast theme,
                 // when visual styles are turned off in the middle of the painting session.
-                ResetTheme();
+                ResetCaches();
+                CheckDpiChange();
                 Invalidate();
             }
         }
@@ -1241,6 +1390,31 @@ namespace KGySoft.WinForms.Controls
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
+        }
+
+        /// <inheritdoc />
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+
+            // As we don't actually rely on the parent font, just inheriting the scaling of the new parent and adjusting default fonts even if AutoScaleFont is false.
+            // Then calling CheckDpiChange so if there are explicitly set fonts (and AutoScaleFont is true), they will be scaled to the new parent.
+            PointF scale = this.GetScale();
+            if (textFont == null)
+                defaultTextFont.Scale(scale);
+            if (descriptionFont == null)
+                defaultDescriptionFont.Scale(scale);
+            CheckDpiChange();
+        }
+
+        /// <inheritdoc />
+        protected override void OnFontChanged(EventArgs e)
+        {
+            if (suppressFontChanged)
+                return;
+
+            ResetSizeCache();
+            base.OnFontChanged(e);
         }
 
         /// <inheritdoc />
@@ -1382,6 +1556,36 @@ namespace KGySoft.WinForms.Controls
             (Events[Accessors.PaintEvent] as PaintEventHandler)?.Invoke(this, e);
         }
 
+        /// <inheritdoc />
+        protected override void Dispose(bool disposing)
+        {
+            textFont = null; // disposed by owner, if needed
+            descriptionFont = null; // disposed by owner, if needed
+
+            if (disposing)
+            {
+                FreeBrushes();
+                FreeRegions();
+
+                fadingPainter.Dispose();
+                themedFontLarge?.Dispose();
+                themedFontLarge = null;
+                themedFontSmall?.Dispose();
+                themedFontSmall = null;
+                defaultTextFont.Dispose();
+                defaultDescriptionFont.Dispose();
+                textFont?.Dispose();
+                descriptionFont?.Dispose();
+                currentImage = null;
+                cachedSecurityShieldImage = null;
+                cachedDefaultGlyphDisabled = null;
+                cachedDefaultGlyphNormal = null;
+                cachedDefaultGlyphHovered = null;
+            }
+
+            base.Dispose(disposing);
+        }
+
         #endregion
 
         #region Private Methods
@@ -1442,7 +1646,7 @@ namespace KGySoft.WinForms.Controls
         {
             if (fadingAnimationsEnabled && FadingPainterInternal.IsSupported)
             {
-                // to enabling animations, double buffering must be disabled
+                // to enable animations, double buffering must be disabled
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
                 return;
             }
@@ -1509,6 +1713,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         private void ResetSizeCache() => preferredSizeCache.Clear();
+
+        private void ResetNativeDescription()
+        {
+            if (IsNativeRendering)
+                User32.SendMessage(Handle, Constants.BCM_SETNOTE, IntPtr.Zero, description);
+        }
 
         private void DoPaint(PaintStateEventArgs e)
         {
@@ -1960,11 +2170,38 @@ namespace KGySoft.WinForms.Controls
             return true;
         }
 
-        private void ResetTheme()
+        private void ResetCaches()
         {
-            base.Font = Font;
             ResetGlyphCache();
+            ResetSizeCache();
             defaultGlyphSize = Size.Empty;
+        }
+
+        private void CheckDpiChange()
+        {
+            PointF scale = this.GetScale();
+            if (scale == lastScale)
+                return;
+
+            ResetCaches();
+            lastScale = scale;
+
+            if (!AutoScaleFont)
+                return;
+
+            if (textFont is ScalingFont explicitTextFont)
+                explicitTextFont.Scale(scale);
+            else
+                defaultTextFont.Scale(scale);
+
+            if (descriptionFont is ScalingFont explicitDescFont)
+                explicitDescFont.Scale(scale);
+            else
+                defaultDescriptionFont.Scale(scale);
+            SetFont((textFont ?? defaultTextFont).Font);
+
+            if (AutoSize)
+                PerformLayout();
         }
 
         private void ResetGlyphCache()
@@ -1972,6 +2209,7 @@ namespace KGySoft.WinForms.Controls
             cachedDefaultGlyphDisabled = null;
             cachedDefaultGlyphNormal = null;
             cachedDefaultGlyphHovered = null;
+            cachedSecurityShieldImage = null;
         }
 
         private bool ShouldSerializeBackColor() => false;
@@ -2039,6 +2277,52 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        private void SetFont(Font? newFont)
+        {
+            Font oldFont = base.Font;
+
+            // If base.Font equals to newFont by value, then setting the new one does not work. This is
+            // especially problematic if the old font is already disposed. In this case we must set null first.
+            if (Equals(oldFont, newFont))
+            {
+                if (ReferenceEquals(newFont, oldFont))
+                    return;
+                suppressFontChanged = true;
+                try
+                {
+                    base.Font = null!;
+                }
+                finally
+                {
+                    suppressFontChanged = false;
+                }
+            }
+
+            // Setting the actual Font property and handling if OnFontChanged is not invoked, which is the case on some platforms
+            base.Font = newFont!;
+            Invalidate();
+            if (newFont?.Height is int fontHeight && fontHeight != FontHeight)
+            {
+                ResetSizeCache();
+                FontHeight = fontHeight;
+            }
+        }
+
+        #endregion
+
+        #region Explicitly Implemented Interface Methods
+
+        int ISupportsFading<ControlAppearanceState>.GetFadingAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo)
+        {
+            // system speeds are determined by the painter
+            return FadingAnimationDefaultSpeed;
+        }
+
+        void ISupportsFading<ControlAppearanceState>.PaintState(ControlAppearanceState state, PaintEventArgs e)
+            => OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
+
+        void IPerMonitorDpiAware.ParentFormDpiChanged() => CheckDpiChange();
+
         #endregion
 
         #region Event Handlers
@@ -2056,64 +2340,6 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #endregion
-
-        #endregion
-
-        #region ISupportsFading Members
-
-        /// <summary>
-        /// Gets or sets whether fading animations are enabled for the control.
-        /// Animations work in Windows Vista and above, with non-classic themes.
-        /// </summary>
-        [Category("CommandLinkButton")]
-        [DefaultValue(true)]
-        [Description("Gets or sets whether fading animations are enabled for the control. Animations work in Windows Vista and above, with non-classic themes.")]
-        public bool FadingAnimationsEnabled
-        {
-            get => fadingAnimationsEnabled;
-            set
-            {
-                if (fadingAnimationsEnabled == value)
-                    return;
-
-                fadingAnimationsEnabled = value;
-                CheckStyles();
-            }
-        }
-
-        FadingOptions ISupportsFadingInternal.FadingAnimationOptions => fadingOptions;
-
-        /// <summary>
-        /// Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
-        /// </summary>
-        [Category("CommandLinkButton")]
-        [DefaultValue(500)]
-        [Description("Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
-        public int FadingAnimationDefaultSpeed
-        {
-            get => fadingAnimationDefaultSpeed;
-            set
-            {
-                if (fadingAnimationDefaultSpeed == value)
-                    return;
-
-                if (fadingAnimationDefaultSpeed < 0)
-                    throw new ArgumentOutOfRangeException("value");
-
-                fadingAnimationDefaultSpeed = value;
-            }
-        }
-
-        ControlAppearanceState ISupportsFading<ControlAppearanceState>.State => GetAppearance();
-
-        int ISupportsFading<ControlAppearanceState>.GetFadingAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo)
-        {
-            // system speeds are determined by the painter
-            return FadingAnimationDefaultSpeed;
-        }
-
-        void ISupportsFading<ControlAppearanceState>.PaintState(ControlAppearanceState state, PaintEventArgs e)
-            => OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
 
         #endregion
     }

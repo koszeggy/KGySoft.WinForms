@@ -119,6 +119,8 @@
     or when no visual style renderer is available.
   + When FadingOptions.Text is enabled, using buffered animation also for Description changes
   + When FadingOptions.Color is enabled, using buffered animation also for the description color changes.
+  + New AutoScaleFont property to allow automatic scaling of the fonts when the DPI changes. Without this the
+    DescriptionFont is never scaled, whereas Font would be scaled on the newer platforms only.
   - Improving high contrast appearance
   - Fixing colors and fonts when changing back and forth between high contrast mode and visual style themes
   - Fixing top image alignment

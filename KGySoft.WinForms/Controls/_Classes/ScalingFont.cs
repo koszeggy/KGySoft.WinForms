@@ -63,7 +63,7 @@ namespace KGySoft.WinForms.Controls
             // initializing with a custom scale
             scaledFont = font;
             disposeScaledFont = dispose;
-            systemScaleFont = font.ScaleFontFrom(scale);
+            systemScaleFont = ScaleFrom(font, scale);
             disposeSystemScaleFont = true;
         }
 
@@ -85,6 +85,24 @@ namespace KGySoft.WinForms.Controls
                 // Font.Size does not throw, though this way we reinterpret the font size in Points without an actual conversion.
                 return new Font(font.FontFamily, font.Size, font.Style);
             }
+        }
+
+        private static Font ScaleTo(Font font, PointF scale)
+        {
+            if (scale == ScaleHelper.SystemScale)
+                return font;
+
+            float ratio = scale.Y / ScaleHelper.SystemScale.Y;
+            return new Font(font.FontFamily, font.SizeInPoints * ratio, font.Style, GraphicsUnit.Point, font.GdiCharSet, font.GdiVerticalFont);
+        }
+
+        private static Font ScaleFrom(Font font, PointF scale)
+        {
+            if (scale == ScaleHelper.SystemScale)
+                return font;
+
+            float ratio = ScaleHelper.SystemScale.Y / scale.Y;
+            return new Font(font.FontFamily, font.SizeInPoints * ratio, font.Style, GraphicsUnit.Point, font.GdiCharSet, font.GdiVerticalFont);
         }
 
         #endregion
@@ -121,7 +139,7 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            scaledFont = systemScaleFont.ScaleFontTo(scale);
+            scaledFont = ScaleTo(systemScaleFont, scale);
             disposeScaledFont = true;
         }
 
@@ -173,7 +191,7 @@ namespace KGySoft.WinForms.Controls
             // reset with a custom scale
             if (disposeSystemScaleFont)
                 systemScaleFont.Dispose();
-            systemScaleFont = scaledFont.ScaleFontFrom(scale);
+            systemScaleFont = ScaleFrom(scaledFont, scale);
             disposeSystemScaleFont = true;
         }
 
