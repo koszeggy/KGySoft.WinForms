@@ -227,12 +227,16 @@ namespace KGySoft.WinForms.Controls
                     base.WndProc(ref m);
                     Rectangle rect = ClientRectangle;
 
-                    // with visual styles the border belongs to the client area
-                    if (VisualStyleHelper.RenderWithVisualStyles)
+                    // When EnableVisualStyles was called, the border belongs to the client area (even if visual styles are actually not available)
+                    if (VisualStyleHelper.InitializedWithVisualStyles)
                         rect.Inflate(-2, -2);
 
-                    int paddingLeft = ShowCheckBox ? 17 : 0;
-                    int paddingRight = ShowUpDown ? 18 : 33;
+                    int paddingLeft = VisualStyleHelper.RenderWithVisualStyles
+                        ? ShowCheckBox ? 17 : 0
+                        : ShowCheckBox ? 19 : 0;
+                    int paddingRight = VisualStyleHelper.RenderWithVisualStyles
+                        ? ShowUpDown ? 18 : 33
+                        : 17;
                     bool rtl = RightToLeftLayout && RightToLeft == RightToLeft.Yes;
                     if (rtl)
                         (paddingLeft, paddingRight) = (paddingRight, paddingLeft);
