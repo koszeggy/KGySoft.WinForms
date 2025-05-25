@@ -259,12 +259,10 @@ namespace KGySoft.WinForms.WinApi
             return size.ToSize();
         }
 
-        internal static Font GetThemeFont(IntPtr hTheme, IntPtr hdc, int part, int state, int prop)
+        internal static Font? GetThemeFont(IntPtr hTheme, IntPtr hdc, int part, int state, int prop)
         {
             int hResult = NativeMethods.GetThemeFont(hTheme, hdc, part, state, prop, out LOGFONT logFont);
-            if (hResult != Constants.S_OK)
-                ThrowError(hResult);
-            return Font.FromLogFont(logFont);
+            return hResult != Constants.S_OK ? null : Font.FromLogFont(logFont);
         }
 
         internal static bool TryGetThemeTransitionDuration(IntPtr hTheme, int part, int stateFrom, int stateTo, int prop, out int duration)

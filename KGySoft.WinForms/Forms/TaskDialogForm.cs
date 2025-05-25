@@ -343,7 +343,8 @@ namespace KGySoft.WinForms.Forms
                             using Graphics g = Graphics.FromHwnd(lblMainInstruction.Handle);
                             try
                             {
-                                mainInstructionsFont = VisualStyleHelper.GetFont(VisualStyleHelper.TaskDialogTheme, g, Constants.TDLG_MAININSTRUCTIONPANE);
+                                mainInstructionsFont = VisualStyleHelper.GetFont(VisualStyleHelper.TaskDialogTheme, g, Constants.TDLG_MAININSTRUCTIONPANE)
+                                    ?? new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
                             }
                             catch (Exception e) when (!e.IsCritical())
                             {

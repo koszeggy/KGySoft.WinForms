@@ -939,14 +939,24 @@ namespace KGySoft.WinForms.Controls
                 if (!VisualStyleHelper.RenderWithVisualStyles)
                     return DefaultNonThemedTextFont;
 
-                if (themedFontLarge != null)
-                    return themedFontLarge;
-
-                themedFontLarge = new Font("Segoe UI", 12f, FontStyle.Regular, GraphicsUnit.Point);
-                if (themedFontLarge.Name != "Segoe UI")
+                if (themedFontLarge == null)
                 {
-                    themedFontLarge.Dispose();
-                    themedFontLarge = new Font("MS Shell Dlg 2", 12f, FontStyle.Regular, GraphicsUnit.Point);
+                    if (IsNativeVisualStylesRenderingAvailable)
+                    {
+                        // Graphics of the screen is alright, we need to get the Font for the default system DPI.
+                        using Graphics g = Graphics.FromHwnd(IntPtr.Zero);
+                        themedFontLarge = VisualStyleHelper.GetFont(VisualStyleHelper.ButtonTheme, g, (int)BUTTONPARTS.BP_COMMANDLINK);
+                    }
+
+                    if (themedFontLarge == null)
+                    {
+                        themedFontLarge = new Font("Segoe UI", 12f, FontStyle.Regular, GraphicsUnit.Point);
+                        if (themedFontLarge.Name != "Segoe UI")
+                        {
+                            themedFontLarge.Dispose();
+                            themedFontLarge = new Font("MS Shell Dlg 2", 12f, FontStyle.Regular, GraphicsUnit.Point);
+                        }
+                    }
                 }
 
                 return themedFontLarge;
@@ -960,15 +970,24 @@ namespace KGySoft.WinForms.Controls
                 if (!VisualStyleHelper.RenderWithVisualStyles)
                     return ScaleHelper.DialogFont;
 
-                if (themedFontSmall != null)
-                    return themedFontSmall;
-
-                themedFontSmall = new Font("Segoe UI", 9f, FontStyle.Regular, GraphicsUnit.Point);
-                if (themedFontSmall.Name != "Segoe UI")
+                if (themedFontSmall == null)
                 {
-                    themedFontSmall.Dispose();
-                    themedFontSmall = new Font("MS Shell Dlg 2", 9f, FontStyle.Regular, GraphicsUnit.Point);
+                    if (IsNativeVisualStylesRenderingAvailable)
+                    {
+                        var largeFont = DefaultTextFont;
+                        themedFontSmall = new Font(largeFont.FontFamily, largeFont.SizeInPoints * 0.75f, largeFont.Style, GraphicsUnit.Point, largeFont.GdiCharSet, largeFont.GdiVerticalFont);
+                    }
+                    else
+                    {
+                        themedFontSmall = new Font("Segoe UI", 9f, FontStyle.Regular, GraphicsUnit.Point);
+                        if (themedFontSmall.Name != "Segoe UI")
+                        {
+                            themedFontSmall.Dispose();
+                            themedFontSmall = new Font("MS Shell Dlg 2", 9f, FontStyle.Regular, GraphicsUnit.Point);
+                        }
+                    }
                 }
+
                 return themedFontSmall;
             }
         }
@@ -1262,27 +1281,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnSystemColorsChanged(EventArgs e)
         {
             base.OnSystemColorsChanged(e);
-            ResetCaches();
-
-            // When no explicit fonts are set, here we don't care about AutoScaleFont and always reset the correctly sized default fonts.
-            // This is like assuming that the parent control has the correctly sized fonts, even though we don't actually rely on parent font.
-            PointF scale = this.GetScale();
-            if (textFont == null)
-            {
-                defaultTextFont.ResetFrom(DefaultTextFont, ScaleHelper.SystemScale);
-                defaultTextFont.Scale(scale);
-            }
-
-            if (descriptionFont == null)
-            {
-                defaultDescriptionFont.ResetFrom(DefaultDescriptionFont, ScaleHelper.SystemScale);
-                defaultDescriptionFont.Scale(scale);
-            }
-
-            OnFlatStyleChanged(false, false);
-            CheckStyles();
-            if (AutoSize)
-                PerformLayout();
+            ResetTheme();
         }
 
         /// <inheritdoc />
@@ -2175,6 +2174,36 @@ namespace KGySoft.WinForms.Controls
             ResetGlyphCache();
             ResetSizeCache();
             defaultGlyphSize = Size.Empty;
+        }
+
+        private void ResetTheme()
+        {
+            ResetCaches();
+
+            // Resetting default fonts
+            themedFontLarge?.Dispose();
+            themedFontSmall?.Dispose();
+            themedFontLarge = null;
+            themedFontSmall = null;
+            defaultTextFont.ResetFrom(DefaultTextFont, ScaleHelper.SystemScale);
+            defaultDescriptionFont.ResetFrom(DefaultDescriptionFont, ScaleHelper.SystemScale);
+
+            // When no explicit fonts are set, here we don't care about AutoScaleFont and always reset the correctly sized default fonts.
+            // This is like assuming that the parent control has the correctly sized fonts, even though we don't actually rely on parent font.
+            PointF scale = this.GetScale();
+            if (textFont == null)
+                defaultTextFont.Scale(scale);
+            if (descriptionFont == null)
+                defaultDescriptionFont.Scale(scale);
+
+            SetFont((textFont ?? defaultTextFont).Font);
+            Invalidate();
+
+            // Handling possible enabling/disabling of visual styles
+            OnFlatStyleChanged(false, false);
+            CheckStyles();
+            if (AutoSize)
+                PerformLayout();
         }
 
         private void CheckDpiChange()
