@@ -57,8 +57,24 @@ namespace KGySoft.WinForms
 
         #endregion
 
+        #region Events
+
+        /// <summary>
+        /// Occurs when the visual styles have changed.
+        /// Unlike Control.SystemColorsChanged, this event is raised for the VisualStyle category of UserPreferenceChanged, and
+        /// makes sure that the cached value of <see cref="RenderWithVisualStyles"/> is always up-to-date.
+        /// </summary>
+        internal static event EventHandler? VisualStylesChanged;
+
+        #endregion
+
         #region Properties
 
+        /// <summary>
+        /// Gets a cached value indicating whether visual styles are available.
+        /// NOTE: when using this property, use VisualStylesChanged of this class instead of Control.SystemColorsChanged or SystemEvents.UserPreferenceChanged
+        ///       to make sure the delegate of the event subscription is always called in sync with the update of this property.
+        /// </summary>
         internal static bool RenderWithVisualStyles => visualStylesAvailable ??= Application.RenderWithVisualStyles;
 
         internal static bool HighContrast => highContrast ??= SystemInformation.HighContrast;
@@ -192,7 +208,13 @@ namespace KGySoft.WinForms
             hasDefaultAnimationCache = CreateHasDefaultAnimationCache();
         }
 
-        internal static bool HasDefaultAnimation(int part, int state1, int state2) => hasDefaultAnimationCache[(part, state1, state2)];
+        internal static bool HasDefaultAnimation(int part, int state1, int state2)
+        {
+            Debug.Assert(RenderWithVisualStyles);
+            if (!RenderWithVisualStyles)
+                return false;
+            return hasDefaultAnimationCache[(part, state1, state2)];
+        }
 
         #endregion
 
@@ -316,8 +338,18 @@ namespace KGySoft.WinForms
 
         private static void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
         {
-            if (e.Category is UserPreferenceCategory.VisualStyle or UserPreferenceCategory.General) // General: Light/Dark mode or DPI
+            // Color: For compatibility reasons, Color is always raised besides VisualStyle when visual styles change, and Color change is emitted before VisualStyle.
+            //        Control.SystemColorsChanged is also triggered for the Color category.
+            // VisualStyle: Using this instead of Color. It's triggered even when switching between non-visual style themes, not just when toggling visual styles on and off.
+            //              Though Application.RenderWithVisualStyles would be alright even after the Color event, some system functions (e.g. BCM_GETIDEALSIZE - used by
+            //              CommandLinkButton.GetPreferredSize when FlatStyle is System) still return the old values after Color, but the good ones when VisualStyle is raised.
+            // General: Light/Dark mode or DPI. Unfortunately, VisualStyle and Color do not include Light/Dark mode changes, and General may be invoked multiple times.
+            if (e.Category is UserPreferenceCategory.VisualStyle or UserPreferenceCategory.General)
+            {
                 ClearCaches();
+                if (e.Category == UserPreferenceCategory.VisualStyle)
+                    VisualStylesChanged?.Invoke(null, EventArgs.Empty);
+            }
         }
 
         #endregion

@@ -337,6 +337,7 @@ namespace KGySoft.WinForms.Controls
         {
             CheckStyles();
             fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton);
+            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
 
         #endregion
@@ -346,6 +347,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
             if (disposing)
                 fadingPainter.Dispose();
 
@@ -407,14 +409,6 @@ namespace KGySoft.WinForms.Controls
         {
             ResetSizeCache();
             base.OnFontChanged(e);
-        }
-
-        /// <inheritdoc />
-        protected override void OnSystemColorsChanged(EventArgs e)
-        {
-            // Needed to react Theme changes (classic to non-classic and vice versa)
-            base.OnSystemColorsChanged(e);
-            CheckStyles();
         }
 
         /// <inheritdoc />
@@ -648,7 +642,7 @@ namespace KGySoft.WinForms.Controls
         {
             if (fadingAnimationsEnabled && FadingPainterInternal.IsSupported)
             {
-                // to enabling animations, double buffering must be disabled
+                // to enable animations, double buffering must be disabled
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
                 return;
             }
@@ -722,6 +716,12 @@ namespace KGySoft.WinForms.Controls
         private bool ShouldSerializeEnabledForeColor() => !enabledForeColor.IsEmpty;
         private bool ShouldSerializeDisabledBackColor() => !disabledBackColor.IsEmpty;
         private bool ShouldSerializeDisabledForeColor() => !disabledForeColor.IsEmpty;
+
+        #endregion
+
+        #region Event Handlers
+
+        private void VisualStyleHelper_VisualStylesChanged(object sender, EventArgs e) => CheckStyles();
 
         #endregion
 

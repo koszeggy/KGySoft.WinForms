@@ -451,6 +451,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             LinkClicked += AdvancedLabel_LinkClicked;
             fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton); // using button timings for enabling/disabling
             CheckStyles();
+            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
 
         #endregion
@@ -461,6 +462,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         protected override void Dispose(bool disposing)
         {
             LinkClicked -= AdvancedLabel_LinkClicked;
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
 
             if (disposing)
                 fadingPainter.Dispose();
@@ -574,13 +576,6 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                     // link could not be resolved
                 }
             }
-        }
-
-        /// <inheritdoc />
-        protected override void OnSystemColorsChanged(EventArgs e)
-        {
-            base.OnSystemColorsChanged(e);
-            CheckStyles();
         }
 
         /// <inheritdoc />
@@ -739,6 +734,12 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         #endregion
 
+        #region Event Handlers
+
+        private void VisualStyleHelper_VisualStylesChanged(object sender, EventArgs e) => CheckStyles();
+
+        #endregion
+
         #region Private Methods
 
         void AdvancedLabel_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
@@ -842,7 +843,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         {
             if (fadingAnimationsEnabled && FadingPainterInternal.IsSupported)
             {
-                // to enabling animations, double buffering must be disabled
+                // to enable animations, double buffering must be disabled
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
                 return;
             }

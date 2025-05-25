@@ -463,6 +463,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public AdvancedComboBox()
         {
+            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
 
         #endregion
@@ -566,13 +567,6 @@ namespace KGySoft.WinForms.Controls
                 OnTextChangedOnLeave(e);
         }
 
-        /// <inheritdoc />
-        protected override void OnSystemColorsChanged(EventArgs e)
-        {
-            base.OnSystemColorsChanged(e);
-            ResetColors(); // can be relevant when switching between high contrast and normal mode
-        }
-
         /// <summary>
         /// Raises the <see cref="ReadOnlyChanged"/> event.
         /// </summary>
@@ -629,6 +623,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
             ReleaseHooks();
             base.Dispose(disposing);
         }
@@ -871,6 +866,12 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Event Handlers
+
+        private void VisualStyleHelper_VisualStylesChanged(object sender, EventArgs e) => ResetColors(); // because DisabledForeColor may depend on visual styles
+
+        #endregion
+
         #endregion
 
         #region IListControl Members
@@ -879,6 +880,7 @@ namespace KGySoft.WinForms.Controls
         /// Gets whether the there is no selected item in the combo box (<see cref="ComboBox.SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
         /// </summary>
         [Obsolete("This property reflects the special value represented by the obsoleted SelectionPlusItems and should not be used")]
+        [Browsable(false)]
         public bool IsEmpty => this.IsEmpty();
 
         /// <summary>

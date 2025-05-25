@@ -78,10 +78,10 @@ namespace KGySoft.WinForms.Controls
         public FadingPainter(ISupportsFading<TState> host, TState? initialState)
         {
             if (host == null)
-                throw new ArgumentNullException("host");
+                throw new ArgumentNullException(nameof(host));
 
             if (!(host is Control))
-                throw new ArgumentException("Host should be a Control class.", "host");
+                throw new ArgumentException("Host should be a Control class.", nameof(host));
 
             operating = FadingPainterInternal.IsSupported && UxTheme.BufferedPaintInit();
             State = initialState;
@@ -289,24 +289,6 @@ namespace KGySoft.WinForms.Controls
         #region Protected Methods
 
         /// <summary>
-        /// Hooks the events of the host control.
-        /// </summary>
-        protected virtual void HookEvents()
-        {
-            Control.SystemColorsChanged += Control_SystemColorsChanged;
-            Control.SizeChanged += Control_SizeChanged;
-        }
-
-        /// <summary>
-        /// Unhooks the events of the host control.
-        /// </summary>
-        protected virtual void UnhookEvents()
-        {
-            Control.SystemColorsChanged -= Control_SystemColorsChanged;
-            Control.SizeChanged -= Control_SizeChanged;
-        }
-
-        /// <summary>
         /// Executed when Windows theme has been changed.
         /// </summary>
         protected virtual void OnThemeChanged()
@@ -363,12 +345,25 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Private Methods
+
+        private void HookEvents()
+        {
+            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_SystemColorsChanged;
+            Control.SizeChanged += Control_SizeChanged;
+        }
+
+        private void UnhookEvents()
+        {
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_SystemColorsChanged;
+            Control.SizeChanged -= Control_SizeChanged;
+        }
+
+        #endregion
+
         #region Event Handlers
 
-        void Control_SystemColorsChanged(object? sender, EventArgs e)
-        {
-            OnThemeChanged();
-        }
+        void VisualStyleHelper_SystemColorsChanged(object? sender, EventArgs e) => OnThemeChanged();
 
         void Control_SizeChanged(object? sender, EventArgs e)
         {

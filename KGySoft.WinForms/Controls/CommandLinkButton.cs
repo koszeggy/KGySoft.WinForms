@@ -368,10 +368,10 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 // turning on ButtonBase.AutoSize would turn off AutoEllipsis
-                bool autoEllipis = base.AutoEllipsis;
+                bool autoEllipsis = base.AutoEllipsis;
                 ResetSizeCache();
                 base.AutoSize = value;
-                base.AutoEllipsis = autoEllipis;
+                base.AutoEllipsis = autoEllipsis;
             }
         }
 
@@ -1177,6 +1177,10 @@ namespace KGySoft.WinForms.Controls
             defaultTextFont = new ScalingFont(DefaultTextFont, ScaleHelper.SystemScale);
             defaultDescriptionFont = new ScalingFont(DefaultDescriptionFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
+
+            // Using this instead of overriding OnSystemColorsChanged so GetPreferredSize
+            // works correctly when FlayStyle is System and visual styles are turned on or off.
+            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
 
         #endregion
@@ -1276,13 +1280,6 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Protected Methods
-
-        /// <inheritdoc />
-        protected override void OnSystemColorsChanged(EventArgs e)
-        {
-            base.OnSystemColorsChanged(e);
-            ResetTheme();
-        }
 
         /// <inheritdoc />
         protected override void WndProc(ref Message m)
@@ -1560,6 +1557,7 @@ namespace KGySoft.WinForms.Controls
         {
             textFont = null; // disposed by owner, if needed
             descriptionFont = null; // disposed by owner, if needed
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
 
             if (disposing)
             {
@@ -1655,8 +1653,11 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckDefaultAnimation()
         {
-            if (!WindowsUtils.IsVistaOrLater || !VisualStyleHelper.HasDefaultAnimation((int)BUTTONPARTS.BP_COMMANDLINK, (int)COMMANDLINKSTATES.CMDLS_DEFAULTED, (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING))
+            if (!WindowsUtils.IsVistaOrLater || !VisualStyleHelper.RenderWithVisualStyles
+                || !VisualStyleHelper.HasDefaultAnimation((int)BUTTONPARTS.BP_COMMANDLINK, (int)COMMANDLINKSTATES.CMDLS_DEFAULTED, (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING))
+            {
                 return;
+            }
 
             bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles && !VisualStyleHelper.HighContrast;
             if (enabled && (defaultAnimationTimer == null || !defaultAnimationTimer.Enabled))
@@ -2202,8 +2203,6 @@ namespace KGySoft.WinForms.Controls
             // Handling possible enabling/disabling of visual styles
             OnFlatStyleChanged(false, false);
             CheckStyles();
-            if (AutoSize)
-                PerformLayout();
         }
 
         private void CheckDpiChange()
@@ -2362,6 +2361,8 @@ namespace KGySoft.WinForms.Controls
             isAlternativeDefaultImage = !isAlternativeDefaultImage;
             Invalidate();
         }
+
+        private void VisualStyleHelper_VisualStylesChanged(object sender, EventArgs e) => ResetTheme();
 
         // ReSharper restore InconsistentNaming
         #endregion

@@ -604,6 +604,7 @@ namespace KGySoft.WinForms.Controls
             fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton);
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
+            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
 
         #endregion
@@ -677,14 +678,6 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnHandleCreated(e);
             CheckDpiChange();
-        }
-
-        /// <inheritdoc />
-        protected override void OnSystemColorsChanged(EventArgs e)
-        {
-            // Needed to react Theme changes (classic to non-classic and vice versa)
-            base.OnSystemColorsChanged(e);
-            CheckStyles();
         }
 
         /// <inheritdoc />
@@ -966,6 +959,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
             if (disposing)
             {
                 fadingPainter.Dispose();
@@ -1044,8 +1038,11 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckDefaultAnimation()
         {
-            if (!WindowsUtils.IsVistaOrLater || !VisualStyleHelper.HasDefaultAnimation((int)BUTTONPARTS.BP_PUSHBUTTON, (int)PUSHBUTTONSTATES.PBS_DEFAULTED, (int)PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING))
+            if (!WindowsUtils.IsVistaOrLater || !VisualStyleHelper.RenderWithVisualStyles
+                || !VisualStyleHelper.HasDefaultAnimation((int)BUTTONPARTS.BP_PUSHBUTTON, (int)PUSHBUTTONSTATES.PBS_DEFAULTED, (int)PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING))
+            {
                 return;
+            }
 
             bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles && !VisualStyleHelper.HighContrast;
             if (enabled && (defaultAnimationTimer == null || !defaultAnimationTimer.Enabled))
@@ -1273,6 +1270,8 @@ namespace KGySoft.WinForms.Controls
             isAlternativeDefaultImage = !isAlternativeDefaultImage;
             Invalidate();
         }
+
+        private void VisualStyleHelper_VisualStylesChanged(object sender, EventArgs e) => CheckStyles();
 
         // ReSharper restore InconsistentNaming
         #endregion
