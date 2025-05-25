@@ -16,12 +16,14 @@
 #region Usings
 
 using System;
+using System.Diagnostics;
 using System.Drawing;
 
 #endregion
 
 namespace KGySoft.WinForms.Controls
 {
+    [DebuggerDisplay("{Font} - Scale: {scale}")]
     internal sealed class ScalingFont : IDisposable
     {
         #region Fields

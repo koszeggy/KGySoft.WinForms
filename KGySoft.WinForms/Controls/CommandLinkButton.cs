@@ -289,7 +289,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 if (fadingAnimationDefaultSpeed < 0)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 fadingAnimationDefaultSpeed = value;
             }
@@ -346,7 +346,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets a value indicating whether the ellipsis character (...) appears at the right edge of the control, denoting that the control text extends beyond the specified length of the control.
         /// </summary>
-        [DefaultValue(true)] // This is the only reson for redefining.
+        [DefaultValue(true)] // This is the only reason for redefining.
         public new bool AutoEllipsis
         {
             get => base.AutoEllipsis;
@@ -1830,7 +1830,7 @@ namespace KGySoft.WinForms.Controls
             int borderWidth = FlatAppearance.BorderSize;
             Color backColor = state.BackColor;
 
-            // unlike other styles, these colors are calculated on the fly because FlatApperance changes would be painful to track
+            // unlike other styles, these colors are calculated on the fly because FlatAppearance changes would be painful to track
             if (state.Pressed)
             {
                 if (borderWidth != 0)
@@ -1842,17 +1842,15 @@ namespace KGySoft.WinForms.Controls
                 {
                     if (VisualStyleHelper.HighContrast)
                     {
-                        if (state.BackColor == SystemColors.Control)
-                            backColor = SystemColors.ControlDark;
-                        else
-                            backColor = ControlPaint.Dark(backColor);
+                        backColor = state.BackColor == SystemColors.Control
+                            ? SystemColors.ControlDark
+                            : ControlPaint.Dark(backColor);
                     }
                     else
                     {
-                        if (state.BackColor == SystemColors.Control)
-                            backColor = SystemColors.ControlLightLight;
-                        else
-                            backColor = ControlPaint.LightLight(backColor);
+                        backColor = state.BackColor == SystemColors.Control
+                            ? SystemColors.ControlLightLight
+                            : ControlPaint.LightLight(backColor);
 
                         float percentage = 0.9f;
                         if (backColor.GetBrightness() < 0.5f)
@@ -2354,7 +2352,7 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Event Handlers
-        // ReSharper disabsle InconsistentNaming
+        // ReSharper disable InconsistentNaming
 
         void defaultAnimationTimer_Tick(object? sender, EventArgs e)
         {

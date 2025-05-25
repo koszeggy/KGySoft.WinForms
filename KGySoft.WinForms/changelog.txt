@@ -78,6 +78,8 @@
   + New VisualsRenderingQuality property: affects the quality of the check box when no proper size is available by
     the visual style renderer on the current DPI.
   + Focus rectangle width is OS and DPI dependent.
+  + New AutoScaleFont property to allow automatic scaling of the font when the DPI changes even on platforms where
+    this is not supported by default.
 ! AdvancedRadioButton class:
   ! Rendering change with Button appearance - see AdvancedButton.
   ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark (when FlatStyle is Popup or Flat,

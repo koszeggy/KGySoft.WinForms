@@ -505,7 +505,7 @@ namespace KGySoft.WinForms.Controls
 
                 fadingOptions = value;
 
-                // storing invisible state so when control turns visible it will fading when enabled
+                // storing invisible state so when control turns visible it will fade if enabled
                 if (!Visible && (fadingOptions & (FadingOptions.Appearing | FadingOptions.AnyChange)) != FadingOptions.None)
                     fadingPainter.State = GetAppearance();
 
@@ -639,7 +639,7 @@ namespace KGySoft.WinForms.Controls
                         this.SetSystemSize(systemSize);
                     }
 
-                    // now base.GetPreferresSize will return correct result
+                    // now base.GetPreferredSize will return correct result
                     preferredSize = base.GetPreferredSize(proposedSize);
                 }
 
@@ -751,7 +751,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
-            // adjusting flatstyle if needed (in System mode this is in WndProc)
+            // adjusting FlatStyle if needed (in System mode this is in WndProc)
             bool invalidated = false;
             if (base.FlatStyle != lastFlatStyle)
             {
@@ -900,7 +900,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnVisibleChanged(EventArgs e)
         {
-            // storing invisible state so when control turns visible it will fading when enabled
+            // storing invisible state so when control turns visible it will fade if enabled
             if (!Visible && (fadingOptions & (FadingOptions.Appearing | FadingOptions.AnyChange)) != FadingOptions.None)
                 fadingPainter.State = GetAppearance();
 
@@ -937,9 +937,7 @@ namespace KGySoft.WinForms.Controls
                 this.SetShowToolTip(Height < preferredHeight);
             }
             else
-            {
                 this.SetShowToolTip(false);
-            }
 
             if (GetStyle(ControlStyles.UserPaint))
             {
@@ -968,9 +966,10 @@ namespace KGySoft.WinForms.Controls
                 cachedSecurityShieldImage = null;
                 font?.Dispose();
                 defaultFont?.Dispose();
+                font = null;
+                defaultFont = null;
             }
 
-            font = null;
             base.Dispose(disposing);
         }
 
