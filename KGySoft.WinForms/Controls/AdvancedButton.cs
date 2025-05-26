@@ -56,7 +56,8 @@ namespace KGySoft.WinForms.Controls
 - Different rendering qualities
 - Adjustable colors in disabled state
 - Fading animations
-- Fixed appearance in several cases")]
+- Fixed appearance in several cases
+- Auto scaling Font on all platform targets")]
     public class AdvancedButton : Button, ISupportsDisabledColor, ISupportButtonAdapter, ISupportsFadingInternal, IPerMonitorDpiAware
     {
         #region Fields

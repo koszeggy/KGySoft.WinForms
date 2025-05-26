@@ -33,15 +33,17 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents a checkbox with full Windows Vista features support. Fully compatible with for Windows XP, too.
+    /// Represents a checkbox with additional features such as disabled colors, fixed auto size, buffered animations and more.
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedCheckBox"/> class offers the following features in addition to <see cref="CheckBox"/>:
     /// <list type="bullet">
-    /// <item><description><see cref="ButtonBase.AutoSize"/> property works as expected when check box is docked</description></item>
-    /// <item><description>Different rendering qualities (see <see cref="TextRenderingQuality"/> and <see cref="VisualsRenderingQuality"/>) properties.</description></item>
-    /// <item><description>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</description></item>
-    /// <item><description>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</description></item>
+    /// <item><see cref="ButtonBase.AutoSize"/> property works as expected when check box is docked</item>
+    /// <item>Different rendering qualities (see <see cref="TextRenderingQuality"/> and <see cref="VisualsRenderingQuality"/>) properties.</item>
+    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
+    /// <item>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</item>
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// </list>
     /// </remarks>
     [ToolboxBitmap(typeof(CheckBox))]
@@ -49,7 +51,8 @@ namespace KGySoft.WinForms.Controls
 - AutoSize works as expected when check box is docked
 - Adjustable rendering qualities
 - Adjustable colors in disabled state
-- Fading animations")]
+- Fading animations
+- Auto scaling Font on all platform targets")]
     public class AdvancedCheckBox : CheckBox, ISupportsDisabledColor, ISupportButtonAdapter, ISupportsFadingInternal, IPerMonitorDpiAware
     {
         #region Fields

@@ -95,6 +95,8 @@
   + New VisualsRenderingQuality property: affects the quality of the check area when no proper size is available by
     the visual style renderer on the current DPI.
   + Focus rectangle width is OS and DPI dependent.
+  + New AutoScaleFont property to allow automatic scaling of the font when the DPI changes even on platforms where
+    this is not supported by default.
 ! AdvancedLabel class:
   ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark
   ! BackColor/ForeColor: when the control is not Enabled, they get/set the disabled colors. The Changed events are
