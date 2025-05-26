@@ -34,24 +34,31 @@ using KGySoft.WinForms.WinApi;
 
 #endregion
 
+#region Suppressions
+
+#if NETCOREAPP3_0
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type. - false alarm in .NET Core 3.0 for Match[Collection]
+#pragma warning disable CS8602 // Dereference of a possibly null reference. - false alarm in .NET Core 3.0 for Match[Collection]
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents a label that supports correct auto sizing, different rendering qualites, disabled coloring, advanced border styles, and
-    /// is able to automatically resolve hyperlinks like the following example:
-    /// <example>
-    /// <c>This is a &lt;a href="http://kgysoft.try.hu"&gt;hyperlink&lt;/a&gt;</c>
-    /// </example>
+    /// Represents a label with additional features such as disabled colors, correct auto sizing, fixed auto size, advanced border styles and more.
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedLabel"/> class offers the following features in addition to <see cref="LinkLabel"/>:
     /// <list type="bullet">
-    /// <item><description><see cref="Label.AutoSize"/> property works as expected when label is docked</description></item>
-    /// <item><description>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</description></item>
-    /// <item><description>Advanced border styles.</description></item>
-    /// <item><description>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</description></item>
-    /// <item><description>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</description></item>
-    /// <item><description>Automatic resolving of hyperlinks.</description></item>
+    /// <item><see cref="Label.AutoSize"/> property works as expected when label is docked</item>
+    /// <item>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</item>
+    /// <item>Advanced border styles.</item>
+    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
+    /// <item>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</item>
+    /// <item>Automatic resolve of hyperlinks.</item>
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// </list>
     /// </remarks>
     [ToolboxBitmap(typeof(AdvancedLabel), "Resources.Toolbox.AdvancedLabel.png")]
@@ -61,8 +68,9 @@ namespace KGySoft.WinForms.Controls
 - Advanced border styles
 - Adjustable colors in disabled state
 - Fading animations
-- Automatic resolving of hyperlinks")]
-    public class AdvancedLabel : LinkLabel, ISupportsDisabledColor, ISupportsFadingInternal
+- Automatic resolving of hyperlinks
+- Auto scaling Font on all platform targets")]
+    public class AdvancedLabel : LinkLabel, ISupportsDisabledColor, ISupportsFadingInternal, IPerMonitorDpiAware
     {
         #region Fields
 
@@ -93,9 +101,16 @@ namespace KGySoft.WinForms.Controls
         
         private HyperlinkResolveMode resolveHyperlinks;
         private string? rawText;
-        private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
+        private bool fadingAnimationsEnabled = true;
+
+        private bool suppressFontChanged;
+        private bool autoScaleFont = true;
+        private bool dpiChanging;
+        private ScalingFont? font; // The explicitly set font.
+        private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
+        private PointF lastScale;
 
         #endregion
 
@@ -121,6 +136,8 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Properties
+        
+        #region Public Properties
 
         /// <summary>
         /// Gets or sets whether clicked links should be handled automatically or when <see cref="HyperlinkClickedEventArgs.Handled"/> is set to <see langword="false"/>.
@@ -250,23 +267,6 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
                 rawText = value;
                 ResetHyperlinkText();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets the font of the text displayed by the control.
-        /// </summary>
-        /// <returns>
-        /// The <see cref="T:System.Drawing.Font"/> to apply to the text displayed by the control. The default is the value of the <see cref="P:System.Windows.Forms.Control.DefaultFont"/> property.
-        /// </returns>
-        [AllowNull]
-        public override Font Font
-        {
-            get => base.Font;
-            set
-            {
-                ResetSizeCache();
-                base.Font = value;
             }
         }
 
@@ -408,6 +408,75 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         }
 
         /// <summary>
+        /// Gets or sets whether fading animations are enabled for the control.
+        /// Animations work in Windows Vista and above, with non-classic themes.
+        /// </summary>
+        [Category("AdvancedLabel")]
+        [DefaultValue(true)]
+        [Description("Gets or sets whether fading animations are enabled for the control. Animations work in Windows Vista and above, with non-classic themes.")]
+        public bool FadingAnimationsEnabled
+        {
+            get => fadingAnimationsEnabled;
+            set
+            {
+                if (fadingAnimationsEnabled == value)
+                    return;
+
+                fadingAnimationsEnabled = value;
+                CheckStyles();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets fading options of the control.
+        /// </summary>
+        [Category("AdvancedLabel")]
+        [DefaultValue(FadingOptions.StandardEffects)]
+        [Description("Gets or sets fading options of the control.")]
+        [TypeConverter(typeof(FlagsEnumConverter))]
+        public FadingOptions FadingAnimationOptions
+        {
+            get => fadingOptions;
+            set
+            {
+                if (fadingOptions == value)
+                    return;
+
+                if (!Enum<FadingOptions>.AllFlagsDefined(value))
+                    throw new ArgumentOutOfRangeException(nameof(value));
+
+                fadingOptions = value;
+
+                // storing invisible state so when control turns visible it will fade if enabled
+                if (!Visible && (fadingOptions & (FadingOptions.Appearing | FadingOptions.AnyChange)) != FadingOptions.None)
+                    fadingPainter.State = GetAppearance();
+
+                Invalidate();
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
+        /// </summary>
+        [Category("AdvancedLabel")]
+        [DefaultValue(500)]
+        [Description("Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
+        public int FadingAnimationDefaultSpeed
+        {
+            get => fadingAnimationDefaultSpeed;
+            set
+            {
+                if (fadingAnimationDefaultSpeed == value)
+                    return;
+
+                if (fadingAnimationDefaultSpeed < 0)
+                    throw new ArgumentOutOfRangeException(nameof(value));
+
+                fadingAnimationDefaultSpeed = value;
+            }
+        }
+
+        /// <summary>
         /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
         /// </summary>
         public new bool UseCompatibleTextRendering
@@ -417,6 +486,87 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             {
                 ResetSizeCache();
                 base.UseCompatibleTextRendering = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// <br/>Default value: <see langword="true"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>When <see langword="true"/>, the <see cref="Font"/> is automatically scaled to the current DPI of the corresponding display on every executing platform.
+        /// It also ensures that without an explicitly set font it is inherited from <see cref="Control.Parent"/>, which would be the normal behavior, but is broken in .NET 6+ and above.</para>
+        /// <para>When <see langword="false"/>, the <see cref="Font"/> may or may not be scaled, and the font of the parent control may or may not be applied correctly, depending on the default behavior of the executing platform.</para>
+        /// <note>Please note that this property affects the font only. Scaling the size and location always depends on the executing platform behavior.</note>
+        /// </remarks>
+        [Category("AdvancedLabel")]
+        [DefaultValue(true)]
+        [Description("True to auto scale Font when DPI changes and inherit the font when it's not explicitly set; False to rely on the default behavior of the current executing platform.")]
+        public bool AutoScaleFont
+        {
+            get => autoScaleFont;
+            set
+            {
+                Debug.Assert(AutoScaleFont ^ defaultFont == null);
+                if (autoScaleFont == value)
+                    return;
+
+                autoScaleFont = value;
+                PointF scale = value ? this.GetScale() : ScaleHelper.SystemScale;
+                font?.ResetFrom(font.Font, scale);
+                if (value)
+                {
+                    defaultFont = new ScalingFont(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
+
+                    // theoretically this would not be needed, but in .NET 6+ the default font handling gets broken after the first DPI change
+                    SetFont((font ?? defaultFont).Font);
+                    return;
+                }
+
+                defaultFont?.Dispose();
+                defaultFont = null;
+                if (font == null)
+                    base.Font = null!;
+            }
+        }
+
+        /// <inheritdoc />
+        [AllowNull]
+        public override Font Font
+        {
+            get => base.Font;
+            set
+            {
+                Debug.Assert(AutoScaleFont ^ defaultFont == null);
+                if (ReferenceEquals(base.Font, value))
+                    return;
+
+                ResetSizeCache();
+
+                // Workaround for .NET Framework 4.7+ behavior when V2 awareness is set both in the app.config and the manifest file:
+                // The base WM_DPICHANGED_BEFOREPARENT handling sets the Font property, in which case we want to avoid setting font if it was null.
+                // .NET Core 3.0+ behaves differently: sets the Font only in base and even calls OnFontChanged but does not set the derived property.
+                if (dpiChanging && AutoScaleFont)
+                    return;
+
+                PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
+
+                // resetting the default font; or null, when AutoScaleFont is false
+                if (value is null)
+                {
+                    font?.Dispose();
+                    font = null;
+                    defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
+                    SetFont(defaultFont?.Font);
+                    return;
+                }
+
+                // setting a font explicitly
+                if (font == null)
+                    font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
+                else
+                    font.ResetFrom(ScaleHelper.GetFontOrDefault(value), scale);
+                SetFont(font.Font);
             }
         }
 
@@ -439,7 +589,13 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         #endregion
 
-        #region Construction and Destruction
+        #region Explicitly Implemented Interface Properties
+
+        ControlAppearanceState ISupportsFading<ControlAppearanceState>.State => GetAppearance();
+
+        #endregion
+        
+        #endregion
 
         #region Constructors
 
@@ -448,29 +604,12 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         /// </summary>
         public AdvancedLabel()
         {
-            LinkClicked += AdvancedLabel_LinkClicked;
-            fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton); // using button timings for enabling/disabling
             CheckStyles();
+            fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton); // using button timings for enabling/disabling
+            defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
+            this.RegisterPerMonitorAwarenessNotifications();
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
-
-        #endregion
-
-        #region Explicit Disposing
-
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-            LinkClicked -= AdvancedLabel_LinkClicked;
-            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
-
-            if (disposing)
-                fadingPainter.Dispose();
-
-            base.Dispose(disposing);
-        }
-
-        #endregion
 
         #endregion
 
@@ -481,7 +620,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         /// <inheritdoc />
         public override Size GetPreferredSize(Size proposedSize)
         {
-            // Workaround: Immediately after calculating preferred size (eg. Dock == Top), another request arrives with empty proposedSize, which ruins the constrained result.
+            // Workaround: Immediately after calculating preferred size (e.g. Dock == Top), another request arrives with empty proposedSize, which ruins the constrained result.
             if (proposedSize == Size.Empty && lastProposedSize != Size.Empty && Dock != DockStyle.None)
             {
                 proposedSize = lastProposedSize;
@@ -541,6 +680,15 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         #region Protected Methods
 
+        protected override void OnFontChanged(EventArgs e)
+        {
+            if (suppressFontChanged)
+                return;
+
+            ResetSizeCache();
+            base.OnFontChanged(e);
+        }
+
         /// <inheritdoc />
         protected override void OnMouseMove(MouseEventArgs e)
         {
@@ -554,14 +702,26 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             }
         }
 
+        /// <inheritdoc />
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected override void OnLinkClicked(LinkLabelLinkClickedEventArgs e)
+        {
+            base.OnLinkClicked(e);
+            if (e.Link?.LinkData is string url)
+            {
+                HyperlinkClickedEventArgs args = new HyperlinkClickedEventArgs(url);
+                OnHyperlinkClicked(args);
+            }
+        }
+
         /// <summary>
         /// Raises the <see cref="HyperlinkClicked"/> event.
         /// </summary>
         /// <param name="args">A <see cref="HyperlinkClickedEventArgs"/> that contains the event data.</param>
         protected virtual void OnHyperlinkClicked(HyperlinkClickedEventArgs args)
         {
-            if (HyperlinkClicked != null)
-                HyperlinkClicked.Invoke(this, args);
+            if (HyperlinkClicked is { } handler)
+                handler.Invoke(this, args);
             else
                 args.Handled = false;
 
@@ -599,13 +759,53 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                 return;
             }
 
-            fadingPainter.State ??= GetAppearance();
-            fadingPainter.Paint(e);
+            try
+            {
+                fadingPainter.State ??= GetAppearance();
+                fadingPainter.Paint(e);
+            }
+            catch (Exception ex) when (!ex.IsCritical())
+            {
+                lastScale = PointF.Empty;
+                font?.Reset();
+                defaultFont?.Reset();
+                CheckDpiChange();
+                SetFont((font ?? defaultFont)?.Font ?? base.Font);
+            }
         }
 
         /// <inheritdoc />
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
+        }
+
+        /// <inheritdoc />
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+
+            // Setting default font from new parent font without scaling (using current scaling of the new parent), and then
+            // calling CheckDpiChange so if there is an explicitly set font, it will be scaled to the new parent.
+            if (font == null)
+                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), this.GetScale());
+            CheckDpiChange();
+        }
+
+        /// <inheritdoc />
+        protected override void OnParentFontChanged(EventArgs e)
+        {
+            base.OnParentFontChanged(e);
+
+            // if the parent control is rescaling its font due to DPI change, then ignoring the event (we do our scaling in CheckDpiChange)
+            if (dpiChanging || !AutoScaleFont)
+                return;
+
+            // but if the parent font is changing not because of scaling, then we reset our default font as well
+            defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), this.GetScale());
+
+            // if font is null, setting default font from new parent font without scaling
+            if (font == null)
+                SetFont(defaultFont.Font);
         }
 
         /// <inheritdoc />
@@ -615,9 +815,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             {
                 case Constants.WM_NCCALCSIZE:
                     if (m.WParam == IntPtr.Zero || m.WParam == new IntPtr(1))
-                    {
                         NCHelper.CalcSizeNC(m.LParam, borderWidth);
-                    }
                     break;
 
                 case Constants.WM_NCPAINT:
@@ -632,15 +830,22 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                         lastFlatStyle = base.FlatStyle;
                         OnFlatStyleChanged();
                     }
+
+                    CheckDpiChange();
                     break;
 
-                //case Constants.WM_SETCURSOR:
-                //    //IDC_HAND == 32649
-                //    SetCursor(LoadCursor(0, 32649));
+                case Constants.WM_DPICHANGED_BEFOREPARENT:
+                    dpiChanging = true;
+                    base.WndProc(ref m);
+                    return;
 
-                //    //the message has been handled
-                //    m.Result = IntPtr.Zero;
-                //    return;
+                case Constants.WM_DPICHANGED_AFTERPARENT:
+                    base.WndProc(ref m);
+                    dpiChanging = false;
+                    CheckDpiChange();
+                    if (AutoSize)
+                        PerformLayout();
+                    return;
             }
 
             base.WndProc(ref m);
@@ -656,7 +861,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         /// <inheritdoc />
         protected override void OnVisibleChanged(EventArgs e)
         {
-            // storing invisible state so when control turns visible it will fading when enabled
+            // storing invisible state so when control turns visible it will fade if enabled
             if (!Visible && (fadingOptions & (FadingOptions.Appearing | FadingOptions.AnyChange)) != FadingOptions.None)
                 fadingPainter.State = GetAppearance();
 
@@ -732,6 +937,23 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             }
         }
 
+        /// <inheritdoc />
+        protected override void Dispose(bool disposing)
+        {
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
+
+            if (disposing)
+            {
+                fadingPainter.Dispose();
+                font?.Dispose();
+                defaultFont?.Dispose();
+                font = null;
+                defaultFont = null;
+            }
+
+            base.Dispose(disposing);
+        }
+
         #endregion
 
         #region Event Handlers
@@ -742,18 +964,9 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         #region Private Methods
 
-        void AdvancedLabel_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
-        {
-            if (e.Link?.LinkData is string url)
-            {
-                HyperlinkClickedEventArgs args = new HyperlinkClickedEventArgs(url);
-                OnHyperlinkClicked(args);
-            }
-        }
-
         private bool ShouldSerializeText() => resolveHyperlinks == HyperlinkResolveMode.None;
         private bool ShouldSerializeRawText() => !ShouldSerializeText();
-
+        private bool ShouldSerializeFont() => font != null;
         private bool ShouldSerializeBackColor() => false;
         private bool ShouldSerializeForeColor() => false;
         private bool ShouldSerializeEnabledBackColor() => !enabledBackColor.IsEmpty;
@@ -891,93 +1104,63 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             return size;
         }
 
+        private void CheckDpiChange()
+        {
+            PointF scale = this.GetScale();
+            if (scale == lastScale)
+                return;
+
+            if (!lastScale.IsEmpty)
+                ResetSizeCache();
+            lastScale = scale;
+            if (!AutoScaleFont)
+                return;
+
+            if (font is ScalingFont explicitFont)
+                explicitFont.Scale(scale);
+            else
+                defaultFont!.Scale(scale);
+            SetFont((font ?? defaultFont!).Font);
+        }
+
+        private void SetFont(Font? newFont)
+        {
+            Font oldFont = base.Font;
+
+            // If base.Font equals to newFont by value, then setting the new one does not work. This is
+            // especially problematic if the old font is already disposed. In this case we must set null first.
+            if (Equals(oldFont, newFont))
+            {
+                if (ReferenceEquals(newFont, oldFont))
+                    return;
+                suppressFontChanged = true;
+                try
+                {
+                    base.Font = null!;
+                }
+                finally
+                {
+                    suppressFontChanged = false;
+                }
+            }
+
+            base.Font = newFont!;
+        }
+
         #endregion
 
-        #endregion
-
-        #region ISupportsFading Members
-
-        /// <summary>
-        /// Gets or sets whether fading animations are enabled for the control.
-        /// Animations work in Windows Vista and above, with non-classic themes.
-        /// </summary>
-        [Category("AdvancedLabel")]
-        [DefaultValue(true)]
-        [Description("Gets or sets whether fading animations are enabled for the control. Animations work in Windows Vista and above, with non-classic themes.")]
-        public bool FadingAnimationsEnabled
-        {
-            get => fadingAnimationsEnabled;
-            set
-            {
-                if (fadingAnimationsEnabled == value)
-                    return;
-
-                fadingAnimationsEnabled = value;
-                CheckStyles();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets fading options of the control.
-        /// </summary>
-        [Category("AdvancedLabel")]
-        [DefaultValue(FadingOptions.StandardEffects)]
-        [Description("Gets or sets fading options of the control.")]
-        [TypeConverter(typeof(FlagsEnumConverter))]
-        public FadingOptions FadingAnimationOptions
-        {
-            get => fadingOptions;
-            set
-            {
-                if (fadingOptions == value)
-                    return;
-
-                if (!Enum<FadingOptions>.AllFlagsDefined(value))
-                    throw new ArgumentOutOfRangeException(nameof(value));
-
-                fadingOptions = value;
-
-                // storing invisible state so when control turns visible it will fading when enabled
-                if (!Visible && (fadingOptions & (FadingOptions.Appearing | FadingOptions.AnyChange)) != FadingOptions.None)
-                    fadingPainter.State = GetAppearance();
-
-                Invalidate();
-            }
-        }
-
-        /// <summary>
-        /// Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
-        /// </summary>
-        [Category("AdvancedLabel")]
-        [DefaultValue(500)]
-        [Description("Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
-        public int FadingAnimationDefaultSpeed
-        {
-            get => fadingAnimationDefaultSpeed;
-            set
-            {
-                if (fadingAnimationDefaultSpeed == value)
-                    return;
-
-                if (fadingAnimationDefaultSpeed < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
-
-                fadingAnimationDefaultSpeed = value;
-            }
-        }
-
-        ControlAppearanceState ISupportsFading<ControlAppearanceState>.State => GetAppearance();
+        #region Explicitly Implemented Interface Methods
 
         int ISupportsFading<ControlAppearanceState>.GetFadingAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo)
-        {
             // system speeds are determined by the painter
-            return FadingAnimationDefaultSpeed;
-        }
+            => FadingAnimationDefaultSpeed;
 
         void ISupportsFading<ControlAppearanceState>.PaintState(ControlAppearanceState state, PaintEventArgs e)
-        {
-            OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
-        }
+            => OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
+
+        void IPerMonitorDpiAware.ParentFormDpiChanged() => CheckDpiChange();
+
+        #endregion
 
         #endregion
     }

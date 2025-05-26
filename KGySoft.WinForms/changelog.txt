@@ -104,6 +104,8 @@
   + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
     DisabledForeColor properties.
   + Making the overridden ForeColor/BackColor properties visible in the designer.
+  + New AutoScaleFont property to allow automatic scaling of the font when the DPI changes even on platforms where
+    this is not supported by default.
 ! AdvancedProgressBar class:
   ! In high contrast mode rendering with the classic style only, no matter what the Style property is.
 ! CommandLinkButton class:
