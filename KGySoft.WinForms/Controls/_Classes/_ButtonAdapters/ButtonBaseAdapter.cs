@@ -245,12 +245,7 @@ namespace KGySoft.WinForms.Controls
             internal bool VerticalText = false;
             internal bool UseCompatibleTextRendering;
             internal bool DotNetOneButtonCompat = true;
-            internal TextFormatFlags GdiTextFormatFlags = TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl;
-            internal StringFormatFlags GdipFormatFlags;
-            internal StringTrimming GdipTrimming;
-            internal HotkeyPrefix GdipHotkeyPrefix;
-            internal StringAlignment GdipAlignment; // horizontal alignment.
-            internal StringAlignment GdipLineAlignment; // vertical alignment.
+            internal TextFormatFlags FormatFlags = TextFormatFlags.WordBreak | TextFormatFlags.TextBoxControl;
             internal Padding Padding;
             internal PointF Scale;
 
@@ -270,54 +265,12 @@ namespace KGySoft.WinForms.Controls
 
             #region Internal Properties
 
-            /// <summary>
-            /// We don't cache the StringFormat itself because we don't have a deterministic way of disposing it, instead
-            /// we cache the flags that make it up and create it on demand so it can be disposed by calling code.
-            /// </summary>
-            internal StringFormat StringFormat
-            {
-                private get
-                {
-                    StringFormat format = new StringFormat();
-
-                    format.FormatFlags = GdipFormatFlags;
-                    format.Trimming = GdipTrimming;
-                    format.HotkeyPrefix = GdipHotkeyPrefix;
-                    format.Alignment = GdipAlignment;
-                    format.LineAlignment = GdipLineAlignment;
-
-                    //if (disableWordWrapping)
-                    //{
-                    //    format.FormatFlags |= StringFormatFlags.NoWrap;
-                    //}
-
-                    return format;
-                }
-                set
-                {
-                    GdipFormatFlags = value.FormatFlags;
-                    GdipTrimming = value.Trimming;
-                    GdipHotkeyPrefix = value.HotkeyPrefix;
-                    GdipAlignment = value.Alignment;
-                    GdipLineAlignment = value.LineAlignment;
-                }
-            }
-
             // Caching it only for the drawing session is alright
             internal int PerMonitorDpiAwarenessLevel => perMonitorAwarenessLevel ??= ScaleHelper.PerMonitorDpiAwarenessVersion;
 
             #endregion
 
             #region Private Properties
-
-            /// <devdoc>
-            /// </devdoc>
-            private TextFormatFlags TextFormatFlags =>
-                //if (disableWordWrapping)
-                //{
-                //    return gdiTextFormatFlags & ~TextFormatFlags.WordBreak;
-                //}
-                GdiTextFormatFlags;
 
             private int FullBorderSize => OnePixExtraBorder ? BorderSize++ : BorderSize;
             private bool OnePixExtraBorder => GrowBorderBy1PxWhenDefault && IsDefault;
@@ -658,7 +611,7 @@ namespace KGySoft.WinForms.Controls
 
             #region Protected Methods
 
-            protected virtual Size GetTextSize(Graphics g, Size proposedSize)
+            protected Size GetTextSize(Graphics g, Size proposedSize)
             {
                 // 0 or 1 means unbounded
                 if (proposedSize.Width <= 1)
@@ -669,21 +622,10 @@ namespace KGySoft.WinForms.Controls
                 //set the Prefix field of TextFormatFlags
                 proposedSize = LayoutUtils.FlipSizeIf(VerticalText, proposedSize);
                 Size textSize = Size.Empty;
-
                 if (UseCompatibleTextRendering)
-                {
-                    // GDI+ text rendering.
-                    //using (Graphics g = WindowsFormsUtils.CreateMeasurementGraphics())
-                    //{
-                    using StringFormat gdipStringFormat = StringFormat;
-                    textSize = Size.Ceiling(g.MeasureString(Text, Font, new SizeF(proposedSize.Width, proposedSize.Height), gdipStringFormat));
-                    //}
-                }
+                    textSize = Size.Ceiling(g.MeasureString(Text, Font, new SizeF(proposedSize.Width, proposedSize.Height), FormatFlags.ToStringFormat()));
                 else if (!string.IsNullOrEmpty(Text))
-                { // GDI text rendering (.NET Framework 2.0 feature).
-                    textSize = TextRenderer.MeasureText(g, Text, Font, proposedSize, TextFormatFlags);
-                }
-                //else skip calling MeasureText, it should return 0,0
+                    textSize = TextRenderer.MeasureText(g, Text, Font, proposedSize, FormatFlags);
 
                 return LayoutUtils.FlipSizeIf(VerticalText, textSize);
 
@@ -1004,17 +946,8 @@ namespace KGySoft.WinForms.Controls
             layout.LayoutRtl = RightToLeft.Yes == control.RightToLeft;
             layout.TextImageRelation = control.TextImageRelation;
             layout.UseCompatibleTextRendering = control.UseCompatibleTextRendering;
-
             if (control.FlatStyle != FlatStyle.System)
-            {
-                if (layout.UseCompatibleTextRendering)
-                {
-                    using StringFormat format = control.GetFormatFlags().ToStringFormat();
-                    layout.StringFormat = format;
-                }
-                else
-                    layout.GdiTextFormatFlags = control.GetFormatFlags();
-            }
+                layout.FormatFlags = control.GetFormatFlags();
 
             return layout;
         }
@@ -1116,11 +1049,12 @@ namespace KGySoft.WinForms.Controls
         {
             Rectangle r = layout.TextBounds;
             bool disabledText3D = layout.Options.ShadowedText;
+            TextFormatFlags formatFlags = layout.Options.FormatFlags;
 
             if (control.UseCompatibleTextRendering)
             {
                 // Draw text using GDI+
-                using StringFormat stringFormat = control.GetFormatFlags().ToStringFormat();
+                StringFormat stringFormat = formatFlags.ToStringFormat();
                 // DrawString doesn't seem to draw where it says it does
                 if (control.TextAlign.AnyCenter())
                     r.X -= 1;
@@ -1140,7 +1074,6 @@ namespace KGySoft.WinForms.Controls
             else
             {
                 // Draw text using GDI (.NET Framework 2.0+ feature).
-                TextFormatFlags formatFlags = control.GetFormatFlags();
 
                 if (disabledText3D && !state.Enabled)
                 {

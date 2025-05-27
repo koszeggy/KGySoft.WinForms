@@ -15,9 +15,15 @@
 
 #region Usings
 
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Text;
 using System.Windows.Forms;
+
+using KGySoft.Collections;
+#if NETFRAMEWORK
+using KGySoft.CoreLibraries;
+#endif
 
 #endregion
 
@@ -25,9 +31,41 @@ namespace KGySoft.WinForms
 {
     internal static class TextFormatFlagsExtensions
     {
+        #region Fields
+
+        private static readonly Cache<TextFormatFlags, StringFormat> formatsCache =
+            new Cache<TextFormatFlags, StringFormat>(TextFormatFlagsToStringFormat, 8, Comparer)
+            {
+                Behavior = CacheBehavior.RemoveOldestElement,
+                DisposeDroppedValues = true
+            };
+
+        #endregion
+
+        #region Properties
+
+#if NETFRAMEWORK
+        private static IEqualityComparer<TextFormatFlags> Comparer => EnumComparer<TextFormatFlags>.Comparer;
+#else
+        private static IEqualityComparer<TextFormatFlags>? Comparer => null;
+#endif
+
+        #endregion
+
         #region Methods
 
-        internal static StringFormat ToStringFormat(this TextFormatFlags tff)
+        #region Internal Methods
+
+        /// <summary>
+        /// Use from the UI thread only, and do not mutate or dispose the result.
+        /// </summary>
+        internal static StringFormat ToStringFormat(this TextFormatFlags tff) => formatsCache[tff];
+
+        #endregion
+
+        #region Private Methods
+
+        private static StringFormat TextFormatFlagsToStringFormat(TextFormatFlags tff)
         {
             StringFormat result = new StringFormat();
             StringFormatFlags sff = StringFormatFlags.MeasureTrailingSpaces;
@@ -38,14 +76,14 @@ namespace KGySoft.WinForms
                 result.LineAlignment = StringAlignment.Far;
             else if ((tff & (TextFormatFlags.VerticalCenter)) != 0)
                 result.LineAlignment = StringAlignment.Center;
-            else if ((tff & (TextFormatFlags.Top)) != 0)
+            else
                 result.LineAlignment = StringAlignment.Near;
 
             if ((tff & (TextFormatFlags.Right)) != 0)
                 result.Alignment = isRtl ? StringAlignment.Near : StringAlignment.Far;
             else if ((tff & (TextFormatFlags.HorizontalCenter)) != 0)
                 result.Alignment = StringAlignment.Center;
-            else if ((tff & (TextFormatFlags.Left)) != 0)
+            else
                 result.Alignment = isRtl ? StringAlignment.Far : StringAlignment.Near;
 
             if (isRtl)
@@ -67,6 +105,8 @@ namespace KGySoft.WinForms
             result.FormatFlags = sff;
             return result;
         }
+
+        #endregion
 
         #endregion
     }
