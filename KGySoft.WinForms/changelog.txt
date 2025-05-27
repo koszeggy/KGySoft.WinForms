@@ -138,6 +138,9 @@
   - Fixing ReadOnly mode in DropDownList style: up to now it was faked by disabling the control.
 ! AdvancedTextBox class:
   ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark
+  ! In Multiline mode AcceptsReturn was ignored and the Return key was forcibly handled to insert a new line. Now
+    AcceptsReturn and AcceptsTab are respected when ReadOnly is false; otherwise, they are ignored, and the Return
+    and Tab keys are allowed to be handled by the parent form as if the properties were false.
   + Making overridden ForeColor/BackColor properties visible in the designer.
   - Fixing Multiline rendering position in disabled mode
 ! AdvancedDateTimePicker:

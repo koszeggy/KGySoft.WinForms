@@ -26,26 +26,21 @@ using KGySoft.WinForms.WinApi;
 
 namespace KGySoft.WinForms.Controls
 {
-    /*******************************************
-     * AdvancedTextBox - TODO: into remarks
-     *
-     * Problems with original TextBox:
-     * - If BackColor is not set, setting ReadOnly makes control gray, but does not turn gray if BackColor is set before
-     * - Disabling the control makes the text gray and it is impossible to change it.
-     *
-     * Solution:
-     * - DisabledBackColor: Color in case of ReadOnly or not Enabled
-     * - DisabledForeColor: Text color in disabled state
-     *
-     * Other features:
-     * - TextChangeOnLeave event: Fires on leave when content differs from the content at getting focused
-     * - If Multiline is true and the control is not ReadOnly, not allowing processing Enter by the parent form/control
-     */
-
     /// <summary>
-    /// Advanced version of <see cref="TextBox"/> control that supports customized coloring even in disabled state
-    /// and has a <see cref="TextChangedOnLeave"/> event.
+    /// Advanced version of <see cref="TextBox"/> control that provides some advanced features and fixes for the original <see cref="TextBox"/>.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="AdvancedTextBox"/> control offers the following features in addition to <see cref="TextBox"/>:
+    /// <list type="bullet">
+    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
+    /// <item><see cref="TextBoxBase.AcceptsTab"/> and <see cref="TextBox.AcceptsReturn"/> are ignored in <see cref="TextBoxBase.ReadOnly"/> mode.</item>
+    /// <item><see cref="TextChangedOnLeave"/> event: occurs when leaving the control and <see cref="TextBox.Text"/> is different from the value when the control received focus.</item>
+    /// </list>
+    /// </remarks>
+    [Description(@"A text box that provides the following features in addition to regular TextBox:
+- Adjustable colors in disabled state
+- AcceptsTab and AcceptsReturn are ignored in ReadOnly mode
+- TextChangedOnLeave event")]
     public class AdvancedTextBox : TextBox, ISupportsDisabledColor
     {
         #region Fields
@@ -78,9 +73,11 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Occurs on leaving the control when content is different from the original one when the control was focused.
+        /// It fires after the <see cref="Control.Leave"/> and before the <see cref="Control.Validating"/> event.
         /// </summary>
         [Category("AdvancedTextBox")]
-        [Description("Occurs on leaving the control when content is different from the original one when the control was focused.")]
+        [Description("Occurs on leaving the control when content is different from the original one when the control was focused. "
+            + "It fires after the Leave and before the Validating event.")]
         public event EventHandler? TextChangedOnLeave;
 
         #endregion
@@ -266,8 +263,22 @@ namespace KGySoft.WinForms.Controls
                 TextRenderer.DrawText(e.Graphics, new string(PasswordChar, Text.Length), Font, textRect, ForeColor, flags);
         }
 
+        /// <inheritdoc/>
         protected override bool IsInputKey(Keys keyData)
-            => ((keyData & Keys.KeyCode) == Keys.Return && !ReadOnly && Multiline && (keyData & Keys.Alt) == Keys.None) || base.IsInputKey(keyData);
+        {
+            if (Multiline && ReadOnly)
+            {
+                switch (keyData & Keys.KeyCode)
+                {
+                    case Keys.Return when (keyData & Keys.Alt) == 0:
+                        return false;
+                    case Keys.Tab when (keyData & Keys.Control) == 0:
+                        return false;
+                }
+            }
+
+            return base.IsInputKey(keyData);
+        }
 
         #endregion
 
@@ -278,10 +289,10 @@ namespace KGySoft.WinForms.Controls
             SetStyle(ControlStyles.UserPaint, !Enabled);
             if (Enabled)
             {
-                // without these font text may change to weird style when control is re-enabled.
-                Font font = Font;
-                Font = null!;
-                Font = font;
+                //// without these font text may change to weird style when control is re-enabled.
+                //Font font = Font;
+                //Font = null!;
+                //Font = font;
             }
 
             ResetColors();
