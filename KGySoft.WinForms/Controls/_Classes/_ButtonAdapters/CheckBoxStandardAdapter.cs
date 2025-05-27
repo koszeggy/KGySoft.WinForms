@@ -114,7 +114,7 @@ namespace KGySoft.WinForms.Controls
             LayoutOptions options = CommonLayout(state);
             options.CheckPaddingSize = 1;
             options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
-            options.CheckSize = VisualStyleHelper.RenderWithVisualStyles
+            options.CheckSize = VisualStyleHelper.RenderWithVisualStyles && (CheckBoxInstance.HasDefaultScaling() || options.PerMonitorDpiAwarenessLevel != 1)
                 ? VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, graphics, state.SystemPartId, state.SystemStateId, false).Width
                 : options.CheckSize.Scale(options.Scale.X);
 
@@ -131,7 +131,7 @@ namespace KGySoft.WinForms.Controls
             if (VisualStyleHelper.RenderWithVisualStyles)
             {
                 if (CheckBoxInstance.VisualsRenderingQuality == RenderingQuality.High
-                    && layout.Options.Scale.X > 1f // just to omit querying part size at 100% DPI
+                    && (layout.Options.Scale.X > 1f || layout.Options.PerMonitorDpiAwarenessLevel == 1) // just to omit querying part size at 100% DPI, unless per-monitor DPI version is 1
                     && layout.Options.CheckSize != VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, true).Width)
                 {
                     VisualStyleHelper.RenderScaled(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);

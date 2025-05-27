@@ -16,9 +16,8 @@
 #region Usings
 
 using System;
-using System.Windows.Forms;
 
-#if !NETCOREAPP
+#if !NET5_0_OR_GREATER
 using Microsoft.Win32;
 #endif
 
@@ -71,7 +70,7 @@ namespace KGySoft.WinForms.WinApi
             if (osVer.Platform != PlatformID.Win32NT)
                 return null;
 
-#if NETCOREAPP
+#if NET5_0_OR_GREATER
             windowsVersion = osVer.Version;
 #else
             if (osVer.Version != new Version(6, 2, 9200, 0))

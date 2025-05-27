@@ -219,6 +219,8 @@ namespace KGySoft.WinForms.Controls
 
             #region Instance Fields
 
+            #region Internal Fields
+
             internal Rectangle Client;
             internal int BorderSize;
             internal int PaddingSize;
@@ -254,16 +256,24 @@ namespace KGySoft.WinForms.Controls
 
             #endregion
 
+            #region Private Fields
+
+            private int? perMonitorAwarenessLevel;
+
+            #endregion
+
+            #endregion
+
             #endregion
 
             #region Properties
 
             #region Internal Properties
 
-            /// <devdoc>
-            ///     We don't cache the StringFormat itself because we don't have a deterministic way of disposing it, instead
-            ///     we cache the flags that make it up and create it on demand so it can be disposed by calling code.
-            /// </devdoc>
+            /// <summary>
+            /// We don't cache the StringFormat itself because we don't have a deterministic way of disposing it, instead
+            /// we cache the flags that make it up and create it on demand so it can be disposed by calling code.
+            /// </summary>
             internal StringFormat StringFormat
             {
                 private get
@@ -292,6 +302,9 @@ namespace KGySoft.WinForms.Controls
                     GdipLineAlignment = value.LineAlignment;
                 }
             }
+
+            // Caching it only for the drawing session is alright
+            internal int PerMonitorDpiAwarenessLevel => perMonitorAwarenessLevel ??= ScaleHelper.PerMonitorDpiAwarenessVersion;
 
             #endregion
 

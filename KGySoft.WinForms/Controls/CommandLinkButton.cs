@@ -1131,7 +1131,7 @@ namespace KGySoft.WinForms.Controls
                 {
                     if (IsNativeVisualStylesRenderingAvailable)
                     {
-                        if (ScaleHelper.PerMonitorAwarenessVersion == 1)
+                        if (ScaleHelper.PerMonitorDpiAwarenessVersion == 1)
                             defaultGlyphSize = this.ScaleSize(referenceThemedGlyphSize);
                         else
                         {

@@ -147,7 +147,7 @@ namespace KGySoft.WinForms
             IntPtr hdc = g.GetHdc();
             try
             {
-                if (control?.HasNonDefaultScaling() == true)
+                if (control?.HasDefaultScaling() == false)
                     hThemeWindow = UxTheme.OpenThemeDataForWindow(control.Handle, GetClassName(hTheme));
 
                 return UxTheme.GetThemePartSize(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, hdc, part, state,
@@ -167,7 +167,7 @@ namespace KGySoft.WinForms
             IntPtr hdc = g.GetHdc();
             try
             {
-                if (control.HasNonDefaultScaling())
+                if (!control.HasDefaultScaling())
                     hThemeWindow = UxTheme.OpenThemeDataForWindow(control.Handle, GetClassName(hTheme));
 
                 UxTheme.DrawThemeBackground(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, hdc, part, state, bounds);
@@ -186,7 +186,7 @@ namespace KGySoft.WinForms
             GraphicsState gState = g.Save();
             try
             {
-                if (control.HasNonDefaultScaling())
+                if (!control.HasDefaultScaling())
                     hThemeWindow = UxTheme.OpenThemeDataForWindow(control.Handle, GetClassName(hTheme));
 
                 // Does not work with UxTheme.GetThemeBitmap, because it ignores DPI and returns the smallest glyphs, even if true size is larger

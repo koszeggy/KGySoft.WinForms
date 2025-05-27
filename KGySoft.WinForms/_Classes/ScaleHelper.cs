@@ -171,7 +171,7 @@ namespace KGySoft.WinForms
             }
         }
 
-        public static int PerMonitorAwarenessVersion
+        public static int PerMonitorDpiAwarenessVersion
         {
             get
             {
@@ -244,11 +244,11 @@ namespace KGySoft.WinForms
         #region Internal Methods
 
         /// <summary>
-        /// Gets whether the display that the specified control is using has a different DPI than the initial DPI of the primary display.
+        /// Gets whether the display that the specified control is using has the same DPI as the initial DPI of the primary display.
         /// </summary>
-        public static bool HasNonDefaultScaling(this Control control)
+        public static bool HasDefaultScaling(this Control control)
             // Avoiding calling IsThreadPerMonitorAware twice, it's called in the GetDpiForHwnd method anyway
-            => isProcessPerMonitorAware && GetDpi(control) != systemInitialDpi;
+            => !isProcessPerMonitorAware || GetDpi(control) == systemInitialDpi;
 
         public static PointF GetScale(this Control control)
         {
@@ -326,7 +326,7 @@ namespace KGySoft.WinForms
         internal static void RegisterPerMonitorAwarenessNotifications(this Control control)
         {
             // Registering the notifier is required only for V1 awareness level. V2 provides direct notifications for the controls.
-            if (PerMonitorAwarenessVersion != 1)
+            if (PerMonitorDpiAwarenessVersion != 1)
                 return;
 
             // No need to store a reference - the notifier will be disposed when the control is disposed.
