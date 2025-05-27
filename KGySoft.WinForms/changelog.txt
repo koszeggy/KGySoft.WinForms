@@ -142,7 +142,7 @@
     AcceptsReturn and AcceptsTab are respected when ReadOnly is false; otherwise, they are ignored, and the Return
     and Tab keys are allowed to be handled by the parent form as if the properties were false.
   + Making overridden ForeColor/BackColor properties visible in the designer.
-  - Fixing Multiline rendering position in disabled mode
+  + Making Ctrl+A work even if auto appending is enabled
 ! AdvancedDateTimePicker:
   ! Custom rendering even in Enabled mode when the control is not in focus.
   + New EnabledBackColor/EnabledForeColor properties: they allow custom enabled colors when the control is not in

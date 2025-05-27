@@ -35,12 +35,14 @@ namespace KGySoft.WinForms.Controls
     /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
     /// <item><see cref="TextBoxBase.AcceptsTab"/> and <see cref="TextBox.AcceptsReturn"/> are ignored in <see cref="TextBoxBase.ReadOnly"/> mode.</item>
     /// <item><see cref="TextChangedOnLeave"/> event: occurs when leaving the control and <see cref="TextBox.Text"/> is different from the value when the control received focus.</item>
+    /// <item>Ctrl+A (Select All) works even if auto appending is enabled.</item>
     /// </list>
     /// </remarks>
     [Description(@"A text box that provides the following features in addition to regular TextBox:
 - Adjustable colors in disabled state
 - AcceptsTab and AcceptsReturn are ignored in ReadOnly mode
-- TextChangedOnLeave event")]
+- TextChangedOnLeave event
+- Ctrl+A works even if auto appending is enabled")]
     public class AdvancedTextBox : TextBox, ISupportsDisabledColor
     {
         #region Fields
@@ -85,7 +87,7 @@ namespace KGySoft.WinForms.Controls
         #region Properties
 
         /// <summary>
-        /// Gets or sets the background color of the control in the current <see cref="Control.Enabled"/> and <see cref="ReadOnly"/> state.
+        /// Gets or sets the background color of the control in the current <see cref="Control.Enabled"/> and <see cref="TextBox.ReadOnly"/> state.
         /// </summary>
         [Description("The background color in the current Enabled/ReadOnly state. This property always sets EnabledBackColor or DisabledBackColor.\r\n\r\n"
             + "Please note that in the WinForms designer a control never actually turns disabled.")]
@@ -278,6 +280,19 @@ namespace KGySoft.WinForms.Controls
             }
 
             return base.IsInputKey(keyData);
+        }
+
+        /// <inheritdoc/>
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            switch (keyData)
+            {
+                case Keys.Control | Keys.A when ShortcutsEnabled:
+                    SelectAll();
+                    return true;
+                default:
+                    return base.ProcessCmdKey(ref msg, keyData);
+            }
         }
 
         #endregion
