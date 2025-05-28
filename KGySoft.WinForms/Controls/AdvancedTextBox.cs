@@ -474,10 +474,19 @@ namespace KGySoft.WinForms.Controls
             SetStyle(ControlStyles.UserPaint, !Enabled);
             if (Enabled)
             {
-                //// without these font text may change to weird style when control is re-enabled.
-                //Font font = base.Font;
-                //base.Font = null!;
-                //base.Font = font;
+                // Without these font text may change to weird style when control is re-enabled.
+                // Occurs when some property changed (e.g. RightToLeft) while the control was disabled.
+                Font previousFont = base.Font;
+                suppressFontChanged = true;
+                try
+                {
+                    base.Font = null!;
+                    base.Font = previousFont;
+                }
+                finally
+                {
+                    suppressFontChanged = false;
+                }
             }
 
             ResetColors();
