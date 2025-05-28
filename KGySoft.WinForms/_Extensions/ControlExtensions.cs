@@ -132,12 +132,13 @@ namespace KGySoft.WinForms
         /// <returns>Format flags for drawing the text of the control.</returns>
         public static TextFormatFlags GetFormatFlags(this Control c)
         {
-            TextFormatFlags flags = TextFormatFlags.GlyphOverhangPadding | TextFormatFlags.TextBoxControl;
+            TextFormatFlags flags = TextFormatFlags.TextBoxControl;
             //| TextFormatFlags.PreserveGraphicsTranslateTransform; // To prevent erasing text when rendered with TextRenderer
 
             bool showEllipsis = false;
             bool useMnemonic = false;
             bool wordBreak = false;
+            bool singleLine = false;
             ContentAlignment? contentAlignment = null;
             HorizontalAlignment? horizontalAlignment = null;
             bool isRtl = c.RightToLeft == RightToLeft.Yes;
@@ -146,11 +147,16 @@ namespace KGySoft.WinForms
             {
                 case TextBoxBase textBox:
                     flags |= TextFormatFlags.ExpandTabs;
-                    wordBreak = textBox.Multiline;
-                    if (textBox is TextBox tb)
-                        horizontalAlignment = tb.TextAlign;
-                    else if (textBox is MaskedTextBox mtb)
-                        horizontalAlignment = mtb.TextAlign;
+                    singleLine = !textBox.Multiline;
+                    wordBreak = !singleLine && textBox.WordWrap;
+                    if (singleLine)
+                        flags |= TextFormatFlags.NoPadding;
+                    horizontalAlignment = textBox switch
+                    {
+                        TextBox tb => tb.TextAlign,
+                        MaskedTextBox mtb => mtb.TextAlign,
+                        _ => horizontalAlignment
+                    };
 
                     break;
                 case ButtonBase button:
@@ -167,6 +173,7 @@ namespace KGySoft.WinForms
                     break;
                 case DateTimePicker dtp:
                     contentAlignment = ContentAlignment.MiddleLeft;
+                    singleLine = true;
                     isRtl &= dtp.RightToLeftLayout;
                     break;
             }
@@ -210,7 +217,7 @@ namespace KGySoft.WinForms
 
             if (wordBreak)
                 flags |= TextFormatFlags.WordBreak;
-            else
+            else if (singleLine)
                 flags |= TextFormatFlags.SingleLine;
 
             if (showEllipsis)

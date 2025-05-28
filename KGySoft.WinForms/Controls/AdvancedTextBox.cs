@@ -197,6 +197,7 @@ namespace KGySoft.WinForms.Controls
                 if (disabledForeColor == value)
                     return;
                 disabledForeColor = value;
+                CheckStyles();
                 ResetColors();
             }
         }
@@ -304,6 +305,7 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnEnabledChanged(e);
             CheckStyles();
+            ResetColors();
         }
 
         /// <inheritdoc/>
@@ -346,11 +348,15 @@ namespace KGySoft.WinForms.Controls
             var clientRect = ClientRectangle;
             e.Graphics.FillRectangle(BackColor.GetBrush(), clientRect);
 
-            // TODO: Adjust rectangle size to DPI (this +5 width is good for 96 DPI but 120 DPI requires +6)
-            Rectangle textRect = Multiline
-                ? new Rectangle(clientRect.X + 1, clientRect.Y + 1, clientRect.Width - 1, clientRect.Height - 1)
-                : new Rectangle(new Point(-2, 1), new Size(clientRect.Width + 5, clientRect.Height - 2));
+            Rectangle textRect = clientRect;
             TextFormatFlags flags = this.GetFormatFlags();
+            textRect.Inflate(-1, -1);
+
+            // The multiline textbox is rendered with some settings that are impossible to reproduce with TextFormatFlags.
+            // The current settings are adjusted for Segoe UI, which is the default font in .NET Core, but the padding apparently changes from font to font.
+            // To minimize chance of the visual difference, we do manual painting only when DisabledForeColor is different from the default color.
+            if (Multiline)
+                textRect.Width += 1;
             if (!UseSystemPasswordChar)
                 TextRenderer.DrawText(e.Graphics, Text.Substring(GetFirstCharIndexFromLine(GetFirstVisibleLine())), Font, textRect, ForeColor, flags);
             else
@@ -471,7 +477,7 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckStyles()
         {
-            SetStyle(ControlStyles.UserPaint, !Enabled);
+            SetStyle(ControlStyles.UserPaint, !Enabled && DisabledForeColor != defaultDisabledForeColor);
             if (Enabled)
             {
                 // Without these font text may change to weird style when control is re-enabled.
@@ -488,8 +494,6 @@ namespace KGySoft.WinForms.Controls
                     suppressFontChanged = false;
                 }
             }
-
-            ResetColors();
         }
 
         private int GetFirstVisibleLine() => User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, IntPtr.Zero, IntPtr.Zero).ToInt32();
