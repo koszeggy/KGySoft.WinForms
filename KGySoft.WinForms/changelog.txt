@@ -106,6 +106,7 @@
   + Making the overridden ForeColor/BackColor properties visible in the designer.
   + New AutoScaleFont property to allow automatic scaling of the font when the DPI changes even on platforms where
     this is not supported by default.
+  - Not serializing LinkArea property in the designer if there are no links defined or ResolveHyperlinks is not set.
 ! AdvancedProgressBar class:
   ! In high contrast mode rendering with the classic style only, no matter what the Style property is.
 ! CommandLinkButton class:

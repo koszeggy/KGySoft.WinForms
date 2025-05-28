@@ -148,21 +148,33 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets whether clicked links should be handled automatically or when HyperlinkClickedEventArgs.Handled is set to false. Caution: Setting this property to true may cause security issues. Use only in secure circumstances!")]
         public bool AutoHandleUrls { get; set; }
 
+        /// <inheritdoc cref="LinkLabel.LinkArea" />
+        public new LinkArea LinkArea
+        {
+            get => base.LinkArea;
+            set
+            {
+                if (resolveHyperlinks == HyperlinkResolveMode.None)
+                    base.LinkArea = value;
+            }
+        }
+
         /// <summary>
         /// Gets or sets whether hyperlinks should be resolved.
         /// </summary>
         /// <remarks>
         /// <para>When value is <see cref="HyperlinkResolveMode.ResolveHrefsOnly"/>, hyperlinks will be resolved only in the following form:
-        /// <example><c>This is a &lt;a href="http://kgysoft.try.hu"&gt;hyperlink&lt;/a&gt;</c></example>
+        /// <example><c>This is a &lt;a href="https://kgysoft.net"&gt;hyperlink&lt;/a&gt;</c></example>
         /// </para>
-        /// <para>When value is <see cref="HyperlinkResolveMode.ResolveAll"/>, simple inline hyperlinks will be resolved, too.
-        /// </para>
+        /// <para>When value is <see cref="HyperlinkResolveMode.ResolveAll"/>, simple inline hyperlinks will be resolved, too.</para>
+        /// <para>When value is <see cref="HyperlinkResolveMode.None"/>, you need to explicitly set <see cref="LinkArea"/> to specify a
+        /// link in the text. If it should contain more than one links, you can use the <see cref="LinkLabel.Links"/> property.</para>
         /// </remarks>
         [Category("AdvancedLabel")]
         [DefaultValue(HyperlinkResolveMode.None)]
         [Description(@"Gets or sets whether hyperlinks should be resolved.
 When value is ""ResolveHrefsOnly"", hyperlinks will be resolved only in the following form:
-This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>
+This is a <a href=""https://kgysoft.net"">hyperlink</a>
 When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
         public HyperlinkResolveMode ResolveHyperlinks
         {
@@ -175,6 +187,9 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
                 if (!Enum<HyperlinkResolveMode>.IsDefined(value))
                     throw new ArgumentOutOfRangeException(nameof(value));
 
+                // when switching back to None, removing previous links
+                if (value == HyperlinkResolveMode.None)
+                    base.LinkArea = default;
                 resolveHyperlinks = value;
                 ResetHyperlinkText();
             }
@@ -225,23 +240,19 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
                 Invalidate();
 
                 if (AutoSize)
-                {
-                    // bug: Otherwise PerformLayout wouldn't work.
-                    Size = Size.Empty;
-                    PerformLayout();
-                }
+                    ResetSize();
             }
         }
 
         /// <summary>
         /// Gets or sets text of the label. When <see cref="ResolveHyperlinks"/> is not <see cref="HyperlinkResolveMode.None"/>,
         /// hyperlinks in text like the following will be converted to hyperlinks:
-        /// <example><c>This is a &lt;a href="http://kgysoft.try.hu"&gt;hyperlink&lt;/a&gt;</c></example>
+        /// <example><c>This is a &lt;a href="http://kgysoft.net"&gt;hyperlink&lt;/a&gt;</c></example>
         /// </summary>
         [RefreshProperties(RefreshProperties.Repaint)]
         [Category("AdvancedLabel")]
-        [Description(@"Gets or sets text of the label. When ResolveHyperlinks is true, hyperlinks in text like the following will be converted to hyperlinks:
-This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
+        [Description(@"Gets or sets text of the label. When ResolveHyperlinks is set, hyperlinks in text like the following will be converted to hyperlinks:
+This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         [AllowNull]
         public override string Text
         {
@@ -293,10 +304,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                 {
                     ResetSizeCache();
                     NCHelper.InvalidateNC(Handle);
-
-                    // bug: Otherwise PerformLayout wouldn't work.
-                    Size = Size.Empty;
-                    PerformLayout();
+                    ResetSize();
                 }
             }
         }
@@ -609,6 +617,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
+            base.LinkArea = default;
         }
 
         #endregion
@@ -680,6 +689,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
 
         #region Protected Methods
 
+        /// <inheritdoc />
         protected override void OnFontChanged(EventArgs e)
         {
             if (suppressFontChanged)
@@ -844,7 +854,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
                     dpiChanging = false;
                     CheckDpiChange();
                     if (AutoSize)
-                        PerformLayout();
+                        ResetSize();
                     return;
             }
 
@@ -973,10 +983,12 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
         private bool ShouldSerializeEnabledForeColor() => !enabledForeColor.IsEmpty;
         private bool ShouldSerializeDisabledBackColor() => !disabledBackColor.IsEmpty;
         private bool ShouldSerializeDisabledForeColor() => !disabledForeColor.IsEmpty;
+        private bool ShouldSerializeLinkArea() => ResolveHyperlinks == HyperlinkResolveMode.None && !LinkArea.IsEmpty;
 
         private void ResetHyperlinkText()
         {
-            Links.Clear();
+            if (resolveHyperlinks != HyperlinkResolveMode.None)
+                Links.Clear();
             ResetSizeCache();
 
             try
@@ -1033,7 +1045,7 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             finally
             {
                 if (AutoSize)
-                    PerformLayout();
+                    ResetSize();
             }
         }
 
@@ -1043,13 +1055,23 @@ This is a <a href=""http://kgysoft.try.hu"">hyperlink</a>")]
             preferredSizeCache.Clear();
         }
 
+        private void ResetSize()
+        {
+            Debug.Assert(AutoSize, "ResetSize is expected to be called only when AutoSize is true.");
+            ResetSizeCache();
+
+            // bug: Otherwise PerformLayout wouldn't work.
+            Size = Size.Empty;
+            PerformLayout();
+        }
+
         private void OnFlatStyleChanged()
         {
             ResetSizeCache();
             CheckStyles();
             Invalidate();
             if (AutoSize)
-                PerformLayout();
+                ResetSize();
         }
 
         private void CheckStyles()
