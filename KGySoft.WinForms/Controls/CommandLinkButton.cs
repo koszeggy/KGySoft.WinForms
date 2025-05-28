@@ -2106,8 +2106,10 @@ namespace KGySoft.WinForms.Controls
             else // any right
                 bounds.X = Width - (HorizontalBasePadding + ImagePadding + imageSize.Width) + offset.Width;
 
-            if (imageAlignment.AnyTop()) // actually to the middle of the first row of Text - that's how System rendering also works
-                bounds.Y = VerticalBasePadding + Math.Max(0, FontHeight / 2 - imageSize.Height / 2 - 1) + offset.Height;
+            // Top: actually to the middle of the first row of Text - that's how System rendering also works
+            if (imageAlignment.AnyTop())
+                // Not using FontHeight because some platforms do not raise FontChanged from SetFont so the base does not always have the correct Font.
+                bounds.Y = VerticalBasePadding + Math.Max(0, (int)Math.Ceiling(Font.SizeInPoints) / 2 - imageSize.Height / 2 - 1) + offset.Height;
             else if (imageAlignment.AnyMiddle())
                 bounds.Y = Height / 2 - imageSize.Height / 2 + offset.Height;
             else // any bottom
@@ -2327,11 +2329,6 @@ namespace KGySoft.WinForms.Controls
             // Setting the actual Font property and handling if OnFontChanged is not invoked, which is the case on some platforms
             base.Font = newFont!;
             Invalidate();
-            if (newFont?.Height is int fontHeight && fontHeight != FontHeight)
-            {
-                ResetSizeCache();
-                FontHeight = fontHeight;
-            }
         }
 
         #endregion
