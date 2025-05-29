@@ -144,7 +144,6 @@ namespace KGySoft.WinForms.Forms
             // 
             this.lblDetailsMain.AutoSize = true;
             this.lblDetailsMain.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblDetailsMain.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.lblDetailsMain.Location = new System.Drawing.Point(0, 33);
             this.lblDetailsMain.Name = "lblDetailsMain";
             this.lblDetailsMain.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
@@ -156,7 +155,6 @@ namespace KGySoft.WinForms.Forms
             // 
             this.lblMessage.AutoSize = true;
             this.lblMessage.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblMessage.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.lblMessage.Location = new System.Drawing.Point(0, 10);
             this.lblMessage.Name = "lblMessage";
             this.lblMessage.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
@@ -179,7 +177,6 @@ namespace KGySoft.WinForms.Forms
             this.lblMainInstruction.AutoSize = true;
             this.lblMainInstruction.BackColor = System.Drawing.Color.Transparent;
             this.lblMainInstruction.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblMainInstruction.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.lblMainInstruction.Location = new System.Drawing.Point(0, 0);
             this.lblMainInstruction.Name = "lblMainInstruction";
             this.lblMainInstruction.Padding = new System.Windows.Forms.Padding(8);
@@ -346,7 +343,6 @@ namespace KGySoft.WinForms.Forms
             // 
             this.lblFooter.AutoSize = true;
             this.lblFooter.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblFooter.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.lblFooter.Location = new System.Drawing.Point(27, 0);
             this.lblFooter.Name = "lblFooter";
             this.lblFooter.Padding = new System.Windows.Forms.Padding(5, 7, 5, 7);
@@ -378,7 +374,6 @@ namespace KGySoft.WinForms.Forms
             // 
             this.lblDetailsFooter.AutoSize = true;
             this.lblDetailsFooter.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblDetailsFooter.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.lblDetailsFooter.Location = new System.Drawing.Point(0, 261);
             this.lblDetailsFooter.Name = "lblDetailsFooter";
             this.lblDetailsFooter.Padding = new System.Windows.Forms.Padding(5, 7, 5, 7);

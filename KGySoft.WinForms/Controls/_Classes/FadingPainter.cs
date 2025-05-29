@@ -339,7 +339,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected virtual void StopAnimations()
         {
-            if (operating && FadingPainterInternal.IsSupported)
+            if (operating && FadingPainterInternal.IsSupported && host.IsHandleCreated)
                 UxTheme.BufferedPaintStopAllAnimations(host.Handle);
         }
 

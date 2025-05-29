@@ -56,6 +56,11 @@ namespace KGySoft.WinForms
         /// </summary>
         int FadingAnimationDefaultSpeed { get; set; }
 
+        /// <summary>
+        /// Gets whether the <see cref="IWin32Window.Handle"/> property is available.
+        /// </summary>
+        bool IsHandleCreated { get; }
+
         #endregion
 
         #region Methods

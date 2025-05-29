@@ -863,7 +863,7 @@ namespace KGySoft.WinForms.Controls
                 if (reportedFlatStyle == value && base.FlatStyle == value && lastFlatStyle == value)
                     return;
 
-                bool recreateHandle = IsNativelySupported &&
+                bool recreateHandle = IsNativelySupported && IsHandleCreated &&
                     ((base.FlatStyle == FlatStyle.System && value != FlatStyle.System) || (base.FlatStyle != FlatStyle.System && value == FlatStyle.System));
                 base.FlatStyle = lastFlatStyle = reportedFlatStyle = value;
                 OnFlatStyleChanged(false, recreateHandle);
@@ -1135,7 +1135,7 @@ namespace KGySoft.WinForms.Controls
                             defaultGlyphSize = this.ScaleSize(referenceThemedGlyphSize);
                         else
                         {
-                            using Graphics g = Graphics.FromHwnd(Handle);
+                            using Graphics g = Graphics.FromHwnd(IsHandleCreated ? Handle : IntPtr.Zero);
                             defaultGlyphSize = VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, 1, false);
                         }
                     }
@@ -1243,7 +1243,7 @@ namespace KGySoft.WinForms.Controls
             if (proposedTextSize.Height <= 1)
                 proposedTextSize.Height = Int32.MaxValue;
 
-            using Graphics g = Graphics.FromHwnd(Handle);
+            using Graphics g = Graphics.FromHwnd(IsHandleCreated ? Handle : IntPtr.Zero);
             bool gdiPlusTextRendering = UseCompatibleTextRendering;
             g.SetTextRenderingQuality(textRenderingQuality, gdiPlusTextRendering);
 
@@ -1337,6 +1337,14 @@ namespace KGySoft.WinForms.Controls
             base.OnHandleCreated(e);
             CheckStyles();
             ResetNativeDescription();
+
+            // Adjusting default fonts even if AutoScaleFont is false.
+            // Then calling CheckDpiChange so if there are explicitly set fonts (and AutoScaleFont is true), they will be scaled to the parent.
+            PointF scale = this.GetScale();
+            if (textFont == null)
+                defaultTextFont.Scale(scale);
+            if (descriptionFont == null)
+                defaultDescriptionFont.Scale(scale);
             CheckDpiChange();
         }
 
@@ -1392,6 +1400,8 @@ namespace KGySoft.WinForms.Controls
         protected override void OnParentChanged(EventArgs e)
         {
             base.OnParentChanged(e);
+            if (!IsHandleCreated)
+                return;
 
             // As we don't actually rely on the parent font, just inheriting the scaling of the new parent and adjusting default fonts even if AutoScaleFont is false.
             // Then calling CheckDpiChange so if there are explicitly set fonts (and AutoScaleFont is true), they will be scaled to the new parent.
@@ -1696,10 +1706,7 @@ namespace KGySoft.WinForms.Controls
                 RecreateHandle();
             CheckDefaultAnimation();
 
-            // adjusting description
-            if (IsNativeRendering)
-                User32.SendMessage(Handle, Constants.BCM_SETNOTE, IntPtr.Zero, description);
-
+            ResetNativeDescription();
             isImageUpToDate = false;
             if (!ignoreCheckImage)
                 CheckImage();
@@ -1716,7 +1723,7 @@ namespace KGySoft.WinForms.Controls
 
         private void ResetNativeDescription()
         {
-            if (IsNativeRendering)
+            if (IsNativeRendering && IsHandleCreated)
                 User32.SendMessage(Handle, Constants.BCM_SETNOTE, IntPtr.Zero, description);
         }
 
@@ -2123,6 +2130,9 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private bool CheckImage()
         {
+            if (!IsHandleCreated)
+                return true;
+
             // if image is up-to-date checking consistency only (to handle setting base.Image)
             if (isImageUpToDate)
             {
@@ -2154,13 +2164,9 @@ namespace KGySoft.WinForms.Controls
                 return true;
 
             if (isElevated)
-            {
                 User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, new IntPtr(1));
-            }
             else if (useDefaultGlyph)
-            {
                 User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, IntPtr.Zero);
-            }
             else
             {
                 currentImage = NoGlyph;

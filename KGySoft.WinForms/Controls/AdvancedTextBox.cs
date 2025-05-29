@@ -300,6 +300,13 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
+        /// <inheritdoc />
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            CheckDpiChange();
+        }
+
         /// <inheritdoc/>
         protected override void OnEnabledChanged(EventArgs e)
         {
@@ -410,6 +417,14 @@ namespace KGySoft.WinForms.Controls
             // if the parent control is rescaling its font due to DPI change, then ignoring the event (we do our scaling in CheckDpiChange)
             if (dpiChanging || !AutoScaleFont)
                 return;
+
+#if NET7_0_OR_GREATER
+            // The parent is rescaling its font due to DPI change without (or before the first) WM_DPICHANGED_BEFOREPARENT message.
+            // Occurs in .NET 7+ when the DPI of the primary display was changed after starting the application, but before opening the parent form.
+            int deviceDpi = DeviceDpi;
+            if (Parent is Control parent && parent.DeviceDpi != deviceDpi || TopLevelControl is Control top && top.DeviceDpi != deviceDpi)
+                return;
+#endif
 
             // but if the parent font is changing not because of scaling, then we reset our default font as well
             defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), this.GetScale());

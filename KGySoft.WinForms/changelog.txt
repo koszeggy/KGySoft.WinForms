@@ -9,6 +9,10 @@
 ! v5.0.0:
 ~~~~~~~~~
 
++ Assembly changes:
+===================
++ Targeting also .NET 7.0.
+
 ! KGySoft.Libraries.Language namespace
 ======================================
 ! Every type in this namespace has been marked as obsolete. This is a legacy namespace from the old
@@ -166,7 +170,6 @@
 ! Assembly changes:
 ===================
 ! The KGySoft.Controls.dll assembly has been renamed to KGySoft.WinForms.dll
-* Making the package freely available to public
 + Targeting also .NET Core 3.0.
 
 + KGySoft.ComponentModel namespace:

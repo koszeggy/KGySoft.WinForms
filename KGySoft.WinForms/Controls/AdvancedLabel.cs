@@ -236,7 +236,7 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
                 }
 
                 ResetSizeCache();
-                NCHelper.InvalidateNC(Handle);
+                InvalidateNC();
                 Invalidate();
 
                 if (AutoSize)
@@ -303,7 +303,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 if (AutoSize)
                 {
                     ResetSizeCache();
-                    NCHelper.InvalidateNC(Handle);
+                    InvalidateNC();
                     ResetSize();
                 }
             }
@@ -658,7 +658,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             if (proposedTextSize.Height <= 1)
                 proposedTextSize.Height = Int32.MaxValue;
 
-            using (Graphics g = Graphics.FromHwnd(Handle))
+            using (Graphics g = Graphics.FromHwnd(IsHandleCreated ? Handle : IntPtr.Zero))
             {
                 g.SetTextRenderingQuality(textRenderingQuality, !useGdi);
 
@@ -688,6 +688,14 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         #endregion
 
         #region Protected Methods
+
+        /// <inheritdoc />
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            CheckDpiChange();
+        }
+
 
         /// <inheritdoc />
         protected override void OnFontChanged(EventArgs e)
@@ -793,6 +801,8 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         protected override void OnParentChanged(EventArgs e)
         {
             base.OnParentChanged(e);
+            if (!AutoScaleFont)
+                return;
 
             // Setting default font from new parent font without scaling (using current scaling of the new parent), and then
             // calling CheckDpiChange so if there is an explicitly set font, it will be scaled to the new parent.
@@ -806,9 +816,18 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         {
             base.OnParentFontChanged(e);
 
-            // if the parent control is rescaling its font due to DPI change, then ignoring the event (we do our scaling in CheckDpiChange)
+            // if the parent control is rescaling its font due to DPI change, then ignoring the event
+            // (we do our scaling in CheckDpiChange or in OnHandleCreated if handle is not created yet)
             if (dpiChanging || !AutoScaleFont)
                 return;
+
+#if NET7_0_OR_GREATER
+            // The parent is rescaling its font due to DPI change without (or before the first) WM_DPICHANGED_BEFOREPARENT message.
+            // Occurs in .NET 7+ when the DPI of the primary display was changed after starting the application, but before opening the parent form.
+            int deviceDpi = DeviceDpi;
+            if (Parent is Control parent && parent.DeviceDpi != deviceDpi || TopLevelControl is Control top && top.DeviceDpi != deviceDpi)
+                return;
+#endif
 
             // but if the parent font is changing not because of scaling, then we reset our default font as well
             defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), this.GetScale());
@@ -865,7 +884,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
-            NCHelper.InvalidateNC(Handle);
+            InvalidateNC();
         }
 
         /// <inheritdoc />
@@ -1167,6 +1186,12 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             }
 
             base.Font = newFont!;
+        }
+
+        private void InvalidateNC()
+        {
+            if (IsHandleCreated)
+                NCHelper.InvalidateNC(Handle);
         }
 
         #endregion
