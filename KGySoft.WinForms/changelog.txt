@@ -138,6 +138,8 @@
 ! AdvancedComboBox class:
   ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark
   + Making overridden ForeColor/BackColor properties visible in the designer.
+  + New AutoScaleFont property to allow automatic scaling of the font when the DPI changes even on platforms where
+    this is not supported by default.
   - Fixing AutoCompleteMode if it was already set in the designer.
   - Fixing ReadOnly mode in Simple style: if the list box area was visible, it was possible to change the selection.
   - Fixing ReadOnly mode in DropDownList style: up to now it was faked by disabling the control.

@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -49,7 +50,7 @@ namespace KGySoft.WinForms.Controls
 - TextChangedOnLeave event
 - Auto complete works in Simple mode
 - Auto scaling Font on all platform targets")]
-    public class AdvancedComboBox : ComboBox, ISupportsDisabledColor, IReadOnlyCapable
+    public class AdvancedComboBox : ComboBox, ISupportsDisabledColor, IReadOnlyCapable, IPerMonitorDpiAware
     {
         #region Nested classes
 
@@ -185,13 +186,20 @@ namespace KGySoft.WinForms.Controls
         private FlatStyle lastFlatStyle = FlatStyle.Standard; // would not be needed if there was an overridable OnFlatStyleChanged method
         private bool systemDrawDropDownListMode = true;
         private bool readOnly;
+        private bool suppressTextChanged;
+        private string? textOnFocus;
         private InnerEditWindow? nativeEditorChild;
         private InnerListBoxWindow? nativeListBoxChild;
-        private string? textOnFocus;
-        private bool textAndFontChanging;
         private AutoCompleteSource origCompleteSource = AutoCompleteSource.None;
         private AutoCompleteMode origCompleteMode = AutoCompleteMode.None;
         private bool clearingText;
+
+        private bool suppressFontChanged;
+        private bool autoScaleFont = true;
+        private bool dpiChanging;
+        private ScalingFont? font; // The explicitly set font.
+        private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
+        private PointF lastScale;
 
         #endregion
 
@@ -351,6 +359,85 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
+        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// <br/>Default value: <see langword="true"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>When <see langword="true"/>, the <see cref="Font"/> is automatically scaled to the current DPI of the corresponding display on every executing platform.
+        /// It also ensures that without an explicitly set font it is inherited from <see cref="Control.Parent"/>, which would be the normal behavior, but is broken in .NET 6+ and above.</para>
+        /// <para>When <see langword="false"/>, the <see cref="Font"/> may or may not be scaled, and the font of the parent control may or may not be applied correctly, depending on the default behavior of the executing platform.</para>
+        /// <note>Please note that this property affects the font only. Scaling the size and location always depends on the executing platform behavior.</note>
+        /// </remarks>
+        [Category("AdvancedComboBox")]
+        [DefaultValue(true)]
+        [Description("True to auto scale Font when DPI changes and inherit the font when it's not explicitly set; False to rely on the default behavior of the current executing platform.")]
+        public bool AutoScaleFont
+        {
+            get => autoScaleFont;
+            set
+            {
+                Debug.Assert(AutoScaleFont ^ defaultFont == null);
+                if (autoScaleFont == value)
+                    return;
+
+                autoScaleFont = value;
+                PointF scale = value ? this.GetScale() : ScaleHelper.SystemScale;
+                font?.ResetFrom(font.Font, scale);
+                if (value)
+                {
+                    defaultFont = new ScalingFont(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
+
+                    // theoretically this would not be needed, but in .NET 6+ the default font handling gets broken after the first DPI change
+                    SetFont((font ?? defaultFont).Font);
+                    return;
+                }
+
+                defaultFont?.Dispose();
+                defaultFont = null;
+                if (font == null)
+                    base.Font = null!;
+            }
+        }
+
+        /// <inheritdoc />
+        [AllowNull]
+        public override Font Font
+        {
+            get => base.Font;
+            set
+            {
+                Debug.Assert(AutoScaleFont ^ defaultFont == null);
+                if (ReferenceEquals(base.Font, value))
+                    return;
+
+                // Workaround for .NET Framework 4.7+ behavior when V2 awareness is set both in the app.config and the manifest file:
+                // The base WM_DPICHANGED_BEFOREPARENT handling sets the Font property, in which case we want to avoid setting font if it was null.
+                // .NET Core 3.0+ behaves differently: sets the Font only in base and even calls OnFontChanged but does not set the derived property.
+                if (dpiChanging && AutoScaleFont)
+                    return;
+
+                PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
+
+                // resetting the default font; or null, when AutoScaleFont is false
+                if (value is null)
+                {
+                    font?.Dispose();
+                    font = null;
+                    defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
+                    SetFont(defaultFont?.Font);
+                    return;
+                }
+
+                // setting a font explicitly
+                if (font == null)
+                    font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
+                else
+                    font.ResetFrom(ScaleHelper.GetFontOrDefault(value), scale);
+                SetFont(font.Font);
+            }
+        }
+
+        /// <summary>
         /// Do not set this property. DrawMode is automatically managed in <see cref="AdvancedComboBox"/>.
         /// </summary>
         [Browsable(false)]
@@ -471,6 +558,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public AdvancedComboBox()
         {
+            defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
 
@@ -510,16 +598,16 @@ namespace KGySoft.WinForms.Controls
             // enabling
             if (Enabled)
             {
-                textAndFontChanging = true;
+                suppressTextChanged = true;
                 try
                 {
-                    // without this text might remain selected even if not focused
+                    // without this Text may remain selected even if not focused
                     if (!Focused && style != ComboBoxStyle.DropDownList)
                         SelectionLength = 0;
                 }
                 finally
                 {
-                    textAndFontChanging = false;
+                    suppressTextChanged = false;
                 }
 
                 // if readonly was changed in disabled style original auto complete should be restored here
@@ -551,6 +639,7 @@ namespace KGySoft.WinForms.Controls
             // The base.OnHandleCreated creates the inner native window for Simple and DropDown modes only.
             base.OnHandleCreated(e);
             InitHooks();
+            CheckDpiChange();
         }
 
         /// <inheritdoc />
@@ -589,7 +678,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnTextChanged(EventArgs e)
         {
             // suppressing event if changing is a workaround
-            if (textAndFontChanging)
+            if (suppressTextChanged)
                 return;
             base.OnTextChanged(e);
         }
@@ -598,7 +687,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnFontChanged(EventArgs e)
         {
             // suppressing event if changing is a workaround
-            if (textAndFontChanging)
+            if (suppressFontChanged)
                 return;
             base.OnFontChanged(e);
         }
@@ -633,6 +722,14 @@ namespace KGySoft.WinForms.Controls
         {
             VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
             ReleaseHooks();
+            if (disposing)
+            {
+                font?.Dispose();
+                defaultFont?.Dispose();
+                font = null;
+                defaultFont = null;
+            }
+
             base.Dispose(disposing);
         }
 
@@ -706,6 +803,7 @@ namespace KGySoft.WinForms.Controls
                             return; // invalidation occurred, so there will be a new paint message
                     }
 
+                    CheckDpiChange();
                     base.WndProc(ref m);
 
                     if (systemDrawDropDownListMode && (DropDownStyle == ComboBoxStyle.DropDownList || nativeEditorChild == null))
@@ -720,10 +818,60 @@ namespace KGySoft.WinForms.Controls
 
                     return;
 
+                case Constants.WM_DPICHANGED_BEFOREPARENT:
+                    dpiChanging = true;
+                    base.WndProc(ref m);
+                    return;
+
+                case Constants.WM_DPICHANGED_AFTERPARENT:
+                    base.WndProc(ref m);
+                    dpiChanging = false;
+                    CheckDpiChange();
+                    if (AutoSize)
+                        PerformLayout();
+                    return;
+
                 default:
                     base.WndProc(ref m);
                     return;
             }
+        }
+
+        /// <inheritdoc />
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+
+            // Setting default font from new parent font without scaling (using current scaling of the new parent), and then
+            // calling CheckDpiChange so if there is an explicitly set font, it will be scaled to the new parent.
+            if (font == null)
+                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), this.GetScale());
+            CheckDpiChange();
+        }
+
+        /// <inheritdoc />
+        protected override void OnParentFontChanged(EventArgs e)
+        {
+            base.OnParentFontChanged(e);
+
+            // if the parent control is rescaling its font due to DPI change, then ignoring the event (we do our scaling in CheckDpiChange)
+            if (dpiChanging || !AutoScaleFont)
+                return;
+
+#if NET7_0_OR_GREATER
+            // The parent is rescaling its font due to DPI change without (or before the first) WM_DPICHANGED_BEFOREPARENT message.
+            // Occurs in .NET 7+ when the DPI of the primary display was changed after starting the application, but before opening the parent form.
+            int deviceDpi = DeviceDpi;
+            if (Parent is Control parent && parent.DeviceDpi != deviceDpi || TopLevelControl is Control top && top.DeviceDpi != deviceDpi)
+                return;
+#endif
+
+            // but if the parent font is changing not because of scaling, then we reset our default font as well
+            defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), this.GetScale());
+
+            // if font is null, setting default font from new parent font without scaling
+            if (font == null)
+                SetFont(defaultFont.Font);
         }
 
         #endregion
@@ -732,6 +880,7 @@ namespace KGySoft.WinForms.Controls
 
         private void InitHooks()
         {
+            Debug.Assert(IsHandleCreated);
             if (DropDownStyle == ComboBoxStyle.Simple)
             {
                 // Hooking inner list box the same way as the base class does. In Simple mode the first child is the list box.
@@ -814,6 +963,7 @@ namespace KGySoft.WinForms.Controls
             return changed;
         }
 
+        private bool ShouldSerializeFont() => font != null;
         private bool ShouldSerializeBackColor() => false;
         private bool ShouldSerializeForeColor() => false;
         private bool ShouldSerializeEnabledBackColor() => !enabledBackColor.IsEmpty;
@@ -871,6 +1021,53 @@ namespace KGySoft.WinForms.Controls
 
             TextRenderer.DrawText(g, base.Text, Font, bounds, ForeColor, this.GetFormatFlags());
         }
+
+        private void CheckDpiChange()
+        {
+            PointF scale = this.GetScale();
+            if (scale == lastScale)
+                return;
+
+            lastScale = scale;
+            if (!AutoScaleFont)
+                return;
+
+            if (font is ScalingFont explicitFont)
+                explicitFont.Scale(scale);
+            else
+                defaultFont!.Scale(scale);
+            SetFont((font ?? defaultFont!).Font);
+        }
+
+        private void SetFont(Font? newFont)
+        {
+            Font oldFont = base.Font;
+
+            // If base.Font equals to newFont by value, then setting the new one does not work. This is
+            // especially problematic if the old font is already disposed. In this case we must set null first.
+            if (Equals(oldFont, newFont))
+            {
+                if (ReferenceEquals(newFont, oldFont))
+                    return;
+                suppressFontChanged = true;
+                try
+                {
+                    base.Font = null!;
+                }
+                finally
+                {
+                    suppressFontChanged = false;
+                }
+            }
+
+            base.Font = newFont!;
+        }
+
+        #endregion
+
+        #region Explicitly Implemented Interface Methods
+
+        void IPerMonitorDpiAware.ParentFormDpiChanged() => CheckDpiChange();
 
         #endregion
 
