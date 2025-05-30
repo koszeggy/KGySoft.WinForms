@@ -419,7 +419,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to the values of an <see cref="Enum"/>.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
-        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will be used as value member.</param>
         /// <param name="translateNames">Indicates whether the displayed enum field names should be translated.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
@@ -434,7 +434,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
-        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will be used as value member.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
         public void LoadFrom(Type enumType, Type valueMemberType, SelectionPlusItems plusItems)
@@ -446,7 +446,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
-        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will be used as value member.</param>
         public void LoadFrom(Type enumType, Type valueMemberType)
         {
             ListControlExtensions.LoadFrom(cmbCombo, enumType, valueMemberType);

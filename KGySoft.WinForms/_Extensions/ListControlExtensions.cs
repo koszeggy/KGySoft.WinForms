@@ -174,7 +174,7 @@ namespace KGySoft.WinForms
         /// </summary>
         /// <param name="control">The target <see cref="ListControl"/> instance.</param>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
-        /// <param name="valueMemberType">Type of the actual value for the items in the list control. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the list control. If <see langword="null"/>, then original enum value will be used as value member.</param>
         /// <param name="translateNames">Indicates whether the displayed enum field names should be translated.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
@@ -241,7 +241,7 @@ namespace KGySoft.WinForms
         /// </summary>
         /// <param name="control">The target <see cref="ListControl"/> instance.</param>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
-        /// <param name="valueMemberType">Type of the actual value for the items in the list control. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the list control. If <see langword="null"/>, then original enum value will be used as value member.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
         public static void LoadFrom(this ListControl control, Type enumType, Type valueMemberType, SelectionPlusItems plusItems)
@@ -254,7 +254,7 @@ namespace KGySoft.WinForms
         /// </summary>
         /// <param name="control">The target <see cref="ListControl"/> instance.</param>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
-        /// <param name="valueMemberType">Type of the actual value for the items in the list control. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the list control. If <see langword="null"/>, then original enum value will be used as value member.</param>
         public static void LoadFrom(this ListControl control, Type enumType, Type valueMemberType)
         {
             LoadFrom(control, enumType, valueMemberType, false, null, false, SelectionPlusItems.None);

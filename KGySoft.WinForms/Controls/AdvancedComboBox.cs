@@ -30,17 +30,25 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Advanced version of <see cref="ComboBox"/> control that supports read-only mode and customized coloring even in disabled state.
-    /// Furthermore, supports numerous data-bound combo initializations and fixes an auto complete bug: in original combo box auto complete
-    /// does not work in <see cref="ComboBoxStyle.Simple"/> mode.
+    /// Advanced version of the <see cref="ComboBox"/> control that provides some advanced features and fixes for the original <see cref="ComboBox"/>.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="AdvancedTextBox"/> control offers the following features in addition to <see cref="TextBox"/>:
+    /// <list type="bullet">
+    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
+    /// <item><see cref="TextChangedOnLeave"/> event: occurs when leaving the control and <see cref="ComboBox.Text"/> is different from the value when the control received focus.</item>
+    /// <item>Auto complete works even in <see cref="ComboBoxStyle.Simple"/> mode.</item>
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
+    /// </list>
+    /// </remarks>
     [ToolboxBitmap(typeof(ComboBox))]
     [Description(@"A combo box with the following additional features:
 - Disabled colors
 - ReadOnly property and ReadOnlyChanged event
-- TextChangedOnLeave
-- LoadFrom methods
-- Auto complete works in Simple mode")]
+- TextChangedOnLeave event
+- Auto complete works in Simple mode
+- Auto scaling Font on all platform targets")]
     public class AdvancedComboBox : ComboBox, ISupportsDisabledColor, IReadOnlyCapable
     {
         #region Nested classes
@@ -629,7 +637,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Draws an item in the dropdown area and also in the control area in dropdownlist mode.
+        /// Draws an item in the dropdown area and also in the control area in DropDownList mode.
         /// Works only if DrawMode is OwnerDrawFixed.
         /// </summary>
         protected override void OnDrawItem(DrawItemEventArgs e)
@@ -874,7 +882,7 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region IListControl Members
+        #region Former IListControl Obsolete Members
 
         /// <summary>
         /// Gets whether the there is no selected item in the combo box (<see cref="ComboBox.SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
@@ -924,7 +932,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to the values of an <see cref="Enum"/>.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
-        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will be used as value member.</param>
         /// <param name="translateNames">Indicates whether the displayed enum field names should be translated.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
@@ -938,7 +946,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
-        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will be used as value member.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
         [Obsolete("LoadFrom methods are obsolete. SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
@@ -949,7 +957,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
-        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will used as value member.</param>
+        /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will be used as value member.</param>
         [Obsolete("LoadFrom methods are obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom(Type enumType, Type valueMemberType)
             => ListControlExtensions.LoadFrom(this, enumType, valueMemberType);
