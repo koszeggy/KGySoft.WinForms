@@ -147,11 +147,12 @@ namespace KGySoft.WinForms.Controls
 
         internal void Reset()
         {
+            bool areSame = ReferenceEquals(systemScaleFont, scaledFont);
             var newSystemFont = CloneWithPoints(systemScaleFont);
-            var newScaledFont = CloneWithPoints(scaledFont);
+            var newScaledFont = areSame ? newSystemFont : CloneWithPoints(scaledFont);
             if (disposeSystemScaleFont)
                 systemScaleFont.Dispose();
-            if (disposeScaledFont)
+            if (disposeScaledFont && !areSame)
                 scaledFont.Dispose();
 
             systemScaleFont = newSystemFont;

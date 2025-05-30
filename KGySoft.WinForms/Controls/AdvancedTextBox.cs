@@ -232,7 +232,7 @@ namespace KGySoft.WinForms.Controls
                     defaultFont = new ScalingFont(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
 
                     // theoretically this would not be needed, but in .NET 6+ the default font handling gets broken after the first DPI change
-                    SetFont((font ?? defaultFont).Font);
+                    SetFont(font ?? defaultFont);
                     return;
                 }
 
@@ -268,7 +268,7 @@ namespace KGySoft.WinForms.Controls
                     font?.Dispose();
                     font = null;
                     defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
-                    SetFont(defaultFont?.Font);
+                    SetFont(defaultFont);
                     return;
                 }
 
@@ -277,7 +277,7 @@ namespace KGySoft.WinForms.Controls
                     font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
                 else
                     font.ResetFrom(ScaleHelper.GetFontOrDefault(value), scale);
-                SetFont(font.Font);
+                SetFont(font);
             }
         }
 
@@ -382,12 +382,19 @@ namespace KGySoft.WinForms.Controls
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
                     dpiChanging = true;
-                    base.WndProc(ref m);
+                    try
+                    {
+                        base.WndProc(ref m);
+                    }
+                    finally
+                    {
+                        dpiChanging = false;
+                    }
+
                     return;
 
                 case Constants.WM_DPICHANGED_AFTERPARENT:
                     base.WndProc(ref m);
-                    dpiChanging = false;
                     CheckDpiChange();
                     if (AutoSize)
                         PerformLayout();
@@ -431,7 +438,7 @@ namespace KGySoft.WinForms.Controls
 
             // if font is null, setting default font from new parent font without scaling
             if (font == null)
-                SetFont(defaultFont.Font);
+                SetFont(defaultFont);
         }
 
         /// <inheritdoc/>
@@ -495,14 +502,17 @@ namespace KGySoft.WinForms.Controls
             SetStyle(ControlStyles.UserPaint, !Enabled && DisabledForeColor != defaultDisabledForeColor);
             if (Enabled)
             {
-                // Without these font text may change to weird style when control is re-enabled.
+                // Without this font text may change to weird style when control is re-enabled.
                 // Occurs when some property changed (e.g. RightToLeft) while the control was disabled.
-                Font previousFont = base.Font;
+                // ScalingFont.Reset is used to clone the original font; otherwise, if any auto-rescale occurred by the system previously,
+                // nullifying the Font property would dispose the original font, and then setting it back would throw an exception.
+                var previousFont = new ScalingFont(base.Font, ScaleHelper.SystemScale);
+                previousFont.Reset();
                 suppressFontChanged = true;
                 try
                 {
                     base.Font = null!;
-                    base.Font = previousFont;
+                    base.Font = previousFont.Font;
                 }
                 finally
                 {
@@ -553,19 +563,26 @@ namespace KGySoft.WinForms.Controls
                 explicitFont.Scale(scale);
             else
                 defaultFont!.Scale(scale);
-            SetFont((font ?? defaultFont!).Font);
+            SetFont(font ?? defaultFont);
         }
 
-        private void SetFont(Font? newFont)
+        private void SetFont(ScalingFont? newFont)
         {
+            if (newFont == null)
+            {
+                base.Font = null!;
+                return;
+            }
+
             Font oldFont = base.Font;
 
-            // If base.Font equals to newFont by value, then setting the new one does not work. This is
-            // especially problematic if the old font is already disposed. In this case we must set null first.
-            if (Equals(oldFont, newFont))
+            // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
+            // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
+            if (Equals(oldFont, newFont.Font))
             {
-                if (ReferenceEquals(newFont, oldFont))
+                if (ReferenceEquals(oldFont, newFont.Font) || !oldFont.IsDisposed())
                     return;
+
                 suppressFontChanged = true;
                 try
                 {
@@ -577,7 +594,7 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            base.Font = newFont!;
+            base.Font = newFont.Font;
         }
 
         #endregion

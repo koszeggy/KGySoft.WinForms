@@ -527,7 +527,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                     defaultFont = new ScalingFont(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
 
                     // theoretically this would not be needed, but in .NET 6+ the default font handling gets broken after the first DPI change
-                    SetFont((font ?? defaultFont).Font);
+                    SetFont(font ?? defaultFont);
                     return;
                 }
 
@@ -565,7 +565,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                     font?.Dispose();
                     font = null;
                     defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
-                    SetFont(defaultFont?.Font);
+                    SetFont(defaultFont);
                     return;
                 }
 
@@ -574,7 +574,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                     font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
                 else
                     font.ResetFrom(ScaleHelper.GetFontOrDefault(value), scale);
-                SetFont(font.Font);
+                SetFont(font);
             }
         }
 
@@ -788,7 +788,8 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 font?.Reset();
                 defaultFont?.Reset();
                 CheckDpiChange();
-                SetFont((font ?? defaultFont)?.Font ?? base.Font);
+                if (AutoScaleFont)
+                    SetFont(font ?? defaultFont);
             }
         }
 
@@ -834,7 +835,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
 
             // if font is null, setting default font from new parent font without scaling
             if (font == null)
-                SetFont(defaultFont.Font);
+                SetFont(defaultFont);
         }
 
         /// <inheritdoc />
@@ -865,12 +866,19 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
                     dpiChanging = true;
-                    base.WndProc(ref m);
+                    try
+                    {
+                        base.WndProc(ref m);
+                    }
+                    finally
+                    {
+                        dpiChanging = false;
+                    }
+
                     return;
 
                 case Constants.WM_DPICHANGED_AFTERPARENT:
                     base.WndProc(ref m);
-                    dpiChanging = false;
                     CheckDpiChange();
                     if (AutoSize)
                         ResetSize();
@@ -1161,19 +1169,26 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 explicitFont.Scale(scale);
             else
                 defaultFont!.Scale(scale);
-            SetFont((font ?? defaultFont!).Font);
+            SetFont(font ?? defaultFont);
         }
 
-        private void SetFont(Font? newFont)
+        private void SetFont(ScalingFont? newFont)
         {
+            if (newFont == null)
+            {
+                base.Font = null!;
+                return;
+            }
+
             Font oldFont = base.Font;
 
-            // If base.Font equals to newFont by value, then setting the new one does not work. This is
-            // especially problematic if the old font is already disposed. In this case we must set null first.
-            if (Equals(oldFont, newFont))
+            // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
+            // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
+            if (Equals(oldFont, newFont.Font))
             {
-                if (ReferenceEquals(newFont, oldFont))
+                if (ReferenceEquals(oldFont, newFont.Font) || !oldFont.IsDisposed())
                     return;
+
                 suppressFontChanged = true;
                 try
                 {
@@ -1185,7 +1200,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 }
             }
 
-            base.Font = newFont!;
+            base.Font = newFont.Font;
         }
 
         private void InvalidateNC()

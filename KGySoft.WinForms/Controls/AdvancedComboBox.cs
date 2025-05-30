@@ -388,7 +388,7 @@ namespace KGySoft.WinForms.Controls
                     defaultFont = new ScalingFont(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
 
                     // theoretically this would not be needed, but in .NET 6+ the default font handling gets broken after the first DPI change
-                    SetFont((font ?? defaultFont).Font);
+                    SetFont(font ?? defaultFont);
                     return;
                 }
 
@@ -424,7 +424,7 @@ namespace KGySoft.WinForms.Controls
                     font?.Dispose();
                     font = null;
                     defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
-                    SetFont(defaultFont?.Font);
+                    SetFont(defaultFont);
                     return;
                 }
 
@@ -433,7 +433,7 @@ namespace KGySoft.WinForms.Controls
                     font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
                 else
                     font.ResetFrom(ScaleHelper.GetFontOrDefault(value), scale);
-                SetFont(font.Font);
+                SetFont(font);
             }
         }
 
@@ -639,7 +639,11 @@ namespace KGySoft.WinForms.Controls
             // The base.OnHandleCreated creates the inner native window for Simple and DropDown modes only.
             base.OnHandleCreated(e);
             InitHooks();
-            CheckDpiChange();
+
+            // BUG workaround: If DropDownStyle is Simple or DropDown, setting the font recreates the handle again, which will end up in a Win32Exception.
+            // In this case waiting with the DPI resizing. In worst case we can still detect the DPI change in WM_PAINT.
+            if (DropDownStyle == ComboBoxStyle.DropDownList)
+                CheckDpiChange();
         }
 
         /// <inheritdoc />
@@ -681,15 +685,6 @@ namespace KGySoft.WinForms.Controls
             if (suppressTextChanged)
                 return;
             base.OnTextChanged(e);
-        }
-
-        /// <inheritdoc />
-        protected override void OnFontChanged(EventArgs e)
-        {
-            // suppressing event if changing is a workaround
-            if (suppressFontChanged)
-                return;
-            base.OnFontChanged(e);
         }
 
         /// <inheritdoc />
@@ -792,7 +787,17 @@ namespace KGySoft.WinForms.Controls
                     ProcessReadOnlyMouseDown(ref m);
                     return;
 
-                case Constants.WM_PAINT when !Enabled:
+                case Constants.WM_PAINT:
+                    if (Enabled)
+                    {
+                        // BUG workaround: In .NET 7+ the control resets the Font in WM_DPICHANGED_BEFOREPARENT, which causes a handle recreation and an immediate repaint.
+                        // If we also set the font here, it will cause a Win32Exception (Error creating window handle)
+                        if (!dpiChanging)
+                            CheckDpiChange();
+                        base.WndProc(ref m);
+                        return;
+                    }
+
                     // As there is no overridable OnFlatStyleChanged we detect FlatStyle change here.
                     // This is required because DisabledForeColor depends on FlatStyle.
                     var flatStyle = FlatStyle;
@@ -803,7 +808,9 @@ namespace KGySoft.WinForms.Controls
                             return; // invalidation occurred, so there will be a new paint message
                     }
 
-                    CheckDpiChange();
+                    // BUG workaround: see above
+                    if (!dpiChanging)
+                        CheckDpiChange();
                     base.WndProc(ref m);
 
                     if (systemDrawDropDownListMode && (DropDownStyle == ComboBoxStyle.DropDownList || nativeEditorChild == null))
@@ -820,12 +827,19 @@ namespace KGySoft.WinForms.Controls
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
                     dpiChanging = true;
-                    base.WndProc(ref m);
+                    try
+                    {
+                        base.WndProc(ref m);
+                    }
+                    finally
+                    {
+                        dpiChanging = false;
+                    }
+
                     return;
 
                 case Constants.WM_DPICHANGED_AFTERPARENT:
                     base.WndProc(ref m);
-                    dpiChanging = false;
                     CheckDpiChange();
                     if (AutoSize)
                         PerformLayout();
@@ -871,7 +885,7 @@ namespace KGySoft.WinForms.Controls
 
             // if font is null, setting default font from new parent font without scaling
             if (font == null)
-                SetFont(defaultFont.Font);
+                SetFont(defaultFont);
         }
 
         #endregion
@@ -1024,6 +1038,10 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckDpiChange()
         {
+            // BUG workaround: If Font is changed while the control is not created (even when IsHandleCreated is already true), the control may not appear. Occurs in Simple mode.
+            if (!Created)
+                return;
+
             PointF scale = this.GetScale();
             if (scale == lastScale)
                 return;
@@ -1036,31 +1054,47 @@ namespace KGySoft.WinForms.Controls
                 explicitFont.Scale(scale);
             else
                 defaultFont!.Scale(scale);
-            SetFont((font ?? defaultFont!).Font);
+            SetFont(font ?? defaultFont);
         }
 
-        private void SetFont(Font? newFont)
+        private void SetFont(ScalingFont? newFont)
         {
-            Font oldFont = base.Font;
-
-            // If base.Font equals to newFont by value, then setting the new one does not work. This is
-            // especially problematic if the old font is already disposed. In this case we must set null first.
-            if (Equals(oldFont, newFont))
+            try
             {
-                if (ReferenceEquals(newFont, oldFont))
-                    return;
-                suppressFontChanged = true;
-                try
+                if (newFont == null)
                 {
                     base.Font = null!;
+                    return;
                 }
-                finally
-                {
-                    suppressFontChanged = false;
-                }
-            }
 
-            base.Font = newFont!;
+                Font oldFont = base.Font;
+
+                // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
+                // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
+                if (Equals(oldFont, newFont.Font))
+                {
+                    if (ReferenceEquals(oldFont, newFont.Font) || !oldFont.IsDisposed())
+                        return;
+
+                    suppressFontChanged = true;
+                    try
+                    {
+                        base.Font = null!;
+                    }
+                    finally
+                    {
+                        suppressFontChanged = false;
+                    }
+                }
+
+                base.Font = newFont.Font;
+            }
+            finally
+            {
+                // Workaround: After font change, the text gets selected even if the control is not focused.
+                if (IsHandleCreated && DropDownStyle != ComboBoxStyle.DropDownList && !Focused)
+                    SelectionLength = 0;
+            }
         }
 
         #endregion

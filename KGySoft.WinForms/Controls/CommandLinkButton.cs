@@ -484,7 +484,7 @@ namespace KGySoft.WinForms.Controls
                 if (textFont == null)
                 {
                     defaultTextFont.Scale(scale);
-                    SetFont(defaultTextFont.Font);
+                    SetFont(defaultTextFont);
                     changed = true;
                 }
 
@@ -543,7 +543,7 @@ namespace KGySoft.WinForms.Controls
                         textFont.ResetFrom(ScaleHelper.GetFontOrDefault(value), scale);
                 }
 
-                SetFont((textFont ?? defaultTextFont).Font);
+                SetFont(textFont ?? defaultTextFont);
             }
         }
 
@@ -1306,13 +1306,20 @@ namespace KGySoft.WinForms.Controls
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
                     dpiChanging = true;
-                    base.WndProc(ref m);
+                    try
+                    {
+                        base.WndProc(ref m);
+                    }
+                    finally
+                    {
+                        dpiChanging = false;
+                    }
+
                     return;
 
                 // Known issue: Security shield icon size is not updated with non-V2 awareness
                 case Constants.WM_DPICHANGED_AFTERPARENT:
                     base.WndProc(ref m);
-                    dpiChanging = false;
 #if NETFRAMEWORK
                     if (IsNativeRendering)
                     {
@@ -2203,7 +2210,7 @@ namespace KGySoft.WinForms.Controls
             if (descriptionFont == null)
                 defaultDescriptionFont.Scale(scale);
 
-            SetFont((textFont ?? defaultTextFont).Font);
+            SetFont(textFont ?? defaultTextFont);
             Invalidate();
 
             // Handling possible enabling/disabling of visual styles
@@ -2232,7 +2239,7 @@ namespace KGySoft.WinForms.Controls
                 explicitDescFont.Scale(scale);
             else
                 defaultDescriptionFont.Scale(scale);
-            SetFont((textFont ?? defaultTextFont).Font);
+            SetFont(textFont ?? defaultTextFont);
 
             if (AutoSize)
                 PerformLayout();
@@ -2311,16 +2318,23 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private void SetFont(Font? newFont)
+        private void SetFont(ScalingFont? newFont)
         {
+            if (newFont == null)
+            {
+                base.Font = null!;
+                return;
+            }
+
             Font oldFont = base.Font;
 
-            // If base.Font equals to newFont by value, then setting the new one does not work. This is
-            // especially problematic if the old font is already disposed. In this case we must set null first.
-            if (Equals(oldFont, newFont))
+            // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
+            // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
+            if (Equals(oldFont, newFont.Font))
             {
-                if (ReferenceEquals(newFont, oldFont))
+                if (ReferenceEquals(oldFont, newFont.Font) || !oldFont.IsDisposed())
                     return;
+
                 suppressFontChanged = true;
                 try
                 {
@@ -2332,9 +2346,7 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            // Setting the actual Font property and handling if OnFontChanged is not invoked, which is the case on some platforms
-            base.Font = newFont!;
-            Invalidate();
+            base.Font = newFont.Font;
         }
 
         #endregion
