@@ -104,7 +104,6 @@
             this.advancedLabel1.AutoSize = true;
             this.advancedLabel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.advancedLabel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.advancedLabel1.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel1.Location = new System.Drawing.Point(3, 29);
             this.advancedLabel1.Name = "advancedLabel1";
             this.advancedLabel1.Size = new System.Drawing.Size(444, 39);
@@ -148,7 +147,6 @@
             // 
             this.advancedLabel10.AutoSize = true;
             this.advancedLabel10.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Flat;
-            this.advancedLabel10.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel10.Location = new System.Drawing.Point(123, 150);
             this.advancedLabel10.Name = "advancedLabel10";
             this.advancedLabel10.Size = new System.Drawing.Size(109, 17);
@@ -159,7 +157,6 @@
             // 
             this.advancedLabel9.AutoSize = true;
             this.advancedLabel9.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.SunkenLow;
-            this.advancedLabel9.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel9.Location = new System.Drawing.Point(123, 132);
             this.advancedLabel9.Name = "advancedLabel9";
             this.advancedLabel9.Size = new System.Drawing.Size(149, 17);
@@ -170,7 +167,6 @@
             // 
             this.advancedLabel8.AutoSize = true;
             this.advancedLabel8.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.RaisedFrame;
-            this.advancedLabel8.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel8.Location = new System.Drawing.Point(123, 114);
             this.advancedLabel8.Name = "advancedLabel8";
             this.advancedLabel8.Size = new System.Drawing.Size(154, 17);
@@ -181,7 +177,6 @@
             // 
             this.advancedLabel7.AutoSize = true;
             this.advancedLabel7.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.SunkenFrame;
-            this.advancedLabel7.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel7.Location = new System.Drawing.Point(123, 96);
             this.advancedLabel7.Name = "advancedLabel7";
             this.advancedLabel7.Size = new System.Drawing.Size(158, 17);
@@ -192,7 +187,6 @@
             // 
             this.advancedLabel6.AutoSize = true;
             this.advancedLabel6.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.RaisedHigh;
-            this.advancedLabel6.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel6.Location = new System.Drawing.Point(123, 78);
             this.advancedLabel6.Name = "advancedLabel6";
             this.advancedLabel6.Size = new System.Drawing.Size(147, 17);
@@ -203,7 +197,6 @@
             // 
             this.advancedLabel5.AutoSize = true;
             this.advancedLabel5.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Raised;
-            this.advancedLabel5.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel5.Location = new System.Drawing.Point(123, 62);
             this.advancedLabel5.Name = "advancedLabel5";
             this.advancedLabel5.Size = new System.Drawing.Size(123, 15);
@@ -214,7 +207,6 @@
             // 
             this.advancedLabel4.AutoSize = true;
             this.advancedLabel4.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Sunken;
-            this.advancedLabel4.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel4.Location = new System.Drawing.Point(123, 46);
             this.advancedLabel4.Name = "advancedLabel4";
             this.advancedLabel4.Size = new System.Drawing.Size(127, 15);
@@ -225,7 +217,6 @@
             // 
             this.advancedLabel3.AutoSize = true;
             this.advancedLabel3.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.FixedSingle;
-            this.advancedLabel3.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel3.Location = new System.Drawing.Point(123, 30);
             this.advancedLabel3.Name = "advancedLabel3";
             this.advancedLabel3.Size = new System.Drawing.Size(144, 15);
@@ -235,7 +226,6 @@
             // advancedLabel2
             // 
             this.advancedLabel2.AutoSize = true;
-            this.advancedLabel2.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel2.Location = new System.Drawing.Point(123, 16);
             this.advancedLabel2.Name = "advancedLabel2";
             this.advancedLabel2.Size = new System.Drawing.Size(114, 13);
@@ -290,7 +280,6 @@
             // advancedLabel17
             // 
             this.advancedLabel17.AutoSize = true;
-            this.advancedLabel17.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel17.Location = new System.Drawing.Point(153, 46);
             this.advancedLabel17.Name = "advancedLabel17";
             this.advancedLabel17.Size = new System.Drawing.Size(99, 17);
@@ -302,7 +291,6 @@
             // advancedLabel16
             // 
             this.advancedLabel16.AutoSize = true;
-            this.advancedLabel16.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel16.Location = new System.Drawing.Point(153, 33);
             this.advancedLabel16.Name = "advancedLabel16";
             this.advancedLabel16.Size = new System.Drawing.Size(111, 17);
@@ -313,7 +301,6 @@
             // advancedLabel15
             // 
             this.advancedLabel15.AutoSize = true;
-            this.advancedLabel15.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel15.Location = new System.Drawing.Point(153, 20);
             this.advancedLabel15.Name = "advancedLabel15";
             this.advancedLabel15.Size = new System.Drawing.Size(96, 17);
@@ -325,7 +312,6 @@
             // advancedLabel14
             // 
             this.advancedLabel14.AutoSize = true;
-            this.advancedLabel14.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel14.Location = new System.Drawing.Point(22, 46);
             this.advancedLabel14.Name = "advancedLabel14";
             this.advancedLabel14.Size = new System.Drawing.Size(89, 13);
@@ -336,7 +322,6 @@
             // advancedLabel13
             // 
             this.advancedLabel13.AutoSize = true;
-            this.advancedLabel13.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel13.Location = new System.Drawing.Point(22, 33);
             this.advancedLabel13.Name = "advancedLabel13";
             this.advancedLabel13.Size = new System.Drawing.Size(101, 13);
@@ -346,7 +331,6 @@
             // advancedLabel12
             // 
             this.advancedLabel12.AutoSize = true;
-            this.advancedLabel12.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel12.Location = new System.Drawing.Point(22, 20);
             this.advancedLabel12.Name = "advancedLabel12";
             this.advancedLabel12.Size = new System.Drawing.Size(87, 13);
@@ -384,7 +368,6 @@
             this.advancedLabel18.AutoHandleUrls = true;
             this.advancedLabel18.AutoSize = true;
             this.advancedLabel18.Dock = System.Windows.Forms.DockStyle.Top;
-            this.advancedLabel18.LinkArea = new System.Windows.Forms.LinkArea(48, 9);
             this.advancedLabel18.Location = new System.Drawing.Point(3, 16);
             this.advancedLabel18.Name = "advancedLabel18";
             this.advancedLabel18.RawText = "An AdvancedLabel may contain hyperlinks such as <a href=\"https://kgysoft.net\">hyp" +
@@ -413,7 +396,6 @@
             // advancedLabel11
             // 
             this.advancedLabel11.AutoSize = true;
-            this.advancedLabel11.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.advancedLabel11.Location = new System.Drawing.Point(3, 25);
             this.advancedLabel11.Name = "advancedLabel11";
             this.advancedLabel11.Size = new System.Drawing.Size(272, 13);

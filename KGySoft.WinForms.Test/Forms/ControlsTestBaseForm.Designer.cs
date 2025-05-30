@@ -32,9 +32,9 @@
             this.pnlTestArea = new System.Windows.Forms.Panel();
             this.lblInstuction = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.grdProperties = new System.Windows.Forms.PropertyGrid();
-            this.splitter1 = new System.Windows.Forms.Splitter();
             this.cmsGridMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.miResetValue = new System.Windows.Forms.ToolStripMenuItem();
+            this.splitter1 = new System.Windows.Forms.Splitter();
             this.pnlTestArea.SuspendLayout();
             this.cmsGridMenu.SuspendLayout();
             this.SuspendLayout();
@@ -51,12 +51,11 @@
             // lblInstuction
             // 
             this.lblInstuction.AutoSize = true;
-            this.lblInstuction.BackColor = System.Drawing.SystemColors.Window;
             this.lblInstuction.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Flat;
             this.lblInstuction.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblInstuction.EnabledBackColor = System.Drawing.SystemColors.Window;
+            this.lblInstuction.EnabledForeColor = System.Drawing.SystemColors.WindowText;
             this.lblInstuction.Font = new System.Drawing.Font("Tahoma", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblInstuction.ForeColor = System.Drawing.SystemColors.WindowText;
-            this.lblInstuction.LinkArea = new System.Windows.Forms.LinkArea(0, 0);
             this.lblInstuction.Location = new System.Drawing.Point(0, 0);
             this.lblInstuction.Name = "lblInstuction";
             this.lblInstuction.Padding = new System.Windows.Forms.Padding(5);
@@ -72,6 +71,21 @@
             this.grdProperties.Name = "grdProperties";
             this.grdProperties.Size = new System.Drawing.Size(215, 260);
             this.grdProperties.TabIndex = 1;
+            this.grdProperties.SelectedObjectsChanged += new System.EventHandler(this.grdProperties_SelectedObjectsChanged);
+            // 
+            // cmsGridMenu
+            // 
+            this.cmsGridMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.miResetValue});
+            this.cmsGridMenu.Name = "cmsGridMenu";
+            this.cmsGridMenu.Size = new System.Drawing.Size(134, 26);
+            // 
+            // miResetValue
+            // 
+            this.miResetValue.Name = "miResetValue";
+            this.miResetValue.Size = new System.Drawing.Size(133, 22);
+            this.miResetValue.Text = "Reset Value";
+            this.miResetValue.Click += new System.EventHandler(this.miResetValue_Click);
             // 
             // splitter1
             // 
@@ -81,20 +95,6 @@
             this.splitter1.Size = new System.Drawing.Size(3, 260);
             this.splitter1.TabIndex = 2;
             this.splitter1.TabStop = false;
-            // 
-            // cmsGridMenu
-            // 
-            this.cmsGridMenu.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.miResetValue});
-            this.cmsGridMenu.Name = "cmsGridMenu";
-            this.cmsGridMenu.Size = new System.Drawing.Size(181, 48);
-            // 
-            // miResetValue
-            // 
-            this.miResetValue.Name = "miResetValue";
-            this.miResetValue.Size = new System.Drawing.Size(180, 22);
-            this.miResetValue.Text = "Reset Value";
-            this.miResetValue.Click += new System.EventHandler(this.miResetValue_Click);
             // 
             // ControlsTestBaseForm
             // 

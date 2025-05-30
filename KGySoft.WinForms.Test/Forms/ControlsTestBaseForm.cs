@@ -137,6 +137,9 @@ namespace KGySoft.WinForms.Test.Forms
             grdProperties.Refresh();
         }
 
+        private void grdProperties_SelectedObjectsChanged(object sender, EventArgs e)
+            => Text = $"{Name} [Selected: {(grdProperties.SelectedObject as Control)?.Name ?? grdProperties.SelectedObject}]";
+
         #endregion
 
         #endregion
