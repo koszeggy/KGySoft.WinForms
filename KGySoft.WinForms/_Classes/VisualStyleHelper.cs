@@ -45,6 +45,20 @@ namespace KGySoft.WinForms
 
         private static readonly ThreadSafeDictionary<int, (SynchronizationContext? Context, EventHandler? Handler)> visualStylesChangedHandlers = new();
 
+        private static readonly LockFreeCacheOptions themeBitmapsCacheProfile = new()
+        {
+            InitialCapacity = 4,
+            ThresholdCapacity = 32,
+            MergeInterval = TimeSpan.FromMilliseconds(100)
+        };
+
+        private static readonly LockFreeCacheOptions hasDefaultAnimationCacheProfile = new()
+        {
+            InitialCapacity = 2,
+            ThresholdCapacity = 2, // may contain only two entries, one for Button, one for CommandLinkButton
+            MergeInterval = TimeSpan.FromMilliseconds(100)
+        };
+
         // If a new theme is added, adjust the GetClassName method as well
         private static IntPtr buttonThemeHandle;
         private static IntPtr taskDialogThemeHandle;
@@ -54,10 +68,9 @@ namespace KGySoft.WinForms
         private static bool? highContrast;
         private static bool? isComCtlV6Available;
 
-        // No need to use thread-safe caches here, because they are always read from the UI thread.
-        // UserPreferenceChanged can be raised from any thread though (hence volatile), but it is not a problem if we always create a new instance when clearing the caches.
-        private static volatile Cache<(IntPtr, int, int), Bitmap> themeBitmapsCache = CreateBitmapsCache();
-        private static volatile Cache<(int, int, int), bool> hasDefaultAnimationCache = CreateHasDefaultAnimationCache();
+        // Using thread-safe caches to support multiple UI threads
+        private static IThreadSafeCacheAccessor<(IntPtr, int, int), Bitmap>? themeBitmapsCache;
+        private static IThreadSafeCacheAccessor<(int, int, int), bool>? hasDefaultAnimationCache;
 
         #endregion
 
@@ -87,6 +100,36 @@ namespace KGySoft.WinForms
         #endregion
 
         #region Properties
+
+        private static IThreadSafeCacheAccessor<(IntPtr, int, int), Bitmap> ThemeBitmapsCache
+        {
+            get
+            {
+                var cache = themeBitmapsCache;
+                while (cache is null) // the while is needed because of ClearCaches
+                {
+                    Interlocked.CompareExchange(ref themeBitmapsCache, ThreadSafeCacheFactory.Create<(IntPtr, int, int), Bitmap>(GetThemeBitmap, themeBitmapsCacheProfile), null);
+                    cache = themeBitmapsCache;
+                }
+
+                return cache;
+            }
+        }
+
+        private static IThreadSafeCacheAccessor<(int, int, int), bool> HasDefaultAnimationCache
+        {
+            get
+            {
+                var cache = hasDefaultAnimationCache;
+                while (cache is null) // the while is needed because of ClearCaches
+                {
+                    Interlocked.CompareExchange(ref hasDefaultAnimationCache, ThreadSafeCacheFactory.Create<(int, int, int), bool>(GetHasDefaultAnimation, hasDefaultAnimationCacheProfile), null);
+                    cache = hasDefaultAnimationCache;
+                }
+
+                return cache;
+            }
+        }
 
         /// <summary>
         /// Gets a cached value indicating whether visual styles are available.
@@ -210,7 +253,7 @@ namespace KGySoft.WinForms
 
                 // Caching by hTheme is OK, even if we open/close the theme data for the control, because opening with the same DPI/color scheme tends to return the same handle.
                 // Even if it wouldn't do so, the cache will drop and dispose the old bitmaps when it's full, or when the theme changes.
-                Bitmap bmp = themeBitmapsCache[(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, part, state)];
+                Bitmap bmp = ThemeBitmapsCache[(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, part, state)];
                 g.InterpolationMode = InterpolationMode.HighQualityBicubic;
                 g.PixelOffsetMode = PixelOffsetMode.Half;
                 g.DrawImage(bmp, bounds);
@@ -251,12 +294,9 @@ namespace KGySoft.WinForms
             visualStylesAvailable = null;
             highContrast = null;
 
-            var oldCache = themeBitmapsCache;
-            themeBitmapsCache = CreateBitmapsCache();
-            foreach (Bitmap bitmap in oldCache.Values)
-                bitmap.Dispose();
-
-            hasDefaultAnimationCache = CreateHasDefaultAnimationCache();
+            // Not disposing the cached bitmaps - they will be freed by the GC (unless a caller or GetThemeBitmap holds a reference to them).
+            Volatile.Write(ref themeBitmapsCache, null);
+            Volatile.Write(ref hasDefaultAnimationCache, null);
         }
 
         internal static bool HasDefaultAnimation(int part, int state1, int state2)
@@ -264,19 +304,12 @@ namespace KGySoft.WinForms
             Debug.Assert(RenderWithVisualStyles);
             if (!RenderWithVisualStyles)
                 return false;
-            return hasDefaultAnimationCache[(part, state1, state2)];
+            return HasDefaultAnimationCache[(part, state1, state2)];
         }
 
         #endregion
 
         #region Private Methods
-
-        private static Cache<(IntPtr, int, int), Bitmap> CreateBitmapsCache() => new Cache<(IntPtr ThemeHandle, int PartId, int StateId), Bitmap>(GetThemeBitmap, 32)
-        {
-            DisposeDroppedValues = true
-        };
-
-        private static Cache<(int, int, int), bool> CreateHasDefaultAnimationCache() => new(GetHasDefaultAnimation, 2);
 
         private static string GetClassName(IntPtr hTheme) => hTheme == buttonThemeHandle ? Constants.ThemeClassButton
             : hTheme == taskDialogThemeHandle ? Constants.ThemeClassTaskDialog

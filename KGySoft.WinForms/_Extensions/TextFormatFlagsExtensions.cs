@@ -33,12 +33,13 @@ namespace KGySoft.WinForms
     {
         #region Fields
 
-        private static readonly Cache<TextFormatFlags, StringFormat> formatsCache =
+        // Need to use a locking cache to be able to use DisposeDroppedValues, but it shouldn't be an issue as we don't expect many concurrent UI threads.
+        private static readonly IThreadSafeCacheAccessor<TextFormatFlags, StringFormat> formatsCache =
             new Cache<TextFormatFlags, StringFormat>(TextFormatFlagsToStringFormat, 8, Comparer)
             {
                 Behavior = CacheBehavior.RemoveOldestElement,
                 DisposeDroppedValues = true
-            };
+            }.GetThreadSafeAccessor();
 
         #endregion
 

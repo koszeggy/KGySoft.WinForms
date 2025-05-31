@@ -31,12 +31,9 @@ namespace KGySoft.WinForms
         #region Fields
 
         // Notes:
-        // - Not using the loader delegate because the key is calculated in the GetCachedBitmap method.
+        // - Not using Cache<,> with a loader delegate because the key is calculated in the GetCachedBitmap method.
         // - Size is turned into ulong to avoid slow value compare in .NET Framework where Size does not implement IEquatable.
-        // - Not enabling DisposeDroppedValues because an image may be used after dropping it from the cache
-        //   (because unlike in VisualStyleHelper or ColorExtensions, the returned cache items may be stored by the caller).
-        //   So relying on the finalizer to dispose the images, which is actually not worse than using non-disposable objects with finalizers like WPF images or weak references.
-        private static readonly Cache<(string, ulong), Bitmap> imagesCache = new Cache<(string, ulong), Bitmap>(8);
+        private static readonly ThreadSafeDictionary<(string, ulong), Bitmap> imagesCache = new();
 
         #endregion
 

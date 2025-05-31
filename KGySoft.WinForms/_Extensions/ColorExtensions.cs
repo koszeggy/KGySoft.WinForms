@@ -26,17 +26,18 @@ namespace KGySoft.WinForms
     {
         #region Fields
 
-        private static readonly Cache<int, Pen> penCache = new(c => new Pen(Color.FromArgb(c)), 16)
+        // Need to use locking caches to be able to use DisposeDroppedValues, but it shouldn't be an issue as we don't expect many concurrent UI threads.
+        private static readonly IThreadSafeCacheAccessor<int, Pen> penCache = new Cache<int, Pen>(c => new Pen(Color.FromArgb(c)), 16)
         {
             DisposeDroppedValues = true,
             EnsureCapacity = true,
-        };
+        }.GetThreadSafeAccessor();
 
-        private static readonly Cache<int, Brush> brushCache = new(c => new SolidBrush(Color.FromArgb(c)), 16)
+        private static readonly IThreadSafeCacheAccessor<int, Brush> brushCache = new Cache<int, Brush>(c => new SolidBrush(Color.FromArgb(c)), 16)
         {
             DisposeDroppedValues = true,
             EnsureCapacity = true,
-        };
+        }.GetThreadSafeAccessor();
 
         #endregion
 

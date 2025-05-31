@@ -18,6 +18,7 @@
 #region Used Namespaces
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -204,9 +205,16 @@ namespace KGySoft.WinForms.Forms
 
         #region Static Fields
 
-        [SuppressMessage("ReSharper", "CollectionNeverUpdated.Local", Justification = "False alarm, GetSystemText is the loader delegate")]
-        private static readonly Cache<SystemTextIds, string> systemTextCache = new Cache<SystemTextIds, string>(GetSystemText, 6, EnumComparer<SystemTextIds>.Comparer);
-        
+        private static readonly LockFreeCacheOptions cacheProfile = new()
+        {
+            InitialCapacity = 6,
+            ThresholdCapacity = 6,
+            MergeInterval = TimeSpan.FromMilliseconds(100)
+        };
+
+        private static readonly IThreadSafeCacheAccessor<SystemTextIds, string> systemTextCache
+            = ThreadSafeCacheFactory.Create(GetSystemText, Comparer, cacheProfile);
+
         private static readonly TaskDialogStandardIcons[] iconsWithColoredHeader = new[] { TaskDialogStandardIcons.SecuritySuccess, TaskDialogStandardIcons.SecurityWarning, TaskDialogStandardIcons.SecurityError, TaskDialogStandardIcons.SecurityShieldGray, TaskDialogStandardIcons.SecurityShieldBlue, TaskDialogStandardIcons.SecurityQuestion };
         private static readonly Size mainIconReferenceSize = new Size(32, 32);
         private static readonly Size footerIconReferenceSize = new Size(16, 16);
@@ -241,6 +249,16 @@ namespace KGySoft.WinForms.Forms
         private bool isRecreatingDialog;
 
         #endregion
+
+        #endregion
+
+        #region Properties
+
+#if NETFRAMEWORK
+        private static IEqualityComparer<SystemTextIds> Comparer => EnumComparer<SystemTextIds>.Comparer;
+#else
+        private static IEqualityComparer<SystemTextIds>? Comparer => null;
+#endif
 
         #endregion
 
