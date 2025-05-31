@@ -19,13 +19,13 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
 using KGySoft.Collections;
 using KGySoft.Drawing;
 using KGySoft.Drawing.Imaging;
-using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
@@ -42,6 +42,8 @@ namespace KGySoft.WinForms
     internal static class VisualStyleHelper
     {
         #region Fields
+
+        private static readonly ThreadSafeDictionary<int, (SynchronizationContext? Context, EventHandler? Handler)> visualStylesChangedHandlers = new();
 
         // If a new theme is added, adjust the GetClassName method as well
         private static IntPtr buttonThemeHandle;
@@ -65,8 +67,22 @@ namespace KGySoft.WinForms
         /// Occurs when the visual styles have changed.
         /// Unlike Control.SystemColorsChanged, this event is raised for the VisualStyle category of UserPreferenceChanged, and
         /// makes sure that the cached value of <see cref="RenderWithVisualStyles"/> is always up-to-date.
+        /// The event is raised from the same thread as event subscription. Make sure unsubscribing is done on the same thread as subscribing, otherwise the event may leak memory.
         /// </summary>
-        internal static event EventHandler? VisualStylesChanged;
+        internal static event EventHandler? VisualStylesChanged
+        {
+            // Capturing the context when adding the first handler from a thread.
+            // No need to combine the delegates in a thread-safe way, because the values themselves are always accessed from the same thread.
+            add => visualStylesChangedHandlers.AddOrUpdate(Thread.CurrentThread.ManagedThreadId,
+                _ => (SynchronizationContext.Current, value),
+                (_,v) => (v.Context, v.Handler + value));
+
+            // Removing the handler from the thread where it was added.
+            // When the thread is not the same, a new entry may be created with a corresponding context and a null handler.
+            remove => visualStylesChangedHandlers.AddOrUpdate(Thread.CurrentThread.ManagedThreadId,
+                _ => (SynchronizationContext.Current, null),
+                (_, v) => (v.Context, v.Handler - value));
+        }
 
         #endregion
 
@@ -367,6 +383,21 @@ namespace KGySoft.WinForms
             return new Color32((byte)a, (byte)r, (byte)g, (byte)b);
         }
 
+        private static void OnVisualStylesChanged(EventArgs e)
+        {
+            // VisualStylesChanged is a special event that raises the subscribers in the same thread as the subscription was made.
+            // This is important because it is based on the UserPreferenceChanged event that can be raised from any thread, at least in .NET Core.
+            int threadId = Thread.CurrentThread.ManagedThreadId;
+            foreach (var handlersPerThread in visualStylesChangedHandlers)
+            {
+                // If the thread is the same or the context is null, invoking the event handler directly; otherwise, using the context to invoke it.
+                if (threadId == handlersPerThread.Key || handlersPerThread.Value.Context == null)
+                    handlersPerThread.Value.Handler?.Invoke(null, e);
+                else
+                    handlersPerThread.Value.Context.Send(_ => handlersPerThread.Value.Handler?.Invoke(null, e), null);
+            }
+        }
+
         #endregion
 
         #region Event handlers
@@ -383,7 +414,7 @@ namespace KGySoft.WinForms
             {
                 ClearCaches();
                 if (e.Category == UserPreferenceCategory.VisualStyle)
-                    VisualStylesChanged?.Invoke(null, EventArgs.Empty);
+                    OnVisualStylesChanged(EventArgs.Empty);
             }
         }
 
