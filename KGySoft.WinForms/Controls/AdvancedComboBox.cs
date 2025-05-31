@@ -163,6 +163,12 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Constants
+
+        private const int referenceDropDownWidth = 17;
+
+        #endregion
+
         #region Fields
 
         #region Static Fields
@@ -485,7 +491,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets whether the combo box should have the default system appearance <see cref="ComboBoxStyle.DropDownList"/> mode.
+        /// Gets or sets whether the combo box should have the default system appearance in <see cref="ComboBoxStyle.DropDownList"/> mode.
         /// If this property is <see langword="false"/>, then drop-down list appearance will look similar to the <see cref="ComboBoxStyle.DropDown"/> mode
         /// even on Windows Vista and newer platforms.
         /// </summary>
@@ -651,6 +657,14 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnHandleDestroyed(e);
             ReleaseHooks();
+        }
+
+        /// <inheritdoc />
+        protected override void OnFontChanged(EventArgs e)
+        {
+            if (suppressFontChanged)
+                return;
+            base.OnFontChanged(e);
         }
 
         /// <inheritdoc />
@@ -992,15 +1006,21 @@ namespace KGySoft.WinForms.Controls
             var clientRect = bounds;
             bool rtl = RightToLeft == RightToLeft.Yes;
             bool visualStyles = VisualStyleHelper.RenderWithVisualStyles;
+            int dropDownButtonWidth = 0;
             if (style == ComboBoxStyle.DropDownList)
             {
                 bounds.X += visualStyles || !rtl ? 2 : 4;
                 bounds.Y += 2;
                 bounds.Width -= visualStyles || !rtl ? 5 : 6;
                 bounds.Height -= 4;
-                bounds.Width -= 17; // assuming that dropdown button is 17 px wide
+
+                // We could use SystemInformation.GetHorizontalScrollBarArrowWidthForDpi on .NET Framework 4.7.2 and above,
+                // but that works only for V2 per-monitor DPI awareness, and only on Windows 10 and above.
+                // This may cause that the disabled rendering will look better than the enabled one on some platforms.
+                dropDownButtonWidth = this.ScaleWidth(referenceDropDownWidth);
+                bounds.Width -= dropDownButtonWidth;
                 if (rtl)
-                    bounds.X += 17;
+                    bounds.X += dropDownButtonWidth;
             }
             else
             {
@@ -1015,7 +1035,7 @@ namespace KGySoft.WinForms.Controls
                 VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_READONLY, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, clientRect);
 
                 var part = rtl ? COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;
-                var buttonSize = new Size(17, 21); // TODO: scale
+                var buttonSize = new Size(dropDownButtonWidth, clientRect.Height);
                 var dropDownButtonBounds = new Rectangle(Point.Empty, buttonSize);
                 if (!rtl)
                     dropDownButtonBounds.X = clientRect.Right - buttonSize.Width;
@@ -1024,16 +1044,15 @@ namespace KGySoft.WinForms.Controls
             else
                 g.FillRectangle(BackColor.GetBrush(), bounds);
 
+            Rectangle textRect = clientRect;
             if (style == ComboBoxStyle.DropDownList)
             {
-                bounds.X -= visualStyles
-                    ? !rtl ? 1 : 0
-                    : !rtl ? 1 : 2;
-                bounds.Y += 2;
-                bounds.Width += 5;
+                textRect.Inflate(-4, -4);
+                if (rtl)
+                    textRect.X += 2;
             }
 
-            TextRenderer.DrawText(g, base.Text, Font, bounds, ForeColor, this.GetFormatFlags());
+            TextRenderer.DrawText(g, base.Text, Font, textRect, ForeColor, this.GetFormatFlags());
         }
 
         private void CheckDpiChange()
