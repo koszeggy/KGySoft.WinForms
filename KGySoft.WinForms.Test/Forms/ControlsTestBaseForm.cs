@@ -91,8 +91,25 @@ namespace KGySoft.WinForms.Test.Forms
                 case WM_LBUTTONDOWN: // when clicking over the disabled pnlTestArea (so the form gets the mouse down event)
                 case WM_MOUSEACTIVATE when (m.LParam.ToInt32() >> 16) == WM_LBUTTONDOWN: // when clicking over a child control, even disabled ones
                     Control child = FindControl(this, Cursor.Position);
-                    if (child != null && child != grdProperties && !grdProperties.Contains(child) && grdProperties.SelectedObject != child)
-                        grdProperties.SelectedObject = child;
+                    if (child == null || child == grdProperties || grdProperties.Contains(child))
+                        break;
+
+                    // selecting a single object
+                    if ((ModifierKeys & Keys.Shift) == 0)
+                    {
+                        if (grdProperties.SelectedObject != child)
+                            grdProperties.SelectedObject = child;
+                        break;
+                    }
+
+                    // adding child to selected objects
+                    var selectedObjects = grdProperties.SelectedObjects.ToList();
+                    if (!selectedObjects.Contains(child))
+                    {
+                        selectedObjects.Add(child);
+                        grdProperties.SelectedObjects = selectedObjects.ToArray();
+                    }
+
                     break;
             }
 
@@ -103,6 +120,13 @@ namespace KGySoft.WinForms.Test.Forms
         {
             base.OnLoad(e);
             lblInstuction.SendToBack();
+        }
+
+        protected override void OnEnabledChanged(EventArgs e)
+        {
+            base.OnEnabledChanged(e);
+            if (!Enabled)
+                Enabled = true; // prevents the form from being disabled along with the property grid and the close button
         }
 
         #endregion
@@ -138,7 +162,10 @@ namespace KGySoft.WinForms.Test.Forms
         }
 
         private void grdProperties_SelectedObjectsChanged(object sender, EventArgs e)
-            => Text = $"{Name} [Selected: {(grdProperties.SelectedObject as Control)?.Name ?? grdProperties.SelectedObject}]";
+        {
+            var selectedObjects = grdProperties.SelectedObjects;
+            Text = $"{Name} [Selected: {(selectedObjects.Length == 1 ? (selectedObjects[0] as Control)?.Name ?? grdProperties.SelectedObject : $"{selectedObjects.Length} controls")}]";
+        }
 
         #endregion
 
