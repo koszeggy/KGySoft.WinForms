@@ -512,12 +512,13 @@ namespace KGySoft.WinForms.Controls
                 try
                 {
                     base.Font = null!;
-                    base.Font = previousFont.Font;
                 }
                 finally
                 {
                     suppressFontChanged = false;
                 }
+
+                base.Font = previousFont.Font;
             }
         }
 
