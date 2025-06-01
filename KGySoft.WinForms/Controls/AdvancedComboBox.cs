@@ -559,8 +559,8 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Properties
 
-        private bool IsSystemDrawnDropDownListMode => DropDownStyle == ComboBoxStyle.DropDownList && systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles
-            && FlatStyle is FlatStyle.System or FlatStyle.Standard;
+        private bool DrawByVisualStylesWhenDisabled => systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles
+            && WindowsUtils.IsVistaOrLater && DropDownStyle == ComboBoxStyle.DropDownList && FlatStyle is FlatStyle.System or FlatStyle.Standard;
 
         #endregion
 
@@ -780,8 +780,10 @@ namespace KGySoft.WinForms.Controls
                     backColor = BackColor;
                 }
 
-                e.Graphics.FillRectangle(backColor.GetBrush(), e.Bounds);
-                TextRenderer.DrawText(e.Graphics, text, e.Font, e.Bounds, foreColor, backColor, this.GetFormatFlags());
+                Rectangle bounds = e.Bounds;
+                e.Graphics.FillRectangle(backColor.GetBrush(), bounds);
+                bounds.Inflate(-1, -1);
+                TextRenderer.DrawText(e.Graphics, text, e.Font, bounds, foreColor, backColor, this.GetFormatFlags());
                 e.DrawFocusRectangle();
             }
             else
@@ -838,7 +840,7 @@ namespace KGySoft.WinForms.Controls
                         CheckDpiChange();
 
                     // In System DrawDropDownList mode we completely redraw the control by visual styles renderer, so just validating the control to prevent repeated WM_PAINT messages.
-                    if (IsSystemDrawnDropDownListMode)
+                    if (DrawByVisualStylesWhenDisabled)
                         User32.ValidateRect(m.HWnd, IntPtr.Zero);
                     // otherwise, we let the system paint the control first for the borders
                     else
@@ -1046,8 +1048,9 @@ namespace KGySoft.WinForms.Controls
             }
 
             // System DropDownList mode: not clearing with background color but drawing the disabled background by visual styles
-            if (IsSystemDrawnDropDownListMode)
+            if (DrawByVisualStylesWhenDisabled)
             {
+                Debug.Assert(WindowsUtils.IsVistaOrLater);
                 VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_READONLY, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, clientRect);
 
                 var part = rtl ? COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;
@@ -1055,6 +1058,7 @@ namespace KGySoft.WinForms.Controls
                 var dropDownButtonBounds = new Rectangle(Point.Empty, buttonSize);
                 if (!rtl)
                     dropDownButtonBounds.X = clientRect.Right - buttonSize.Width;
+                
                 VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)part, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, dropDownButtonBounds);
             }
             else
