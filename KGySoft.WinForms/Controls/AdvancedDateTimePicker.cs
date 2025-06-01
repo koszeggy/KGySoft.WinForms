@@ -17,8 +17,10 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
+
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -26,12 +28,23 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents a date-time picker that supports coloring in disabled state.
-    /// Its <see cref="Value"/> property is redefined so it returns <see cref="DateTime.MaxValue"/> if <see cref="DateTimePicker.Checked"/> is <see langword="false"/> and
-    /// instead of throwing exception when invalid date is assigned to it, it simpy changes <see cref="DateTimePicker.Checked"/> false (if checkbox is visible), or just ignores the value.
+    /// Advanced version of <see cref="DateTimePicker"/> control that provides some advanced features and fixes for the original <see cref="DateTimePicker"/>.
     /// </summary>
-    [Description("A date-time picker with custom colors (no custom enabled fore color so far though), and improved Value")]
-    public class AdvancedDateTimePicker : DateTimePicker, ISupportsDisabledColor
+    /// <remarks>
+    /// The <see cref="DateTimePicker"/> control offers the following features in addition to <see cref="DateTimePicker"/>:
+    /// <list type="bullet">
+    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
+    /// <item>Its <see cref="Value"/> property is redefined so it returns <see cref="DateTime.MaxValue"/> if <see cref="DateTimePicker.Checked"/> is <see langword="false"/> and
+    /// instead of throwing exception when invalid date is assigned to it, it simpy changes <see cref="DateTimePicker.Checked"/> false (if checkbox is visible), or just ignores the value.</item>
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
+    /// </list>
+    /// </remarks>
+    [Description(@"A date-time picker provides the following features in addition to regular DateTimePicker:
+- Adjustable colors in disabled state
+- Value property is redefined to return DateTime.MaxValue if Checked is false; instead of throwing exceptions, out-of-range values don't change Value
+- Auto scaling Font on all platform targets")]
+    public class AdvancedDateTimePicker : DateTimePicker, ISupportsDisabledColor, IPerMonitorDpiAware
     {
         #region Fields
 
@@ -53,6 +66,13 @@ namespace KGySoft.WinForms.Controls
         private Color enabledForeColor;
         private Color disabledBackColor;
         private Color disabledForeColor;
+
+        private bool suppressFontChanged;
+        private bool autoScaleFont = true;
+        private bool dpiChanging;
+        private ScalingFont? font; // The explicitly set font.
+        private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
+        private PointF lastScale;
 
         #endregion
 
@@ -78,7 +98,7 @@ namespace KGySoft.WinForms.Controls
             }
             set
             {
-                // ignoring invalid value (eg. when control is data bound, DateTime.MinValue may come)
+                // ignoring invalid value (e.g. when control is data bound, DateTime.MinValue may come)
                 if (value < MinDate || value > MaxDate)
                 {
                     if (ShowCheckBox)
@@ -193,6 +213,85 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        /// <summary>
+        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// <br/>Default value: <see langword="true"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>When <see langword="true"/>, the <see cref="Font"/> is automatically scaled to the current DPI of the corresponding display on every executing platform.
+        /// It also ensures that without an explicitly set font it is inherited from <see cref="Control.Parent"/>, which would be the normal behavior, but is broken in .NET 6+ and above.</para>
+        /// <para>When <see langword="false"/>, the <see cref="Font"/> may or may not be scaled, and the font of the parent control may or may not be applied correctly, depending on the default behavior of the executing platform.</para>
+        /// <note>Please note that this property affects the font only. Scaling the size and location always depends on the executing platform behavior.</note>
+        /// </remarks>
+        [Category("AdvancedDateTimePicker")]
+        [DefaultValue(true)]
+        [Description("True to auto scale Font when DPI changes and inherit the font when it's not explicitly set; False to rely on the default behavior of the current executing platform.")]
+        public bool AutoScaleFont
+        {
+            get => autoScaleFont;
+            set
+            {
+                Debug.Assert(AutoScaleFont ^ defaultFont == null);
+                if (autoScaleFont == value)
+                    return;
+
+                autoScaleFont = value;
+                PointF scale = value ? this.GetScale() : ScaleHelper.SystemScale;
+                font?.ResetFrom(font.Font, scale);
+                if (value)
+                {
+                    defaultFont = new ScalingFont(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
+
+                    // theoretically this would not be needed, but in .NET 6+ the default font handling gets broken after the first DPI change
+                    SetFont(font ?? defaultFont);
+                    return;
+                }
+
+                defaultFont?.Dispose();
+                defaultFont = null;
+                if (font == null)
+                    base.Font = null!;
+            }
+        }
+
+        /// <inheritdoc />
+        [AllowNull]
+        public override Font Font
+        {
+            get => base.Font;
+            set
+            {
+                Debug.Assert(AutoScaleFont ^ defaultFont == null);
+                if (ReferenceEquals(base.Font, value))
+                    return;
+
+                // Workaround for .NET Framework 4.7+ behavior when V2 awareness is set both in the app.config and the manifest file:
+                // The base WM_DPICHANGED_BEFOREPARENT handling sets the Font property, in which case we want to avoid setting font if it was null.
+                // .NET Core 3.0+ behaves differently: sets the Font only in base and even calls OnFontChanged but does not set the derived property.
+                if (dpiChanging && AutoScaleFont)
+                    return;
+
+                PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
+
+                // resetting the default font; or null, when AutoScaleFont is false
+                if (value is null)
+                {
+                    font?.Dispose();
+                    font = null;
+                    defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
+                    SetFont(defaultFont);
+                    return;
+                }
+
+                // setting a font explicitly
+                if (font == null)
+                    font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
+                else
+                    font.ResetFrom(ScaleHelper.GetFontOrDefault(value), scale);
+                SetFont(font);
+            }
+        }
+
         #endregion
 
         #region Constructors
@@ -202,6 +301,8 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public AdvancedDateTimePicker()
         {
+            defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
+            this.RegisterPerMonitorAwarenessNotifications();
         }
 
         #endregion
@@ -209,6 +310,13 @@ namespace KGySoft.WinForms.Controls
         #region Methods
 
         #region Protected Methods
+
+        /// <inheritdoc />
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            CheckDpiChange();
+        }
 
         /// <inheritdoc />
         protected override void WndProc(ref Message m)
@@ -220,10 +328,19 @@ namespace KGySoft.WinForms.Controls
                         g.FillRectangle(BackColor.GetBrush(), ClientRectangle);
                     return;
 
-                case Constants.WM_PAINT when !Focused:
+                case Constants.WM_PAINT:
+                    if (Focused)
+                    {
+                        CheckDpiChange();
+                        base.WndProc(ref m);
+                        return;
+                    }
+
                     // Needed because there is no [On]CheckedChanged.
                     // It's important that it's before the base.WndProc call, so there will not be extra paint if color changes cause invalidation.
                     ResetColors();
+
+                    CheckDpiChange();
                     base.WndProc(ref m);
                     Rectangle rect = ClientRectangle;
 
@@ -263,6 +380,26 @@ namespace KGySoft.WinForms.Controls
                     }
 
                     return;
+
+                case Constants.WM_DPICHANGED_BEFOREPARENT:
+                    dpiChanging = true;
+                    try
+                    {
+                        base.WndProc(ref m);
+                    }
+                    finally
+                    {
+                        dpiChanging = false;
+                    }
+
+                    return;
+
+                case Constants.WM_DPICHANGED_AFTERPARENT:
+                    base.WndProc(ref m);
+                    CheckDpiChange();
+                    if (AutoSize)
+                        PerformLayout();
+                    return;
             }
 
             base.WndProc(ref m);
@@ -274,6 +411,65 @@ namespace KGySoft.WinForms.Controls
             base.OnGotFocus(e);
             if (!VisualStyleHelper.RenderWithVisualStyles)
                 Invalidate();
+        }
+
+        /// <inheritdoc />
+        protected override void OnFontChanged(EventArgs e)
+        {
+            if (suppressFontChanged)
+                return;
+            base.OnFontChanged(e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+
+            // Setting default font from new parent font without scaling (using current scaling of the new parent), and then
+            // calling CheckDpiChange so if there is an explicitly set font, it will be scaled to the new parent.
+            if (font == null)
+                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), this.GetScale());
+            CheckDpiChange();
+        }
+
+        /// <inheritdoc />
+        protected override void OnParentFontChanged(EventArgs e)
+        {
+            base.OnParentFontChanged(e);
+
+            // if the parent control is rescaling its font due to DPI change, then ignoring the event (we do our scaling in CheckDpiChange)
+            if (dpiChanging || !AutoScaleFont)
+                return;
+
+#if NET7_0_OR_GREATER
+            // The parent is rescaling its font due to DPI change without (or before the first) WM_DPICHANGED_BEFOREPARENT message.
+            // Occurs in .NET 7+ when the DPI of the primary display was changed after starting the application, but before opening the parent form.
+            int deviceDpi = DeviceDpi;
+            if (Parent is Control parent && parent.DeviceDpi != deviceDpi || TopLevelControl is Control top && top.DeviceDpi != deviceDpi)
+                return;
+#endif
+
+            // but if the parent font is changing not because of scaling, then we reset our default font as well
+            defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), this.GetScale());
+
+            // if font is null, setting default font from new parent font without scaling
+            if (font == null)
+                SetFont(defaultFont);
+        }
+
+        /// <inheritdoc />
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                font?.Dispose();
+                defaultFont?.Dispose();
+                font = null;
+                defaultFont = null;
+            }
+
+            base.Dispose(disposing);
         }
 
         #endregion
@@ -297,12 +493,67 @@ namespace KGySoft.WinForms.Controls
                 base.ForeColor = disabledFgColor;
         }
 
+        private bool ShouldSerializeFont() => font != null;
         private bool ShouldSerializeBackColor() => false;
         private bool ShouldSerializeForeColor() => false;
         private bool ShouldSerializeEnabledBackColor() => !enabledBackColor.IsEmpty;
         private bool ShouldSerializeEnabledForeColor() => !enabledForeColor.IsEmpty;
         private bool ShouldSerializeDisabledBackColor() => !disabledBackColor.IsEmpty;
         private bool ShouldSerializeDisabledForeColor() => !disabledForeColor.IsEmpty;
+
+        private void CheckDpiChange()
+        {
+            PointF scale = this.GetScale();
+            if (scale == lastScale)
+                return;
+
+            lastScale = scale;
+            if (!AutoScaleFont)
+                return;
+
+            if (font is ScalingFont explicitFont)
+                explicitFont.Scale(scale);
+            else
+                defaultFont!.Scale(scale);
+            SetFont(font ?? defaultFont);
+        }
+
+        private void SetFont(ScalingFont? newFont)
+        {
+            if (newFont == null)
+            {
+                base.Font = null!;
+                return;
+            }
+
+            Font oldFont = base.Font;
+
+            // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
+            // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
+            if (Equals(oldFont, newFont.Font))
+            {
+                if (ReferenceEquals(oldFont, newFont.Font) || !oldFont.IsDisposed())
+                    return;
+
+                suppressFontChanged = true;
+                try
+                {
+                    base.Font = null!;
+                }
+                finally
+                {
+                    suppressFontChanged = false;
+                }
+            }
+
+            base.Font = newFont.Font;
+        }
+
+        #endregion
+
+        #region Explicitly Implemented Interface Methods
+
+        void IPerMonitorDpiAware.ParentFormDpiChanged() => CheckDpiChange();
 
         #endregion
 

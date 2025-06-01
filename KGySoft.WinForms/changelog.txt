@@ -158,6 +158,8 @@
     focus. When the control is in focus, only custom background color is supported with no visual styles available.
   + Making overridden ForeColor/BackColor properties visible in the designer.
   + Improving disabled rendering
+  + New AutoScaleFont property to allow automatic scaling of the font when the DPI changes even on platforms where
+    this is not supported by default.
 
 + KGySoft.WinForms.Forms namespace:
 ===================================
