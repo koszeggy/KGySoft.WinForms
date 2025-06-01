@@ -171,6 +171,10 @@ namespace KGySoft.WinForms
                     showEllipsis = label.AutoEllipsis;
                     useMnemonic = label.UseMnemonic;
                     break;
+                case ComboBox:
+                    singleLine = true;
+                    flags |= TextFormatFlags.NoPadding;
+                    break;
                 case DateTimePicker dtp:
                     contentAlignment = ContentAlignment.MiddleLeft;
                     singleLine = true;

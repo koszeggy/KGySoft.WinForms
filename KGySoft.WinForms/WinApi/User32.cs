@@ -424,6 +424,16 @@ namespace KGySoft.WinForms.WinApi
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool GetClientRect(IntPtr hwnd, out RECT lpRect);
 
+        /// <summary>
+        /// The ValidateRect function validates the client area within a rectangle by removing the rectangle from the update region of the specified window.
+        /// </summary>
+        /// <param name="hWnd">Handle to the window whose update region is to be modified. If this parameter is NULL, the system invalidates and redraws all windows and sends the WM_ERASEBKGND and WM_NCPAINT messages to the window procedure before the function returns.</param>
+        /// <param name="lpRect">Pointer to a RECT structure that contains the client coordinates of the rectangle to be removed from the update region. If this parameter is NULL, the entire client area is removed.</param>
+        /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool ValidateRect(IntPtr hWnd, IntPtr lpRect);
+
         #endregion
     }
 }

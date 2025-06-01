@@ -100,11 +100,11 @@ namespace KGySoft.WinForms.Controls
 
                     // Special handling for disabled painting
                     case Constants.WM_PAINT when !parent.Enabled:
-                        base.WndProc(ref m);
-                        var bounds = User32.GetClientRect(Handle, out var rect) ? rect.ToRectangle() : Rectangle.Empty;
+                        User32.ValidateRect(m.HWnd, IntPtr.Zero);
+                        Rectangle bounds = User32.GetClientRect(m.HWnd, out var rect) ? rect.ToRectangle() : Rectangle.Empty;
                         if (!bounds.IsEmpty)
                         {
-                            using var g = Graphics.FromHwnd(Handle);
+                            using var g = Graphics.FromHwnd(m.HWnd);
                             parent.DrawDisabledTextBox(g, bounds);
                         }
 
@@ -238,6 +238,8 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Instance Properties
+        
+        #region Public Properties
 
         /// <summary>
         /// Gets or sets the background color of the control in the current <see cref="Control.Enabled"/> and <see cref="ReadOnly"/> state.
@@ -555,6 +557,15 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Private Properties
+
+        private bool IsSystemDrawnDropDownListMode => DropDownStyle == ComboBoxStyle.DropDownList && systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles
+            && FlatStyle is FlatStyle.System or FlatStyle.Standard;
+
+        #endregion
+
+        #endregion
+
         #endregion
 
         #region Constructors
@@ -825,14 +836,20 @@ namespace KGySoft.WinForms.Controls
                     // BUG workaround: see above
                     if (!dpiChanging)
                         CheckDpiChange();
-                    base.WndProc(ref m);
+
+                    // In System DrawDropDownList mode we completely redraw the control by visual styles renderer, so just validating the control to prevent repeated WM_PAINT messages.
+                    if (IsSystemDrawnDropDownListMode)
+                        User32.ValidateRect(m.HWnd, IntPtr.Zero);
+                    // otherwise, we let the system paint the control first for the borders
+                    else
+                        base.WndProc(ref m);
 
                     if (systemDrawDropDownListMode && (DropDownStyle == ComboBoxStyle.DropDownList || nativeEditorChild == null))
                     {
-                        var bounds = User32.GetClientRect(Handle, out var rect) ? rect.ToRectangle() : Rectangle.Empty;
+                        var bounds = User32.GetClientRect(m.HWnd, out var rect) ? rect.ToRectangle() : Rectangle.Empty;
                         if (!bounds.IsEmpty)
                         {
-                            using var g = Graphics.FromHwnd(Handle);
+                            using var g = Graphics.FromHwnd(m.HWnd);
                             DrawDisabledTextBox(g, bounds);
                         }
                     }
@@ -1029,8 +1046,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             // System DropDownList mode: not clearing with background color but drawing the disabled background by visual styles
-            if (style == ComboBoxStyle.DropDownList && systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles
-                && FlatStyle is FlatStyle.System or FlatStyle.Standard)
+            if (IsSystemDrawnDropDownListMode)
             {
                 VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_READONLY, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, clientRect);
 
