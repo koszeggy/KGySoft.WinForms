@@ -31,6 +31,7 @@ namespace KGySoft.WinForms.WinApi
         internal const string ThemeClassButton = "BUTTON";
         internal const string ThemeClassTaskDialog = "TASKDIALOG";
         internal const string ThemeClassComboBox = "COMBOBOX";
+        internal const string ThemeDatePicker = "DATEPICKER";
 
         internal const int S_OK = 0;
 

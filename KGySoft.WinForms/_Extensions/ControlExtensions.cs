@@ -176,6 +176,7 @@ namespace KGySoft.WinForms
                     flags |= TextFormatFlags.NoPadding;
                     break;
                 case DateTimePicker dtp:
+                    flags |= TextFormatFlags.NoPadding;
                     contentAlignment = ContentAlignment.MiddleLeft;
                     singleLine = true;
                     isRtl &= dtp.RightToLeftLayout;

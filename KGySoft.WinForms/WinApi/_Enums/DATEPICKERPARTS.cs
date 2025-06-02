@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: COMBOBOXPARTS.cs
+//  File: DATEPICKERPARTS.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -15,17 +15,10 @@
 
 namespace KGySoft.WinForms.WinApi
 {
-    internal enum COMBOBOXPARTS
+    internal enum DATEPICKERPARTS
     {
-        CP_COMPATIBLEBACKGROUND = 0, // Actually not defined, but works even in XP
-        CP_DROPDOWNBUTTON = 1,
-        CP_BACKGROUND = 2,
-        CP_TRANSPARENTBACKGROUND = 3,
-        CP_BORDER = 4,
-        CP_READONLY = 5,
-        CP_DROPDOWNBUTTONRIGHT = 6,
-        CP_DROPDOWNBUTTONLEFT = 7,
-        CP_CUEBANNER = 8,
-        CP_DROPDOWNITEM = 9,
+        DP_DATETEXT = 1,
+        DP_DATEBORDER = 2,
+        DP_SHOWCALENDARBUTTONRIGHT = 3,
     };
 }
