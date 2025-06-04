@@ -190,9 +190,11 @@ namespace KGySoft.WinForms.Controls
         private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
         private PointF lastScale;
 
+        private RenderingQuality checkBoxRenderingQuality = RenderingQuality.High;
         private bool isHovered;
         private bool isDropDownHovered;
-        private RenderingQuality checkBoxRenderingQuality = RenderingQuality.High;
+        private bool isPressed;
+        private bool isDroppedDown;
 
         #endregion
 
@@ -490,7 +492,7 @@ namespace KGySoft.WinForms.Controls
 
                     // On Vista and above the calendar button can be either a combo box drop down button or the regular calendar button, depending on the text length.
                     // As it's practically impossible to tell the actual button type of the system rendering, we always draw the non-Focused appearance ourselves with our preference.
-                    bool fullCustomPaint = !Focused || ShowCheckBox && !Checked;
+                    bool fullCustomPaint = isDroppedDown || !Focused || ShowCheckBox && !Checked;
                     if (fullCustomPaint)
                         User32.ValidateRect(m.HWnd, IntPtr.Zero);
                     else
@@ -518,7 +520,7 @@ namespace KGySoft.WinForms.Controls
 
                         // 3. Drop down button. With visual styles we may use the wider calendar drop down button more likely than the native rendering.
                         //    With no visual styles we fix the RTL appearance - except when initializing without visual styles, because the button may be redrawn outside a WM_PAINT message...
-                        if (!ShowUpDown && (fullCustomPaint || !VisualStyleHelper.RenderWithVisualStyles && VisualStyleHelper.InitializedWithVisualStyles))
+                        if (!ShowUpDown && (fullCustomPaint || !VisualStyleHelper.RenderWithVisualStyles))
                             PaintDropDownButton(g, layout);
 
                         // 4. Text. Clearing the Right flag because TextRenderer recognizes The RTL layout somehow and always expects Left alignment.
@@ -549,12 +551,21 @@ namespace KGySoft.WinForms.Controls
                         PerformLayout();
                     return;
 
-
                 // If we use the wider calendar drop down button when the system rendering would use the smaller one, we need to adjust the mouse position to make sure
-                // to open the calendar. If the control is just getting focused, the appearance may change to the narrower button after drop-down, but it's alright.
-                case Constants.WM_LBUTTONDOWN when IsCustomCalendarSize && isDropDownHovered:
-                    m.LParam = new IntPtr(((long)m.LParam & 0xFFFF0000) | ((uint)Width - 5));
-                    break;
+                // to open/close the calendar. If the control is just getting focused, the appearance may change to the narrower button, but it's alright.
+                case Constants.WM_LBUTTONDOWN when isDropDownHovered:
+                    m.LParam = new IntPtr((m.LParam & (nint)0xFFFF0000) | ((nint)(uint)Width - 5));
+                    isPressed = true;
+                    base.WndProc(ref m);
+                    return;
+
+                case Constants.WM_LBUTTONUP when isDropDownHovered:
+                    base.WndProc(ref m);
+                    isPressed = false;
+                    if (!VisualStyleHelper.RenderWithVisualStyles)
+                        Invalidate();
+                    return;
+
             }
 
             base.WndProc(ref m);
@@ -616,8 +627,10 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseLeave(EventArgs e)
         {
-            isHovered = isDropDownHovered = false;
             base.OnMouseLeave(e);
+            isHovered = isDropDownHovered = false;
+            if (isPressed && !VisualStyleHelper.RenderWithVisualStyles)
+                Invalidate();
         }
 
         /// <inheritdoc />
@@ -633,7 +646,7 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnMouseMove(e);
 
-            if (!IsCustomCalendarSize)
+            if (!IsCustomCalendarSize && VisualStyleHelper.RenderWithVisualStyles)
                 return;
 
             // We may render the wider calendar drop down button under different conditions,
@@ -647,7 +660,15 @@ namespace KGySoft.WinForms.Controls
                 return;
 
             isDropDownHovered = dropDownHovered;
-            Invalidate(layout.DropDownBounds);
+            if (VisualStyleHelper.RenderWithVisualStyles)
+                Invalidate();
+            else
+            {
+                bool pressed = dropDownHovered && MouseButtons == MouseButtons.Left;
+                if (pressed != isPressed)
+                    Invalidate();
+                isPressed = pressed;
+            }
         }
 
         /// <inheritdoc />
@@ -655,6 +676,24 @@ namespace KGySoft.WinForms.Controls
         {
             Invalidate();
             base.OnSizeChanged(e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnDropDown(EventArgs eventargs)
+        {
+            base.OnDropDown(eventargs);
+            isDroppedDown = true;
+            isDropDownHovered = false;
+            if (!VisualStyleHelper.InitializedWithVisualStyles)
+                Invalidate();
+        }
+
+        /// <inheritdoc />
+        protected override void OnCloseUp(EventArgs eventargs)
+        {
+            base.OnCloseUp(eventargs);
+            isDroppedDown = isPressed = false;
+            Invalidate();
         }
 
         /// <inheritdoc />
@@ -780,7 +819,8 @@ namespace KGySoft.WinForms.Controls
             if (VisualStyleHelper.RenderWithVisualStyles)
             {
                 int state = (int)(!Enabled ? DATEPICKERSTATES.DPS_DISABLED
-                    : isDropDownHovered ? MouseButtons == MouseButtons.Left ? DATEPICKERSTATES.DPS_FOCUSED : DATEPICKERSTATES.DPS_HOT
+                    : isDroppedDown || isPressed ? DATEPICKERSTATES.DPS_FOCUSED
+                    : isDropDownHovered ? DATEPICKERSTATES.DPS_HOT
                     : DATEPICKERSTATES.DPS_NORMAL);
 
                 IntPtr theme = layout.IsCalendarDropDown ? VisualStyleHelper.DatePickerTheme : VisualStyleHelper.ComboBoxTheme;
@@ -790,12 +830,7 @@ namespace KGySoft.WinForms.Controls
                 VisualStyleHelper.Render(theme, this, g, part, state, layout.DropDownBounds);
             }
             else
-            {
-                bool isPressed = false;
-                if (MouseButtons == MouseButtons.Left)
-                    isPressed = RectangleToScreen(layout.DropDownBounds).Contains(Cursor.Position);
                 ControlPaint.DrawComboButton(g, layout.TranslatedDropDownBounds, !Enabled ? ButtonState.Inactive : isPressed ? ButtonState.Pushed : ButtonState.Normal);
-            }
 
         }
 
