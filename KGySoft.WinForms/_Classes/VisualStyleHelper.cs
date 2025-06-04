@@ -59,7 +59,7 @@ namespace KGySoft.WinForms
             MergeInterval = TimeSpan.FromMilliseconds(100)
         };
 
-        // If a new theme is added, adjust the GetClassName method as well
+        // If a new theme is added, adjust the GetClassName and ClearCaches methods as well
         private static IntPtr buttonThemeHandle;
         private static IntPtr taskDialogThemeHandle;
         private static IntPtr comboBoxThemeHandle;
@@ -293,6 +293,8 @@ namespace KGySoft.WinForms
         {
             buttonThemeHandle = IntPtr.Zero;
             taskDialogThemeHandle = IntPtr.Zero;
+            comboBoxThemeHandle = IntPtr.Zero;
+            datePickerThemeHandle = IntPtr.Zero;
             visualStylesAvailable = null;
             highContrast = null;
 

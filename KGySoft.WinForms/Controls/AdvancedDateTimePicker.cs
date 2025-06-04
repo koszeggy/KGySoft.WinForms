@@ -46,6 +46,105 @@ namespace KGySoft.WinForms.Controls
 - Auto scaling Font on all platform targets")]
     public class AdvancedDateTimePicker : DateTimePicker, ISupportsDisabledColor, IPerMonitorDpiAware
     {
+        #region Nested Types
+
+        private sealed class LayoutData
+        {
+            #region Fields
+
+            internal readonly Rectangle BackgroundBounds;
+            internal readonly Rectangle CheckBoxBounds;
+            internal readonly Rectangle DropDownBounds;
+            internal readonly Rectangle TextBounds;
+            internal readonly bool IsCalendarDropDown;
+            internal readonly bool IsRightToLeft;
+
+            #endregion
+
+            #region Constructors
+
+            internal LayoutData(AdvancedDateTimePicker control, Graphics g)
+            {
+                // 1. background
+                Rectangle bounds = control.ClientRectangle;
+                Rectangle textRect = bounds;
+                bool rtl = IsRightToLeft = control.RightToLeftLayout && control.RightToLeft == RightToLeft.Yes;
+
+                // When EnableVisualStyles was called, the border belongs to the client area (even if visual styles are actually not available),
+                // so we could omit this if VisualStyleHelper.InitializedWithVisualStyles is false,
+                // but apparently the system rendering applies the same padding to the client rectangle as well.
+                textRect.Inflate(-2, -2);
+                BackgroundBounds = textRect;
+
+                // 2. check box
+                int checkBoxPadding = control.ShowCheckBox ? textRect.Height + 1 : 0;
+                if (checkBoxPadding > 0)
+                {
+                    CheckBoxBounds = new Rectangle(textRect.X, textRect.Y, checkBoxPadding - 1, checkBoxPadding - 1);
+
+                    if (VisualStyleHelper.InitializedWithVisualStyles)
+                        CheckBoxBounds.Inflate(-1, -1);
+                    else
+                    {
+                        CheckBoxBounds.Width -= 1;
+                        CheckBoxBounds.Height -= 1;
+                    }
+
+                    textRect.Width -= checkBoxPadding;
+
+                    // Strange visual style renderer behavior: in RTL mode it mirrors the X coordinates so we always must pretend if the checkbox was on the left side.
+                    // Does not happen with ControlPaint though, so without visual styles in RTL mode we need to translate the coordinates.
+                    if (rtl && !VisualStyleHelper.RenderWithVisualStyles)
+                        CheckBoxBounds.X = textRect.Right + 1;
+                    else if (!rtl)
+                        textRect.X += checkBoxPadding;
+                }
+
+                // 3. drop down
+                int dropDownSize = control.ScaleWidth(referenceDropDownWidth);
+
+                // checking if we have enough space for the wider calendar drop down button
+                if (VisualStyleHelper.RenderWithVisualStyles && !control.ShowUpDown && WindowsUtils.IsVistaOrLater)
+                {
+                    int textWidth = TextRenderer.MeasureText(g, control.Text, control.Font, Size.Empty, control.GetFormatFlags()).Width;
+                    if (textWidth + dropDownSize * 2 <= textRect.Width)
+                    {
+                        IsCalendarDropDown = true;
+                        dropDownSize <<= 1;
+                    }
+                }
+
+                if (!control.ShowUpDown)
+                {
+                    bool fullHeight = !VisualStyleHelper.InitializedWithVisualStyles || VisualStyleHelper.RenderWithVisualStyles && WindowsUtils.IsVistaOrLater;
+
+                    // Strange visual style renderer behavior: in RTL mode it mirrors the X coordinates AND the glyph image.
+                    // The image mirroring does not happen for the checkbox rendering above. And ControlPaint does not mirror the X coordinate either.
+                    bool translateRtl = rtl && !VisualStyleHelper.RenderWithVisualStyles;
+                    DropDownBounds = new Rectangle(fullHeight ? (translateRtl ? 0 : bounds.Right - dropDownSize) : (translateRtl ? textRect.X : textRect.Right - dropDownSize),
+                        fullHeight ? 0 : textRect.Y, dropDownSize, fullHeight ? bounds.Height : textRect.Height);
+                }
+
+                // 4. text
+                textRect.Width -= dropDownSize;
+                if (rtl)
+                    textRect.X += dropDownSize;
+
+                // Even stranger TextRenderer behavior: Somehow it recognizes the RTL layout (is it in the native DC somewhere?)
+                // so we have to undo the translation that we made for filling the background.
+                // This behavior is different from every other custom rendering that we use with TextRenderer and GetFormatFlags.
+                // Note that if we use g.DrawString instead, it needs the original flags and the original rectangle.
+                if (rtl)
+                    textRect.X -= dropDownSize - checkBoxPadding;
+
+                TextBounds = textRect;
+            }
+
+            #endregion
+        }
+
+        #endregion
+
         #region Constants
 
         private const int referenceDropDownWidth = 17;
@@ -73,7 +172,6 @@ namespace KGySoft.WinForms.Controls
         private Color disabledBackColor;
         private Color disabledForeColor;
 
-        private bool isHovered;
         private bool suppressFontChanged;
         private bool autoScaleFont = true;
         private bool dpiChanging;
@@ -81,11 +179,16 @@ namespace KGySoft.WinForms.Controls
         private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
         private PointF lastScale;
 
+        private bool isHovered;
+        private bool isDropDownHovered;
+
         #endregion
 
         #endregion
 
         #region Properties
+      
+        #region Public Properties
 
         /// <summary>
         /// Gets or sets the date/time value assigned to the control.
@@ -301,6 +404,14 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Private Properties
+
+        private bool IsCustomCalendarSize => VisualStyleHelper.RenderWithVisualStyles && !ShowUpDown && (!Focused || (ShowCheckBox && !Checked));
+
+        #endregion
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -310,6 +421,7 @@ namespace KGySoft.WinForms.Controls
         {
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
+            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
 
         #endregion
@@ -336,199 +448,51 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 case Constants.WM_PAINT:
-                    if (Focused)
-                    {
-                        CheckDpiChange();
-                        base.WndProc(ref m);
-                        return;
-                    }
-
                     // Needed because there is no [On]CheckedChanged.
                     // It's important that it's before the base.WndProc call, so there will not be extra paint if color changes cause invalidation.
                     ResetColors();
                     CheckDpiChange();
-                    User32.ValidateRect(m.HWnd, IntPtr.Zero);
 
                     // On Vista and above the calendar button can be either a combo box drop down button or the regular calendar button, depending on the text length.
-                    // As it's practically impossible to determine the actual button type, we always draw the non-Focused appearance ourselves.
-                    Rectangle bounds = ClientRectangle;
-                    Rectangle textRect = bounds;
+                    // As it's practically impossible to tell the actual button type of the system rendering, we always draw the non-Focused appearance ourselves with our preference.
+                    bool fullCustomPaint = !Focused || ShowCheckBox && !Checked;
+                    if (fullCustomPaint)
+                        User32.ValidateRect(m.HWnd, IntPtr.Zero);
+                    else
+                        base.WndProc(ref m);
 
-                    // When EnableVisualStyles was called, the border belongs to the client area (even if visual styles are actually not available),
-                    // so we could omit this if VisualStyleHelper.InitializedWithVisualStyles is false,
-                    // but apparently the system rendering applies the same padding to the client rectangle as well.
-                    textRect.Inflate(-2, -2);
-
-                    int checkBoxPadding = ShowCheckBox ? textRect.Height + 1 : 0;
-                    int dropDownSize = this.ScaleWidth(referenceDropDownWidth);
-                    bool isEnabled = Enabled;
-                    bool isChecked = checkBoxPadding > 0 && Checked;
+                    // Accepting system rendering if the control is focused, rendering without visual styles and RTL mode is not enabled.
+                    bool rtl = RightToLeftLayout && RightToLeft == RightToLeft.Yes;
+                    if (!fullCustomPaint && !rtl && !VisualStyleHelper.RenderWithVisualStyles)
+                        return;
 
                     using (Graphics g = Graphics.FromHwnd(m.HWnd))
                     {
-                        bool showCalendarDropDown = false;
-                        TextFormatFlags flags = this.GetFormatFlags();
-                        string text = Text;
-                        Font f = Font;
-                        bool rtl = RightToLeftLayout && RightToLeft == RightToLeft.Yes;
-                        int state = (int)(!isEnabled ? DATEPICKERSTATES.DPS_DISABLED
-                            : isHovered ? DATEPICKERSTATES.DPS_HOT
-                            : DATEPICKERSTATES.DPS_NORMAL);
-
-                        // checking if we have enough space for the wider calendar drop down button
-                        if (VisualStyleHelper.RenderWithVisualStyles && !ShowUpDown && WindowsUtils.IsVistaOrLater)
-                        {
-                            int textWidth = TextRenderer.MeasureText(g, text, f).Width;
-                            if (textWidth + checkBoxPadding + dropDownSize * 2 <= textRect.Width)
-                            {
-                                showCalendarDropDown = true;
-                                dropDownSize <<= 1;
-                            }
-                        }
-
-                        // Strange behavior: if the control is RTL, VisibleClipBounds.X is -1 so the calculated rect is off by one pixel.
-                        // Fixing it in a compatible way.
+                        // Strange behavior: if the control is RTL, VisibleClipBounds.X is -1 so the calculated rects are off by one pixel. Fixing it in a compatible way.
                         if (g.VisibleClipBounds.X < 0)
                             g.TranslateTransform(g.VisibleClipBounds.X, g.VisibleClipBounds.Y);
 
-                        // 1. background and border
-                        if (VisualStyleHelper.RenderWithVisualStyles)
-                        {
-                            if (WindowsUtils.IsVistaOrLater)
-                                VisualStyleHelper.Render(VisualStyleHelper.DatePickerTheme, this, g, (int)DATEPICKERPARTS.DP_DATEBORDER, state, bounds);
-                            else
-                                VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_COMPATIBLEBACKGROUND, state, bounds);
-                            g.FillRectangle(BackColor.GetBrush(), textRect);
-                        }
-                        else
-                        {
-                            g.Clear(BackColor);
+                        var layout = new LayoutData(this, g);
 
-                            // If the application was initialized with visual styles (even if they are not enabled), the borders are in the client area, so we need to draw them
-                            if (VisualStyleHelper.InitializedWithVisualStyles)
-                                ControlPaint.DrawBorder3D(g, bounds);
-                        }
+                        // 1. Background and border
+                        if (fullCustomPaint)
+                            PaintBackground(g, layout);
 
-                        // 2. check box
-                        if (checkBoxPadding > 0)
-                        {
-                            Rectangle checkBoxRect = new Rectangle(textRect.X, textRect.Y, checkBoxPadding - 1, checkBoxPadding - 1);
+                        // 2. Check box: When visual styles are enabled, reflecting the hovered state.
+                        //    Otherwise, fixing RTL appearance (the borders would be mirrored)
+                        if (ShowCheckBox && (fullCustomPaint || rtl || VisualStyleHelper.RenderWithVisualStyles))
+                            PaintCheckBox(g, layout, !fullCustomPaint);
 
-                            if (VisualStyleHelper.InitializedWithVisualStyles)
-                                checkBoxRect.Inflate(-1, -1);
-                            else
-                            {
-                                checkBoxRect.Width -= 1;
-                                checkBoxRect.Height -= 1;
-                            }
+                        // 3. Drop down button. With visual styles we may use the wider calendar drop down button more likely than the native rendering.
+                        //    With no visual styles we fix the RTL appearance - it's not perfect, because the button may be redrawn outside a WM_PAINT message...
+                        if (!ShowUpDown && (fullCustomPaint || rtl && !VisualStyleHelper.RenderWithVisualStyles))
+                            PaintDropDownButton(g, layout);
 
-                            textRect.Width -= checkBoxPadding;
-
-                            // Strange visual style renderer behavior: in RTL mode it mirrors the X coordinates. Does not happen with ControlPaint though.
-                            if (rtl && !VisualStyleHelper.RenderWithVisualStyles)
-                                checkBoxRect.X = textRect.Right + 1;
-                            else if (!rtl)
-                                textRect.X += checkBoxPadding;
-
-                            if (VisualStyleHelper.RenderWithVisualStyles)
-                            {
-                                var checkState = isChecked
-                                    ? !isEnabled ? CheckBoxState.CheckedDisabled
-                                        : isHovered ? CheckBoxState.CheckedHot
-                                        : CheckBoxState.CheckedNormal
-                                    : !isEnabled ? CheckBoxState.UncheckedDisabled
-                                        : isHovered ? CheckBoxState.UncheckedHot
-                                        : CheckBoxState.UncheckedNormal;
-
-                                VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, checkBoxRect);
-                            }
-                            else
-                            {
-                                var checkState = ButtonState.Normal;
-                                if (!isEnabled)
-                                    checkState |= ButtonState.Inactive;
-                                if (isChecked)
-                                    checkState |= ButtonState.Checked;
-                                ControlPaint.DrawCheckBox(g, checkBoxRect, checkState);
-                            }
-                        }
-
-                        // 3. drop down
-                        if (!ShowUpDown)
-                        {
-                            bool fullHeight = !VisualStyleHelper.InitializedWithVisualStyles || VisualStyleHelper.RenderWithVisualStyles && WindowsUtils.IsVistaOrLater;
-
-                            // Strange visual style renderer behavior: in RTL mode it mirrors the X coordinates AND the glyph image.
-                            // The image mirroring does not happen for the checkbox rendering above. And ControlPaint does not mirror the X coordinate either.
-                            bool translateRtl = rtl && !VisualStyleHelper.RenderWithVisualStyles;
-                            Rectangle dropDownRect = new Rectangle(fullHeight ? (translateRtl ? 0 : bounds.Right - dropDownSize) : (translateRtl ? textRect.X : textRect.Right - dropDownSize),
-                                fullHeight ? 0 : textRect.Y, dropDownSize, fullHeight ? bounds.Height : textRect.Height);
-
-                            if (VisualStyleHelper.RenderWithVisualStyles)
-                            {
-                                if (isHovered && isEnabled && !RectangleToScreen(dropDownRect).Contains(Cursor.Position))
-                                    state = (int)DATEPICKERSTATES.DPS_NORMAL;
-
-                                IntPtr theme = showCalendarDropDown ? VisualStyleHelper.DatePickerTheme : VisualStyleHelper.ComboBoxTheme;
-                                int part = showCalendarDropDown ? (int)DATEPICKERPARTS.DP_SHOWCALENDARBUTTONRIGHT // TODO: RTL
-                                    : !WindowsUtils.IsVistaOrLater ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTON
-                                    : rtl ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;
-                                VisualStyleHelper.Render(theme, this, g, part, state, dropDownRect);
-                            }
-                            else
-                                ControlPaint.DrawComboButton(g, dropDownRect, isEnabled ? ButtonState.Normal : ButtonState.Inactive);
-                        }
-
-                        // 4. text
-                        textRect.Width -= dropDownSize;
-                        if (rtl)
-                            textRect.X += dropDownSize;
-
-                        // Even stranger TextRenderer behavior: Somehow it recognizes the RTL layout (is it in the native DC somewhere?)
-                        // so we have to undo the translation that we made for filling the background.
-                        // This behavior is different from every other custom rendering that we use with TextRenderer and GetFormatFlags
-                        if (rtl)
-                            textRect.X -= dropDownSize - checkBoxPadding;
-                        TextRenderer.DrawText(g, Text, Font, textRect, ForeColor, BackColor, flags & ~TextFormatFlags.Right);
-
-                        // Note that if we use g.DrawString instead, it needs the original flags and the original rectangle.
-                        //g.DrawString(Text, Font, ForeColor.GetBrush(), rect, flags.ToStringFormat());
+                        // 4. Text. Clearing the Right flag because TextRenderer recognizes The RTL layout somehow and always expects Left alignment.
+                        // If we were using Graphics.DrawString with the ToStringFormat extension, the Right flag should not be cleared.
+                        if (fullCustomPaint)
+                            TextRenderer.DrawText(g, Text, Font, layout.TextBounds, ForeColor, BackColor, this.GetFormatFlags() & ~TextFormatFlags.Right);
                     }
-
-                    //// When EnableVisualStyles was called, the border belongs to the client area (even if visual styles are actually not available)
-                    //if (VisualStyleHelper.InitializedWithVisualStyles)
-                    //    rect.Inflate(-2, -2);
-
-                    //int paddingLeft = VisualStyleHelper.RenderWithVisualStyles
-                    //    ? ShowCheckBox ? 17 : 0
-                    //    : ShowCheckBox ? 19 : 0;
-                    //int paddingRight = VisualStyleHelper.RenderWithVisualStyles
-                    //    ? ShowUpDown ? 18 : 33
-                    //    : 17;
-                    //bool rtl = RightToLeftLayout && RightToLeft == RightToLeft.Yes;
-                    //if (rtl)
-                    //    (paddingLeft, paddingRight) = (paddingRight, paddingLeft);
-                    //rect.X += paddingLeft;
-                    //rect.Width -= paddingLeft + paddingRight;
-                    //using (Graphics g = Graphics.FromHwnd(Handle))
-                    //{
-                    //    // Strange behavior: if the control is RTL, VisibleClipBounds.X is -1 so the calculated rect is off by one pixel.
-                    //    // Fixing it in a compatible way.
-                    //    if (g.VisibleClipBounds.X < 0)
-                    //        g.TranslateTransform(g.VisibleClipBounds.X, g.VisibleClipBounds.Y);
-                    //    var flags =  this.GetFormatFlags();
-                    //    g.FillRectangle(BackColor.GetBrush(), rect);
-
-                    //    // Even stranger TextRenderer behavior: Somehow it recognizes the RTL layout (is it in the native DC somewhere?)
-                    //    // so we have to undo the translation that we made for filling the background.
-                    //    // This behavior is different from every other custom rendering that we use with TextRenderer and GetFormatFlags
-                    //    if (rtl)
-                    //        rect.X -= paddingLeft - paddingRight;
-                    //    TextRenderer.DrawText(g, Text, Font, rect, ForeColor, BackColor, flags & ~TextFormatFlags.Right);
-
-                    //    // Note that if we use g.DrawString instead, it needs the original flags and the original rectangle.
-                    //    //g.DrawString(Text, Font, ForeColor.GetBrush(), rect, flags.ToStringFormat());
-                    //}
 
                     return;
 
@@ -551,6 +515,13 @@ namespace KGySoft.WinForms.Controls
                     if (AutoSize)
                         PerformLayout();
                     return;
+
+
+                // If we use the wider calendar drop down button when the system rendering would use the smaller one, we need to adjust the mouse position to make sure
+                // to open the calendar. If the control is just getting focused, the appearance may change to the narrower button after drop-down, but it's alright.
+                case Constants.WM_LBUTTONDOWN when IsCustomCalendarSize && isDropDownHovered:
+                    m.LParam = new IntPtr(((long)m.LParam & 0xFFFF0000) | ((uint)Width - 5));
+                    break;
             }
 
             base.WndProc(ref m);
@@ -612,8 +583,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseLeave(EventArgs e)
         {
-            isHovered = false;
-         //   Invalidate();
+            isHovered = isDropDownHovered = false;
             base.OnMouseLeave(e);
         }
 
@@ -621,8 +591,30 @@ namespace KGySoft.WinForms.Controls
         protected override void OnMouseEnter(EventArgs e)
         {
             isHovered = true;
-           // Invalidate();
+            isDropDownHovered = false;
             base.OnMouseEnter(e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnMouseMove(MouseEventArgs e)
+        {
+            base.OnMouseMove(e);
+
+            if (!IsCustomCalendarSize)
+                return;
+
+            // We may render the wider calendar drop down button under different conditions,
+            // so we need to invalidate the control if its hover state changes according to our custom rendering.
+            LayoutData layout;
+            using (var g = Graphics.FromHwnd(Handle))
+                layout = new LayoutData(this, g);
+
+            bool dropDownHovered = layout.DropDownBounds.Contains(e.Location);
+            if (isDropDownHovered == dropDownHovered)
+                return;
+
+            isDropDownHovered = dropDownHovered;
+            Invalidate(layout.DropDownBounds);
         }
 
         /// <inheritdoc />
@@ -635,6 +627,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
             if (disposing)
             {
                 font?.Dispose();
@@ -665,6 +658,106 @@ namespace KGySoft.WinForms.Controls
                 base.ForeColor = enabledFgColor;
             else if (!enabled && DisabledForeColor is Color disabledFgColor && disabledFgColor != baseForeColor)
                 base.ForeColor = disabledFgColor;
+        }
+
+        private void PaintBackground(Graphics g, LayoutData layout)
+        {
+            if (VisualStyleHelper.RenderWithVisualStyles)
+            {
+                int state = (int)(!Enabled ? DATEPICKERSTATES.DPS_DISABLED
+                    : isHovered ? DATEPICKERSTATES.DPS_HOT
+                    : DATEPICKERSTATES.DPS_NORMAL);
+
+                if (WindowsUtils.IsVistaOrLater)
+                    VisualStyleHelper.Render(VisualStyleHelper.DatePickerTheme, this, g, (int)DATEPICKERPARTS.DP_DATEBORDER, state, ClientRectangle);
+                else // Windows XP: there is no DatePicker theme, using the COMBOBOX instead with Part 0 (EDIT 2 could also work but the disabled state has a strange background)
+                    VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_COMPATIBLEBACKGROUND, state, ClientRectangle);
+
+                // Clearing the background only in disabled state or when a custom back color is specified; otherwise, preserving the theme back color
+                if (state == (int)DATEPICKERSTATES.DPS_DISABLED || (ShowCheckBox && !Checked) || !enabledBackColor.IsEmpty)
+                    g.FillRectangle(BackColor.GetBrush(), layout.BackgroundBounds);
+                return;
+            }
+
+            g.Clear(BackColor);
+
+            // If the application was initialized with visual styles (even if they are not enabled), the borders are in the client area, so we need to draw them.
+            // Otherwise, the border belongs to the NC area.
+            if (VisualStyleHelper.InitializedWithVisualStyles)
+                ControlPaint.DrawBorder3D(g, ClientRectangle);
+        }
+
+        private void PaintCheckBox(Graphics g, LayoutData layout, bool paintBackground)
+        {
+            Debug.Assert(ShowCheckBox);
+            
+            if (VisualStyleHelper.RenderWithVisualStyles)
+            {
+                var checkState = Checked
+                    ? !Enabled ? CheckBoxState.CheckedDisabled
+                        : isHovered ? CheckBoxState.CheckedHot
+                        : CheckBoxState.CheckedNormal
+                    : !Enabled ? CheckBoxState.UncheckedDisabled
+                        : isHovered ? CheckBoxState.UncheckedHot
+                        : CheckBoxState.UncheckedNormal;
+
+                // When the control is not fully custom painted, we already have the system painted background. To avoid having too dark alpha pixels,
+                // we need to clear the background of the checkbox area. We do it only when using visual styles, because otherwise the checkbox never has alpha pixels.
+                // Note that we always do it for Focused controls, so using always the Window background color.
+                // Please also note that unlike the visual style renderer, FillRectangle does not mirror the bounds in RTL mode, so we need to do the translation.
+                if (paintBackground)
+                {
+                    var bounds = layout.CheckBoxBounds;
+                    bounds.Inflate(1, 1);
+                    if (RightToLeftLayout && RightToLeft == RightToLeft.Yes)
+                        bounds.X = Width - bounds.Right;
+                    g.FillRectangle(SystemBrushes.Window, bounds);
+                }
+
+                VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, layout.CheckBoxBounds);
+            }
+            else
+            {
+                var checkState = ButtonState.Normal;
+                if (!Enabled)
+                    checkState |= ButtonState.Inactive;
+                if (Checked)
+                    checkState |= ButtonState.Checked;
+                ControlPaint.DrawCheckBox(g, layout.CheckBoxBounds, checkState);
+            }
+        }
+
+        private void PaintDropDownButton(Graphics g, LayoutData layout)
+        {
+            Debug.Assert(!ShowUpDown);
+
+            if (VisualStyleHelper.RenderWithVisualStyles)
+            {
+                int state = (int)(!Enabled ? DATEPICKERSTATES.DPS_DISABLED
+                    : isDropDownHovered ? MouseButtons == MouseButtons.Left ? DATEPICKERSTATES.DPS_FOCUSED : DATEPICKERSTATES.DPS_HOT
+                    : DATEPICKERSTATES.DPS_NORMAL);
+
+                IntPtr theme = layout.IsCalendarDropDown ? VisualStyleHelper.DatePickerTheme : VisualStyleHelper.ComboBoxTheme;
+                int part = layout.IsCalendarDropDown ? (int)DATEPICKERPARTS.DP_SHOWCALENDARBUTTONRIGHT
+                    : !WindowsUtils.IsVistaOrLater ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTON
+                    : layout.IsRightToLeft ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;
+                VisualStyleHelper.Render(theme, this, g, part, state, layout.DropDownBounds);
+            }
+            else
+            {
+                bool isPressed = false;
+                if (MouseButtons == MouseButtons.Left)
+                {
+                    // For non-visual styles, layout.DropDownBounds is already translated to RTL. But RectangleToScreen also does the translation, so we need to undo it.
+                    Rectangle rect = layout.DropDownBounds;
+                    if (RightToLeftLayout && RightToLeft == RightToLeft.Yes)
+                        rect.X = Width - rect.Right; // translating the X coordinate in RTL mode
+                    isPressed = RectangleToScreen(rect).Contains(Cursor.Position);
+                }
+
+                ControlPaint.DrawComboButton(g, layout.DropDownBounds, !Enabled ? ButtonState.Inactive : isPressed ? ButtonState.Pushed : ButtonState.Normal);
+            }
+
         }
 
         private bool ShouldSerializeFont() => font != null;
@@ -728,6 +821,12 @@ namespace KGySoft.WinForms.Controls
         #region Explicitly Implemented Interface Methods
 
         void IPerMonitorDpiAware.ParentFormDpiChanged() => CheckDpiChange();
+
+        #endregion
+
+        #region Event Handlers
+
+        private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e) => Invalidate();
 
         #endregion
 
