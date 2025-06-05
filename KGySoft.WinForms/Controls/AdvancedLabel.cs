@@ -70,6 +70,7 @@ namespace KGySoft.WinForms.Controls
 - Fading animations
 - Automatic resolving of hyperlinks
 - Auto scaling Font on all platform targets")]
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
     public class AdvancedLabel : LinkLabel, ISupportsDisabledColor, ISupportsFadingInternal, IPerMonitorDpiAware
     {
         #region Fields

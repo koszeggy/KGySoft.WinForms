@@ -18,6 +18,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Windows.Forms;
 
 #endregion
@@ -123,7 +124,7 @@ namespace KGySoft.WinForms.Controls
             }
             set
             {
-                Value = Convert.ToDecimal(value);
+                Value = Convert.ToDecimal(value, CultureInfo.CurrentCulture);
             }
         }
 

@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Globalization;
 using System.Windows.Forms;
 
 using KGySoft.Libraries.Language;
@@ -72,12 +73,12 @@ namespace KGySoft.WinForms.Forms
         static public void InfoMessage(string msg, params object[] args)
         {
             if (!UseAdvancedDialogs)
-                MessageBox.Show(DialogsOwner, Language.Translate(msg, args), Language.Translate("Information" + Language.DistinctionSeparator + "Dialogs"), MessageBoxButtons.OK, MessageBoxIcon.Information);
+                MessageBox.Show(DialogsOwner, Language.Translate(CultureInfo.CurrentCulture, msg, args), Language.Translate("Information" + Language.DistinctionSeparator + "Dialogs"), MessageBoxButtons.OK, MessageBoxIcon.Information);
             else
             {
                 using (AdvancedMessageDialog frm = new AdvancedMessageDialog())
                 {
-                    frm.Execute(Language.Translate(msg, args), AdvancedDialogTypes.Information);
+                    frm.Execute(Language.Translate(CultureInfo.CurrentCulture, msg, args), AdvancedDialogTypes.Information);
                 }
             }
         }
@@ -107,12 +108,12 @@ namespace KGySoft.WinForms.Forms
         static public void ErrorMessage(string msg, params object[] args)
         {
             if (!UseAdvancedDialogs)
-                MessageBox.Show(DialogsOwner, Language.Translate(msg, args), Language.Translate("Error" + Language.DistinctionSeparator + "Dialogs"), MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(DialogsOwner, Language.Translate(CultureInfo.CurrentCulture, msg, args), Language.Translate("Error" + Language.DistinctionSeparator + "Dialogs"), MessageBoxButtons.OK, MessageBoxIcon.Error);
             else
             {
                 using (AdvancedMessageDialog frm = new AdvancedMessageDialog())
                 {
-                    frm.Execute(Language.Translate(msg, args), AdvancedDialogTypes.Error);
+                    frm.Execute(Language.Translate(CultureInfo.CurrentCulture, msg, args), AdvancedDialogTypes.Error);
                 }
             }
         }
@@ -142,12 +143,12 @@ namespace KGySoft.WinForms.Forms
         static public void WarningMessage(string msg, params object[] args)
         {
             if (!UseAdvancedDialogs)
-                MessageBox.Show(DialogsOwner, Language.Translate(msg, args), Language.Translate("Warning" + Language.DistinctionSeparator + "Dialogs"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(DialogsOwner, Language.Translate(CultureInfo.CurrentCulture, msg, args), Language.Translate("Warning" + Language.DistinctionSeparator + "Dialogs"), MessageBoxButtons.OK, MessageBoxIcon.Warning);
             else
             {
                 using (AdvancedMessageDialog frm = new AdvancedMessageDialog())
                 {
-                    frm.Execute(Language.Translate(msg, args), AdvancedDialogTypes.Warning);
+                    frm.Execute(Language.Translate(CultureInfo.CurrentCulture, msg, args), AdvancedDialogTypes.Warning);
                 }
             }
         }
@@ -188,7 +189,7 @@ namespace KGySoft.WinForms.Forms
         {
             if (!UseAdvancedDialogs)
             {
-                return MessageBox.Show(DialogsOwner, Language.Translate(msg, args), Language.Translate("Confirmation" + Language.DistinctionSeparator + "Dialogs"),
+                return MessageBox.Show(DialogsOwner, Language.Translate(CultureInfo.CurrentCulture, msg, args), Language.Translate("Confirmation" + Language.DistinctionSeparator + "Dialogs"),
                     cancelButton ? MessageBoxButtons.YesNoCancel : MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             }
             else
@@ -196,9 +197,9 @@ namespace KGySoft.WinForms.Forms
                 using (AdvancedMessageDialog frm = new AdvancedMessageDialog())
                 {
                     if (cancelButton)
-                        return frm.Execute(Language.Translate(msg, args), String.Empty, Language.Translate("Confirmation" + Language.DistinctionSeparator + "Dialogs"), AdvancedDialogTypes.Confirmation, ButtonTypes.YesNoCancel, false, false, String.Empty);
+                        return frm.Execute(Language.Translate(CultureInfo.CurrentCulture, msg, args), String.Empty, Language.Translate("Confirmation" + Language.DistinctionSeparator + "Dialogs"), AdvancedDialogTypes.Confirmation, ButtonTypes.YesNoCancel, false, false, String.Empty);
                     else
-                        return frm.Execute(Language.Translate(msg, args), AdvancedDialogTypes.Confirmation);
+                        return frm.Execute(Language.Translate(CultureInfo.CurrentCulture, msg, args), AdvancedDialogTypes.Confirmation);
                 }
             }
         }
@@ -235,7 +236,7 @@ namespace KGySoft.WinForms.Forms
             {
                 using (AdvancedMessageDialog frm = new AdvancedMessageDialog())
                 {
-                    return frm.Execute(Language.Translate(msg, args), AdvancedDialogTypes.Confirmation) == DialogResult.Yes;
+                    return frm.Execute(Language.Translate(CultureInfo.CurrentCulture, msg, args), AdvancedDialogTypes.Confirmation) == DialogResult.Yes;
                 }
             }
         }

@@ -53,6 +53,7 @@ namespace KGySoft.WinForms.Controls
 - Adjustable colors in disabled state
 - Fading animations
 - Auto scaling Font on all platform targets")]
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
     public class AdvancedRadioButton : RadioButton, ISupportsDisabledColor, ISupportButtonAdapter, ISupportsFadingInternal, IPerMonitorDpiAware
     {
         #region Fields

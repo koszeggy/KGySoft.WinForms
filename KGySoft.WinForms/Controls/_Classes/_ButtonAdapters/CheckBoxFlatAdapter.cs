@@ -35,6 +35,36 @@ namespace KGySoft.WinForms.Controls
 
         #region Methods
 
+        #region Static Methods
+
+        protected static void DrawCheckFlat(PaintEventArgs e, LayoutData layout, Color checkColor, Color checkBackground, Color checkBorder, ColorData colors, ControlAppearanceState state)
+        {
+            Rectangle checkBounds = layout.CheckBounds;
+            checkBounds.Width--;
+            checkBounds.Height--;
+            e.Graphics.DrawRectangle(checkBorder.GetPen(), checkBounds);
+
+            checkBounds.Inflate(-1, -1);
+            if (state.CheckState == CheckState.Indeterminate)
+            {
+                checkBounds.Width++;
+                checkBounds.Height++;
+                DrawDitheredFill(e.Graphics, colors.ButtonFace, checkBackground, checkBounds);
+            }
+            else
+            {
+                checkBounds.Width++;
+                checkBounds.Height++;
+                e.Graphics.FillRectangle(checkBackground.GetBrush(), checkBounds);
+            }
+
+            DrawCheckOnly(e.Graphics, layout, colors, checkColor, true, state);
+        }
+
+        #endregion
+
+        #region Instance Methods
+
         #region Internal Methods
 
         internal override void PaintDown(PaintStateEventArgs e)
@@ -98,30 +128,6 @@ namespace KGySoft.WinForms.Controls
             return options;
         }
 
-        protected void DrawCheckFlat(PaintEventArgs e, LayoutData layout, Color checkColor, Color checkBackground, Color checkBorder, ColorData colors, ControlAppearanceState state)
-        {
-            Rectangle checkBounds = layout.CheckBounds;
-            checkBounds.Width--;
-            checkBounds.Height--;
-            e.Graphics.DrawRectangle(checkBorder.GetPen(), checkBounds);
-
-            checkBounds.Inflate(-1, -1);
-            if (state.CheckState == CheckState.Indeterminate)
-            {
-                checkBounds.Width++;
-                checkBounds.Height++;
-                DrawDitheredFill(e.Graphics, colors.ButtonFace, checkBackground, checkBounds);
-            }
-            else
-            {
-                checkBounds.Width++;
-                checkBounds.Height++;
-                e.Graphics.FillRectangle(checkBackground.GetBrush(), checkBounds);
-            }
-
-            DrawCheckOnly(e, layout, colors, checkColor, true, state);
-        }
-
         #endregion
 
         #region Private Methods
@@ -137,6 +143,8 @@ namespace KGySoft.WinForms.Controls
             AdjustFocusRectangle(state, layout);
             PaintField(e, layout, colors, true);
         }
+
+        #endregion
 
         #endregion
 

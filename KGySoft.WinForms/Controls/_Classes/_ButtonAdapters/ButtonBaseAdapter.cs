@@ -20,7 +20,6 @@
 using System;
 using System.Collections.Specialized;
 using System.Drawing;
-using System.Drawing.Text;
 using System.Windows.Forms;
 
 #endregion
@@ -837,6 +836,9 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Methods
 
+        protected static void PaintButtonBackground(PaintEventArgs e, Rectangle bounds, Color backColor)
+            => e.Graphics.FillRectangle(backColor.GetBrush(), bounds);
+
         protected static Brush CreateDitherBrush(Color color1, Color color2)
         {
             // Note: Don't dispose the bitmap here. The texture brush will take ownership
@@ -957,9 +959,6 @@ namespace KGySoft.WinForms.Controls
         #region Protected Methods
 
         protected abstract LayoutOptions Layout(Graphics graphics, ControlAppearanceState state);
-
-        protected void PaintButtonBackground(PaintEventArgs e, Rectangle bounds, Color backColor)
-            => e.Graphics.FillRectangle(backColor.GetBrush(), bounds);
 
         protected void PaintField(PaintStateEventArgs e, LayoutData layout, ColorData colors, bool drawFocus)
         {

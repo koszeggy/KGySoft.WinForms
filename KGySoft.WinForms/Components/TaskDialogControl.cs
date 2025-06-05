@@ -173,7 +173,7 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Returns the string representation of this instance.
         /// </summary>
-        public override string? ToString() => !String.IsNullOrEmpty(Name) ? Name : base.ToString();
+        public override string ToString() => !String.IsNullOrEmpty(Name) ? Name : base.ToString()!;
 
         #endregion
 
@@ -185,9 +185,7 @@ namespace KGySoft.WinForms.Components
             {
                 CheckDisposed();
                 if (parent != null)
-                {
-                    throw new InvalidOperationException(Language.Translate("Control {0} is already parented", ToString()!));
-                }
+                    throw new InvalidOperationException(Res.TaskDialogHasParent(ToString()));
             }
 
             parent = parentDialog;

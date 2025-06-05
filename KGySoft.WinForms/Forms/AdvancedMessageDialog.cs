@@ -20,6 +20,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Globalization;
 using System.IO;
 using System.Threading;
 using System.Windows.Forms;
@@ -79,6 +80,11 @@ namespace KGySoft.WinForms.Forms
         /// Gets or sets log directory for saving logs and screenshots.
         /// </summary>
         public static string ErrorLogDirectory { get; set; }
+
+        /// <summary>
+        /// An optional custom error handler that can be used to handle exceptions in a custom way (e.g. log into a database or file).
+        /// </summary>
+        public static Action<Exception>? CustomErrorHandler = null;
 
         #endregion
 
@@ -144,7 +150,7 @@ namespace KGySoft.WinForms.Forms
                     return Path.GetFullPath(filename);
                 }
             }
-            catch
+            catch (Exception e) when (!e.IsCritical())
             {
                 // suppressing any error
                 return String.Empty;
@@ -181,7 +187,7 @@ namespace KGySoft.WinForms.Forms
                     return Path.GetFullPath(filename);
                 }
             }
-            catch
+            catch (Exception e) when (!e.IsCritical())
             {
                 return String.Empty;
             }
@@ -220,12 +226,11 @@ namespace KGySoft.WinForms.Forms
                 Cursor.Current = Cursors.WaitCursor;
                 try
                 {
-                    //if (CustomErrorHandler != null)
-                    //    CustomErrorHandler(e);
-
+                    if (e != null)
+                        CustomErrorHandler?.Invoke(e);
                     if (!String.IsNullOrEmpty(logNamePrefix))
                     {
-                        string filename = logNamePrefix + DateTime.Now.ToString("yyyyMMddhhmmssffff");
+                        string filename = logNamePrefix + DateTime.Now.ToString("yyyyMMddhhmmssffff", CultureInfo.InvariantCulture);
                         screenshot = Screenshot(filename);
                         ErrorToFile(filename, txtDetails.Text);
                     }
@@ -236,10 +241,9 @@ namespace KGySoft.WinForms.Forms
                 }
                 ShowDialog();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ex.IsCritical())
             {
-                //if (CustomErrorHandler != null)
-                //    CustomErrorHandler(ex);
+                CustomErrorHandler?.Invoke(ex);
             }
         }
 
@@ -312,7 +316,7 @@ namespace KGySoft.WinForms.Forms
                     Cursor.Current = Cursors.WaitCursor;
                     try
                     {
-                        string filename = (logNamePrefix ?? String.Empty) + DateTime.Now.ToString("yyyyMMddhhmmssffff");
+                        string filename = (logNamePrefix ?? String.Empty) + DateTime.Now.ToString("yyyyMMddhhmmssffff", CultureInfo.InvariantCulture);
                         if (saveScreenshot)
                             screenshot = Screenshot(filename);
                         if (saveLog)
@@ -326,10 +330,9 @@ namespace KGySoft.WinForms.Forms
                 exception = null;
                 return ShowDialog();
             }
-            catch (Exception ex)
+            catch (Exception ex) when (!ex.IsCritical())
             {
-                //if (CustomErrorHandler != null)
-                //    CustomErrorHandler(ex);
+                CustomErrorHandler?.Invoke(ex);
                 return DialogResult.None;
             }
         }

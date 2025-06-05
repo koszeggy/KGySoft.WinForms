@@ -427,7 +427,7 @@ namespace KGySoft.WinForms
                 return value;
             if (type.IsEnum)
                 return Enum.ToObject(type, value);
-            return Convert.ChangeType(value, type);
+            return Convert.ChangeType(value, type, CultureInfo.InvariantCulture);
         }
 
         #endregion

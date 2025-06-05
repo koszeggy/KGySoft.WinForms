@@ -18,6 +18,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Windows.Forms;
 
 #endregion
@@ -148,7 +149,7 @@ namespace KGySoft.WinForms.Controls
             }
             set
             {
-                Value = Convert.ToDateTime(value);
+                Value = Convert.ToDateTime(value, CultureInfo.CurrentCulture);
             }
         }
 

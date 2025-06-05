@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Windows.Forms;
 
 using KGySoft.Libraries.Language;
@@ -224,11 +225,11 @@ namespace KGySoft.WinForms.Controls
             values.Clear();
             foreach (object i in Enum.GetValues(enumType))
             {
-                if (Convert.ToInt32(i) == 0)
+                if (Convert.ToInt32(i, CultureInfo.InvariantCulture) == 0)
                     continue;
-                string item = Enum.ToObject(enumType, Convert.ToInt32(i)).ToString()!;
+                string item = Enum.ToObject(enumType, Convert.ToInt32(i, CultureInfo.InvariantCulture)).ToString()!;
                 this.Items.Add(translate ? Language.Translate(item) : item);
-                values.Add(Convert.ToInt32(i));
+                values.Add(Convert.ToInt32(i, CultureInfo.InvariantCulture));
             }
         }
 

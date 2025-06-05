@@ -18,15 +18,12 @@
 using System;
 using System.Collections;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Linq;
 using System.Windows.Forms;
 
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
-using KGySoft.Libraries.Language;
 using KGySoft.WinForms.Forms;
 
 #endregion
@@ -42,8 +39,6 @@ namespace KGySoft.WinForms.Components
     public sealed class TaskDialog : IWin32Window, IDisposable
     {
         #region Constants
-
-        #region Internal Constants
 
         internal const string PropertyMessage = "Message";
         internal const string PropertyMainInstruction = "MainInstruction";
@@ -68,15 +63,6 @@ namespace KGySoft.WinForms.Components
         internal const string PropertyProgressBarMaximum = "ProgressBarMaximum";
         internal const string PropertyProgressBarValue = "ProgressBarValue";
         internal const string PropertyProgressBarMarqueeAnimationSpeed = "ProgressBarMarqueeAnimationSpeed";
-
-        #endregion
-
-        #region Private Constants
-
-        private const string propertyChangeNotAllowed = "Changing {0} property is not allowed while dialog is displayed__TaskDialog";
-        private const TaskDialogOptions allOptions = TaskDialogOptions.HyperlinksEnabled | TaskDialogOptions.AllowCancel | TaskDialogOptions.UseCommandLinks | TaskDialogOptions.UseCommandLinksNoIcon | TaskDialogOptions.ExpandFooterArea | TaskDialogOptions.DetailsExpanded | TaskDialogOptions.PositionRelativeToWindow | TaskDialogOptions.RightToLeftLayout | TaskDialogOptions.AllowMinimize;// | TaskDialogOptions.SelectableTexts;
-
-        #endregion
 
         #endregion
 
@@ -117,22 +103,13 @@ namespace KGySoft.WinForms.Components
         private TaskDialogResult dialogResult;
         private int width;
 
-        // hiding event backing fields as they were simple auto events
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private EventHandler? created;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private EventHandler<TaskDialogTickEventArgs>? tick;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private EventHandler<CancelEventArgs>? closing;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private EventHandler? closed;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private EventHandler<HyperlinkClickedEventArgs>? hyperlinkClicked;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private EventHandler? checkBoxCheckedChanged;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private EventHandler? helpRequested;
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private EventHandler<TaskDialogDetailsVisibleChangedEventArgs>? detailsVisibleChanged;
 
         #endregion
@@ -398,7 +375,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gest or sets options of the task dialog.
+        /// Gets or sets the options of the task dialog.
         /// </summary>
         public TaskDialogOptions Options
         {
@@ -409,28 +386,12 @@ namespace KGySoft.WinForms.Components
                     return;
 
                 CheckCanChangeProperty();
-                if ((value | allOptions) != allOptions)
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                if (!value.AllFlagsDefined())
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.FlagsEnumOutOfRange(value));
 
                 options = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyOptions);
-                }
-
-                //if (dialogInstance != null)
-                //{
-                //    throw new InvalidOperationException(Language.Translate(propertyChangeNotAllowed, "Options"));
-                //}
-
-                //if ((value | allOptions) != allOptions)
-                //{
-                //    throw new ArgumentOutOfRangeException("value");
-                //}
-
-                //options = value;
             }
         }
 
@@ -588,7 +549,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets standard buttons if the dialog. When <see cref="Buttons"/> are not empty, this property is ignored.
+        /// Gets or sets standard buttons of the dialog. When <see cref="Buttons"/> are not empty, this property is ignored.
         /// If neither standard nor custom buttons are specified, the task dialog will contain the OK button by default.
         /// By default, these buttons will use the current windows language, unless <see cref="TaskDialogOptions.TranslateStandardButtons"/> is set
         /// in <see cref="Options"/>.
@@ -866,7 +827,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gest or sets whether the <see cref="TaskDialog"/> is to be forced to operate in compatibility mode
+        /// Gets or sets whether the <see cref="TaskDialog"/> is to be forced to operate in compatibility mode
         /// even if current operating system supports native task dialogs.
         /// </summary>
         public bool ForceCompatibilityMode
@@ -875,9 +836,7 @@ namespace KGySoft.WinForms.Components
             set
             {
                 if (dialogInstance != null)
-                {
-                    throw new InvalidOperationException(Language.Translate(propertyChangeNotAllowed, "ForceCompatibilityMode"));
-                }
+                    throw new InvalidOperationException(Res.TaskDialogPropertyChange("ForceCompatibilityMode"));
 
                 forceCompatibilityMode = value;
             }

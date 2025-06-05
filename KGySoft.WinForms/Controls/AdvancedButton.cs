@@ -58,6 +58,7 @@ namespace KGySoft.WinForms.Controls
 - Fading animations
 - Fixed appearance in several cases
 - Auto scaling Font on all platform targets")]
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
     public class AdvancedButton : Button, ISupportsDisabledColor, ISupportButtonAdapter, ISupportsFadingInternal, IPerMonitorDpiAware
     {
         #region Fields

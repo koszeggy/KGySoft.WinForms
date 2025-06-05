@@ -19,6 +19,7 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Globalization;
 using System.Windows.Forms;
 
 #endregion
@@ -129,7 +130,7 @@ namespace KGySoft.WinForms.Controls
 			}
 			set
 			{
-				CheckedContent = Convert.ToBoolean(value);
+				CheckedContent = Convert.ToBoolean(value, CultureInfo.CurrentCulture);
 			}
 		}
 

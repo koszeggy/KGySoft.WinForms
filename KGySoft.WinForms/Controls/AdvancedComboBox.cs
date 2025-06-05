@@ -50,6 +50,7 @@ namespace KGySoft.WinForms.Controls
 - TextChangedOnLeave event
 - Auto complete works in Simple mode
 - Auto scaling Font on all platform targets")]
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
     public class AdvancedComboBox : ComboBox, ISupportsDisabledColor, IReadOnlyCapable, IPerMonitorDpiAware
     {
         #region Nested classes

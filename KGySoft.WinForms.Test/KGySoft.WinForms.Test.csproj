@@ -2,8 +2,8 @@
 
   <PropertyGroup>
     <!--NOTE: scaling of system button adapters is fixed in .NET 5.0+ -->
-    <!--<TargetFrameworks>net35;net40;net45;netcoreapp3.0;net5.0-windows</TargetFrameworks>-->
-    <TargetFrameworks>net35;net40;net5.0-windows</TargetFrameworks>
+    <!--<TargetFrameworks>net35;net40;net47;net48;netcoreapp3.0;net7.0-windows</TargetFrameworks>-->
+    <TargetFrameworks>net9.0-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>KGySoft.WinForms.Test</RootNamespace>
     <LangVersion>latest</LangVersion>
@@ -11,12 +11,14 @@
     <UseWindowsForms>true</UseWindowsForms>
     <OutputType>WinExe</OutputType>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+
+    <NoWarn>$(NoWarn);WFO1000</NoWarn>
   </PropertyGroup>
 
   <!-- .NET Framework only references -->
-  <ItemGroup Condition="'$(TargetFramework)'=='net35' OR '$(TargetFramework)'=='net40' OR '$(TargetFramework)'=='net45'">
+  <!--<ItemGroup Condition="'$(TargetFramework)'=='net35' OR '$(TargetFramework)'=='net40' OR '$(TargetFramework)'=='net45' OR '$(TargetFramework)'=='net48'">
     <Reference Include="System.Windows.Forms" />
-  </ItemGroup>
+  </ItemGroup>-->
   <ItemGroup>
     <ProjectReference Include="..\KGySoft.WinForms\KGySoft.WinForms.csproj" />
   </ItemGroup>

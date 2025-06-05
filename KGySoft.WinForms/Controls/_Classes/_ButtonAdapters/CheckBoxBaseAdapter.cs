@@ -62,8 +62,10 @@ namespace KGySoft.WinForms.Controls
         #region Methods
 
         #region Static Methods
+        
+        #region Protected Methods
 
-        private static void DrawCheckOnly(int checkSize, Graphics g, LayoutData layout, ColorData colors, Color checkColor, bool disabledColors, ControlAppearanceState state)
+        protected static void DrawCheckOnly(Graphics g, LayoutData layout, ColorData colors, Color checkColor, bool disabledColors, ControlAppearanceState state)
         {
             if (state.CheckState == CheckState.Unchecked)
                 return;
@@ -74,7 +76,7 @@ namespace KGySoft.WinForms.Controls
                 checkColor = VisualStyleHelper.HighContrast ? colors.Highlight : colors.ButtonShadow;
             
             Rectangle checkBounds = layout.CheckBounds;
-            if (checkBounds.Width == checkSize)
+            if (checkBounds.Width == FlatCheckSize)
             {
                 checkBounds.Width++;
                 checkBounds.Height++;
@@ -93,6 +95,10 @@ namespace KGySoft.WinForms.Controls
 
             g.DrawImageColorized(image, checkBounds, checkColor);
         }
+
+        #endregion
+
+        #region Private Methods
 
         private static Bitmap GetCheckBoxImage(Color checkColor, Rectangle fullSize, ref Color cacheCheckColor, ref Bitmap? cacheCheckImage)
         {
@@ -128,6 +134,8 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #endregion
+
         #region Instance Methods
 
         #region Internal Methods
@@ -145,9 +153,6 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Protected Methods
-
-        protected void DrawCheckOnly(PaintEventArgs e, LayoutData layout, ColorData colors, Color checkColor, bool disabledColors, ControlAppearanceState state)
-            => DrawCheckOnly(11, e.Graphics, layout, colors, checkColor, disabledColors, state);
 
         protected void AdjustFocusRectangle(ControlAppearanceState state, LayoutData layout)
         {

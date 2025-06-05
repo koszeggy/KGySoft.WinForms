@@ -49,6 +49,7 @@ namespace KGySoft.WinForms.Controls
 - Value property is redefined to return DateTime.MaxValue if Checked is false; instead of throwing exceptions, out-of-range values don't change Value
 - Auto scaling Font on all platform targets
 - Adjustable checkbox rendering quality")]
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
     public class AdvancedDateTimePicker : DateTimePicker, ISupportsDisabledColor, IPerMonitorDpiAware
     {
         #region Nested Types

@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <!--<TargetFrameworks>net35;net40;netcoreapp3.0;net7.0-windows</TargetFrameworks>-->
-    <TargetFrameworks>net35;net40;netcoreapp3.0;net7.0-windows;net9.0-windows</TargetFrameworks>
+    <TargetFrameworks>net9.0-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>KGySoft.WinForms</RootNamespace>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\KGySoft.snk</AssemblyOriginatorKeyFile>
     <!--<RunCodeAnalysis>true</RunCodeAnalysis>-->
-    <!--<CodeAnalysisRuleSet>KGySoft.WinForms.ruleset</CodeAnalysisRuleSet>-->
+    <CodeAnalysisRuleSet>..\KGySoft.WinForms.ruleset</CodeAnalysisRuleSet>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <UseWindowsForms>true</UseWindowsForms>
@@ -18,6 +18,13 @@
 
     <NoWarn>$(NoWarn);WFO1000</NoWarn>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="9.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
 
   <ItemGroup>
     <None Remove="HelpOut\**" />
@@ -42,13 +49,6 @@
   <ItemGroup Condition="'$(TargetFramework)'=='net35' OR '$(TargetFramework)'=='net40' OR '$(TargetFramework)'=='net45'">
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Design" />
-  </ItemGroup>
-
-  <!--TODO: remove content-->
-  <ItemGroup>
-    <Compile Remove="Interop\**" />
-    <EmbeddedResource Remove="Interop\**" />
-    <None Remove="Interop\**" />
   </ItemGroup>
 
   <ItemGroup>

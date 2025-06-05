@@ -483,6 +483,26 @@ namespace KGySoft.WinForms.Controls
 
         #region Methods
 
+        #region Instance Methods
+
+        #region Static Methods
+
+        private static decimal RoundTo(decimal value, int order)
+        {
+            CultureInfo ci = new CultureInfo(Thread.CurrentThread.CurrentCulture.Name, true);
+
+            ci.NumberFormat.NumberDecimalDigits = order <= 0 ? -order : 0;
+            if (order > 0)
+            {
+                decimal scale = 10m.Pow(order);
+                return Decimal.Parse((value / scale).ToString("F", ci), ci) * scale;
+            }
+            else
+                return Decimal.Parse(value.ToString("F", ci), ci);
+        }
+
+        #endregion
+
         #region Protected Methods
 
         protected override void OnEnter(EventArgs e)
@@ -534,7 +554,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             // applying multipliers
-            if (e.KeyChar.ToString().ToLower().IndexOfAny(multipliers) >= 0)
+            if (e.KeyChar.ToString().ToLowerInvariant().IndexOfAny(multipliers) >= 0)
             {
                 ApplyText(e.KeyChar.ToString(), true);
                 SelectionStart = Text.Length;
@@ -573,10 +593,7 @@ namespace KGySoft.WinForms.Controls
             try
             {
                 if (!Blank && IsValid(Text, true))
-                {
-                    // TODO: Parse by Language/CurrentCulture...
-                    SetValue(Decimal.Parse(Text), false);
-                }
+                    SetValue(Decimal.Parse(Text, CultureInfo.CurrentCulture), false);
             }
             finally
             {
@@ -646,20 +663,6 @@ namespace KGySoft.WinForms.Controls
             base.TextAlign = align;
         }
 
-        private decimal RoundTo(decimal value, int order)
-        {
-            CultureInfo ci = new CultureInfo(Thread.CurrentThread.CurrentCulture.Name, true);
-
-            ci.NumberFormat.NumberDecimalDigits = order <= 0 ? Convert.ToInt32(-order) : 0;
-            if (order > 0)
-            {
-                decimal scale = Convert.ToDecimal(Math.Pow(10, order));
-                return decimal.Parse((value / scale).ToString("F", ci)) * scale;
-            }
-            else
-                return decimal.Parse(value.ToString("F", ci));
-        }
-
         /// <summary>
         /// Set value and refreshes text.
         /// </summary>
@@ -719,7 +722,7 @@ namespace KGySoft.WinForms.Controls
         {
             decimal d = 0;
             bool result = (!strong && (s == "-" || s == ""
-                            || s[s.Length - 1].ToString().ToLower().IndexOfAny(multipliers) >= 0))
+                            || s[s.Length - 1].ToString().ToLowerInvariant().IndexOfAny(multipliers) >= 0))
                     || decimal.TryParse(s, out d);
             if (result && strong)
                 result = CheckRange(d, false);
@@ -854,7 +857,7 @@ namespace KGySoft.WinForms.Controls
             if (text == "")
                 return;
 
-            text = text.ToLower();
+            text = text.ToLowerInvariant();
             if (text[text.Length - 1].ToString().IndexOfAny(multipliers) >= 0)
             {
                 decimal num;
@@ -869,7 +872,7 @@ namespace KGySoft.WinForms.Controls
                             case 'y': num *= 1000000000; break;
                         }
                 }
-                catch
+                catch (Exception e) when (!e.IsCritical())
                 {
                     // During editing we can suppress the exception - in this case simply there is no multiplication.
                     // (When setting Text, we would throw though)
@@ -881,6 +884,8 @@ namespace KGySoft.WinForms.Controls
 
             base.Text = text;
         }
+
+        #endregion
 
         #endregion
 

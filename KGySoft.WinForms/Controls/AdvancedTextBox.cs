@@ -47,6 +47,7 @@ namespace KGySoft.WinForms.Controls
 - TextChangedOnLeave event
 - Ctrl+A works even if auto appending is enabled
 - Auto scaling Font on all platform targets")]
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
     public class AdvancedTextBox : TextBox, ISupportsDisabledColor, IPerMonitorDpiAware
     {
         #region Fields

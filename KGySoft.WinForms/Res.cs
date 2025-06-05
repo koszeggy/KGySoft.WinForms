@@ -152,6 +152,12 @@ namespace KGySoft.WinForms
         /// <summary>[ ] {0}</summary>
         internal static string TaskDialogCheckBoxUnchecked(string? text) => Get("TaskDialog_CheckBoxUncheckedFormat", text);
 
+        /// <summary>Task dialog control '{0}' already has a parent.</summary>
+        internal static string TaskDialogHasParent(string name) => Get("TaskDialog_HasParentFormat", name);
+
+        /// <summary>Changing property '{0}' is not allowed while the dialog is displayed.</summary>
+        internal static string TaskDialogPropertyChange(string name) => Get("TaskDialog_PropertyChangeFormat", name);
+
         #endregion
 
         #endregion

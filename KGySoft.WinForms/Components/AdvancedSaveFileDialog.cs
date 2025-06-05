@@ -474,21 +474,21 @@ namespace KGySoft.WinForms.Components
                 SelectedFileChanged(this, e);
         }
 
-        private void FindScreenToClient(IntPtr parent, ref RECT rect)
-        {
-            POINT topLeft;
-            POINT bottomRight;
-            topLeft.x = rect.Left;
-            topLeft.y = rect.Top;
-            User32.ScreenToClient(parent, ref topLeft);
-            bottomRight.x = rect.Right;
-            bottomRight.y = rect.Bottom;
-            User32.ScreenToClient(parent, ref bottomRight);
-            rect.Top = topLeft.y;
-            rect.Left = topLeft.x;
-            rect.Bottom = bottomRight.y;
-            rect.Right = bottomRight.x;
-        }
+        //private void FindScreenToClient(IntPtr parent, ref RECT rect)
+        //{
+        //    POINT topLeft;
+        //    POINT bottomRight;
+        //    topLeft.x = rect.Left;
+        //    topLeft.y = rect.Top;
+        //    User32.ScreenToClient(parent, ref topLeft);
+        //    bottomRight.x = rect.Right;
+        //    bottomRight.y = rect.Bottom;
+        //    User32.ScreenToClient(parent, ref bottomRight);
+        //    rect.Top = topLeft.y;
+        //    rect.Left = topLeft.x;
+        //    rect.Bottom = bottomRight.y;
+        //    rect.Right = bottomRight.x;
+        //}
 
         #endregion
 

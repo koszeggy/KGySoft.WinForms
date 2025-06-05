@@ -65,6 +65,22 @@ namespace KGySoft.WinForms.Controls
 
         #region Methods
 
+        #region Static Methods
+
+        protected static ButtonState GetButtonState(ControlAppearanceState state)
+        {
+            ButtonState result = ButtonState.Normal;
+            if (state.CheckState != CheckState.Unchecked)
+                result |= ButtonState.Checked;
+            if (!state.Enabled)
+                result |= ButtonState.Inactive;
+            if (state.Pressed)
+                result |= ButtonState.Pushed;
+            return result;
+        }
+
+        #endregion
+
         #region Instance Methods
 
         internal override LayoutOptions CommonLayout(ControlAppearanceState state)
@@ -89,18 +105,6 @@ namespace KGySoft.WinForms.Controls
         }
 
         #region Protected Methods
-
-        protected ButtonState GetButtonState(ControlAppearanceState state)
-        {
-            ButtonState result = ButtonState.Normal;
-            if (state.CheckState != CheckState.Unchecked)
-                result |= ButtonState.Checked;
-            if (!state.Enabled)
-                result |= ButtonState.Inactive;
-            if (state.Pressed)
-                result |= ButtonState.Pushed;
-            return result;
-        }
 
         protected abstract ButtonBaseAdapter CreateButtonAdapter();
 

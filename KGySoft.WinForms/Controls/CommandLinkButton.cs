@@ -47,6 +47,7 @@ namespace KGySoft.WinForms.Controls
     /// </summary>
     [ToolboxBitmap(typeof(CommandLinkButton), "Resources.Toolbox.CommandLinkButton.png")]
     [Description("Vista-like CommandLink button that works also in compatibility mode. On Vista and above you can set FlatStyle to System to render the button by the Windows.")]
+    [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
     public class CommandLinkButton : Button, ISupportsDisabledColor, ISupportsFadingInternal, IPerMonitorDpiAware
     {
         #region Nested Classes
