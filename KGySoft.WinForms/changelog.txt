@@ -30,6 +30,7 @@
 ! DataGridViewTextAndImageColumn class: Removed, it was already obsolete.
 ! DataGridViewTextAndImageCell class: Removed, it was already obsolete.
 + New ScaleHelper class
++ New WinFormsModule class
 
 + KGySoft.ComponentModel namespace:
 ===================================
@@ -43,6 +44,7 @@
 ========================================
 * TaskDialog class:
   + Supporting high DPI
+  + Ctrl+C copies the textual content of the task dialog to the clipboard even in compatibility mode.
   - Fixing widths
   - Native mode: fixing some rare exception cases during Dispose
   - Compatibility mode: improving expando button image quality
