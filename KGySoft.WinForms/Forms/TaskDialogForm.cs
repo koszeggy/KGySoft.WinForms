@@ -21,7 +21,6 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.IO;
@@ -35,7 +34,6 @@ using System.Windows.Forms.VisualStyles;
 using KGySoft.Collections;
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
-using KGySoft.Libraries.Language;
 using KGySoft.WinForms.Components;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.WinApi;
@@ -262,8 +260,6 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region Construction and Destruction
-
         #region Constructors
 
         public TaskDialogForm()
@@ -280,7 +276,7 @@ namespace KGySoft.WinForms.Forms
             pnlMain.SizeChanged += Control_SizeChanged;
             pnlMainControls.SizeChanged += Control_SizeChanged;
             pnlFooter.SizeChanged += Control_SizeChanged;
-            cbCheckBox.CheckedChanged += cbCheckBox_CheckedChanged;
+            chbCheckBox.CheckedChanged += cbCheckBox_CheckedChanged;
             timer.Tick += timer_Tick;
             lblMessage.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
             lblDetailsMain.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
@@ -294,56 +290,9 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region Explicit Disposing
-
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
-        protected override void Dispose(bool disposing)
-        {
-            // Happens only when TaskDialog.Dispose was called while showing: forcing close and waiting for being closed
-            if (dialogState != TaskDialogStatus.Closed)
-            {
-                isForcedClosing = true;
-                dialogState = TaskDialogStatus.Closed;
-            }
-
-            FreeRadioButtons();
-            FreeButtons();
-            FreeCommandLinks();
-            HandleCreated -= TaskDialogForm_HandleCreated;
-            Load -= TaskDialogForm_Load;
-            FormClosing -= TaskDialogForm_FormClosing;
-            Closed -= TaskDialogForm_Closed;
-            KeyDown -= TaskDialogForm_KeyDown;
-            btnShowHideDetails.ExpandedChanged -= btnShowHideDetails_ExpandedChanged;
-            pnlMain.SizeChanged -= Control_SizeChanged;
-            pnlMainControls.SizeChanged -= Control_SizeChanged;
-            pnlFooter.SizeChanged -= Control_SizeChanged;
-            cbCheckBox.CheckedChanged -= cbCheckBox_CheckedChanged;
-            timer.Tick -= timer_Tick;
-            lblMessage.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
-            lblDetailsMain.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
-            lblDetailsFooter.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
-            lblFooter.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
-            HelpRequested -= TaskDialogForm_HelpRequested;
-            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
-
-            if (disposing)
-            {
-                components?.Dispose();
-                mainInstructionsFont?.Dispose();
-            }
-
-            base.Dispose(disposing);
-        }
-
-        #endregion
-
-        #endregion
-
         #region Properties
+
+        #region Private Properties
 
         private Font MainInstructionsFont
         {
@@ -411,6 +360,14 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
+        #region Explicitly Implemented Interface Properties
+
+        TaskDialogStatus ITaskDialog.ShowState => dialogState;
+
+        #endregion
+
+        #endregion
+
         #region Methods
 
         #region Static Methods
@@ -450,6 +407,13 @@ namespace KGySoft.WinForms.Forms
 
         #region Protected Methods
 
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            if (keyData == (Keys.Control | Keys.C))
+                CopyToClipboard();
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
@@ -462,6 +426,49 @@ namespace KGySoft.WinForms.Forms
             if (dialogState == TaskDialogStatus.Showing)
                 isRecreatingDialog = true;
             base.OnHandleDestroyed(e);
+        }
+
+        /// <summary>
+        /// Clean up any resources being used.
+        /// </summary>
+        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        protected override void Dispose(bool disposing)
+        {
+            // Happens only when TaskDialog.Dispose was called while showing: forcing close and waiting for being closed
+            if (dialogState != TaskDialogStatus.Closed)
+            {
+                isForcedClosing = true;
+                dialogState = TaskDialogStatus.Closed;
+            }
+
+            FreeRadioButtons();
+            FreeButtons();
+            FreeCommandLinks();
+            HandleCreated -= TaskDialogForm_HandleCreated;
+            Load -= TaskDialogForm_Load;
+            FormClosing -= TaskDialogForm_FormClosing;
+            Closed -= TaskDialogForm_Closed;
+            KeyDown -= TaskDialogForm_KeyDown;
+            btnShowHideDetails.ExpandedChanged -= btnShowHideDetails_ExpandedChanged;
+            pnlMain.SizeChanged -= Control_SizeChanged;
+            pnlMainControls.SizeChanged -= Control_SizeChanged;
+            pnlFooter.SizeChanged -= Control_SizeChanged;
+            chbCheckBox.CheckedChanged -= cbCheckBox_CheckedChanged;
+            timer.Tick -= timer_Tick;
+            lblMessage.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
+            lblDetailsMain.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
+            lblDetailsFooter.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
+            lblFooter.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
+            HelpRequested -= TaskDialogForm_HelpRequested;
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
+
+            if (disposing)
+            {
+                components?.Dispose();
+                mainInstructionsFont?.Dispose();
+            }
+
+            base.Dispose(disposing);
         }
 
         #endregion
@@ -486,7 +493,7 @@ namespace KGySoft.WinForms.Forms
 
             result.HasMainText = result.HasMessage || (result.HasDetails && !isDetailsInFooter && isDetailsExpanded);
             result.HasButtons = host.StandardButtons != TaskDialogStandardButtonFlags.None
-                || (host.StandardButtons == TaskDialogStandardButtonFlags.None && host.Buttons.Count == 0) // This creates a cancel button
+                || (host.StandardButtons == TaskDialogStandardButtonFlags.None && host.Buttons.Count == 0) // This creates an OK button
                 || (!result.HasCommandLinks && host.Buttons.Count > 0);
             result.HasMainControls = result.HasDetails || result.HasVerification || result.HasButtons;
             result.IsDetailsVisibleInFooter = result.HasDetails && isDetailsInFooter && isDetailsExpanded;
@@ -501,7 +508,7 @@ namespace KGySoft.WinForms.Forms
         private void FirstInit()
         {
             selectedCustomButtonIndex = -1;
-            cbCheckBox.Checked = host.CheckBoxChecked;
+            chbCheckBox.Checked = host.CheckBoxChecked;
             if (ownerWindow != null && (host.Options & TaskDialogOptions.PositionRelativeToWindow) != TaskDialogOptions.None)
                 StartPosition = FormStartPosition.CenterParent;
             else
@@ -554,7 +561,7 @@ namespace KGySoft.WinForms.Forms
             lblDetailsFooter.Text = cfg.HasDetails && isDetailsInFooter ? host.DetailsText : String.Empty;
             lblDetailsMain.Text = cfg.HasDetails && !isDetailsInFooter ? host.DetailsText : String.Empty;
             ResetShowHideDetailsText();
-            cbCheckBox.Text = cfg.HasVerification ? host.CheckBoxText : String.Empty;
+            chbCheckBox.Text = cfg.HasVerification ? host.CheckBoxText : String.Empty;
             lblFooter.Text = cfg.HasFooter ? host.FooterText : String.Empty;
             isResizing = false;
 
@@ -603,7 +610,7 @@ namespace KGySoft.WinForms.Forms
             {
                 // setting minimum size so buttons may consume the rest place: counting desiredWidth from checks
                 if (cfg.HasVerification)
-                    desiredWidth = cbCheckBox.GetPreferredSize(Size.Empty).Width + cbCheckBox.Margin.Horizontal + pnlChecks.Margin.Horizontal;
+                    desiredWidth = chbCheckBox.GetPreferredSize(Size.Empty).Width + chbCheckBox.Margin.Horizontal + pnlChecks.Margin.Horizontal;
 
                 // Expando texts are calculated even if invisible, so checks panel is not rearranged when details text appears
                 if (desiredWidth < maxWidth)
@@ -643,7 +650,7 @@ namespace KGySoft.WinForms.Forms
                 if (cfg.HasMainControls)
                 {
                     btnShowHideDetails.Visible = cfg.HasDetails;
-                    cbCheckBox.Visible = cfg.HasVerification;
+                    chbCheckBox.Visible = cfg.HasVerification;
                     pnlButtons.Visible = cfg.HasButtons;
 
                     // buttons only
@@ -997,7 +1004,7 @@ namespace KGySoft.WinForms.Forms
                                 desiredHeight = btnShowHideDetails.Height + btnShowHideDetails.Margin.Vertical;
 
                             if (cfg.HasVerification)
-                                desiredHeight += cbCheckBox.Height + cbCheckBox.Margin.Vertical;
+                                desiredHeight += chbCheckBox.Height + chbCheckBox.Margin.Vertical;
 
                             desiredHeight += pnlChecks.Margin.Vertical;
                             pnlChecks.Height = desiredHeight;
@@ -1184,9 +1191,7 @@ namespace KGySoft.WinForms.Forms
                 MinimumSize = new Size(70, 23).Scale(scale),
             };
             if ((host.Options & TaskDialogOptions.TranslateStandardButtons) != TaskDialogOptions.None)
-            {
-                btn.Text = Language.Translate("&" + Enum<TaskDialogStandardButtonFlags>.ToString(standardButton) + "__TaskDialogForm");
-            }
+                btn.Text = Res.Get(standardButton);
             else
             {
                 switch (standardButton)
@@ -1210,7 +1215,7 @@ namespace KGySoft.WinForms.Forms
                         btn.Text = systemTextCache[SystemTextIds.No];
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException("standardButton");
+                        throw new ArgumentOutOfRangeException(nameof(standardButton), PublicResources.FlagsEnumOutOfRange(standardButton));
                 }
             }
 
@@ -1249,8 +1254,8 @@ namespace KGySoft.WinForms.Forms
         {
             if (String.IsNullOrEmpty(host.ShowDetailsText) && String.IsNullOrEmpty(host.HideDetailsText))
             {
-                btnShowHideDetails.TextExpanded = Language.Translate("Hide &details__TaskDialogForm");
-                btnShowHideDetails.TextCollapsed = Language.Translate("See &details__TaskDialogForm");
+                btnShowHideDetails.TextExpanded = Res.TaskDialogHideDetails;
+                btnShowHideDetails.TextCollapsed = Res.TaskDialogShowDetails;
             }
             else
             {
@@ -1664,6 +1669,488 @@ namespace KGySoft.WinForms.Forms
             return pnlRadioButtons.Controls[host.RadioButtons.Count - taskDialogControl.Id - 1];
         }
 
+        private void CopyToClipboard()
+        {
+            #region Local Methods
+
+            static string? Strip(string? text)
+            {
+                if (text == null || !text.Contains('&'))
+                    return text;
+                
+                if (!text.Contains("&&"))
+                    return text.Replace("&", String.Empty);
+
+                return text.Split(["&&"], StringSplitOptions.None).Select(s => s.Replace("&", String.Empty)).Join('&');
+            }
+
+            #endregion
+
+            var result = new StringBuilder();
+            Configuration cfg = GetConfiguration();
+
+            result.AppendLine(Res.TaskDialogCaption);
+            result.AppendLine(Text);
+            if (cfg.HasMainInstruction)
+            {
+                result.AppendLine();
+                result.AppendLine(Res.TaskDialogMainInstruction);
+                result.AppendLine(host.MainInstruction);
+            }
+
+            if (cfg.HasMessage)
+            {
+                result.AppendLine();
+                result.AppendLine(Res.TaskDialogMessage);
+                result.AppendLine(host.Message);
+            }
+
+            if (cfg.HasDetails && !isDetailsInFooter)
+            {
+                result.AppendLine();
+                result.AppendLine(Res.TaskDialogDetails);
+                result.AppendLine(host.DetailsText);
+            }
+
+            if (cfg.HasRadioButtons)
+            {
+                result.AppendLine();
+                foreach (TaskDialogRadioButton radioButton in host.RadioButtons)
+                    result.AppendLine(radioButton.Checked ? Res.TaskDialogRadioButtonChecked(Strip(radioButton.Text)) : Res.TaskDialogRadioButtonUnchecked(Strip(radioButton.Text)));
+            }
+
+            if (cfg.HasCommandLinks)
+            {
+                bool useGlyph = (host.Options & TaskDialogOptions.UseCommandLinks) != 0;
+                result.AppendLine();
+                foreach (TaskDialogButton button in host.Buttons)
+                {
+                    if (button.IsElevated)
+                        result.AppendLine(Res.TaskDialogButtonElevated(Strip(button.Text)));
+                    else if (button.CustomIcon != null)
+                        result.AppendLine(Res.TaskDialogButtonCustomIcon(Strip(button.Text)));
+                    else if (useGlyph)
+                        result.AppendLine(Res.TaskDialogButtonCommandLink(Strip(button.Text)));
+                    else if (useGlyph)
+                        result.AppendLine(Res.TaskDialogButton(Strip(button.Text)));
+                }
+            }
+
+            if (cfg.HasDetails)
+            {
+                result.AppendLine();
+                result.Append(isDetailsExpanded ? Res.TaskDialogExpandoButtonExpanded(Strip(btnShowHideDetails.Text)) : Res.TaskDialogExpandoButtonCollapsed(Strip(btnShowHideDetails.Text)));
+                if (cfg.HasVerification || !cfg.HasButtons)
+                    result.AppendLine();
+            }
+
+            if (cfg.HasVerification)
+            {
+                result.AppendLine();
+                result.Append(host.CheckBoxChecked ? Res.TaskDialogCheckBoxChecked(Strip(host.CheckBoxText)) : Res.TaskDialogCheckBoxUnchecked(Strip(host.CheckBoxText)));
+                if (!cfg.HasButtons)
+                    result.AppendLine();
+            }
+
+            if (cfg.HasButtons)
+            {
+                if (!cfg.HasVerification && !cfg.HasDetails)
+                    result.AppendLine();
+                else
+                    result.Append("  ");
+
+                bool first = true;
+                foreach (var button in pnlButtons.Controls.OfType<AdvancedButton>())
+                {
+                    if (!first)
+                        result.Append(" ");
+                    first = false;
+
+                    if (button.IsElevated)
+                        result.Append(Res.TaskDialogButtonElevated(Strip(button.Text)));
+                    else if (button.Image != null)
+                        result.Append(Res.TaskDialogButtonCustomIcon(Strip(button.Text)));
+                    else
+                        result.Append(Res.TaskDialogButton(Strip(button.Text)));
+                }
+
+                result.AppendLine();
+            }
+
+            if (cfg.HasFooter)
+            {
+                result.AppendLine();
+                result.AppendLine(Res.TaskDialogFooter);
+                result.AppendLine(host.FooterText);
+            }
+
+            if (cfg.HasDetails && isDetailsInFooter)
+            {
+                result.AppendLine();
+                result.AppendLine(Res.TaskDialogDetails);
+                result.AppendLine(host.DetailsText);
+            }
+
+            Clipboard.SetText(result.ToString());
+        }
+
+        #endregion
+
+        #region Explicitly Implemented Interface Methods
+
+        void ITaskDialog.Close(TaskDialogResult result)
+        {
+            switch (result)
+            {
+                case TaskDialogResult.Close:
+                    DialogResult = DialogResult.Abort;
+                    break;
+                case TaskDialogResult.Custom:
+                    DialogResult = DialogResult.Ignore;
+                    break;
+                default:
+                    DialogResult = (DialogResult)result;
+                    break;
+            }
+        }
+
+        TaskDialogResult ITaskDialog.Execute(TaskDialog taskDialog, IntPtr owner, out int selectedButtonIndex, out int selectedRadioButtonIndex, out bool checkBoxChecked)
+        {
+            host = taskDialog;
+            if (owner != IntPtr.Zero)
+                ownerWindow = new Win32Window { Handle = owner };
+
+            FirstInit();
+            ResetSettings();
+
+            // showing the dialog
+            if (ownerWindow == null)
+                ShowDialog();
+            else
+                ShowDialog(ownerWindow);
+
+            // mapping result
+            TaskDialogResult result;
+            switch (DialogResult)
+            {
+                case DialogResult.Abort: // Abort is mapped to Close
+                    result = TaskDialogResult.Close;
+                    break;
+                case DialogResult.Ignore: // can happen on forced closing with Custom result
+                    result = TaskDialogResult.Custom;
+                    break;
+                default:
+                    result = (TaskDialogResult)DialogResult;
+                    break;
+            }
+
+            selectedButtonIndex = selectedCustomButtonIndex;
+            if (selectedButtonIndex >= 0)
+                result = TaskDialogResult.Custom;
+
+            selectedRadioButtonIndex = -1;
+            TaskDialogRadioButton? selectedRadioButton = host.RadioButtons.FirstOrDefault(rb => rb.Checked);
+            if (selectedRadioButton != null)
+                selectedRadioButtonIndex = selectedRadioButton.Id;
+
+            checkBoxChecked = chbCheckBox.Checked;
+            return result;
+        }
+
+        void ITaskDialog.PropertyChanged(string propName)
+        {
+            if (dialogState == TaskDialogStatus.Initializing || dialogState == TaskDialogStatus.Closed)
+            {
+                throw new InvalidOperationException("Changing property in invalid state.");
+            }
+
+            Configuration cfg;
+            PointF scale = this.GetScale();
+            switch (propName)
+            {
+                case TaskDialog.PropertyMessage:
+                    UpdateText(lblMessage, host.Message, true, false);
+                    return;
+
+                case TaskDialog.PropertyMainInstruction:
+                    UpdateText(lblMainInstruction, host.MainInstruction, true, false);
+                    return;
+
+                case TaskDialog.PropertyFooterText:
+                    UpdateText(lblFooter, host.FooterText, true, false);
+                    return;
+
+                case TaskDialog.PropertyDetailsText:
+                    UpdateText(isDetailsInFooter ? lblDetailsFooter : lblDetailsMain, host.DetailsText, true, false);
+                    return;
+
+                case TaskDialog.PropertyCaption:
+                    ResetCaption();
+                    return;
+
+                case TaskDialog.PropertyCheckBoxText:
+                    UpdateText(chbCheckBox, host.CheckBoxText, true, false);
+                    return;
+
+                case TaskDialog.PropertyShowDetailsText:
+                case TaskDialog.PropertyHideDetailsText:
+                    if (((btnShowHideDetails.IsExpanded && propName == TaskDialog.PropertyHideDetailsText)
+                        || (!btnShowHideDetails.IsExpanded && propName == TaskDialog.PropertyShowDetailsText))
+                        && (!String.IsNullOrEmpty(host.ShowDetailsText) && !String.IsNullOrEmpty(host.HideDetailsText)))
+                    {
+                        UpdateText(btnShowHideDetails, propName == TaskDialog.PropertyShowDetailsText ? host.ShowDetailsText : host.HideDetailsText, false, false);
+                    }
+                    else
+                    {
+                        ResetShowHideDetailsText();
+                        ResetHeights(GetConfiguration());
+                    }
+                    return;
+
+                case TaskDialog.PropertyStandardButtons:
+                    cfg = GetConfiguration();
+                    SuspendLayout();
+                    try
+                    {
+                        // updating visibilities if the buttons panel will just appear/disappear
+                        if (!pnlButtons.Visible ||
+                            host.StandardButtons == TaskDialogStandardButtonFlags.None && !cfg.HasButtons)
+                        {
+                            ResetVisibilities(cfg);
+                        }
+
+                        ResetButtons(cfg, scale);
+                    }
+                    finally
+                    {
+                        ResumeLayout();
+                    }
+
+                    ResetDefaultButton(cfg);
+                    if (host.Width == 0)
+                    {
+                        ResetWidths(cfg, scale);
+                    }
+
+                    ResetHeights(cfg);
+                    return;
+
+                case TaskDialog.PropertyDefaultStandardButton:
+                    ResetDefaultButton(GetConfiguration());
+                    return;
+
+                case TaskDialog.PropertyWidth:
+                    ResetWidths(cfg = GetConfiguration(), scale);
+                    ResetHeights(cfg);
+                    return;
+
+                case TaskDialog.PropertyOptions:
+                    ResetSettings();
+                    return;
+
+                case TaskDialog.PropertyCheckBoxChecked:
+                    isCheckboxChecking = true;
+                    try
+                    {
+                        chbCheckBox.Checked = host.CheckBoxChecked;
+                    }
+                    finally
+                    {
+                        isCheckboxChecking = false;
+                    }
+                    return;
+
+                case TaskDialog.PropertyIcon:
+                case TaskDialog.PropertyCustomIcon:
+                    ResetMainIcon(this.GetScale());
+                    return;
+
+                case TaskDialog.PropertyFooterIcon:
+                case TaskDialog.PropertyCustomFooterIcon:
+                    ResetFooterIcon(this.GetScale());
+                    return;
+
+                case TaskDialog.PropertyProgressBarStyle:
+                    if (host.ProgressBarStyle == TaskDialogProgressBarStyle.None || !pbProgress.Visible)
+                    {
+                        // turning off progress bar
+                        if (host.ProgressBarStyle == TaskDialogProgressBarStyle.None)
+                        {
+                            pnlProgressBar.Visible = false;
+                        }
+                        // turning on progress bar
+                        else
+                        {
+                            // preventing flickering scrollbar is possible
+                            Height += pnlProgressBar.Height;
+                            pnlProgressBar.Visible = true;
+                        }
+
+                        ResetHeights(GetConfiguration());
+                    }
+
+                    if (host.ProgressBarStyle != TaskDialogProgressBarStyle.None)
+                        pbProgress.IsMarquee = host.ProgressBarStyle == TaskDialogProgressBarStyle.Marquee;
+
+                    return;
+
+                case TaskDialog.PropertyProgressBarState:
+                    pbProgress.State = host.ProgressBarState;
+                    return;
+
+                case TaskDialog.PropertyProgressBarMinimum:
+                    pbProgress.Minimum = host.ProgressBarMinimum;
+                    return;
+
+                case TaskDialog.PropertyProgressBarMaximum:
+                    pbProgress.Maximum = host.ProgressBarMaximum;
+                    return;
+
+                case TaskDialog.PropertyProgressBarValue:
+                    pbProgress.Value = host.ProgressBarValue;
+                    return;
+
+                case TaskDialog.PropertyProgressBarMarqueeAnimationSpeed:
+                    pbProgress.MarqueeAnimationSpeed = host.ProgressBarMarqueeAnimationSpeed;
+                    return;
+
+                default:
+                    throw new NotSupportedException("Not supported property: " + propName);
+            }
+        }
+
+        void ITaskDialog.ControlPropertyChanged(TaskDialogControl taskDialogControl, string propName)
+        {
+            if (taskDialogControl is TaskDialogButton button)
+            {
+                Control control = GetControl(button);
+                switch (propName)
+                {
+                    case TaskDialogButtonBase.PropertyText:
+                        UpdateText(control, button.Text, false, false);
+                        return;
+
+                    case TaskDialogButtonBase.PropertyDescription:
+                        if (control is CommandLinkButton)
+                            UpdateText(control, button.Description, false, true);
+                        else
+                            BaseToolTip.SetToolTip(control, button.Description);
+                        return;
+
+                    case TaskDialogButtonBase.PropertyEnabled:
+                        control.Enabled = button.Enabled;
+                        return;
+
+                    case TaskDialogButton.PropertyIsDefault:
+                        ResetDefaultButton(GetConfiguration());
+                        return;
+
+                    case TaskDialogButton.PropertyIsElevated:
+                    case TaskDialogButton.PropertyCustomIcon:
+                        UpdateButtonIcon(control, button);
+                        return;
+
+                    default:
+                        throw new NotSupportedException("Not supported button property: " + propName);
+                }
+            }
+
+            if (taskDialogControl is TaskDialogRadioButton radioButton)
+            {
+                Debug.Assert(pnlRadioButtons.Controls.Count > radioButton.Id);
+                Control control = GetControl(radioButton);
+                switch (propName)
+                {
+                    case TaskDialogButtonBase.PropertyText:
+                        UpdateText(control, radioButton.Text, false, false);
+                        return;
+
+                    case TaskDialogButtonBase.PropertyDescription:
+                        BaseToolTip.SetToolTip(control, radioButton.Description);
+                        return;
+
+                    case TaskDialogButtonBase.PropertyEnabled:
+                        control.Enabled = radioButton.Enabled;
+                        return;
+
+                    case TaskDialogRadioButton.PropertyChecked:
+                        // if invoked from Checked event handler, exiting, because TaskDialogRadioButton is set there
+                        if (isRadioButtonChecking)
+                            return;
+
+                        // index 0. is at bottom, so indexing backwards
+                        ((RadioButton)pnlRadioButtons.Controls[host.RadioButtons.Count - radioButton.Id - 1]).Checked = radioButton.Checked;
+                        return;
+
+                    default:
+                        throw new NotSupportedException("Not supported radio button property: " + propName);
+                }
+            }
+
+            throw new InvalidOperationException("Invalid control type");
+        }
+
+        void ITaskDialog.CustomButtonsChanged(TaskDialogControlCollectionChangeTypes changeType, int index)
+        {
+            Configuration cfg = GetConfiguration();
+            bool buttonsChanged = (host.Options & (TaskDialogOptions.UseCommandLinks | TaskDialogOptions.UseCommandLinksNoIcon)) == 0;
+            PointF scale = this.GetScale();
+            SuspendLayout();
+            try
+            {
+                // updating visibilities if the buttons panel will just appear/disappear
+                if (!pnlCommandLinks.Visible && cfg.HasCommandLinks || // command link appears
+                    pnlCommandLinks.HasChildren && !cfg.HasCommandLinks || // command link disappears
+                    !pnlButtons.Visible && cfg.HasButtons || // buttons appear
+                    pnlButtons.HasChildren && !cfg.HasButtons) // buttons disappear
+                {
+                    ResetVisibilities(cfg);
+                }
+
+                if (buttonsChanged)
+                    ResetButtons(cfg, scale);
+                else
+                    ResetCommandLinks(cfg);
+            }
+            finally
+            {
+                ResumeLayout();
+            }
+
+            ResetDefaultButton(cfg);
+            if (host.Width == 0 || buttonsChanged)
+            {
+                ResetWidths(cfg, scale);
+            }
+
+            ResetHeights(cfg);
+        }
+
+        void ITaskDialog.RadioButtonsChanged(TaskDialogControlCollectionChangeTypes changeType, int index)
+        {
+            Configuration cfg = GetConfiguration();
+            SuspendLayout();
+            try
+            {
+                // updating visibilities if the radio buttons panel will just appear/disappear
+                if (!pnlRadioButtons.Visible && cfg.HasRadioButtons ||
+                    pnlRadioButtons.HasChildren && !cfg.HasRadioButtons)
+                {
+                    ResetVisibilities(cfg);
+                }
+
+                ResetRadioButtons(cfg);
+            }
+            finally
+            {
+                ResumeLayout();
+            }
+
+            ResetHeights(cfg);
+        }
+
+        void ITaskDialog.TimerChanged(bool enabled) => timer.Enabled = enabled;
+
         #endregion
 
         #region Event Handlers
@@ -1922,7 +2409,7 @@ namespace KGySoft.WinForms.Forms
             if (dialogState == TaskDialogStatus.Initializing || isCheckboxChecking)
                 return;
 
-            host.OnCheckBoxCheckedChanged(cbCheckBox.Checked);
+            host.OnCheckBoxCheckedChanged(chbCheckBox.Checked);
         }
 
         private void timer_Tick(object? sender, EventArgs e)
@@ -1953,368 +2440,6 @@ namespace KGySoft.WinForms.Forms
         #endregion
 
         #endregion
-
-        #endregion
-
-        #region ITaskDialog Members
-
-        TaskDialogStatus ITaskDialog.ShowState => dialogState;
-
-        void ITaskDialog.Close(TaskDialogResult result)
-        {
-            switch (result)
-            {
-                case TaskDialogResult.Close:
-                    DialogResult = DialogResult.Abort;
-                    break;
-                case TaskDialogResult.Custom:
-                    DialogResult = DialogResult.Ignore;
-                    break;
-                default:
-                    DialogResult = (DialogResult)result;
-                    break;
-            }
-        }
-
-        TaskDialogResult ITaskDialog.Execute(TaskDialog taskDialog, IntPtr owner, out int selectedButtonIndex, out int selectedRadioButtonIndex, out bool checkBoxChecked)
-        {
-            host = taskDialog;
-            if (owner != IntPtr.Zero)
-                ownerWindow = new Win32Window { Handle = owner };
-
-            FirstInit();
-            ResetSettings();
-
-            // showing the dialog
-            if (ownerWindow == null)
-                ShowDialog();
-            else
-                ShowDialog(ownerWindow);
-
-            // mapping result
-            TaskDialogResult result;
-            switch (DialogResult)
-            {
-                case DialogResult.Abort: // Abort is mapped to Close
-                    result = TaskDialogResult.Close;
-                    break;
-                case DialogResult.Ignore: // can happen on forced closing with Custom result
-                    result = TaskDialogResult.Custom;
-                    break;
-                default:
-                    result = (TaskDialogResult)DialogResult;
-                    break;
-            }
-
-            selectedButtonIndex = selectedCustomButtonIndex;
-            if (selectedButtonIndex >= 0)
-                result = TaskDialogResult.Custom;
-
-            selectedRadioButtonIndex = -1;
-            TaskDialogRadioButton? selectedRadioButton = host.RadioButtons.FirstOrDefault(rb => rb.Checked);
-            if (selectedRadioButton != null)
-                selectedRadioButtonIndex = selectedRadioButton.Id;
-
-            checkBoxChecked = cbCheckBox.Checked;
-            return result;
-        }
-
-        void ITaskDialog.PropertyChanged(string propName)
-        {
-            if (dialogState == TaskDialogStatus.Initializing || dialogState == TaskDialogStatus.Closed)
-            {
-                throw new InvalidOperationException("Changing property in invalid state.");
-            }
-
-            Configuration cfg;
-            PointF scale = this.GetScale();
-            switch (propName)
-            {
-                case TaskDialog.PropertyMessage:
-                    UpdateText(lblMessage, host.Message, true, false);
-                    return;
-
-                case TaskDialog.PropertyMainInstruction:
-                    UpdateText(lblMainInstruction, host.MainInstruction, true, false);
-                    return;
-
-                case TaskDialog.PropertyFooterText:
-                    UpdateText(lblFooter, host.FooterText, true, false);
-                    return;
-
-                case TaskDialog.PropertyDetailsText:
-                    UpdateText(isDetailsInFooter ? lblDetailsFooter : lblDetailsMain, host.DetailsText, true, false);
-                    return;
-
-                case TaskDialog.PropertyCaption:
-                    ResetCaption();
-                    return;
-
-                case TaskDialog.PropertyCheckBoxText:
-                    UpdateText(cbCheckBox, host.CheckBoxText, true, false);
-                    return;
-
-                case TaskDialog.PropertyShowDetailsText:
-                case TaskDialog.PropertyHideDetailsText:
-                    if (((btnShowHideDetails.IsExpanded && propName == TaskDialog.PropertyHideDetailsText)
-                        || (!btnShowHideDetails.IsExpanded && propName == TaskDialog.PropertyShowDetailsText))
-                        && (!String.IsNullOrEmpty(host.ShowDetailsText) && !String.IsNullOrEmpty(host.HideDetailsText)))
-                    {
-                        UpdateText(btnShowHideDetails, propName == TaskDialog.PropertyShowDetailsText ? host.ShowDetailsText : host.HideDetailsText, false, false);
-                    }
-                    else
-                    {
-                        ResetShowHideDetailsText();
-                        ResetHeights(GetConfiguration());
-                    }
-                    return;
-
-                case TaskDialog.PropertyStandardButtons:
-                    cfg = GetConfiguration();
-                    SuspendLayout();
-                    try
-                    {
-                        // updating visibilities if the buttons panel will just appear/disappear
-                        if (!pnlButtons.Visible ||
-                            host.StandardButtons == TaskDialogStandardButtonFlags.None && !cfg.HasButtons)
-                        {
-                            ResetVisibilities(cfg);
-                        }
-
-                        ResetButtons(cfg, scale);
-                    }
-                    finally
-                    {
-                        ResumeLayout();
-                    }
-
-                    ResetDefaultButton(cfg);
-                    if (host.Width == 0)
-                    {
-                        ResetWidths(cfg, scale);
-                    }
-
-                    ResetHeights(cfg);
-                    return;
-
-                case TaskDialog.PropertyDefaultStandardButton:
-                    ResetDefaultButton(GetConfiguration());
-                    return;
-
-                case TaskDialog.PropertyWidth:
-                    ResetWidths(cfg = GetConfiguration(), scale);
-                    ResetHeights(cfg);
-                    return;
-
-                case TaskDialog.PropertyOptions:
-                    ResetSettings();
-                    return;
-
-                case TaskDialog.PropertyCheckBoxChecked:
-                    isCheckboxChecking = true;
-                    try
-                    {
-                        cbCheckBox.Checked = host.CheckBoxChecked;
-                    }
-                    finally
-                    {
-                        isCheckboxChecking = false;
-                    }
-                    return;
-
-                case TaskDialog.PropertyIcon:
-                case TaskDialog.PropertyCustomIcon:
-                    ResetMainIcon(this.GetScale());
-                    return;
-
-                case TaskDialog.PropertyFooterIcon:
-                case TaskDialog.PropertyCustomFooterIcon:
-                    ResetFooterIcon(this.GetScale());
-                    return;
-
-                case TaskDialog.PropertyProgressBarStyle:
-                    if (host.ProgressBarStyle == TaskDialogProgressBarStyle.None || !pbProgress.Visible)
-                    {
-                        // turning off progress bar
-                        if (host.ProgressBarStyle == TaskDialogProgressBarStyle.None)
-                        {
-                            pnlProgressBar.Visible = false;
-                        }
-                        // turning on progress bar
-                        else
-                        {
-                            // preventing flickering scrollbar is possible
-                            Height += pnlProgressBar.Height;
-                            pnlProgressBar.Visible = true;
-                        }
-
-                        ResetHeights(GetConfiguration());
-                    }
-
-                    if (host.ProgressBarStyle != TaskDialogProgressBarStyle.None)
-                        pbProgress.IsMarquee = host.ProgressBarStyle == TaskDialogProgressBarStyle.Marquee;
-
-                    return;
-
-                case TaskDialog.PropertyProgressBarState:
-                    pbProgress.State = host.ProgressBarState;
-                    return;
-
-                case TaskDialog.PropertyProgressBarMinimum:
-                    pbProgress.Minimum = host.ProgressBarMinimum;
-                    return;
-
-                case TaskDialog.PropertyProgressBarMaximum:
-                    pbProgress.Maximum = host.ProgressBarMaximum;
-                    return;
-
-                case TaskDialog.PropertyProgressBarValue:
-                    pbProgress.Value = host.ProgressBarValue;
-                    return;
-
-                case TaskDialog.PropertyProgressBarMarqueeAnimationSpeed:
-                    pbProgress.MarqueeAnimationSpeed = host.ProgressBarMarqueeAnimationSpeed;
-                    return;
-
-                default:
-                    throw new NotSupportedException("Not supported property: " + propName);
-            }
-        }
-
-        void ITaskDialog.ControlPropertyChanged(TaskDialogControl taskDialogControl, string propName)
-        {
-            if (taskDialogControl is TaskDialogButton button)
-            {
-                Control control = GetControl(button);
-                switch (propName)
-                {
-                    case TaskDialogButtonBase.PropertyText:
-                        UpdateText(control, button.Text, false, false);
-                        return;
-
-                    case TaskDialogButtonBase.PropertyDescription:
-                        if (control is CommandLinkButton)
-                            UpdateText(control, button.Description, false, true);
-                        else
-                            BaseToolTip.SetToolTip(control, button.Description);
-                        return;
-
-                    case TaskDialogButtonBase.PropertyEnabled:
-                        control.Enabled = button.Enabled;
-                        return;
-
-                    case TaskDialogButton.PropertyIsDefault:
-                        ResetDefaultButton(GetConfiguration());
-                        return;
-
-                    case TaskDialogButton.PropertyIsElevated:
-                    case TaskDialogButton.PropertyCustomIcon:
-                        UpdateButtonIcon(control, button);
-                        return;
-
-                    default:
-                        throw new NotSupportedException("Not supported button property: " + propName);
-                }
-            }
-
-            if (taskDialogControl is TaskDialogRadioButton radioButton)
-            {
-                Debug.Assert(pnlRadioButtons.Controls.Count > radioButton.Id);
-                Control control = GetControl(radioButton);
-                switch (propName)
-                {
-                    case TaskDialogButtonBase.PropertyText:
-                        UpdateText(control, radioButton.Text, false, false);
-                        return;
-
-                    case TaskDialogButtonBase.PropertyDescription:
-                        BaseToolTip.SetToolTip(control, radioButton.Description);
-                        return;
-
-                    case TaskDialogButtonBase.PropertyEnabled:
-                        control.Enabled = radioButton.Enabled;
-                        return;
-
-                    case TaskDialogRadioButton.PropertyChecked:
-                        // if invoked from Checked event handler, exiting, because TaskDialogRadioButton is set there
-                        if (isRadioButtonChecking)
-                            return;
-
-                        // index 0. is at bottom, so indexing backwards
-                        ((RadioButton)pnlRadioButtons.Controls[host.RadioButtons.Count - radioButton.Id - 1]).Checked = radioButton.Checked;
-                        return;
-
-                    default:
-                        throw new NotSupportedException("Not supported radio button property: " + propName);
-                }
-            }
-
-            throw new InvalidOperationException("Invalid control type");
-        }
-
-        void ITaskDialog.CustomButtonsChanged(TaskDialogControlCollectionChangeTypes changeType, int index)
-        {
-            Configuration cfg = GetConfiguration();
-            bool buttonsChanged = (host.Options & (TaskDialogOptions.UseCommandLinks | TaskDialogOptions.UseCommandLinksNoIcon)) == 0;
-            PointF scale = this.GetScale();
-            SuspendLayout();
-            try
-            {
-                // updating visibilities if the buttons panel will just appear/disappear
-                if (!pnlCommandLinks.Visible && cfg.HasCommandLinks || // command link appears
-                    pnlCommandLinks.HasChildren && !cfg.HasCommandLinks || // command link disappears
-                    !pnlButtons.Visible && cfg.HasButtons || // buttons appear
-                    pnlButtons.HasChildren && !cfg.HasButtons) // buttons disappear
-                {
-                    ResetVisibilities(cfg);
-                }
-
-                if (buttonsChanged)
-                    ResetButtons(cfg, scale);
-                else
-                    ResetCommandLinks(cfg);
-            }
-            finally
-            {
-                ResumeLayout();
-            }
-
-            ResetDefaultButton(cfg);
-            if (host.Width == 0 || buttonsChanged)
-            {
-                ResetWidths(cfg, scale);
-            }
-
-            ResetHeights(cfg);
-        }
-
-        void ITaskDialog.RadioButtonsChanged(TaskDialogControlCollectionChangeTypes changeType, int index)
-        {
-            Configuration cfg = GetConfiguration();
-            SuspendLayout();
-            try
-            {
-                // updating visibilities if the radio buttons panel will just appear/disappear
-                if (!pnlRadioButtons.Visible && cfg.HasRadioButtons ||
-                    pnlRadioButtons.HasChildren && !cfg.HasRadioButtons)
-                {
-                    ResetVisibilities(cfg);
-                }
-
-                ResetRadioButtons(cfg);
-            }
-            finally
-            {
-                ResumeLayout();
-            }
-
-            ResetHeights(cfg);
-        }
-
-        void ITaskDialog.TimerChanged(bool enabled)
-        {
-            timer.Enabled = enabled;
-        }
 
         #endregion
     }

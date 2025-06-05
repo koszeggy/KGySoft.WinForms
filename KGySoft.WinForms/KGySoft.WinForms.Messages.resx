@@ -98,6 +98,75 @@
 	<resheader name="writer">
 		<value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.3500.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
 	</resheader>
+  <data name="TaskDialog_ShowDetails" xml:space="preserve">
+    <value>See &amp;details</value>
+  </data>
+  <data name="TaskDialog_HideDetails" xml:space="preserve">
+    <value>Hide &amp;details</value>
+  </data>
+  <data name="TaskDialog_Caption" xml:space="preserve">
+    <value>[Window Title]</value>
+  </data>
+  <data name="TaskDialog_MainInstruction" xml:space="preserve">
+    <value>[Main Instruction]</value>
+  </data>
+  <data name="TaskDialog_Message" xml:space="preserve">
+    <value>[Content]</value>
+  </data>
+  <data name="TaskDialog_Details" xml:space="preserve">
+    <value>[Expanded Information]</value>
+  </data>
+  <data name="TaskDialog_Footer" xml:space="preserve">
+    <value>[Footer]</value>
+  </data>
+  <data name="TaskDialog_RadioButtonCheckedFormat" xml:space="preserve">
+    <value>(O) {0}</value>
+  </data>
+  <data name="TaskDialog_RadioButtonUncheckedFormat" xml:space="preserve">
+    <value>( ) {0}</value>
+  </data>
+    <data name="TaskDialog_ButtonFormat" xml:space="preserve">
+    <value>[{0}]</value>
+  </data>
+  <data name="TaskDialog_ButtonElevatedFormat" xml:space="preserve">
+    <value>[U {0}]</value>
+  </data>
+  <data name="TaskDialog_ButtonCommandLinkFormat" xml:space="preserve">
+    <value>[-> {0}]</value>
+  </data>
+  <data name="TaskDialog_ButtonCustomIconFormat" xml:space="preserve">
+    <value>[# {0}]</value>
+  </data>
+  <data name="TaskDialog_ExpandoButtonExpandedFormat" xml:space="preserve">
+    <value>[^] {0}</value>
+  </data>
+  <data name="TaskDialog_ExpandoButtonCollapsedFormat" xml:space="preserve">
+    <value>[V] {0}</value>
+  </data>
+  <data name="TaskDialog_CheckBoxCheckedFormat" xml:space="preserve">
+    <value>[X] {0}</value>
+  </data>
+  <data name="TaskDialog_CheckBoxUncheckedFormat" xml:space="preserve">
+    <value>[ ] {0}</value>
+  </data>
+  <data name="TaskDialogStandardButtonFlags.OK" xml:space="preserve">
+    <value>&amp;OK</value>
+  </data>
+  <data name="TaskDialogStandardButtonFlags.Yes" xml:space="preserve">
+    <value>&amp;Yes</value>
+  </data>
+  <data name="TaskDialogStandardButtonFlags.No" xml:space="preserve">
+    <value>&amp;No</value>
+  </data>
+  <data name="TaskDialogStandardButtonFlags.Cancel" xml:space="preserve">
+    <value>&amp;Cancel</value>
+  </data>
+  <data name="TaskDialogStandardButtonFlags.Retry" xml:space="preserve">
+    <value>&amp;Retry</value>
+  </data>
+  <data name="TaskDialogStandardButtonFlags.Close" xml:space="preserve">
+    <value>&amp;Close</value>
+  </data>
   <data name="VisualStyles_NoVisualStyles" xml:space="preserve">
     <value>Visual styles are not available.</value>
   </data>

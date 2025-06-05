@@ -36,7 +36,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlButtons = new System.Windows.Forms.FlowLayoutPanel();
             this.pnlChecks = new System.Windows.Forms.TableLayoutPanel();
             this.btnShowHideDetails = new KGySoft.WinForms.Forms.TaskDialogForm.ExpandoButton();
-            this.cbCheckBox = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.chbCheckBox = new KGySoft.WinForms.Controls.AdvancedCheckBox();
             this.pnlDividerMainBottom = new System.Windows.Forms.Panel();
             this.pnlDividerControlsBottom = new System.Windows.Forms.Panel();
             this.pnlDividerFooterTop = new System.Windows.Forms.Panel();
@@ -243,7 +243,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlChecks.ColumnCount = 1;
             this.pnlChecks.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle(System.Windows.Forms.SizeType.Percent, 100F));
             this.pnlChecks.Controls.Add(this.btnShowHideDetails, 0, 0);
-            this.pnlChecks.Controls.Add(this.cbCheckBox, 0, 1);
+            this.pnlChecks.Controls.Add(this.chbCheckBox, 0, 1);
             this.pnlChecks.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlChecks.Location = new System.Drawing.Point(3, 3);
             this.pnlChecks.Name = "pnlChecks";
@@ -269,15 +269,15 @@ namespace KGySoft.WinForms.Forms
             // 
             // cbCheckBox
             // 
-            this.cbCheckBox.AutoSize = true;
-            this.cbCheckBox.Dock = System.Windows.Forms.DockStyle.Top;
-            this.cbCheckBox.Location = new System.Drawing.Point(8, 33);
-            this.cbCheckBox.Margin = new System.Windows.Forms.Padding(8, 3, 3, 3);
-            this.cbCheckBox.Name = "cbCheckBox";
-            this.cbCheckBox.Size = new System.Drawing.Size(163, 17);
-            this.cbCheckBox.TabIndex = 1;
-            this.cbCheckBox.Text = "cbCheckBox";
-            this.cbCheckBox.UseVisualStyleBackColor = true;
+            this.chbCheckBox.AutoSize = true;
+            this.chbCheckBox.Dock = System.Windows.Forms.DockStyle.Top;
+            this.chbCheckBox.Location = new System.Drawing.Point(8, 33);
+            this.chbCheckBox.Margin = new System.Windows.Forms.Padding(8, 3, 3, 3);
+            this.chbCheckBox.Name = "chbCheckBox";
+            this.chbCheckBox.Size = new System.Drawing.Size(163, 17);
+            this.chbCheckBox.TabIndex = 1;
+            this.chbCheckBox.Text = "chbCheckBox";
+            this.chbCheckBox.UseVisualStyleBackColor = true;
             // 
             // pnlDividerMainBottom
             // 
@@ -446,7 +446,7 @@ namespace KGySoft.WinForms.Forms
         private System.Windows.Forms.Panel pnlDividerMainBottom;
         private System.Windows.Forms.TableLayoutPanel pnlChecks;
         private ExpandoButton btnShowHideDetails;
-        private AdvancedCheckBox cbCheckBox;
+        private AdvancedCheckBox chbCheckBox;
         private System.Windows.Forms.Panel pnlDividerControlsBottom;
         private System.Windows.Forms.Panel pnlDividerFooterTop;
         private System.Windows.Forms.TableLayoutPanel pnlFooter;

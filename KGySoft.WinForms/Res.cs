@@ -18,7 +18,7 @@
 
 using System;
 using System.Globalization;
-
+using KGySoft.CoreLibraries;
 using KGySoft.Resources;
 
 #endregion
@@ -49,6 +49,31 @@ namespace KGySoft.WinForms
 
         #region Properties
 
+        #region TaskDialog
+
+        /// <summary>See &amp;details</summary>
+        internal static string TaskDialogShowDetails => Get("TaskDialog_ShowDetails");
+
+        /// <summary>Hide &amp;details</summary>
+        internal static string TaskDialogHideDetails => Get("TaskDialog_HideDetails");
+
+        /// <summary>[Window Title]</summary>
+        internal static string TaskDialogCaption => Get("TaskDialog_Caption");
+
+        /// <summary>[Main Instruction]</summary>
+        internal static string TaskDialogMainInstruction => Get("TaskDialog_MainInstruction");
+
+        /// <summary>[Content]</summary>
+        internal static string TaskDialogMessage => Get("TaskDialog_Message");
+
+        /// <summary>[Expanded Information]</summary>
+        internal static string TaskDialogDetails => Get("TaskDialog_Details");
+
+        /// <summary>[Footer]</summary>
+        internal static string TaskDialogFooter => Get("TaskDialog_Footer");
+
+        #endregion
+
         #region Visual Styles
 
         /// <summary>Visual styles are not available.</summary>
@@ -61,6 +86,12 @@ namespace KGySoft.WinForms
         #region Methods
 
         #region Internal Methods
+
+        #region General
+
+        internal static string Get<TEnum>(TEnum value) where TEnum : struct, Enum => Get($"{value.GetType().Name}.{Enum<TEnum>.ToString(value)}");
+
+        #endregion
 
         #region Accessors
 
@@ -78,6 +109,40 @@ namespace KGySoft.WinForms
 
         /// <summary>Method "{0}" was not found on type "{1}".</summary>
         internal static string AccessorsMethodDoesNotExist(string? methodName, Type type) => Get("Accessors_InstanceDoesNotExistFormat", methodName, type);
+
+        #endregion
+
+        #region TaskDialog
+
+        /// <summary>(O) {0}</summary>
+        internal static string TaskDialogRadioButtonChecked(string? text) => Get("TaskDialog_RadioButtonCheckedFormat", text);
+
+        /// <summary>( ) {0}</summary>
+        internal static string TaskDialogRadioButtonUnchecked(string? text) => Get("TaskDialog_RadioButtonUncheckedFormat", text);
+
+        /// <summary>[{0}]</summary>
+        internal static string TaskDialogButton(string? text) => Get("TaskDialog_ButtonFormat", text);
+
+        /// <summary>[U {0}]</summary>
+        internal static string TaskDialogButtonElevated(string? text) => Get("TaskDialog_ButtonElevatedFormat", text);
+
+        /// <summary>[-> {0}]</summary>
+        internal static string TaskDialogButtonCommandLink(string? text) => Get("TaskDialog_ButtonCommandLinkFormat", text);
+
+        /// <summary>[# {0}]</summary>
+        internal static string TaskDialogButtonCustomIcon(string? text) => Get("TaskDialog_ButtonCustomIconFormat", text);
+
+        /// <summary>[^] {0}</summary>
+        internal static string TaskDialogExpandoButtonExpanded(string? text) => Get("TaskDialog_ExpandoButtonExpandedFormat", text);
+
+        /// <summary>[V] {0}</summary>
+        internal static string TaskDialogExpandoButtonCollapsed(string? text) => Get("TaskDialog_ExpandoButtonCollapsedFormat", text);
+
+        /// <summary>[X] {0}</summary>
+        internal static string TaskDialogCheckBoxChecked(string? text) => Get("TaskDialog_CheckBoxCheckedFormat", text);
+
+        /// <summary>[ ] {0}</summary>
+        internal static string TaskDialogCheckBoxUnchecked(string? text) => Get("TaskDialog_CheckBoxUncheckedFormat", text);
 
         #endregion
 
