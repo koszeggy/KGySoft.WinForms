@@ -11,7 +11,7 @@
 
 + Assembly changes:
 ===================
-+ Targeting also .NET 7.0.
++ Targeting also .NET 5.0 and 7.0.
 
 ! KGySoft.Libraries.Language namespace
 ======================================
@@ -31,6 +31,7 @@
 ! DataGridViewTextAndImageCell class: Removed, it was already obsolete.
 + New ScaleHelper class
 + New WinFormsModule class
++ New EventHandlerExtensions class
 
 + KGySoft.ComponentModel namespace:
 ===================================
