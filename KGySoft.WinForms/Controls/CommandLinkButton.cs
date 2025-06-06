@@ -207,7 +207,7 @@ namespace KGySoft.WinForms.Controls
         /// That is on Windows Vista or later, when Application.EnableVisualStyles() was called.
         /// NOTE: it does not mean that visual styles are actually used (use <see cref="IsNativeVisualStylesRenderingAvailable"/> to check that).
         /// </summary>
-        private static bool IsNativelySupported => WindowsUtils.IsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles;
+        private static bool IsNativelySupported => OSUtils.IsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles;
 
         private static Font DefaultNonThemedTextFont => defaultNonThemedTextFont ??= new Font(ScaleHelper.DialogFont, FontStyle.Bold);
         private static bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && VisualStyleHelper.RenderWithVisualStyles;
@@ -1671,7 +1671,7 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckDefaultAnimation()
         {
-            if (!WindowsUtils.IsVistaOrLater || !VisualStyleHelper.RenderWithVisualStyles
+            if (!OSUtils.IsVistaOrLater || !VisualStyleHelper.RenderWithVisualStyles
                 || !VisualStyleHelper.HasDefaultAnimation((int)BUTTONPARTS.BP_COMMANDLINK, (int)COMMANDLINKSTATES.CMDLS_DEFAULTED, (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING))
             {
                 return;
@@ -1765,7 +1765,7 @@ namespace KGySoft.WinForms.Controls
                 e.Graphics.FillRectangle(state.BackColor.GetBrush(), new Rectangle(clientRectangle.X - 1, clientRectangle.Y - 1, clientRectangle.Width + 1, clientRectangle.Height + 1));
 
             // Native rendering
-            if (WindowsUtils.IsVistaOrLater)
+            if (OSUtils.IsVistaOrLater)
                 VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, e.Graphics, state.SystemPartId, state.SystemStateId, clientRectangle);
             else
             {
@@ -1934,7 +1934,7 @@ namespace KGySoft.WinForms.Controls
         private void DrawFocusRectangle(PaintStateEventArgs e)
         {
             var state = e.State;
-            int width = WindowsUtils.IsWindows10OrLater || this.GetScale().X >= 1.5f ? 2 : 1;
+            int width = OSUtils.IsWindows10OrLater || this.GetScale().X >= 1.5f ? 2 : 1;
             width = Math.Min(HorizontalBasePadding, this.ScaleWidth(width));
             Rectangle rect = ClientRectangle;
             rect.Inflate(-3, -3);
@@ -1953,7 +1953,7 @@ namespace KGySoft.WinForms.Controls
             // default glyph when visual styles are available
             if (IsNativeVisualStylesRenderingAvailable && !isElevated && image == null && useDefaultGlyph)
             {
-                bool isSimpleArrow = WindowsUtils.IsWindows10OrLater;
+                bool isSimpleArrow = OSUtils.IsWindows10OrLater;
                 bool isRightToLeft = RightToLeft == RightToLeft.Yes;
                 bool isNonNativeSize = bounds.Size != VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, true);
                 bool isCustomDrawnArrow = isSimpleArrow

@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: WindowsUtils.cs
+//  File: OSUtils.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -25,20 +25,27 @@ using Microsoft.Win32;
 
 namespace KGySoft.WinForms.WinApi
 {
-    internal static class WindowsUtils
+    internal static class OSUtils
     {
         #region Fields
 
         private static bool? isXpOrLater;
         private static bool? isVistaOrLater;
         private static bool? isWin10OrLater;
-        private static bool? isWin10_1607OrLater;
+        private static bool? isWin10Build1607OrLater;
         private static bool? isWin81OrLater;
+        private static bool? isWindows;
+        private static bool? isLinux;
+        private static bool? isMono;
         private static Version? windowsVersion;
 
         #endregion
 
         #region Properties
+
+        internal static bool IsWindows => isWindows ??= Environment.OSVersion.Platform is PlatformID.Win32NT or PlatformID.Win32Windows;
+        internal static bool IsLinux => isLinux ??= Environment.OSVersion.Platform is PlatformID.Unix or (PlatformID)128;
+        internal static bool IsMono => isMono ??= Type.GetType("Mono.Runtime") != null;
 
         internal static bool IsWindowsXpOrLater
             => isXpOrLater ??= GetWindowsVersion() is Version version && version >= new Version(5, 1, 2600);
@@ -55,8 +62,8 @@ namespace KGySoft.WinForms.WinApi
         /// <summary>
         ///  Windows 10 Anniversary Update or later. (Redstone 1, build 14393, version 1607)
         /// </summary>
-        internal static bool IsWindows10_1607OrLater
-            => isWin10_1607OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 14393);
+        internal static bool IsWindows10Build1607OrLater
+            => isWin10Build1607OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 14393);
 
         #endregion
 

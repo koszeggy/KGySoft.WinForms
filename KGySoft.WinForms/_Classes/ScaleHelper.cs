@@ -136,7 +136,7 @@ namespace KGySoft.WinForms
 
         #region Fields
 
-        private static readonly bool isProcessPerMonitorAware = WindowsUtils.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
+        private static readonly bool isProcessPerMonitorAware = OSUtils.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
         private static readonly Point systemInitialDpi = GetDpiForHdc(User32.GetDC(IntPtr.Zero));
         private static readonly PointF systemScale = new PointF(systemInitialDpi.X / defaultDpi, systemInitialDpi.Y / defaultDpi);
         private static readonly PointF defaultScale = new PointF(1f, 1f);
@@ -162,7 +162,7 @@ namespace KGySoft.WinForms
                 if (!isProcessPerMonitorAware)
                     return false;
 
-                if (!WindowsUtils.IsWindows10_1607OrLater)
+                if (!OSUtils.IsWindows10Build1607OrLater)
                     return true;
 
                 IntPtr dpiAwareness = User32.GetThreadDpiAwarenessContext();
@@ -177,7 +177,7 @@ namespace KGySoft.WinForms
             {
                 if (!isProcessPerMonitorAware)
                     return 0;
-                if (!WindowsUtils.IsWindows10_1607OrLater)
+                if (!OSUtils.IsWindows10Build1607OrLater)
                     return 1;
 
                 IntPtr dpiAwareness = User32.GetThreadDpiAwarenessContext();
@@ -366,7 +366,7 @@ namespace KGySoft.WinForms
             if (IsThreadPerMonitorAware)
             {
                 // Windows 10 1607 or later
-                if (WindowsUtils.IsWindows10_1607OrLater)
+                if (OSUtils.IsWindows10Build1607OrLater)
                 {
                     // NOTE: this always returns a single value, so we assume the same DPI in both dimensions.
                     var dpi = (int)User32.GetDpiForWindow(hwnd);

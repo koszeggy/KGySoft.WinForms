@@ -57,7 +57,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Properties
 
-        internal static bool IsSupported => WindowsUtils.IsVistaOrLater && VisualStyleHelper.RenderWithVisualStyles;
+        internal static bool IsSupported => OSUtils.IsVistaOrLater && VisualStyleHelper.RenderWithVisualStyles;
 
         #endregion
 
@@ -293,7 +293,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected override int GetSpeed(ControlAppearanceState prevState, ControlAppearanceState newState)
         {
-            if (!WindowsUtils.IsVistaOrLater)
+            if (!OSUtils.IsVistaOrLater)
                 return base.GetSpeed(prevState, newState);
 
             // not considering color change because color may change with these events (enabled-disabled)

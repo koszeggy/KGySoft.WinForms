@@ -151,7 +151,7 @@ namespace KGySoft.WinForms
                     return isComCtlV6Available.Value;
 
                 // pre-XP: no visual styles
-                if (!WindowsUtils.IsWindowsXpOrLater)
+                if (!OSUtils.IsWindowsXpOrLater)
                 {
                     isComCtlV6Available = false;
                     return false;

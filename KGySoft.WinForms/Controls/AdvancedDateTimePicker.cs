@@ -113,7 +113,7 @@ namespace KGySoft.WinForms.Controls
                 int dropDownSize = control.ScaleWidth(referenceDropDownWidth);
 
                 // checking if we have enough space for the wider calendar drop down button
-                if (VisualStyleHelper.RenderWithVisualStyles && !control.ShowUpDown && WindowsUtils.IsVistaOrLater)
+                if (VisualStyleHelper.RenderWithVisualStyles && !control.ShowUpDown && OSUtils.IsVistaOrLater)
                 {
                     int textWidth = TextRenderer.MeasureText(g, control.Text, control.Font, Size.Empty, control.GetFormatFlags()).Width;
                     if (textWidth + dropDownSize * 2 <= textRect.Width)
@@ -125,7 +125,7 @@ namespace KGySoft.WinForms.Controls
 
                 if (!control.ShowUpDown)
                 {
-                    bool fullHeight = !VisualStyleHelper.InitializedWithVisualStyles || VisualStyleHelper.RenderWithVisualStyles && WindowsUtils.IsVistaOrLater;
+                    bool fullHeight = !VisualStyleHelper.InitializedWithVisualStyles || VisualStyleHelper.RenderWithVisualStyles && OSUtils.IsVistaOrLater;
 
                     // Strange visual style renderer behavior: in RTL mode it mirrors the X coordinates AND the glyph image.
                     // The image mirroring does not happen for the checkbox rendering though. And ControlPaint does not mirror the X coordinate either.
@@ -741,7 +741,7 @@ namespace KGySoft.WinForms.Controls
                     : isHovered ? DATEPICKERSTATES.DPS_HOT
                     : DATEPICKERSTATES.DPS_NORMAL);
 
-                if (WindowsUtils.IsVistaOrLater)
+                if (OSUtils.IsVistaOrLater)
                     VisualStyleHelper.Render(VisualStyleHelper.DatePickerTheme, this, g, (int)DATEPICKERPARTS.DP_DATEBORDER, state, ClientRectangle);
                 else // Windows XP: there is no DatePicker theme, using the COMBOBOX instead with Part 0 (EDIT 2 could also work but the disabled state has a strange background)
                     VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_COMPATIBLEBACKGROUND, state, ClientRectangle);
@@ -826,7 +826,7 @@ namespace KGySoft.WinForms.Controls
 
                 IntPtr theme = layout.IsCalendarDropDown ? VisualStyleHelper.DatePickerTheme : VisualStyleHelper.ComboBoxTheme;
                 int part = layout.IsCalendarDropDown ? (int)DATEPICKERPARTS.DP_SHOWCALENDARBUTTONRIGHT
-                    : !WindowsUtils.IsVistaOrLater ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTON
+                    : !OSUtils.IsVistaOrLater ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTON
                     : layout.IsRightToLeft ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;
                 VisualStyleHelper.Render(theme, this, g, part, state, layout.DropDownBounds);
             }

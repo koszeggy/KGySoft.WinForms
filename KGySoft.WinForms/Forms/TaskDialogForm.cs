@@ -302,7 +302,7 @@ namespace KGySoft.WinForms.Forms
                 {
                     if (VisualStyleHelper.RenderWithVisualStyles)
                     {
-                        if (WindowsUtils.IsVistaOrLater)
+                        if (OSUtils.IsVistaOrLater)
                         {
                             // ISSUE: the following throws an exception because only FontProperty.GlyphFont is accepted by VisualStyleRenderer.GetFont
                             //var renderer = new VisualStyleRenderer(classTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 0);
@@ -343,7 +343,7 @@ namespace KGySoft.WinForms.Forms
             {
                 if (mainInstructionsColor.IsEmpty)
                 {
-                    var color = WindowsUtils.IsVistaOrLater
+                    var color = OSUtils.IsVistaOrLater
                         ? new VisualStyleRenderer(Constants.ThemeClassTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 1).GetColor(ColorProperty.TextColor)
                         : Color.FromArgb(0, 51, 153);
 
@@ -1301,7 +1301,7 @@ namespace KGySoft.WinForms.Forms
             }
 
             // progress bar
-            if (!WindowsUtils.IsVistaOrLater)
+            if (!OSUtils.IsVistaOrLater)
             {
                 pbProgress.Style = AdvancedProgressBarStyle.ThemedShiny;
             }

@@ -242,7 +242,7 @@ namespace KGySoft.WinForms.Forms
                 Size imageSize;
                 if (VisualStyleHelper.RenderWithVisualStyles)
                 {
-                    if (WindowsUtils.IsVistaOrLater)
+                    if (OSUtils.IsVistaOrLater)
                         PaintNativeButton(g, out imageSize);
                     else
                         PaintThemedButton(g, out imageSize);
@@ -277,7 +277,7 @@ namespace KGySoft.WinForms.Forms
             {
                 if (VisualStyleHelper.RenderWithVisualStyles)
                 {
-                    if (WindowsUtils.IsVistaOrLater)
+                    if (OSUtils.IsVistaOrLater)
                         return VisualStyleHelper.GetPartSize(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)EXPANDOBUTTONSTATES.TDLGEBS_NORMAL, true);
                     return DefaultImageNormalDown.Size;
                 }

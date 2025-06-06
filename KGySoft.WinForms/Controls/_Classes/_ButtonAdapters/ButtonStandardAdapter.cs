@@ -47,7 +47,7 @@ namespace KGySoft.WinForms.Controls
                 return PUSHBUTTONSTATES.PBS_PRESSED;
 
             PUSHBUTTONSTATES result = (PUSHBUTTONSTATES)state.SystemStateId;
-            if (result == PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING && !WindowsUtils.IsVistaOrLater)
+            if (result == PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING && !OSUtils.IsVistaOrLater)
                 result = PUSHBUTTONSTATES.PBS_DEFAULTED;
 
             return result;
@@ -221,7 +221,7 @@ namespace KGySoft.WinForms.Controls
         private LayoutOptions PaintLayout(ControlAppearanceState state, bool up)
         {
             LayoutOptions options = CommonLayout(state);
-            options.ForceDoubleFocusWidth = WindowsUtils.IsWindows10OrLater;
+            options.ForceDoubleFocusWidth = OSUtils.IsWindows10OrLater;
             options.TextOffset = !up;
             options.GrowBorderBy1PxWhenDefault = options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
             return options;
