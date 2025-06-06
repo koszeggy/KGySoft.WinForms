@@ -34,6 +34,7 @@ namespace KGySoft.WinForms.WinApi
         private static bool? isWin10OrLater;
         private static bool? isWin10Build1607OrLater;
         private static bool? isWin81OrLater;
+        private static bool? isWin11OrLater;
         private static bool? isWindows;
         private static bool? isLinux;
         private static bool? isMono;
@@ -64,6 +65,9 @@ namespace KGySoft.WinForms.WinApi
         /// </summary>
         internal static bool IsWindows10Build1607OrLater
             => isWin10Build1607OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 14393);
+
+        internal static bool IsWindows11OrLater
+            => isWin11OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 22000);
 
         #endregion
 

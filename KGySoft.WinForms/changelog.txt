@@ -166,9 +166,13 @@
   + New CheckBoxRenderingQuality property: allows to set the quality of the check box rendering when no proper size
     is available by the visual style renderer on the current DPI.
 
-+ KGySoft.WinForms.Forms namespace:
+! KGySoft.WinForms.Forms namespace:
 ===================================
-+ BaseForm class:
+! BaseForm class:
+  ! The BaseToolTip field has been concealed by the EditorBrowsableState.Never attribute. Actually not a breaking
+    change as the code referencing the field is still working, but the field is no longer visible in the IDE.
+  + Event subscriptions are automatically removed when the form is disposed.
+  + New ToolTip property
   + New CommandBindings property
 
 

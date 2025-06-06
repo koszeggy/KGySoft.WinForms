@@ -30,8 +30,8 @@ using KGySoft.Libraries.Language;
 #if !NET5_0_OR_GREATER
 using KGySoft.Reflection;
 using KGySoft.WinForms.Reflection;
-using KGySoft.WinForms.WinApi;
 #endif
+using KGySoft.WinForms.WinApi;
 
 #endregion
 
@@ -45,13 +45,13 @@ namespace KGySoft.WinForms.Forms
     /// <list type="bullet">
     /// <item>Removes all event subscriptions when the form is disposed. To do that for the events of derived controls as well,
     /// use the <see cref="Component.Events"/> property in your derived event <see langword="add"/>/<see langword="remove"/> accessors.</item>
-    /// <item><see cref="BaseToolTip"/> property.</item>
-    /// <item><see cref="CommandBindings"/> property. See </item>
+    /// <item><see cref="ToolTip"/> property.</item>
+    /// <item><see cref="CommandBindings"/> property. See the <a href="https://kgysoft.net/corelibraries#command-binding" target="_blank">online documentation</a> for details.</item>
     /// <item>Advanced MDI application support, see <see cref="ShowMdiChild"/> method and <see cref="CalledMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
     /// <item>Fixes a <a href="https://github.com/dotnet/winforms/issues/1504" target="_blank">resizing bug</a> that exists in .NET Framework and .NET Core 3.x that can occur with multiple displays.</item>
     /// </list>
     /// </remarks>
-    public partial class BaseForm: Form
+    public class BaseForm: Form
     {
         #region Fields
 
@@ -65,6 +65,20 @@ namespace KGySoft.WinForms.Forms
 
         #region Instance Fields
 
+        #region Protected Fields
+        
+        /// <summary>
+        /// Gets the <see cref="System.Windows.Forms.ToolTip"/> of the <see cref="BaseForm"/>.
+        /// Kept for compatibility, if a derived form uses it from the designer.
+        /// From code, prefer using the <see cref="ToolTip"/> property instead.
+        /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected readonly ToolTip BaseToolTip;
+
+        #endregion
+
+        #region Private Fields
+        
         private readonly CommandBindingsCollection commandBindings = new WinFormsCommandBindingsCollection();
 
         private bool translateControls;
@@ -73,6 +87,8 @@ namespace KGySoft.WinForms.Forms
         private bool resumeCaller;
         private BaseForm? callerMdiForm;
         private MdiClient? mdiClient;
+
+        #endregion
 
         #endregion
 
@@ -136,6 +152,8 @@ namespace KGySoft.WinForms.Forms
 
         #region Properties
 
+        #region Public Properties
+
         /// <summary>
         /// Gets or sets whether the form should translate its controls.
         /// </summary>
@@ -153,6 +171,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Gets whether the form is suspended by a called MDI child.
         /// </summary>
+        [Browsable(false)]
         public bool IsSuspended => suspended;
 
         /// <summary>
@@ -162,6 +181,17 @@ namespace KGySoft.WinForms.Forms
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         public CommandBindingsCollection CommandBindings => commandBindings;
+
+        #endregion
+
+        #region Protected Properties
+
+        /// <summary>
+        /// Gets a <see cref="System.Windows.Forms.ToolTip"/> instance that can be used to show tooltips for controls of this form.
+        /// </summary>
+        protected ToolTip ToolTip => BaseToolTip;
+
+        #endregion
 
         #endregion
 
@@ -187,7 +217,23 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Creates a new instance of <see cref="BaseForm"/>
         /// </summary>
-        public BaseForm() => InitializeComponent();
+        public BaseForm()
+        {
+            // CenterScreen StartPosition is kept for compatibility, CenterParent would actually be better.
+            StartPosition = FormStartPosition.CenterScreen;
+            BaseToolTip = new ToolTip
+            {
+                InitialDelay = 500,
+                ReshowDelay = 100
+            };
+
+#if !NET35
+            if (!OSUtils.IsWindows11OrLater)
+#endif
+            {
+                BaseToolTip.AutoPopDelay = Int16.MaxValue;
+            }
+        }
 
         #endregion
 
@@ -265,7 +311,7 @@ namespace KGySoft.WinForms.Forms
             base.Dispose(disposing);
             if (disposing)
             {
-                components?.Dispose();
+                BaseToolTip.Dispose();
                 commandBindings.Dispose();
                 Events.Dispose();
             }
@@ -322,7 +368,7 @@ namespace KGySoft.WinForms.Forms
             switch (m.Msg)
             {
 #if !NET5_0_OR_GREATER
-                case Constants.WM_NCHITTEST:
+                case Constants.WM_NCHITTEST when OSUtils.IsWindows && !OSUtils.IsMono:
                     WmNCHitTest(ref m);
                     return;
 #endif
@@ -367,7 +413,7 @@ namespace KGySoft.WinForms.Forms
         [Obsolete]
         private void TranslateToolTip(Control control)
         {
-            if (BaseToolTip.CanExtend(control) && BaseToolTip.GetToolTip(control).Length > 0)
+            if (BaseToolTip.GetToolTip(control)?.Length > 0)
                 BaseToolTip.SetToolTip(control, Language.Translate(BaseToolTip.GetToolTip(control)));
         }
 
@@ -377,7 +423,7 @@ namespace KGySoft.WinForms.Forms
                 return mdiClient;
 
             if (!IsMdiContainer)
-                throw new InvalidOperationException("Form must be an MDI container. Set IsMdiContainer before accessing this member!");
+                throw new InvalidOperationException(Res.BaseFormNotMdiContainer);
             MdiClient? result = null;
             foreach (Control? child in Controls)
             {
@@ -386,7 +432,7 @@ namespace KGySoft.WinForms.Forms
                     break;
             }
 
-            mdiClient = result ?? throw new InvalidOperationException("MDI Client area not found");
+            mdiClient = result ?? throw new InvalidOperationException(Res.BaseFormMdiClientNotFound);
             return result;
         }
 

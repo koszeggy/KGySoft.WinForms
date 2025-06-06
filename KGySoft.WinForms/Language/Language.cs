@@ -68,7 +68,7 @@ namespace KGySoft.Libraries.Language
         /// <param name="text">The text to translate.</param>
         /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possible distinction postfixes. Use the
         /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
-        public static string Translate(string text)
+        public static string Translate(string? text)
         {
             if (text == null!)
                 return String.Empty;

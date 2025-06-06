@@ -101,6 +101,12 @@
   <data name="General_InternalErrorFormat" xml:space="preserve">
     <value>Internal Error: {0}</value>
   </data>
+  <data name="BaseForm_NotMdiContainer" xml:space="preserve">
+    <value>The form must be an MDI container. Set IsMdiContainer before accessing this member.</value>
+  </data>
+  <data name="BaseForm_MdiClientNotFound" xml:space="preserve">
+    <value>MDI Client area not found.</value>
+  </data>
   <data name="TaskDialog_ShowDetails" xml:space="preserve">
     <value>See &amp;details</value>
   </data>

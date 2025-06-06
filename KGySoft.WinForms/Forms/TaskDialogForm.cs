@@ -769,7 +769,8 @@ namespace KGySoft.WinForms.Forms
                     else
                         checkedSet = true;
                 }
-                BaseToolTip.SetToolTip(rb, radioButton.Description);
+
+                ToolTip.SetToolTip(rb, radioButton.Description);
                 radioButton.Id = index++;
                 pnlRadioButtons.Controls.Add(rb);
                 rb.BringToFront();
@@ -821,7 +822,7 @@ namespace KGySoft.WinForms.Forms
                         };
 
                         btn.Click += Button_Click;
-                        BaseToolTip.SetToolTip(btn, button.Description);
+                        ToolTip.SetToolTip(btn, button.Description);
                         button.Id = index++;
                         if (!button.IsElevated && button.CustomIcon != null)
                             btn.Image = button.CustomIcon.ToAlphaBitmap();
@@ -2042,7 +2043,7 @@ namespace KGySoft.WinForms.Forms
                         if (control is CommandLinkButton)
                             UpdateText(control, button.Description, false, true);
                         else
-                            BaseToolTip.SetToolTip(control, button.Description);
+                            ToolTip.SetToolTip(control, button.Description);
                         return;
 
                     case TaskDialogButtonBase.PropertyEnabled:
@@ -2074,7 +2075,7 @@ namespace KGySoft.WinForms.Forms
                         return;
 
                     case TaskDialogButtonBase.PropertyDescription:
-                        BaseToolTip.SetToolTip(control, radioButton.Description);
+                        ToolTip.SetToolTip(control, radioButton.Description);
                         return;
 
                     case TaskDialogButtonBase.PropertyEnabled:

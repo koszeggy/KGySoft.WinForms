@@ -49,6 +49,16 @@ namespace KGySoft.WinForms
 
         #region Properties
 
+        #region BaseForm
+
+        /// <summary>The form must be an MDI container. Set IsMdiContainer before accessing this member.</summary>
+        internal static string BaseFormNotMdiContainer => Get("BaseForm_NotMdiContainer");
+
+        /// <summary>MDI Client area not found.</summary>
+        internal static string BaseFormMdiClientNotFound => Get("BaseForm_MdiClientNotFound");
+
+        #endregion
+
         #region TaskDialog
 
         /// <summary>See &amp;details</summary>
