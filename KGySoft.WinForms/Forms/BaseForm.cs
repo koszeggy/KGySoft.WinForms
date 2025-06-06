@@ -16,6 +16,9 @@
 #region Usings
 
 using System;
+#if !NET5_0_OR_GREATER
+using System.Collections.Specialized;
+#endif
 using System.ComponentModel;
 #if !NET5_0_OR_GREATER
 using System.Drawing;
@@ -25,6 +28,7 @@ using System.Windows.Forms;
 using KGySoft.ComponentModel;
 using KGySoft.Libraries.Language;
 #if !NET5_0_OR_GREATER
+using KGySoft.Reflection;
 using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 #endif
@@ -34,12 +38,32 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Forms
 {
     /// <summary>
-    /// A base form that provides tooltips for its controls and makes possible to
-    /// translate form content. Supports showing forms as child forms of an MDI application.
+    /// A base form with additional features and bug fixes.
     /// </summary>
+    /// <remarks>
+    /// The <see cref="BaseForm"/> class provides the following features and changes:
+    /// <list type="bullet">
+    /// <item>Removes all event subscriptions when the form is disposed. To do that for the events of derived controls as well,
+    /// use the <see cref="Component.Events"/> property in your derived event <see langword="add"/>/<see langword="remove"/> accessors.</item>
+    /// <item><see cref="BaseToolTip"/> property.</item>
+    /// <item><see cref="CommandBindings"/> property. See </item>
+    /// <item>Advanced MDI application support, see <see cref="ShowMdiChild"/> method and <see cref="CalledMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
+    /// <item>Fixes a <a href="https://github.com/dotnet/winforms/issues/1504" target="_blank">resizing bug</a> that exists in .NET Framework and .NET Core 3.x that can occur with multiple displays.</item>
+    /// </list>
+    /// </remarks>
     public partial class BaseForm: Form
     {
         #region Fields
+
+        #region Static Fields
+
+#if !NET5_0_OR_GREATER
+        private static readonly BitVector32.Section formStateRenderSizeGrip;
+#endif
+
+        #endregion
+
+        #region Instance Fields
 
         private readonly CommandBindingsCollection commandBindings = new WinFormsCommandBindingsCollection();
 
@@ -49,6 +73,8 @@ namespace KGySoft.WinForms.Forms
         private bool resumeCaller;
         private BaseForm? callerMdiForm;
         private MdiClient? mdiClient;
+
+        #endregion
 
         #endregion
 
@@ -134,19 +160,36 @@ namespace KGySoft.WinForms.Forms
         /// the <see cref="PropertyCommandStateUpdater"/> to the created bindings.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
         public CommandBindingsCollection CommandBindings => commandBindings;
 
         #endregion
 
         #region Constructors
 
+        #region Static Constructors
+
+#if !NET5_0_OR_GREATER
+        static BaseForm()
+        {
+            if (!OSUtils.IsWindows || OSUtils.IsMono)
+                return;
+
+            // Not using Accessors because it's obtained only once.
+            formStateRenderSizeGrip = Reflector.TryGetField(typeof(Form), "FormStateRenderSizeGrip", out object? value) && value is BitVector32.Section section ? section : default;
+        }
+#endif
+
+        #endregion
+
+        #region Instance Constructors
+
         /// <summary>
         /// Creates a new instance of <see cref="BaseForm"/>
         /// </summary>
-        public BaseForm()
-        {
-            InitializeComponent();
-        }
+        public BaseForm() => InitializeComponent();
+
+        #endregion
 
         #endregion
 
@@ -354,7 +397,7 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         private void WmNCHitTest(ref Message m)
         {
-            if (this.IsGripVisible())
+            if (this.FormState()[formStateRenderSizeGrip] != 0)
             {
                 // Here is the bug in original code: LParam contains two shorts. Without the cast negative values are positive ints
                 int x = m.LParam.SignedLOWORD();
@@ -362,9 +405,9 @@ namespace KGySoft.WinForms.Forms
                 POINT pt = new POINT(x, y);
                 User32.ScreenToClient(Handle, ref pt);
                 Size clientSize = ClientSize;
-                if (((pt.x >= (clientSize.Width - 16)) && (pt.y >= (clientSize.Height - 16))) && (clientSize.Height >= 16))
+                if (pt.x >= clientSize.Width - 16 && pt.y >= clientSize.Height - 16 && clientSize.Height >= 16)
                 {
-                    m.Result = IsMirrored ? ((IntPtr)16) : ((IntPtr)17);
+                    m.Result = IsMirrored ? (IntPtr)16 : (IntPtr)17;
                     return;
                 }
             }
@@ -373,10 +416,8 @@ namespace KGySoft.WinForms.Forms
             if (AutoSizeMode == AutoSizeMode.GrowAndShrink)
             {
                 nint result = m.Result;
-                if ((result >= 10) && (result <= 17))
-                {
+                if (result >= 10 && result <= 17)
                     m.Result = (IntPtr)18;
-                }
             }
         }
 #endif

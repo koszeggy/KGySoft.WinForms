@@ -226,11 +226,10 @@ namespace KGySoft.WinForms.Reflection
         #region Form
 
 #if NETFRAMEWORK || NETCOREAPP3_0
-        internal static bool IsGripVisible(this Form form)
+        internal static BitVector32 FormState(this Form form)
         {
             var formState = GetFieldValue<BitVector32>(form, "formState", false);
-            var section = GetFieldValue<BitVector32.Section>(typeof(Form), "FormStateRenderSizeGrip", false);
-            return formState[section] != 0;
+            return formState;
         }
 #endif
 
