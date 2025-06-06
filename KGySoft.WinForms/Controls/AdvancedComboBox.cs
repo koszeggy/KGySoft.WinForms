@@ -1083,7 +1083,7 @@ namespace KGySoft.WinForms.Controls
                 return;
 
             PointF scale = this.GetScale();
-            if (scale == lastScale)
+            if (scale == lastScale || Disposing || IsDisposed)
                 return;
 
             lastScale = scale;

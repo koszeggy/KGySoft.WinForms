@@ -217,7 +217,7 @@ namespace KGySoft.WinForms
                                 ? new Font(defaultGuiFont.FontFamily, defaultGuiFont.Size / defaultDpi * 72f, defaultGuiFont.Style, GraphicsUnit.Point, defaultGuiFont.GdiCharSet, defaultGuiFont.GdiVerticalFont)
                                 : defaultControlFont;
                         }
-                        catch (Exception)
+                        catch (Exception e) when (!e.IsCritical())
                         {
                             defaultFont = Control.DefaultFont;
                         }
@@ -343,8 +343,15 @@ namespace KGySoft.WinForms
 
         private static Point GetDpi(Control control)
         {
-            if (!isProcessPerMonitorAware || !control.IsHandleCreated)
+            if (!isProcessPerMonitorAware)
                 return systemInitialDpi;
+
+            if (!control.IsHandleCreated)
+            {
+                control = control.TopLevelControl ?? control;
+                if (!control.IsHandleCreated)
+                    return systemInitialDpi;
+            }
 
             // NOTE: we could use control.DeviceDpi here on .NET Framework 4.7 or later, but it fails in some cases:
             // .NET Framework: if app.config is not set to per-monitor DPI aware (even though it's set in the manifest) OR Windows 10 compatibility mode is not set in the manifest

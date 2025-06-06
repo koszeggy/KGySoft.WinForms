@@ -1209,7 +1209,7 @@ namespace KGySoft.WinForms.Controls
         private void CheckDpiChange()
         {
             PointF scale = this.GetScale();
-            if (scale == lastScale)
+            if (scale == lastScale || Disposing || IsDisposed)
                 return;
 
             if (!lastScale.IsEmpty)

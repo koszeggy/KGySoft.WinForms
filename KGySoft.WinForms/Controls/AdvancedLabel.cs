@@ -1157,7 +1157,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         private void CheckDpiChange()
         {
             PointF scale = this.GetScale();
-            if (scale == lastScale)
+            if (scale == lastScale || Disposing || IsDisposed)
                 return;
 
             if (!lastScale.IsEmpty)
