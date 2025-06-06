@@ -815,9 +815,9 @@ namespace KGySoft.WinForms.Forms
                             TextImageRelation = TextImageRelation.ImageBeforeText,
                             Tag = button,
                             Margin = new Padding(3.Scale(scale.X), 0, 3.Scale(scale.X), 0),
-                            AutoSizeMode = AutoSizeMode.GrowAndShrink, // though AutoSize is false, GetPreferredSize would otherwise union with self Size
                             Size = new Size(70, 23).Scale(scale),
                             MinimumSize = new Size(70, 23).Scale(scale),
+                            MaximumSize = new Size(0, 23).Scale(scale),
                             IsElevated = button.IsElevated
                         };
 
@@ -1186,9 +1186,9 @@ namespace KGySoft.WinForms.Forms
                 UseVisualStyleBackColor = true,
                 AutoSize = false,
                 Margin = new Padding(3.Scale(scale.X), 0, 3.Scale(scale.X), 0),
-                AutoSizeMode = AutoSizeMode.GrowAndShrink, // though AutoSize is false, GetPreferredSize would otherwise union with self Size
                 Size = new Size(70, 23).Scale(scale),
                 MinimumSize = new Size(70, 23).Scale(scale),
+                MaximumSize = new Size(0, 23).Scale(scale),
             };
             if ((host.Options & TaskDialogOptions.TranslateStandardButtons) != TaskDialogOptions.None)
                 btn.Text = Res.Get(standardButton);
@@ -1215,7 +1215,7 @@ namespace KGySoft.WinForms.Forms
                         btn.Text = systemTextCache[SystemTextIds.No];
                         break;
                     default:
-                        throw new ArgumentOutOfRangeException(nameof(standardButton), PublicResources.FlagsEnumOutOfRange(standardButton));
+                        throw new InvalidOperationException(Res.InternalError($"Unexpected button: {standardButton}"));
                 }
             }
 
@@ -1240,7 +1240,7 @@ namespace KGySoft.WinForms.Forms
                     btn.DialogResult = DialogResult.No;
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException("standardButton");
+                    throw new InvalidOperationException(Res.InternalError($"Unexpected button: {standardButton}"));
             }
 
             pnlButtons.Controls.Add(btn);
@@ -1541,14 +1541,22 @@ namespace KGySoft.WinForms.Forms
                 else
                     ((CommandLinkButton)control).Description = value;
 
-                // Adjusting form height to prevent scrollbar flickering
-                if (control.Visible && (preferredSize = control.GetPreferredSize(new Size(control.Width, 0))).Height > origSize.Height)
+                if (control.Visible)
                 {
-                    // possible divider visibility change
-                    if (visibilityChange)
-                        preferredSize.Height += 2;
+                    // Adjusting form height to prevent scrollbar flickering
+                    if (control.AutoSize)
+                    {
+                        if ((preferredSize = control.GetPreferredSize(new Size(control.Width, 0))).Height > origSize.Height)
+                        {
+                            // possible divider visibility change
+                            if (visibilityChange)
+                                preferredSize.Height += 2;
 
-                    Height += preferredSize.Height - origSize.Height;
+                            Height += preferredSize.Height - origSize.Height;
+                        }
+                    }
+                    else
+                        preferredSize = control.GetPreferredSize(Size.Empty);
                 }
             }
             finally
@@ -1561,6 +1569,8 @@ namespace KGySoft.WinForms.Forms
 
             if (control.AutoSize)
                 preferredSize = control.Size;
+            else
+                control.Size = preferredSize;
             if (visibilityChange || origSize != preferredSize)
                 ResetHeights(cfg ?? GetConfiguration());
 
@@ -1585,6 +1595,10 @@ namespace KGySoft.WinForms.Forms
                         commandLinkButton.Image = taskDialogButton.CustomIcon.ToAlphaBitmap();
                     else if (commandLinkButton.Image != null)
                         commandLinkButton.Image = null;
+
+                    // Adjusting form height to prevent scrollbar flickering
+                    if ((preferredSize = control.GetPreferredSize(new Size(control.Width, 0))).Height > origSize.Height)
+                        Height += preferredSize.Height - origSize.Height;
                 }
                 else
                 {
@@ -1594,12 +1608,7 @@ namespace KGySoft.WinForms.Forms
                         button.Image = taskDialogButton.CustomIcon.ToAlphaBitmap();
                     else if (button.Image != null)
                         button.Image = null;
-                }
-
-                // Adjusting form height to prevent scrollbar flickering
-                if ((preferredSize = control.GetPreferredSize(new Size(control.Width, 0))).Height > origSize.Height)
-                {
-                    Height += preferredSize.Height - origSize.Height;
+                    preferredSize = control.GetPreferredSize(Size.Empty);
                 }
             }
             finally
@@ -1612,6 +1621,8 @@ namespace KGySoft.WinForms.Forms
 
             if (control.AutoSize)
                 preferredSize = control.Size;
+            else
+                control.Size = preferredSize;
             if (origSize != preferredSize)
                 ResetHeights(GetConfiguration());
 
@@ -1860,9 +1871,7 @@ namespace KGySoft.WinForms.Forms
         void ITaskDialog.PropertyChanged(string propName)
         {
             if (dialogState == TaskDialogStatus.Initializing || dialogState == TaskDialogStatus.Closed)
-            {
-                throw new InvalidOperationException("Changing property in invalid state.");
-            }
+                throw new InvalidOperationException(Res.InternalError("Changing property in invalid state."));
 
             Configuration cfg;
             PointF scale = this.GetScale();

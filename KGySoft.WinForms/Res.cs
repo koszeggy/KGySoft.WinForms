@@ -89,7 +89,6 @@ namespace KGySoft.WinForms
 
         #region General
 
-
         /// <summary>
         /// Just an empty method to be able to trigger the static constructor without running any code other than field initializations.
         /// </summary>
@@ -98,6 +97,9 @@ namespace KGySoft.WinForms
         }
 
         internal static string Get<TEnum>(TEnum value) where TEnum : struct, Enum => Get($"{value.GetType().Name}.{Enum<TEnum>.ToString(value)}");
+
+        /// <summary>Internal Error: {0}</summary>
+        internal static string InternalError(string msg) => Get("General_InternalErrorFormat", msg);
 
         #endregion
 
