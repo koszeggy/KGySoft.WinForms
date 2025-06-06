@@ -107,8 +107,8 @@ namespace KGySoft.WinForms.Components
         //DetailsSelectable = 1 << 16
 
         /// <summary>
-        /// Indicates that texts of <see cref="TaskDialog.StandardButtons"/> are translated by <see cref="Language"/>
-        /// class instead of using Windows' current language.
+        /// Indicates that texts of <see cref="TaskDialog.StandardButtons"/> are localized from the library resources
+        /// rather than using Windows resources.
         /// <note>This flag causes to use <see cref="TaskDialog"/> in compatibility mode.</note>
         /// </summary>
         TranslateStandardButtons = 1 << 17

@@ -443,7 +443,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Gets or sets one of the standard icons as the main icon for the dialog.
-        /// Setting this property clears <see cref="CustomIcon"/> and vice-versa.
+        /// Setting this property clears <see cref="CustomIcon"/> and vice versa.
         /// </summary>
         public TaskDialogStandardIcons Icon
         {
@@ -455,10 +455,8 @@ namespace KGySoft.WinForms.Components
 
                 CheckCanChangeProperty();
 
-                if (!Enum<TaskDialogStandardIcons>.IsDefined(value))
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                if (!value.IsDefined())
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 isEmulatedStandardMainIcon = false;
                 ReplaceIcon(ref customIcon, null, 0);
@@ -473,7 +471,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Gets or sets a custom <see cref="System.Drawing.Icon"/> as the main icon for the dialog.
-        /// Setting this property clears <see cref="Icon"/> and vice-versa.
+        /// Setting this property clears <see cref="Icon"/> and vice versa.
         /// </summary>
         public Icon? CustomIcon
         {
@@ -498,7 +496,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Gets or sets one of the standard icons as the footer icon for the dialog.
-        /// Setting this property clears <see cref="CustomFooterIcon"/> and vice-versa.
+        /// Setting this property clears <see cref="CustomFooterIcon"/> and vice versa.
         /// </summary>
         public TaskDialogStandardIcons FooterIcon
         {
@@ -510,10 +508,8 @@ namespace KGySoft.WinForms.Components
 
                 CheckCanChangeProperty();
 
-                if (!Enum<TaskDialogStandardIcons>.IsDefined(value))
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                if (!value.IsDefined())
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 isEmulatedStandardFooterIcon = false;
                 ReplaceIcon(ref customFooterIcon, null, 0);
@@ -527,7 +523,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Gets or sets a custom <see cref="System.Drawing.Icon"/> as the footer icon for the dialog.
-        /// Setting this property clears <see cref="FooterIcon"/> and vice-versa.
+        /// Setting this property clears <see cref="FooterIcon"/> and vice versa.
         /// </summary>
         public Icon? CustomFooterIcon
         {
@@ -563,10 +559,8 @@ namespace KGySoft.WinForms.Components
                     return;
 
                 CheckCanChangeProperty();
-                if (((int)value | 0x3F) != 0x3F)
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                if (!value.AllFlagsDefined())
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.FlagsEnumOutOfRange(value));
 
                 standardButtons = value;
                 if (IsDialogShowing)
@@ -590,10 +584,8 @@ namespace KGySoft.WinForms.Components
                     return;
 
                 CheckCanChangeProperty();
-                if (!Enum<TaskDialogStandardButtons>.IsDefined(value))
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                if (!value.IsDefined())
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 defaultStandardButton = value;
                 if (IsDialogShowing)
@@ -619,9 +611,7 @@ namespace KGySoft.WinForms.Components
 
                 CheckCanChangeProperty();
                 if (width < 0)
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.ArgumentMustBeGreaterThanOrEqualTo(0));
 
                 width = value;
                 if (IsDialogShowing)
@@ -668,10 +658,8 @@ namespace KGySoft.WinForms.Components
 
                 CheckCanChangeProperty();
 
-                if (!Enum<TaskDialogProgressBarStyle>.IsDefined(value))
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                if (!value.IsDefined())
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 progressBarStyle = value;
                 if (IsDialogShowing)
@@ -694,10 +682,8 @@ namespace KGySoft.WinForms.Components
 
                 CheckCanChangeProperty();
 
-                if (!Enum<ProgressBarState>.IsDefined(value))
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                if (!value.IsDefined())
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 progressBarState = value;
                 if (IsDialogShowing)
@@ -722,20 +708,13 @@ namespace KGySoft.WinForms.Components
                 CheckCanChangeProperty();
 
                 if (value < 0 || value >= progressBarMaximum)
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
-
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.ArgumentOutOfRange);
                 if (progressBarValue < value)
-                {
                     ProgressBarValue = value;
-                }
 
                 progressBarMinimum = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyProgressBarMinimum);
-                }
             }
         }
 
@@ -754,20 +733,14 @@ namespace KGySoft.WinForms.Components
                 CheckCanChangeProperty();
 
                 if (value < progressBarMinimum)
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.ArgumentOutOfRange);
 
                 if (progressBarValue > value)
-                {
                     ProgressBarValue = value;
-                }
 
                 progressBarMaximum = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyProgressBarMaximum);
-                }
             }
         }
 
@@ -786,9 +759,7 @@ namespace KGySoft.WinForms.Components
                 CheckCanChangeProperty();
 
                 if (value < progressBarMinimum || value > progressBarMaximum)
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.ArgumentOutOfRange);
 
                 progressBarValue = value;
                 if (IsDialogShowing)
@@ -814,9 +785,7 @@ namespace KGySoft.WinForms.Components
                 CheckCanChangeProperty();
 
                 if (value < 0)
-                {
-                    throw new ArgumentOutOfRangeException("value");
-                }
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.ArgumentMustBeGreaterThanOrEqualTo(0));
 
                 progressBarMarqueeAnimationSpeed = value;
                 if (IsDialogShowing)
@@ -877,22 +846,15 @@ namespace KGySoft.WinForms.Components
             set
             {
                 CheckDisposed();
-
                 if (value != dialogResult)
                 {
-                    if (!Enum<TaskDialogResult>.IsDefined(value))
-                    {
-                        throw new ArgumentOutOfRangeException("value");
-                    }
+                    if (!value.IsDefined())
+                        throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                     if (IsDialogShowing)
-                    {
                         dialogInstance!.Close(value);
-                    }
                     else
-                    {
                         dialogResult = value;
-                    }
                 }
             }
         }
