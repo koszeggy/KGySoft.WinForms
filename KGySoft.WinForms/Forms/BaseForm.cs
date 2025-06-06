@@ -45,10 +45,11 @@ namespace KGySoft.WinForms.Forms
     /// <list type="bullet">
     /// <item>Removes all event subscriptions when the form is disposed. To do that for the events of derived controls as well,
     /// use the <see cref="Component.Events"/> property in your derived event <see langword="add"/>/<see langword="remove"/> accessors.</item>
-    /// <item><see cref="ToolTip"/> property.</item>
+    /// <item><see cref="ToolTip"/> property to create tool tips for the controls on the form.</item>
     /// <item><see cref="CommandBindings"/> property. See the <a href="https://kgysoft.net/corelibraries#command-binding" target="_blank">online documentation</a> for details.</item>
     /// <item>Advanced MDI application support, see <see cref="ShowMdiChild"/> method and <see cref="CalledMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
     /// <item>Fixes a <a href="https://github.com/dotnet/winforms/issues/1504" target="_blank">resizing bug</a> that exists in .NET Framework and .NET Core 3.x that can occur with multiple displays.</item>
+    /// <item>An <see cref="IsDesignMode"/> property that works even during initialization, when <see cref="Component.DesignMode"/> would return <see langword="false"/>.</item>
     /// </list>
     /// </remarks>
     public class BaseForm: Form
@@ -190,6 +191,12 @@ namespace KGySoft.WinForms.Forms
         /// Gets a <see cref="System.Windows.Forms.ToolTip"/> instance that can be used to show tooltips for controls of this form.
         /// </summary>
         protected ToolTip ToolTip => BaseToolTip;
+
+        /// <summary>
+        /// Gets whether the form is in design mode. Unlike the <see cref="Component.DesignMode"/> property,
+        /// this property works even during initialization.
+        /// </summary>
+        protected bool IsDesignMode => DesignMode || LicenseManager.UsageMode == LicenseUsageMode.Designtime;
 
         #endregion
 
