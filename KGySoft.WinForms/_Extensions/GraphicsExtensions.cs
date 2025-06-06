@@ -18,7 +18,6 @@
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
-using KGySoft.Drawing;
 using KGySoft.WinForms.Controls;
 
 #endregion

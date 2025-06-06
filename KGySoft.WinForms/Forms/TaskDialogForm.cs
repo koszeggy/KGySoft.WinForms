@@ -598,7 +598,6 @@ namespace KGySoft.WinForms.Forms
 
             // setting heights (will be called also on OnShow if needed - this is just to prevent immediate resizing when form is appearing)
             ResetHeights(cfg);
-
         }
 
         private void ResetChecksWidth(Configuration cfg, bool minSize)

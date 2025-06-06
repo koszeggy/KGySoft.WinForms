@@ -89,7 +89,7 @@ namespace KGySoft.WinForms
             // No need to combine the delegates in a thread-safe way, because the values themselves are always accessed from the same thread.
             add => visualStylesChangedHandlers.AddOrUpdate(Thread.CurrentThread.ManagedThreadId,
                 _ => (SynchronizationContext.Current, value),
-                (_,v) => (v.Context, v.Handler + value));
+                (_, v) => (v.Context, v.Handler + value));
 
             // Removing the handler from the thread where it was added.
             // When the thread is not the same, a new entry may be created with a corresponding context and a null handler.

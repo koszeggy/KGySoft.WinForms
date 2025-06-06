@@ -662,10 +662,8 @@ namespace KGySoft.WinForms.Controls
                 preferredSize = LayoutUtils.UnionSizes(((ISupportButtonAdapter)this).Adapter.GetPreferredSizeCore(g, proposedConstraints, GetAppearance()) + Padding.Size, MinimumSize);
             }
 
-            if (AutoSizeMode != AutoSizeMode.GrowAndShrink)
-            {
+            if (AutoSize && AutoSizeMode == AutoSizeMode.GrowOnly)
                 preferredSize = LayoutUtils.UnionSizes(preferredSize, Size);
-            }
 
             preferredSizeCache[((long)proposedSize.Height << 32) | (uint)proposedSize.Width] = preferredSize;
             return preferredSize;
