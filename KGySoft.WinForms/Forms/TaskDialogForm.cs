@@ -217,7 +217,6 @@ namespace KGySoft.WinForms.Forms
         private static readonly Size mainIconReferenceSize = new Size(32, 32);
         private static readonly Size footerIconReferenceSize = new Size(16, 16);
 
-
         #endregion
 
         #region Instance Fields
@@ -267,22 +266,16 @@ namespace KGySoft.WinForms.Forms
             InitializeComponent();
             this.DisableAutoScaling();
             pnlMainInstruction.Owner = this;
-            HandleCreated += TaskDialogForm_HandleCreated;
-            Load += TaskDialogForm_Load;
-            FormClosing += TaskDialogForm_FormClosing;
-            Closed += TaskDialogForm_Closed;
-            KeyDown += TaskDialogForm_KeyDown;
             btnShowHideDetails.ExpandedChanged += btnShowHideDetails_ExpandedChanged;
             pnlMain.SizeChanged += Control_SizeChanged;
             pnlMainControls.SizeChanged += Control_SizeChanged;
             pnlFooter.SizeChanged += Control_SizeChanged;
             chbCheckBox.CheckedChanged += cbCheckBox_CheckedChanged;
             timer.Tick += timer_Tick;
-            lblMessage.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
-            lblDetailsMain.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
-            lblDetailsFooter.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
-            lblFooter.HyperlinkClicked += TaskDialogForm_HyperlinkClicked;
-            HelpRequested += TaskDialogForm_HelpRequested;
+            lblMessage.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
+            lblDetailsMain.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
+            lblDetailsFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
+            lblFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
             if (SystemFonts.MessageBoxFont is Font font)
                 Font = font;
@@ -407,17 +400,112 @@ namespace KGySoft.WinForms.Forms
 
         #region Protected Methods
 
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        protected override void OnHandleCreated(EventArgs e)
         {
-            if (keyData == (Keys.Control | Keys.C))
-                CopyToClipboard();
-            return base.ProcessCmdKey(ref msg, keyData);
+            base.OnHandleCreated(e);
+            host.Handle = Handle;
+        }
+
+        protected override void OnLoad(EventArgs e)
+        {
+            bool isLoaded = IsLoaded;
+            base.OnLoad(e);
+            if (isLoaded)
+                return; // can happen when RightToLeft changes
+
+            dialogState = TaskDialogStatus.Showing;
+            switch (host.Icon)
+            {
+                case TaskDialogStandardIcons.Information:
+                    SystemSounds.Asterisk.Play();
+                    break;
+                case TaskDialogStandardIcons.Warning:
+                    SystemSounds.Exclamation.Play();
+                    break;
+                case TaskDialogStandardIcons.Error:
+                    SystemSounds.Hand.Play();
+                    break;
+                case TaskDialogStandardIcons.Question:
+                    SystemSounds.Question.Play();
+                    break;
+            }
+
+            host.OnCreated();
+            timer.Enabled = host.IsTickAssigned;
         }
 
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
             ResetHeights(GetConfiguration());
+        }
+
+        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        {
+            switch (keyData)
+            {
+                case Keys.Control | Keys.C:
+                    CopyToClipboard();
+                    break;
+                case Keys.Alt | Keys.F4:
+                    altF4Pressed = true;
+                    break;
+                case Keys.Escape when ControlBox:
+                    DialogResult = DialogResult.Cancel;
+                    break;
+            }
+
+            return base.ProcessCmdKey(ref msg, keyData);
+        }
+
+        protected override void OnHelpRequested(HelpEventArgs hevent)
+        {
+            base.OnHelpRequested(hevent);
+            host.OnHelpRequested();
+        }
+
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            base.OnFormClosing(e);
+            if (e.CloseReason == CloseReason.UserClosing)
+            {
+                // preventing ALT+F4 if there is no X (Cancel) option
+                if (altF4Pressed && !ControlBox)
+                {
+                    e.Cancel = true;
+                    altF4Pressed = false;
+                    return;
+                }
+
+                CancelEventArgs args = new CancelEventArgs(false);
+                host.OnClosing(args);
+                e.Cancel = args.Cancel;
+                dialogState = args.Cancel ? TaskDialogStatus.Showing : TaskDialogStatus.Closing;
+                if (args.Cancel)
+                    selectedCustomButtonIndex = -1;
+            }
+            else if (e.CloseReason == CloseReason.None)
+            {
+                // preventing closing the dialog when just recreating it (RightToLeft changes)
+                e.Cancel = isRecreatingDialog;
+                isRecreatingDialog = false;
+            }
+            else
+            {
+                isForcedClosing = true;
+                dialogState = TaskDialogStatus.Closing;
+            }
+        }
+
+        protected override void OnFormClosed(FormClosedEventArgs e)
+        {
+            base.OnFormClosed(e);
+            dialogState = TaskDialogStatus.Closed;
+            host.Handle = IntPtr.Zero;
+
+            // closing from dispose or other serious reason: omitting Closed event
+            if (!isForcedClosing)
+                host.OnClosed();
         }
 
         protected override void OnHandleDestroyed(EventArgs e)
@@ -444,22 +532,16 @@ namespace KGySoft.WinForms.Forms
             FreeRadioButtons();
             FreeButtons();
             FreeCommandLinks();
-            HandleCreated -= TaskDialogForm_HandleCreated;
-            Load -= TaskDialogForm_Load;
-            FormClosing -= TaskDialogForm_FormClosing;
-            Closed -= TaskDialogForm_Closed;
-            KeyDown -= TaskDialogForm_KeyDown;
             btnShowHideDetails.ExpandedChanged -= btnShowHideDetails_ExpandedChanged;
             pnlMain.SizeChanged -= Control_SizeChanged;
             pnlMainControls.SizeChanged -= Control_SizeChanged;
             pnlFooter.SizeChanged -= Control_SizeChanged;
             chbCheckBox.CheckedChanged -= cbCheckBox_CheckedChanged;
             timer.Tick -= timer_Tick;
-            lblMessage.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
-            lblDetailsMain.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
-            lblDetailsFooter.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
-            lblFooter.HyperlinkClicked -= TaskDialogForm_HyperlinkClicked;
-            HelpRequested -= TaskDialogForm_HelpRequested;
+            lblMessage.HyperlinkClicked -= AdvancedLabel_HyperlinkClicked;
+            lblDetailsMain.HyperlinkClicked -= AdvancedLabel_HyperlinkClicked;
+            lblDetailsFooter.HyperlinkClicked -= AdvancedLabel_HyperlinkClicked;
+            lblFooter.HyperlinkClicked -= AdvancedLabel_HyperlinkClicked;
             VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
 
             if (disposing)
@@ -518,7 +600,7 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Can be called multiple times during the life of the dialog
+        /// Can be called multiple times during the lifetime of the dialog
         /// </summary>
         private void ResetSettings()
         {
@@ -2165,83 +2247,6 @@ namespace KGySoft.WinForms.Forms
         #region Event Handlers
         // ReSharper disable InconsistentNaming
 
-        private void TaskDialogForm_HandleCreated(object? sender, EventArgs e) => host.Handle = Handle;
-
-        private void TaskDialogForm_Load(object? sender, EventArgs e)
-        {
-            dialogState = TaskDialogStatus.Showing;
-            switch (host.Icon)
-            {
-                case TaskDialogStandardIcons.Information:
-                    SystemSounds.Asterisk.Play();
-                    break;
-                case TaskDialogStandardIcons.Warning:
-                    SystemSounds.Exclamation.Play();
-                    break;
-                case TaskDialogStandardIcons.Error:
-                    SystemSounds.Hand.Play();
-                    break;
-                case TaskDialogStandardIcons.Question:
-                    SystemSounds.Question.Play();
-                    break;
-            }
-
-            host.OnCreated();
-            timer.Enabled = host.IsTickAssigned;
-        }
-
-        private void TaskDialogForm_KeyDown(object? sender, KeyEventArgs e)
-        {
-            if (e.KeyData == (Keys.Alt | Keys.F4))
-                altF4Pressed = true;
-            if (e.KeyData == Keys.Escape && ControlBox)
-                DialogResult = DialogResult.Cancel;
-        }
-
-        private void TaskDialogForm_FormClosing(object? sender, FormClosingEventArgs e)
-        {
-            if (e.CloseReason == CloseReason.UserClosing)
-            {
-                // preventing ALT+F4 if there is no X (Cancel) option
-                if (altF4Pressed && !ControlBox)
-                {
-                    e.Cancel = true;
-                    altF4Pressed = false;
-                    return;
-                }
-
-                CancelEventArgs args = new CancelEventArgs(false);
-                host.OnClosing(args);
-                e.Cancel = args.Cancel;
-                dialogState = args.Cancel ? TaskDialogStatus.Showing : TaskDialogStatus.Closing;
-                if (args.Cancel)
-                    selectedCustomButtonIndex = -1;
-            }
-            else if (e.CloseReason == CloseReason.None)
-            {
-                // preventing closing the dialog when just recreating it (RightToLeft changes)
-                e.Cancel = isRecreatingDialog;
-                isRecreatingDialog = false;
-            }
-            else
-            {
-                isForcedClosing = true;
-                dialogState = TaskDialogStatus.Closing;
-            }
-        }
-
-        private void TaskDialogForm_Closed(object? sender, EventArgs e)
-        {
-            dialogState = TaskDialogStatus.Closed;
-            host.Handle = IntPtr.Zero;
-
-            // closing from dispose or other serious reason: omitting Closed event
-            if (!isForcedClosing)
-            {
-                host.OnClosed();
-            }
-        }
-
         private void RadioButton_CheckedChanged(object? sender, EventArgs e)
         {
             RadioButton rb = (RadioButton)sender!;
@@ -2432,9 +2437,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void TaskDialogForm_HyperlinkClicked(object? sender, HyperlinkClickedEventArgs e) => host.OnHyperlinkClicked(e);
-
-        private void TaskDialogForm_HelpRequested(object? sender, HelpEventArgs hlpevent) => host.OnHelpRequested();
+        private void AdvancedLabel_HyperlinkClicked(object? sender, HyperlinkClickedEventArgs e) => host.OnHyperlinkClicked(e);
 
         private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e)
         {
