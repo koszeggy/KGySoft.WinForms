@@ -91,7 +91,7 @@ namespace KGySoft.WinForms.Forms
         private readonly InvokeMarshaller invoker;
 
         private bool translateControls;
-        private bool isTranslated;
+        private bool isLoaded;
         private bool suspended;
         private bool resumeCaller;
         private BaseForm? callerMdiForm;
@@ -226,6 +226,13 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         protected bool IsDesignMode => DesignMode || LicenseManager.UsageMode == LicenseUsageMode.Designtime;
 
+        /// <summary>
+        /// Gets whether the form has already been loaded. This property is <see langword="true"/> after the <see cref="Form.Load"/> event is raised for the first time,
+        /// and remains <see langword="true"/> even if the form is shown as a dialog multiple times or the handle is recreated (e.g. because <see cref="Control.RightToLeft"/> changes).
+        /// Can be useful of we overload the <see cref="Form.OnLoad"/> method and want to avoid executing some initialization more than once.
+        /// </summary>
+        protected bool IsLoaded => isLoaded;
+
         #endregion
 
         #endregion
@@ -316,11 +323,10 @@ namespace KGySoft.WinForms.Forms
             base.OnLoad(e);
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            // translating only at first load (WinForms bug: despite the documentation, by ShowDialog Load occurs multiple times)
-            if (!isTranslated)
+            if (!isLoaded)
                 PerformTranslate(this);
-            isTranslated = true;
 #pragma warning restore CS0618 // Type or member is obsolete
+            isLoaded = true;
         }
 
         /// <inheritdoc />
