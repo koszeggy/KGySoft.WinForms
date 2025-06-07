@@ -170,11 +170,14 @@
 ===================================
 ! BaseForm class:
   ! The BaseToolTip field has been concealed by the EditorBrowsableState.Never attribute. Actually not a breaking
-    change as the code referencing the field is still working, but the field is no longer visible in the IDE.
-  + Event subscriptions are automatically removed when the form is disposed.
+    change as the code referencing the field is still working, but the field is no longer visible in the IDE. Use
+    the new ToolTip property instead.
+  ! The default timings of BaseToolTip field (ToolTip property) have been changed.
   + New ToolTip property
+  + Event subscriptions to self events are automatically removed when the form is disposed.
   + New CommandBindings property
   + New IsDesignMode property
+  + New InvokeOnUIThread method: a safer and more convenient way to invoke a delegate on the UI thread.
 
 
 ~~~~~~~~~

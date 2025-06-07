@@ -91,6 +91,13 @@ namespace KGySoft.WinForms
 
         #endregion
 
+        #region InvokeMarshaller
+
+        /// <summary>Invoke is required but no SynchronizationContext was captured and the handle of the owner is not created yet.</summary>
+        internal static string InvokeMarshallerNoSynchronizationContext => Get("InvokeMarshaller_NoSynchronizationContext");
+
+        #endregion
+
         #endregion
 
         #region Methods

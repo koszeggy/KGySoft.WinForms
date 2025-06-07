@@ -200,4 +200,7 @@
   <data name="Accessors_MethodDoesNotExistFormat" xml:space="preserve">
     <value>Method "{0}" was not found on type "{1}".</value>
   </data>
+  <data name="InvokeMarshaller_NoSynchronizationContext" xml:space="preserve">
+    <value>Invoke is required but no SynchronizationContext was captured and the handle of the owner is not created yet.</value>
+  </data>
 </root>

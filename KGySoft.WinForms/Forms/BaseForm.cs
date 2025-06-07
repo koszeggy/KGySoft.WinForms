@@ -50,6 +50,7 @@ namespace KGySoft.WinForms.Forms
     /// <item>Advanced MDI application support, see <see cref="ShowMdiChild"/> method and <see cref="CalledMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
     /// <item>Fixes a <a href="https://github.com/dotnet/winforms/issues/1504" target="_blank">resizing bug</a> that exists in .NET Framework and .NET Core 3.x that can occur with multiple displays.</item>
     /// <item>An <see cref="IsDesignMode"/> property that works even during initialization, when <see cref="Component.DesignMode"/> would return <see langword="false"/>.</item>
+    /// <item><see cref="InvokeOnUIThread">InvokeOnUIThread</see> method.</item>
     /// </list>
     /// </remarks>
     public class BaseForm: Form
@@ -81,6 +82,7 @@ namespace KGySoft.WinForms.Forms
         #region Private Fields
         
         private readonly CommandBindingsCollection commandBindings = new WinFormsCommandBindingsCollection();
+        private readonly InvokeMarshaller invoker;
 
         private bool translateControls;
         private bool isTranslated;
@@ -226,8 +228,8 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         public BaseForm()
         {
-            // CenterScreen StartPosition is kept for compatibility, CenterParent would actually be better.
-            StartPosition = FormStartPosition.CenterScreen;
+            invoker = new InvokeMarshaller(this);
+            StartPosition = FormStartPosition.CenterScreen; // kept for compatibility, CenterParent would actually be better
             BaseToolTip = new ToolTip
             {
                 InitialDelay = 500,
@@ -240,6 +242,7 @@ namespace KGySoft.WinForms.Forms
             {
                 BaseToolTip.AutoPopDelay = Int16.MaxValue;
             }
+
         }
 
         #endregion
@@ -384,6 +387,17 @@ namespace KGySoft.WinForms.Forms
                     break;
             }
         }
+
+        /// <summary>
+        /// Invokes the specified <paramref name="callback"/> on the thread that the control was created on.
+        /// </summary>
+        /// <param name="callback">The callback to invoke.</param>
+        /// <remarks>
+        /// <para>This method is similar as using <see cref="Control.InvokeRequired"/> and <see cref="Control.Invoke(Delegate)"/> together,
+        /// but it works even when the handle is not created yet, in which case <see cref="Control.InvokeRequired"/> returns <see langword="false"/>.</para>
+        /// <para>The callback is invoked only if <see cref="Control.Disposing"/> and <see cref="Control.IsDisposed"/> properties return <see langword="false"/>.</para>
+        /// </remarks>
+        protected void InvokeOnUIThread(Action callback) => invoker.Invoke(callback);
 
         #endregion
 
