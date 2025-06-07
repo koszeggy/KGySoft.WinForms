@@ -20,9 +20,7 @@ using System;
 using System.Collections.Specialized;
 #endif
 using System.ComponentModel;
-#if !NET5_0_OR_GREATER
 using System.Drawing;
-#endif
 using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
@@ -32,6 +30,14 @@ using KGySoft.Reflection;
 using KGySoft.WinForms.Reflection;
 #endif
 using KGySoft.WinForms.WinApi;
+
+#endregion
+
+#region Suppressions
+
+#if NETFRAMEWORK && !NET47_OR_GREATER
+#pragma warning disable CS1574 // the documentation contains types that are not available in every target
+#endif
 
 #endregion
 
@@ -149,6 +155,26 @@ namespace KGySoft.WinForms.Forms
         {
             add => Events.AddHandler(nameof(Resumed), value);
             remove => Events.RemoveHandler(nameof(Resumed), value);
+        }
+
+        /// <summary>
+        /// Occurs when the display scale of the form's display changes. Similar to the <see cref="Form.DpiChanged"/> event,
+        /// but this is available for all .NET versions, and the event arguments contain the new scale of the display rather than DPI values.
+        /// </summary>
+        /// <remarks>
+        /// <para>This event is raised only on Windows 8.1 or later when the application has per-monitor DPI awareness,
+        /// and is not triggered when first showing the form on the primary display, even if that has non-100% scaling.</para>
+        /// <para>On platform targets where the <see cref="Form.DpiChanged"/> event is also available, this event is raised after <see cref="Form.DpiChanged"/>.
+        /// If you want to prevent auto-scaling by <see cref="Form.DpiChanged"/>, subscribe <see cref="Form.DpiChanged"/> as well (or override <see cref="Form.OnDpiChanged">OnDpiChanged</see>),
+        /// and set <see cref="CancelEventArgs.Cancel"/> in the event arguments to <see langword="true"/>.</para>
+        /// </remarks>
+        [Category("BaseForm")]
+        [Description("Occurs when the display scale of the form's display changes. Similar to the DpiChanged event, "
+            + "but this is available for all .NET versions, and the event arguments contain the new scale of the display rather than DPI values.")]
+        public event EventHandler<ScaleChangedEventArgs>? ScaleChanged
+        {
+            add => Events.AddHandler(nameof(ScaleChanged), value);
+            remove => Events.RemoveHandler(nameof(ScaleChanged), value);
         }
 
         #endregion
@@ -353,24 +379,31 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Triggers <see cref="CalledMdiChildClosed"/> event.
+        /// Raises the <see cref="CalledMdiChildClosed"/> event.
         /// </summary>
-        /// <param name="sender">The sender closed form.</param>
-        /// <param name="e">Arguments of closed form.</param>
+        /// <param name="sender">The closed form, which is the sender of the provided arguments.</param>
+        /// <param name="e">Arguments of the closed form.</param>
         protected virtual void OnCalledMdiChildClosed(BaseForm sender, FormClosedEventArgs e)
-            => Events.GetHandler<FormClosedEventHandler>(nameof(CalledMdiChildClosed))?.Invoke(this, e);
+            => Events.GetHandler<FormClosedEventHandler>(nameof(CalledMdiChildClosed))?.Invoke(sender, e);
 
         /// <summary>
-        /// Triggers <see cref="Suspended"/> event.
+        /// Raises the <see cref="Suspended"/> event.
         /// </summary>
         protected virtual void OnSuspended(EventArgs e)
             => Events.GetHandler<EventHandler>(nameof(Suspended))?.Invoke(this, e);
 
         /// <summary>
-        /// Triggers <see cref="Resumed"/> event.
+        /// Raises the <see cref="Resumed"/> event.
         /// </summary>
         protected virtual void OnResumed(EventArgs e)
             => Events.GetHandler<EventHandler>(nameof(Resumed))?.Invoke(this, e);
+
+        /// <summary>
+        /// Raises the <see cref="ScaleChanged"/> event.
+        /// </summary>
+        /// <param name="e">Contains the arguments of the event.</param>
+        protected virtual void OnScaleChanged(ScaleChangedEventArgs e)
+            => Events.GetHandler<EventHandler<ScaleChangedEventArgs>>(nameof(ScaleChanged))?.Invoke(this, e);
 
         /// <inheritdoc />
         protected override void WndProc(ref Message m)
@@ -382,6 +415,20 @@ namespace KGySoft.WinForms.Forms
                     WmNCHitTest(ref m);
                     return;
 #endif
+
+                case Constants.WM_DPICHANGED:
+                    var scale = new PointF(m.WParam.LOWORD() / ScaleHelper.DefaultDpi, m.WParam.HIWORD() / ScaleHelper.DefaultDpi);
+                    Rectangle suggestedBounds;
+                    unsafe
+                    {
+                        suggestedBounds = ((RECT*)m.LParam)->ToRectangle();
+                    }
+
+                    base.WndProc(ref m);
+                    OnScaleChanged(new ScaleChangedEventArgs(suggestedBounds, scale));
+
+                    return;
+
                 default:
                     base.WndProc(ref m);
                     break;

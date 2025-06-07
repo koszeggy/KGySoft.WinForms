@@ -16,18 +16,21 @@
 #region Usings
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 #endregion
 
 namespace KGySoft.WinForms
 {
+    [SuppressMessage("ReSharper", "RedundantCast", Justification = "False alarm, needed for .NET Framework")]
     internal static class IntPtrExtensions
     {
         #region Methods
 
         internal static int SignedLOWORD(this IntPtr value) => (short)((nint)value & 0xffff);
-
         internal static int SignedHIWORD(this IntPtr value) => (short)(((nint)value >> 16) & 0xffff);
+        internal static int LOWORD(this IntPtr value) => (ushort)((nint)value & 0xffff);
+        internal static int HIWORD(this IntPtr value) => (ushort)(((nint)value >> 16) & 0xffff);
 
         #endregion
     }

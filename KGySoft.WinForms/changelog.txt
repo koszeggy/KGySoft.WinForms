@@ -178,6 +178,8 @@
   + New CommandBindings property
   + New IsDesignMode property
   + New InvokeOnUIThread method: a safer and more convenient way to invoke a delegate on the UI thread.
+  + New ScaleChanged event: raised when the DPI changes and the application is per-monitor DPI aware.
++ New ScaleChangedEventArgs class
 
 
 ~~~~~~~~~

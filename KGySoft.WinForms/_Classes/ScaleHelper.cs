@@ -130,7 +130,7 @@ namespace KGySoft.WinForms
 
         #region Constants
 
-        private const float defaultDpi = 96f;
+        internal const float DefaultDpi = 96f;
 
         #endregion
 
@@ -138,7 +138,7 @@ namespace KGySoft.WinForms
 
         private static readonly bool isProcessPerMonitorAware = OSUtils.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
         private static readonly Point systemInitialDpi = GetDpiForHdc(User32.GetDC(IntPtr.Zero));
-        private static readonly PointF systemScale = new PointF(systemInitialDpi.X / defaultDpi, systemInitialDpi.Y / defaultDpi);
+        private static readonly PointF systemScale = new PointF(systemInitialDpi.X / DefaultDpi, systemInitialDpi.Y / DefaultDpi);
         private static readonly PointF defaultScale = new PointF(1f, 1f);
 
         private static Font? defaultFont;
@@ -214,7 +214,7 @@ namespace KGySoft.WinForms
                             Font defaultControlFont = Control.DefaultFont;
 
                             defaultFont = Equals(defaultGuiFont.FontFamily, defaultControlFont.FontFamily) && defaultGuiFont.SizeInPoints.Equals(defaultControlFont.SizeInPoints)
-                                ? new Font(defaultGuiFont.FontFamily, defaultGuiFont.Size / defaultDpi * 72f, defaultGuiFont.Style, GraphicsUnit.Point, defaultGuiFont.GdiCharSet, defaultGuiFont.GdiVerticalFont)
+                                ? new Font(defaultGuiFont.FontFamily, defaultGuiFont.Size / DefaultDpi * 72f, defaultGuiFont.Style, GraphicsUnit.Point, defaultGuiFont.GdiCharSet, defaultGuiFont.GdiVerticalFont)
                                 : defaultControlFont;
                         }
                         catch (Exception e) when (!e.IsCritical())
@@ -259,7 +259,7 @@ namespace KGySoft.WinForms
                 return systemScale;
 
             Point dpi = GetDpi(control);
-            return new PointF(dpi.X / defaultDpi, dpi.Y / defaultDpi);
+            return new PointF(dpi.X / DefaultDpi, dpi.Y / DefaultDpi);
         }
 
         public static PointF GetScale(IntPtr handle)
@@ -267,7 +267,7 @@ namespace KGySoft.WinForms
             if (!isProcessPerMonitorAware)
                 return systemScale;
             Point dpi = GetDpiForHwnd(handle);
-            return new PointF(dpi.X / defaultDpi, dpi.Y / defaultDpi);
+            return new PointF(dpi.X / DefaultDpi, dpi.Y / DefaultDpi);
         }
 
         /// <summary>
@@ -280,7 +280,7 @@ namespace KGySoft.WinForms
                 ThrowNull(nameof(graphics));
 
             if (!isProcessPerMonitorAware)
-                return new PointF(graphics.DpiX / defaultDpi, graphics.DpiY / defaultDpi);
+                return new PointF(graphics.DpiX / DefaultDpi, graphics.DpiY / DefaultDpi);
 
             IntPtr hdc = graphics.GetHdc();
             try
@@ -289,7 +289,7 @@ namespace KGySoft.WinForms
                 if (hwnd != IntPtr.Zero)
                 {
                     Point dpi = GetDpiForHwnd(hwnd);
-                    return new PointF(dpi.X / defaultDpi, dpi.Y / defaultDpi);
+                    return new PointF(dpi.X / DefaultDpi, dpi.Y / DefaultDpi);
                 }
             }
             finally
@@ -297,7 +297,7 @@ namespace KGySoft.WinForms
                 graphics.ReleaseHdc(hdc);
             }
 
-            return new PointF(graphics.DpiX / defaultDpi, graphics.DpiY / defaultDpi);
+            return new PointF(graphics.DpiX / DefaultDpi, graphics.DpiY / DefaultDpi);
         }
 
         public static Size ScaleSize(this Control control, Size size) => size.Scale(control.GetScale());
