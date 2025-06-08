@@ -1316,6 +1316,7 @@ namespace KGySoft.WinForms.Controls
                         dpiChanging = false;
                     }
 
+                    CheckDpiChange();
                     return;
 
                 // Known issue: Security shield icon size is not updated with non-V2 awareness
@@ -1332,11 +1333,13 @@ namespace KGySoft.WinForms.Controls
                     }
 #endif
 
-                    CheckDpiChange();
+                    return;
+
+                default:
+                    base.WndProc(ref m);
                     return;
             }
 
-            base.WndProc(ref m);
         }
 
         /// <inheritdoc />

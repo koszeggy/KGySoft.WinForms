@@ -722,19 +722,17 @@ namespace KGySoft.WinForms.Controls
                         dpiChanging = false;
                     }
 
+                    // This autoscales font when needed
+                    CheckDpiChange();
                     return;
 
                 // Known issue: Security shield icon size is not updated with non-V2 awareness
                 case Constants.WM_DPICHANGED_AFTERPARENT:
                     base.WndProc(ref m);
 
-                    // This autoscales font when needed
-                    CheckDpiChange();
-                    if (AutoSize)
-                        PerformLayout();
-
-                    // System FlatStyle: the WM_DPICHANGED_AFTERPARENT resets the elevated icon, but we want to prevent that if an image is set
-                    if (isElevated && base.FlatStyle == FlatStyle.System)
+                    // System FlatStyle: the WM_DPICHANGED_AFTERPARENT resets the elevated icon, but we want to prevent that if an image is set.
+                    // Doing it even if IsElevated is false, because if it was true before, then the shield icon is still displayed.
+                    if (base.FlatStyle == FlatStyle.System)
                     {
                         if (base.Image != null)
                         {
@@ -744,15 +742,18 @@ namespace KGySoft.WinForms.Controls
 #if NETFRAMEWORK
                         // .NET Framework: The Elevated icon size is not updated, so we need to recreate the handle
                         // Would not be needed for .NET Framework 4.7+ when app.config awareness is also set to V2.
-                        else if (Created)
+                        else if (isElevated && Created)
                             RecreateHandle();
 #endif
                     }
 
                     return;
+
+                default:
+                    base.WndProc(ref m);
+                    return;
             }
 
-            base.WndProc(ref m);
         }
 
         /// <inheritdoc />
@@ -1201,7 +1202,7 @@ namespace KGySoft.WinForms.Controls
         {
             if (currentImage == null)
                 return false;
-            return !isElevated && ReferenceEquals(currentImage, cachedSecurityShieldImage);
+            return !ReferenceEquals(currentImage, cachedSecurityShieldImage);
         }
 
         private void CheckDpiChange()
@@ -1226,14 +1227,14 @@ namespace KGySoft.WinForms.Controls
 
         private void ResetScale()
         {
-            if (isElevated)
+            if (isElevated && ReferenceEquals(currentImage, cachedSecurityShieldImage))
             {
                 base.Image = null;
                 isImageUpToDate = false;
-                cachedSecurityShieldImage = null;
                 Invalidate();
             }
 
+            cachedSecurityShieldImage = null;
             lastScale = PointF.Empty;
             ResetSizeCache();
         }

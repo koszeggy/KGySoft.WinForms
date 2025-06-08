@@ -657,18 +657,12 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
-            if (base.FlatStyle != FlatStyle.System)
-            {
-                base.WndProc(ref m);
-                return;
-            }
-
             switch (m.Msg)
             {
                 case Constants.WM_PAINT:
                     // FlatStyle is not overridable property so in case of native rendering reacting for its change here.
                     // (On custom rendering, this is handled in OnPaint)
-                    if (base.FlatStyle != lastFlatStyle)
+                    if (base.FlatStyle == FlatStyle.System && base.FlatStyle != lastFlatStyle)
                     {
                         lastFlatStyle = base.FlatStyle;
                         OnFlatStyleChanged();
@@ -689,17 +683,14 @@ namespace KGySoft.WinForms.Controls
                         dpiChanging = false;
                     }
 
+                    CheckDpiChange();
                     return;
 
-                case Constants.WM_DPICHANGED_AFTERPARENT:
+                default:
                     base.WndProc(ref m);
-                    CheckDpiChange();
-                    if (AutoSize)
-                        PerformLayout();
                     return;
             }
 
-            base.WndProc(ref m);
         }
 
         /// <inheritdoc />

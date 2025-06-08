@@ -870,13 +870,7 @@ namespace KGySoft.WinForms.Controls
                         dpiChanging = false;
                     }
 
-                    return;
-
-                case Constants.WM_DPICHANGED_AFTERPARENT:
-                    base.WndProc(ref m);
                     CheckDpiChange();
-                    if (AutoSize)
-                        PerformLayout();
                     return;
 
                 default:

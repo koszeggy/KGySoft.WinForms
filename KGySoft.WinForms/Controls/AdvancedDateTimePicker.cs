@@ -543,13 +543,7 @@ namespace KGySoft.WinForms.Controls
                         dpiChanging = false;
                     }
 
-                    return;
-
-                case Constants.WM_DPICHANGED_AFTERPARENT:
-                    base.WndProc(ref m);
                     CheckDpiChange();
-                    if (AutoSize)
-                        PerformLayout();
                     return;
 
                 // If we use the wider calendar drop down button when the system rendering would use the smaller one, we need to adjust the mouse position to make sure
@@ -567,9 +561,11 @@ namespace KGySoft.WinForms.Controls
                         Invalidate();
                     return;
 
+                default:
+                    base.WndProc(ref m);
+                    return;
             }
 
-            base.WndProc(ref m);
         }
 
         /// <inheritdoc />

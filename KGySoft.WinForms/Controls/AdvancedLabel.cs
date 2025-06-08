@@ -876,13 +876,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                         dpiChanging = false;
                     }
 
-                    return;
-
-                case Constants.WM_DPICHANGED_AFTERPARENT:
-                    base.WndProc(ref m);
                     CheckDpiChange();
-                    if (AutoSize)
-                        ResetSize();
                     return;
             }
 
