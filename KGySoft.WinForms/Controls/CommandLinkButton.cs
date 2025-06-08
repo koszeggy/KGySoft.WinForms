@@ -1115,8 +1115,8 @@ namespace KGySoft.WinForms.Controls
         private int ImagePadding => UsesTheming ? 5 : 3;
         private int ImageTextMargin => UsesTheming ? 1 : 4;
 
-        private Size ImageSize => isElevated ? SecurityShieldImage.Size // note: cachedSecurityShieldImageSize is the scaled reference size, not necessarily the actual extracted size
-            : base.Image != null ? base.Image.Size
+        private Size ImageSize => base.Image != null ? base.Image.Size
+            : isElevated ? SecurityShieldImage.Size // note: cachedSecurityShieldImageSize is the scaled reference size, not necessarily the actual extracted size
             : useDefaultGlyph ? DefaultGlyphSize
             : new Size(1, 1);
 
@@ -1320,17 +1320,21 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 // Known issue: Security shield icon size is not updated with non-V2 awareness
-                case Constants.WM_DPICHANGED_AFTERPARENT:
+                case Constants.WM_DPICHANGED_AFTERPARENT when IsNativeRendering:
                     base.WndProc(ref m);
-#if NETFRAMEWORK
-                    if (IsNativeRendering)
+
+                    // Without this the custom image is replaced by the shield icon on DPI change if it was ever displayed,
+                    if (isElevated && base.Image != null)
                     {
-                        // .NET Framework: Font, Glyph and Elevated icon size is not updated on DPI change, so we need to recreate the handle
-                        // Note: Would not be needed for .NET Framework 4.7+ when V2 awareness is set both in the app.config and the manifest
-                        if (Created)
-                            RecreateHandle();
                         isImageUpToDate = false;
+                        Invalidate();
                     }
+#if NETFRAMEWORK
+                    // .NET Framework: Font, Glyph and Elevated icon size is not updated on DPI change, so we need to recreate the handle
+                    // Note: Would not be needed for .NET Framework 4.7+ when V2 awareness is set both in the app.config and the manifest
+                    if (Created)
+                        RecreateHandle();
+                    isImageUpToDate = false;
 #endif
 
                     return;
