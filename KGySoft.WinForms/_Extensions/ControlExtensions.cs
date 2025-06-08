@@ -231,7 +231,7 @@ namespace KGySoft.WinForms
                 flags |= TextFormatFlags.RightToLeft;
             if (!useMnemonic)
                 flags |= TextFormatFlags.NoPrefix;
-            if (c is ISupportButtonAdapter adapter && !adapter.ShowKeyboardCues || !c.ShowKeyboardCues())
+            if (c.TopLevelControl?.IsHandleCreated != true || c is ISupportButtonAdapter adapter && !adapter.ShowKeyboardCues || !c.ShowKeyboardCues())
                 flags |= TextFormatFlags.HidePrefix;
 
             return flags;
