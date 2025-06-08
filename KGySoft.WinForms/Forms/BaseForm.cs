@@ -96,6 +96,7 @@ namespace KGySoft.WinForms.Forms
         private bool resumeCaller;
         private BaseForm? callerMdiForm;
         private MdiClient? mdiClient;
+        private PointF deviceScale = ScaleHelper.SystemScale;
 
         #endregion
 
@@ -158,23 +159,26 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Occurs when the display scale of the form's display changes. Similar to the <see cref="Form.DpiChanged"/> event,
-        /// but this is available for all .NET versions, and the event arguments contain the new scale of the display rather than DPI values.
+        /// Occurs when the scale of the form's display device changes. Similar to the <see cref="Form.DpiChanged"/> event,
+        /// but this is available for all .NET versions, and the event arguments contain the scale of the display rather than DPI values.
         /// </summary>
         /// <remarks>
-        /// <para>This event is raised only on Windows 8.1 or later when the application has per-monitor DPI awareness,
-        /// and is not triggered when first showing the form on the primary display, even if that has non-100% scaling.</para>
+        /// <para>This event is raised only on Windows 8.1 or later when the application has per-monitor DPI awareness.</para>
         /// <para>On platform targets where the <see cref="Form.DpiChanged"/> event is also available, this event is raised after <see cref="Form.DpiChanged"/>.
         /// If you want to prevent auto-scaling by <see cref="Form.DpiChanged"/>, subscribe <see cref="Form.DpiChanged"/> as well (or override <see cref="Form.OnDpiChanged">OnDpiChanged</see>),
-        /// and set <see cref="CancelEventArgs.Cancel"/> in the event arguments to <see langword="true"/>.</para>
+        /// and set <see cref="CancelEventArgs.Cancel"/> in the event arguments to <see langword="true"/>.
+        /// In contrast, the arguments of the <see cref="DeviceScaleChanged"/> event cannot be canceled, but this event does not do anything automatically if not subscribed.</para>
+        /// <para>Unlike in the <see cref="Form.DpiChanged"/> event arguments, the <see cref="DeviceScaleChangedEventArgs.SuggestedBounds">DeviceScaleChangedEventArgs.SuggestedBounds</see> property
+        /// contains a scaled size even if <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.None"/>.
+        /// The suggested bounds still can be ignored by the subscriber of the event.</para>
         /// </remarks>
         [Category("BaseForm")]
-        [Description("Occurs when the display scale of the form's display changes. Similar to the DpiChanged event, "
-            + "but this is available for all .NET versions, and the event arguments contain the new scale of the display rather than DPI values.")]
-        public event EventHandler<ScaleChangedEventArgs>? ScaleChanged
+        [Description("Occurs when the scale of the form's display device changes. Similar to the DpiChanged event, "
+            + "but this is available for all .NET versions, and the event arguments contain the scale of the display rather than DPI values.")]
+        public event EventHandler<DeviceScaleChangedEventArgs>? DeviceScaleChanged
         {
-            add => Events.AddHandler(nameof(ScaleChanged), value);
-            remove => Events.RemoveHandler(nameof(ScaleChanged), value);
+            add => Events.AddHandler(nameof(DeviceScaleChanged), value);
+            remove => Events.RemoveHandler(nameof(DeviceScaleChanged), value);
         }
 
         #endregion
@@ -210,6 +214,20 @@ namespace KGySoft.WinForms.Forms
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         public CommandBindingsCollection CommandBindings => commandBindings;
+
+        /// <summary>
+        /// Gets the current scale of the form's display device. Before showing the form, or when per-monitor DPI awareness is not enabled,
+        /// this property returns the system scale of the primary display, which is the same as the <see cref="ScaleHelper.SystemScale">ScaleHelper.SystemScale</see> property.
+        /// </summary>
+        /// <remarks>
+        /// <para>This property is similar to the <see cref="Control.DeviceDpi"/> property, but it returns the scale factor as a <see cref="PointF"/> value,
+        /// and it is available on all .NET versions, even on .NET Framework 3.5.</para>
+        /// <note>Even on platforms where the <see cref="Control.DeviceDpi"/> is available, the <see cref="Control.DeviceDpi"/> property
+        /// may return an incorrect value (e.g. the .NET Framework requires the DPI awareness settings in the <c>app.config</c> file, even
+        /// if the awareness is set in the application manifest). In contrast, this property always returns the correct scale
+        /// if there is an application manifest file or the DPI awareness is set for the application manually.</note>
+        /// </remarks>
+        public PointF DeviceScale => deviceScale;
 
         #endregion
 
@@ -318,6 +336,13 @@ namespace KGySoft.WinForms.Forms
         #region Protected methods
 
         /// <inheritdoc />
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            deviceScale = this.GetScale();
+            base.OnHandleCreated(e);
+        }
+
+        /// <inheritdoc />
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
@@ -405,11 +430,11 @@ namespace KGySoft.WinForms.Forms
             => Events.GetHandler<EventHandler>(nameof(Resumed))?.Invoke(this, e);
 
         /// <summary>
-        /// Raises the <see cref="ScaleChanged"/> event.
+        /// Raises the <see cref="DeviceScaleChanged"/> event.
         /// </summary>
         /// <param name="e">Contains the arguments of the event.</param>
-        protected virtual void OnScaleChanged(ScaleChangedEventArgs e)
-            => Events.GetHandler<EventHandler<ScaleChangedEventArgs>>(nameof(ScaleChanged))?.Invoke(this, e);
+        protected virtual void OnDeviceScaleChanged(DeviceScaleChangedEventArgs e)
+            => Events.GetHandler<EventHandler<DeviceScaleChangedEventArgs>>(nameof(DeviceScaleChanged))?.Invoke(this, e);
 
         /// <inheritdoc />
         protected override void WndProc(ref Message m)
@@ -423,15 +448,25 @@ namespace KGySoft.WinForms.Forms
 #endif
 
                 case Constants.WM_DPICHANGED:
+                    PointF oldScale = deviceScale;
                     var scale = new PointF(m.WParam.LOWORD() / ScaleHelper.DefaultDpi, m.WParam.HIWORD() / ScaleHelper.DefaultDpi);
+                    var scaleChange = new PointF(scale.X / oldScale.X, scale.Y / oldScale.Y);
                     Rectangle suggestedBounds;
                     unsafe
                     {
                         suggestedBounds = ((RECT*)m.LParam)->ToRectangle();
                     }
 
+                    // Refining the originally suggested bounds as it sometimes can be weird, e.g. can make the form larger and larger on each DPI change
+                    // (e.g. when border style is FixedSingle). Also, suggesting a scaled size even if AutoScaleMode is None, which still can be ignored.
+                    Size suggestedSize = Size.Scale(scaleChange);
+                    Point suggestedMiddle = suggestedBounds.Location + new Size(suggestedBounds.Size.Width / 2, suggestedBounds.Size.Height / 2);
+                    var suggestedLocation = new Point(suggestedMiddle.X - suggestedSize.Width / 2, suggestedMiddle.Y - suggestedSize.Height / 2);
+                    suggestedBounds = new Rectangle(suggestedLocation, suggestedSize);
+
+                    deviceScale = scale;
                     base.WndProc(ref m);
-                    OnScaleChanged(new ScaleChangedEventArgs(suggestedBounds, scale));
+                    OnDeviceScaleChanged(new DeviceScaleChangedEventArgs(suggestedBounds, scale, oldScale, scaleChange));
 
                     return;
 

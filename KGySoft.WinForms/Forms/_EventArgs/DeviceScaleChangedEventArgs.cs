@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: ScaleChangedEventArgs.cs
+//  File: DeviceScaleChangedEventArgs.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -23,15 +23,26 @@ using System.Drawing;
 namespace KGySoft.WinForms.Forms
 {
     /// <summary>
-    /// Represents the event data for the <see cref="BaseForm.ScaleChanged"/> event.
+    /// Represents the event data for the <see cref="BaseForm.DeviceScaleChanged"/> event.
     /// </summary>
-    public sealed class ScaleChangedEventArgs : EventArgs
+    public sealed class DeviceScaleChangedEventArgs : EventArgs
     {
         #region Properties
+
         /// <summary>
         /// Gets the new scale factor.
         /// </summary>
         public PointF NewScale { get; }
+
+        /// <summary>
+        /// Gets the previous scale factor.
+        /// </summary>
+        public PointF PreviousScale { get; }
+
+        /// <summary>
+        /// Gets the relative change of the scale factor to the previous one.
+        /// </summary>
+        public PointF ScaleChange { get; }
 
         /// <summary>
         /// Gets the suggested bounds of the form after scaling.
@@ -42,10 +53,12 @@ namespace KGySoft.WinForms.Forms
 
         #region Constructors
         
-        internal ScaleChangedEventArgs(Rectangle suggestedBounds, PointF newScale)
+        internal DeviceScaleChangedEventArgs(Rectangle suggestedBounds, PointF newScale, PointF previousScale, PointF scaleChange)
         {
             SuggestedBounds = suggestedBounds;
             NewScale = newScale;
+            PreviousScale = previousScale;
+            ScaleChange = scaleChange;
         }
         
         #endregion
