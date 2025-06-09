@@ -678,6 +678,7 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnHandleCreated(e);
             CheckDpiChange();
+            CheckImage();
         }
 
         /// <inheritdoc />
