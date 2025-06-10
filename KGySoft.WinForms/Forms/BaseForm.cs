@@ -345,13 +345,14 @@ namespace KGySoft.WinForms.Forms
         /// <inheritdoc />
         protected override void OnLoad(EventArgs e)
         {
+            bool loaded = isLoaded;
+            isLoaded = true;
             base.OnLoad(e);
 
 #pragma warning disable CS0618 // Type or member is obsolete
-            if (!isLoaded)
+            if (!loaded)
                 PerformTranslate(this);
 #pragma warning restore CS0618 // Type or member is obsolete
-            isLoaded = true;
         }
 
         /// <inheritdoc />
