@@ -18,7 +18,6 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
-using System.Linq;
 using System.Windows.Forms;
 
 using KGySoft.WinForms.Controls;
@@ -291,13 +290,6 @@ namespace KGySoft.WinForms
                     e.Graphics.EndContainer(cstate);
                 }
             }
-        }
-
-        internal static void DisableAutoScaling(this ContainerControl control)
-        {
-            control.AutoScaleMode = AutoScaleMode.None;
-            foreach (var childContainer in control.Controls.OfType<ContainerControl>())
-                childContainer.DisableAutoScaling();
         }
 
         #endregion

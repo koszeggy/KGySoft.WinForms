@@ -241,7 +241,7 @@ namespace KGySoft.WinForms
 
         #region Methods
 
-        #region Internal Methods
+        #region Public Methods
 
         /// <summary>
         /// Gets whether the display that the specified control is using has the same DPI as the initial DPI of the primary display.
@@ -307,6 +307,12 @@ namespace KGySoft.WinForms
         public static Size Scale(this Size size, PointF scale) => Size.Round(ScaleF(size, scale));
         public static int Scale(this int size, float scale) => (int)Math.Round(size * scale);
 
+        public static Padding Scale(this Padding padding, PointF scale) => new Padding(
+            padding.Left.Scale(scale.X),
+            padding.Top.Scale(scale.Y),
+            padding.Right.Scale(scale.X),
+            padding.Bottom.Scale(scale.Y));
+
         public static Font GetFontOrDefault(Font? font)
         {
             if (font == null)
@@ -321,6 +327,8 @@ namespace KGySoft.WinForms
             return font;
         }
 
+        #endregion
+
         #region Internal Methods
 
         internal static void RegisterPerMonitorAwarenessNotifications(this Control control)
@@ -332,8 +340,6 @@ namespace KGySoft.WinForms
             // No need to store a reference - the notifier will be disposed when the control is disposed.
             var _ = new FormDpiChangeNotifier(control);
         }
-
-        #endregion
 
         #endregion
 

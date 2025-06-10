@@ -168,6 +168,7 @@ namespace KGySoft.WinForms.Forms
             internal bool HasMainText { get; set; }
             internal bool HasRadioButtons { get; set; }
             internal bool HasMainIcon { get; set; }
+            internal bool HasFooterIcon { get; set; }
             internal bool HasFooter { get; set; }
             internal bool HasCommandLinks { get; set; }
             internal bool HasVerification { get; set; }
@@ -199,6 +200,18 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
+        #region Constants
+
+        private const int formReferenceMinWidth = 180; // in DLU
+        private const int mainTextReferenceMinHeight = 25;
+        private const int messageReferenceMaxWidth = 280; // in DLU
+        private const int mainIconBackgroundReferenceHeight = 49;
+        private const int mainIconBackgroundReferenceWidth = 50;
+        private const int footerIconColumnReferenceWidth = 24;
+        private const int checkBoxAndExpandoColumnReferenceWidth = 180;
+
+        #endregion
+
         #region Fields
 
         #region Static Fields
@@ -213,9 +226,11 @@ namespace KGySoft.WinForms.Forms
         private static readonly IThreadSafeCacheAccessor<SystemTextIds, string> systemTextCache
             = ThreadSafeCacheFactory.Create(GetSystemText, Comparer, cacheProfile);
 
-        private static readonly TaskDialogStandardIcons[] iconsWithColoredHeader = new[] { TaskDialogStandardIcons.SecuritySuccess, TaskDialogStandardIcons.SecurityWarning, TaskDialogStandardIcons.SecurityError, TaskDialogStandardIcons.SecurityShieldGray, TaskDialogStandardIcons.SecurityShieldBlue, TaskDialogStandardIcons.SecurityQuestion };
+        private static readonly TaskDialogStandardIcons[] iconsWithColoredHeader = [TaskDialogStandardIcons.SecuritySuccess, TaskDialogStandardIcons.SecurityWarning, TaskDialogStandardIcons.SecurityError, TaskDialogStandardIcons.SecurityShieldGray, TaskDialogStandardIcons.SecurityShieldBlue, TaskDialogStandardIcons.SecurityQuestion];
         private static readonly Size mainIconReferenceSize = new Size(32, 32);
         private static readonly Size footerIconReferenceSize = new Size(16, 16);
+        private static readonly Size buttonReferenceSize = new Size(76, 23);
+        private static readonly Padding buttonReferenceMargin = new Padding(3, 0, 3, 0);
 
         #endregion
 
@@ -264,7 +279,6 @@ namespace KGySoft.WinForms.Forms
         public TaskDialogForm()
         {
             InitializeComponent();
-            this.DisableAutoScaling();
             pnlMainInstruction.Owner = this;
             btnShowHideDetails.ExpandedChanged += btnShowHideDetails_ExpandedChanged;
             pnlMain.SizeChanged += Control_SizeChanged;
@@ -403,7 +417,10 @@ namespace KGySoft.WinForms.Forms
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            host.Handle = Handle;
+
+            // normally host is never null here, but during debugging the handle can be created before Execute is called
+            if (host != null!)
+                host.Handle = Handle;
         }
 
         protected override void OnLoad(EventArgs e)
@@ -434,12 +451,6 @@ namespace KGySoft.WinForms.Forms
             timer.Enabled = host.IsTickAssigned;
         }
 
-        protected override void OnShown(EventArgs e)
-        {
-            base.OnShown(e);
-            ResetHeights(GetConfiguration());
-        }
-
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             switch (keyData)
@@ -462,6 +473,43 @@ namespace KGySoft.WinForms.Forms
         {
             base.OnHelpRequested(hevent);
             host.OnHelpRequested();
+        }
+
+        protected override void OnDeviceScaleChanged(DeviceScaleChangedEventArgs e)
+        {
+            base.OnDeviceScaleChanged(e);
+            Configuration cfg = GetConfiguration();
+            PointF scale = e.NewScale;
+            isResizing = true;
+            SuspendLayout();
+            try
+            {
+                ResetConstraints(scale);
+                Bounds = e.SuggestedBounds;
+                if (cfg.HasMainIcon)
+                    pnlMain.ColumnStyles[0].Width = mainIconBackgroundReferenceWidth.Scale(scale.X);
+                if (cfg.HasFooterIcon)
+                    pnlFooter.ColumnStyles[0].Width = footerIconColumnReferenceWidth.Scale(scale.X);
+
+                if (cfg.HasButtons)
+                {
+                    foreach (AdvancedButton button in pnlButtons.Controls)
+                    {
+                        // NOTE: FlowLayoutPanel does not like if the unconstrained dimension of MaximumSize is 0 here.
+                        // Strange, it works well when setting MaximumSize = (0, y) before adding the button it to the panel.
+                        button.MinimumSize = buttonReferenceSize.Scale(scale);
+                        button.MaximumSize = new Size(Int32.MaxValue, buttonReferenceSize.Height.Scale(scale.Y));
+                    }
+                }
+            }
+            finally
+            {
+                ResumeLayout();
+                isResizing = false;
+            }
+
+            ResetWidths(cfg, e.NewScale);
+            ResetHeights(cfg);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -566,6 +614,7 @@ namespace KGySoft.WinForms.Forms
                 HasDetails = !String.IsNullOrEmpty(host.DetailsText),
                 HasRadioButtons = host.RadioButtons.Count > 0,
                 HasMainIcon = host.CustomIcon != null || host.Icon != TaskDialogStandardIcons.None,
+                HasFooterIcon = host.CustomFooterIcon != null || host.FooterIcon != TaskDialogStandardIcons.None,
                 HasFooter = !String.IsNullOrEmpty(host.FooterText),
                 HasCommandLinks = ((host.Options & (TaskDialogOptions.UseCommandLinks | TaskDialogOptions.UseCommandLinksNoIcon)) != TaskDialogOptions.None) && host.Buttons.Count > 0,
                 HasVerification = !String.IsNullOrEmpty(host.CheckBoxText),
@@ -620,17 +669,15 @@ namespace KGySoft.WinForms.Forms
             lblDetailsFooter.ResolveHyperlinks = resolve;
             RightToLeft = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
 
-            // size constraints (TODO: reset on DPI change)
-            MinimumSize = new Size(cfg.DluToPixelsX(180), 0).Scale(scale);
-            pnlMainTexts.MinimumSize = new Size(0, 25).Scale(scale);
-            pnlMainIconBackground.MinimumSize = new Size(0, 49).Scale(scale);
+            // size constraints
+            ResetConstraints(scale);
 
             // visibilities
             ResetVisibilities(cfg);
 
             // setting icon
-            ResetMainIcon(scale);
-            ResetFooterIcon(scale);
+            ResetMainIcon(cfg, scale);
+            ResetFooterIcon(cfg, scale);
 
             // set theme
             ResetTheme();
@@ -682,12 +729,22 @@ namespace KGySoft.WinForms.Forms
             ResetHeights(cfg);
         }
 
+        private void ResetConstraints(PointF scale)
+        {
+            pnlMainTexts.MinimumSize = new Size(0, mainTextReferenceMinHeight).Scale(scale);
+            pnlMainIconBackground.MinimumSize = new Size(0, mainIconBackgroundReferenceHeight).Scale(scale);
+        }
+
         private void ResetChecksWidth(Configuration cfg, bool minSize)
         {
+            if (!minSize && !cfg.HasButtons)
+                return;
+
             int maxWidth = pnlMainControls.Width / 2;
             int desiredWidth = 0;
 
-            if (minSize)
+            // not calculating the minimum size requirement if there are no custom buttons and not the minimum size is set
+            if (minSize || !cfg.HasCommandLinks)
             {
                 // setting minimum size so buttons may consume the rest place: counting desiredWidth from checks
                 if (cfg.HasVerification)
@@ -697,14 +754,20 @@ namespace KGySoft.WinForms.Forms
                 if (desiredWidth < maxWidth)
                     desiredWidth = Math.Max(desiredWidth, btnShowHideDetails.GetPreferredSize(Size.Empty).Width) + btnShowHideDetails.Margin.Horizontal + pnlChecks.Margin.Horizontal;
             }
-            else
-            {
-                // Setting maximum size consuming what is not needed by the buttons. This may provide enough place for a changing show/hide details or checkbox text
-                // Counting desiredWidth from buttons. Precondition: form width and buttons width is calculated now.
-                if (!cfg.HasButtons)
-                    return;
 
-                desiredWidth = ClientSize.Width - pnlButtons.Width - pnlButtons.Margin.Horizontal;
+            if (!minSize)
+            {
+                // Sharing the remaining size that is not needed by the buttons.
+                // This may provide enough place for changing show/hide details or checkbox text, and also for changing button texts/elevated statuses
+                // Counting desiredWidth from buttons. Precondition: form width and buttons width is calculated now.
+                int buttonsDesiredWidth = pnlButtons.Width + pnlButtons.Margin.Horizontal;
+
+                if (cfg.HasCommandLinks)
+                    // There are no custom buttons: offering the maximum remaining size to the checkbox and the expando button
+                    desiredWidth = ClientSize.Width - buttonsDesiredWidth;
+                else
+                    // halving the remaining size between buttons and the checkbox/expando button
+                    desiredWidth = (desiredWidth + ClientSize.Width - buttonsDesiredWidth) / 2;
             }
 
             pnlMainControls.ColumnStyles[0].Width = Math.Min(maxWidth, desiredWidth);
@@ -876,9 +939,7 @@ namespace KGySoft.WinForms.Forms
 
             // a simple OK button
             if (host.StandardButtons == TaskDialogStandardButtonFlags.None && host.Buttons.Count == 0)
-            {
                 AddStandardButton(TaskDialogStandardButtonFlags.OK, scale);
-            }
             else
             {
                 // custom buttons
@@ -896,10 +957,9 @@ namespace KGySoft.WinForms.Forms
                             Enabled = button.Enabled,
                             TextImageRelation = TextImageRelation.ImageBeforeText,
                             Tag = button,
-                            Margin = new Padding(3.Scale(scale.X), 0, 3.Scale(scale.X), 0),
-                            Size = new Size(70, 23).Scale(scale),
-                            MinimumSize = new Size(70, 23).Scale(scale),
-                            MaximumSize = new Size(0, 23).Scale(scale),
+                            Margin = buttonReferenceMargin.Scale(scale),
+                            MinimumSize = buttonReferenceSize.Scale(scale),
+                            MaximumSize = new Size(Int32.MaxValue, buttonReferenceSize.Height.Scale(scale.Y)),
                             IsElevated = button.IsElevated
                         };
 
@@ -917,9 +977,7 @@ namespace KGySoft.WinForms.Forms
                 if (host.StandardButtons != TaskDialogStandardButtonFlags.None)
                 {
                     foreach (TaskDialogStandardButtonFlags flag in Enum<TaskDialogStandardButtonFlags>.GetFlags(host.StandardButtons, false))
-                    {
                         AddStandardButton(flag, scale);
-                    }
                 }
             }
         }
@@ -1016,8 +1074,9 @@ namespace KGySoft.WinForms.Forms
                 return;
             }
 
-            Rectangle screen = Screen.FromControl(this).WorkingArea;
-            int screenHeight = screen.Height;
+            Screen screen = Screen.FromControl(this);
+            Rectangle screenBounds = screen.WorkingArea;
+            int screenHeight = screenBounds.Height;
             isResettingHeight = true;
             try
             {
@@ -1130,135 +1189,140 @@ namespace KGySoft.WinForms.Forms
                 isResettingHeight = false;
             }
 
-            // When form is invisible, avoiding recursion, otherwise, window may remain small due to false Top values in invisible state
-            if (isResetHeightPending && Visible)
+            if (isResetHeightPending)
             {
                 isResetHeightPending = false;
                 ResetHeights(cfg);
             }
 
-            if (Top - screen.Top + Height > screenHeight)
-                Top = screenHeight + screen.Top - Height;
+            if (Top - screenBounds.Top + Height > screenHeight)
+                Top = screenHeight + screenBounds.Top - Height;
         }
 
         private void ResetWidths(Configuration cfg, PointF scale)
         {
-            // setting form width
-            Rectangle screen = Screen.FromControl(this).WorkingArea;
-            int screenWidth = screen.Width;
-            if (host.Width > 0)
+            isResizing = true;
+            try
             {
-                int desiredWidth = Math.Max(MinimumSize.Width, cfg.DluToPixelsX(host.Width).Scale(scale.X));
-                Width = Math.Min(desiredWidth, screenWidth);
-            }
-            // auto width
-            else
-            {
-                // regular buttons: up to screen width
-                int desiredWidth = MinimumSize.Width;
+                // setting form width
+                Screen screen = Screen.FromControl(this);
+                Rectangle screenBounds = screen.WorkingArea;
+                int screenWidth = screenBounds.Width;
+                int minimumWidth = cfg.DluToPixelsX(formReferenceMinWidth).Scale(scale.X);
+                if (host.Width > 0)
+                {
+                    int desiredWidth = Math.Max(minimumWidth, cfg.DluToPixelsX(host.Width).Scale(scale.X));
+                    Width = Math.Min(desiredWidth, screenWidth);
+                }
+                // auto width
+                else
+                {
+                    // regular buttons: up to screen width
+                    int desiredWidth = minimumWidth;
+                    if (cfg.HasButtons)
+                    {
+                        // setting button sizes without limits to get desired size
+                        pnlButtons.SuspendLayout();
+                        try
+                        {
+                            foreach (Button button in pnlButtons.Controls)
+                                button.Size = button.GetPreferredSize(Size.Empty);
+                        }
+                        finally
+                        {
+                            pnlButtons.ResumeLayout();
+                        }
+
+                        int preferredWidth = pnlButtons.GetPreferredSize(Size.Empty).Width + pnlButtons.Margin.Horizontal + pnlButtons.Padding.Horizontal;
+                        if (cfg.HasVerification || cfg.HasDetails)
+                            preferredWidth += checkBoxAndExpandoColumnReferenceWidth.Scale(scale.X);
+                        if (preferredWidth > desiredWidth)
+                            desiredWidth = preferredWidth;
+                    }
+
+                    // lblMessage, lblDetailsMain, command links text: up to 280 DLU
+                    int maxWidth = cfg.DluToPixelsX(messageReferenceMaxWidth).Scale(scale.X);
+                    if (desiredWidth < maxWidth)
+                    {
+                        // message
+                        if (cfg.HasMessage)
+                        {
+                            int preferredWidth = lblMessage.GetPreferredSize(Size.Empty).Width + pnlMainTexts.Padding.Horizontal;
+                            if (cfg.HasMainIcon)
+                                preferredWidth += pnlMainIcon.Width;
+
+                            if (preferredWidth > desiredWidth)
+                                desiredWidth = Math.Min(preferredWidth, maxWidth);
+                        }
+
+                        // details in main (regardless visibility)
+                        if (cfg.HasDetails && !isDetailsInFooter && desiredWidth < maxWidth)
+                        {
+                            int preferredWidth = lblDetailsMain.GetPreferredSize(Size.Empty).Width + pnlMainTexts.Padding.Horizontal;
+                            if (cfg.HasMainIcon)
+                                preferredWidth += pnlMainIcon.Width;
+
+                            if (preferredWidth > desiredWidth)
+                                desiredWidth = Math.Min(preferredWidth, maxWidth);
+                        }
+
+                        // command link buttons
+                        if (cfg.HasCommandLinks && desiredWidth < maxWidth)
+                        {
+                            foreach (CommandLinkButton commandLinkButton in pnlCommandLinks.Controls)
+                            {
+                                int preferredWidth = commandLinkButton.GetPreferredSize(Size.Empty).Width + pnlCommandLinks.Padding.Horizontal;
+                                if (cfg.HasMainIcon)
+                                    preferredWidth += pnlMainIcon.Width;
+
+                                if (preferredWidth > desiredWidth)
+                                    desiredWidth = Math.Min(preferredWidth, maxWidth);
+
+                                if (desiredWidth == maxWidth)
+                                    break;
+                            }
+                        }
+                    }
+
+                    int widthClientDiff = Width - ClientSize.Width;
+                    Width = Math.Min(desiredWidth + widthClientDiff, screenWidth);
+                }
+
+                // setting pnlChecks minimum width (It always has priority regardless of form width. Its maximum size is smaller than minimum form size so it is ok)
+                if (cfg.HasVerification || cfg.HasDetails)
+                    ResetChecksWidth(cfg, true);
+
+                // resetting button sizes along with max size so they will not be wider than text
                 if (cfg.HasButtons)
                 {
-                    // setting button sizes without limits to get desired size
+                    Size maxButtonSize = new Size(pnlButtons.Width - pnlButtons.Padding.Horizontal, 0);
+
                     pnlButtons.SuspendLayout();
                     try
                     {
                         foreach (Button button in pnlButtons.Controls)
                         {
-                            button.Size = button.GetPreferredSize(Size.Empty);
+                            button.MaximumSize = maxButtonSize;
+                            button.Size = button.GetPreferredSize(maxButtonSize);
                         }
                     }
                     finally
                     {
                         pnlButtons.ResumeLayout();
                     }
-
-                    int preferredWidth = pnlButtons.GetPreferredSize(Size.Empty).Width + (ClientSize.Width - pnlButtons.Width);
-                    if (preferredWidth > desiredWidth)
-                        desiredWidth = preferredWidth;
                 }
 
-                // lblMessage, lblDetailsMain, command links text: up to 280 DLU
-                int maxWidth = cfg.DluToPixelsX(280).Scale(scale.X);
-                if (desiredWidth < maxWidth)
-                {
-                    // message
-                    if (cfg.HasMessage)
-                    {
-                        int preferredWidth = lblMessage.GetPreferredSize(Size.Empty).Width + pnlMainTexts.Padding.Horizontal;
-                        if (cfg.HasMainIcon)
-                            preferredWidth += pnlMainIcon.Width;
+                // reset pnlChecks maximum width
+                if (cfg.HasVerification || cfg.HasDetails)
+                    ResetChecksWidth(cfg, false);
 
-                        if (preferredWidth > desiredWidth)
-                            desiredWidth = Math.Min(preferredWidth, maxWidth);
-                    }
-
-                    // details in main (regardless visibility)
-                    if (cfg.HasDetails && !isDetailsInFooter && desiredWidth < maxWidth)
-                    {
-                        int preferredWidth = lblDetailsMain.GetPreferredSize(Size.Empty).Width + pnlMainTexts.Padding.Horizontal;
-                        if (cfg.HasMainIcon)
-                            preferredWidth += pnlMainIcon.Width;
-
-                        if (preferredWidth > desiredWidth)
-                            desiredWidth = Math.Min(preferredWidth, maxWidth);
-                    }
-
-                    // command link buttons
-                    if (cfg.HasCommandLinks && desiredWidth < maxWidth)
-                    {
-                        foreach (CommandLinkButton commandLinkButton in pnlCommandLinks.Controls)
-                        {
-                            int preferredWidth = commandLinkButton.GetPreferredSize(Size.Empty).Width + pnlCommandLinks.Padding.Horizontal;
-                            if (cfg.HasMainIcon)
-                                preferredWidth += pnlMainIcon.Width;
-
-                            if (preferredWidth > desiredWidth)
-                                desiredWidth = Math.Min(preferredWidth, maxWidth);
-
-                            if (desiredWidth == maxWidth)
-                                break;
-                        }
-                    }
-                }
-
-                int widthClientDiff = Width - ClientSize.Width;
-                Width = Math.Min(desiredWidth + widthClientDiff, screenWidth);
+                if (Left - screenBounds.Left + Width > screenWidth)
+                    Left = screenWidth + screenBounds.Left - Width;
             }
-
-            // setting pnlChecks minimum width (It always has priority regardless of form width. Its maximum size is smaller than minimum form size so it is ok)
-            if (cfg.HasVerification || cfg.HasDetails)
+            finally
             {
-                ResetChecksWidth(cfg, true);
+                isResizing = false;
             }
-
-            // resetting button sizes along with max size so they will not be wider than text
-            if (cfg.HasButtons)
-            {
-                Size maxButtonSize = new Size(pnlButtons.Width - pnlButtons.Padding.Horizontal, 0);
-
-                pnlButtons.SuspendLayout();
-                try
-                {
-                    foreach (Button button in pnlButtons.Controls)
-                    {
-                        button.MaximumSize = maxButtonSize;
-                        button.Size = button.GetPreferredSize(maxButtonSize);
-                    }
-                }
-                finally
-                {
-                    pnlButtons.ResumeLayout();
-                }
-            }
-
-            // reset pnlChecks maximum width
-            if (cfg.HasVerification || cfg.HasDetails)
-            {
-                ResetChecksWidth(cfg, false);
-            }
-
-            if (Left - screen.Left + Width > screenWidth)
-                Left = screenWidth + screen.Left - Width;
         }
 
         private void AddStandardButton(TaskDialogStandardButtonFlags standardButton, PointF scale)
@@ -1267,10 +1331,10 @@ namespace KGySoft.WinForms.Forms
             {
                 UseVisualStyleBackColor = true,
                 AutoSize = false,
-                Margin = new Padding(3.Scale(scale.X), 0, 3.Scale(scale.X), 0),
+                Margin = buttonReferenceMargin.Scale(scale),
                 Size = new Size(70, 23).Scale(scale),
-                MinimumSize = new Size(70, 23).Scale(scale),
-                MaximumSize = new Size(0, 23).Scale(scale),
+                MinimumSize = buttonReferenceSize.Scale(scale),
+                MaximumSize = new Size(Int32.MaxValue, buttonReferenceSize.Height.Scale(scale.Y)),
             };
             if ((host.Options & TaskDialogOptions.TranslateStandardButtons) != TaskDialogOptions.None)
                 btn.Text = Res.Get(standardButton);
@@ -1390,11 +1454,11 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetMainIcon(PointF scale)
+        private void ResetMainIcon(Configuration cfg, PointF scale)
         {
-            bool hasMainIcon = host.CustomIcon != null || host.Icon != TaskDialogStandardIcons.None;
+            bool hasMainIcon = cfg.HasMainIcon;
             pnlMainIcon.Visible = hasMainIcon;
-            pnlMain.ColumnStyles[0].Width = hasMainIcon ? 50.Scale(scale.X) : 0;
+            pnlMain.ColumnStyles[0].Width = hasMainIcon ? mainIconBackgroundReferenceWidth.Scale(scale.X) : 0;
             bool requireSpecialHeadColors = !VisualStyleHelper.HighContrast && host.Icon.In(iconsWithColoredHeader);
 
             if (requireSpecialHeadColors)
@@ -1502,11 +1566,11 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetFooterIcon(PointF scale)
+        private void ResetFooterIcon(Configuration cfg, PointF scale)
         {
-            bool hasFooterIcon = host.CustomFooterIcon != null || host.FooterIcon != TaskDialogStandardIcons.None;
+            bool hasFooterIcon = cfg.HasFooterIcon;
             pnlFooterIcon.Visible = hasFooterIcon;
-            pnlFooter.ColumnStyles[0].Width = hasFooterIcon ? 24.Scale(scale.X) : 0;
+            pnlFooter.ColumnStyles[0].Width = hasFooterIcon ? footerIconColumnReferenceWidth.Scale(scale.X) : 0;
 
             if (!hasFooterIcon)
                 return;
@@ -1913,6 +1977,10 @@ namespace KGySoft.WinForms.Forms
             if (owner != IntPtr.Zero)
                 ownerWindow = new Win32Window { Handle = owner };
 
+            // This forces to create the handle. May cause some resets and additional DPI changes, but it's still better than handling
+            // the side effects of the deferred handle creation (e.g. the ResumeLayout in ResetHeights may change the screen,
+            // recursive reentrancy in OnDeviceScaleChanged when setting MinimumSize in ResetConstraints, etc.).
+            host.Handle = Handle;
             FirstInit();
             ResetSettings();
 
@@ -2053,12 +2121,12 @@ namespace KGySoft.WinForms.Forms
 
                 case TaskDialog.PropertyIcon:
                 case TaskDialog.PropertyCustomIcon:
-                    ResetMainIcon(this.GetScale());
+                    ResetMainIcon(GetConfiguration(), this.GetScale());
                     return;
 
                 case TaskDialog.PropertyFooterIcon:
                 case TaskDialog.PropertyCustomFooterIcon:
-                    ResetFooterIcon(this.GetScale());
+                    ResetFooterIcon(GetConfiguration(), this.GetScale());
                     return;
 
                 case TaskDialog.PropertyProgressBarStyle:
@@ -2411,9 +2479,7 @@ namespace KGySoft.WinForms.Forms
         {
             // watching this event to recalculate sizes if scrollbar of the form appears/disappears
             if (!Visible || isResizing)
-            {
                 return;
-            }
 
             ResetHeights(GetConfiguration());
         }

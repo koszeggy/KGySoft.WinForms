@@ -75,7 +75,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlMain.Name = "pnlMain";
             this.pnlMain.RowCount = 1;
             this.pnlMain.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.pnlMain.Size = new System.Drawing.Size(359, 170);
+            this.pnlMain.Size = new System.Drawing.Size(360, 170);
             this.pnlMain.TabIndex = 0;
             // 
             // pnlMainContent
@@ -89,7 +89,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlMainContent.Location = new System.Drawing.Point(50, 0);
             this.pnlMainContent.Margin = new System.Windows.Forms.Padding(0);
             this.pnlMainContent.Name = "pnlMainContent";
-            this.pnlMainContent.Size = new System.Drawing.Size(309, 170);
+            this.pnlMainContent.Size = new System.Drawing.Size(310, 170);
             this.pnlMainContent.TabIndex = 3;
             // 
             // pnlCommandLinks
@@ -98,7 +98,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlCommandLinks.Location = new System.Drawing.Point(0, 160);
             this.pnlCommandLinks.Name = "pnlCommandLinks";
             this.pnlCommandLinks.Padding = new System.Windows.Forms.Padding(10, 5, 10, 5);
-            this.pnlCommandLinks.Size = new System.Drawing.Size(309, 10);
+            this.pnlCommandLinks.Size = new System.Drawing.Size(310, 10);
             this.pnlCommandLinks.TabIndex = 7;
             // 
             // pnlRadioButtons
@@ -107,7 +107,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlRadioButtons.Location = new System.Drawing.Point(0, 150);
             this.pnlRadioButtons.Name = "pnlRadioButtons";
             this.pnlRadioButtons.Padding = new System.Windows.Forms.Padding(10, 5, 10, 5);
-            this.pnlRadioButtons.Size = new System.Drawing.Size(309, 10);
+            this.pnlRadioButtons.Size = new System.Drawing.Size(310, 10);
             this.pnlRadioButtons.TabIndex = 6;
             // 
             // pnlProgressBar
@@ -117,7 +117,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlProgressBar.Location = new System.Drawing.Point(0, 119);
             this.pnlProgressBar.Name = "pnlProgressBar";
             this.pnlProgressBar.Padding = new System.Windows.Forms.Padding(5);
-            this.pnlProgressBar.Size = new System.Drawing.Size(309, 31);
+            this.pnlProgressBar.Size = new System.Drawing.Size(310, 31);
             this.pnlProgressBar.TabIndex = 3;
             // 
             // pbProgress
@@ -126,7 +126,7 @@ namespace KGySoft.WinForms.Forms
             this.pbProgress.Location = new System.Drawing.Point(5, 5);
             this.pbProgress.Name = "pbProgress";
             this.pbProgress.RightToLeftLayout = true;
-            this.pbProgress.Size = new System.Drawing.Size(299, 15);
+            this.pbProgress.Size = new System.Drawing.Size(300, 15);
             this.pbProgress.TabIndex = 0;
             // 
             // pnlMainTexts
@@ -137,7 +137,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlMainTexts.Location = new System.Drawing.Point(0, 49);
             this.pnlMainTexts.Name = "pnlMainTexts";
             this.pnlMainTexts.Padding = new System.Windows.Forms.Padding(0, 10, 0, 10);
-            this.pnlMainTexts.Size = new System.Drawing.Size(309, 70);
+            this.pnlMainTexts.Size = new System.Drawing.Size(310, 70);
             this.pnlMainTexts.TabIndex = 5;
             // 
             // lblDetailsMain
@@ -147,7 +147,7 @@ namespace KGySoft.WinForms.Forms
             this.lblDetailsMain.Location = new System.Drawing.Point(0, 33);
             this.lblDetailsMain.Name = "lblDetailsMain";
             this.lblDetailsMain.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
-            this.lblDetailsMain.Size = new System.Drawing.Size(309, 23);
+            this.lblDetailsMain.Size = new System.Drawing.Size(310, 23);
             this.lblDetailsMain.TabIndex = 4;
             this.lblDetailsMain.Text = "lblDetailsMain";
             // 
@@ -158,7 +158,7 @@ namespace KGySoft.WinForms.Forms
             this.lblMessage.Location = new System.Drawing.Point(0, 10);
             this.lblMessage.Name = "lblMessage";
             this.lblMessage.Padding = new System.Windows.Forms.Padding(8, 5, 8, 5);
-            this.lblMessage.Size = new System.Drawing.Size(309, 23);
+            this.lblMessage.Size = new System.Drawing.Size(310, 23);
             this.lblMessage.TabIndex = 3;
             this.lblMessage.Text = "lblMessage";
             // 
@@ -168,19 +168,19 @@ namespace KGySoft.WinForms.Forms
             this.pnlMainInstruction.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlMainInstruction.Location = new System.Drawing.Point(0, 0);
             this.pnlMainInstruction.Name = "pnlMainInstruction";
-            this.pnlMainInstruction.Size = new System.Drawing.Size(309, 49);
+            this.pnlMainInstruction.Size = new System.Drawing.Size(310, 49);
             this.pnlMainInstruction.TabIndex = 4;
             // 
             // lblMainInstruction
             // 
             this.lblMainInstruction.AutoEllipsis = true;
             this.lblMainInstruction.AutoSize = true;
-            this.lblMainInstruction.BackColor = System.Drawing.Color.Transparent;
             this.lblMainInstruction.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblMainInstruction.EnabledBackColor = System.Drawing.Color.Transparent;
             this.lblMainInstruction.Location = new System.Drawing.Point(0, 0);
             this.lblMainInstruction.Name = "lblMainInstruction";
             this.lblMainInstruction.Padding = new System.Windows.Forms.Padding(8);
-            this.lblMainInstruction.Size = new System.Drawing.Size(309, 29);
+            this.lblMainInstruction.Size = new System.Drawing.Size(310, 29);
             this.lblMainInstruction.TabIndex = 1;
             this.lblMainInstruction.Text = "lblMainInstruction";
             // 
@@ -201,14 +201,16 @@ namespace KGySoft.WinForms.Forms
             this.pnlMainIconBackground.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlMainIconBackground.Location = new System.Drawing.Point(0, 0);
             this.pnlMainIconBackground.Name = "pnlMainIconBackground";
+            this.pnlMainIconBackground.Padding = new System.Windows.Forms.Padding(8);
             this.pnlMainIconBackground.Size = new System.Drawing.Size(50, 49);
             this.pnlMainIconBackground.TabIndex = 1;
             // 
             // pbMainIcon
             // 
-            this.pbMainIcon.Location = new System.Drawing.Point(8, 9);
+            this.pbMainIcon.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.pbMainIcon.Location = new System.Drawing.Point(8, 8);
             this.pbMainIcon.Name = "pbMainIcon";
-            this.pbMainIcon.Size = new System.Drawing.Size(32, 32);
+            this.pbMainIcon.Size = new System.Drawing.Size(34, 33);
             this.pbMainIcon.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             this.pbMainIcon.TabIndex = 0;
             this.pbMainIcon.TabStop = false;
@@ -225,14 +227,14 @@ namespace KGySoft.WinForms.Forms
             this.pnlMainControls.Name = "pnlMainControls";
             this.pnlMainControls.RowCount = 1;
             this.pnlMainControls.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.pnlMainControls.Size = new System.Drawing.Size(359, 59);
+            this.pnlMainControls.Size = new System.Drawing.Size(360, 59);
             this.pnlMainControls.TabIndex = 2;
             // 
             // pnlButtons
             // 
             this.pnlButtons.AutoSize = true;
             this.pnlButtons.Dock = System.Windows.Forms.DockStyle.Right;
-            this.pnlButtons.Location = new System.Drawing.Point(350, 3);
+            this.pnlButtons.Location = new System.Drawing.Point(351, 3);
             this.pnlButtons.Name = "pnlButtons";
             this.pnlButtons.Padding = new System.Windows.Forms.Padding(3);
             this.pnlButtons.Size = new System.Drawing.Size(6, 53);
@@ -267,7 +269,7 @@ namespace KGySoft.WinForms.Forms
             this.btnShowHideDetails.Text = "btnShowHideDetails";
             this.btnShowHideDetails.TextAlign = System.Drawing.ContentAlignment.TopLeft;
             // 
-            // cbCheckBox
+            // chbCheckBox
             // 
             this.chbCheckBox.AutoSize = true;
             this.chbCheckBox.Dock = System.Windows.Forms.DockStyle.Top;
@@ -284,7 +286,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlDividerMainBottom.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlDividerMainBottom.Location = new System.Drawing.Point(0, 170);
             this.pnlDividerMainBottom.Name = "pnlDividerMainBottom";
-            this.pnlDividerMainBottom.Size = new System.Drawing.Size(359, 1);
+            this.pnlDividerMainBottom.Size = new System.Drawing.Size(360, 1);
             this.pnlDividerMainBottom.TabIndex = 1;
             // 
             // pnlDividerControlsBottom
@@ -292,7 +294,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlDividerControlsBottom.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlDividerControlsBottom.Location = new System.Drawing.Point(0, 230);
             this.pnlDividerControlsBottom.Name = "pnlDividerControlsBottom";
-            this.pnlDividerControlsBottom.Size = new System.Drawing.Size(359, 1);
+            this.pnlDividerControlsBottom.Size = new System.Drawing.Size(360, 1);
             this.pnlDividerControlsBottom.TabIndex = 3;
             // 
             // pnlDividerFooterTop
@@ -300,7 +302,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlDividerFooterTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlDividerFooterTop.Location = new System.Drawing.Point(0, 231);
             this.pnlDividerFooterTop.Name = "pnlDividerFooterTop";
-            this.pnlDividerFooterTop.Size = new System.Drawing.Size(359, 1);
+            this.pnlDividerFooterTop.Size = new System.Drawing.Size(360, 1);
             this.pnlDividerFooterTop.TabIndex = 4;
             // 
             // pnlFooter
@@ -315,7 +317,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlFooter.Name = "pnlFooter";
             this.pnlFooter.RowCount = 1;
             this.pnlFooter.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-            this.pnlFooter.Size = new System.Drawing.Size(359, 27);
+            this.pnlFooter.Size = new System.Drawing.Size(360, 27);
             this.pnlFooter.TabIndex = 5;
             // 
             // pnlFooterIcon
@@ -346,7 +348,7 @@ namespace KGySoft.WinForms.Forms
             this.lblFooter.Location = new System.Drawing.Point(27, 0);
             this.lblFooter.Name = "lblFooter";
             this.lblFooter.Padding = new System.Windows.Forms.Padding(5, 7, 5, 7);
-            this.lblFooter.Size = new System.Drawing.Size(329, 27);
+            this.lblFooter.Size = new System.Drawing.Size(330, 27);
             this.lblFooter.TabIndex = 1;
             this.lblFooter.Text = "lblFooter";
             // 
@@ -355,7 +357,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlDividerFooterBottom.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlDividerFooterBottom.Location = new System.Drawing.Point(0, 259);
             this.pnlDividerFooterBottom.Name = "pnlDividerFooterBottom";
-            this.pnlDividerFooterBottom.Size = new System.Drawing.Size(359, 1);
+            this.pnlDividerFooterBottom.Size = new System.Drawing.Size(360, 1);
             this.pnlDividerFooterBottom.TabIndex = 6;
             // 
             // pnlDividerDetailsFooterTop
@@ -363,7 +365,7 @@ namespace KGySoft.WinForms.Forms
             this.pnlDividerDetailsFooterTop.Dock = System.Windows.Forms.DockStyle.Top;
             this.pnlDividerDetailsFooterTop.Location = new System.Drawing.Point(0, 260);
             this.pnlDividerDetailsFooterTop.Name = "pnlDividerDetailsFooterTop";
-            this.pnlDividerDetailsFooterTop.Size = new System.Drawing.Size(359, 1);
+            this.pnlDividerDetailsFooterTop.Size = new System.Drawing.Size(360, 1);
             this.pnlDividerDetailsFooterTop.TabIndex = 7;
             // 
             // timer
@@ -377,16 +379,15 @@ namespace KGySoft.WinForms.Forms
             this.lblDetailsFooter.Location = new System.Drawing.Point(0, 261);
             this.lblDetailsFooter.Name = "lblDetailsFooter";
             this.lblDetailsFooter.Padding = new System.Windows.Forms.Padding(5, 7, 5, 7);
-            this.lblDetailsFooter.Size = new System.Drawing.Size(359, 27);
+            this.lblDetailsFooter.Size = new System.Drawing.Size(360, 27);
             this.lblDetailsFooter.TabIndex = 8;
             this.lblDetailsFooter.Text = "lblDetailsFooter";
             // 
             // TaskDialogForm
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
             this.AutoScroll = true;
-            this.ClientSize = new System.Drawing.Size(359, 296);
+            this.ClientSize = new System.Drawing.Size(360, 300);
             this.Controls.Add(this.lblDetailsFooter);
             this.Controls.Add(this.pnlDividerDetailsFooterTop);
             this.Controls.Add(this.pnlDividerFooterBottom);
