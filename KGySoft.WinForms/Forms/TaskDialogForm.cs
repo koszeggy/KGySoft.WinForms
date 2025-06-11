@@ -474,6 +474,13 @@ namespace KGySoft.WinForms.Forms
             host.OnHelpRequested();
         }
 
+        protected override void OnShown(EventArgs e)
+        {
+            // Fixing the height in some cases, especially when opening the dialog on a display with a different DPI than the one of the main display.
+            base.OnShown(e);
+            ResetHeights(GetConfiguration());
+        }
+
         protected override void OnDeviceScaleChanged(DeviceScaleChangedEventArgs e)
         {
             base.OnDeviceScaleChanged(e);
