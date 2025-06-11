@@ -316,10 +316,9 @@ namespace KGySoft.WinForms.Forms
                             //using Graphics g = Graphics.FromHwnd(Handle);
                             //mainInstructionsFont = renderer.GetFont(g, (FontProperty)Constants.TMT_FONT);
 
-                            using Graphics g = Graphics.FromHwnd(lblMainInstruction.Handle);
                             try
                             {
-                                mainInstructionsFont = VisualStyleHelper.GetFont(VisualStyleHelper.TaskDialogTheme, g, Constants.TDLG_MAININSTRUCTIONPANE)
+                                mainInstructionsFont = VisualStyleHelper.GetFont(VisualStyleHelper.TaskDialogTheme, Constants.TDLG_MAININSTRUCTIONPANE)
                                     ?? new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
                             }
                             catch (Exception e) when (!e.IsCritical())
@@ -680,7 +679,7 @@ namespace KGySoft.WinForms.Forms
             ResetFooterIcon(cfg, scale);
 
             // set theme
-            ResetTheme();
+            ResetTheme(scale);
 
             // set texts
             ResetCaption();
@@ -1410,16 +1409,22 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetTheme()
+        private void ResetTheme(PointF scale)
         {
             // clearing caches
             btnShowHideDetails.ResetTheme();
             mainInstructionsFont?.Dispose();
             mainInstructionsFont = null;
 
-            // fonts
-            lblMainInstruction.Font = null!; // must be set to null; otherwise, if the new font is the same as the old one, it may not overwrite the disposed font.
-            lblMainInstruction.Font = !String.IsNullOrEmpty(host.MainInstruction) ? MainInstructionsFont : Font;
+            // font
+            if (!String.IsNullOrEmpty(host.MainInstruction))
+            {
+                // MainInstructionsFont always returns the system scale size so scaling if needed
+                Font font = MainInstructionsFont;
+                lblMainInstruction.Font = scale == ScaleHelper.SystemScale ? font : new ScalingFont(font, ScaleHelper.SystemScale).GetScaled(scale);
+            }
+            else
+                lblMainInstruction.Font = Font;
 
             // colors
             bool isThemed = VisualStyleHelper.RenderWithVisualStyles;
@@ -1556,7 +1561,7 @@ namespace KGySoft.WinForms.Forms
                 }
 
                 isSpecialHeadColors = requireSpecialHeadColors;
-                ResetTheme();
+                ResetTheme(scale);
                 pnlMainInstruction.Invalidate();
                 ResetHeights(GetConfiguration());
             }
@@ -2509,7 +2514,7 @@ namespace KGySoft.WinForms.Forms
         {
             PointF scale = this.GetScale();
             Configuration cfg = GetConfiguration();
-            ResetTheme();
+            ResetTheme(scale);
             ResetWidths(cfg, scale);
             ResetHeights(cfg);
         }

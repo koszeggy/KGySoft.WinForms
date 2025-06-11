@@ -145,6 +145,13 @@ namespace KGySoft.WinForms.Controls
             disposeScaledFont = true;
         }
 
+        internal Font GetScaled(PointF newScale)
+        {
+            Scale(newScale);
+            disposeScaledFont = false; // Do not dispose the scaled font when returning it, because it is used by the caller.
+            return scaledFont;
+        }
+
         internal void Reset()
         {
             bool areSame = ReferenceEquals(systemScaleFont, scaledFont);

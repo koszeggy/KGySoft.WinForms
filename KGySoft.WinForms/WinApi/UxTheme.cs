@@ -259,9 +259,9 @@ namespace KGySoft.WinForms.WinApi
             return size.ToSize();
         }
 
-        internal static Font? GetThemeFont(IntPtr hTheme, IntPtr hdc, int part, int state, int prop)
+        internal static Font? GetThemeFont(IntPtr hTheme, int part, int state, int prop)
         {
-            int hResult = NativeMethods.GetThemeFont(hTheme, hdc, part, state, prop, out LOGFONT logFont);
+            int hResult = NativeMethods.GetThemeFont(hTheme, IntPtr.Zero, part, state, prop, out LOGFONT logFont);
             return hResult != Constants.S_OK ? null : Font.FromLogFont(logFont);
         }
 

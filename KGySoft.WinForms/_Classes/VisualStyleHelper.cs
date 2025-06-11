@@ -276,18 +276,7 @@ namespace KGySoft.WinForms
         internal static Color GetTextColor(IntPtr hTheme, int part, int state, Color defaultColor)
             => UxTheme.GetThemeColor(hTheme, part, state, Constants.TMT_COLOR, defaultColor);
 
-        internal static Font? GetFont(IntPtr hTheme, Graphics g, int part)
-        {
-            IntPtr hdc = g.GetHdc();
-            try
-            {
-                return UxTheme.GetThemeFont(hTheme, hdc, part, 0, Constants.TMT_FONT);
-            }
-            finally
-            {
-                g.ReleaseHdc(hdc);
-            }
-        }
+        internal static Font? GetFont(IntPtr hTheme, int part) => UxTheme.GetThemeFont(hTheme, part, 0, Constants.TMT_FONT);
 
         internal static void ClearCaches()
         {

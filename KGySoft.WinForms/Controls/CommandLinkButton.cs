@@ -943,11 +943,7 @@ namespace KGySoft.WinForms.Controls
                 if (themedFontLarge == null)
                 {
                     if (IsNativeVisualStylesRenderingAvailable)
-                    {
-                        // Graphics of the screen is alright, we need to get the Font for the default system DPI.
-                        using Graphics g = Graphics.FromHwnd(IntPtr.Zero);
-                        themedFontLarge = VisualStyleHelper.GetFont(VisualStyleHelper.ButtonTheme, g, (int)BUTTONPARTS.BP_COMMANDLINK);
-                    }
+                        themedFontLarge = VisualStyleHelper.GetFont(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_COMMANDLINK);
 
                     if (themedFontLarge == null)
                     {
