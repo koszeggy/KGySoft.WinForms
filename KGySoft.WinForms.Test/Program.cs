@@ -28,9 +28,15 @@ namespace KGySoft.WinForms.Test
                 dlg.Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.UseCommandLinks;
                 dlg.Buttons.Add(new TaskDialogButton("btnControlsTest", "Controls Test"));
                 dlg.Buttons.Add(new TaskDialogButton("btnTaskDialogTest", "TaskDialog Test"));
+                //dlg.Buttons.Add(new TaskDialogButton("btnMisc", "Misc Tests"));
 
                 dlg.Buttons["btnControlsTest"].Click += (sender, args) => ShowControlsTestMenu(((TaskDialogButton)sender).Parent);
                 dlg.Buttons["btnTaskDialogTest"].Click += (sender, args) => ShowTaskDialogTestMenu(((TaskDialogButton)sender).Parent);
+                //dlg.Buttons["btnMisc"].Click += (sender, args) =>
+                //{
+                //    using var frm = new MiscTest();
+                //    frm.ShowDialog();
+                //};
                 dlg.Show();
             }
         }
@@ -133,19 +139,6 @@ namespace KGySoft.WinForms.Test
                 //dlg.Buttons.Add(new TaskDialogButton("Toggle PositionRelativeToWindow") { Description = "Off", Tag = TaskDialogOptions.PositionRelativeToWindow });
                 dlg.Buttons.Add(new TaskDialogButton("Toggle RightToLeftLayout") { Description = "Off", Tag = TaskDialogOptions.RightToLeftLayout });
                 dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-
-                //dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize\nasfsafd\nasdfsaf") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-                //dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-                //dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-                //dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-                //dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-                //dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-                //dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-                //dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-                //dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-                //dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
-                //dlg.CheckBoxText = "bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla\nmegint csak bla bla bla bla bla";
-                //dlg.ShowDetailsText = "bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla bla\nmegint csak bla bla bla bla bla";
                 dlg.Width = 300;
 
                 foreach (TaskDialogButton button in dlg.Buttons)
@@ -239,7 +232,7 @@ namespace KGySoft.WinForms.Test
                             state = (state + 1) % states.Length;
                             break;
                         case TaskDialogProgressBarStyle.Regular:
-                            td.MainInstruction = "Progress: " + (td.ProgressBarValue == 0 ? "0 %" : String.Format("{0:P0}", (float)td.ProgressBarValue / td.ProgressBarMaximum));
+                            td.MainInstruction = "Progress: " + (td.ProgressBarValue == 0 ? "0 %" : $"{(float)td.ProgressBarValue / td.ProgressBarMaximum:P0}");
                             break;
                     }
                 };
@@ -273,13 +266,12 @@ namespace KGySoft.WinForms.Test
         private static void btnTimerTest_Click(object sender, HandledEventArgs e)
         {
             TaskDialog senderDialog = ((TaskDialogButton)sender).Parent;
-            const string elapsed = "Elapsed: {0} seconds";
 
             using (TaskDialog dlg = new TaskDialog())
             {
                 dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
                 dlg.Caption = "Timer demo";
-                dlg.MainInstruction = String.Format(elapsed, 0);
+                dlg.MainInstruction = "Elapsed: 0 seconds";
                 dlg.StandardButtons = TaskDialogStandardButtonFlags.Close;
 
                 bool resetRequested = false;
@@ -288,7 +280,7 @@ namespace KGySoft.WinForms.Test
 
                 dlg.Tick += (td, args) =>
                 {
-                    ((TaskDialog)td).MainInstruction = String.Format(elapsed, args.Elapsed / 1000);
+                    ((TaskDialog)td).MainInstruction = $"Elapsed: {args.Elapsed / 1000} seconds";
                     args.Reset = resetRequested;
                     resetRequested = false;
                 };
@@ -418,6 +410,7 @@ namespace KGySoft.WinForms.Test
             using (TaskDialog dlg = new TaskDialog())
             {
                 dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
+                dlg.Options = dlg.ForceCompatibilityMode ? TaskDialogOptions.TranslateStandardButtons : TaskDialogOptions.None;
                 dlg.Caption = "Buttons test";
                 dlg.Message = "OK and Cancel buttons are standard ones, while Custom button is a custom one." + Environment.NewLine
                     + "You can define radio buttons, too.";
@@ -440,14 +433,14 @@ namespace KGySoft.WinForms.Test
                 };
 
                 dlg.RadioButtons.Add(new TaskDialogRadioButton("rbStandard", "Standard Button") { Checked = true });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("rbComamndLink", "Command Link Button with Glyph"));
+                dlg.RadioButtons.Add(new TaskDialogRadioButton("rbCommandLink", "Command Link Button with Glyph"));
                 dlg.RadioButtons.Add(new TaskDialogRadioButton("rbCommandNoLink", "Command Link Button without Glyph"));
                 dlg.RadioButtons["rbStandard"].Selected += (rb, args) =>
                 {
                     ((TaskDialogRadioButton)rb).Parent.Options = TaskDialogOptions.None;
                 };
 
-                dlg.RadioButtons["rbComamndLink"].Selected += (rb, args) =>
+                dlg.RadioButtons["rbCommandLink"].Selected += (rb, args) =>
                 {
                     ((TaskDialogRadioButton)rb).Parent.Options = TaskDialogOptions.UseCommandLinks;
                 };
@@ -475,6 +468,7 @@ namespace KGySoft.WinForms.Test
             using (TaskDialog dlg = new TaskDialog())
             {
                 dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
+                dlg.CustomIcon = dlg.CustomFooterIcon = Icons.Application;
                 dlg.Options = TaskDialogOptions.AllowCancel;
                 dlg.Caption = "Icons test";
                 dlg.MainInstruction = "Select an icon";
