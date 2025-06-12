@@ -208,7 +208,7 @@ namespace KGySoft.WinForms
             IntPtr hdc = g.GetHdc();
             try
             {
-                if (control?.HasDefaultScaling() == false)
+                if (control?.IsHandleCreated == true && !control.HasDefaultScaling())
                     hThemeWindow = UxTheme.OpenThemeDataForWindow(control.Handle, GetClassName(hTheme));
 
                 return UxTheme.GetThemePartSize(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, hdc, part, state,
