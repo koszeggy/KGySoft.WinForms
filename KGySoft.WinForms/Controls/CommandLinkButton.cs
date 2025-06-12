@@ -123,6 +123,7 @@ namespace KGySoft.WinForms.Controls
         private bool useDefaultGlyph = true;
         private bool isImageUpToDate = true;
         private bool dpiChanging;
+        //private bool isLoaded; // see the commented OnCreateControl
         private string? description;
 
         private Brush? pressedBrush;
@@ -1358,6 +1359,20 @@ namespace KGySoft.WinForms.Controls
                 defaultDescriptionFont.Scale(scale);
             CheckDpiChange();
         }
+
+        //  ISSUE: This would fix the appearance with System FlatStyle when DPI was changed after launching the application,
+        //  and showing the control on the primary display. But in same cases it causes Win32Exceptions "Failed to set Win32 parent window of the Control".
+        ///// <inheritdoc />
+        //protected override void OnCreateControl()
+        //{
+        //    base.OnCreateControl();
+        //    if (isLoaded)
+        //        return;
+
+        //    isLoaded = true;
+        //    if (IsNativeRendering && this.GetScale() != ScaleHelper.SystemScale)
+        //        RecreateHandle();
+        //}
 
         /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
