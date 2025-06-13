@@ -15,6 +15,8 @@
 
 #region Usings
 
+using KGySoft.Drawing.Imaging;
+
 #region Used Namespaces
 
 using System;
@@ -227,6 +229,10 @@ namespace KGySoft.WinForms.Forms
             = ThreadSafeCacheFactory.Create(GetSystemText, Comparer, cacheProfile);
 
         private static readonly TaskDialogStandardIcons[] iconsWithColoredHeader = [TaskDialogStandardIcons.SecuritySuccess, TaskDialogStandardIcons.SecurityWarning, TaskDialogStandardIcons.SecurityError, TaskDialogStandardIcons.SecurityShieldGray, TaskDialogStandardIcons.SecurityShieldBlue, TaskDialogStandardIcons.SecurityQuestion];
+
+        private static readonly Color mainInstructionsDefaultThemedColor = Color.FromArgb(0, 51, 153);
+        private static readonly Color dividerBottomDefaultThemedColor = Color.FromArgb(223, 223, 223);
+
         private static readonly Size mainIconReferenceSize = new Size(32, 32);
         private static readonly Size footerIconReferenceSize = new Size(16, 16);
         private static readonly Size buttonReferenceSize = new Size(76, 23);
@@ -364,8 +370,8 @@ namespace KGySoft.WinForms.Forms
                 if (mainInstructionsColor.IsEmpty)
                 {
                     var color = OSUtils.IsVistaOrLater
-                        ? new VisualStyleRenderer(Constants.ThemeClassTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 1).GetColor(ColorProperty.TextColor)
-                        : Color.FromArgb(0, 51, 153);
+                        ? VisualStyleHelper.GetTextColor(VisualStyleHelper.TaskDialogTheme, Constants.TDLG_MAININSTRUCTIONPANE, 1, mainInstructionsDefaultThemedColor)
+                        : mainInstructionsDefaultThemedColor;
 
                     // ISSUE: When changing from high contrast to normal theme, the VisualStyleRenderer.GetColor(ColorProperty.TextColor) keeps returning
                     // the high contrast SystemColors.ControlText color for a while. Skipping the caching until returning from OnSystemColorsChanged or
@@ -374,6 +380,7 @@ namespace KGySoft.WinForms.Forms
                         return color;
                     mainInstructionsColor = color;
                 }
+
                 return mainInstructionsColor;
             }
         }
@@ -1491,12 +1498,18 @@ namespace KGySoft.WinForms.Forms
 
             // colors
             bool isThemed = VisualStyleHelper.RenderWithVisualStyles;
+            bool highContrast = VisualStyleHelper.HighContrast;
             cacheMainInstructionsColor ??= isThemed; // Not allowing caching the themed fore color if starting with non-themed rendering. See more details in ThemedMainInstructionsColor.
-            BackColor = isThemed ? Color.FromArgb(240, 240, 240) : SystemColors.Control;
             pnlMain.BackColor = isThemed ? SystemColors.Window : SystemColors.Control;
-            pnlMain.ForeColor = isThemed ? SystemColors.WindowText : SystemColors.ControlText;
-            Color dividerBottom = isThemed ? Color.FromArgb(223, 223, 223) : SystemColors.Control;
-            Color dividerTop = isThemed ? Color.White : SystemColors.GrayText;
+            pnlMain.ForeColor = isThemed ?
+                SystemColors.WindowText :
+                SystemColors.WindowText.ToColor32().TolerantEquals(SystemColors.Control, 128) ? SystemColors.ControlText : SystemColors.WindowText;
+            pnlCommandLinks.BackColor = isThemed ? SystemColors.Window : SystemColors.Control;
+            pnlCommandLinks.ForeColor = isThemed ? SystemColors.WindowText : SystemColors.ControlText;
+            Color dividerBottom = !isThemed ? SystemColors.Control
+                : highContrast ? SystemColors.WindowText
+                : dividerBottomDefaultThemedColor;
+            Color dividerTop = isThemed ? SystemColors.Window : SystemColors.GrayText;
             pnlDividerMainBottom.BackColor = dividerBottom;
             pnlDividerControlsBottom.BackColor = dividerBottom;
             pnlDividerFooterTop.BackColor = dividerTop;
@@ -1509,7 +1522,17 @@ namespace KGySoft.WinForms.Forms
             }
             else
             {
-                lblMainInstruction.ForeColor = isThemed ? ThemedMainInstructionsColor : SystemColors.ControlText;
+                Color foreColor;
+                if (isThemed)
+                {
+                    foreColor = ThemedMainInstructionsColor;
+                    if (foreColor.ToColor32().TolerantEquals(SystemColors.Window, 128))
+                        foreColor = SystemColors.WindowText;
+                }
+                else
+                    foreColor = SystemColors.ControlText;
+
+                lblMainInstruction.ForeColor = foreColor;
                 pnlMainIconBackground.BackColor = pnlMain.BackColor;
             }
 
@@ -2573,6 +2596,7 @@ namespace KGySoft.WinForms.Forms
         {
             PointF scale = this.GetScale();
             Configuration cfg = GetConfiguration();
+            mainInstructionsColor = Color.Empty;
             ResetTheme(scale);
             ResetWidths(cfg, scale);
             ResetHeights(cfg);

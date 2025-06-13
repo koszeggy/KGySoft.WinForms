@@ -173,7 +173,6 @@ namespace KGySoft.WinForms.Forms
             // 
             // lblMainInstruction
             // 
-            this.lblMainInstruction.AutoEllipsis = true;
             this.lblMainInstruction.AutoSize = true;
             this.lblMainInstruction.Dock = System.Windows.Forms.DockStyle.Top;
             this.lblMainInstruction.EnabledBackColor = System.Drawing.Color.Transparent;
