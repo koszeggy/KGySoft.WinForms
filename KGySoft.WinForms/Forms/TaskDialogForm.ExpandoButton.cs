@@ -167,7 +167,7 @@ namespace KGySoft.WinForms.Forms
             {
                 using Graphics g = Graphics.FromHwnd(Handle);
                 g.SetTextRenderingQuality(TextRenderingQuality, UseCompatibleTextRendering);
-                var imageSize = GetImageSize(g);
+                var imageSize = GetImageSize();
                 return LayoutUtils.UnionSizes(imageSize, GetTextSize(g, imageSize, null, proposedSize) + new Size(0, 1)) // +1 for focus rectangle
                     + new Size(Margin.Left + imageSize.Width, Margin.Top);
             }
@@ -265,25 +265,7 @@ namespace KGySoft.WinForms.Forms
 
             #region Private Methods
 
-            //private void AdjustHeight()
-            //{
-            //    using (Graphics g = Graphics.FromHwnd(Handle))
-            //    {
-            //        Height = Math.Max(imageSize.Height, GetTextSize(g, null).Height + Margin.Vertical);
-            //    }
-            //}
-
-            private Size GetImageSize(Graphics g)
-            {
-                if (VisualStyleHelper.RenderWithVisualStyles)
-                {
-                    if (OSUtils.IsVistaOrLater)
-                        return VisualStyleHelper.GetPartSize(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)EXPANDOBUTTONSTATES.TDLGEBS_NORMAL, true);
-                    return DefaultImageNormalDown.Size;
-                }
-
-                return referenceImageSize.Scale(this.GetScale());
-            }
+            private Size GetImageSize() => referenceImageSize.Scale(this.GetScale());
 
             private Image ExtractBitmap(Icon icon, string name)
             {
@@ -333,8 +315,11 @@ namespace KGySoft.WinForms.Forms
                         state = EXPANDOBUTTONSTATES.TDLGEBS_EXPANDEDNORMAL;
                 }
 
-                imageSize = GetImageSize(g);
-                VisualStyleHelper.Render(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)state, new Rectangle(Point.Empty, imageSize));
+                imageSize = GetImageSize();
+                if (imageSize == VisualStyleHelper.GetPartSize(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)EXPANDOBUTTONSTATES.TDLGEBS_NORMAL, true))
+                    VisualStyleHelper.Render(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)state, new Rectangle(Point.Empty, imageSize));
+                else
+                    VisualStyleHelper.RenderScaled(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)state, new Rectangle(Point.Empty, imageSize));
             }
 
             private void PaintThemedButton(Graphics g, out Size imageSize)
@@ -384,16 +369,23 @@ namespace KGySoft.WinForms.Forms
                     }
 
                     ImageAttributes? attr = null;
-                    if (isHovered && !isPressed)
+                    try
                     {
-                        attr = new ImageAttributes();
-                        ColorMap map = new ColorMap { OldColor = SystemColors.ControlText, NewColor = SystemColors.HotTrack };
-                        attr.SetRemapTable(new ColorMap[] { map }, ColorAdjustType.Bitmap);
-                    }
+                        if (isHovered && !isPressed)
+                        {
+                            attr = new ImageAttributes();
+                            ColorMap map = new ColorMap { OldColor = SystemColors.ControlText, NewColor = SystemColors.HotTrack };
+                            attr.SetRemapTable(new ColorMap[] { map }, ColorAdjustType.Bitmap);
+                        }
 
-                    rect.Inflate(-4, -4);
-                    g.DrawImage(image, new Rectangle(rect.Left + offset, rect.Top + offset, rect.Width, rect.Height),
-                        rect.Left, rect.Top, rect.Width, rect.Height, GraphicsUnit.Pixel, attr);
+                        rect.Inflate(-4, -4);
+                        g.DrawImage(image, new Rectangle(rect.Left + offset, rect.Top + offset, rect.Width, rect.Height),
+                            rect.Left, rect.Top, rect.Width, rect.Height, GraphicsUnit.Pixel, attr);
+                    }
+                    finally
+                    {
+                        attr?.Dispose();
+                    }
                 }
             }
 
