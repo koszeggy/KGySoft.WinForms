@@ -179,8 +179,8 @@ namespace KGySoft.WinForms.Forms
             this.lblMainInstruction.EnabledBackColor = System.Drawing.Color.Transparent;
             this.lblMainInstruction.Location = new System.Drawing.Point(0, 0);
             this.lblMainInstruction.Name = "lblMainInstruction";
-            this.lblMainInstruction.Padding = new System.Windows.Forms.Padding(8);
-            this.lblMainInstruction.Size = new System.Drawing.Size(310, 29);
+            this.lblMainInstruction.Padding = new System.Windows.Forms.Padding(8, 12, 8, 5);
+            this.lblMainInstruction.Size = new System.Drawing.Size(310, 30);
             this.lblMainInstruction.TabIndex = 1;
             this.lblMainInstruction.Text = "lblMainInstruction";
             // 

@@ -230,7 +230,21 @@ namespace KGySoft.WinForms.Forms
         private static readonly Size mainIconReferenceSize = new Size(32, 32);
         private static readonly Size footerIconReferenceSize = new Size(16, 16);
         private static readonly Size buttonReferenceSize = new Size(76, 23);
-        private static readonly Padding buttonReferenceMargin = new Padding(3, 0, 3, 0);
+
+        private static readonly Padding buttonsReferenceMargin = new Padding(3, 0, 3, 0);
+        private static readonly Padding mainInstructionReferencePadding = new Padding(8, 12, 8, 5);
+        private static readonly Padding mainInstructionSpecialColorsReferencePadding = new Padding(8, 15, 8, 15);
+        private static readonly Padding labelReferencePadding = new Padding(8, 5, 8, 5);
+        private static readonly Padding textsPanelReferencePadding = new Padding(0, 10, 0, 10);
+        private static readonly Padding progressBarReferencePadding = new Padding(5);
+        private static readonly Padding controlsPanelReferencePadding = new Padding(10, 5, 10, 5);
+        private static readonly Padding radioButtonsReferencePadding = new Padding(5, 0, 5, 5);
+        private static readonly Padding buttonsPanelReferenceMargin = new Padding(3);
+        private static readonly Padding buttonsPanelReferencePadding = new Padding(3);
+        private static readonly Padding expandoButtonReferenceMargin = new Padding(3);
+        private static readonly Padding checkBoxReferenceMargin = new Padding(8, 3, 3, 3);
+        private static readonly Padding footerReferenceMargin = new Padding(3, 0, 3, 0);
+        private static readonly Padding footerReferencePadding = new Padding(5, 7, 5, 7);
 
         #endregion
 
@@ -491,22 +505,12 @@ namespace KGySoft.WinForms.Forms
             Point suggestedCenter = e.SuggestedBounds.Location + new Size(e.SuggestedBounds.Size.Width / 2, e.SuggestedBounds.Size.Height / 2);
             try
             {
-                ResetConstraints(scale);
+                ResetConstraints(scale, false);
                 if (cfg.HasMainIcon)
                     pnlMain.ColumnStyles[0].Width = mainIconBackgroundReferenceWidth.Scale(scale.X);
                 if (cfg.HasFooterIcon)
                     pnlFooter.ColumnStyles[0].Width = footerIconColumnReferenceWidth.Scale(scale.X);
-
-                if (cfg.HasButtons)
-                {
-                    foreach (AdvancedButton button in pnlButtons.Controls)
-                    {
-                        // NOTE: FlowLayoutPanel does not like if the unconstrained dimension of MaximumSize is 0 here.
-                        // Strange, it works well when setting MaximumSize = (0, y) before adding the button it to the panel.
-                        button.MinimumSize = buttonReferenceSize.Scale(scale);
-                        button.MaximumSize = new Size(Int32.MaxValue, buttonReferenceSize.Height.Scale(scale.Y));
-                    }
-                }
+                ResetPaddings(scale, false);
             }
             finally
             {
@@ -676,7 +680,7 @@ namespace KGySoft.WinForms.Forms
             RightToLeft = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
 
             // size constraints
-            ResetConstraints(scale);
+            ResetConstraints(scale, true);
 
             // visibilities
             ResetVisibilities(cfg);
@@ -684,6 +688,9 @@ namespace KGySoft.WinForms.Forms
             // setting icon
             ResetMainIcon(cfg, scale);
             ResetFooterIcon(cfg, scale);
+
+            // paddings and margins (should be after resetting main icon)
+            ResetPaddings(scale, true);
 
             // set theme
             ResetTheme(scale);
@@ -712,7 +719,7 @@ namespace KGySoft.WinForms.Forms
             }
 
             // set radio buttons
-            ResetRadioButtons(cfg);
+            ResetRadioButtons(cfg, scale);
 
             // buttons
             ResetButtons(cfg, scale);
@@ -735,10 +742,47 @@ namespace KGySoft.WinForms.Forms
             ResetHeights(cfg);
         }
 
-        private void ResetConstraints(PointF scale)
+        private void ResetConstraints(PointF scale, bool isFullReset)
         {
             pnlMainTexts.MinimumSize = new Size(0, mainTextReferenceMinHeight).Scale(scale);
             pnlMainIconBackground.MinimumSize = new Size(0, mainIconBackgroundReferenceHeight).Scale(scale);
+            
+            // exiting if buttons will be completely reset
+            if (isFullReset)
+                return;
+
+            foreach (AdvancedButton button in pnlButtons.Controls)
+            {
+                // NOTE: FlowLayoutPanel does not like if the unconstrained dimension of MaximumSize is 0 here.
+                // Strange, it works well when setting MaximumSize = (0, y) before adding the button it to the panel.
+                button.MinimumSize = buttonReferenceSize.Scale(scale);
+                button.MaximumSize = new Size(Int32.MaxValue, buttonReferenceSize.Height.Scale(scale.Y));
+            }
+        }
+
+        private void ResetPaddings(PointF scale, bool isFullReset)
+        {
+            // No need to reset the icons paddings, because they are centered anyway. The default padding just ensures that bigger icons have some space around them.
+            lblMainInstruction.Padding = isSpecialHeadColors ? mainInstructionSpecialColorsReferencePadding.Scale(scale) : mainInstructionReferencePadding.Scale(scale);
+            pnlMainTexts.Padding = textsPanelReferencePadding.Scale(scale);
+            lblMessage.Padding = lblDetailsMain.Padding = labelReferencePadding.Scale(scale);
+            pnlProgressBar.Padding = progressBarReferencePadding.Scale(scale);
+            pnlRadioButtons.Padding = pnlCommandLinks.Padding = controlsPanelReferencePadding.Scale(scale);
+            pnlButtons.Margin = buttonsPanelReferenceMargin.Scale(scale);
+            pnlButtons.Padding = buttonsPanelReferencePadding.Scale(scale);
+            btnShowHideDetails.Margin = expandoButtonReferenceMargin.Scale(scale);
+            chbCheckBox.Margin = checkBoxReferenceMargin.Scale(scale);
+            lblFooter.Margin = footerReferenceMargin.Scale(scale);
+            lblFooter.Padding = lblDetailsFooter.Padding = footerReferencePadding.Scale(scale);
+
+            // exiting if buttons will be completely reset
+            if (isFullReset)
+                return;
+
+            foreach (AdvancedButton button in pnlButtons.Controls)
+                button.Margin = buttonsReferenceMargin.Scale(scale);
+            foreach (AdvancedRadioButton radioButton in pnlRadioButtons.Controls)
+                radioButton.Padding = radioButtonsReferencePadding.Scale(scale);
         }
 
         private void ResetChecksWidth(Configuration cfg, bool minSize)
@@ -883,7 +927,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetRadioButtons(Configuration cfg)
+        private void ResetRadioButtons(Configuration cfg, PointF scale)
         {
             if (dialogState != TaskDialogStatus.Initializing)
             {
@@ -907,7 +951,7 @@ namespace KGySoft.WinForms.Forms
                     Checked = !checkedSet && radioButton.Checked,
                     Enabled = radioButton.Enabled,
                     Dock = DockStyle.Top,
-                    Padding = new Padding(5, 0, 5, 5),
+                    Padding = radioButtonsReferencePadding.Scale(scale),
                     Tag = radioButton
                 };
 
@@ -963,7 +1007,7 @@ namespace KGySoft.WinForms.Forms
                             Enabled = button.Enabled,
                             TextImageRelation = TextImageRelation.ImageBeforeText,
                             Tag = button,
-                            Margin = buttonReferenceMargin.Scale(scale),
+                            Margin = buttonsReferenceMargin.Scale(scale),
                             MinimumSize = buttonReferenceSize.Scale(scale),
                             MaximumSize = new Size(Int32.MaxValue, buttonReferenceSize.Height.Scale(scale.Y)),
                             IsElevated = button.IsElevated
@@ -1349,7 +1393,7 @@ namespace KGySoft.WinForms.Forms
             {
                 UseVisualStyleBackColor = true,
                 AutoSize = false,
-                Margin = buttonReferenceMargin.Scale(scale),
+                Margin = buttonsReferenceMargin.Scale(scale),
                 Size = new Size(70, 23).Scale(scale),
                 MinimumSize = buttonReferenceSize.Scale(scale),
                 MaximumSize = new Size(Int32.MaxValue, buttonReferenceSize.Height.Scale(scale.Y)),
@@ -1462,20 +1506,16 @@ namespace KGySoft.WinForms.Forms
             {
                 lblMainInstruction.ForeColor = host.Icon == TaskDialogStandardIcons.SecurityWarning ? Color.Black : Color.White;
                 pnlMainIconBackground.BackColor = gradientStart;
-                lblMainInstruction.Padding = new Padding(8, 15, 8, 15);
             }
             else
             {
                 lblMainInstruction.ForeColor = isThemed ? ThemedMainInstructionsColor : SystemColors.ControlText;
                 pnlMainIconBackground.BackColor = pnlMain.BackColor;
-                lblMainInstruction.Padding = new Padding(8, 12, 8, 5);
             }
 
             // progress bar
             if (!OSUtils.IsVistaOrLater)
-            {
                 pbProgress.Style = AdvancedProgressBarStyle.ThemedShiny;
-            }
         }
 
         private void ResetMainIcon(Configuration cfg, PointF scale)
@@ -1796,7 +1836,7 @@ namespace KGySoft.WinForms.Forms
             if (origSize != preferredSize)
                 ResetHeights(GetConfiguration());
 
-            // workaround: hide scrollbar if gets accidentaly visible
+            // workaround: hide scrollbar if it gets accidentally visible
             int screenHeight = Screen.FromControl(this).WorkingArea.Height;
             if (Height < screenHeight)
                 AdjustFormScrollbars(false);
@@ -2322,7 +2362,7 @@ namespace KGySoft.WinForms.Forms
                     ResetVisibilities(cfg);
                 }
 
-                ResetRadioButtons(cfg);
+                ResetRadioButtons(cfg, this.GetScale());
             }
             finally
             {
@@ -2401,7 +2441,7 @@ namespace KGySoft.WinForms.Forms
                 int formHeight = Math.Min(Height + diff, screenHeight);
                 resetHeightsNeeded = Height >= screenHeight || Height + diff > screenHeight;
 
-                // when expnding, setting form height first to prevent appearing scrollbars for a moment
+                // when expanding, setting form height first to prevent appearing scrollbars for a moment
                 if (isDetailsExpanded && !resetHeightsNeeded)
                     Height = formHeight;
 
@@ -2478,7 +2518,7 @@ namespace KGySoft.WinForms.Forms
             else if (Top - screen.Top + Height > screenHeight)
                 Top = screenHeight + screen.Top - Height;
 
-            // workaround: hide scrollbar if gets accidentaly visible
+            // workaround: hide scrollbar if it gets accidentally visible
             if (Height < screenHeight)
                 AdjustFormScrollbars(false);
 
