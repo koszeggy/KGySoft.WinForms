@@ -116,7 +116,7 @@ namespace KGySoft.WinForms.Components
                     return;
 
                 CheckChangePropertyValue();
-                TaskDialog.ReplaceIcon(ref customIcon, value, 16);
+                customIcon = value;
                 OnPropertyChanged(PropertyCustomIcon);
             }
         }
@@ -186,14 +186,7 @@ namespace KGySoft.WinForms.Components
             click = null;
 
             if (disposing)
-            {
-                if (customIcon != null)
-                {
-                    customIcon.Dispose();
-                }
-
                 customIcon = null;
-            }
         }
 
         #endregion

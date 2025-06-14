@@ -210,6 +210,7 @@ namespace KGySoft.WinForms.Forms
         private const int mainIconBackgroundReferenceWidth = 50;
         private const int footerIconColumnReferenceWidth = 24;
         private const int checkBoxAndExpandoColumnReferenceWidth = 180;
+        private const int progressBarReferenceHeight = 15;
 
         #endregion
 
@@ -232,8 +233,6 @@ namespace KGySoft.WinForms.Forms
         private static readonly Color mainInstructionsDefaultThemedColor = Color.FromArgb(0, 51, 153);
         private static readonly Color dividerBottomDefaultThemedColor = Color.FromArgb(223, 223, 223);
 
-        private static readonly Size mainIconReferenceSize = new Size(32, 32);
-        private static readonly Size footerIconReferenceSize = new Size(16, 16);
         private static readonly Size buttonReferenceSize = new Size(76, 23);
 
         private static readonly Padding buttonsReferenceMargin = new Padding(3, 0, 3, 0);
@@ -771,6 +770,7 @@ namespace KGySoft.WinForms.Forms
             pnlMainTexts.Padding = textsPanelReferencePadding.Scale(scale);
             lblMessage.Padding = lblDetailsMain.Padding = labelReferencePadding.Scale(scale);
             pnlProgressBar.Padding = progressBarReferencePadding.Scale(scale);
+            pbProgress.Height = progressBarReferenceHeight.Scale(scale.Y);
             pnlRadioButtons.Padding = pnlCommandLinks.Padding = controlsPanelReferencePadding.Scale(scale);
             pnlButtons.Margin = buttonsPanelReferenceMargin.Scale(scale);
             pnlButtons.Padding = buttonsPanelReferencePadding.Scale(scale);
@@ -1150,9 +1150,11 @@ namespace KGySoft.WinForms.Forms
 
                     // Workaround: pnlMainTexts.Height (AutoSize does not work)
                     if (cfg.HasMainText)
+                    {
                         pnlMainTexts.Height = (cfg.HasMessage ? lblMessage.Height : 0)
-                                              + (cfg.HasDetails && cfg.IsDetailsVisibleInMain ? lblDetailsMain.Height : 0)
-                                              + pnlMainTexts.Padding.Vertical;
+                            + (cfg.HasDetails && cfg.IsDetailsVisibleInMain ? lblDetailsMain.Height : 0)
+                            + pnlMainTexts.Padding.Vertical;
+                    }
                     else
                         pnlMainTexts.Height = pnlMainTexts.MinimumSize.Height;
 
@@ -1172,13 +1174,16 @@ namespace KGySoft.WinForms.Forms
                         pnlRadioButtons.Height = lastButton.Top + lastButton.Height + 10;
                     }
 
+                    if (cfg.HasProgressBar)
+                        pnlProgressBar.Height = pbProgress.Height + pnlProgressBar.Padding.Vertical;
+
                     // pnlMain(Content) height (AutoSize does not work correctly)
                     int desiredHeight;
                     if (cfg.HasCommandLinks)
                         desiredHeight = pnlCommandLinks.Top + pnlCommandLinks.Height;
                     else if (cfg.HasRadioButtons)
                         desiredHeight = pnlRadioButtons.Top + pnlRadioButtons.Height;
-                    else if (host.ProgressBarStyle != TaskDialogProgressBarStyle.None)
+                    else if (cfg.HasProgressBar)
                         desiredHeight = pnlProgressBar.Top + pnlProgressBar.Height;
                     else if (cfg.HasMainText)
                         desiredHeight = pnlMainTexts.Top + pnlMainTexts.Height;
@@ -1573,57 +1578,24 @@ namespace KGySoft.WinForms.Forms
 
             Icon icon;
             if (!hasMainIcon)
-                icon = Resources.TaskDialogIcon;
+                icon = OSUtils.IsVistaOrLater ? Icons.FromFile("imageres", 116) : Resources.TaskDialogIcon;
             else if (host.CustomIcon != null)
                 icon = host.CustomIcon;
             else
+                icon = host.Icon.ToIcon();
+
+            pbMainIcon.Image?.Dispose();
+            if (hasMainIcon)
             {
-                // Will not be disposed because Icon property uses the instance
-                switch (host.Icon)
-                {
-                    case TaskDialogStandardIcons.Information:
-                        icon = Icons.SystemInformation;
-                        break;
-                    case TaskDialogStandardIcons.Warning:
-                        icon = Icons.SystemWarning;
-                        break;
-                    case TaskDialogStandardIcons.Error:
-                        icon = Icons.SystemError;
-                        break;
-                    case TaskDialogStandardIcons.Question:
-                        icon = Icons.SystemQuestion;
-                        break;
-                    case TaskDialogStandardIcons.SecuritySuccess:
-                        icon = Icons.SecuritySuccess;
-                        break;
-                    case TaskDialogStandardIcons.SecurityWarning:
-                        icon = Icons.SecurityWarning;
-                        break;
-                    case TaskDialogStandardIcons.SecurityError:
-                        icon = Icons.SecurityError;
-                        break;
-                    case TaskDialogStandardIcons.SecurityShield:
-                    case TaskDialogStandardIcons.SecurityShieldBlue:
-                    case TaskDialogStandardIcons.SecurityShieldGray:
-                        icon = Icons.SystemShield;
-                        break;
-                    case TaskDialogStandardIcons.SecurityQuestion:
-                        icon = Icons.SecurityQuestion;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-
-            if (pbMainIcon.Image != null)
-                pbMainIcon.Image.Dispose();
-            using (var resizedIcon = icon.Resize(mainIconReferenceSize.Scale(scale)))
+                using var resizedIcon = icon.Resize(IconsHelper.LargeIconReferenceSize.Scale(scale));
                 pbMainIcon.Image = resizedIcon.ExtractBitmap(0);
+            }
+            else
+                pbMainIcon.Image = null;
 
-            // Bug: cannot dispose previous icon because DefaultIcon can be disposed, too. It is internal so I cannot check it.
-            //if (Icon != DefaultIcon)
-            //    Icon.Dispose();
-            Icon = host.FormIcon ?? icon;
+            // Bug: cannot dispose previous icon because DefaultIcon can be disposed, too.
+            var formIcon = host.FormIcon ?? icon;
+            Icon = formIcon;
 
             if (dialogState != TaskDialogStatus.Initializing &&
                 (isSpecialHeadColors != requireSpecialHeadColors || requireSpecialHeadColors))
@@ -1631,9 +1603,7 @@ namespace KGySoft.WinForms.Forms
                 // if changing to special colors, increasing height forward to prevent
                 // the flickering if scrollbars. 14 is the padding difference
                 if (isSpecialHeadColors != requireSpecialHeadColors && requireSpecialHeadColors)
-                {
                     Height += 14;
-                }
 
                 isSpecialHeadColors = requireSpecialHeadColors;
                 ResetTheme(scale);
@@ -1641,9 +1611,7 @@ namespace KGySoft.WinForms.Forms
                 ResetHeights(GetConfiguration());
             }
             else
-            {
                 isSpecialHeadColors = requireSpecialHeadColors;
-            }
         }
 
         private void ResetFooterIcon(Configuration cfg, PointF scale)
@@ -1652,58 +1620,20 @@ namespace KGySoft.WinForms.Forms
             pnlFooterIcon.Visible = hasFooterIcon;
             pnlFooter.ColumnStyles[0].Width = hasFooterIcon ? footerIconColumnReferenceWidth.Scale(scale.X) : 0;
             if (hasFooterIcon)
-                pbFooterIcon.Width = footerIconReferenceSize.Width.Scale(scale.X);
+                pbFooterIcon.Width = IconsHelper.SmallIconReferenceSize.Width.Scale(scale.X);
 
+            pbFooterIcon.Image?.Dispose();
             if (!hasFooterIcon)
-                return;
-
-            if (host.CustomFooterIcon != null)
             {
-                pbFooterIcon.Image = host.CustomFooterIcon.ToAlphaBitmap();
+                pbFooterIcon.Image = null;
                 return;
             }
 
-            Icon icon;
-            switch (host.FooterIcon)
-            {
-                case TaskDialogStandardIcons.Information:
-                    icon = Icons.SystemInformation;
-                    break;
-                case TaskDialogStandardIcons.Warning:
-                    icon = Icons.SystemWarning;
-                    break;
-                case TaskDialogStandardIcons.Error:
-                    icon = Icons.SystemError;
-                    break;
-                case TaskDialogStandardIcons.Question:
-                    icon = Icons.SystemQuestion;
-                    break;
-                case TaskDialogStandardIcons.SecuritySuccess:
-                    icon = Icons.SecuritySuccess;
-                    break;
-                case TaskDialogStandardIcons.SecurityWarning:
-                    icon = Icons.SecurityWarning;
-                    break;
-                case TaskDialogStandardIcons.SecurityError:
-                    icon = Icons.SecurityError;
-                    break;
-                case TaskDialogStandardIcons.SecurityShield:
-                case TaskDialogStandardIcons.SecurityShieldBlue:
-                case TaskDialogStandardIcons.SecurityShieldGray:
-                    icon = Icons.SystemShield;
-                    break;
-                case TaskDialogStandardIcons.SecurityQuestion:
-                    icon = Icons.SecurityQuestion;
-                    break;
-                default:
-                    throw new ArgumentOutOfRangeException();
-            }
-
-            using (icon)
-            {
-                using var resizedIcon = icon.Resize(footerIconReferenceSize.Scale(scale));
-                pbFooterIcon.Image = resizedIcon.ExtractBitmap(0);
-            }
+            Icon icon = host.CustomFooterIcon ?? host.FooterIcon.ToIcon();
+            using Icon resizedIcon = icon.Resize(IconsHelper.SmallIconReferenceSize.Scale(scale));
+            pbFooterIcon.Image = resizedIcon.ExtractBitmap(0);
+            if (host.CustomFooterIcon == null)
+                icon.Dispose();
         }
 
         private void FreeRadioButtons()
@@ -1759,9 +1689,7 @@ namespace KGySoft.WinForms.Forms
             try
             {
                 if (visibilityChange)
-                {
                     ResetVisibilities(cfg = GetConfiguration());
-                }
 
                 // because of suspending, control is not resized here
                 if (!updateDescription)
@@ -1870,9 +1798,7 @@ namespace KGySoft.WinForms.Forms
             {
                 IOrderedEnumerable<Control> controls = this.Controls.Cast<Control>().OrderBy(c => c.TabIndex);
                 foreach (Control control in controls)
-                {
                     control.BringToFront();
-                }
             }
             finally
             {
@@ -1886,15 +1812,11 @@ namespace KGySoft.WinForms.Forms
             {
                 // command link
                 if ((host.Options & (TaskDialogOptions.UseCommandLinks | TaskDialogOptions.UseCommandLinksNoIcon)) != 0)
-                {
                     return pnlCommandLinks.Controls[host.Buttons.Count - taskDialogControl.Id - 1];
-                }
 
                 // custom button - if there is no standard button, direct indexing
                 if (host.StandardButtons == TaskDialogStandardButtonFlags.None)
-                {
                     return pnlButtons.Controls[taskDialogControl.Id];
-                }
 
                 // if there are standard buttons, searching
                 foreach (Control control in pnlButtons.Controls)
@@ -2169,9 +2091,7 @@ namespace KGySoft.WinForms.Forms
 
                     ResetDefaultButton(cfg);
                     if (host.Width == 0)
-                    {
                         ResetWidths(cfg, scale);
-                    }
 
                     ResetHeights(cfg);
                     return;
@@ -2216,9 +2136,7 @@ namespace KGySoft.WinForms.Forms
                     {
                         // turning off progress bar
                         if (host.ProgressBarStyle == TaskDialogProgressBarStyle.None)
-                        {
                             pnlProgressBar.Visible = false;
-                        }
                         // turning on progress bar
                         else
                         {
@@ -2360,9 +2278,7 @@ namespace KGySoft.WinForms.Forms
 
             ResetDefaultButton(cfg);
             if (host.Width == 0 || buttonsChanged)
-            {
                 ResetWidths(cfg, scale);
-            }
 
             ResetHeights(cfg);
         }
@@ -2374,11 +2290,8 @@ namespace KGySoft.WinForms.Forms
             try
             {
                 // updating visibilities if the radio buttons panel will just appear/disappear
-                if (!pnlRadioButtons.Visible && cfg.HasRadioButtons ||
-                    pnlRadioButtons.HasChildren && !cfg.HasRadioButtons)
-                {
+                if (!pnlRadioButtons.Visible && cfg.HasRadioButtons || pnlRadioButtons.HasChildren && !cfg.HasRadioButtons)
                     ResetVisibilities(cfg);
-                }
 
                 ResetRadioButtons(cfg, this.GetScale());
             }
@@ -2444,11 +2357,8 @@ namespace KGySoft.WinForms.Forms
                 // counting icon height only when it is non-themed or there is no main instruction
                 int iconHeight = 0;
                 bool hasMainInstruction = !String.IsNullOrEmpty(host.MainInstruction);
-                if ((host.Icon != TaskDialogStandardIcons.None || host.CustomIcon != null)
-                    && !(hasMainInstruction && host.Icon.In(iconsWithColoredHeader)))
-                {
+                if ((host.Icon != TaskDialogStandardIcons.None || host.CustomIcon != null) && !(hasMainInstruction && host.Icon.In(iconsWithColoredHeader)))
                     iconHeight = pnlMainIconBackground.MinimumSize.Height;
-                }
 
                 int minHeight = Math.Max(pnlMainTexts.MinimumSize.Height, iconHeight - (hasMainInstruction ? lblMainInstruction.Height : 0));
                 int mainTextHeight = Math.Max(minHeight,

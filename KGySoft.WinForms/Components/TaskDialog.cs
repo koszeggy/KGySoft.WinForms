@@ -23,7 +23,6 @@ using System.Linq;
 using System.Windows.Forms;
 
 using KGySoft.CoreLibraries;
-using KGySoft.Drawing;
 using KGySoft.WinForms.Forms;
 
 #endregion
@@ -459,8 +458,8 @@ namespace KGySoft.WinForms.Components
                     throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 isEmulatedStandardMainIcon = false;
-                ReplaceIcon(ref customIcon, null, 0);
-                ReplaceIcon(ref formIcon, null, 0);
+                customIcon = null;
+                formIcon = null;
                 icon = value;
                 if (IsDialogShowing)
                 {
@@ -484,13 +483,10 @@ namespace KGySoft.WinForms.Components
                 CheckCanChangeProperty();
                 isEmulatedStandardMainIcon = false;
                 icon = TaskDialogStandardIcons.None;
-                ReplaceIcon(ref customIcon, value, 32);
-                //ReplaceIcon(ref formIcon, value, 16);
+                customIcon = value;
                 formIcon = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyCustomIcon);
-                }
             }
         }
 
@@ -512,7 +508,7 @@ namespace KGySoft.WinForms.Components
                     throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 isEmulatedStandardFooterIcon = false;
-                ReplaceIcon(ref customFooterIcon, null, 0);
+                customFooterIcon = null;
                 footerIcon = value;
                 if (IsDialogShowing)
                 {
@@ -536,7 +532,7 @@ namespace KGySoft.WinForms.Components
                 CheckCanChangeProperty();
                 isEmulatedStandardFooterIcon = false;
                 footerIcon = TaskDialogStandardIcons.None;
-                ReplaceIcon(ref customFooterIcon, value, 16);
+                customFooterIcon = value;
                 if (IsDialogShowing)
                 {
                     dialogInstance!.PropertyChanged(PropertyCustomFooterIcon);
@@ -799,6 +795,25 @@ namespace KGySoft.WinForms.Components
         /// Gets or sets whether the <see cref="TaskDialog"/> is to be forced to operate in compatibility mode
         /// even if current operating system supports native task dialogs.
         /// </summary>
+        /// <remarks>
+        /// <para>Compatibility mode is automatically used in the following cases:
+        /// <list type="bullet">
+        /// <item>The operating system is not Windows Vista or later.</item>
+        /// <item><see cref="Application.EnableVisualStyles"/> was not called on launching the application.</item>
+        /// <item><see cref="TaskDialogOptions.TranslateStandardButtons"/> is set in <see cref="Options"/>.</item>
+        /// <item><see cref="Icon"/> is <see cref="TaskDialogStandardIcons.SecurityQuestion"/> (so the special header colors can be applied).</item>
+        /// <item>There is at least one button in <see cref="Buttons"/> that has a custom icon (<see cref="TaskDialogButton.CustomIcon"/> is set).</item>
+        /// </list></para>
+        /// <para>When this property is set to <see langword="true"/>, the following improvements can be observed:
+        /// <list type="bullet">
+        /// <item>If the custom buttons have <see cref="TaskDialogButtonBase.Description"/>, and buttons are displayed as standard buttons
+        /// rather than command links, then the descriptions are displayed as tool tips when the buttons are hovered by the mouse.</item>
+        /// <item><c>Ctrl+C</c> copies more information than the standard version (e.g. includes the texts of the radio buttons, indicates elevated icons, etc.)</item>
+        /// <item>When DPI changes, custom icons are adjusted as well.</item>
+        /// <item>In high contrast mode it is ensured that the content remains visible if Control and Window colors are the inverse of each other.</item>
+        /// <item>Better support of Right-to-Left mode.</item>
+        /// </list></para>
+        /// </remarks>
         public bool ForceCompatibilityMode
         {
             get => forceCompatibilityMode;
@@ -880,12 +895,10 @@ namespace KGySoft.WinForms.Components
             set
             {
                 isEmulatedStandardMainIcon = true;
-                ReplaceIcon(ref customIcon, value, 32);
+                customIcon = value;
                 formIcon = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyCustomIcon);
-                }
             }
         }
 
@@ -899,7 +912,7 @@ namespace KGySoft.WinForms.Components
             set
             {
                 isEmulatedStandardFooterIcon = true;
-                ReplaceIcon(ref customFooterIcon, value, 16);
+                customFooterIcon = value;
                 if (IsDialogShowing)
                 {
                     dialogInstance!.PropertyChanged(PropertyCustomFooterIcon);
@@ -957,7 +970,7 @@ namespace KGySoft.WinForms.Components
             detailsVisibleChanged = null;
 
             // disposing some objects regardless of disposing parameter because they can hold
-            // either unmanged resources or event subscriptions
+            // either unmanaged resources or event subscriptions
             if (dialogInstance != null)
             {
                 dialogInstance.Dispose();
@@ -978,9 +991,6 @@ namespace KGySoft.WinForms.Components
                 detailsText = null;
                 showDetailsText = null;
                 hideDetailsText = null;
-                ReplaceIcon(ref customIcon, null, 0);
-                ReplaceIcon(ref customFooterIcon, null, 0);
-                ReplaceIcon(ref formIcon, null, 0);
                 buttons = null!;
                 radioButtons = null!;
             }
@@ -991,36 +1001,6 @@ namespace KGySoft.WinForms.Components
         #endregion
 
         #region Methods
-
-        #region Static Methods
-
-        internal static void ReplaceIcon(ref Icon? value, Icon? newValue, int requiredSize)
-        {
-            // same instances
-            if (value == newValue)
-            {
-                return;
-            }
-
-            // disposing original instance
-            if (value != null)
-            {
-                value.Dispose();
-                value = null;
-            }
-
-            if (newValue == null)
-            {
-                return;
-            }
-
-            // This always creates a new instance, even if the size is the same.
-            value = newValue.Resize(new Size(requiredSize, requiredSize));
-        }
-
-        #endregion
-
-        #region Instance Methods
 
         #region Public Methods
 
@@ -1291,8 +1271,6 @@ namespace KGySoft.WinForms.Components
                 || icon == TaskDialogStandardIcons.SecurityQuestion // security question icon (due to blue background)
                 || buttons.Any(b => b.CustomIcon != null); // custom button icons
         }
-
-        #endregion
 
         #endregion
 

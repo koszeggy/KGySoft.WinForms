@@ -15,11 +15,13 @@
 
 #region Usings
 
+using System;
 using System.Drawing;
 
 using KGySoft.Collections;
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
+using KGySoft.WinForms.Components;
 
 #endregion
 
@@ -72,6 +74,21 @@ namespace KGySoft.WinForms
             imagesCache[key] = bitmap;
             return bitmap;
         }
+
+        internal static Icon ToIcon(this TaskDialogStandardIcons icon) => icon switch
+        {
+            TaskDialogStandardIcons.Information => Icons.SystemInformation,
+            TaskDialogStandardIcons.Warning => Icons.SystemWarning,
+            TaskDialogStandardIcons.Error => Icons.SystemError,
+            TaskDialogStandardIcons.Question => Icons.SystemQuestion,
+            TaskDialogStandardIcons.SecuritySuccess => Icons.SystemSecuritySuccess,
+            TaskDialogStandardIcons.SecurityWarning => Icons.SystemSecurityWarning,
+            TaskDialogStandardIcons.SecurityError => Icons.SystemSecurityError,
+            TaskDialogStandardIcons.SecurityShield or TaskDialogStandardIcons.SecurityShieldBlue or TaskDialogStandardIcons.SecurityShieldGray => Icons.SystemShield,
+            TaskDialogStandardIcons.SecurityQuestion => Icons.SystemSecurityQuestion,
+            _ => throw new ArgumentOutOfRangeException()
+        };
+
 
         #endregion
     }
