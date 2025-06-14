@@ -508,14 +508,10 @@ namespace KGySoft.WinForms.Forms
             PointF scale = e.NewScale;
             isResizing = true;
             SuspendLayout();
-            Point suggestedCenter = e.SuggestedBounds.Location + new Size(e.SuggestedBounds.Size.Width / 2, e.SuggestedBounds.Size.Height / 2);
+            Point suggestedCenter = e.SuggestedBounds.GetCenter();
             try
             {
                 ResetConstraints(scale, false);
-                if (cfg.HasMainIcon)
-                    pnlMain.ColumnStyles[0].Width = mainIconBackgroundReferenceWidth.Scale(scale.X);
-                if (cfg.HasFooterIcon)
-                    pnlFooter.ColumnStyles[0].Width = footerIconColumnReferenceWidth.Scale(scale.X);
                 ResetPaddings(scale, false);
             }
             finally
@@ -1240,7 +1236,7 @@ namespace KGySoft.WinForms.Forms
                 else
                     desiredClientHeight = pnlMain.Height - pnlMain.Top;
 
-                SetHeight(Math.Min(desiredClientHeight + heightClientDiff, screenHeight), suggestedCenter);
+                SetHeight(Math.Min(desiredClientHeight + heightClientDiff, screenHeight), suggestedCenter, screen);
             }
             finally
             {
@@ -1252,9 +1248,6 @@ namespace KGySoft.WinForms.Forms
                 isResetHeightPending = false;
                 ResetHeights(cfg, suggestedCenter);
             }
-
-            if (suggestedCenter == null && Top - screenBounds.Top + Height > screenHeight)
-                Top = screenHeight + screenBounds.Top - Height;
         }
 
         private void ResetWidths(Configuration cfg, PointF scale, Point? suggestedCenter = null)
@@ -1270,7 +1263,7 @@ namespace KGySoft.WinForms.Forms
                 if (host.Width > 0)
                 {
                     int desiredWidth = Math.Max(minimumWidth, cfg.DluToPixelsX(host.Width).Scale(scale.X));
-                    SetWidth(Math.Min(desiredWidth, screenWidth), suggestedCenter);
+                    SetWidth(Math.Min(desiredWidth, screenWidth), suggestedCenter, screen);
                 }
                 // auto width
                 else
@@ -1343,7 +1336,7 @@ namespace KGySoft.WinForms.Forms
                     }
 
                     int widthClientDiff = Width - ClientSize.Width;
-                    SetWidth(Math.Min(desiredWidth + widthClientDiff, screenWidth), suggestedCenter);
+                    SetWidth(Math.Min(desiredWidth + widthClientDiff, screenWidth), suggestedCenter, screen);
                 }
 
                 // setting pnlChecks minimum width (It always has priority regardless of form width. Its maximum size is smaller than minimum form size so it is ok)
@@ -1373,9 +1366,6 @@ namespace KGySoft.WinForms.Forms
                 // reset pnlChecks maximum width
                 if (cfg.HasVerification || cfg.HasDetails)
                     ResetChecksWidth(cfg, false);
-
-                if (suggestedCenter == null && Left - screenBounds.Left + Width > screenWidth)
-                    Left = screenWidth + screenBounds.Left - Width;
             }
             finally
             {
@@ -1383,16 +1373,18 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void SetWidth(int width, Point? suggestedCenter)
+        private void SetWidth(int width, Point? suggestedCenter, Screen screen)
         {
+            bool adjustExceeding = suggestedCenter == null;
             suggestedCenter ??= new Point(Left + Width / 2, Top + Height / 2);
-            Bounds = new Rectangle(suggestedCenter.Value.X - width / 2, suggestedCenter.Value.Y - Height / 2, width, Height);
+            Bounds = new Rectangle(suggestedCenter.Value.X - width / 2, suggestedCenter.Value.Y - Height / 2, width, Height).EnsureScreen(screen, adjustExceeding);
         }
 
-        private void SetHeight(int height, Point? suggestedCenter)
+        private void SetHeight(int height, Point? suggestedCenter, Screen screen)
         {
+            bool adjustExceeding = suggestedCenter == null;
             suggestedCenter ??= new Point(Left + Width / 2, Top + Height / 2);
-            Bounds = new Rectangle(suggestedCenter.Value.X - Width / 2, suggestedCenter.Value.Y - height / 2, Width, height);
+            Bounds = new Rectangle(suggestedCenter.Value.X - Width / 2, suggestedCenter.Value.Y - height / 2, Width, height).EnsureScreen(screen, adjustExceeding);
         }
 
         private void AddStandardButton(TaskDialogStandardButtonFlags standardButton, PointF scale)

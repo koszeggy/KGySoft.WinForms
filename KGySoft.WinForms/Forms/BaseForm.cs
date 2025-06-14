@@ -451,24 +451,17 @@ namespace KGySoft.WinForms.Forms
                 case Constants.WM_DPICHANGED:
                     PointF oldScale = deviceScale;
                     var scale = new PointF(m.WParam.LOWORD() / ScaleHelper.DefaultDpi, m.WParam.HIWORD() / ScaleHelper.DefaultDpi);
+                    deviceScale = scale;
                     var scaleChange = new PointF(scale.X / oldScale.X, scale.Y / oldScale.Y);
                     Rectangle suggestedBounds;
-                    unsafe
-                    {
-                        suggestedBounds = ((RECT*)m.LParam)->ToRectangle();
-                    }
+                    unsafe { suggestedBounds = ((RECT*)m.LParam)->ToRectangle(); }
+                    Screen newScreen = Screen.FromRectangle(suggestedBounds);
 
                     // Refining the originally suggested bounds as it sometimes can be weird, e.g. can make the form larger and larger on each DPI change
                     // (e.g. when border style is FixedSingle). Also, suggesting a scaled size even if AutoScaleMode is None, which still can be ignored.
-                    Size suggestedSize = Size.Scale(scaleChange);
-                    Point suggestedMiddle = suggestedBounds.Location + new Size(suggestedBounds.Size.Width / 2, suggestedBounds.Size.Height / 2);
-                    var suggestedLocation = new Point(suggestedMiddle.X - suggestedSize.Width / 2, suggestedMiddle.Y - suggestedSize.Height / 2);
-                    suggestedBounds = new Rectangle(suggestedLocation, suggestedSize);
-
-                    deviceScale = scale;
+                    suggestedBounds = new Rectangle(suggestedBounds.Location, Size.Scale(scaleChange)).EnsureScreen(newScreen, false);
                     base.WndProc(ref m);
                     OnDeviceScaleChanged(new DeviceScaleChangedEventArgs(suggestedBounds, scale, oldScale, scaleChange));
-
                     return;
 
                 default:
