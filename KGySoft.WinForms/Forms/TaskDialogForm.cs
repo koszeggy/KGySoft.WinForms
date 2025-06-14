@@ -31,7 +31,6 @@ using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
-using System.Windows.Forms.VisualStyles;
 
 using KGySoft.Collections;
 using KGySoft.CoreLibraries;
@@ -525,6 +524,8 @@ namespace KGySoft.WinForms.Forms
                 isResizing = false;
             }
 
+            ResetMainIcon(cfg, scale);
+            ResetFooterIcon(cfg, scale);
             ResetWidths(cfg, scale, suggestedCenter);
             ResetHeights(cfg, suggestedCenter);
         }
@@ -1658,6 +1659,8 @@ namespace KGySoft.WinForms.Forms
             bool hasFooterIcon = cfg.HasFooterIcon;
             pnlFooterIcon.Visible = hasFooterIcon;
             pnlFooter.ColumnStyles[0].Width = hasFooterIcon ? footerIconColumnReferenceWidth.Scale(scale.X) : 0;
+            if (hasFooterIcon)
+                pbFooterIcon.Width = footerIconReferenceSize.Width.Scale(scale.X);
 
             if (!hasFooterIcon)
                 return;
