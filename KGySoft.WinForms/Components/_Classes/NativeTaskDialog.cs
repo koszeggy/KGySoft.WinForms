@@ -19,12 +19,14 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Media;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
+using System.Windows.Forms;
 
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
@@ -40,6 +42,65 @@ namespace KGySoft.WinForms.Components
     /// </summary>
     internal sealed class NativeTaskDialog : ITaskDialog
     {
+        #region Nested Classes
+
+        private sealed class NativeWindowHandler : NativeWindow
+        {
+            #region Fields
+
+            private readonly NativeTaskDialog owner;
+
+            #endregion
+
+            #region Constructors
+
+            internal NativeWindowHandler(NativeTaskDialog owner)
+            {
+                this.owner = owner;
+                AssignHandle(owner.dialogHandle);
+            }
+
+            #endregion
+
+            #region Methods
+
+            protected override void WndProc(ref Message m)
+            {
+                switch (m.Msg)
+                {
+                    case Constants.WM_DPICHANGED:
+                        base.WndProc(ref m);
+                        
+                        owner.scale = default;
+
+                        Icon? customMainIcon = owner.host.CustomIcon ?? owner.host.EmulatedStandardMainIcon;
+                        Icon? customFooterIcon = owner.host.CustomFooterIcon ?? owner.host.EmulatedStandardFooterIcon;
+
+                        // The condition of reallocation is actually more complex, but in worst case the UpdateCustomIcon call(s) below
+                        // will reallocate the dialog. If this happens, it might be reallocated twice, but for the next time isEverReallocated will be true.
+                        if ((customFooterIcon != null || customMainIcon != null) && owner.isEverReallocated)
+                        {
+                            owner.ReallocateDialog();
+                            return;
+                        }
+
+                        if (customMainIcon != null)
+                            owner.UpdateCustomIcon(Constants.TDI_MAIN, customMainIcon);
+                        if (customFooterIcon != null)
+                            owner.UpdateCustomIcon(Constants.TDI_FOOTER, customFooterIcon);
+                        return;
+
+                    default:
+                        base.WndProc(ref m);
+                        return;
+                }
+            }
+
+            #endregion
+        }
+
+        #endregion
+
         #region Constants
 
         private const int firstButtonId = 1000;
@@ -52,7 +113,6 @@ namespace KGySoft.WinForms.Components
         #region Static Fields
 
         private static readonly TaskDialogStandardIcons[] whiteBackgroundIcons = new[] { TaskDialogStandardIcons.None, TaskDialogStandardIcons.Information, TaskDialogStandardIcons.Warning, TaskDialogStandardIcons.Error, TaskDialogStandardIcons.SecurityShield };
-        private static readonly Size smallIconReferenceSize = new Size(16, 16);
 
         #endregion
 
@@ -65,7 +125,7 @@ namespace KGySoft.WinForms.Components
         private IntPtr ownerHandle;
         private IntPtr dialogHandle;
         private Dictionary<TASKDIALOG_ELEMENTS, IntPtr>? updatedTexts;
-        bool isForcedClosing;
+        private bool isForcedClosing;
         private bool ignoreFirstRadioButtonCheck;
         TASKDIALOGCONFIG config;
         private int eventHandlerCount;
@@ -73,12 +133,19 @@ namespace KGySoft.WinForms.Components
         private bool isCheckedChanging;
         private bool isRadioButtonClicked;
         private bool isEverReallocated;
+        private Icon? mainIcon;
+        private Icon? footerIcon;
+        private Icon? smallFormIcon;
+        private NativeWindowHandler? nativeHandler;
+        private PointF scale;
 
         #endregion
 
         #endregion
 
         #region Properties
+
+        #region Static Properties
 
         /// <summary>
         /// Returns true if the current operating system and application supports native TaskDialog.
@@ -95,43 +162,43 @@ namespace KGySoft.WinForms.Components
 
         #endregion
 
+        #region Instance Properties
+        
+        #region Private Properties
+
+        private PointF Scale
+        {
+            get
+            {
+                if (scale.IsEmpty)
+                    scale = dialogHandle == IntPtr.Zero ? ScaleHelper.SystemScale : ScaleHelper.GetScale(dialogHandle);
+                return scale;
+            }
+        }
+
+        #endregion
+
+        #region Explicitly Implemented Interface Properties
+
+        TaskDialogStatus ITaskDialog.ShowState => dialogState;
+
+        #endregion
+
+        #endregion
+
+        #endregion
+
         #region Construction and Destruction
 
-        internal NativeTaskDialog()
-        {
-            callback = ProcessDialogMessages;
-        }
+        #region Constructors
 
-        ~NativeTaskDialog()
-        {
-            Dispose();
-        }
+        internal NativeTaskDialog() => callback = ProcessDialogMessages;
 
-        #region Explicit Disposing
+        #endregion
 
-        public void Dispose()
-        {
-            // Happens only when TaskDialog.Dispose was called while showing: forcing close and waiting for being closed
-            if (dialogState != TaskDialogStatus.Closed)
-            {
-                if (isForcedClosing)
-                    return;
+        #region Destructor
 
-                isForcedClosing = true;
-                DoClose(TaskDialogResult.Close);
-
-                // waiting for being closed
-                while (dialogState != TaskDialogStatus.Closed)
-                {
-                    Thread.Sleep(10);
-                }
-            }
-
-            // freeing unmanaged resources
-            FreeUpdatedTexts();
-
-            GC.SuppressFinalize(this);
-        }
+        ~NativeTaskDialog() => Dispose(false);
 
         #endregion
 
@@ -147,9 +214,7 @@ namespace KGySoft.WinForms.Components
         private static IntPtr AllocateButtons(IList? buttons, int startId, bool needDescription)
         {
             if (buttons == null || buttons.Count == 0)
-            {
                 return IntPtr.Zero;
-            }
 
             // building native structures
             TASKDIALOG_BUTTON[] nativeButtons = new TASKDIALOG_BUTTON[buttons.Count];
@@ -175,9 +240,7 @@ namespace KGySoft.WinForms.Components
             int buttonSize = Marshal.SizeOf(typeof(TASKDIALOG_BUTTON));
             IntPtr result = Marshal.AllocHGlobal(nativeButtons.Length * buttonSize);
             for (int i = 0; i < nativeButtons.Length; i++)
-            {
                 Marshal.StructureToPtr(nativeButtons[i], new IntPtr((long)result + i * buttonSize), false);
-            }
 
             return result;
         }
@@ -188,32 +251,33 @@ namespace KGySoft.WinForms.Components
         private static void FreeButtons(IntPtr buttonsArray, uint count)
         {
             if (buttonsArray == IntPtr.Zero)
-            {
                 return;
-            }
 
             int buttonSize = Marshal.SizeOf(typeof(TASKDIALOG_BUTTON));
             for (int i = 0; i < count; i++)
-            {
                 Marshal.DestroyStructure(new IntPtr((long)buttonsArray + i * buttonSize), typeof(TASKDIALOG_BUTTON));
-            }
 
             Marshal.FreeHGlobal(buttonsArray);
         }
 
         private static bool IsBackgroundDifferent(TaskDialogStandardIcons icon1, TaskDialogStandardIcons icon2)
-        {
-            if (icon1 == icon2)
-            {
-                return false;
-            }
-
-            return !(icon1.In(whiteBackgroundIcons) && icon2.In(whiteBackgroundIcons));
-        }
+            => icon1 != icon2 && !(icon1.In(whiteBackgroundIcons) && icon2.In(whiteBackgroundIcons));
 
         #endregion
 
         #region Instance Methods
+
+        #region Public Methods
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        #endregion
+
+        #region Private Methods
 
         /// <summary>
         /// Can be called multiple times during the life of a native dialog
@@ -242,71 +306,46 @@ namespace KGySoft.WinForms.Components
             config.cxWidth = (uint)host.Width;
 
             // setting custom main icon
-            if (host.Icon == TaskDialogStandardIcons.Question || host.Icon == TaskDialogStandardIcons.SecurityQuestion || host.CustomIcon != null)
+            if (host.Icon is TaskDialogStandardIcons.Question or TaskDialogStandardIcons.SecurityQuestion || host.CustomIcon != null)
             {
                 config.dwFlags |= TASKDIALOG_FLAGS.TDF_USE_HICON_MAIN;
-                if (host.CustomIcon != null)
-                {
-                    config.hMainIcon = host.CustomIcon.Handle;
-                }
-                else // if (host.Icon == TaskDialogStandardIcons.Question || host.Icon == TaskDialogStandardIcons.SecurityQuestion)
+                if (host.CustomIcon is Icon customIcon)
+                    config.hMainIcon = ResetMainIcon(customIcon).Handle;
+                else // if (host.Icon is TaskDialogStandardIcons.Question or TaskDialogStandardIcons.SecurityQuestion)
                 {
                     // only when initializing, otherwise, will be changed by UpdateStandardIcon
                     if (dialogState == TaskDialogStatus.Initializing)
-                    {
-                        using Icon icon = host.Icon == TaskDialogStandardIcons.Question ? Icons.SystemQuestion : Icons.SecurityQuestion;
-                        host.EmulatedStandardMainIcon = icon;
-                    }
-
-                    config.hMainIcon = host.EmulatedStandardMainIcon?.Handle ?? IntPtr.Zero;
+                        host.EmulatedStandardMainIcon = host.Icon.ToIcon();
+                    config.hMainIcon = ResetMainIcon(host.EmulatedStandardMainIcon)?.Handle ?? IntPtr.Zero;
                 }
             }
 
             // setting custom footer icon
-            if (host.FooterIcon == TaskDialogStandardIcons.Question || host.FooterIcon == TaskDialogStandardIcons.SecurityQuestion || host.CustomFooterIcon != null)
+            if (host.FooterIcon is TaskDialogStandardIcons.Question or TaskDialogStandardIcons.SecurityQuestion || host.CustomFooterIcon != null)
             {
                 config.dwFlags |= TASKDIALOG_FLAGS.TDF_USE_HICON_FOOTER;
-                if (host.CustomFooterIcon != null)
-                {
-                    config.hFooterIcon = host.CustomFooterIcon.Handle;
-                }
-                else // if (host.FooterIcon == TaskDialogStandardIcons.Question || host.FooterIcon == TaskDialogStandardIcons.SecurityQuestion)
+                if (host.CustomFooterIcon is Icon customFooterIcon)
+                    config.hFooterIcon = ResetFooterIcon(customFooterIcon).Handle;
+                else // if (host.FooterIcon is TaskDialogStandardIcons.Question or TaskDialogStandardIcons.SecurityQuestion)
                 {
                     // only when initializing, otherwise, will be changed by UpdateStandardFooterIcon
                     if (dialogState == TaskDialogStatus.Initializing)
-                    {
-                        using Icon icon = host.FooterIcon == TaskDialogStandardIcons.Question ? Icons.SystemQuestion : Icons.SecurityQuestion;
-                        host.EmulatedStandardFooterIcon = icon;
-                    }
-
-                    config.hFooterIcon = host.EmulatedStandardFooterIcon?.Handle ?? IntPtr.Zero;
+                        host.EmulatedStandardFooterIcon = host.FooterIcon.ToIcon();
+                    config.hFooterIcon = ResetFooterIcon(host.EmulatedStandardFooterIcon)?.Handle ?? IntPtr.Zero;
                 }
             }
 
             // configuring flags, which are not in TaskDialog.Options because they were redundant
             if (host.CheckBoxChecked)
-            {
                 config.dwFlags |= TASKDIALOG_FLAGS.TDF_VERIFICATION_FLAG_CHECKED;
-            }
-
             if (host.ProgressBarStyle == TaskDialogProgressBarStyle.Marquee)
-            {
                 config.dwFlags |= TASKDIALOG_FLAGS.TDF_SHOW_MARQUEE_PROGRESS_BAR;
-            }
             else if (host.ProgressBarStyle == TaskDialogProgressBarStyle.Regular)
-            {
                 config.dwFlags |= TASKDIALOG_FLAGS.TDF_SHOW_PROGRESS_BAR;
-            }
-
             if (host.IsTickAssigned)
-            {
                 config.dwFlags |= TASKDIALOG_FLAGS.TDF_CALLBACK_TIMER;
-            }
-
             if (host.Width == 0)
-            {
                 config.dwFlags |= TASKDIALOG_FLAGS.TDF_SIZE_TO_CONTENT;
-            }
 
             // configuring custom buttons
             config.pButtons = AllocateButtons(host.Buttons, firstButtonId, (host.Options & (TaskDialogOptions.UseCommandLinks | TaskDialogOptions.UseCommandLinksNoIcon)) != TaskDialogOptions.None);
@@ -318,9 +357,7 @@ namespace KGySoft.WinForms.Components
                     config.nDefaultButton = defaultButton.Id;
             }
             else
-            {
                 config.dwFlags &= ~(TASKDIALOG_FLAGS.TDF_USE_COMMAND_LINKS | TASKDIALOG_FLAGS.TDF_USE_COMMAND_LINKS_NO_ICON);
-            }
 
             // configuring radio buttons
             config.pRadioButtons = AllocateButtons(host.RadioButtons, firstRadioButtonId, false);
@@ -334,9 +371,7 @@ namespace KGySoft.WinForms.Components
                     if (rb.Checked)
                     {
                         if (checkedFound)
-                        {
                             rb.CheckedInternal = false;
-                        }
                         else
                         {
                             checkedRadioButton = rb;
@@ -351,10 +386,29 @@ namespace KGySoft.WinForms.Components
                     ignoreFirstRadioButtonCheck = true;
                 }
                 else
-                {
                     config.dwFlags |= TASKDIALOG_FLAGS.TDF_NO_DEFAULT_RADIO_BUTTON;
-                }
             }
+        }
+
+        [return: NotNullIfNotNull(nameof(icon))]
+        private Icon? ResetMainIcon(Icon? icon)
+        {
+            mainIcon?.Dispose();
+            return mainIcon = icon?.Resize(IconsHelper.LargeIconReferenceSize.Scale(Scale));
+        }
+
+        [return: NotNullIfNotNull(nameof(icon))]
+        private Icon? ResetFooterIcon(Icon? icon)
+        {
+            footerIcon?.Dispose();
+            return footerIcon = icon?.Resize(IconsHelper.SmallIconReferenceSize.Scale(Scale));
+        }
+
+        private void ResetSmallFormIcon(Icon icon)
+        {
+            smallFormIcon?.Dispose();
+            smallFormIcon = icon.Resize(IconsHelper.SmallIconReferenceSize.Scale(Scale));
+            User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_SMALL, smallFormIcon.Handle);
         }
 
         /// <summary>
@@ -373,20 +427,36 @@ namespace KGySoft.WinForms.Components
             {
                 switch (uNotification)
                 {
+                    case TASKDIALOG_NOTIFICATIONS.TDN_DIALOG_CONSTRUCTED:
+                        // this is executed multiple times, even when the dialog is reallocated, though the handle is always the same
+                        dialogHandle = hwnd;
+                        host.Handle = hwnd;
+                        return 0;
+
                     case TASKDIALOG_NOTIFICATIONS.TDN_CREATED:
-                        // performing rest of the initialization, which need an already created dialog
+                        // performing the rest of the initialization, which needs an already created dialog - executed only once
+                        PointF oldScale = scale;
+                        scale = default;
                         InitializeCreatedDialog(true);
                         dialogState = TaskDialogStatus.Showing;
                         if (host.Icon == TaskDialogStandardIcons.Question)
-                        {
                             SystemSounds.Question.Play();
+                        if (ScaleHelper.IsThreadPerMonitorAware)
+                            nativeHandler = new NativeWindowHandler(this);
+
+                        if (Scale != oldScale)
+                        {
+                            if ((host.CustomIcon ?? host.EmulatedStandardMainIcon) is Icon customMainIcon)
+                                UpdateCustomIcon(Constants.TDI_MAIN, customMainIcon);
+                            if ((host.CustomFooterIcon ?? host.EmulatedStandardFooterIcon) is Icon customFooterIcon)
+                                UpdateCustomIcon(Constants.TDI_FOOTER, customFooterIcon);
                         }
 
                         host.OnCreated();
                         return 0;
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_NAVIGATED:
-                        // performing rest of the initialization after the dialog is reallocated
+                        // performing the rest of the initialization after the dialog is reallocated
                         InitializeCreatedDialog(false);
                         return 0;
 
@@ -405,9 +475,7 @@ namespace KGySoft.WinForms.Components
                                 isClosing = !e.Handled;
                             }
                             else
-                            {
                                 isClosing = true;
-                            }
                         }
 
                         // handling if closing the dialog
@@ -453,9 +521,7 @@ namespace KGySoft.WinForms.Components
 
                         // closing from dispose: omitting Closed event
                         if (!isForcedClosing)
-                        {
                             host.OnClosed();
-                        }
 
                         return 0;
 
@@ -487,11 +553,6 @@ namespace KGySoft.WinForms.Components
                             return 0;
                         }
 
-                    case TASKDIALOG_NOTIFICATIONS.TDN_DIALOG_CONSTRUCTED:
-                        dialogHandle = hwnd;
-                        host.Handle = hwnd;
-                        return 0;
-
                     case TASKDIALOG_NOTIFICATIONS.TDN_VERIFICATION_CLICKED:
                         host.OnCheckBoxCheckedChanged((int)wParam == 1);
                         return 0;
@@ -513,9 +574,7 @@ namespace KGySoft.WinForms.Components
             {
                 eventHandlerCount--;
                 if (isReallocatePending)
-                {
                     ReallocateDialog();
-                }
             }
         }
 
@@ -527,14 +586,14 @@ namespace KGySoft.WinForms.Components
             // setting title icon (only if modeless)
             if (config.hwndParent == IntPtr.Zero)
             {
-                // Custom and (Security)Question: setting the good quality 16x16 icon as form icon (native dialog would not handle it nicely).
+                // Custom and (Security)Question: setting the good quality icon as form icon (the native dialog would not handle it nicely).
                 if (host.FormIcon != null)
                 {
                     User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_BIG, host.FormIcon.Handle);
-                    User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_SMALL, host.FormIcon.Resize(smallIconReferenceSize.Scale(ScaleHelper.GetScale(dialogHandle))).Handle);
+                    ResetSmallFormIcon(host.FormIcon);
                 }
 
-                // only when initializing, otherwise, will be changed by UpdateStandardIcon
+                // only when reallocating the dialog (may happen after a custom -> standard icon change), otherwise, will be changed by UpdateStandardIcon
                 else if (host.Icon != TaskDialogStandardIcons.None && !isFirstCreate) // on first init this is redundant but when icon has been changed from custom to standard, NAVIGATE does not update title icon
                     User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, Constants.TDI_MAIN, (IntPtr)host.Icon);
             }
@@ -543,9 +602,7 @@ namespace KGySoft.WinForms.Components
             if (host.ProgressBarStyle != TaskDialogProgressBarStyle.None)
             {
                 if (host.ProgressBarStyle == TaskDialogProgressBarStyle.Marquee)
-                {
                     UpdateProgressBarMarqueeAnimationSpeed(host.ProgressBarMarqueeAnimationSpeed);
-                }
                 else
                 {
                     UpdateProgressBarRange((ushort)host.ProgressBarMinimum, (ushort)host.ProgressBarMaximum);
@@ -560,23 +617,16 @@ namespace KGySoft.WinForms.Components
             foreach (TaskDialogButton button in host.Buttons)
             {
                 if (button.IsElevated)
-                {
                     UpdateElevatedStatus(button);
-                }
-
                 if (!button.Enabled)
-                {
                     UpdateButtonEnabled(button);
-                }
             }
 
             // Disabled radio buttons
             foreach (TaskDialogRadioButton radioButton in host.RadioButtons)
             {
                 if (!radioButton.Enabled)
-                {
                     UpdateRadioButtonEnabled(radioButton);
-                }
             }
         }
 
@@ -595,22 +645,16 @@ namespace KGySoft.WinForms.Components
         }
 
         private void UpdateButtonEnabled(TaskDialogButton button)
-        {
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_ENABLE_BUTTON, new IntPtr(button.Id), new IntPtr(button.Enabled ? 1 : 0));
-        }
+            => User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_ENABLE_BUTTON, new IntPtr(button.Id), new IntPtr(button.Enabled ? 1 : 0));
 
         private void UpdateRadioButtonEnabled(TaskDialogRadioButton radioButton)
-        {
-            User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_ENABLE_RADIO_BUTTON, new IntPtr(radioButton.Id), new IntPtr(radioButton.Enabled ? 1 : 0));
-        }
+            => User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_ENABLE_RADIO_BUTTON, new IntPtr(radioButton.Id), new IntPtr(radioButton.Enabled ? 1 : 0));
 
         private void UpdateText(TASKDIALOG_ELEMENTS element, string? text)
         {
             IntPtr ptrText;
             if (updatedTexts == null)
-            {
                 updatedTexts = new Dictionary<TASKDIALOG_ELEMENTS, IntPtr>(EnumComparer<TASKDIALOG_ELEMENTS>.Comparer);
-            }
             else if (updatedTexts.TryGetValue(element, out ptrText) && ptrText != IntPtr.Zero)
             {
                 // if there is already an updated text for given element, freeing it first
@@ -620,11 +664,8 @@ namespace KGySoft.WinForms.Components
 
             // allocating unmanaged memory for the new string
             ptrText = Marshal.StringToHGlobalUni(text);
-
             if (ptrText != IntPtr.Zero)
-            {
                 updatedTexts[element] = ptrText;
-            }
 
             // updating the text in dialog
             User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_ELEMENT_TEXT, (IntPtr)element, ptrText);
@@ -640,16 +681,15 @@ namespace KGySoft.WinForms.Components
             {
                 // it will trigger UpdateCustomIcon
                 if (element == Constants.TDI_MAIN)
-                    host.EmulatedStandardMainIcon = icon == TaskDialogStandardIcons.Question ? Icons.SystemQuestion : Icons.SecurityQuestion;
+                    host.EmulatedStandardMainIcon = icon.ToIcon();
                 else
-                    host.EmulatedStandardFooterIcon = icon == TaskDialogStandardIcons.Question ? Icons.SystemQuestion : Icons.SecurityQuestion;
+                    host.EmulatedStandardFooterIcon = icon.ToIcon();
                 return;
             }
 
-            // Recreating, if needed
+            // Recreating if needed
             if (((element == Constants.TDI_MAIN) && (config.dwFlags & TASKDIALOG_FLAGS.TDF_USE_HICON_MAIN) != 0) // currently a custom current main icon is used
                 || ((element == Constants.TDI_FOOTER) && (config.dwFlags & TASKDIALOG_FLAGS.TDF_USE_HICON_FOOTER) != 0) // currently a custom current footer icon is used
-                //|| icon == TaskDialogStandardIcons.Question || icon == TaskDialogStandardIcons.SecurityQuestion // (sequrity)question icon is requested, which is created manually
                 || IsBackgroundDifferent(icon, element == Constants.TDI_MAIN ? (TaskDialogStandardIcons)config.hMainIcon : (TaskDialogStandardIcons)config.hFooterIcon) // background color changes
                 )
             {
@@ -684,15 +724,15 @@ namespace KGySoft.WinForms.Components
             // storing icon handle in config so it can be compared later again
             IntPtr iconHandle;
             if (element == Constants.TDI_MAIN)
-                config.hMainIcon = iconHandle = host.Icon != TaskDialogStandardIcons.None ? host.EmulatedStandardMainIcon!.Handle : icon?.Handle ?? IntPtr.Zero;
+                config.hMainIcon = iconHandle = ResetMainIcon(host.Icon != TaskDialogStandardIcons.None ? host.EmulatedStandardMainIcon! : icon)?.Handle ?? IntPtr.Zero;
             else
-                config.hFooterIcon = iconHandle = host.FooterIcon != TaskDialogStandardIcons.None ? host.EmulatedStandardFooterIcon!.Handle : icon?.Handle ?? IntPtr.Zero;
+                config.hFooterIcon = iconHandle = ResetFooterIcon(host.FooterIcon != TaskDialogStandardIcons.None ? host.EmulatedStandardFooterIcon! : icon)?.Handle ?? IntPtr.Zero;
 
             User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, element, iconHandle);
             if (element == Constants.TDI_MAIN && host.FormIcon != null)
             {
                 User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_BIG, host.FormIcon.Handle);
-                User32.SendMessage(dialogHandle, Constants.WM_SETICON, Constants.ICON_SMALL, host.FormIcon.Resize(smallIconReferenceSize.Scale(ScaleHelper.GetScale(dialogHandle))).Handle);
+                ResetSmallFormIcon(host.FormIcon);
             }
         }
 
@@ -713,21 +753,15 @@ namespace KGySoft.WinForms.Components
                 UpdateProgressBarValue(host.ProgressBarValue);
             }
             else
-            {
                 UpdateProgressBarMarqueeAnimationSpeed(host.ProgressBarMarqueeAnimationSpeed);
-            }
         }
 
         private void UpdateProgressBarState(ProgressBarState state)
         {
             if (host.ProgressBarStyle == TaskDialogProgressBarStyle.Marquee)
-            {
                 UpdateProgressBarMarqueeAnimationSpeed(host.ProgressBarMarqueeAnimationSpeed);
-            }
             else
-            {
                 User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_STATE, (nint)state + 1, IntPtr.Zero);
-            }
         }
 
         private void UpdateProgressBarRange(int minimum, int maximum)
@@ -743,17 +777,13 @@ namespace KGySoft.WinForms.Components
 
             // if state is non-normal, value has to be set twice
             if (host.ProgressBarState != ProgressBarState.Normal)
-            {
                 User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_POS, new IntPtr(value), IntPtr.Zero);
-            }
         }
 
         private void UpdateProgressBarMarqueeAnimationSpeed(int value)
         {
             if (host.ProgressBarStyle != TaskDialogProgressBarStyle.Marquee)
-            {
                 return;
-            }
 
             IntPtr isRunning = host.ProgressBarState == ProgressBarState.Normal && value > 0 ? new IntPtr(1) : IntPtr.Zero;
             User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_PROGRESS_BAR_MARQUEE, isRunning, new IntPtr(value));
@@ -768,9 +798,7 @@ namespace KGySoft.WinForms.Components
         private void ReallocateDialog()
         {
             if (dialogState == TaskDialogStatus.Closed)
-            {
                 return;
-            }
 
             // If called from callback, deferred until the end of the callback
             if (eventHandlerCount > 0)
@@ -817,35 +845,43 @@ namespace KGySoft.WinForms.Components
             updatedTexts = null;
         }
 
-        #endregion
-
-        #endregion
-
-        #region ITaskDialog Members
-
-        /// <summary>
-        /// Gets the state of the dialog. When it is <see cref="TaskDialogStatus.Initializing"/>, property changing is not allowed in host <see cref="TaskDialog"/>.
-        /// Changing notifications will be forwarded to the implementation in <see cref="TaskDialogStatus.Showing"/> and <see cref="TaskDialogStatus.Closing"/> states.
-        /// </summary>
-        TaskDialogStatus ITaskDialog.ShowState
+        private void Dispose(bool disposing)
         {
-            get { return dialogState; }
+            nativeHandler?.DestroyHandle();
+
+            // Happens only when TaskDialog.Dispose was called while showing: forcing close and waiting for being closed
+            if (dialogState != TaskDialogStatus.Closed)
+            {
+                if (isForcedClosing)
+                    return;
+
+                isForcedClosing = true;
+                DoClose(TaskDialogResult.Close);
+
+                // waiting for being closed
+                while (dialogState != TaskDialogStatus.Closed)
+                    Thread.Sleep(10);
+            }
+
+            // freeing unmanaged resources
+            FreeUpdatedTexts();
+
+            if (disposing)
+            {
+                mainIcon?.Dispose();
+                footerIcon?.Dispose();
+                smallFormIcon?.Dispose();
+            }
         }
 
-        /// <summary>
-        /// Executes the dialog (blocking call is expected).
-        /// </summary>
-        /// <param name="taskDialog">The host <see cref="TaskDialog"/> instance.</param>
-        /// <param name="owner">Owner window handle (if any)</param>
-        /// <param name="selectedButtonIndex">Zero based index of the custom button that closed the dialog, or -1 if the dialog was not closed by a custom button.</param>
-        /// <param name="selectedRadioButtonIndex">Zero based index of the selected radio button, or -1 if there was no selected radio button.</param>
-        /// <param name="checkBoxChecked">A value that indicated whether the verification checkbox was checked when the dialog was closed.</param>
-        /// <returns>A <see cref="TaskDialogResult"/> value that identifies the standard button that caused the closing of the dialog. If <see cref="TaskDialogResult.Custom"/>, then refer <paramref name="selectedButtonIndex"/>.</returns>
+        #endregion
+
+        #region Explicitly Implemented Interface Methods
+
         TaskDialogResult ITaskDialog.Execute(TaskDialog taskDialog, IntPtr owner, out int selectedButtonIndex, out int selectedRadioButtonIndex, out bool checkBoxChecked)
         {
             host = taskDialog;
             ownerHandle = owner;
-
             ResetSettings();
 
             try
@@ -857,14 +893,10 @@ namespace KGySoft.WinForms.Components
                 // It works only when V5 has not been loaded yet, otherwise, an EntryPointNotFound exception occurs.
                 // IsAvailable checks whether V6 context is accessible, so when using via the TaskDialog class, this using is not really necessary
                 using (new ThemingActivationContext(true))
-                {
                     hResult = Comctl32.TaskDialogIndirect(ref config, out selectedButtonIndex, out selectedRadioButtonIndex, out checkBoxChecked);
-                }
 
                 if (hResult < 0)
-                {
                     throw Marshal.GetExceptionForHR(hResult);
-                }
 
                 TaskDialogResult result = Enum<TaskDialogResult>.IsDefined(selectedButtonIndex) ? (TaskDialogResult)selectedButtonIndex : TaskDialogResult.Custom;
 
@@ -897,15 +929,10 @@ namespace KGySoft.WinForms.Components
             DoClose(result);
         }
 
-        /// <summary>
-        /// Indicates that a <see cref="TaskDialog"/> property has been changed.
-        /// </summary>
         void ITaskDialog.PropertyChanged(string propName)
         {
             if (dialogState == TaskDialogStatus.Initializing || dialogState == TaskDialogStatus.Closed)
-            {
                 throw new InvalidOperationException("Changing property in invalid state.");
-            }
 
             switch (propName)
             {
@@ -1012,9 +1039,7 @@ namespace KGySoft.WinForms.Components
                     case TaskDialogButtonBase.PropertyDescription:
                         // updating description only when it has effect
                         if ((config.dwFlags & (TASKDIALOG_FLAGS.TDF_USE_COMMAND_LINKS | TASKDIALOG_FLAGS.TDF_USE_COMMAND_LINKS_NO_ICON)) != 0)
-                        {
                             ReallocateDialog();
-                        }
 
                         return;
 
@@ -1034,9 +1059,7 @@ namespace KGySoft.WinForms.Components
                         {
                             // IsDefault set: has effect only if there are no defaults before the button
                             if (realDefault == button)
-                            {
                                 ReallocateDialog();
-                            }
                         }
                         else
                         {
@@ -1098,9 +1121,7 @@ namespace KGySoft.WinForms.Components
 
                             // if not raised from callback (so not the user actually clicked), but set by Checked property, then checking the actual radio button
                             if (!isRadioButtonClicked)
-                            {
                                 User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_RADIO_BUTTON, new IntPtr(radioButton.Id), IntPtr.Zero);
-                            }
                             return;
 
                         }
@@ -1117,20 +1138,13 @@ namespace KGySoft.WinForms.Components
             throw new InvalidOperationException("Invalid control type");
         }
 
-        void ITaskDialog.CustomButtonsChanged(TaskDialogControlCollectionChangeTypes changeType, int index)
-        {
-            ReallocateDialog();
-        }
+        void ITaskDialog.CustomButtonsChanged(TaskDialogControlCollectionChangeTypes changeType, int index) => ReallocateDialog();
+        void ITaskDialog.RadioButtonsChanged(TaskDialogControlCollectionChangeTypes changeType, int index) => ReallocateDialog();
+        void ITaskDialog.TimerChanged(bool enabled) => ReallocateDialog();
 
-        void ITaskDialog.RadioButtonsChanged(TaskDialogControlCollectionChangeTypes changeType, int index)
-        {
-            ReallocateDialog();
-        }
+        #endregion
 
-        void ITaskDialog.TimerChanged(bool enabled)
-        {
-            ReallocateDialog();
-        }
+        #endregion
 
         #endregion
     }

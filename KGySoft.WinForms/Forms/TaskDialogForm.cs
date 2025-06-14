@@ -15,8 +15,6 @@
 
 #region Usings
 
-using KGySoft.Drawing.Imaging;
-
 #region Used Namespaces
 
 using System;
@@ -35,6 +33,7 @@ using System.Windows.Forms;
 using KGySoft.Collections;
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
+using KGySoft.Drawing.Imaging;
 using KGySoft.WinForms.Components;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.WinApi;

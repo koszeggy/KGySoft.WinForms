@@ -346,9 +346,7 @@ namespace KGySoft.WinForms.Components
                 checkBoxChecked = value;
 
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyCheckBoxChecked);
-                }
 
                 OnCheckBoxCheckedChanged(value);
             }
@@ -462,9 +460,7 @@ namespace KGySoft.WinForms.Components
                 formIcon = null;
                 icon = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyIcon);
-                }
             }
         }
 
@@ -511,9 +507,7 @@ namespace KGySoft.WinForms.Components
                 customFooterIcon = null;
                 footerIcon = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyFooterIcon);
-                }
             }
         }
 
@@ -534,9 +528,7 @@ namespace KGySoft.WinForms.Components
                 footerIcon = TaskDialogStandardIcons.None;
                 customFooterIcon = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyCustomFooterIcon);
-                }
             }
         }
 
@@ -560,9 +552,7 @@ namespace KGySoft.WinForms.Components
 
                 standardButtons = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyStandardButtons);
-                }
             }
         }
 
@@ -585,9 +575,7 @@ namespace KGySoft.WinForms.Components
 
                 defaultStandardButton = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyDefaultStandardButton);
-                }
             }
         }
 
@@ -611,9 +599,7 @@ namespace KGySoft.WinForms.Components
 
                 width = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyWidth);
-                }
             }
         }
 
@@ -659,9 +645,7 @@ namespace KGySoft.WinForms.Components
 
                 progressBarStyle = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyProgressBarStyle);
-                }
             }
         }
 
@@ -683,9 +667,7 @@ namespace KGySoft.WinForms.Components
 
                 progressBarState = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyProgressBarState);
-                }
             }
         }
 
@@ -759,9 +741,7 @@ namespace KGySoft.WinForms.Components
 
                 progressBarValue = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyProgressBarValue);
-                }
             }
         }
 
@@ -785,9 +765,7 @@ namespace KGySoft.WinForms.Components
 
                 progressBarMarqueeAnimationSpeed = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyProgressBarMarqueeAnimationSpeed);
-                }
             }
         }
 
@@ -874,6 +852,11 @@ namespace KGySoft.WinForms.Components
             }
         }
 
+        /// <summary>
+        /// Gets the handle of the dialog.
+        /// </summary>
+        public IntPtr Handle { get; internal set; }
+
         #endregion
 
         #region Internal Properties
@@ -914,9 +897,7 @@ namespace KGySoft.WinForms.Components
                 isEmulatedStandardFooterIcon = true;
                 customFooterIcon = value;
                 if (IsDialogShowing)
-                {
                     dialogInstance!.PropertyChanged(PropertyCustomFooterIcon);
-                }
             }
         }
 
@@ -946,55 +927,7 @@ namespace KGySoft.WinForms.Components
 
         #region Destructor
 
-        ~TaskDialog()
-        {
-            Dispose(false);
-        }
-
-        #endregion
-
-        #region Explicit Disposing
-
-        private void Dispose(bool disposing)
-        {
-            disposed = true;
-
-            // clearing events in all circumstances
-            created = null;
-            tick = null;
-            closing = null;
-            closed = null;
-            hyperlinkClicked = null;
-            checkBoxCheckedChanged = null;
-            helpRequested = null;
-            detailsVisibleChanged = null;
-
-            // disposing some objects regardless of disposing parameter because they can hold
-            // either unmanaged resources or event subscriptions
-            if (dialogInstance != null)
-            {
-                dialogInstance.Dispose();
-                dialogInstance = null;
-            }
-
-            ((IDisposable)buttons).Dispose();
-            ((IDisposable)radioButtons).Dispose();
-
-            // on explicit disposing nullifying references
-            if (disposing)
-            {
-                message = null;
-                mainInstruction = null;
-                caption = null;
-                footerText = null;
-                checkBoxText = null;
-                detailsText = null;
-                showDetailsText = null;
-                hideDetailsText = null;
-                buttons = null!;
-                radioButtons = null!;
-            }
-        }
+        ~TaskDialog() => Dispose(false);
 
         #endregion
 
@@ -1099,6 +1032,13 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public void Close() => DialogResult = TaskDialogResult.Close;
 
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
         #endregion
 
         #region Internal Methods
@@ -1106,11 +1046,7 @@ namespace KGySoft.WinForms.Components
         internal void ControlPropertyChanged(TaskDialogControl control, string propName)
         {
             CheckCanChangeProperty();
-
-            if (dialogInstance != null)
-            {
-                dialogInstance.ControlPropertyChanged(control, propName);
-            }
+            dialogInstance?.ControlPropertyChanged(control, propName);
         }
 
         internal void ControlCollectionChanged(IList collection, TaskDialogControlCollectionChangeTypes changeType, int index)
@@ -1139,32 +1075,15 @@ namespace KGySoft.WinForms.Components
             throw new InvalidOperationException("Cannot change property while TaskDialog is being initialized.");
         }
 
-        internal void OnCreated()
-        {
-            if (created != null)
-            {
-                created.Invoke(this, EventArgs.Empty);
-            }
-        }
-
-        internal void OnTick(TaskDialogTickEventArgs e)
-        {
-            if (tick != null)
-            {
-                tick.Invoke(this, e);
-            }
-        }
+        internal void OnCreated() => created?.Invoke(this, EventArgs.Empty);
+        internal void OnTick(TaskDialogTickEventArgs e) => tick?.Invoke(this, e);
 
         internal void OnHyperlinkClicked(HyperlinkClickedEventArgs e)
         {
-            if (hyperlinkClicked != null)
-            {
-                hyperlinkClicked.Invoke(this, e);
-            }
+            if (hyperlinkClicked is { } handler)
+                handler.Invoke(this, e);
             else
-            {
                 e.Handled = false;
-            }
         }
 
         /// <summary>
@@ -1173,50 +1092,23 @@ namespace KGySoft.WinForms.Components
         internal void OnCheckBoxCheckedChanged(bool isChecked)
         {
             checkBoxChecked = isChecked;
-            if (checkBoxCheckedChanged != null)
-            {
-                checkBoxCheckedChanged.Invoke(this, EventArgs.Empty);
-            }
+            checkBoxCheckedChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        internal void OnHelpRequested()
-        {
-            if (helpRequested != null)
-            {
-                helpRequested.Invoke(this, EventArgs.Empty);
-            }
-        }
+        internal void OnHelpRequested() => helpRequested?.Invoke(this, EventArgs.Empty);
 
         internal void OnDetailsVisibleChanged(TaskDialogDetailsVisibleChangedEventArgs e)
         {
             if (e.DetailsVisible)
-            {
                 options |= TaskDialogOptions.DetailsExpanded;
-            }
             else
-            {
                 options &= ~TaskDialogOptions.DetailsExpanded;
-            }
 
-            if (detailsVisibleChanged != null)
-            {
-                detailsVisibleChanged.Invoke(this, e);
-            }
+            detailsVisibleChanged?.Invoke(this, e);
         }
 
-        internal void OnClosing(CancelEventArgs e)
-        {
-            if (closing != null)
-            {
-                closing.Invoke(this, e);
-            }
-        }
-
-        internal void OnClosed()
-        {
-            if (closed != null)
-                closed.Invoke(this, EventArgs.Empty);
-        }
+        internal void OnClosing(CancelEventArgs e) => closing?.Invoke(this, e);
+        internal void OnClosed() => closed?.Invoke(this, EventArgs.Empty);
 
         #endregion
 
@@ -1225,9 +1117,7 @@ namespace KGySoft.WinForms.Components
         private void CheckDisposed()
         {
             if (disposed)
-            {
                 throw new ObjectDisposedException("TaskDialog");
-            }
         }
 
         private TaskDialogResult ShowInternal(IntPtr owner, out int customButtonIndex, out int radioButtonIndex, out bool verificationTextChecked)
@@ -1272,27 +1162,48 @@ namespace KGySoft.WinForms.Components
                 || buttons.Any(b => b.CustomIcon != null); // custom button icons
         }
 
-        #endregion
-
-        #endregion
-
-        #region IDisposable Members
-
-        /// <inheritdoc />
-        public void Dispose()
+        private void Dispose(bool disposing)
         {
-            Dispose(true);
-            GC.SuppressFinalize(this);
+            disposed = true;
+
+            // clearing events in all circumstances
+            created = null;
+            tick = null;
+            closing = null;
+            closed = null;
+            hyperlinkClicked = null;
+            checkBoxCheckedChanged = null;
+            helpRequested = null;
+            detailsVisibleChanged = null;
+
+            // disposing some objects regardless of disposing parameter because they can hold
+            // either unmanaged resources or event subscriptions
+            if (dialogInstance != null)
+            {
+                dialogInstance.Dispose();
+                dialogInstance = null;
+            }
+
+            ((IDisposable)buttons).Dispose();
+            ((IDisposable)radioButtons).Dispose();
+
+            // on explicit disposing nullifying references
+            if (disposing)
+            {
+                message = null;
+                mainInstruction = null;
+                caption = null;
+                footerText = null;
+                checkBoxText = null;
+                detailsText = null;
+                showDetailsText = null;
+                hideDetailsText = null;
+                buttons = null!;
+                radioButtons = null!;
+            }
         }
 
         #endregion
-
-        #region IWin32Window Members
-
-        /// <summary>
-        /// Gets the handle of the dialog.
-        /// </summary>
-        public IntPtr Handle { get; internal set; }
 
         #endregion
     }

@@ -264,7 +264,7 @@ namespace KGySoft.WinForms
 
         public static PointF GetScale(IntPtr handle)
         {
-            if (!isProcessPerMonitorAware)
+            if (!isProcessPerMonitorAware || handle == IntPtr.Zero)
                 return systemScale;
             Point dpi = GetDpiForHwnd(handle);
             return new PointF(dpi.X / DefaultDpi, dpi.Y / DefaultDpi);
