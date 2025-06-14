@@ -68,7 +68,6 @@ namespace KGySoft.WinForms.Controls
         private static readonly Color defaultEnabledForeColor = SystemColors.ControlText;
         private static readonly Color defaultDisabledForeColor = SystemColors.GrayText;
         private static readonly string nbsp = '\u00A0'.ToString(null);
-        private static readonly Size referenceIconSize = new Size(16, 16);
 
         #endregion
 
@@ -553,7 +552,7 @@ namespace KGySoft.WinForms.Controls
             {
                 if (cachedSecurityShieldImage == null)
                 {
-                    Size size = this.ScaleSize(referenceIconSize);
+                    Size size = this.ScaleSize(IconsHelper.SmallIconReferenceSize);
                     using var icon = Icons.SystemShield;
                     cachedSecurityShieldImage = icon.GetCachedBitmap(nameof(Icons.SystemShield), size);
                 }

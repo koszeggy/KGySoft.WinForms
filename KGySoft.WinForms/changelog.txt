@@ -180,6 +180,7 @@
   + New InvokeOnUIThread method: a safer and more convenient way to invoke a delegate on the UI thread.
   + New DeviceScaleChanged event: raised when the DPI changes and the application is per-monitor DPI aware.
   + New IsLoaded property
+  + Scaling the small icon of the form properly when the DPI changes.
 + New DeviceScaleChangedEventArgs class
 
 

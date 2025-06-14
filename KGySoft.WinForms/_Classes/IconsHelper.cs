@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: IconsCache.cs
+//  File: IconsHelper.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -25,14 +25,25 @@ using KGySoft.Drawing;
 
 namespace KGySoft.WinForms
 {
-    internal static class IconsCache
+    internal static class IconsHelper
     {
         #region Fields
+
+        #region Internal Fields
+
+        internal static readonly Size LargeIconReferenceSize = new Size(32, 32);
+        internal static readonly Size SmallIconReferenceSize = new Size(16, 16);
+
+        #endregion
+
+        #region Private Fields
 
         // Notes:
         // - Not using Cache<,> with a loader delegate because the key is calculated in the GetCachedBitmap method.
         // - Size is turned into ulong to avoid slow value compare in .NET Framework where Size does not implement IEquatable.
         private static readonly ThreadSafeDictionary<(string, ulong), Bitmap> imagesCache = new();
+        
+        #endregion
 
         #endregion
 

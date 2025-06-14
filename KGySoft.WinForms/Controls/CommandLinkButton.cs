@@ -98,7 +98,6 @@ namespace KGySoft.WinForms.Controls
         private static readonly Color hoveredBackColor = Color.FromArgb(96, 222, 222, 222);
         private static readonly Color selectedFrameColor = Color.FromArgb(64, 0, 204, 255);
         private static readonly Color selectedFrameColorAlternative = Color.FromArgb(192, 0, 204, 255);
-        private static readonly Size referenceElevatedIconSize = new Size(16, 16);
         private static readonly Size referenceThemedGlyphSize = new Size(20, 20);
         private static readonly Size referenceNonThemedGlyphSize = new Size(17, 17);
 
@@ -918,7 +917,7 @@ namespace KGySoft.WinForms.Controls
             {
                 if (cachedSecurityShieldImage == null)
                 {
-                    Size size = this.ScaleSize(referenceElevatedIconSize);
+                    Size size = this.ScaleSize(IconsHelper.SmallIconReferenceSize);
                     using var icon = Icons.SystemShield;
                     cachedSecurityShieldImage = icon.GetCachedBitmap(nameof(Icons.SystemShield), size);
                 }

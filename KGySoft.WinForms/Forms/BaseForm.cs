@@ -20,10 +20,12 @@ using System;
 using System.Collections.Specialized;
 #endif
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
+using KGySoft.Drawing;
 using KGySoft.Libraries.Language;
 #if !NET5_0_OR_GREATER
 using KGySoft.Reflection;
@@ -57,6 +59,7 @@ namespace KGySoft.WinForms.Forms
     /// <item>Fixes a <a href="https://github.com/dotnet/winforms/issues/1504" target="_blank">resizing bug</a> that exists in .NET Framework and .NET Core 3.x that can occur with multiple displays.</item>
     /// <item>An <see cref="IsDesignMode"/> property that works even during initialization, when <see cref="Component.DesignMode"/> would return <see langword="false"/>.</item>
     /// <item><see cref="InvokeOnUIThread">InvokeOnUIThread</see> method.</item>
+    /// <item>Fixes the small icon of the form if the application is per-monitor DPI aware and the DPI of the form is different from the DPI of the primary display.</item>
     /// </list>
     /// </remarks>
     public class BaseForm: Form
@@ -97,6 +100,7 @@ namespace KGySoft.WinForms.Forms
         private BaseForm? callerMdiForm;
         private MdiClient? mdiClient;
         private PointF deviceScale = ScaleHelper.SystemScale;
+        private Icon? smallIcon;
 
         #endregion
 
@@ -229,6 +233,32 @@ namespace KGySoft.WinForms.Forms
         /// </remarks>
         public PointF DeviceScale => deviceScale;
 
+
+        /// <inheritdoc cref="Form.Icon" />
+        [AllowNull]
+        public new Icon Icon
+        {
+            get => base.Icon;
+            set
+            {
+                base.Icon = value;
+                smallIcon?.Dispose();
+                if (value == null)
+                {
+                    smallIcon = null;
+                    return;
+                }
+
+                if (!OSUtils.IsWindows || !ScaleHelper.IsThreadPerMonitorAware)
+                    return;
+
+                // Fixing the small icon if the DPI of the form is different from the system DPI
+                smallIcon = value.Resize(this.ScaleSize(IconsHelper.SmallIconReferenceSize));
+                if (IsHandleCreated)
+                    User32.SendMessage(Handle, Constants.WM_SETICON, Constants.ICON_SMALL, smallIcon.Handle);
+            }
+        }
+
         #endregion
 
         #region Protected Properties
@@ -340,6 +370,7 @@ namespace KGySoft.WinForms.Forms
         {
             deviceScale = this.GetScale();
             base.OnHandleCreated(e);
+            ResetSmallIcon();
         }
 
         /// <inheritdoc />
@@ -382,6 +413,7 @@ namespace KGySoft.WinForms.Forms
                 BaseToolTip.Dispose();
                 commandBindings.Dispose();
                 Events.Dispose();
+                smallIcon?.Dispose();
             }
 
             mdiClient = null;
@@ -460,7 +492,9 @@ namespace KGySoft.WinForms.Forms
                     // Refining the originally suggested bounds as it sometimes can be weird, e.g. can make the form larger and larger on each DPI change
                     // (e.g. when border style is FixedSingle). Also, suggesting a scaled size even if AutoScaleMode is None, which still can be ignored.
                     suggestedBounds = new Rectangle(suggestedBounds.Location, Size.Scale(scaleChange)).EnsureScreen(newScreen, false);
+                    
                     base.WndProc(ref m);
+                    ResetSmallIcon();
                     OnDeviceScaleChanged(new DeviceScaleChangedEventArgs(suggestedBounds, scale, oldScale, scaleChange));
                     return;
 
@@ -570,6 +604,17 @@ namespace KGySoft.WinForms.Forms
             }
         }
 #endif
+
+        private void ResetSmallIcon()
+        {
+            if (smallIcon == null || !OSUtils.IsWindows || !ScaleHelper.IsThreadPerMonitorAware)
+                return;
+
+            smallIcon.Dispose();
+            smallIcon = base.Icon.Resize(this.ScaleSize(IconsHelper.SmallIconReferenceSize));
+            if (IsHandleCreated)
+                User32.SendMessage(Handle, Constants.WM_SETICON, Constants.ICON_SMALL, smallIcon.Handle);
+        }
 
         #endregion
     }
