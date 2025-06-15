@@ -694,6 +694,10 @@ namespace KGySoft.WinForms.Components
                 )
             {
                 ReallocateDialog();
+
+                // Switching from custom icon to None does not restore the default form icon, which is fixed here
+                if (icon == TaskDialogStandardIcons.None && element == Constants.TDI_MAIN)
+                    User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, Constants.TDI_MAIN, IntPtr.Zero);
                 return;
             }
 
