@@ -1090,7 +1090,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private bool CheckImage()
         {
-            if (!IsHandleCreated)
+            if (!IsHandleCreated && base.FlatStyle == FlatStyle.System)
                 return true;
 
             // if image is up-to-date checking consistency only (to handle setting base.Image)
@@ -1107,10 +1107,8 @@ namespace KGySoft.WinForms.Controls
                 base.FlatStyle = lastFlatStyle = FlatStyle.System;
 
             // Image > Elevated > no image
-            if (FlatStyle == FlatStyle.System && OSUtils.IsVistaOrLater)
-            {
+            if (base.FlatStyle == FlatStyle.System && OSUtils.IsVistaOrLater)
                 this.SetSystemSize(new Size(Int32.MinValue, Int32.MinValue));
-            }
 
             Invalidate();
             ResetSizeCache();
