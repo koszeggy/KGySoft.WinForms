@@ -23,6 +23,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Media;
@@ -72,8 +73,8 @@ namespace KGySoft.WinForms.Forms
     // Added functionalities:
     // - Custom button/link icons
     // - Security question mode with colored background
-    // [- Selectable message/details text mode]
-    // [- Formattable message/details text mode]
+    // - More detailed Ctrl+C
+    // - Description as tooltip for buttons
     // [- Help button, if help is subscribed. Watch dynamic subscriptions while the dialog is shown.]
     /// <summary>
     /// A task dialog implementation with Windows Forms technology
@@ -232,7 +233,7 @@ namespace KGySoft.WinForms.Forms
         private static readonly Color mainInstructionsDefaultThemedColor = Color.FromArgb(0, 51, 153);
         private static readonly Color dividerBottomDefaultThemedColor = Color.FromArgb(223, 223, 223);
 
-        private static readonly Size buttonReferenceSize = new Size(76, 23);
+        private static readonly Size buttonReferenceSize = new Size(78, 24); // the native version is 23 high, but it is not enough for a 16x16 icon with Standard FlatStyle
 
         private static readonly Padding buttonsReferenceMargin = new Padding(3, 0, 3, 0);
         private static readonly Padding mainInstructionReferencePadding = new Padding(8, 12, 8, 5);
@@ -425,6 +426,44 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
+        private static void ResetButtonIcon(AdvancedButton button, Icon? icon, PointF scale)
+        {
+            button.Image?.Dispose();
+            if (icon == null)
+            {
+                button.Image = null;
+                return;
+            }
+
+            using Icon resizedIcon = icon.Resize(IconsHelper.SmallIconReferenceSize.Scale(scale));
+            button.Image = resizedIcon.ExtractBitmap(0);
+        }
+
+        private static void ResetCommandLinkIcon(CommandLinkButton commandLink, Icon? icon, PointF scale)
+        {
+            commandLink.Image?.Dispose();
+            if (icon == null)
+            {
+                commandLink.Image = null;
+                return;
+            }
+
+            Size preferredSize = IconsHelper.LargeIconReferenceSize.Scale(scale);
+            IconInfo[] info = icon.GetIconInfo();
+            int? preferredOrLargerMin = info.Where(i => i.Size.Width >= preferredSize.Width).Select(i => (int?)i.Size.Width).Min();
+
+            // the icon has at least one image that is not more than twice as large as the preferred size: extracting the nearest image to the preferred size without resizing
+            if (!(preferredOrLargerMin > preferredSize.Width * 2)) // not <= because preferredOrLargerMin can be null if only smaller images are available
+            {
+                commandLink.Image = icon.ExtractNearestBitmap(preferredSize, PixelFormat.Format32bppArgb);
+                return;
+            }
+
+            // the icon has only more than twice as large image(s) than the preferred size: resizing (shrinking) it to twice of the preferred size
+            using Icon resizedIcon = icon.Resize(new Size(preferredSize.Width * 2, preferredSize.Height * 2));
+            commandLink.Image = resizedIcon.ExtractBitmap(0);
+        }
+
         #endregion
 
         #region Instance Methods
@@ -516,6 +555,18 @@ namespace KGySoft.WinForms.Forms
             {
                 ResumeLayout(false); // performing layout is not needed here, because ResetWidths and ResetHeights will do it
                 isResizing = false;
+            }
+
+            if (cfg.HasButtons)
+            {
+                foreach (AdvancedButton button in pnlButtons.Controls.Cast<AdvancedButton>().Where(b => b.Tag is TaskDialogButton { IsElevated: false, CustomIcon: not null }))
+                    ResetButtonIcon(button, ((TaskDialogButton)button.Tag).CustomIcon!, scale);
+            }
+
+            if (cfg.HasCommandLinks)
+            {
+                foreach (CommandLinkButton commandLink in pnlCommandLinks.Controls.Cast<CommandLinkButton>().Where(b => b.Tag is TaskDialogButton { IsElevated: false, CustomIcon: not null }))
+                    ResetCommandLinkIcon(commandLink, ((TaskDialogButton)commandLink.Tag).CustomIcon!, scale);
             }
 
             ResetMainIcon(cfg, scale);
@@ -727,7 +778,7 @@ namespace KGySoft.WinForms.Forms
             ResetButtons(cfg, scale);
 
             // command links
-            ResetCommandLinks(cfg);
+            ResetCommandLinks(cfg, scale);
 
             // set default button
             ResetDefaultButton(cfg);
@@ -1020,7 +1071,7 @@ namespace KGySoft.WinForms.Forms
                         ToolTip.SetToolTip(btn, button.Description);
                         button.Id = index++;
                         if (!button.IsElevated && button.CustomIcon != null)
-                            btn.Image = button.CustomIcon.ToAlphaBitmap();
+                            ResetButtonIcon(btn, button.CustomIcon, scale);
 
                         pnlButtons.Controls.Add(btn);
                     }
@@ -1035,7 +1086,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetCommandLinks(Configuration cfg)
+        private void ResetCommandLinks(Configuration cfg, PointF scale)
         {
             if (dialogState != TaskDialogStatus.Initializing)
             {
@@ -1074,7 +1125,7 @@ namespace KGySoft.WinForms.Forms
                 btn.Click += Button_Click;
                 button.Id = index++;
                 if (!button.IsElevated && button.CustomIcon != null)
-                    btn.Image = button.CustomIcon.ToAlphaBitmap();
+                    ResetCommandLinkIcon(btn, button.CustomIcon, scale);
 
                 pnlCommandLinks.Controls.Add(btn);
                 btn.BringToFront();
@@ -1747,9 +1798,9 @@ namespace KGySoft.WinForms.Forms
                 {
                     commandLinkButton.IsElevated = taskDialogButton.IsElevated;
                     if (!taskDialogButton.IsElevated && taskDialogButton.CustomIcon != null)
-                        commandLinkButton.Image = taskDialogButton.CustomIcon.ToAlphaBitmap();
+                        ResetCommandLinkIcon(commandLinkButton, taskDialogButton.CustomIcon, DeviceScale);
                     else if (commandLinkButton.Image != null)
-                        commandLinkButton.Image = null;
+                        ResetCommandLinkIcon(commandLinkButton, null, default);
 
                     // Adjusting form height to prevent scrollbar flickering
                     if ((preferredSize = control.GetPreferredSize(new Size(control.Width, 0))).Height > origSize.Height)
@@ -1760,9 +1811,9 @@ namespace KGySoft.WinForms.Forms
                     AdvancedButton button = ((AdvancedButton)control);
                     button.IsElevated = taskDialogButton.IsElevated;
                     if (!taskDialogButton.IsElevated && taskDialogButton.CustomIcon != null)
-                        button.Image = taskDialogButton.CustomIcon.ToAlphaBitmap();
+                        ResetButtonIcon(button, taskDialogButton.CustomIcon, DeviceScale);
                     else if (button.Image != null)
-                        button.Image = null;
+                        ResetButtonIcon(button, null, default);
                     preferredSize = control.GetPreferredSize(Size.Empty);
                 }
             }
@@ -2268,7 +2319,7 @@ namespace KGySoft.WinForms.Forms
                 if (buttonsChanged)
                     ResetButtons(cfg, scale);
                 else
-                    ResetCommandLinks(cfg);
+                    ResetCommandLinks(cfg, scale);
             }
             finally
             {

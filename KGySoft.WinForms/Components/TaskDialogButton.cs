@@ -25,12 +25,12 @@ using System.Drawing;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Represents a custom button in a <see cref="TaskDialog"/> that can be added to <see cref="TaskDialog.Buttons"/> collection.
-    /// The button can be either a reguler push button or a link command depending on <see cref="TaskDialog.Options"/> property flags.
+    /// Represents a custom button in a <see cref="TaskDialog"/> that can be added to the <see cref="TaskDialog.Buttons"/> collection.
+    /// The button can be either a regular push button or a command link depending on <see cref="TaskDialog.Options"/> property flags.
     /// </summary>
     /// <seealso cref="TaskDialogControlCollection{T}"/>
     /// <seealso cref="TaskDialogOptions"/>
-    public sealed class TaskDialogButton: TaskDialogButtonBase
+    public sealed class TaskDialogButton : TaskDialogButtonBase
     {
         #region Constants
 
@@ -123,7 +123,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Gets or sets whether this button is the default button.
-        /// If there are more default buttons in a collection first one will be the default one when the dialog appears.
+        /// If there are more default buttons in a collection, the first one will be the default button when the dialog appears.
         /// </summary>
         public bool IsDefault
         {

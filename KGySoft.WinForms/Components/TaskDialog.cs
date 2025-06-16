@@ -786,8 +786,8 @@ namespace KGySoft.WinForms.Components
         /// <list type="bullet">
         /// <item>If the custom buttons have <see cref="TaskDialogButtonBase.Description"/>, and buttons are displayed as standard buttons
         /// rather than command links, then the descriptions are displayed as tool tips when the buttons are hovered by the mouse.</item>
+        /// <item>The <see cref="TaskDialogButtonBase.Description"/> of radio buttons are displayed as tool tips.</item>
         /// <item><c>Ctrl+C</c> copies more information than the standard version (e.g. includes the texts of the radio buttons, indicates elevated icons, etc.)</item>
-        /// <item>When DPI changes, custom icons are adjusted as well.</item>
         /// <item>In high contrast mode it is ensured that the content remains visible if Control and Window colors are the inverse of each other.</item>
         /// <item>Better support of Right-to-Left mode.</item>
         /// </list></para>
