@@ -2528,7 +2528,7 @@ namespace KGySoft.WinForms.Forms
         private void Control_SizeChanged(object? sender, EventArgs e)
         {
             // watching this event to recalculate sizes if scrollbar of the form appears/disappears
-            if (!Visible || isResizing)
+            if (!Visible || isResizing || WindowState == FormWindowState.Minimized)
                 return;
 
             ResetHeights(GetConfiguration());
