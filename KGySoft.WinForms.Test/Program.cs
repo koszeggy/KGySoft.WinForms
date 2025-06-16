@@ -116,6 +116,10 @@ namespace KGySoft.WinForms.Test
                 btn.Click += btnOptionsTest_Click;
                 dlg.Buttons.Add(btn);
 
+                btn = new TaskDialogButton("Help Test");
+                btn.Click += btnHelpTest_Click;
+                dlg.Buttons.Add(btn);
+
                 btn = new TaskDialogButton("Button Icons Test") { Description = "No native support, runs always in compatibility mode" };
                 btn.Click += btnButtonIconsTest_Click;
                 dlg.Buttons.Add(btn);
@@ -516,37 +520,37 @@ namespace KGySoft.WinForms.Test
             using TaskDialog dlg = new TaskDialog
             {
                 Caption = "Custom Icons Test",
-                DetailsText = @"You can use multi-resolution icons on TaskDialog buttons.
-
-On 100% DPI the icon size is always resized to 16x16 for standard buttons.
-
-When buttons are displayed as command links, the preferred icon size is 32x32 on 100% DPI. If the icon has only larger images than twice of the preferred icon size, then the icon is resized; otherwise, the closest unscaled image is applied. Please note that this differs from the elevated icons behavior, which uses 16x16 icons on 100% DPI.",
+                DetailsText = "You can use multi-resolution icons on TaskDialog buttons." + Environment.NewLine + Environment.NewLine
+                    + "On 100% DPI the icon size is always resized to 16x16 for standard buttons." + Environment.NewLine + Environment.NewLine
+                    + "When buttons are displayed as command links, the preferred icon size is 32x32 on 100% DPI. If the icon has only larger images than twice of the preferred icon size, "
+                    + "then the icon is resized; otherwise, the closest unscaled image is applied. Please note that this differs from the elevated icons behavior, which uses 16x16 icons on 100% DPI.",
                 Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.DetailsExpanded,
                 Buttons =
                 {
                     new TaskDialogButton("No icon") { Description = "As a command link, displays the default arrow glyph." },
                     new TaskDialogButton("btnElevated", "Elevated mode")
                     {
-                        Description = @"As an elevated button or command link, has always a 16x16 icon on 100% DPI, gradually increasing size on higher DPIs. This behavior is compatible with the native task dialogs.
-When elevated mode is disabled (use the check box below), a custom icon is displayed, which has a different sizing behavior as a command link (see Multi-resolution icon)",
+                        Description = "As an elevated button or command link, has always a 16x16 icon on 100% DPI, gradually increasing size on higher DPIs. "
+                            + "This behavior is compatible with the native task dialogs." + Environment.NewLine
+                            + "When elevated mode is disabled (use the check box below), a custom icon is displayed, which has a different sizing behavior as a command link (see Multi-resolution icon)",
                         IsElevated = true,
                     },
                     new TaskDialogButton("Multi-resolution icon")
                     {
-                        Description = @"As a button, the icon size is 16x16 on 100% DPI, increasing gradually on higher DPIs.
-As a command link, it renders the native icon image nearest to 32x32 on 100% DPI, gradually increasing the preferred size on higher DPIs",
+                        Description = "As a button, the icon size is 16x16 on 100% DPI, increasing gradually on higher DPIs." + Environment.NewLine
+                            + "As a command link, it renders the native icon image nearest to 32x32 on 100% DPI, gradually increasing the preferred size on higher DPIs",
                         CustomIcon = Icons.SystemApplication
                     },
                     new TaskDialogButton("Fix 16x16 icon")
                     {
-                        Description = @"As a button, the native 16x16 icon is displayed on 100% DPI, which is resized (gets blurry) on higher DPIs.
-As a command link, always the native 16x16 icon is displayed.",
+                        Description = "As a button, the native 16x16 icon is displayed on 100% DPI, which is resized (gets blurry) on higher DPIs." + Environment.NewLine
+                            + "As a command link, always the native 16x16 icon is displayed.",
                         CustomIcon = Icons.SystemInformation.Resize(new Size(16, 16))
                     },
                     new TaskDialogButton("Fix 256x256 icon")
                     {
-                        Description = @"As a button, icon image is shrunk to 16x16 on 100% DPI.
-As a command link, rendered as a 64x64 icon on 100% DPI. When using 400% DPI or higher the unscaled 256x256 icon is displayed.",
+                        Description = @"As a button, icon image is shrunk to 16x16 on 100% DPI." + Environment.NewLine
+                            + "As a command link, rendered as a 64x64 icon on 100% DPI. When using 400% DPI or higher the unscaled 256x256 icon is displayed.",
                         CustomIcon = Icons.SystemWarning.Resize(new Size(256, 256))
                     },
                 },
@@ -559,9 +563,9 @@ As a command link, rendered as a 64x64 icon on 100% DPI. When using 400% DPI or 
                     },
                     new TaskDialogRadioButton("rbCommandLinks", "Show as command links")
                     {
-                        Description = @"When this option is selected, icons preserve their native size.
-For multi-resolution icons, the preferred custom icon size is 32x32 on 100% DPI.
-Elevated buttons still use the 16x16 icon size on 100% DPI to maintain compatibility with the native task dialogs."
+                        Description = "When this option is selected, icons preserve their native size." + Environment.NewLine
+                            + "For multi-resolution icons, the preferred custom icon size is 32x32 on 100% DPI." + Environment.NewLine
+                            + "Elevated buttons still use the 16x16 icon size on 100% DPI to maintain compatibility with the native task dialogs."
                     },
                 },
                 CheckBoxText = "Native elevated mode",
@@ -598,5 +602,37 @@ Elevated buttons still use the 16x16 icon size on 100% DPI to maintain compatibi
             dlg.Show();
         }
 
+        private static void btnHelpTest_Click(object sender, HandledEventArgs e)
+        {
+            TaskDialog senderDialog = ((TaskDialogButton)sender).Parent!;
+
+            using TaskDialog dlg = new TaskDialog
+            {
+                ForceCompatibilityMode = senderDialog.CheckBoxChecked,
+                Caption = "Help Test",
+                MainInstruction = "Press F1 for help",
+                Message = "When the HelpRequested event is subscribed, you can press F1 on the task dialog to invoke the event." + Environment.NewLine + Environment.NewLine
+                    + "In compatibility mode you can click also the ? button on the task dialog header if AllowCancel is enabled in options (and AllowMinimize is not enabled).",
+                Options = TaskDialogOptions.AllowCancel // to show the ? button in compatibility mode
+            };
+
+            dlg.HelpRequested += (tdSender, _) =>
+            {
+                TaskDialog td = (TaskDialog)tdSender;
+                using TaskDialog helpDlg = new TaskDialog
+                {
+                    ForceCompatibilityMode = senderDialog.CheckBoxChecked,
+                    Caption = "Help",
+                    MainInstruction = "This is the help dialog.",
+                    Message = "Help was requested",
+                    Icon = TaskDialogStandardIcons.Question,
+                    StandardButtons = TaskDialogStandardButtonFlags.Close,
+                    Options = TaskDialogOptions.AllowCancel
+                };
+                helpDlg.Show(td);
+            };
+
+            dlg.Show();
+        }
     }
 }

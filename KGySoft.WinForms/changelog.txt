@@ -44,11 +44,12 @@
 * KGySoft.WinForms.Components namespace:
 ========================================
 * TaskDialog class:
-  + Supporting high DPI
+  + Supporting high DPI and per-monitor DPI awareness.
   + Ctrl+C copies the textual content of the task dialog to the clipboard even in compatibility mode.
   - Fixing widths
   - Native mode: fixing some rare exception cases during Dispose
-  - Compatibility mode: improving expando button image quality
+  * Compatibility mode: improving expando button image quality, showing ? button if HelpRequested event is assigned,
+    adjusting sizes of custom button icons.
 
 ! KGySoft.WinForms.Controls namespace:
 ======================================
@@ -178,6 +179,7 @@
   + New CommandBindings property
   + New IsDesignMode property
   + New InvokeOnUIThread method: a safer and more convenient way to invoke a delegate on the UI thread.
+  + New DeviceScale property
   + New DeviceScaleChanged event: raised when the DPI changes and the application is per-monitor DPI aware.
   + New IsLoaded property
   + Scaling the small icon of the form properly when the DPI changes.

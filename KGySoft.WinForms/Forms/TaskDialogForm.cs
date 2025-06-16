@@ -525,10 +525,16 @@ namespace KGySoft.WinForms.Forms
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
+        protected override void OnHelpButtonClicked(CancelEventArgs e)
+        {
+            host.OnHelpRequested();
+            e.Cancel = true; // to prevent actually changing to request help mode
+        }
+
         protected override void OnHelpRequested(HelpEventArgs hevent)
         {
-            base.OnHelpRequested(hevent);
             host.OnHelpRequested();
+            hevent.Handled = true; // to prevent invoking host.OnHelpRequested() multiple times
         }
 
         protected override void OnShown(EventArgs e)
@@ -560,13 +566,13 @@ namespace KGySoft.WinForms.Forms
             if (cfg.HasButtons)
             {
                 foreach (AdvancedButton button in pnlButtons.Controls.Cast<AdvancedButton>().Where(b => b.Tag is TaskDialogButton { IsElevated: false, CustomIcon: not null }))
-                    ResetButtonIcon(button, ((TaskDialogButton)button.Tag).CustomIcon!, scale);
+                    ResetButtonIcon(button, ((TaskDialogButton)button.Tag!).CustomIcon!, scale);
             }
 
             if (cfg.HasCommandLinks)
             {
                 foreach (CommandLinkButton commandLink in pnlCommandLinks.Controls.Cast<CommandLinkButton>().Where(b => b.Tag is TaskDialogButton { IsElevated: false, CustomIcon: not null }))
-                    ResetCommandLinkIcon(commandLink, ((TaskDialogButton)commandLink.Tag).CustomIcon!, scale);
+                    ResetCommandLinkIcon(commandLink, ((TaskDialogButton)commandLink.Tag!).CustomIcon!, scale);
             }
 
             ResetMainIcon(cfg, scale);
@@ -723,8 +729,10 @@ namespace KGySoft.WinForms.Forms
             PointF scale = this.GetScale();
 
             // options
-            ControlBox = (host.Options & TaskDialogOptions.AllowCancel) != TaskDialogOptions.None || (host.StandardButtons & TaskDialogStandardButtonFlags.Cancel) != TaskDialogStandardButtonFlags.None;
+            ControlBox = (host.Options & (TaskDialogOptions.AllowCancel | TaskDialogOptions.AllowMinimize)) != TaskDialogOptions.None
+                || (host.StandardButtons & TaskDialogStandardButtonFlags.Cancel) != TaskDialogStandardButtonFlags.None;
             MinimizeBox = (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None;
+            HelpButton = host.IsHelpRequestedAssigned;
             HyperlinkResolveMode resolve = useLinks ? HyperlinkResolveMode.ResolveHrefsOnly : HyperlinkResolveMode.None;
             lblMessage.ResolveHyperlinks = resolve;
             lblDetailsMain.ResolveHyperlinks = resolve;
@@ -1080,7 +1088,7 @@ namespace KGySoft.WinForms.Forms
                 // standard buttons
                 if (host.StandardButtons != TaskDialogStandardButtonFlags.None)
                 {
-                    foreach (TaskDialogStandardButtonFlags flag in Enum<TaskDialogStandardButtonFlags>.GetFlags(host.StandardButtons, false))
+                    foreach (TaskDialogStandardButtonFlags flag in Enum<TaskDialogStandardButtonFlags>.GetFlags(host.StandardButtons))
                         AddStandardButton(flag, scale);
                 }
             }

@@ -867,6 +867,7 @@ namespace KGySoft.WinForms.Components
                 || dialogInstance.ShowState == TaskDialogStatus.Closing);
 
         internal bool IsTickAssigned => tick != null;
+        internal bool IsHelpRequestedAssigned => helpRequested != null;
 
         /// <summary>
         /// When an <see cref="ITaskDialog"/> implementation does not support one of the <see cref="TaskDialogStandardIcons"/>, it can set this property
