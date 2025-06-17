@@ -750,6 +750,7 @@ namespace KGySoft.WinForms.Forms
             var rtl = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
             isRtlChanging = dialogState == TaskDialogStatus.Showing && rtl != RightToLeft;
             RightToLeft = rtl;
+            pbFooterIcon.Dock = cfg.IsRightToLeft ? DockStyle.Left : DockStyle.Right;
 
             // Modal forms on Windows: when changing RTL, the DialogResult is set to Cancel in older framework targets, causing the dialog to close.
             // To make it work the same way on all platforms, we set it to Ignore, signaling the check in OnFormClosing.

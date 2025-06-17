@@ -251,8 +251,10 @@ namespace KGySoft.WinForms.Forms
                     PaintClassicButton(g, out imageSize);
 
                 Size textSize = GetTextSize(g, imageSize, isExpanded, Size);
-                TextFormatFlags formatFlags = this.GetFormatFlags(); //TextFormatFlags.WordBreak | TextFormatFlags.Left | TextFormatFlags.EndEllipsis;
+                TextFormatFlags formatFlags = this.GetFormatFlags();
                 Rectangle textRect = new Rectangle(Margin.Left + imageSize.Width, Margin.Top, textSize.Width, textSize.Height);
+                if ((formatFlags & TextFormatFlags.RightToLeft) != 0)
+                    textRect.X = ClientRectangle.Right - textRect.Right;
                 TextRenderer.DrawText(g, Text, Font, textRect, ForeColor, formatFlags);
                 if (ShowFocusCues && Enabled && (IsDefault || Focused))
                 {
@@ -266,6 +268,14 @@ namespace KGySoft.WinForms.Forms
             #region Private Methods
 
             private Size GetImageSize() => referenceImageSize.Scale(this.GetScale());
+
+            private Rectangle GetButtonBounds(Size imageSize)
+            {
+                var result = new Rectangle(Point.Empty, imageSize);
+                if (RightToLeft == RightToLeft.Yes)
+                    result.X = ClientRectangle.Right - imageSize.Width;
+                return result;
+            }
 
             private Image ExtractBitmap(Icon icon, string name)
             {
@@ -317,9 +327,9 @@ namespace KGySoft.WinForms.Forms
 
                 imageSize = GetImageSize();
                 if (imageSize == VisualStyleHelper.GetPartSize(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)EXPANDOBUTTONSTATES.TDLGEBS_NORMAL, true))
-                    VisualStyleHelper.Render(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)state, new Rectangle(Point.Empty, imageSize));
+                    VisualStyleHelper.Render(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)state, GetButtonBounds(imageSize));
                 else
-                    VisualStyleHelper.RenderScaled(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)state, new Rectangle(Point.Empty, imageSize));
+                    VisualStyleHelper.RenderScaled(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)state, GetButtonBounds(imageSize));
             }
 
             private void PaintThemedButton(Graphics g, out Size imageSize)
@@ -339,13 +349,13 @@ namespace KGySoft.WinForms.Forms
                 }
 
                 imageSize = image.Size;
-                g.DrawImage(image, new Rectangle(Point.Empty, imageSize));
+                g.DrawImage(image, GetButtonBounds(imageSize));
             }
 
             private void PaintClassicButton(Graphics g, out Size imageSize)
             {
-                imageSize = referenceImageSize.Scale(this.GetScale());
-                Rectangle rect = new Rectangle(Point.Empty, imageSize);
+                imageSize = GetImageSize();
+                Rectangle rect = GetButtonBounds(imageSize);
                 ButtonState state = ButtonState.Normal;
                 if (isPressed)
                     state = ButtonState.Pushed;
