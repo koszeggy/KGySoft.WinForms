@@ -276,7 +276,8 @@ namespace KGySoft.WinForms.Forms
         private bool isResettingVisibilities;
         private bool isResetHeightPending;
         private bool isCheckboxChecking;
-        private bool isRecreatingDialog;
+        private bool isRtlChanging;
+        private Point location;
 
         #endregion
 
@@ -483,10 +484,17 @@ namespace KGySoft.WinForms.Forms
         {
             bool isLoaded = IsLoaded;
             base.OnLoad(e);
-            if (isLoaded)
-                return; // can happen when RightToLeft changes
-
             dialogState = TaskDialogStatus.Showing;
+            if (isLoaded) // can happen when RightToLeft changes
+            {
+                if (!isRtlChanging)
+                    return;
+
+                isRtlChanging = false;
+                Location = location;
+                return;
+            }
+
             switch (host.Icon)
             {
                 case TaskDialogStandardIcons.Information:
@@ -601,11 +609,17 @@ namespace KGySoft.WinForms.Forms
                 if (args.Cancel)
                     selectedCustomButtonIndex = -1;
             }
-            else if (e.CloseReason == CloseReason.None)
+            else if (isRtlChanging)
             {
-                // preventing closing the dialog when just recreating it (RightToLeft changes)
-                e.Cancel = isRecreatingDialog;
-                isRecreatingDialog = false;
+                // Changing RightToLeft causes the dialog close. We let it happen because the parent may also change,
+                // and if we cancel the closing here, then a dialog may turn a non-modal form. Reopening as a dialog is handled in ITaskDialog.Execute
+                if (DialogResult != DialogResult.Ignore)
+                {
+                    isRtlChanging = false;
+                    dialogState = TaskDialogStatus.Closing;
+                }
+                else
+                    location = Location;
             }
             else
             {
@@ -617,20 +631,15 @@ namespace KGySoft.WinForms.Forms
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
+            if (isRtlChanging)
+                return;
+
             dialogState = TaskDialogStatus.Closed;
             host.Handle = IntPtr.Zero;
 
             // closing from dispose or other serious reason: omitting Closed event
             if (!isForcedClosing)
                 host.OnClosed();
-        }
-
-        protected override void OnHandleDestroyed(EventArgs e)
-        {
-            // can happen when RightToLeft changes
-            if (dialogState == TaskDialogStatus.Showing)
-                isRecreatingDialog = true;
-            base.OnHandleDestroyed(e);
         }
 
         /// <summary>
@@ -738,7 +747,14 @@ namespace KGySoft.WinForms.Forms
             lblDetailsMain.ResolveHyperlinks = resolve;
             lblFooter.ResolveHyperlinks = resolve;
             lblDetailsFooter.ResolveHyperlinks = resolve;
-            RightToLeft = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
+            var rtl = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
+            isRtlChanging = dialogState == TaskDialogStatus.Showing && rtl != RightToLeft;
+            RightToLeft = rtl;
+
+            // Modal forms on Windows: when changing RTL, the DialogResult is set to Cancel in older framework targets, causing the dialog to close.
+            // To make it work the same way on all platforms, we set it to Ignore, signaling the check in OnFormClosing.
+            if (isRtlChanging && OSUtils.IsWindows && !OSUtils.IsMono)
+                DialogResult = DialogResult.Ignore;
 
             // size constraints
             ResetConstraints(scale, true);
@@ -2047,10 +2063,22 @@ namespace KGySoft.WinForms.Forms
             ResetSettings();
 
             // showing the dialog
-            if (ownerWindow == null)
-                ShowDialog();
-            else
-                ShowDialog(ownerWindow);
+            do
+            {
+
+                if (ownerWindow == null)
+                    ShowDialog();
+                else
+                    ShowDialog(ownerWindow);
+
+                // the handle of the owner may change, too
+                if (isRtlChanging)
+                {
+                    IntPtr newOwner = User32.GetActiveWindow();
+                    if (newOwner != IntPtr.Zero)
+                        ownerWindow = new Win32Window { Handle = User32.GetActiveWindow() };
+                }
+            } while (isRtlChanging);
 
             // mapping result
             TaskDialogResult result;
