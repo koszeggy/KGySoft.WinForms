@@ -885,6 +885,11 @@ namespace KGySoft.WinForms.Components
         TaskDialogResult ITaskDialog.Execute(TaskDialog taskDialog, IntPtr owner, out int selectedButtonIndex, out int selectedRadioButtonIndex, out bool checkBoxChecked)
         {
             host = taskDialog;
+
+            // If owner was not specified, the caller form remains enabled, and can be even closed.
+            // Preventing this by specifying the active window as owner (this is what Form.ShowDialog() also does).
+            if (owner == IntPtr.Zero)
+                owner = User32.GetActiveWindow();
             ownerHandle = owner;
             ResetSettings();
 
@@ -900,7 +905,7 @@ namespace KGySoft.WinForms.Components
                     hResult = Comctl32.TaskDialogIndirect(ref config, out selectedButtonIndex, out selectedRadioButtonIndex, out checkBoxChecked);
 
                 if (hResult < 0)
-                    throw Marshal.GetExceptionForHR(hResult);
+                    throw Marshal.GetExceptionForHR(hResult) ?? new Win32Exception(hResult);
 
                 TaskDialogResult result = Enum<TaskDialogResult>.IsDefined(selectedButtonIndex) ? (TaskDialogResult)selectedButtonIndex : TaskDialogResult.Custom;
 

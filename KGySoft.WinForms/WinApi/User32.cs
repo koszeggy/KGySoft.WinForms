@@ -434,6 +434,13 @@ namespace KGySoft.WinForms.WinApi
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool ValidateRect(IntPtr hWnd, IntPtr lpRect);
 
+        /// <summary>
+        /// Retrieves the window handle to the active window attached to the calling thread's message queue.
+        /// </summary>
+        /// <returns>The return value is the handle to the active window attached to the calling thread's message queue. Otherwise, the return value is NULL.</returns>
+        [DllImport("user32.dll")]
+        internal static extern IntPtr GetActiveWindow();
+
         #endregion
     }
 }

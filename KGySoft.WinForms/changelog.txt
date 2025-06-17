@@ -48,6 +48,7 @@
   + Ctrl+C copies the textual content of the task dialog to the clipboard even in compatibility mode.
   - Fixing widths
   - Native mode: fixing some rare exception cases during Dispose
+  - Native mode: when owner was not specified, the caller window remained enabled
   * Compatibility mode: improving expando button image quality, showing ? button if HelpRequested event is assigned,
     adjusting sizes of custom button icons.
 
