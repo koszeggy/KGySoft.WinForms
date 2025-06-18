@@ -82,6 +82,9 @@ namespace KGySoft.WinForms
         /// <summary>[Footer]</summary>
         internal static string TaskDialogFooter => Get("TaskDialog_Footer");
 
+        /// <summary>Cannot change this property while the TaskDialog is being initialized.</summary>
+        internal static string TaskDialogInitializing => Get("TaskDialog_Initializing");
+
         #endregion
 
         #region Visual Styles

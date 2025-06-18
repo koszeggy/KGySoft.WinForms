@@ -326,13 +326,13 @@ namespace KGySoft.WinForms.Forms
             this.pnlFooterIcon.Location = new System.Drawing.Point(0, 3);
             this.pnlFooterIcon.Margin = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.pnlFooterIcon.Name = "pnlFooterIcon";
-            this.pnlFooterIcon.Padding = new System.Windows.Forms.Padding(0, 4, 0, 4);
+            this.pnlFooterIcon.Padding = new System.Windows.Forms.Padding(8, 4, 0, 4);
             this.pnlFooterIcon.Size = new System.Drawing.Size(24, 24);
             this.pnlFooterIcon.TabIndex = 0;
             // 
             // pbFooterIcon
             // 
-            this.pbFooterIcon.Dock = System.Windows.Forms.DockStyle.Right;
+            this.pbFooterIcon.Dock = System.Windows.Forms.DockStyle.Top;
             this.pbFooterIcon.Location = new System.Drawing.Point(8, 4);
             this.pbFooterIcon.Name = "pbFooterIcon";
             this.pbFooterIcon.Size = new System.Drawing.Size(16, 16);

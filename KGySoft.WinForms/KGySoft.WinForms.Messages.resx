@@ -128,6 +128,9 @@
   <data name="TaskDialog_Footer" xml:space="preserve">
     <value>[Footer]</value>
   </data>
+  <data name="TaskDialog_Initializing" xml:space="preserve">
+    <value>Cannot change this property while the TaskDialog is being initialized.</value>
+  </data>
   <data name="TaskDialog_RadioButtonCheckedFormat" xml:space="preserve">
     <value>(O) {0}</value>
   </data>

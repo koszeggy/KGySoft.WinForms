@@ -250,6 +250,8 @@ namespace KGySoft.WinForms.Forms
         private static readonly Padding checkBoxReferenceMargin = new Padding(8, 3, 3, 3);
         private static readonly Padding footerReferenceMargin = new Padding(3, 0, 3, 0);
         private static readonly Padding footerReferencePadding = new Padding(5, 7, 5, 7);
+        private static readonly Padding footerPanelPaddingLtr = new Padding(8, 4, 0, 4);
+        private static readonly Padding footerPanelPaddingRtl = new Padding(0, 4, 8, 4);
 
         private static readonly EnumThreadWndProc enumThreadWindowsCallback = PopulateThreadWindows;
 
@@ -765,6 +767,7 @@ namespace KGySoft.WinForms.Forms
             else
                 StartPosition = FormStartPosition.CenterScreen;
 
+            ShowIcon = ShowInTaskbar = executeNonModal;
             dialogStarted = DateTime.UtcNow; // for full compatibility it should be in ResetSettings
         }
 
@@ -780,9 +783,10 @@ namespace KGySoft.WinForms.Forms
             PointF scale = this.GetScale();
 
             // options
-            ControlBox = (host.Options & (TaskDialogOptions.AllowCancel | TaskDialogOptions.AllowMinimize)) != TaskDialogOptions.None
+            ControlBox = (host.Options & TaskDialogOptions.AllowCancel) != TaskDialogOptions.None
+                || executeNonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None
                 || (host.StandardButtons & TaskDialogStandardButtonFlags.Cancel) != TaskDialogStandardButtonFlags.None;
-            MinimizeBox = (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None;
+            MinimizeBox = executeNonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None;
             HelpButton = host.IsHelpRequestedAssigned;
             HyperlinkResolveMode resolve = useLinks ? HyperlinkResolveMode.ResolveHrefsOnly : HyperlinkResolveMode.None;
             lblMessage.ResolveHyperlinks = resolve;
@@ -792,7 +796,7 @@ namespace KGySoft.WinForms.Forms
             var rtl = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
             isRtlChanging = dialogState == TaskDialogStatus.Showing && rtl != RightToLeft;
             RightToLeft = rtl;
-            pbFooterIcon.Dock = cfg.IsRightToLeft ? DockStyle.Left : DockStyle.Right;
+            pnlFooterIcon.Padding = cfg.IsRightToLeft ? footerPanelPaddingRtl : footerPanelPaddingLtr;
 
             // Modal forms on Windows: when changing RTL, the DialogResult is set to Cancel in older framework targets, causing the dialog to close.
             // To make it work the same way on all platforms, we set it to Ignore, signaling the check in OnFormClosing.
@@ -1710,9 +1714,12 @@ namespace KGySoft.WinForms.Forms
             else
                 pbMainIcon.Image = null;
 
-            // Bug: cannot dispose previous icon because DefaultIcon can be disposed, too.
-            var formIcon = host.FormIcon ?? icon;
-            Icon = formIcon;
+            if (ShowIcon)
+            {
+                // Bug: cannot dispose previous icon because DefaultIcon can be disposed, too.
+                var formIcon = host.FormIcon ?? icon;
+                Icon = formIcon;
+            }
 
             if (dialogState != TaskDialogStatus.Initializing &&
                 (isSpecialHeadColors != requireSpecialHeadColors || requireSpecialHeadColors))
@@ -1737,7 +1744,7 @@ namespace KGySoft.WinForms.Forms
             pnlFooterIcon.Visible = hasFooterIcon;
             pnlFooter.ColumnStyles[0].Width = hasFooterIcon ? footerIconColumnReferenceWidth.Scale(scale.X) : 0;
             if (hasFooterIcon)
-                pbFooterIcon.Width = IconsHelper.SmallIconReferenceSize.Width.Scale(scale.X);
+                pbFooterIcon.Height = IconsHelper.SmallIconReferenceSize.Height.Scale(scale.Y);
 
             pbFooterIcon.Image?.Dispose();
             if (!hasFooterIcon)
@@ -2095,14 +2102,16 @@ namespace KGySoft.WinForms.Forms
         TaskDialogResult ITaskDialog.Execute(TaskDialog taskDialog, IntPtr owner, out int selectedButtonIndex, out int selectedRadioButtonIndex, out bool checkBoxChecked)
         {
             host = taskDialog;
+            executeNonModal = owner == IntPtr.Zero && OSUtils.IsWindows && !OSUtils.IsMono;
             if (owner != IntPtr.Zero)
                 ownerWindow = new Win32Window { Handle = owner };
             
+            FirstInit();
+
             // This forces to create the handle. May cause some resets and additional DPI changes, but it's still better than handling
             // the side effects of the deferred handle creation (e.g. the ResumeLayout in ResetHeights may change the screen,
             // recursive reentrancy in OnDeviceScaleChanged when setting MinimumSize in ResetConstraints, etc.).
             host.Handle = Handle;
-            FirstInit();
             ResetSettings();
 
             // showing the dialog
@@ -2111,7 +2120,6 @@ namespace KGySoft.WinForms.Forms
                 // If the native task dialog is shown without an owner, it does not block its caller, while works as ShowDialog in terms of blocking the call
                 // until the form is closed. Here we mimic the same behavior: though the top-level windows will be blocked by ShowDialog,
                 // we unblock them once this form is shown. Additionally, the currently active window becomes the owner of this form, which we reset as well.
-                executeNonModal = owner == IntPtr.Zero && OSUtils.IsWindows && !OSUtils.IsMono;
                 if (ownerWindow == null)
                     ShowDialog(); // there is no Show method that is both blocking and non-modal, so we use ShowDialog here, and adjusting the owner in OnShown
                 else

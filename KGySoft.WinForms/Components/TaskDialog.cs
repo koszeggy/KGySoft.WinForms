@@ -798,7 +798,7 @@ namespace KGySoft.WinForms.Components
             set
             {
                 if (dialogInstance != null)
-                    throw new InvalidOperationException(Res.TaskDialogPropertyChange("ForceCompatibilityMode"));
+                    throw new InvalidOperationException(Res.TaskDialogPropertyChange(nameof(ForceCompatibilityMode)));
 
                 forceCompatibilityMode = value;
             }
@@ -1067,13 +1067,10 @@ namespace KGySoft.WinForms.Components
         {
             CheckDisposed();
 
-            if (dialogInstance == null
-                || dialogInstance.ShowState != TaskDialogStatus.Initializing)
-            {
+            if (dialogInstance == null || dialogInstance.ShowState != TaskDialogStatus.Initializing)
                 return;
-            }
 
-            throw new InvalidOperationException("Cannot change property while TaskDialog is being initialized.");
+            throw new InvalidOperationException(Res.TaskDialogInitializing);
         }
 
         internal void OnCreated() => created?.Invoke(this, EventArgs.Empty);
