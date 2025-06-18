@@ -149,6 +149,10 @@ namespace KGySoft.WinForms.WinApi
         internal const int DEFAULT_GUI_FONT = 17;
 #endif
 
+        internal const int GWLP_HWNDPARENT = -8;
+
+        internal const int ControlStates_Modal = 0x00000020;
+
         #endregion
     }
 }

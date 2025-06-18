@@ -943,9 +943,9 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         /// <returns>A <see cref="TaskDialogResult"/> value that indicates one of the pressed standard buttons specified by <see cref="StandardButtons"/> property.
         /// If return value is <see cref="TaskDialogResult.None"/>, then the dialog might have been closed by a custom button, which can be identified by <see cref="SelectedButtonIndex"/>.
-        /// <para>Result is stored also in <see cref="DialogResult"/> property.</para>
+        /// The result is stored also in the <see cref="DialogResult"/> property.
         /// </returns>
-        /// <param name="owner">Handle of the parent window. Can be empty (<see cref="IntPtr.Zero"/>).</param>
+        /// <param name="owner">Handle of the parent window. If <see cref="IntPtr.Zero">IntPtr.Zero</see>, the dialog is shown as a non-modal window.</param>
         /// <param name="customButtonIndex">Returns the index of the clicked custom button specified in <see cref="Buttons"/> collection if the button closed the dialog.
         /// <para>Result is stored also in <see cref="SelectedButtonIndex"/> property.</para>
         /// </param>
@@ -967,9 +967,9 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         /// <returns>A <see cref="TaskDialogResult"/> value that indicates one of the pressed standard buttons specified by <see cref="StandardButtons"/> property.
         /// If return value is <see cref="TaskDialogResult.None"/>, then the dialog might have been closed by a custom button, which can be identified by <see cref="SelectedButtonIndex"/>.
-        /// <para>Result is stored also in <see cref="DialogResult"/> property.</para>
+        /// The result is stored also in the <see cref="DialogResult"/> property.
         /// </returns>
-        /// <param name="owner">Handle of the parent window. Can be <see langword="null"/>.</param>
+        /// <param name="owner">Handle of the parent window. If <see langword="null"/>, the dialog is shown as a non-modal window.</param>
         /// <param name="customButtonIndex">Returns the index of the clicked custom button specified in <see cref="Buttons"/> collection if the button closed the dialog.
         /// <para>Result is stored also in <see cref="SelectedButtonIndex"/> property.</para>
         /// </param>
@@ -991,9 +991,9 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         /// <returns>A <see cref="TaskDialogResult"/> value that indicates one of the pressed standard buttons specified by <see cref="StandardButtons"/> property.
         /// If return value is <see cref="TaskDialogResult.None"/>, then the dialog might have been closed by a custom button, which can be identified by <see cref="SelectedButtonIndex"/>.
-        /// <para>Result is stored also in <see cref="DialogResult"/> property.</para>
+        /// The result is stored also in the <see cref="DialogResult"/> property.
         /// </returns>
-        /// <param name="owner">Handle of the parent window. Can be empty (<see cref="IntPtr.Zero"/>).</param>
+        /// <param name="owner">Handle of the parent window. If <see cref="IntPtr.Zero">IntPtr.Zero</see>, the dialog is shown as a non-modal window.</param>
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedButtonIndex"/>
         /// <seealso cref="SelectedRadioButtonIndex"/>
@@ -1005,9 +1005,9 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         /// <returns>A <see cref="TaskDialogResult"/> value that indicates one of the pressed standard buttons specified by <see cref="StandardButtons"/> property.
         /// If return value is <see cref="TaskDialogResult.None"/>, then the dialog might have been closed by a custom button, which can be identified by <see cref="SelectedButtonIndex"/>.
-        /// <para>Result is stored also in <see cref="DialogResult"/> property.</para>
+        /// The result is stored also in the <see cref="DialogResult"/> property.
         /// </returns>
-        /// <param name="owner">Handle of the parent window. Can be <see langword="null"/>.</param>
+        /// <param name="owner">Handle of the parent window. If <see langword="null"/>, the dialog is shown as a non-modal window.</param>
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedButtonIndex"/>
         /// <seealso cref="SelectedRadioButtonIndex"/>
@@ -1015,11 +1015,11 @@ namespace KGySoft.WinForms.Components
         public TaskDialogResult Show(IWin32Window? owner) => Show(owner?.Handle ?? IntPtr.Zero, out int _, out int _, out bool _);
 
         /// <summary>
-        /// Shows the <see cref="TaskDialog"/> using the current configuration.
+        /// Shows the <see cref="TaskDialog"/> as a non-modal window, using the current configuration.
         /// </summary>
         /// <returns>A <see cref="TaskDialogResult"/> value that indicates one of the pressed standard buttons specified by <see cref="StandardButtons"/> property.
         /// If return value is <see cref="TaskDialogResult.None"/>, then the dialog might have been closed by a custom button, which can be identified by <see cref="SelectedButtonIndex"/>.
-        /// <para>Result is stored also in <see cref="DialogResult"/> property.</para>
+        /// The result is stored also in the <see cref="DialogResult"/> property.
         /// </returns>
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedButtonIndex"/>

@@ -37,6 +37,7 @@ using KGySoft.Drawing;
 using KGySoft.Drawing.Imaging;
 using KGySoft.WinForms.Components;
 using KGySoft.WinForms.Controls;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -250,6 +251,8 @@ namespace KGySoft.WinForms.Forms
         private static readonly Padding footerReferenceMargin = new Padding(3, 0, 3, 0);
         private static readonly Padding footerReferencePadding = new Padding(5, 7, 5, 7);
 
+        private static readonly EnumThreadWndProc enumThreadWindowsCallback = PopulateThreadWindows;
+
         #endregion
 
         #region Instance Fields
@@ -260,8 +263,8 @@ namespace KGySoft.WinForms.Forms
         private int selectedCustomButtonIndex;
         private bool isDetailsExpanded; // Indicates only the state if details is not empty. Does not mean it is visible.
         private bool isDetailsInFooter;
-        DateTime dialogStarted;
         private bool isSpecialHeadColors;
+        private DateTime dialogStarted;
         private Color gradientStart;
         private Color gradientEnd;
         private Color mainInstructionsColor;
@@ -277,6 +280,7 @@ namespace KGySoft.WinForms.Forms
         private bool isResetHeightPending;
         private bool isCheckboxChecking;
         private bool isRtlChanging;
+        private bool executeNonModal;
         private Point location;
 
         #endregion
@@ -465,6 +469,21 @@ namespace KGySoft.WinForms.Forms
             commandLink.Image = resizedIcon.ExtractBitmap(0);
         }
 
+        /// <summary>
+        /// Gets the visible Win32 windows of the current thread along with their owners.
+        /// </summary>
+        /// <param name="hWnd">The handle of the window that is currently enumerated.</param>
+        /// <param name="lParam">A GCHandle to the result dictionary.</param>
+        /// <returns><see langword="true"/> to continue the enumeration.</returns>
+        private static bool PopulateThreadWindows(IntPtr hWnd, IntPtr lParam)
+        {
+            if (!User32.IsWindowVisible(hWnd))
+                return true;
+            IntPtr owner = User32.GetWindowLong(hWnd, Constants.GWLP_HWNDPARENT);
+            ((Dictionary<IntPtr, IntPtr>)GCHandle.FromIntPtr(lParam).Target!).Add(hWnd, owner);
+            return true;
+        }
+
         #endregion
 
         #region Instance Methods
@@ -547,8 +566,31 @@ namespace KGySoft.WinForms.Forms
 
         protected override void OnShown(EventArgs e)
         {
-            // Fixing the height in some cases, especially when opening the dialog on a display with a different DPI than the one of the main display.
             base.OnShown(e);
+
+            // if the dialog was opened without an owner, simulating the native task dialog behavior that opens in a non-modal way
+            if (executeNonModal)
+            {
+                // Removing the owner and making the form non-modal (Owner is always null here, so not setting that).
+                User32.SetWindowLong(Handle, Constants.GWLP_HWNDPARENT, IntPtr.Zero);
+                this.SetState(Constants.ControlStates_Modal, false); // without this, the form cannot be closed before closing possible child windows
+
+                // Enabling every top-level window that do not own other windows (not using Application.OpenForms because that ignores native Win32 windows).
+                // Now that we cleared the owner of this form, the caller form will be among the windows to enable.
+                var threadWindows = new Dictionary<IntPtr, IntPtr>(); // key: self window handle, value: owner window handle (if any)
+                GCHandle handle = GCHandle.Alloc(threadWindows);
+                User32.EnumThreadWindows(Kernel32.GetCurrentThreadId(), enumThreadWindowsCallback, GCHandle.ToIntPtr(handle));
+                handle.Free();
+                var owners = new HashSet<IntPtr>(threadWindows.Values.Where(h => h != IntPtr.Zero));
+                foreach (IntPtr hWnd in threadWindows.Keys)
+                {
+                    // enabling the window only if it does not own any other window
+                    if (!owners.Contains(hWnd))
+                        User32.EnableWindow(hWnd, true);
+                }
+            }
+
+            // Fixing the height in some cases, especially when opening the dialog on a display with a different DPI than the one of the main display.
             ResetHeights(GetConfiguration());
         }
 
@@ -2055,7 +2097,7 @@ namespace KGySoft.WinForms.Forms
             host = taskDialog;
             if (owner != IntPtr.Zero)
                 ownerWindow = new Win32Window { Handle = owner };
-
+            
             // This forces to create the handle. May cause some resets and additional DPI changes, but it's still better than handling
             // the side effects of the deferred handle creation (e.g. the ResumeLayout in ResetHeights may change the screen,
             // recursive reentrancy in OnDeviceScaleChanged when setting MinimumSize in ResetConstraints, etc.).
@@ -2066,14 +2108,17 @@ namespace KGySoft.WinForms.Forms
             // showing the dialog
             do
             {
-
+                // If the native task dialog is shown without an owner, it does not block its caller, while works as ShowDialog in terms of blocking the call
+                // until the form is closed. Here we mimic the same behavior: though the top-level windows will be blocked by ShowDialog,
+                // we unblock them once this form is shown. Additionally, the currently active window becomes the owner of this form, which we reset as well.
+                executeNonModal = owner == IntPtr.Zero && OSUtils.IsWindows && !OSUtils.IsMono;
                 if (ownerWindow == null)
-                    ShowDialog();
+                    ShowDialog(); // there is no Show method that is both blocking and non-modal, so we use ShowDialog here, and adjusting the owner in OnShown
                 else
                     ShowDialog(ownerWindow);
 
                 // the handle of the owner may change, too
-                if (isRtlChanging)
+                if (isRtlChanging && ownerWindow != null)
                 {
                     IntPtr newOwner = User32.GetActiveWindow();
                     if (newOwner != IntPtr.Zero)

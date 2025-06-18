@@ -441,6 +441,84 @@ namespace KGySoft.WinForms.WinApi
         [DllImport("user32.dll")]
         internal static extern IntPtr GetActiveWindow();
 
+        /// <summary>
+        /// Enables or disables mouse and keyboard input to the specified window or control.
+        /// When input is disabled, the window does not receive input such as mouse clicks and key presses. When input is enabled, the window receives all input.
+        /// </summary>
+        /// <param name="hWnd">A handle to the window to be enabled or disabled.</param>
+        /// <param name="bEnable">Indicates whether to enable or disable the window. If this parameter is TRUE, the window is enabled. If the parameter is FALSE, the window is disabled.</param>
+        /// <returns>If the window was previously disabled, the return value is nonzero.
+        /// If the window was not previously disabled, the return value is zero.</returns>
+        [DllImport("user32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EnableWindow(IntPtr hWnd, bool bEnable);
+
+        /// <summary>
+        /// Enumerates all nonchild windows associated with a thread by passing the handle to each window, in turn, to an application-defined callback function.
+        /// EnumThreadWindows continues until the last window is enumerated or the callback function returns FALSE.
+        /// To enumerate child windows of a particular window, use the EnumChildWindows function.
+        /// </summary>
+        /// <param name="dwThreadId">The identifier of the thread whose windows are to be enumerated.</param>
+        /// <param name="lpfn">A pointer to an application-defined callback function. For more information, see EnumThreadWndProc.</param>
+        /// <param name="lParam">An application-defined value to be passed to the callback function.</param>
+        /// <returns>If the callback function returns TRUE for all windows in the thread specified by dwThreadId, the return value is TRUE.
+        /// If the callback function returns FALSE on any enumerated window, or if there are no windows found in the thread specified by dwThreadId, the return value is FALSE.</returns>
+        [DllImport("user32.dll")]
+        internal static extern bool EnumThreadWindows(uint dwThreadId, EnumThreadWndProc lpfn, IntPtr lParam);
+
+        /// <summary>
+        /// Determines the visibility state of the specified window.
+        /// </summary>
+        /// <param name="hWnd">A handle to the window to be tested.</param>
+        /// <returns>If the specified window, its parent window, its parent's parent window, and so forth, have the WS_VISIBLE style, the return value is nonzero. Otherwise, the return value is zero.</returns>
+        [DllImport("user32.dll")]
+        internal static extern bool IsWindowVisible(IntPtr hWnd);
+
+        /// <summary>
+        /// Changes an attribute of the specified window. The function also sets a value at the specified offset in the extra window memory. 
+        /// </summary>
+        /// <param name="hWnd">A handle to the window and, indirectly, the class to which the window belongs. The SetWindowLong[Ptr] function fails if the process that owns the window specified by the hWnd parameter is at a higher process privilege in the UIPI hierarchy than the process the calling thread resides in.</param>
+        /// <param name="nIndex">The zero-based offset to the value to be set. Valid values are in the range zero through the number of bytes of extra window memory, minus the size of a LONG_PTR.</param>
+        /// <param name="dwNewLong">The replacement value.</param>
+        /// <returns>If the function succeeds, the return value is the previous value of the specified offset.
+        /// If the function fails, the return value is zero. To get extended error information, call GetLastError.</returns>
+        internal static IntPtr SetWindowLong(IntPtr hWnd, int nIndex, IntPtr dwNewLong)
+        {
+            #region Local Methods
+            
+            [DllImport("user32.dll", EntryPoint = "SetWindowLong", CharSet = CharSet.Auto)]
+            static extern IntPtr SetWindowLongPtr32(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+            [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", CharSet = CharSet.Auto)]
+            static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
+
+            #endregion
+
+            return IntPtr.Size == 4 ? SetWindowLongPtr32(hWnd, nIndex, dwNewLong) : SetWindowLongPtr64(hWnd, nIndex, dwNewLong);
+        }
+
+        /// <summary>
+        /// Retrieves information about the specified window. The function also retrieves the value at a specified offset into the extra window memory.
+        /// </summary>
+        /// <param name="hWnd">A handle to the window and, indirectly, the class to which the window belongs.</param>
+        /// <param name="nIndex">The zero-based offset to the value to be retrieved. Valid values are in the range zero through the number of bytes of extra window memory, minus the size of a LONG_PTR. To retrieve any other value, specify one of the following values.</param>
+        /// <returns>If the function succeeds, the return value is the requested value.
+        /// If the function fails, the return value is zero. To get extended error information, call GetLastError.</returns>
+        internal static IntPtr GetWindowLong(IntPtr hWnd, int nIndex)
+        {
+            #region Local Methods
+
+            [DllImport("user32.dll", EntryPoint = "GetWindowLong", CharSet = CharSet.Auto)]
+            static extern IntPtr GetWindowLongPtr32(IntPtr hWnd, int nIndex);
+
+            [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", CharSet = CharSet.Auto)]
+            static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
+
+            #endregion
+
+            return IntPtr.Size == 4 ? GetWindowLongPtr32(hWnd, nIndex) : GetWindowLongPtr64(hWnd, nIndex);
+        }
+
         #endregion
     }
 }

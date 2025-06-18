@@ -69,17 +69,39 @@ namespace KGySoft.WinForms.WinApi
 
         #region Methods
 
-        [DllImport("Kernel32.dll", SetLastError = true)]
+        /// <summary>
+        /// The CreateActCtx function creates an activation context.
+        /// </summary>
+        /// <param name="actctx">Pointer to an ACTCTX structure that contains information about the activation context to be created.</param>
+        /// <returns>If the function succeeds, it returns a handle to the returned activation context. Otherwise, it returns INVALID_HANDLE_VALUE.</returns>
+        [DllImport("kernel32.dll", SetLastError = true)]
         internal static extern ActivationContextSafeHandle CreateActCtx(ref ACTCTX actctx);
 
+        /// <summary>
+        /// The ReleaseActCtx function decrements the reference count of the specified activation context.
+        /// </summary>
+        /// <param name="hActCtx">Handle to the ACTCTX structure that contains information on the activation context for which the reference count is to be decremented.</param>
         [DllImport("kernel32.dll"), ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
         internal static extern void ReleaseActCtx(IntPtr hActCtx);
 
-        [DllImport("Kernel32.dll", SetLastError = true)]
+        /// <summary>
+        /// The ActivateActCtx function activates the specified activation context. It does this by pushing the specified activation context to the top of the activation stack.
+        /// The specified activation context is thus associated with the current thread and any appropriate side-by-side API functions.
+        /// </summary>
+        /// <param name="hActCtx">Handle to an ACTCTX structure that contains information on the activation context that is to be made active.</param>
+        /// <param name="lpCookie">Pointer to a ULONG_PTR that functions as a cookie, uniquely identifying a specific, activated activation context.</param>
+        /// <returns>If the function succeeds, it returns TRUE. Otherwise, it returns FALSE.</returns>
+        [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool ActivateActCtx(ActivationContextSafeHandle hActCtx, out IntPtr lpCookie);
 
-        [DllImport("Kernel32.dll", SetLastError = true)]
+        /// <summary>
+        /// The DeactivateActCtx function deactivates the activation context corresponding to the specified cookie.
+        /// </summary>
+        /// <param name="dwFlags">Flags that indicate how the deactivation is to occur.</param>
+        /// <param name="lpCookie">The ULONG_PTR that was passed into the call to ActivateActCtx. This value is used as a cookie to identify a specific activated activation context.</param>
+        /// <returns>If the function succeeds, it returns TRUE. Otherwise, it returns FALSE.</returns>
+        [DllImport("kernel32.dll", SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         internal static extern bool DeactivateActCtx(uint dwFlags, IntPtr lpCookie);
 
@@ -114,6 +136,13 @@ namespace KGySoft.WinForms.WinApi
         /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</returns>
         [DllImport("kernel32.dll")]
         internal static extern bool FreeLibrary(IntPtr hModule);
+
+        /// <summary>
+        /// Retrieves the thread identifier of the calling thread.
+        /// </summary>
+        /// <returns>The return value is the thread identifier of the calling thread.</returns>
+        [DllImport("kernel32.dll")]
+        internal static extern uint GetCurrentThreadId();
 
         #endregion
     }

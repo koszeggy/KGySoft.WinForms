@@ -128,7 +128,6 @@ namespace KGySoft.WinForms.Reflection
 
         #endregion
 
-
         #endregion
 
         #region Methods
@@ -176,6 +175,10 @@ namespace KGySoft.WinForms.Reflection
         internal static void SetDoubleBuffered(this Control control, bool value) => GetProperty(typeof(Control), "DoubleBuffered")!.Set(control, value);
         internal static void SetStyle(this Control control, ControlStyles flags, bool value)
             => GetMethodByName(typeof(Control), "SetStyle")!.Invoke(control, flags, value);
+
+        // NOTE: on newer .NET versions the state parameter is an enum, but reflection works with the underlying type (int) as well
+        internal static void SetState(this Control control, int state, bool value)
+            => GetMethodByName(typeof(Control), "SetState")?.Invoke(control, state, value);
 
         #endregion
 
