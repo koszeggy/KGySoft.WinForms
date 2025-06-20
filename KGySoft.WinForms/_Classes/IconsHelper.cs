@@ -54,7 +54,7 @@ namespace KGySoft.WinForms
         internal static Bitmap GetCachedBitmap(this Icon icon, string name, Size size)
         {
             var key = (name, (ulong)(uint)size.Width << 32 | (uint)size.Height);
-            if (imagesCache.TryGetValue(key, out Bitmap? bitmap))
+            if (imagesCache.TryGetValue(key, out Bitmap? bitmap) && !bitmap.IsDisposed())
                 return bitmap;
 
             using var resizedIcon = icon.Resize(size);
@@ -66,7 +66,7 @@ namespace KGySoft.WinForms
         internal static Bitmap GetCachedBitmap(this Icon icon, string name, Size size, ScalingMode scalingMode)
         {
             var key = ($"{name}_{Enum<ScalingMode>.ToString(scalingMode)}", (ulong)(uint)size.Width << 32 | (uint)size.Height);
-            if (imagesCache.TryGetValue(key, out Bitmap? bitmap))
+            if (imagesCache.TryGetValue(key, out Bitmap? bitmap) && !bitmap.IsDisposed())
                 return bitmap;
 
             using var resizedIcon = icon.Resize(size);

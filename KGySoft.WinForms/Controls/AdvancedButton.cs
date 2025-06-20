@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
@@ -550,7 +551,8 @@ namespace KGySoft.WinForms.Controls
         {
             get
             {
-                if (cachedSecurityShieldImage == null)
+                // unlike in CommandLinkButton, the elevated icon may be set in base.Image, so it is publicly accessible (and disposable)
+                if (cachedSecurityShieldImage == null || cachedSecurityShieldImage.IsDisposed())
                 {
                     Size size = this.ScaleSize(IconsHelper.SmallIconReferenceSize);
                     using var icon = Icons.SystemShield;
