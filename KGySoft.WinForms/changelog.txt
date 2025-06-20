@@ -49,8 +49,12 @@
   - Fixing widths
   - Native mode: fixing some rare exception cases during Dispose
   - Native mode: when owner was not specified, the caller window remained enabled
+  - Compatibility mode: opening without an owner was still modal, which is not how the native TaskDialog works.
   * Compatibility mode: improving expando button image quality, showing ? button if HelpRequested event is assigned,
     adjusting sizes of custom button icons.
++ TaskDialogOptions enum:
+  + New ForceShowSysMenu option
+  + New ForceShowInTaskbar option
 
 ! KGySoft.WinForms.Controls namespace:
 ======================================

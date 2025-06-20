@@ -561,8 +561,8 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets standard buttons of the dialog. When <see cref="Buttons"/> are not empty, this property is ignored.
-        /// If neither standard nor custom buttons are specified, the task dialog will contain the OK button by default.
+        /// Gets or sets the standard buttons of the dialog. When <see cref="Buttons"/> are not empty, this property is ignored.
+        /// If neither standard nor custom buttons are specified, the task dialog will have an OK button by default.
         /// By default, these buttons will use the current windows language, unless <see cref="TaskDialogOptions.TranslateStandardButtons"/> is set
         /// in <see cref="Options"/>.
         /// </summary>

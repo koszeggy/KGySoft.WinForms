@@ -5,6 +5,7 @@ using System.Windows.Forms;
 using KGySoft.Drawing;
 using KGySoft.Reflection;
 using KGySoft.WinForms.Components;
+using KGySoft.WinForms.Forms;
 using KGySoft.WinForms.Test.Forms;
 
 using TaskDialog = KGySoft.WinForms.Components.TaskDialog;
@@ -112,7 +113,11 @@ namespace KGySoft.WinForms.Test
                 btn.Click += btnProgressBar_Click;
                 dlg.Buttons.Add(btn);
 
-                btn = new TaskDialogButton("Options Test");
+                btn = new TaskDialogButton("btnOptionsModal", "Options Test (Modal)");
+                btn.Click += btnOptionsTest_Click;
+                dlg.Buttons.Add(btn);
+
+                btn = new TaskDialogButton("btnOptionsModeless", "Options Test (Modeless)");
                 btn.Click += btnOptionsTest_Click;
                 dlg.Buttons.Add(btn);
 
@@ -130,27 +135,33 @@ namespace KGySoft.WinForms.Test
 
         private static void btnOptionsTest_Click(object sender, HandledEventArgs e)
         {
-            TaskDialog senderDialog = ((TaskDialogButton)sender).Parent;
-
+            var senderButton = (TaskDialogButton)sender;
             using (TaskDialog dlg = new TaskDialog())
             {
-                dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
+                dlg.ForceCompatibilityMode = senderButton.Parent!.CheckBoxChecked;
                 dlg.DetailsText = "This is the DetailsText";
                 dlg.Message = "This is a <a href=\"https://kgysoft.net\">sample link</a>";
-                dlg.Options = TaskDialogOptions.HyperlinksEnabled | TaskDialogOptions.UseCommandLinks | TaskDialogOptions.DetailsExpanded;
+                dlg.Options = TaskDialogOptions.HyperlinksEnabled | TaskDialogOptions.UseCommandLinksNoIcon | TaskDialogOptions.DetailsExpanded | TaskDialogOptions.AllowCancel | TaskDialogOptions.AllowMinimize | TaskDialogOptions.ForceShowInTaskbar;
                 dlg.FooterIcon = TaskDialogStandardIcons.Warning;
-                dlg.FooterText = "Warning: In native mode RightToLeftLayout cannot be undone";
+                dlg.FooterText = "• UseCommandLinks has higher priority than and UseCommandLinksNoIcon" + Environment.NewLine
+                    + "• In native mode RightToLeftLayout cannot be undone" + Environment.NewLine
+                    + "• AllowMinimize works only if the dialog was opened without an owner (modeless)" + Environment.NewLine
+                    + "• AllowMinimize implicitly enables cancellation, as if AllowCancel was also set" + Environment.NewLine
+                    + "• In native mode enabling AllowMinimize after showing the dialog will show a non-functional button" + Environment.NewLine
+                    + "• In native mode toggling ForceShowInTaskbar works only if it was initially enabled";
                 dlg.StandardButtons = TaskDialogStandardButtonFlags.Close;
 
                 dlg.Buttons.Add(new TaskDialogButton("Toggle HyperlinksEnabled") { Description = "On", Tag = TaskDialogOptions.HyperlinksEnabled });
-                dlg.Buttons.Add(new TaskDialogButton("Toggle AllowCancel") { Description = "Off", Tag = TaskDialogOptions.AllowCancel });
+                dlg.Buttons.Add(new TaskDialogButton("Toggle AllowCancel") { Description = "On", Tag = TaskDialogOptions.AllowCancel });
                 dlg.Buttons.Add(new TaskDialogButton("Toggle UseCommandLinks") { Description = "Off", Tag = TaskDialogOptions.UseCommandLinks });
                 dlg.Buttons.Add(new TaskDialogButton("Toggle UseCommandLinksNoIcon") { Description = "On", Tag = TaskDialogOptions.UseCommandLinksNoIcon });
                 dlg.Buttons.Add(new TaskDialogButton("Toggle ExpandFooterArea") { Description = "Off", Tag = TaskDialogOptions.ExpandFooterArea });
                 dlg.Buttons.Add(new TaskDialogButton("Toggle DetailsExpanded") { Description = "On", Tag = TaskDialogOptions.DetailsExpanded });
                 //dlg.Buttons.Add(new TaskDialogButton("Toggle PositionRelativeToWindow") { Description = "Off", Tag = TaskDialogOptions.PositionRelativeToWindow });
                 dlg.Buttons.Add(new TaskDialogButton("Toggle RightToLeftLayout") { Description = "Off", Tag = TaskDialogOptions.RightToLeftLayout });
-                dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "Off", Tag = TaskDialogOptions.AllowMinimize });
+                dlg.Buttons.Add(new TaskDialogButton("Toggle AllowMinimize") { Description = "On", Tag = TaskDialogOptions.AllowMinimize });
+                dlg.Buttons.Add(new TaskDialogButton("Toggle ForceShowSysMenu") { Description = "Off", Tag = TaskDialogOptions.ForceShowSysMenu });
+                dlg.Buttons.Add(new TaskDialogButton("Toggle ForceShowInTaskbar") { Description = "On", Tag = TaskDialogOptions.ForceShowInTaskbar });
                 dlg.Width = 300;
 
                 foreach (TaskDialogButton button in dlg.Buttons)
@@ -173,7 +184,7 @@ namespace KGySoft.WinForms.Test
                     };
                 }
 
-                dlg.Show();
+                dlg.Show(senderButton.Name == "btnOptionsModal" ? senderButton.Parent : null);
             }
         }
 
@@ -184,7 +195,7 @@ namespace KGySoft.WinForms.Test
 
             using (TaskDialog dlg = new TaskDialog())
             {
-                dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
+                dlg.ForceCompatibilityMode = senderDialog!.CheckBoxChecked;
                 dlg.Caption = "Progress Bar test";
                 dlg.Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.UseCommandLinks;
                 dlg.StandardButtons = TaskDialogStandardButtonFlags.Close;
@@ -271,7 +282,7 @@ namespace KGySoft.WinForms.Test
                     button.Enabled = false;
                 };
 
-                dlg.Show();
+                dlg.Show(senderDialog);
             }
         }
 
@@ -281,7 +292,7 @@ namespace KGySoft.WinForms.Test
 
             using (TaskDialog dlg = new TaskDialog())
             {
-                dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
+                dlg.ForceCompatibilityMode = senderDialog!.CheckBoxChecked;
                 dlg.Caption = "Timer demo";
                 dlg.MainInstruction = "Elapsed: 0 seconds";
                 dlg.StandardButtons = TaskDialogStandardButtonFlags.Close;
@@ -297,13 +308,13 @@ namespace KGySoft.WinForms.Test
                     resetRequested = false;
                 };
 
-                dlg.Show();
+                dlg.Show(senderDialog);
             }
         }
 
         private static void btnTextElements_Click(object sender, HandledEventArgs e)
         {
-            TaskDialog senderDialog = ((TaskDialogButton)sender).Parent;
+            TaskDialog senderDialog = ((TaskDialogButton)sender).Parent!;
 
             const string caption = "This is the Caption. When not set, displays application name.";
             const string mainInstruction = "This is the MainInstruction. When not set, Message is displayed here.";
@@ -348,70 +359,63 @@ namespace KGySoft.WinForms.Test
                 dlg.Buttons["btnCaption"].Click += (btn, args) =>
                 {
                     TaskDialogButton button = (TaskDialogButton)btn;
-                    button.Parent.Caption = String.IsNullOrEmpty(button.Parent.Caption) ? caption : null;
+                    button.Parent!.Caption = String.IsNullOrEmpty(button.Parent.Caption) ? caption : null;
                     button.Description = String.IsNullOrEmpty(button.Parent.Caption) ? "Off" : "On";
                 };
 
                 dlg.Buttons["btnMainInstruction"].Click += (btn, args) =>
                 {
                     TaskDialogButton button = (TaskDialogButton)btn;
-                    button.Parent.MainInstruction = String.IsNullOrEmpty(button.Parent.MainInstruction) ? mainInstruction : null;
+                    button.Parent!.MainInstruction = String.IsNullOrEmpty(button.Parent.MainInstruction) ? mainInstruction : null;
                     button.Description = String.IsNullOrEmpty(button.Parent.MainInstruction) ? "Off" : "On";
                 };
 
                 dlg.Buttons["btnMessage"].Click += (btn, args) =>
                 {
                     TaskDialogButton button = (TaskDialogButton)btn;
-                    button.Parent.Message = String.IsNullOrEmpty(button.Parent.Message) ? message : null;
+                    button.Parent!.Message = String.IsNullOrEmpty(button.Parent.Message) ? message : null;
                     button.Description = String.IsNullOrEmpty(button.Parent.Message) ? "Off" : "On";
                 };
 
                 dlg.Buttons["btnDetailsText"].Click += (btn, args) =>
                 {
                     TaskDialogButton button = (TaskDialogButton)btn;
-                    button.Parent.DetailsText = String.IsNullOrEmpty(button.Parent.DetailsText) ? detailsText : null;
+                    button.Parent!.DetailsText = String.IsNullOrEmpty(button.Parent.DetailsText) ? detailsText : null;
                     button.Description = String.IsNullOrEmpty(button.Parent.DetailsText) ? "Off" : "On";
                 };
 
                 dlg.Buttons["btnFooterText"].Click += (btn, args) =>
                 {
                     TaskDialogButton button = (TaskDialogButton)btn;
-                    button.Parent.FooterText = String.IsNullOrEmpty(button.Parent.FooterText) ? footerText : null;
+                    button.Parent!.FooterText = String.IsNullOrEmpty(button.Parent.FooterText) ? footerText : null;
                     button.Description = String.IsNullOrEmpty(button.Parent.FooterText) ? "Off" : "On";
                 };
 
                 dlg.Buttons["btnCheckBoxText"].Click += (btn, args) =>
                 {
                     TaskDialogButton button = (TaskDialogButton)btn;
-                    button.Parent.CheckBoxText = String.IsNullOrEmpty(button.Parent.CheckBoxText) ? checkBoxText : null;
+                    button.Parent!.CheckBoxText = String.IsNullOrEmpty(button.Parent.CheckBoxText) ? checkBoxText : null;
                     button.Description = String.IsNullOrEmpty(button.Parent.CheckBoxText) ? "Off" : "On";
                 };
 
                 dlg.Buttons["btnShowDetailsText"].Click += (btn, args) =>
                 {
                     TaskDialogButton button = (TaskDialogButton)btn;
-                    button.Parent.ShowDetailsText = String.IsNullOrEmpty(button.Parent.ShowDetailsText) ? showDetailsText : null;
+                    button.Parent!.ShowDetailsText = String.IsNullOrEmpty(button.Parent.ShowDetailsText) ? showDetailsText : null;
                     button.Description = String.IsNullOrEmpty(button.Parent.ShowDetailsText) ? "Off" : "On";
                 };
 
                 dlg.Buttons["btnHideDetailsText"].Click += (btn, args) =>
                 {
                     TaskDialogButton button = (TaskDialogButton)btn;
-                    button.Parent.HideDetailsText = String.IsNullOrEmpty(button.Parent.HideDetailsText) ? hideDetailsText : null;
+                    button.Parent!.HideDetailsText = String.IsNullOrEmpty(button.Parent.HideDetailsText) ? hideDetailsText : null;
                     button.Description = String.IsNullOrEmpty(button.Parent.HideDetailsText) ? "Off" : "On";
                 };
 
-                dlg.RadioButtons["rbMessage"].Selected += (rb, args) =>
-                {
-                    ((TaskDialogRadioButton)rb).Parent.Options &= ~TaskDialogOptions.ExpandFooterArea;
-                };
+                dlg.RadioButtons["rbMessage"].Selected += (rb, args) => ((TaskDialogRadioButton)rb).Parent!.Options &= ~TaskDialogOptions.ExpandFooterArea;
+                dlg.RadioButtons["rbFooter"].Selected += (rb, args) => ((TaskDialogRadioButton)rb).Parent!.Options |= TaskDialogOptions.ExpandFooterArea;
 
-                dlg.RadioButtons["rbFooter"].Selected += (rb, args) =>
-                {
-                    ((TaskDialogRadioButton)rb).Parent.Options |= TaskDialogOptions.ExpandFooterArea;
-                };
-
-                dlg.Show();
+                dlg.Show(senderDialog);
             }
         }
 
@@ -419,100 +423,83 @@ namespace KGySoft.WinForms.Test
         {
             TaskDialog senderDialog = ((TaskDialogButton)sender).Parent;
 
-            using (TaskDialog dlg = new TaskDialog())
+            using TaskDialog dlg = new TaskDialog();
+            dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
+            dlg.Options = dlg.ForceCompatibilityMode ? TaskDialogOptions.TranslateStandardButtons : TaskDialogOptions.None;
+            dlg.Caption = "Buttons test";
+            dlg.Message = "OK and Cancel buttons are standard ones, while Custom button is a custom one." + Environment.NewLine
+                + "You can define radio buttons, too.";
+
+            dlg.StandardButtons = TaskDialogStandardButtonFlags.OK | TaskDialogStandardButtonFlags.Cancel;
+
+            dlg.Buttons.Add(new TaskDialogButton("btnCustom", "Custom") { Description = "I am a custom button" });
+            dlg.Buttons["btnCustom"].Click += (btn, args) =>
             {
-                dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
-                dlg.Options = dlg.ForceCompatibilityMode ? TaskDialogOptions.TranslateStandardButtons : TaskDialogOptions.None;
-                dlg.Caption = "Buttons test";
-                dlg.Message = "OK and Cancel buttons are standard ones, while Custom button is a custom one." + Environment.NewLine
-                    + "You can define radio buttons, too.";
+                TaskDialog owner = ((TaskDialogButton)btn).Parent!;
+                using TaskDialog dlgQuestion = new TaskDialog();
+                dlgQuestion.ForceCompatibilityMode = owner.ForceCompatibilityMode;
+                dlgQuestion.Caption = "Confirmation";
+                dlgQuestion.Icon = TaskDialogStandardIcons.Question;
+                dlgQuestion.Message = "Do you want to close the Buttons test dialog?";
+                dlgQuestion.StandardButtons = TaskDialogStandardButtonFlags.Yes | TaskDialogStandardButtonFlags.No;
+                args.Handled = dlgQuestion.Show(owner) == TaskDialogResult.No;
+            };
 
-                dlg.StandardButtons = TaskDialogStandardButtonFlags.OK | TaskDialogStandardButtonFlags.Cancel;
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("rbStandard", "Standard Button") { Checked = true });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("rbCommandLink", "Command Link Button with Glyph"));
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("rbCommandNoLink", "Command Link Button without Glyph"));
+            dlg.RadioButtons["rbStandard"].Selected += (rb, args) => ((TaskDialogRadioButton)rb).Parent!.Options = TaskDialogOptions.None;
+            dlg.RadioButtons["rbCommandLink"].Selected += (rb, args) => ((TaskDialogRadioButton)rb).Parent!.Options = TaskDialogOptions.UseCommandLinks;
+            dlg.RadioButtons["rbCommandNoLink"].Selected += (rb, args) => ((TaskDialogRadioButton)rb).Parent!.Options = TaskDialogOptions.UseCommandLinksNoIcon;
 
-                dlg.Buttons.Add(new TaskDialogButton("btnCustom", "Custom") { Description = "I am a custom button" });
-                dlg.Buttons["btnCustom"].Click += (btn, args) =>
-                {
-                    TaskDialog owner = ((TaskDialogButton)btn).Parent;
-                    using (TaskDialog dlgQuestion = new TaskDialog())
-                    {
-                        dlgQuestion.ForceCompatibilityMode = owner.ForceCompatibilityMode;
-                        dlgQuestion.Caption = "Confirmation";
-                        dlgQuestion.Icon = TaskDialogStandardIcons.Question;
-                        dlgQuestion.Message = "Do you want to close the Buttons test dialog?";
-                        dlgQuestion.StandardButtons = TaskDialogStandardButtonFlags.Yes | TaskDialogStandardButtonFlags.No;
-                        args.Handled = dlgQuestion.Show(owner) == TaskDialogResult.No;
-                    }
-                };
+            dlg.CheckBoxText = "Has Elevated Icon";
+            dlg.CheckBoxCheckedChanged += (tdSender, args) =>
+            {
+                TaskDialog td = (TaskDialog)tdSender;
+                td.Buttons["btnCustom"].IsElevated = td.CheckBoxChecked;
+            };
 
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("rbStandard", "Standard Button") { Checked = true });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("rbCommandLink", "Command Link Button with Glyph"));
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("rbCommandNoLink", "Command Link Button without Glyph"));
-                dlg.RadioButtons["rbStandard"].Selected += (rb, args) =>
-                {
-                    ((TaskDialogRadioButton)rb).Parent.Options = TaskDialogOptions.None;
-                };
-
-                dlg.RadioButtons["rbCommandLink"].Selected += (rb, args) =>
-                {
-                    ((TaskDialogRadioButton)rb).Parent.Options = TaskDialogOptions.UseCommandLinks;
-                };
-
-                dlg.RadioButtons["rbCommandNoLink"].Selected += (rb, args) =>
-                {
-                    ((TaskDialogRadioButton)rb).Parent.Options = TaskDialogOptions.UseCommandLinksNoIcon;
-                };
-
-                dlg.CheckBoxText = "Has Elevated Icon";
-                dlg.CheckBoxCheckedChanged += (tdSender, args) =>
-                {
-                    TaskDialog td = (TaskDialog)tdSender;
-                    td.Buttons["btnCustom"].IsElevated = td.CheckBoxChecked;
-                };
-
-                dlg.Show();
-            }
+            dlg.Show(senderDialog);
         }
 
         private static void btnIconTest_Click(object sender, HandledEventArgs e)
         {
-            TaskDialog senderDialog = ((TaskDialogButton)sender).Parent;
+            TaskDialog senderDialog = ((TaskDialogButton)sender).Parent!;
 
-            using (TaskDialog dlg = new TaskDialog())
+            using TaskDialog dlg = new TaskDialog();
+            dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
+            dlg.Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.ForceShowSysMenu;
+            dlg.Caption = "Icons test";
+            dlg.MainInstruction = "Select an icon";
+            dlg.FooterText = "Footer can have an icon, too.";
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("None") { Checked = true, Tag = TaskDialogStandardIcons.None });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Information") { Tag = TaskDialogStandardIcons.Information });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Warning") { Tag = TaskDialogStandardIcons.Warning });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Question") { Tag = TaskDialogStandardIcons.Question });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Error") { Tag = TaskDialogStandardIcons.Error });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("rbCustom", "Custom Icon"));
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield") { Tag = TaskDialogStandardIcons.SecurityShield });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield Gray") { Tag = TaskDialogStandardIcons.SecurityShieldGray });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield Blue") { Tag = TaskDialogStandardIcons.SecurityShieldBlue });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Success") { Tag = TaskDialogStandardIcons.SecuritySuccess });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Warning") { Tag = TaskDialogStandardIcons.SecurityWarning });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Error") { Tag = TaskDialogStandardIcons.SecurityError });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Question") { Tag = TaskDialogStandardIcons.SecurityQuestion });
+
+            foreach (TaskDialogRadioButton radioButton in dlg.RadioButtons)
             {
-                dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
-                dlg.Options = TaskDialogOptions.AllowCancel;
-                dlg.Caption = "Icons test";
-                dlg.MainInstruction = "Select an icon";
-                dlg.FooterText = "Footer can have an icon, too.";
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("None") { Checked = true, Tag = TaskDialogStandardIcons.None });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Information") { Tag = TaskDialogStandardIcons.Information });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Warning") { Tag = TaskDialogStandardIcons.Warning });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Question") { Tag = TaskDialogStandardIcons.Question });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Error") { Tag = TaskDialogStandardIcons.Error });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("rbCustom", "Custom Icon"));
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield") { Tag = TaskDialogStandardIcons.SecurityShield });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield Gray") { Tag = TaskDialogStandardIcons.SecurityShieldGray });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield Blue") { Tag = TaskDialogStandardIcons.SecurityShieldBlue });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Success") { Tag = TaskDialogStandardIcons.SecuritySuccess });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Warning") { Tag = TaskDialogStandardIcons.SecurityWarning });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Error") { Tag = TaskDialogStandardIcons.SecurityError });
-                dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Question") { Tag = TaskDialogStandardIcons.SecurityQuestion });
-
-                foreach (TaskDialogRadioButton radioButton in dlg.RadioButtons)
+                radioButton.Selected += (rbSender, args) =>
                 {
-                    radioButton.Selected += (rbSender, args) =>
-                    {
-                        TaskDialogRadioButton rb = (TaskDialogRadioButton)rbSender;
+                    TaskDialogRadioButton rb = (TaskDialogRadioButton)rbSender;
 
-                        if (rb.Name == "rbCustom")
-                            rb.Parent.CustomIcon = rb.Parent.CustomFooterIcon = Icons.Application;
-                        else
-                            rb.Parent.Icon = rb.Parent.FooterIcon = (TaskDialogStandardIcons)rb.Tag;
-                    };
-                }
-
-                dlg.Show();
+                    if (rb.Name == "rbCustom")
+                        rb.Parent!.CustomIcon = rb.Parent.CustomFooterIcon = Icons.Application;
+                    else
+                        rb.Parent!.Icon = rb.Parent.FooterIcon = (TaskDialogStandardIcons)rb.Tag!;
+                };
             }
+
+            dlg.Show(senderDialog);
         }
 
         private static void btnButtonIconsTest_Click(object sender, HandledEventArgs e)
@@ -599,7 +586,7 @@ namespace KGySoft.WinForms.Test
                 dlg.Buttons["btnElevated"].IsElevated = td.CheckBoxChecked;
             };
 
-            dlg.Show();
+            dlg.Show(((TaskDialogButton)sender).Parent);
         }
 
         private static void btnHelpTest_Click(object sender, HandledEventArgs e)
@@ -618,7 +605,6 @@ namespace KGySoft.WinForms.Test
 
             dlg.HelpRequested += (tdSender, _) =>
             {
-                TaskDialog td = (TaskDialog)tdSender;
                 using TaskDialog helpDlg = new TaskDialog
                 {
                     ForceCompatibilityMode = senderDialog.CheckBoxChecked,
@@ -629,10 +615,10 @@ namespace KGySoft.WinForms.Test
                     StandardButtons = TaskDialogStandardButtonFlags.Close,
                     Options = TaskDialogOptions.AllowCancel
                 };
-                helpDlg.Show(td);
+                helpDlg.Show((TaskDialog)tdSender);
             };
 
-            dlg.Show();
+            dlg.Show(senderDialog);
         }
     }
 }

@@ -21,12 +21,13 @@ using System.Drawing;
 using System.Drawing.Design;
 using System.Linq;
 using System.Windows.Forms;
+using KGySoft.WinForms.Forms;
 
 #endregion
 
 namespace KGySoft.WinForms.Test.Forms
 {
-    internal partial class ControlsTestBaseForm : Form
+    internal partial class ControlsTestBaseForm : BaseForm
     {
         #region Constants
 
@@ -135,14 +136,16 @@ namespace KGySoft.WinForms.Test.Forms
 
         private void miResetValue_Click(object sender, EventArgs e)
         {
-            object selectedObject = grdProperties.SelectedObject;
-            if (selectedObject == null)
+            object[] selectedObjects = grdProperties.SelectedObjects;
+            if (!(selectedObjects?.Length > 0))
                 return;
 
             PropertyDescriptor descriptor = grdProperties.SelectedGridItem?.PropertyDescriptor;
             if (descriptor == null)
                 return;
 
+            // when multiple objects are selected, the descriptor is a MergePropertyDescriptor that expects an array of objects
+            object selectedObject = selectedObjects.Length == 1 ? selectedObjects[0] : selectedObjects;
             if (descriptor.CanResetValue(selectedObject))
             {
                 descriptor.ResetValue(selectedObject);
