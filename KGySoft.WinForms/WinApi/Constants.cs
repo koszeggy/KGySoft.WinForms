@@ -150,6 +150,9 @@ namespace KGySoft.WinForms.WinApi
 #endif
 
         internal const int GWLP_HWNDPARENT = -8;
+        internal const int GWL_EXSTYLE = -20;
+        internal const nint WS_EX_DLGMODALFRAME = 0x00000001;
+        internal const nint WS_EX_APPWINDOW = 0x00040000;
 
         internal const int ControlStates_Modal = 0x00000020;
 

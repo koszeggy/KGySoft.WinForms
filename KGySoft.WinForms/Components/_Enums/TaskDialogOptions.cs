@@ -94,23 +94,30 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Indicates that the <see cref="TaskDialog"/> can be minimized.
+        /// Works only if the task dialog is shown without specifying an owner, so it is executed as a non-modal dialog.
+        /// It implicitly allows cancellation as if <see cref="AllowCancel"/> was also set.
         /// </summary>
         AllowMinimize = 1 << 15,
 
         // NOTE: Below there are non-native features. These flags should be masked out when assigning to TASKDIALOG_FLAGS
-
-        ///// <summary>
-        ///// Indicates that <see cref="TaskDialog.DetailsText"/> should be selectable so it can
-        ///// easily copied to the clipboard.
-        ///// <note>This flag causes to use <see cref="TaskDialog"/> in compatibility mode.</note>
-        ///// </summary>
-        //DetailsSelectable = 1 << 16
 
         /// <summary>
         /// Indicates that texts of <see cref="TaskDialog.StandardButtons"/> are localized from the library resources
         /// rather than using Windows resources.
         /// <note>This flag causes to use <see cref="TaskDialog"/> in compatibility mode.</note>
         /// </summary>
-        TranslateStandardButtons = 1 << 17
+        TranslateStandardButtons = 1 << 16,
+
+        /// <summary>
+        /// Indicates that the task dialog should show the form system menu with an icon even if it is shown as a modal dialog (i.e. it has an owner).
+        /// The system menu icon reflects the main icon of the task dialog, or shows the default icon if no main icon is set.
+        /// This option is effective only if <see cref="AllowCancel"/> is also set or the task dialog has a cancel standard button, so the window caption bar has also a close button.
+        /// </summary>
+        ForceShowSysMenu = 1 << 17,
+
+        /// <summary>
+        /// Indicates that the task dialog should be shown in the taskbar even if it is shown as a modal dialog (i.e. it has an owner).
+        /// </summary>
+        ForceShowInTaskbar = 1 << 18
     }
 }

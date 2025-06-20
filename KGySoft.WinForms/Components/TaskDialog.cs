@@ -23,12 +23,20 @@ using System.Linq;
 using System.Windows.Forms;
 
 using KGySoft.CoreLibraries;
+using KGySoft.Drawing;
 using KGySoft.WinForms.Forms;
+using KGySoft.WinForms.WinApi;
 
 #endregion
 
 namespace KGySoft.WinForms.Components
 {
+    #region Usings
+
+    using Resources = Properties.Resources;
+
+    #endregion
+
     /// <summary>
     /// Represents a task dialog window that is able to display regular buttons, Vista-like command options,
     /// radio buttons and progress bar. Can work in compatibility mode so dialog can be use even with Windows XP or when visual styles are not available.
@@ -63,9 +71,19 @@ namespace KGySoft.WinForms.Components
         internal const string PropertyProgressBarValue = "ProgressBarValue";
         internal const string PropertyProgressBarMarqueeAnimationSpeed = "ProgressBarMarqueeAnimationSpeed";
 
+        internal const int NativeOptionsMask = 0xFFFF;
+
         #endregion
 
         #region Fields
+
+        #region Static Fields
+
+        private static Icon? defaultIcon;
+
+        #endregion
+
+        #region Instance Fields
 
         private bool disposed;
         private ITaskDialog? dialogInstance;
@@ -110,6 +128,8 @@ namespace KGySoft.WinForms.Components
         private EventHandler? checkBoxCheckedChanged;
         private EventHandler? helpRequested;
         private EventHandler<TaskDialogDetailsVisibleChangedEventArgs>? detailsVisibleChanged;
+
+        #endregion
 
         #endregion
 
@@ -229,6 +249,14 @@ namespace KGySoft.WinForms.Components
         #endregion
 
         #region Properties
+
+        #region Static Properties
+
+        internal static Icon DefaultIcon => defaultIcon ??= OSUtils.IsVistaOrLater ? Icons.FromFile("imageres", 116) : Resources.TaskDialogIcon;
+
+        #endregion
+
+        #region Instance Properties
 
         #region Public Properties
 
@@ -861,13 +889,12 @@ namespace KGySoft.WinForms.Components
 
         #region Internal Properties
 
-        internal bool IsDialogShowing =>
-            (dialogInstance != null)
-            && (dialogInstance.ShowState == TaskDialogStatus.Showing
-                || dialogInstance.ShowState == TaskDialogStatus.Closing);
+        internal bool IsDialogShowing
+            => (dialogInstance != null) && (dialogInstance.ShowState == TaskDialogStatus.Showing || dialogInstance.ShowState == TaskDialogStatus.Closing);
 
         internal bool IsTickAssigned => tick != null;
         internal bool IsHelpRequestedAssigned => helpRequested != null;
+        internal bool IsNativeDialog => dialogInstance is NativeTaskDialog;
 
         /// <summary>
         /// When an <see cref="ITaskDialog"/> implementation does not support one of the <see cref="TaskDialogStandardIcons"/>, it can set this property
@@ -903,9 +930,15 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets the form icon. It is set by setting <see cref="CustomIcon"/> or <see cref="EmulatedStandardMainIcon"/>.
+        /// Gets the form icon. It is set also by setting <see cref="CustomIcon"/> or <see cref="EmulatedStandardMainIcon"/>.
         /// </summary>
-        internal Icon? FormIcon => formIcon;
+        internal Icon? FormIcon
+        {
+            get => formIcon;
+            set => formIcon = value;
+        }
+
+        #endregion
 
         #endregion
 
@@ -1155,7 +1188,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         private bool IsNonNativeFeatureRequired()
         {
-            return ((int)options | 0xFFFF) > 0xFFFF // non-native options
+            return ((options & TaskDialogOptions.TranslateStandardButtons) != 0) // options not supported natively
                 || icon == TaskDialogStandardIcons.SecurityQuestion // security question icon (due to blue background)
                 || buttons.Any(b => b.CustomIcon != null); // custom button icons
         }

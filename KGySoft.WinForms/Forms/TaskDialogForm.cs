@@ -55,12 +55,6 @@ using TaskDialogRadioButton = KGySoft.WinForms.Components.TaskDialogRadioButton;
 
 namespace KGySoft.WinForms.Forms
 {
-    #region Usings
-
-    using Resources = Properties.Resources;
-
-    #endregion
-
     // Known incompatibilities (they are intended):
     // - Icon position is the same for every icon type
     // - Different animation on toggling expando button resizing
@@ -435,7 +429,8 @@ namespace KGySoft.WinForms.Forms
 
         private static void ResetButtonIcon(AdvancedButton button, Icon? icon, PointF scale)
         {
-            button.Image?.Dispose();
+            if (!button.IsElevated)
+                button.Image?.Dispose();
             if (icon == null)
             {
                 button.Image = null;
@@ -448,7 +443,8 @@ namespace KGySoft.WinForms.Forms
 
         private static void ResetCommandLinkIcon(CommandLinkButton commandLink, Icon? icon, PointF scale)
         {
-            commandLink.Image?.Dispose();
+            if (!commandLink.IsElevated)
+                commandLink.Image?.Dispose();
             if (icon == null)
             {
                 commandLink.Image = null;
@@ -767,7 +763,6 @@ namespace KGySoft.WinForms.Forms
             else
                 StartPosition = FormStartPosition.CenterScreen;
 
-            ShowIcon = ShowInTaskbar = executeNonModal;
             dialogStarted = DateTime.UtcNow; // for full compatibility it should be in ResetSettings
         }
 
@@ -782,12 +777,24 @@ namespace KGySoft.WinForms.Forms
             Configuration cfg = GetConfiguration();
             PointF scale = this.GetScale();
 
-            // options
-            ControlBox = (host.Options & TaskDialogOptions.AllowCancel) != TaskDialogOptions.None
+            // options - Show... properties do not check their change so we do it here to prevent unnecessary style reset or handle recreation
+            bool showControlBox = (host.Options & TaskDialogOptions.AllowCancel) != TaskDialogOptions.None
                 || executeNonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None
                 || (host.StandardButtons & TaskDialogStandardButtonFlags.Cancel) != TaskDialogStandardButtonFlags.None;
-            MinimizeBox = executeNonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None;
-            HelpButton = host.IsHelpRequestedAssigned;
+            if (ControlBox != showControlBox)
+                ControlBox = showControlBox;
+            bool showMinimizeBox = executeNonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None;
+            if (MinimizeBox != showMinimizeBox)
+                MinimizeBox = showMinimizeBox;
+            bool showHelpButton = host.IsHelpRequestedAssigned;
+            if (HelpButton != showHelpButton)
+                HelpButton = showHelpButton;
+            bool showIcon = executeNonModal || (host.Options & TaskDialogOptions.ForceShowSysMenu) != TaskDialogOptions.None;
+            if (ShowIcon != showIcon)
+                ShowIcon = showIcon;
+            bool showInTaskbar = executeNonModal || (host.Options & TaskDialogOptions.ForceShowInTaskbar) != TaskDialogOptions.None;
+            if (ShowInTaskbar != showInTaskbar)
+                ShowInTaskbar = showInTaskbar;
             HyperlinkResolveMode resolve = useLinks ? HyperlinkResolveMode.ResolveHrefsOnly : HyperlinkResolveMode.None;
             lblMessage.ResolveHyperlinks = resolve;
             lblDetailsMain.ResolveHyperlinks = resolve;
@@ -1699,7 +1706,7 @@ namespace KGySoft.WinForms.Forms
 
             Icon icon;
             if (!hasMainIcon)
-                icon = OSUtils.IsVistaOrLater ? Icons.FromFile("imageres", 116) : Resources.TaskDialogIcon;
+                icon = TaskDialog.DefaultIcon;
             else if (host.CustomIcon != null)
                 icon = host.CustomIcon;
             else
