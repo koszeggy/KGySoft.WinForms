@@ -51,7 +51,7 @@ namespace KGySoft.WinForms.Forms
     /// <remarks>
     /// The <see cref="BaseForm"/> class provides the following features and changes:
     /// <list type="bullet">
-    /// <item>Removes all event subscriptions when the form is disposed. To do that for the events of derived controls as well,
+    /// <item>Removes all event subscriptions when the form is disposed. To do that for the events of derived forms as well,
     /// use the <see cref="Component.Events"/> property in your derived event <see langword="add"/>/<see langword="remove"/> accessors.</item>
     /// <item><see cref="ToolTip"/> property to create tool tips for the controls on the form.</item>
     /// <item><see cref="CommandBindings"/> property. See the <a href="https://kgysoft.net/corelibraries#command-binding" target="_blank">online documentation</a> for details.</item>
