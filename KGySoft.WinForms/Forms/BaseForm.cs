@@ -231,8 +231,8 @@ namespace KGySoft.WinForms.Forms
         /// if the awareness is set in the application manifest). In contrast, this property always returns the correct scale
         /// if there is an application manifest file or the DPI awareness is set for the application manually.</note>
         /// </remarks>
+        [Browsable(false)]
         public PointF DeviceScale => deviceScale;
-
 
         /// <inheritdoc cref="Form.Icon" />
         [AllowNull]
