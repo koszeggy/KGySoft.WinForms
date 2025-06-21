@@ -45,7 +45,7 @@
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(75, 23);
             this.btnApply.TabIndex = 2;
-            this.btnApply.Text = "btnApply";
+            this.btnApply.Text = "&Apply";
             this.btnApply.UseVisualStyleBackColor = false;
             this.btnApply.Visible = false;
             // 
@@ -60,7 +60,7 @@
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 1;
-            this.btnCancel.Text = "btnCancel";
+            this.btnCancel.Text = "&Cancel";
             this.btnCancel.UseVisualStyleBackColor = false;
             // 
             // btnOK
@@ -74,7 +74,7 @@
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 0;
-            this.btnOK.Text = "btnOK";
+            this.btnOK.Text = "&OK";
             this.btnOK.UseVisualStyleBackColor = false;
             // 
             // OkCancelButtons

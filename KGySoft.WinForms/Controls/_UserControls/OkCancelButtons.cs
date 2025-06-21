@@ -25,20 +25,64 @@ using KGySoft.WinForms.WinApi;
 
 namespace KGySoft.WinForms.Controls
 {
+    /// <summary>
+    /// Provides a user control with OK, Cancel and optionally Apply buttons.
+    /// </summary>
     public sealed partial class OkCancelButtons : BaseUserControl
     {
         #region Fields
 
+        private bool isOkButtonVisible = true;
+        private bool isCancelButtonVisible = true;
         private bool isApplyVisible;
-        private bool areDefaultButtonsVisible = true;
 
         #endregion
 
         #region Properties
 
-        #region Public Properties
+        /// <summary>
+        /// Gets or sets whether the OK button is visible.
+        /// Default value: <see langword="true"/>.
+        /// </summary>
+        [DefaultValue(true)]
+        [Category("OkCancelButtons")]
+        [Description("Gets or sets whether the OK button is visible.")]
+        public bool OKButtonVisible
+        {
+            get => isOkButtonVisible;
+            set
+            {
+                if (isOkButtonVisible == value)
+                    return;
+                OKButton.Visible = isOkButtonVisible = value;
+            }
+        }
 
+        /// <summary>
+        /// Gets or sets whether the Cancel button is visible.
+        /// Default value: <see langword="true"/>.
+        /// </summary>
+        [DefaultValue(true)]
+        [Category("OkCancelButtons")]
+        [Description("Gets or sets whether the Cancel button is visible.")]
+        public bool CancelButtonVisible
+        {
+            get => isCancelButtonVisible;
+            set
+            {
+                if (isCancelButtonVisible == value)
+                    return;
+                CancelButton.Visible = isCancelButtonVisible = value;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether the Apply button is visible.
+        /// <br/>Default value: <see langword="false"/>.
+        /// </summary>
         [DefaultValue(false)]
+        [Category("OkCancelButtons")]
+        [Description("Gets or sets whether the Apply button is visible.")]
         public bool ApplyButtonVisible
         {
             get => isApplyVisible;
@@ -50,37 +94,41 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        #endregion
+        /// <summary>
+        /// Gets the OK button.
+        /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Button OKButton => btnOK;
 
-        #region Internal Properties
+        /// <summary>
+        /// Gets the Cancel button.
+        /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Button CancelButton => btnCancel;
 
-        internal Button OKButton => btnOK;
-        internal Button CancelButton => btnCancel;
-        internal Button ApplyButton => btnApply;
-
-        internal bool DefaultButtonsVisible
-        {
-            get => areDefaultButtonsVisible;
-            set
-            {
-                if (areDefaultButtonsVisible == value)
-                    return;
-                OKButton.Visible = CancelButton.Visible = areDefaultButtonsVisible = value;
-            }
-        }
-
-        #endregion
+        /// <summary>
+        /// Gets the Apply button.
+        /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Button ApplyButton => btnApply;
 
         #endregion
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="OkCancelButtons"/> class.
+        /// </summary>
         public OkCancelButtons() => InitializeComponent();
 
         #endregion
 
         #region Methods
 
+        /// <inheritdoc />
         protected override void OnLoad(EventArgs e)
         {
             // Fixing high DPI appearance on Mono
@@ -97,6 +145,7 @@ namespace KGySoft.WinForms.Controls
             base.OnLoad(e);
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing)
