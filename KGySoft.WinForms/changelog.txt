@@ -171,6 +171,7 @@
     this is not supported by default.
   + New CheckBoxRenderingQuality property: allows to set the quality of the check box rendering when no proper size
     is available by the visual style renderer on the current DPI.
++ New BaseUserControl class: Migrated from the KGySoft.Drawing.ImagingTools project.
 
 ! KGySoft.WinForms.Forms namespace:
 ===================================

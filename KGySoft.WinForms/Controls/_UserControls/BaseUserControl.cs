@@ -20,11 +20,11 @@ using System.ComponentModel;
 using System.Threading;
 using System.Windows.Forms;
 
-using KGySoft.Drawing.ImagingTools.View.Forms;
+using KGySoft.ComponentModel;
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools.View.UserControls
+namespace KGySoft.WinForms.Controls
 {
     internal class BaseUserControl : UserControl
     {
@@ -32,8 +32,6 @@ namespace KGySoft.Drawing.ImagingTools.View.UserControls
 
         private readonly int threadId;
         private readonly ManualResetEventSlim handleCreated;
-
-        private bool themeApplied;
 
         #endregion
 
@@ -49,7 +47,6 @@ namespace KGySoft.Drawing.ImagingTools.View.UserControls
         {
             threadId = Thread.CurrentThread.ManagedThreadId;
             handleCreated = new ManualResetEventSlim();
-            ThemeColors.ThemeChanged += ThemeColors_ThemeChanged;
         }
 
         #endregion
@@ -94,45 +91,16 @@ namespace KGySoft.Drawing.ImagingTools.View.UserControls
                 return;
 
             handleCreated.Set();
-            if (ThemeColors.IsThemeEverChanged)
-                ApplyTheme();
-        }
-
-        protected virtual void ApplyTheme()
-        {
-            if (themeApplied)
-                return;
-
-            // Applying the theme to the child controls only if the parent is not a BaseForm, because BaseForm would apply it automatically
-            if (ParentForm is not BaseForm)
-            {
-                themeApplied = true;
-                ControlExtensions.ApplyTheme(this);
-            }
         }
 
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
-            ThemeColors.ThemeChanged -= ThemeColors_ThemeChanged;
             if (disposing)
             {
                 handleCreated.Dispose();
                 Events.Dispose();
             }
-        }
-
-        #endregion
-
-        #region Event Handlers
-
-        private void ThemeColors_ThemeChanged(object? sender, EventArgs e)
-        {
-            themeApplied = false;
-            if (!IsHandleCreated)
-                return;
-
-            InvokeIfRequired(ApplyTheme);
         }
 
         #endregion
