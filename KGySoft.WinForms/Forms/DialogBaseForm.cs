@@ -16,17 +16,97 @@
 #region Usings
 
 using System;
+using System.ComponentModel;
 using System.Windows.Forms;
+using KGySoft.WinForms.Controls;
 
 #endregion
 
 namespace KGySoft.WinForms.Forms
 {
     /// <summary>
-    /// Base form for OK/Cancel dialogs.
+    /// Base form for OK/Cancel(/Apply) dialogs.
     /// </summary>
     public partial class DialogBaseForm : BaseForm
     {
+        #region Properties
+
+        #region Public Properties
+
+        /// <summary>
+        /// Gets or sets whether the OK button is visible.
+        /// Default value: <see langword="true"/>.
+        /// </summary>
+        [DefaultValue(true)]
+        [Category("DialogBaseForm")]
+        [Description("Gets or sets whether the OK button is visible.")]
+        public bool ShowOKButton
+        {
+            get => okCancelButtons.OKButtonVisible;
+            set
+            {
+                okCancelButtons.OKButtonVisible = value;
+                AcceptButton = value ? okCancelButtons.OKButton : null;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether the Cancel button is visible.
+        /// Default value: <see langword="true"/>.
+        /// </summary>
+        [DefaultValue(true)]
+        [Category("DialogBaseForm")]
+        [Description("Gets or sets whether the Cancel button is visible.")]
+        public bool ShowCancelButton
+        {
+            get => okCancelButtons.CancelButtonVisible;
+            set
+            {
+                okCancelButtons.CancelButtonVisible = value;
+                CancelButton = value ? okCancelButtons.CancelButton : null;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether the Apply button is visible.
+        /// Default value: <see langword="false"/>.
+        /// </summary>
+        [DefaultValue(false)]
+        [Category("DialogBaseForm")]
+        [Description("Gets or sets whether the Apply button is visible.")]
+        public bool ShowApplyButton
+        {
+            get => okCancelButtons.ApplyButtonVisible;
+            set => okCancelButtons.ApplyButtonVisible = value;
+        }
+
+        #endregion
+
+        #region Protected Properties
+
+        // ReSharper disable InconsistentNaming - Justification: These were protected field names, they are kept for backward compatibility.
+
+        /// <summary>Gets the OK button.</summary>
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected Button btnOK => okCancelButtons.OKButton;
+
+        /// <summary>Gets the OK button.</summary>
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected Button btnCancel => okCancelButtons.CancelButton;
+
+        /// <summary>Gets buttons panel.</summary>
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected OkCancelButtons pnlButtons => okCancelButtons;
+
+        // ReSharper restore InconsistentNaming
+
+        #endregion
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -35,8 +115,10 @@ namespace KGySoft.WinForms.Forms
         public DialogBaseForm()
         {
             InitializeComponent();
-            this.btnOK.Click += new System.EventHandler(this.btnOK_Click);
-            this.btnCancel.Click += new System.EventHandler(this.btnCancel_Click);
+            AcceptButton = okCancelButtons.OKButton;
+            CancelButton = okCancelButtons.CancelButton;
+            okCancelButtons.OKButton.Click += btnOK_Click;
+            okCancelButtons.CancelButton.Click += btnCancel_Click;
         }
 
         #endregion
@@ -49,10 +131,7 @@ namespace KGySoft.WinForms.Forms
         /// Executes the dialog window.
         /// </summary>
         /// <returns>Returns true, when the OK button was pressed, otherwise, false.</returns>
-        public virtual bool Execute()
-        {
-            return ShowDialog() == DialogResult.OK;
-        }
+        public virtual bool Execute() => ShowDialog() == DialogResult.OK;
 
         #endregion
 
@@ -64,18 +143,15 @@ namespace KGySoft.WinForms.Forms
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            btnOK.Click -= btnOK_Click;
-            btnCancel.Click -= btnCancel_Click;
-            if (disposing && (components != null))
-            {
-                components.Dispose();
-            }
+            okCancelButtons.OKButton.Click -= btnOK_Click;
+            okCancelButtons.CancelButton.Click -= btnCancel_Click;
+            if (disposing)
+                components?.Dispose();
             base.Dispose(disposing);
         }
 
         /// <summary>
         /// Override this method when anything needs to be performed when the OK button is pressed.
-        /// Call base method to close the window with positive result.
         /// </summary>
         protected virtual void OKPressed()
         {
@@ -85,7 +161,6 @@ namespace KGySoft.WinForms.Forms
 
         /// <summary>
         /// Override this method when anything needs to be performed when the Cancel button is pressed.
-        /// Call base method to close the window with negative result.
         /// </summary>
         protected virtual void CancelPressed()
         {
@@ -97,15 +172,9 @@ namespace KGySoft.WinForms.Forms
 
         #region Event handlers
 
-        private void btnOK_Click(object sender, EventArgs e)
-        {
-            OKPressed();
-        }
+        private void btnOK_Click(object sender, EventArgs e) => OKPressed();
 
-        private void btnCancel_Click(object sender, EventArgs e)
-        {
-            CancelPressed();
-        }
+        private void btnCancel_Click(object sender, EventArgs e) => CancelPressed();
 
         #endregion
 
