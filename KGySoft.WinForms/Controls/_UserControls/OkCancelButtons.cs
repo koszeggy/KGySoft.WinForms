@@ -19,12 +19,13 @@ using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+using KGySoft.WinForms.WinApi;
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools.View.UserControls
+namespace KGySoft.WinForms.Controls
 {
-    internal sealed partial class OkCancelButtons : BaseUserControl
+    public sealed partial class OkCancelButtons : BaseUserControl
     {
         #region Fields
 
@@ -84,7 +85,7 @@ namespace KGySoft.Drawing.ImagingTools.View.UserControls
         {
             // Fixing high DPI appearance on Mono
             PointF scale;
-            if (OSUtils.IsMono && (scale = this.GetScale()) != new PointF(1f, 1f))
+            if (OSUtils.IsMono && (scale = this.GetScale()) != ScaleHelper.DefaultScale)
             {
                 Height = (int)(35 * scale.Y);
                 var referenceButtonSize = new Size(75, 23);

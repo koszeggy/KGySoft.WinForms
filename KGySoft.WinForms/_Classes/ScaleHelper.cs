@@ -150,6 +150,7 @@ namespace KGySoft.WinForms
 
         #region Public Properties
 
+        public static PointF DefaultScale => defaultScale;
         public static PointF SystemScale => systemScale;
 
         public static bool IsProcessPerMonitorAware => isProcessPerMonitorAware;

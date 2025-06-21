@@ -1,4 +1,4 @@
-﻿namespace KGySoft.Drawing.ImagingTools.View.UserControls
+﻿namespace KGySoft.WinForms.Controls
 {
     partial class OkCancelButtons
     {
