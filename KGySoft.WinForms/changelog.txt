@@ -32,6 +32,7 @@
 + New ScaleHelper class
 + New WinFormsModule class
 + New EventHandlerExtensions class
++ New AsyncTaskBase class: Migrated from the KGySoft.Drawing.ImagingTools project.
 
 + KGySoft.ComponentModel namespace:
 ===================================

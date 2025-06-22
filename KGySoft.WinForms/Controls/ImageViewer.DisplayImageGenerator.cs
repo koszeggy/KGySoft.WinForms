@@ -172,7 +172,7 @@ namespace KGySoft.WinForms.Controls
             {
                 if (task == null)
                     return;
-                task.IsCanceled = true;
+                task.Cancel();
             }
 
             private static void WaitForPendingGenerate(AsyncTaskBase? task)
@@ -379,7 +379,7 @@ namespace KGySoft.WinForms.Controls
                             return;
 
                         // We just initiate cancellation but not awaiting the completion.
-                        task.IsCanceled = true;
+                        task.Cancel();
                     }
 
                     // We do not await the task (we are in a lock here that is used in the task, too).
@@ -411,7 +411,7 @@ namespace KGySoft.WinForms.Controls
                     // x4: because we want to convert to 32bpp
                     long managedPressure = size.Width * size.Height * 4;
                     if (!MemoryHelper.CanAllocate(managedPressure) && !task.SourceBitmap.PixelFormat.In(unsupportedFormats))
-                        task.IsCanceled = true;
+                        task.Cancel();
 
                     Bitmap? result = null;
                     try
@@ -433,7 +433,7 @@ namespace KGySoft.WinForms.Controls
                     {
                         // Despite all the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
                         // NOTE: practically we always can recover from here: we simply don't use a generated clone and the worker thread can be finished
-                        task.IsCanceled = true;
+                        task.Cancel();
                         enabled = false;
                     }
                     finally
@@ -503,7 +503,7 @@ namespace KGySoft.WinForms.Controls
                     Size doubledSize = new Size(task.Size.Width << 1, task.Size.Height << 1);
                     long managedPressure = doubledSize.Width * doubledSize.Height * 16;
                     if (!MemoryHelper.CanAllocate(managedPressure))
-                        task.IsCanceled = true;
+                        task.Cancel();
 
                     if (task.IsCanceled)
                         return null;
@@ -540,7 +540,7 @@ namespace KGySoft.WinForms.Controls
                     {
                         // Despite all the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
                         // NOTE: practically we always can recover from here: we simply don't use a generated preview and the worker thread can be finished
-                        task.IsCanceled = true;
+                        task.Cancel();
                         enabled = false;
                     }
                     finally
@@ -587,7 +587,7 @@ namespace KGySoft.WinForms.Controls
                     {
                         // Despite all the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
                         // NOTE: practically we always can recover from here: we simply don't use a generated preview and the worker thread can be finished
-                        task.IsCanceled = true;
+                        task.Cancel();
                         enabled = false;
                     }
                     finally
