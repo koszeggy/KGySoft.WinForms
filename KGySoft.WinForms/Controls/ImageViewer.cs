@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -29,9 +30,29 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents an image display control with zooming. Does not support implicit animation.
+    /// Represents a high-performance image display control with zooming and panning by the keyboard and the mouse.
+    /// Does not support auto-rendering animated images.
     /// </summary>
-    internal partial class ImageViewer : BaseControl
+    /// <remarks>
+    /// <para>The <see cref="ImageViewer"/> control supports both <see cref="Bitmap"/> and <see cref="Metafile"/> instances,
+    /// including the ones with a <see cref="Image.PixelFormat"/> that is not supported by <see cref="PictureBox"/> or the GDI+ renderer, even on Linux/Mono.</para>
+    /// <para>The control can use optimizations for very fast rendering even if the image is zoomed. It can use multiple CPU cores to generate the displayed image.
+    /// The generation happens asynchronously, so the control may display a low-quality preview image while the high-quality one is being generated.
+    /// Very huge images may consume much memory, but if too high memory pressure is detected, the optimizations are automatically turned off.</para>
+    /// <para>The <see cref="SmoothZooming"/> property allows turning on and off interpolation when zooming. It can be used also for <see cref="Metafile"/> images,
+    /// in which case the metafile is rendered with antialiasing. As a contrast, the <see cref="PictureBox"/> control always uses interpolation
+    /// when displaying a resized <see cref="Bitmap"/>, and never uses antialiasing when displaying a <see cref="Metafile"/> image.</para>
+    /// <para>The <see cref="Zoom"/> property allows you to set an arbitrary zoom. The zoom can also be adjusted by the mouse (Ctrl+Mouse wheel).
+    /// When the displayed image is larger than the control, the scrollbars are automatically shown. Pan the image by dragging it with the mouse or by using the arrow keys.
+    /// You can also use the <see cref="AutoZoom"/> property to <see langword="true"/> to automatically adjust the zoom to fit the image to the control.</para>
+    /// <note type="important">If you access the <see cref="BitmapData"/> of a <see cref="Bitmap"/> that is assigned to the <see cref="Image"/>
+    /// property, make sure you lock on the image until you unlock the <see cref="BitmapData"/> instance. The <see cref="ImageViewer"/> control may process the image
+    /// on different threads asynchronously to generate the displayed image, and during this time it locks the <see cref="Image"/> instance.
+    /// To avoid a possible "bitmap region is already locked" exception, you should also lock on the same <see cref="System.Drawing.Image"/> instance
+    /// Though the latest standards don't recommend using publicly exposed synchronization root objects, careful locking as described above will not cause deadlocks.
+    /// Another option is if you clone the image before assigning it to the <see cref="Image"/> property, though this may cause a significant memory overhead for large images.</note>
+    /// </remarks>
+    public partial class ImageViewer : BaseControl
     {
         #region InvalidateFlags enum
 
@@ -62,7 +83,7 @@ namespace KGySoft.WinForms.Controls
         private Image? image;
         private Rectangle targetRectangle;
         private Rectangle clientRectangle;
-        private float zoom = 1;
+        private float zoom = 1f;
         private Size scrollbarSize;
         private Size imageSize;
         private PixelFormat pixelFormat;
@@ -86,13 +107,23 @@ namespace KGySoft.WinForms.Controls
 
         #region Events
 
-        internal event EventHandler? AutoZoomChanged
+        /// <summary>
+        /// Occurs when the <see cref="AutoZoom"/> property is changed.
+        /// </summary>
+        [Category("ImageViewer")]
+        [Description("Occurs when the AutoZoom property is changed.")]
+        public event EventHandler? AutoZoomChanged
         {
             add => Events.AddHandler(nameof(AutoZoomChanged), value);
             remove => Events.RemoveHandler(nameof(AutoZoomChanged), value);
         }
 
-        internal event EventHandler? ZoomChanged
+        /// <summary>
+        /// Occurs when the <see cref="Zoom"/> property is changed.
+        /// </summary>
+        [Category("ImageViewer")]
+        [Description("Occurs when the Zoom property is changed.")]
+        public event EventHandler? ZoomChanged
         {
             add => Events.AddHandler(nameof(ZoomChanged), value);
             remove => Events.RemoveHandler(nameof(ZoomChanged), value);
@@ -102,9 +133,16 @@ namespace KGySoft.WinForms.Controls
 
         #region Properties
 
-        #region Internal Properties
+        #region Public Properties
 
-        internal Image? Image
+        /// <summary>
+        /// Gets or sets the image to be displayed by the <see cref="ImageViewer"/>.
+        /// </summary>
+        [Bindable(true)]
+        [Category("ImageViewer")]
+        [Description("Gets or sets the image to be displayed by this control.")]
+        [DefaultValue(null)]
+        public Image? Image
         {
             get => image;
             set
@@ -116,19 +154,50 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        internal bool AutoZoom
+        /// <summary>
+        /// Gets or sets whether the control automatically adjusts the zoom to fit the image to the control.
+        /// <br/>Default value: <see langword="false"/>.
+        /// </summary>
+        [Category("ImageViewer")]
+        [Description("Determines whether the control automatically adjusts the zoom to fit the image to the control.")]
+        [DefaultValue(false)]
+        public bool AutoZoom
         {
             get => autoZoom;
             set => SetAutoZoom(value, true);
         }
 
-        internal float Zoom
+        /// <summary>
+        /// Gets or sets the zoom factor of the displayed image.
+        /// <br/>Default value: 1.
+        /// </summary>
+        /// <remarks>
+        /// <para>This property can be set only if the <see cref="AutoZoom"/> property is <see langword="false"/>.</para>
+        /// <para>Setting this property to <see cref="Single.NaN"/> is equivalent to setting it to 1.
+        /// Also, this property never throws an exception if the value is not a valid zoom factor. Instead, it is automatically adjusted to a valid value.</para>
+        /// <para>The minimum zoom factor dynamically depends on the image size, so that the minimum zoomed image is at least 1 pixel in width and height.</para>
+        /// <para>The maximum zoom factor is also dynamically determined based on the image size and the screen size.
+        /// For <see cref="Metafile"/> images, the maximum zoom is between 1x and 2x screen size. 2x screen size is allowed if that is below 10,000 pixels.
+        /// For <see cref="Bitmap"/> images, the default maximum zoom is image size x 10 (adjusted with DPI) but at least screen size x 2.</para>
+        /// </remarks>
+        [Category("ImageViewer")]
+        [Description("When AutoZoom is False, determines the zoom factor of the displayed image. The value may be automatically adjusted to a valid zoom factor.")]
+        public float Zoom
         {
             get => zoom;
             set => SetZoom(value);
         }
 
-        internal bool SmoothZooming
+        /// <summary>
+        /// When a <see cref="Bitmap"/> is assigned to <see cref="Image"/>, gets or sets whether the control uses interpolation when <see cref="Zoom"/> is not 1.
+        /// When a <see cref="Metafile"/> is assigned to <see cref="Image"/>, gets or sets whether the metafile is rendered with antialiasing.
+        /// Default value: <see langword="false"/>.
+        /// </summary>
+        [Category("ImageViewer")]
+        [Description("When a Bitmap is assigned to Image, determines whether the control uses interpolation when Zoom is not 1. "
+            + "When a Metafile is assigned to Image, determines whether the metafile is rendered with antialiasing.")]
+        [DefaultValue(false)]
+        public bool SmoothZooming
         {
             get => smoothZooming;
             set
@@ -144,6 +213,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Properties
 
+        /// <inheritdoc />
         protected override CreateParams CreateParams
         {
             get
@@ -162,6 +232,9 @@ namespace KGySoft.WinForms.Controls
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ImageViewer"/> class.
+        /// </summary>
         public ImageViewer()
         {
             InitializeComponent();
@@ -181,12 +254,14 @@ namespace KGySoft.WinForms.Controls
 
         #region Methods
 
-        #region Internal Methods
+        #region Public Methods
 
         /// <summary>
-        /// Should be called when image content is changed while image reference remains the same (eg. rotation, palette change)
+        /// Updates the displayed image.
+        /// Call this method when <see cref="Image"/> content is mutated while the reference did not change
+        /// (e.g. rotation, palette change are such mutating operations).
         /// </summary>
-        internal void UpdateImage()
+        public void UpdateImage()
         {
             if (image == null)
                 return;
@@ -208,19 +283,28 @@ namespace KGySoft.WinForms.Controls
             Invalidate(flags);
         }
 
-        internal void IncreaseZoom()
+        /// <summary>
+        /// Increases the zoom of the displayed image by 25%.
+        /// </summary>
+        public void IncreaseZoom()
         {
             SetAutoZoom(false, false);
             ApplyZoomChange(0.25f);
         }
 
-        internal void DecreaseZoom()
+        /// <summary>
+        /// Decreases the zoom of the displayed image by 25%.
+        /// </summary>
+        public void DecreaseZoom()
         {
             SetAutoZoom(false, false);
             ApplyZoomChange(-0.25f);
         }
 
-        internal void ResetZoom()
+        /// <summary>
+        /// Resets the zoom of the displayed image to 1 (100%), and disables the <see cref="AutoZoom"/> property.
+        /// </summary>
+        public void ResetZoom()
         {
             if (zoom.Equals(1f))
                 return;
@@ -232,12 +316,14 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
+        /// <inheritdoc />
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
             Invalidate(InvalidateFlags.Sizes | (autoZoom ? InvalidateFlags.DisplayImage : InvalidateFlags.None));
         }
 
+        /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
             base.OnPaint(e);
@@ -250,6 +336,7 @@ namespace KGySoft.WinForms.Controls
                 PaintImage(e.Graphics);
         }
 
+        /// <inheritdoc />
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
             switch (keyData)
@@ -271,6 +358,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        /// <inheritdoc />
         protected override void OnMouseDown(MouseEventArgs e)
         {
             base.OnMouseDown(e);
@@ -283,6 +371,7 @@ namespace KGySoft.WinForms.Controls
             Cursor = CursorsCache.HandGrab;
         }
 
+        /// <inheritdoc />
         protected override void OnMouseUp(MouseEventArgs e)
         {
             base.OnMouseUp(e);
@@ -292,6 +381,7 @@ namespace KGySoft.WinForms.Controls
             Cursor = sbHorizontalVisible || sbVerticalVisible ? CursorsCache.HandOpen : null;
         }
 
+        /// <inheritdoc />
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
@@ -304,6 +394,7 @@ namespace KGySoft.WinForms.Controls
                 sbVertical.SetValueSafe(scrollingOrigin.Y - distance.Y);
         }
 
+        /// <inheritdoc />
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             base.OnMouseWheel(e);
@@ -324,6 +415,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        /// <inheritdoc />
         protected override void OnMouseHWheel(HandledMouseEventArgs e)
         {
             base.OnMouseHWheel(e);
@@ -333,8 +425,22 @@ namespace KGySoft.WinForms.Controls
                 HorizontalScroll(-e.Delta);
         }
 
+        /// <inheritdoc />
         protected override void OnRightToLeftChanged(EventArgs e) => AdjustSizes();
 
+        /// <summary>
+        /// Raises the <see cref="AutoZoomChanged"/> event.
+        /// </summary>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected virtual void OnAutoZoomChanged(EventArgs e) => Events.GetHandler<EventHandler>(nameof(AutoZoomChanged))?.Invoke(this, e);
+
+        /// <summary>
+        /// Raises the <see cref="ZoomChanged"/> event.
+        /// </summary>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
+        protected virtual void OnZoomChanged(EventArgs e) => Events.GetHandler<EventHandler>(nameof(ZoomChanged))?.Invoke(this, e);
+
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (IsDisposed)
@@ -595,6 +701,8 @@ namespace KGySoft.WinForms.Controls
             if (autoZoom || isApplyingZoom)
                 return;
 
+            if (Single.IsNaN(value))
+                value = 1f;
             float minZoom = image == null ? 1f : 1f / Math.Min(imageSize.Width, imageSize.Height);
             if (value < minZoom)
                 value = minZoom;
@@ -639,8 +747,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private void OnAutoZoomChanged(EventArgs e) => Events.GetHandler<EventHandler>(nameof(AutoZoomChanged))?.Invoke(this, e);
-        private void OnZoomChanged(EventArgs e) => Events.GetHandler<EventHandler>(nameof(ZoomChanged))?.Invoke(this, e);
+        private bool ShouldSerializeZoom() => !autoZoom && !zoom.Equals(1f);
 
         #endregion
 

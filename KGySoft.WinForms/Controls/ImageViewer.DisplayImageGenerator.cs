@@ -34,11 +34,15 @@ using KGySoft.WinForms.WinApi;
 
 #pragma warning disable CS1690 // Accessing a member on a field of a marshal-by-reference class may cause a runtime exception - false alarm, ImageViewer is never a remote object.
 
+#if NETFRAMEWORK
+// ReSharper disable RedundantSuppressNullableWarningExpression 
+#endif
+
 #endregion
 
 namespace KGySoft.WinForms.Controls
 {
-    internal partial class ImageViewer
+    partial class ImageViewer
     {
         #region PreviewGenerator class
 
@@ -87,8 +91,8 @@ namespace KGySoft.WinForms.Controls
             #region Static Fields
 
             /// <summary>
-            /// These formats are not are not supported by Graphics even though a Bitmap can use them.
-            /// On Linux/Mono some formats are completely unsupported but they do not appear here.
+            /// These formats are not supported by Graphics even though a Bitmap can use them.
+            /// On Linux/Mono some formats are completely unsupported, but they do not appear here.
             /// </summary>
             private static readonly PixelFormat[] unsupportedFormats = OSUtils.IsWindows
                 ? new[] { PixelFormat.Format16bppGrayScale }
@@ -421,13 +425,10 @@ namespace KGySoft.WinForms.Controls
                         using IWritableBitmapData dst = result.GetWritableBitmapData();
 
                         // here allowing to use max parallelization as the original image is locked anyway
-                        var cfg = new AsyncConfig { IsCancelRequestedCallback = () => task.IsCanceled, ThrowIfCanceled = false };
+                        var cfg = new ParallelConfig { IsCancelRequestedCallback = () => task.IsCanceled, ThrowIfCanceled = false };
 
-                        // Not using Task and await because we want to be compatible with .NET 3.5, too.
-                        IAsyncResult asyncResult = src.BeginCopyTo(dst, asyncConfig: cfg);
-
-                        // As we are already on a pool thread the End... call does not block the UI. It's still not the same as CopyTo() due to cancellation support.
-                        asyncResult.EndCopyTo();
+                        // As we are already on a pool thread the call does not block the UI.
+                        src.CopyTo(dst, Point.Empty, null, null, cfg);
                     }
                     catch (Exception e) when (!e.IsCriticalGdi())
                     {
@@ -521,19 +522,17 @@ namespace KGySoft.WinForms.Controls
                             using IReadableBitmapData src = doubled.GetReadableBitmapData();
                             using IReadWriteBitmapData dst = result.GetReadWriteBitmapData();
 
-                            // not using Task and await we want to be compatible with .NET 3.5
-                            IAsyncResult asyncResult = src.BeginDrawInto(dst, 
+                            // As we are already on a pool thread this is not a UI blocking call
+                            src.DrawInto(dst,
                                 new Rectangle(Point.Empty, doubled.Size),
                                 new Rectangle(Point.Empty, task.Size),
-                                asyncConfig: new AsyncConfig
+                                null, null, default,
+                                new ParallelConfig
                                 {
                                     IsCancelRequestedCallback = () => task.IsCanceled,
                                     ThrowIfCanceled = false,
-                                    MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 2)
+                                    MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 2) // TODO: ParallelHelper.CoreCount
                                 });
-
-                            // As we are already on a pool thread this is not a UI blocking call
-                            asyncResult.EndDrawInto();
                         }
                     }
                     catch (Exception e) when (!e.IsCriticalGdi())
@@ -568,19 +567,17 @@ namespace KGySoft.WinForms.Controls
                             using IReadableBitmapData src = ((Bitmap)task.SourceImage).GetReadableBitmapData();
                             using IReadWriteBitmapData dst = result.GetReadWriteBitmapData();
 
-                            // not using Task and await we want to be compatible with .NET 3.5
-                            IAsyncResult asyncResult = src.BeginDrawInto(dst,
+                            // As we are already on a pool thread this call does not block the UI.
+                            src.DrawInto(dst,
                                 new Rectangle(Point.Empty, task.SourceImage.Size),
-                                new Rectangle(Point.Empty, task.Size), 
-                                asyncConfig: new AsyncConfig
+                                new Rectangle(Point.Empty, task.Size),
+                                null, null, default,
+                                parallelConfig: new AsyncConfig
                                 {
                                     IsCancelRequestedCallback = () => task.IsCanceled,
                                     ThrowIfCanceled = false,
-                                    MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 2)
+                                    MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 2) // TODO: ParallelHelper.CoreCount
                                 });
-
-                            // As we are already on a pool thread the End... call does not block the UI.
-                            asyncResult.EndDrawInto();
                         }
                     }
                     catch (Exception e) when (!e.IsCriticalGdi())
