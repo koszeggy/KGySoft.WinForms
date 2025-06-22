@@ -272,6 +272,7 @@ namespace KGySoft.WinForms.Forms
         /// Gets whether the form is in design mode. Unlike the <see cref="Component.DesignMode"/> property,
         /// this property works even during initialization.
         /// </summary>
+        [Browsable(false)]
         protected bool IsDesignMode => DesignMode || LicenseManager.UsageMode == LicenseUsageMode.Designtime;
 
         /// <summary>
@@ -279,6 +280,7 @@ namespace KGySoft.WinForms.Forms
         /// and remains <see langword="true"/> even if the form is shown as a dialog multiple times or the handle is recreated (e.g. because <see cref="Control.RightToLeft"/> changes).
         /// Can be useful of we overload the <see cref="Form.OnLoad"/> method and want to avoid executing some initialization more than once.
         /// </summary>
+        [Browsable(false)]
         protected bool IsLoaded => isLoaded;
 
         #endregion

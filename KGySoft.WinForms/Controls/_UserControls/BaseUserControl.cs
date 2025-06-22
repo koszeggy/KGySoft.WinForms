@@ -67,6 +67,7 @@ namespace KGySoft.WinForms.Controls
         /// Gets whether the user control is in design mode. Unlike the <see cref="Component.DesignMode"/> property,
         /// this property works even during initialization.
         /// </summary>
+        [Browsable(false)]
         protected bool IsDesignMode => DesignMode || LicenseManager.UsageMode == LicenseUsageMode.Designtime;
 
         #endregion
