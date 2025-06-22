@@ -19,7 +19,7 @@ using System.Runtime.InteropServices;
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools.WinApi
+namespace KGySoft.WinForms.WinApi
 {
     [StructLayout(LayoutKind.Sequential)]
     // ReSharper disable once InconsistentNaming

@@ -16,17 +16,17 @@
 #region Usings
 
 using System;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Threading;
 
 using KGySoft.CoreLibraries;
+using KGySoft.Drawing;
 using KGySoft.Drawing.Imaging;
-using KGySoft.Drawing.ImagingTools.Model;
 using KGySoft.Reflection;
 using KGySoft.Threading;
+using KGySoft.WinForms.WinApi;
 
 #endregion
 
@@ -36,7 +36,7 @@ using KGySoft.Threading;
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools.View.Controls
+namespace KGySoft.WinForms.Controls
 {
     internal partial class ImageViewer
     {
@@ -429,9 +429,9 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
                         // As we are already on a pool thread the End... call does not block the UI. It's still not the same as CopyTo() due to cancellation support.
                         asyncResult.EndCopyTo();
                     }
-                    catch (Exception)
+                    catch (Exception e) when (!e.IsCriticalGdi())
                     {
-                        // Despite all of the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
+                        // Despite all the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
                         // NOTE: practically we always can recover from here: we simply don't use a generated clone and the worker thread can be finished
                         task.IsCanceled = true;
                         enabled = false;
@@ -536,9 +536,9 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
                             asyncResult.EndDrawInto();
                         }
                     }
-                    catch (Exception)
+                    catch (Exception e) when (!e.IsCriticalGdi())
                     {
-                        // Despite all of the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
+                        // Despite all the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
                         // NOTE: practically we always can recover from here: we simply don't use a generated preview and the worker thread can be finished
                         task.IsCanceled = true;
                         enabled = false;
@@ -583,9 +583,9 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
                             asyncResult.EndDrawInto();
                         }
                     }
-                    catch (Exception)
+                    catch (Exception e) when (!e.IsCriticalGdi())
                     {
-                        // Despite all of the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
+                        // Despite all the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
                         // NOTE: practically we always can recover from here: we simply don't use a generated preview and the worker thread can be finished
                         task.IsCanceled = true;
                         enabled = false;
@@ -652,7 +652,7 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
                                     ? bitmap.ConvertPixelFormat(PixelFormat.Format32bppPArgb)
                                     : (Image)owner.image.Clone();
                             }
-                            catch (Exception)
+                            catch (Exception e) when (!e.IsCriticalGdi())
                             {
                                 enabled = false;
                                 return;

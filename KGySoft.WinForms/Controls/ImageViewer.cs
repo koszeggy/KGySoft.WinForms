@@ -22,11 +22,11 @@ using System.Drawing.Imaging;
 using System.Threading;
 using System.Windows.Forms;
 
-using KGySoft.Drawing.ImagingTools.WinApi;
+using KGySoft.WinForms.WinApi;
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools.View.Controls
+namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents an image display control with zooming. Does not support implicit animation.
@@ -151,14 +151,10 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
                 CreateParams cp = base.CreateParams;
 
                 // Fixed single border
-                cp.Style |= Constants.WS_BORDER;
+                cp.Style |= (int)Constants.WS_BORDER;
                 return cp;
             }
         }
-
-        #endregion
-
-        #region Private Properties
 
         #endregion
 
@@ -284,7 +280,7 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
             isDragging = true;
             draggingOrigin = new Size(e.Location);
             scrollingOrigin = new Point(sbHorizontal.Value, sbVertical.Value);
-            Cursor = Cursors.HandGrab;
+            Cursor = CursorsCache.HandGrab;
         }
 
         protected override void OnMouseUp(MouseEventArgs e)
@@ -293,7 +289,7 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
             if ((e.Button & MouseButtons.Left) == MouseButtons.None)
                 return;
             isDragging = false;
-            Cursor = sbHorizontalVisible || sbVerticalVisible ? Cursors.HandOpen : null;
+            Cursor = sbHorizontalVisible || sbVerticalVisible ? CursorsCache.HandOpen : null;
         }
 
         protected override void OnMouseMove(MouseEventArgs e)
@@ -518,7 +514,7 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
 
             sbHorizontal.Visible = sbHorizontalVisible;
             sbVertical.Visible = sbVerticalVisible;
-            Cursor = sbHorizontalVisible || sbVerticalVisible ? Cursors.HandOpen : null;
+            Cursor = sbHorizontalVisible || sbVerticalVisible ? CursorsCache.HandOpen : null;
             isDragging = false;
 
             clientRectangle = new Rectangle(clientLocation, clientSize);

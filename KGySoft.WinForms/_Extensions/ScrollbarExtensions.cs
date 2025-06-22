@@ -19,7 +19,7 @@ using System.Windows.Forms;
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools.View
+namespace KGySoft.WinForms
 {
     internal static class ScrollbarExtensions
     {

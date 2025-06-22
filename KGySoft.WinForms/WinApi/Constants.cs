@@ -84,6 +84,7 @@ namespace KGySoft.WinForms.WinApi
         internal const uint DS_CONTROL = 0x400;
 
         internal const uint WS_CLIPSIBLINGS = 0x04000000;
+        internal const uint WS_BORDER = 0x00800000;
         internal const uint WS_VISIBLE = 0x10000000;
         internal const uint WS_CHILD = 0x40000000;
         internal const uint WS_TABSTOP = 0x00010000;

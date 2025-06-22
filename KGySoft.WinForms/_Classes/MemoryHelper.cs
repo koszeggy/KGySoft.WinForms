@@ -18,12 +18,13 @@
 using System;
 #if NETFRAMEWORK
 using System.Security;
-using KGySoft.Drawing.ImagingTools.WinApi; 
+
+using KGySoft.WinForms.WinApi;
 #endif
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools
+namespace KGySoft.WinForms
 {
     internal static class MemoryHelper
     {

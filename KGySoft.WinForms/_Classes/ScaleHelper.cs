@@ -307,6 +307,8 @@ namespace KGySoft.WinForms
         public static SizeF ScaleF(this Size size, PointF scale) => new SizeF(scale.X * size.Width, scale.Y * size.Height);
         public static Size Scale(this Size size, PointF scale) => Size.Round(ScaleF(size, scale));
         public static int Scale(this int size, float scale) => (int)Math.Round(size * scale);
+        public static Size Scale(this Size size, float scale) => size.Scale(new PointF(scale, scale));
+        public static SizeF ScaleF(this Size size, float scale) => size.ScaleF(new PointF(scale, scale));
 
         public static Padding Scale(this Padding padding, PointF scale) => new Padding(
             padding.Left.Scale(scale.X),

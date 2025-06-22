@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel;
 using System.Windows.Forms;
 
-namespace KGySoft.Drawing.ImagingTools.View.Controls
+namespace KGySoft.WinForms.Controls
 {
     partial class ImageViewer
     {

@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: Cursors.cs
+//  File: CursorsCache.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -23,12 +23,14 @@ using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 using KGySoft.Collections;
+using KGySoft.Drawing;
+using KGySoft.WinForms.WinApi;
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools.View
+namespace KGySoft.WinForms
 {
-    internal static class Cursors
+    internal static class CursorsCache
     {
         #region Nested classes
 
@@ -89,7 +91,7 @@ namespace KGySoft.Drawing.ImagingTools.View
                 return null;
             if (!cursors.TryGetValue(resourceName, out CursorInfo? info))
                 cursors[resourceName] = info = new CursorInfo((Icon)Properties.Resources.ResourceManager.GetObject(resourceName, CultureInfo.InvariantCulture)!);
-            return info.GetCreateCursor(referenceSize.Scale(OSUtils.SystemScale));
+            return info.GetCreateCursor(referenceSize.Scale(ScaleHelper.SystemScale));
         }
 
         #endregion

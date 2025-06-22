@@ -27,6 +27,9 @@ namespace KGySoft.WinForms
 
         internal static bool IsCritical(this Exception e) => e is OutOfMemoryException or StackOverflowException or AccessViolationException;
 
+        // For GDI exceptions we allow even OutOfMemoryException
+        internal static bool IsCriticalGdi(this Exception e) => e.IsCritical() && e is not OutOfMemoryException;
+
         #endregion
     }
 }

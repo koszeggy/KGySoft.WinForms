@@ -15,6 +15,7 @@
 
 #region Usings
 
+using System.ComponentModel;
 #if NETFRAMEWORK
 using System.Security.Permissions;
 #endif
@@ -44,7 +45,7 @@ namespace KGySoft.WinForms.WinApi
         {
             #region Constructors
 
-            public ActivationContextSafeHandle()
+            internal ActivationContextSafeHandle()
                 : base(true)
             {
             }
@@ -81,7 +82,7 @@ namespace KGySoft.WinForms.WinApi
         /// The ReleaseActCtx function decrements the reference count of the specified activation context.
         /// </summary>
         /// <param name="hActCtx">Handle to the ACTCTX structure that contains information on the activation context for which the reference count is to be decremented.</param>
-        [DllImport("kernel32.dll"), ReliabilityContract(Consistency.WillNotCorruptState, Cer.MayFail)]
+        [DllImport("kernel32.dll")]
         internal static extern void ReleaseActCtx(IntPtr hActCtx);
 
         /// <summary>
@@ -143,6 +144,25 @@ namespace KGySoft.WinForms.WinApi
         /// <returns>The return value is the thread identifier of the calling thread.</returns>
         [DllImport("kernel32.dll")]
         internal static extern uint GetCurrentThreadId();
+
+        /// <summary>
+        /// GlobalMemoryStatusEx: Retrieves information about the system's current usage of both physical and virtual memory.
+        /// </summary>
+        internal static long GetTotalMemory()
+        {
+            #region Private Methods
+
+            [return: MarshalAs(UnmanagedType.Bool)]
+            [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+            static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
+
+            #endregion
+
+            var status = new MEMORYSTATUSEX { dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX)) };
+            if (!GlobalMemoryStatusEx(ref status))
+                throw new Win32Exception(Marshal.GetLastWin32Error());
+            return (long)status.ullTotalPhys;
+        }
 
         #endregion
     }

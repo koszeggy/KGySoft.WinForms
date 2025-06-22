@@ -20,7 +20,7 @@ using System.Threading;
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools.Model
+namespace KGySoft.WinForms
 {
     /// <summary>
     /// Represents a cancellable and completable asynchronous task that is compatible with all targeted frameworks.
