@@ -18,11 +18,11 @@
 using System;
 using System.Windows.Forms;
 
-using KGySoft.Drawing.ImagingTools.WinApi;
+using KGySoft.WinForms.WinApi;
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools.View.Controls
+namespace KGySoft.WinForms.Controls
 {
     internal class BaseControl : Control
     {
@@ -64,7 +64,7 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
                 // Horizontal scroll
                 case Constants.WM_MOUSEHWHEEL:
                     HandledMouseEventArgs args = new HandledMouseEventArgs(MouseButtons.None, 0,
-                            m.LParam.GetSignedLoWord(), m.LParam.GetSignedHiWord(), m.WParam.GetSignedHiWord());
+                            m.LParam.SignedLOWORD(), m.LParam.SignedHIWORD(), m.WParam.SignedHIWORD());
                     OnMouseHWheel(args);
                     m.Result = new IntPtr(args.Handled ? 0 : 1);
                     if (args.Handled)
