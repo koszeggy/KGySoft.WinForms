@@ -24,7 +24,6 @@ namespace KGySoft.WinForms.Test
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
             using (TaskDialog dlg = new TaskDialog())
             {
                 dlg.Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.UseCommandLinks;
@@ -53,6 +52,7 @@ namespace KGySoft.WinForms.Test
                 td.Options = TaskDialogOptions.UseCommandLinks;
                 td.StandardButtons = TaskDialogStandardButtonFlags.Cancel;
                 td.MainInstruction = "Select a control to test";
+                td.Buttons.Add(new TaskDialogButton("ImageViewer"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedButton"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedCheckBox"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedLabel"));
