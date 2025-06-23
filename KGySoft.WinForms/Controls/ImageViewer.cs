@@ -17,12 +17,13 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Threading;
 using System.Windows.Forms;
-
+using KGySoft.WinForms.Forms;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -39,17 +40,20 @@ namespace KGySoft.WinForms.Controls
     /// <para>The control can use optimizations for very fast rendering even if the image is zoomed. It can use multiple CPU cores to generate the displayed image.
     /// The generation happens asynchronously, so the control may display a low-quality preview image while the high-quality one is being generated.
     /// Very huge images may consume much memory, but if too high memory pressure is detected, the optimizations are automatically turned off.</para>
-    /// <para>The <see cref="SmoothZooming"/> property allows turning on and off interpolation when zooming. It can be used also for <see cref="Metafile"/> images,
+    /// <para>The <see cref="SmoothingEnabled"/> property allows turning on and off interpolation when zooming. It can be used also for <see cref="Metafile"/> images,
     /// in which case the metafile is rendered with antialiasing. As a contrast, the <see cref="PictureBox"/> control always uses interpolation
     /// when displaying a resized <see cref="Bitmap"/>, and never uses antialiasing when displaying a <see cref="Metafile"/> image.</para>
     /// <para>The <see cref="Zoom"/> property allows you to set an arbitrary zoom. The zoom can also be adjusted by the mouse (Ctrl+Mouse wheel).
     /// When the displayed image is larger than the control, the scrollbars are automatically shown. Pan the image by dragging it with the mouse or by using the arrow keys.
     /// You can also use the <see cref="AutoZoom"/> property to <see langword="true"/> to automatically adjust the zoom to fit the image to the control.</para>
-    /// <note type="important">If you access the <see cref="BitmapData"/> of a <see cref="Bitmap"/> that is assigned to the <see cref="Image"/>
-    /// property, make sure you lock on the image until you unlock the <see cref="BitmapData"/> instance. The <see cref="ImageViewer"/> control may process the image
+    /// <note type="important">Never assign the same <see cref="Bitmap"/> instance to a <see cref="PictureBox"/> and an <see cref="ImageViewer"/>.
+    /// Doing so may lead to an <see cref="InvalidOperationException"/> ("bitmap region is already locked"), because <see cref="ImageViewer"/> may access the <see cref="BitmapData"/>
+    /// of the <see cref="Bitmap"/> asynchronously while the <see cref="PictureBox"/> control may try to paint the image. Assigning the same image to multiple <see cref="ImageViewer"/> controls is safe.
+    /// Similarly, if you access the <see cref="BitmapData"/> of a <see cref="Bitmap"/> that is assigned to the <see cref="Image"/>
+    /// property, make sure you lock on the image until you access <see cref="BitmapData"/> instance. The <see cref="ImageViewer"/> control may process the image
     /// on different threads asynchronously to generate the displayed image, and during this time it locks the <see cref="Image"/> instance.
-    /// To avoid a possible "bitmap region is already locked" exception, you should also lock on the same <see cref="System.Drawing.Image"/> instance
-    /// Though the latest standards don't recommend using publicly exposed synchronization root objects, careful locking as described above will not cause deadlocks.
+    /// To avoid the <see cref="InvalidOperationException"/>, you should also lock on the same <see cref="System.Drawing.Image"/> instance.
+    /// Though the latest coding standards don't recommend using publicly exposed synchronization root objects, careful locking as described above will not cause deadlocks.
     /// Another option is if you clone the image before assigning it to the <see cref="Image"/> property, though this may cause a significant memory overhead for large images.</note>
     /// </remarks>
     public partial class ImageViewer : BaseControl
@@ -89,12 +93,13 @@ namespace KGySoft.WinForms.Controls
         private PixelFormat pixelFormat;
 
         private bool isMetafile;
-        private bool smoothZooming;
+        private bool smoothingEnabled;
         private bool autoZoom;
         private bool sbHorizontalVisible;
         private bool sbVerticalVisible;
         private bool isApplyingZoom;
         private bool isDragging;
+        private bool allowUnsafeCooperativeLocking;
 
         private int scrollFractionVertical;
         private int scrollFractionHorizontal;
@@ -189,23 +194,64 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// When a <see cref="Bitmap"/> is assigned to <see cref="Image"/>, gets or sets whether the control uses interpolation when <see cref="Zoom"/> is not 1.
+        /// When a <see cref="Bitmap"/> is assigned to <see cref="Image"/>, gets or sets whether rendering with resize uses interpolation (that is when <see cref="Zoom"/> is not 1).
         /// When a <see cref="Metafile"/> is assigned to <see cref="Image"/>, gets or sets whether the metafile is rendered with antialiasing.
         /// Default value: <see langword="false"/>.
         /// </summary>
         [Category("ImageViewer")]
-        [Description("When a Bitmap is assigned to Image, determines whether the control uses interpolation when Zoom is not 1. "
+        [Description("When a Bitmap is assigned to Image, determines whether rendering with resize uses interpolation (that is when Zoom is not 1). "
             + "When a Metafile is assigned to Image, determines whether the metafile is rendered with antialiasing.")]
         [DefaultValue(false)]
-        public bool SmoothZooming
+        public bool SmoothingEnabled
         {
-            get => smoothZooming;
+            get => smoothingEnabled;
             set
             {
-                if (smoothZooming == value)
+                if (smoothingEnabled == value)
                     return;
-                smoothZooming = value;
+                smoothingEnabled = value;
                 Invalidate(InvalidateFlags.DisplayImage);
+            }
+        }
+
+        // When true, the control may use less memory, but the Image data may be accessed on other threads asynchronously, which may lead to exceptions if Image is accessed concurrently.
+        // In this case Image is locked while it is being processed, so if you also want to access the Image on other threads, you need to cooperatively lock on the Image instance.
+        // Must be set to false if the Image is used in another Control (e.g. Button, PictureBox, PropertyGrid, etc.) as they do not support unsafe cooperative locking.
+        // In this case the Image is cloned internally before generating a good quality resized image asynchronously.
+        [Category("ImageViewer")]
+        [EditorBrowsable(EditorBrowsableState.Advanced)]
+        [DefaultValue(false)]
+        public bool AllowUnsafeCooperativeLocking
+        {
+            get => allowUnsafeCooperativeLocking;
+            set
+            {
+                if (allowUnsafeCooperativeLocking == value)
+                    return;
+
+                allowUnsafeCooperativeLocking = value;
+
+                // When going to safe processing, we cancel the current tasks to make sure that Image can be used safely immediately.
+                // If there is some image processing in progress, we invalidate the control so the pending repaint restarts in safe mode.
+                if (!value && displayImageGenerator.CancelPendingTasks())
+                    Invalidate();
+
+                // NOTE: when going to unsafe mode, the possibly created image clone can be freed.
+                // As we don't have strict exit conditions for that case, we let the possibly pending tasks finish. The clone will be discarded when the tasks finish.
+            }
+        }
+
+        /// <inheritdoc />
+        [Browsable(false)] // Hiding Cursor property because it is automatically changed. Still allowing to set it at run-time though.
+        [AllowNull]
+        public override Cursor Cursor
+        {
+            get => base.Cursor;
+            set
+            {
+                if (IsDesignMode)
+                    return;
+                base.Cursor = value;
             }
         }
 
@@ -655,7 +701,9 @@ namespace KGySoft.WinForms.Controls
                 // Locking on display image so if it is the same as the original image, which is also locked when accessing its bitmap data
                 // so the "bitmap region is already locked" can be avoided. Important: this cannot be ensured without locking here internally because
                 // OnPaint can occur any time after invalidating.
-                bool useLock = image == toDraw;
+                // NOTE: Of course, to avoid the exception every participant must cooperate and lock on the image when accessing its bitmap data.
+                //       This not happens if the image used by 3rd party code (e.g. PictureBox, PropertyGrid) without locking on it.
+                bool useLock = image == toDraw && allowUnsafeCooperativeLocking;
                 if (useLock)
                     Monitor.Enter(toDraw);
                 try
@@ -747,6 +795,8 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
+        private bool ShouldSerializeCursor() => false;
         private bool ShouldSerializeZoom() => !autoZoom && !zoom.Equals(1f);
 
         #endregion

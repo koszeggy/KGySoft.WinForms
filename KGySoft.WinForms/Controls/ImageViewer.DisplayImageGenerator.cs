@@ -116,7 +116,7 @@ namespace KGySoft.WinForms.Controls
             /// <summary>
             /// true if generator can generate new content. Turned off on low memory or by <see cref="Free"/>. Invalidating the image enables it again.
             /// </summary>
-            private bool enabled;
+            private bool enabled; // no need to be volatile, as it is always accessed in a lock, or (when async operation is disabled) from a single thread
 
             private GenerateDefaultImageTask? generateDefaultImageTask;
             private GenerateResizedImageTask? generateResizedImageTask;
@@ -131,6 +131,12 @@ namespace KGySoft.WinForms.Controls
             /// </summary>
             private volatile Image? defaultDisplayImage;
             private volatile bool isDefaultImageCloned;
+
+            /// <summary>
+            /// The clone of the original image that is used to safely generate the resized display image.
+            /// Used only when <see cref="AllowUnsafeCooperativeLocking"/> is false, so we cannot be sure that we can safely use the original image from another thread.
+            /// </summary>
+            private Image? origImageClone;
 
             /// <summary>
             /// If not null, contains the last cached size-adjusted display image.
@@ -157,7 +163,7 @@ namespace KGySoft.WinForms.Controls
 
             #region Properties
 
-            // This is alright, this class is private.
+            // This is alright, this class is private and is not exposed publicly.
             internal object SyncRoot => this;
 
             #endregion
@@ -225,10 +231,18 @@ namespace KGySoft.WinForms.Controls
             internal (Image?, InterpolationMode) GetDisplayImage()
             {
                 Debug.Assert(owner.image != null);
+
+                // When turning on AllowUnsafeCooperativeLocking, we don't free possibly existing the clone immediately, so we do it here if there is no running resize task.
+                if (owner.AllowUnsafeCooperativeLocking && generateResizedImageTask == null)
+                {
+                    origImageClone?.Dispose();
+                    origImageClone = null;
+                }
+
                 InterpolationMode interpolationMode = InterpolationMode.NearestNeighbor;
 
                 // 1.) Returning with a size adjusted display image
-                if (owner.smoothZooming && resizedDisplayImageSize == owner.targetRectangle.Size)
+                if (owner.smoothingEnabled && resizedDisplayImageSize == owner.targetRectangle.Size)
                     return (resizedDisplayImage, interpolationMode);
 
                 // 2.) Checking if there is an already available default image. It might have to be resized on painting.
@@ -236,7 +250,7 @@ namespace KGySoft.WinForms.Controls
 
                 // Smoothing Bitmap: leaving NearestNeighbor if a resized image is expected to be generated;
                 // otherwise, using some interpolation to be applied during painting
-                if (!owner.isMetafile && owner.smoothZooming)
+                if (!owner.isMetafile && owner.smoothingEnabled)
                 {
                     float zoom = owner.zoom;
                     Size size = owner.imageSize;
@@ -266,12 +280,6 @@ namespace KGySoft.WinForms.Controls
                     // here we already have a default display image we can return with
                     return (result, interpolationMode);
 
-                // Waiting for the display image to be generated if pixel format is not supported,
-                // or it is so slow (>= 48bpp) that it is faster to wait for the converted image and paint the existing one.
-                // Note: Not using async because this project targets also .NET 3.5 and the image is locked anyway also in paint
-                if (owner.pixelFormat.In(unsupportedFormats) || owner.pixelFormat.In(slowFormats))
-                    generateDefaultImageTask?.WaitForCompletion();
-
                 // Too low memory: turning off image generation and freeing up resources.
                 if (!enabled)
                 {
@@ -287,6 +295,20 @@ namespace KGySoft.WinForms.Controls
                     result = null;
 
                 return (result, interpolationMode);
+            }
+
+            // returns true if there were pending tasks that were canceled
+            internal bool CancelPendingTasks()
+            {
+                bool result = generateDefaultImageTask != null || generateResizedImageTask != null;
+                if (!result)
+                    return result;
+
+                CancelRunningGenerate(generateDefaultImageTask);
+                CancelRunningGenerate(generateResizedImageTask);
+                WaitForPendingGenerate(generateDefaultImageTask);
+                WaitForPendingGenerate(generateResizedImageTask);
+                return result;
             }
 
             #endregion
@@ -315,6 +337,9 @@ namespace KGySoft.WinForms.Controls
                     resizedDisplayImageSize = default;
                     resizedDisplayImage?.Dispose();
                     resizedDisplayImage = null;
+
+                    origImageClone?.Dispose();
+                    origImageClone = null;
                 }
             }
 
@@ -350,8 +375,21 @@ namespace KGySoft.WinForms.Controls
                     SourceBitmap = bitmap!,
                     InvalidateOwner = bitmap!.RawFormat.Guid == ImageFormat.Icon.Guid
                 };
-                generateDefaultImageTask = task;
-                ThreadPool.QueueUserWorkItem(GenerateDefaultImage!, task);
+
+                bool operateAsync = owner.AllowUnsafeCooperativeLocking && !owner.IsDesignMode;
+
+                // Forcing sync operation if pixel format is not supported,
+                // or it is so slow (>= 48bpp) that it is faster to wait for the converted image than paint the existing one.
+                if (owner.pixelFormat.In(unsupportedFormats) || owner.pixelFormat.In(slowFormats))
+                    operateAsync = false;
+
+                if (operateAsync)
+                {
+                    generateDefaultImageTask = task;
+                    ThreadPool.QueueUserWorkItem(GenerateDefaultImage!, task);
+                }
+                else
+                    GenerateDefaultImage(task);
             }
 
             private void BeginGenerateResizedDisplayImageIfNeeded()
@@ -360,7 +398,7 @@ namespace KGySoft.WinForms.Controls
 
                 // Metafile: If smoothing edges is enabled
                 // Bitmap: If smoothing resize is enabled, the image is shrunk and image size is larger than 1024x1024
-                bool isGenerateNeeded = owner.smoothZooming && (owner.isMetafile
+                bool isGenerateNeeded = owner.smoothingEnabled && (owner.isMetafile
                     || owner.zoom < 1f && (owner.imageSize.Width > sizeThreshold || owner.imageSize.Height > sizeThreshold));
 
                 // Not canceling the possible generate task here. It will call an invalidate in the end and we can see whether we use the result.
@@ -393,11 +431,25 @@ namespace KGySoft.WinForms.Controls
                 }
 
                 Debug.Assert(generateResizedImageTask == null);
-                task = new GenerateResizedImageTask
+                task = new GenerateResizedImageTask { Size = size };
+
+                // If unsafe cooperative locking is allowed, we can use the original image directly
+                if (owner.AllowUnsafeCooperativeLocking)
+                    task.SourceImage = owner.image!;
+                else
                 {
-                    SourceImage = owner.image!,
-                    Size = size
-                };
+                    // Otherwise, we use a clone of the original image so it can be safely used from another thread
+                    try
+                    {
+                        origImageClone ??= owner.image is Bitmap bitmap ? bitmap.CloneCurrentFrame() : (Image)owner.image!.Clone();
+                    }
+                    catch (Exception e) when (!e.IsCriticalGdi())
+                    {
+                        enabled = false;
+                        return;
+                    }                    
+                    task.SourceImage = origImageClone;
+                }
 
                 generateResizedImageTask = task;
                 ThreadPool.QueueUserWorkItem(GenerateResizedImage!, task);
@@ -427,7 +479,7 @@ namespace KGySoft.WinForms.Controls
                         // here allowing to use max parallelization as the original image is locked anyway
                         var cfg = new ParallelConfig { IsCancelRequestedCallback = () => task.IsCanceled, ThrowIfCanceled = false };
 
-                        // As we are already on a pool thread the call does not block the UI.
+                        // When operating asynchronously, we are already on a pool thread, so the call does not block the UI.
                         src.CopyTo(dst, Point.Empty, null, null, cfg);
                     }
                     catch (Exception e) when (!e.IsCriticalGdi())
@@ -463,7 +515,10 @@ namespace KGySoft.WinForms.Controls
 
                     // Locking on the image to avoid the possible "bitmap region is already locked" issue.
                     // Until the default image is generated, it is locked during the paint, too.
-                    lock (task.SourceBitmap)
+                    bool lockOnImage = owner.allowUnsafeCooperativeLocking;
+                    if (lockOnImage)
+                        Monitor.Enter(task.SourceBitmap);
+                    try
                     {
                         try
                         {
@@ -475,6 +530,11 @@ namespace KGySoft.WinForms.Controls
                         {
                             task.SetCompleted();
                         }
+                    }
+                    finally
+                    {
+                        if (lockOnImage)
+                            Monitor.Exit(task.SourceBitmap);
                     }
 
                     if (result == null || task.IsCanceled)
@@ -606,7 +666,7 @@ namespace KGySoft.WinForms.Controls
                 try
                 {
                     // canceled or lost race
-                    if (task.IsCanceled || task.SourceImage != owner.image || task.Size != requestedSize || !enabled || disposed)
+                    if (task.IsCanceled || task.SourceImage != (origImageClone ?? owner.image) || task.Size != requestedSize || !enabled || disposed)
                         return;
 
                     // returning if we already have the result
@@ -626,7 +686,8 @@ namespace KGySoft.WinForms.Controls
                     }
 
                     // 1.) If there is no cloned display image generating that one first so the UI can use that while the original image will be free to create the resized images from.
-                    if (!isDefaultImageCloned)
+                    // Not needed when unsafe cooperative locking is not allowed, because then the task.SourceImage is already a clone of the original image.
+                    if (!isDefaultImageCloned && owner.AllowUnsafeCooperativeLocking)
                     {
                         // The clone is just being generated. Invalidating and returning to come back later.
                         if (defaultDisplayImage == null || generateDefaultImageTask != null)
