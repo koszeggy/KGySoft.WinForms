@@ -167,7 +167,7 @@ namespace KGySoft.WinForms.Test.Forms
         private void grdProperties_SelectedObjectsChanged(object sender, EventArgs e)
         {
             var selectedObjects = grdProperties.SelectedObjects;
-            Text = $"{Name} [Selected: {(selectedObjects.Length == 1 ? (selectedObjects[0] as Control)?.Name ?? grdProperties.SelectedObject : $"{selectedObjects.Length} controls")}]";
+            lblSelection.Text = $"{(selectedObjects.Length == 1 ? (selectedObjects[0] as Control)?.Name ?? grdProperties.SelectedObject : $"{selectedObjects.Length} controls selected")}";
         }
 
         #endregion

@@ -5,7 +5,6 @@ using System.Windows.Forms;
 using KGySoft.Drawing;
 using KGySoft.Reflection;
 using KGySoft.WinForms.Components;
-using KGySoft.WinForms.Forms;
 using KGySoft.WinForms.Test.Forms;
 
 using TaskDialog = KGySoft.WinForms.Components.TaskDialog;
