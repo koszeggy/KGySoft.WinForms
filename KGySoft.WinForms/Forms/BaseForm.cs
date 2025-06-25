@@ -20,7 +20,6 @@ using System;
 using System.Collections.Specialized;
 #endif
 using System.ComponentModel;
-using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -62,7 +61,7 @@ namespace KGySoft.WinForms.Forms
     /// <item>Fixes the small icon of the form if the application is per-monitor DPI aware and the DPI of the form is different from the DPI of the primary display.</item>
     /// </list>
     /// </remarks>
-    public class BaseForm: Form
+    public class BaseForm : Form
     {
         #region Fields
 
@@ -235,8 +234,7 @@ namespace KGySoft.WinForms.Forms
         public PointF DeviceScale => deviceScale;
 
         /// <inheritdoc cref="Form.Icon" />
-        [AllowNull]
-        public new Icon Icon
+        public new Icon? Icon
         {
             get => base.Icon;
             set
@@ -352,7 +350,7 @@ namespace KGySoft.WinForms.Forms
                 if (suspendCaller)
                     Suspend();
             }
-            this.Show();
+            Show();
         }
 
         /// <summary>
@@ -530,7 +528,7 @@ namespace KGySoft.WinForms.Forms
             {
                 suspended = true;
                 if (!IsMdiContainer)
-                    this.Enabled = false;
+                    Enabled = false;
                 OnSuspended(EventArgs.Empty);
             }
         }
@@ -544,7 +542,7 @@ namespace KGySoft.WinForms.Forms
             {
                 suspended = false;
                 if (!IsMdiContainer)
-                    this.Enabled = true;
+                    Enabled = true;
                 OnResumed(EventArgs.Empty);
             }
         }
@@ -613,8 +611,8 @@ namespace KGySoft.WinForms.Forms
                 return;
 
             smallIcon.Dispose();
-            smallIcon = base.Icon.Resize(this.ScaleSize(IconsHelper.SmallIconReferenceSize));
-            if (IsHandleCreated)
+            smallIcon = base.Icon?.Resize(this.ScaleSize(IconsHelper.SmallIconReferenceSize));
+            if (smallIcon != null && IsHandleCreated)
                 User32.SendMessage(Handle, Constants.WM_SETICON, Constants.ICON_SMALL, smallIcon.Handle);
         }
 
