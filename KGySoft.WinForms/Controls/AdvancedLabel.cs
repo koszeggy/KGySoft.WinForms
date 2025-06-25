@@ -1009,7 +1009,9 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
 
         private void ResetHyperlinkText()
         {
-            if (resolveHyperlinks != HyperlinkResolveMode.None)
+            // Once the handle is created, for empty text Links.Count changes to 1,
+            // which causes that the whole text turns into a hyperlink when setting a new value
+            if (resolveHyperlinks != HyperlinkResolveMode.None || IsHandleCreated && String.IsNullOrEmpty(base.Text))
                 Links.Clear();
             ResetSizeCache();
 
