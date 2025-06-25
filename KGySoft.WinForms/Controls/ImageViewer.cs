@@ -128,6 +128,60 @@ namespace KGySoft.WinForms.Controls
             remove => Events.RemoveHandler(nameof(ZoomChanged), value);
         }
 
+        /// <inheritdoc cref="Control.ForeColorChanged" />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new event EventHandler? ForeColorChanged
+        {
+            add => base.ForeColorChanged += value;
+            remove => base.ForeColorChanged -= value;
+        }
+
+        /// <inheritdoc cref="Control.ForeColorChanged" />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new event EventHandler? TextChanged
+        {
+            add => base.TextChanged += value;
+            remove => base.TextChanged -= value;
+        }
+
+        /// <inheritdoc cref="Control.FontChanged" />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new event EventHandler? FontChanged
+        {
+            add => base.FontChanged += value;
+            remove => base.FontChanged -= value;
+        }
+
+        /// <inheritdoc cref="Control.PaddingChanged" />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new event EventHandler? PaddingChanged
+        {
+            add => base.PaddingChanged += value;
+            remove => base.PaddingChanged -= value;
+        }
+
+        /// <inheritdoc cref="Control.CausesValidationChanged" />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new event EventHandler? CausesValidationChanged
+        {
+            add => base.CausesValidationChanged += value;
+            remove => base.CausesValidationChanged -= value;
+        }
+
+        /// <inheritdoc cref="Control.ImeModeChanged" />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new event EventHandler? ImeModeChanged
+        {
+            add => base.ImeModeChanged += value;
+            remove => base.ImeModeChanged -= value;
+        }
+
         #endregion
 
         #region Properties
@@ -254,6 +308,72 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        /// <inheritdoc />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override Color ForeColor
+        {
+            get => base.ForeColor;
+            set => base.ForeColor = value;
+        }
+
+        /// <inheritdoc />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Bindable(false)]
+        [AllowNull]
+        public override string Text
+        {
+            get => base.Text;
+            set => base.Text = value;
+        }
+
+        /// <inheritdoc />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [AllowNull]
+        public override Font Font
+        {
+            get => base.Font;
+            set => base.Font = value!;
+        }
+
+        /// <inheritdoc cref="Control.Padding" />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new Padding Padding
+        {
+            get => base.Padding;
+            set => base.Padding = value;
+        }
+
+        /// <inheritdoc />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override bool AllowDrop
+        {
+            get => base.AllowDrop;
+            set => base.AllowDrop = value;
+        }
+
+        /// <inheritdoc cref="Control.CausesValidation" />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new bool CausesValidation
+        {
+            get => base.CausesValidation;
+            set => base.CausesValidation = value;
+        }
+
+        /// <inheritdoc cref="Control.ImeMode" />
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new ImeMode ImeMode
+        {
+            get => base.ImeMode;
+            set => base.ImeMode = value;
+        }
+
         #endregion
 
         #region Protected Properties
@@ -270,6 +390,12 @@ namespace KGySoft.WinForms.Controls
                 return cp;
             }
         }
+
+        /// <inheritdoc />
+        protected override Size DefaultSize => new(100, 100);
+
+        /// <inheritdoc />
+        protected override ImeMode DefaultImeMode => ImeMode.Disable;
 
         #endregion
 
@@ -362,6 +488,11 @@ namespace KGySoft.WinForms.Controls
             AutoZoom = false;
             Zoom = 1f;
         }
+
+        /// <inheritdoc />
+        public override string ToString() => image is null
+            ? base.ToString()
+            : $"{image.GetType().Name} {imageSize.Width} x {imageSize.Height}{(isMetafile ? null : $" {pixelFormat}")}";
 
         #endregion
 
