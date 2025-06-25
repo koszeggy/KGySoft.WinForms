@@ -149,6 +149,7 @@
             pictureBox.Location = new System.Drawing.Point(3, 50);
             pictureBox.Name = "pictureBox";
             pictureBox.Size = new System.Drawing.Size(266, 241);
+            pictureBox.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
             pictureBox.TabIndex = 2;
             pictureBox.TabStop = false;
             // 
@@ -156,8 +157,9 @@
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(800, 450);
-            InstructionsText = "ImageViewer supports custom zooming (even by the mouse), as well as toggling smooth zooming.\r\n\r\nUse the predefined options or set the Image property to set an image.";
+            ClientSize = new System.Drawing.Size(820, 450);
+            InstructionsText = "ImageViewer supports custom zooming and panning, as well as toggling smoothing (even for metafiles).\r\n"
+                + "Use the predefined options or click the controls to set their properties.";
             Name = "frmImageViewer";
             Text = "frmImageViewer";
             pnlTestArea.ResumeLayout(false);

@@ -116,7 +116,7 @@ namespace KGySoft.WinForms.Controls
             /// <summary>
             /// true if generator can generate new content. Turned off on low memory or by <see cref="Free"/>. Invalidating the image enables it again.
             /// </summary>
-            private bool enabled; // no need to be volatile, as it is always accessed in a lock, or (when async operation is disabled) from a single thread
+            private volatile bool enabled;
 
             private GenerateDefaultImageTask? generateDefaultImageTask;
             private GenerateResizedImageTask? generateResizedImageTask;
@@ -163,8 +163,19 @@ namespace KGySoft.WinForms.Controls
 
             #region Properties
 
+            #region Internal Properties
+            
             // This is alright, this class is private and is not exposed publicly.
             internal object SyncRoot => this;
+
+            #endregion
+
+            #region Private Properties
+
+            private bool GenerateResizedBitmap => enabled && (owner.optimizations & ImageViewerOptimizationOptions.GenerateResizedBitmap) != 0;
+            private bool CheckMemoryUsage => (owner.optimizations & ImageViewerOptimizationOptions.CheckQuicklyAvailableMemory) != 0;
+
+            #endregion
 
             #endregion
 
@@ -248,6 +259,15 @@ namespace KGySoft.WinForms.Controls
                 // 2.) Checking if there is an already available default image. It might have to be resized on painting.
                 Image? result = defaultDisplayImage;
 
+                // 3.) Starting to generate cached images if needed
+                if (enabled)
+                {
+                    if (result == null)
+                        BeginGenerateDefaultDisplayImageIfNeeded();
+
+                    BeginGenerateResizedDisplayImageIfNeeded();
+                }
+
                 // Smoothing Bitmap: leaving NearestNeighbor if a resized image is expected to be generated;
                 // otherwise, using some interpolation to be applied during painting
                 if (!owner.isMetafile && owner.smoothingEnabled)
@@ -261,18 +281,9 @@ namespace KGySoft.WinForms.Controls
                     // 1-4x zoom: HighQualityBilinear for large images to prevent heavy lagging; otherwise, HighQualityBicubic
                     else if (zoom > 1f)
                         interpolationMode = size.Width > sizeThreshold || size.Height > sizeThreshold ? InterpolationMode.HighQualityBilinear : InterpolationMode.HighQualityBicubic;
-                    // Shrinking of larger images if generating is disabled: applying a hopefully-not-too-slow fallback interpolation
-                    else if (!enabled && zoom < 1f)
+                    // Shrinking larger images if generating is disabled: applying a hopefully-not-too-slow fallback interpolation
+                    else if (!GenerateResizedBitmap && zoom < 1f)
                         interpolationMode = owner.targetRectangle.Width > sizeThreshold || owner.targetRectangle.Height > sizeThreshold ? InterpolationMode.Bilinear : InterpolationMode.Bicubic;
-                }
-
-                // 3.) Starting to generate cached images if needed
-                if (enabled)
-                {
-                    if (result == null)
-                        BeginGenerateDefaultDisplayImageIfNeeded();
-
-                    BeginGenerateResizedDisplayImageIfNeeded();
                 }
 
                 // 4.) Returning either a generated display or the original image
@@ -360,7 +371,19 @@ namespace KGySoft.WinForms.Controls
                     // for non-PARGB32 images larger than 256x256 - note: leaving even slow formats unconverted below sizeThreshold / 4
                     || owner.pixelFormat != PixelFormat.Format32bppPArgb && (owner.imageSize.Width > sizeThreshold >> 2 || owner.imageSize.Height > sizeThreshold >> 2)
                     // and for native icons: converting because icons are handled oddly by GDI+, for example, the first column has half pixel width
-                    || bitmap.RawFormat.Guid == ImageFormat.Icon.Guid);
+                    || owner.isIcon);
+
+                // skipping generating clone if we are running on low memory, and it would only serve performance
+                // x4: because we want to convert it to 32bpp
+                if (isGenerateNeeded && CheckMemoryUsage && !owner.pixelFormat.In(unsupportedFormats))
+                {
+                    long memoryPressure = (long)owner.imageSize.Width * owner.imageSize.Height * 4L;
+                    if (!MemoryHelper.IsAvailableUnmanaged(memoryPressure))
+                    {
+                        isGenerateNeeded = false;
+                        enabled = false; // disabling generating images as we cannot allocate the memory needed for the default image
+                    }
+                }
 
                 if (!isGenerateNeeded)
                 {
@@ -373,7 +396,7 @@ namespace KGySoft.WinForms.Controls
                 var task = new GenerateDefaultImageTask
                 {
                     SourceBitmap = bitmap!,
-                    InvalidateOwner = bitmap!.RawFormat.Guid == ImageFormat.Icon.Guid
+                    InvalidateOwner = owner.isIcon
                 };
 
                 bool operateAsync = owner.AllowUnsafeCooperativeLocking && !owner.IsDesignMode;
@@ -396,12 +419,14 @@ namespace KGySoft.WinForms.Controls
             {
                 Debug.Assert(owner.image != null && owner.pixelFormat != default);
 
+                Image image = owner.image!;
+
                 // Metafile: If smoothing edges is enabled
                 // Bitmap: If smoothing resize is enabled, the image is shrunk and image size is larger than 1024x1024
                 bool isGenerateNeeded = owner.smoothingEnabled && (owner.isMetafile
                     || owner.zoom < 1f && (owner.imageSize.Width > sizeThreshold || owner.imageSize.Height > sizeThreshold));
 
-                // Not canceling the possible generate task here. It will call an invalidate in the end and we can see whether we use the result.
+                // Not canceling the possible generate task here. It will call an invalidate in the end, and we can see whether we use the result.
                 Size size = owner.targetRectangle.Size;
                 if (!isGenerateNeeded || size.Width < 1 || size.Height < 1)
                 {
@@ -435,16 +460,33 @@ namespace KGySoft.WinForms.Controls
 
                 // If unsafe cooperative locking is allowed, we can use the original image directly
                 if (owner.AllowUnsafeCooperativeLocking)
-                    task.SourceImage = owner.image!;
+                    task.SourceImage = image;
                 else
                 {
-                    // Otherwise, we use a clone of the original image so it can be safely used from another thread
+                    // Turning of optimizations if there is not enough memory to generate a clone bitmap
+                    if (CheckMemoryUsage && image is Bitmap)
+                    {
+                        // Getting stride without locking the bitmap. Assuming stride is always aligned to 4 bytes
+                        // (may not be correct for specially constructed bitmaps, but good enough for guessing memory usage).
+                        int stride = ((owner.imageSize.Width * owner.pixelFormat.ToBitsPerPixel() + 31) >> 5) << 2;
+                        long memoryPressure = (long)stride * owner.imageSize.Height;
+                        if (!MemoryHelper.IsAvailableUnmanaged(memoryPressure))
+                        {
+                            task.Dispose(); // not assigned to a field yet, so we can dispose it safely
+                            enabled = false;
+                            return;
+                        }
+                    }
+
+                    // Otherwise, we use a clone of the original image so it can be safely used from another thread.
                     try
                     {
-                        origImageClone ??= owner.image is Bitmap bitmap ? bitmap.CloneCurrentFrame() : (Image)owner.image!.Clone();
+                        // no locking is needed, because AllowUnsafeCooperativeLocking is false here
+                        origImageClone ??= image is Bitmap bitmap ? bitmap.CloneCurrentFrame() : (Image)image.Clone();
                     }
                     catch (Exception e) when (!e.IsCriticalGdi())
                     {
+                        task.Dispose(); // not assigned to a field yet, so we can dispose it safely
                         enabled = false;
                         return;
                     }                    
@@ -459,16 +501,9 @@ namespace KGySoft.WinForms.Controls
             {
                 #region Local Methods
 
-                static Bitmap? DoGenerateDefaultImage(GenerateDefaultImageTask task, ref bool enabled)
+                Bitmap? DoGenerateDefaultImage(GenerateDefaultImageTask task)
                 {
-                    Size size = task.SourceBitmap.Size;
-
-                    // skipping generating clone if there is not enough memory and it would only serve performance
-                    // x4: because we want to convert to 32bpp
-                    long managedPressure = size.Width * size.Height * 4;
-                    if (!MemoryHelper.CanAllocate(managedPressure) && !task.SourceBitmap.PixelFormat.In(unsupportedFormats))
-                        task.Cancel();
-
+                    Size size = owner.imageSize;
                     Bitmap? result = null;
                     try
                     {
@@ -484,7 +519,7 @@ namespace KGySoft.WinForms.Controls
                     }
                     catch (Exception e) when (!e.IsCriticalGdi())
                     {
-                        // Despite all the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
+                        // The memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
                         // NOTE: practically we always can recover from here: we simply don't use a generated clone and the worker thread can be finished
                         task.Cancel();
                         enabled = false;
@@ -507,15 +542,15 @@ namespace KGySoft.WinForms.Controls
 
                 try
                 {
-                    // canceled or lost race
-                    if (task.IsCanceled || isDefaultImageCloned || task.SourceBitmap != owner.image || !enabled || disposed)
+                    // canceled, lost race, already disposed, or generating is disabled due to low memory while the original pixel format is supported
+                    if (task.IsCanceled || isDefaultImageCloned || task.SourceBitmap != owner.image || disposed || (!enabled && !task.SourceBitmap.PixelFormat.In(unsupportedFormats)))
                         return;
 
                     Bitmap? result = null;
 
                     // Locking on the image to avoid the possible "bitmap region is already locked" issue.
                     // Until the default image is generated, it is locked during the paint, too.
-                    bool lockOnImage = owner.allowUnsafeCooperativeLocking;
+                    bool lockOnImage = owner.AllowUnsafeCooperativeLocking;
                     if (lockOnImage)
                         Monitor.Enter(task.SourceBitmap);
                     try
@@ -524,7 +559,7 @@ namespace KGySoft.WinForms.Controls
                         {
                             // Generating the actual result. IsCanceled might be true if the lock above could not be immediately acquired
                             if (!task.IsCanceled)
-                                result = DoGenerateDefaultImage(task, ref enabled);
+                                result = DoGenerateDefaultImage(task);
                         }
                         finally
                         {
@@ -558,23 +593,41 @@ namespace KGySoft.WinForms.Controls
             {
                 #region Local Methods
 
-                static Bitmap? GenerateResizedMetafile(GenerateResizedImageTask task, ref bool enabled)
+                Bitmap? GenerateResizedMetafile(GenerateResizedImageTask task)
                 {
-                    // For the resizing large managed buffer of source.Height * target.Width of ColorF (16 bytes) is allocated internally. To be safe we count with the doubled sizes.
-                    Size doubledSize = new Size(task.Size.Width << 1, task.Size.Height << 1);
-                    long managedPressure = doubledSize.Width * doubledSize.Height * 16;
-                    if (!MemoryHelper.CanAllocate(managedPressure))
-                        task.Cancel();
+                    if (CheckMemoryUsage)
+                    {
+                        // for the source and resized bitmaps (metafiles always have a 32 bpp pixel format, the target is 32 bpp PARGB)
+                        Size doubledSize = new Size(task.Size.Width << 1, task.Size.Height << 1);
+                        long unmanagedPressure = (long)doubledSize.Width * doubledSize.Height * 4L + (long)task.Size.Width * task.Size.Height * 4L;
+
+                        // During resizing a large managed buffer of target.Width * source.Height of PColorF (16 bytes) is allocated internally.
+                        long managedPressure = (long)task.Size.Width * doubledSize.Height * 16L;
+
+                        if (!MemoryHelper.IsAvailableUnmanaged(unmanagedPressure) || !MemoryHelper.IsAvailableManaged(managedPressure))
+                            task.Cancel();
+                    }
 
                     if (task.IsCanceled)
                         return null;
 
-                    // MetafileExtensions.ToBitmap does the same if anti aliasing is requested but this way the process can be canceled
+                    // MetafileExtensions.ToBitmap does the same if antialiasing is requested but this way the process can be canceled
                     Bitmap? result = null;
                     Bitmap? doubled = null;
                     try
                     {
-                        doubled = new Bitmap(task.SourceImage, task.Size.Width << 1, task.Size.Height << 1);
+                        bool lockOnImage = owner.AllowUnsafeCooperativeLocking;
+                        if (lockOnImage)
+                            Monitor.Enter(task.SourceImage);
+                        try
+                        {
+                            doubled = new Bitmap(task.SourceImage, task.Size.Width << 1, task.Size.Height << 1);
+                        }
+                        finally
+                        {
+                            if (lockOnImage)
+                                Monitor.Exit(task.SourceImage);
+                        }
 
                         if (!task.IsCanceled)
                         {
@@ -597,7 +650,7 @@ namespace KGySoft.WinForms.Controls
                     }
                     catch (Exception e) when (!e.IsCriticalGdi())
                     {
-                        // Despite all the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
+                        // The memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
                         // NOTE: practically we always can recover from here: we simply don't use a generated preview and the worker thread can be finished
                         task.Cancel();
                         enabled = false;
@@ -615,14 +668,35 @@ namespace KGySoft.WinForms.Controls
                     return result;
                 }
 
-                static Bitmap? GenerateResizedBitmap(GenerateResizedImageTask task, ref bool enabled)
+                Bitmap? GenerateResizedBitmap(GenerateResizedImageTask task)
                 {
+                    if (CheckMemoryUsage)
+                    {
+                        long unmanagedPressure = (long)task.Size.Width * task.Size.Height * 4L;
+
+                        // During resizing a large managed buffer of target.Width * source.Height of PColorF (16 bytes) is allocated internally.
+                        long managedPressure = (long)task.Size.Width * owner.imageSize.Height * 16L;
+
+                        if (!MemoryHelper.IsAvailableUnmanaged(unmanagedPressure) || !MemoryHelper.IsAvailableManaged(managedPressure))
+                        {
+                            // unlike in GenerateResizedMetafile, here we set enabled to false, so the caller GetDisplayImage can use fallback interpolations
+                            task.Cancel();
+                            enabled = false;
+                        }
+                    }
+
+                    if (task.IsCanceled)
+                        return null;
+
                     // BitmapExtensions.Resize does the same but this way the process can be canceled
                     Bitmap? result = null;
                     try
                     {
                         result = new Bitmap(task.Size.Width, task.Size.Height, PixelFormat.Format32bppPArgb);
-                        lock (task.SourceImage)
+                        bool lockOnImage = owner.AllowUnsafeCooperativeLocking;
+                        if (lockOnImage)
+                            Monitor.Enter(task.SourceImage);
+                        try
                         {
                             using IReadableBitmapData src = ((Bitmap)task.SourceImage).GetReadableBitmapData();
                             using IReadWriteBitmapData dst = result.GetReadWriteBitmapData();
@@ -639,10 +713,15 @@ namespace KGySoft.WinForms.Controls
                                     MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 2) // TODO: ParallelHelper.CoreCount
                                 });
                         }
+                        finally
+                        {
+                            if (lockOnImage)
+                                Monitor.Exit(task.SourceImage);
+                        }
                     }
                     catch (Exception e) when (!e.IsCriticalGdi())
                     {
-                        // Despite all the preconditions the memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
+                        // The memory could not be allocated or some other error occurred (yes, we catch even OutOfMemoryException here)
                         // NOTE: practically we always can recover from here: we simply don't use a generated preview and the worker thread can be finished
                         task.Cancel();
                         enabled = false;
@@ -696,19 +775,29 @@ namespace KGySoft.WinForms.Controls
                             return;
                         }
 
+                        if (CheckMemoryUsage && !owner.pixelFormat.In(unsupportedFormats))
+                        {
+                            long memoryPressure = (long)owner.imageSize.Width * owner.imageSize.Height * 4L;
+                            if (!MemoryHelper.IsAvailableUnmanaged(memoryPressure))
+                            {
+                                enabled = false;
+                                return;
+                            }
+                        }
+
                         Debug.Assert(ReferenceEquals(owner.image, defaultDisplayImage), "If isDefaultImageCloned is false, then defaultDisplayImage is expected to be the original instance here.");
                         Debug.Assert(owner.isMetafile || owner.pixelFormat == PixelFormat.Format32bppPArgb, "Clone is expected to be missing for metafiles and 32bpp PARGB bitmaps only.");
                         Image clone;
 
                         // This may block the UI in OnPaint but once the clone is created OnPaint will use that instead of the original image.
-                        lock (task.SourceImage)
+                        lock (task.SourceImage) // always locking, because AllowUnsafeCooperativeLocking is true here
                         {
                             try
                             {
                                 // we do not allow canceling this part because this would be started again and again
-                                clone = owner.image is Bitmap bitmap
+                                clone = task.SourceImage is Bitmap bitmap
                                     ? bitmap.ConvertPixelFormat(PixelFormat.Format32bppPArgb)
-                                    : (Image)owner.image.Clone();
+                                    : (Image)task.SourceImage.Clone();
                             }
                             catch (Exception e) when (!e.IsCriticalGdi())
                             {
@@ -729,7 +818,7 @@ namespace KGySoft.WinForms.Controls
                     try
                     {
                         if (!task.IsCanceled)
-                            result = task.SourceImage is Metafile ? GenerateResizedMetafile(task, ref enabled) : GenerateResizedBitmap(task, ref enabled);
+                            result = task.SourceImage is Metafile ? GenerateResizedMetafile(task) : GenerateResizedBitmap(task);
                     }
                     finally
                     {

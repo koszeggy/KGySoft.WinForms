@@ -16,11 +16,12 @@
 #region Usings
 
 using System;
+using System.Runtime.InteropServices;
 #if NETFRAMEWORK
 using System.Security;
+#endif
 
 using KGySoft.WinForms.WinApi;
-#endif
 
 #endregion
 
@@ -38,7 +39,7 @@ namespace KGySoft.WinForms
         #region Fields
 
 #if NETFRAMEWORK
-        private static long? maxMemoryForGC; 
+        private static long? maxMemoryForGC;
 #endif
 
         #endregion
@@ -55,7 +56,7 @@ namespace KGySoft.WinForms
                 {
                     maxMemoryForGC = Math.Min(
                         IntPtr.Size == 4 ? 1_600_000_000 : Int64.MaxValue,
-                        OSUtils.IsWindows ? Kernel32.GetTotalMemory() : Int64.MaxValue);
+                        OSUtils.IsWindows ? GetTotalMemory() : Int64.MaxValue);
                 }
 
                 return maxMemoryForGC.Value;
@@ -68,13 +69,15 @@ namespace KGySoft.WinForms
         #endregion
 
         #region Methods
+  
+        #region Internal Methods
 
         /// <summary>
         /// Gets an educated guess whether an array of specified size can be allocated.
         /// It does not consider virtual memory and does not guarantee that out of memory can be avoided (especially in pre .NET 4.0 versions).
         /// We also ignore gcAllowVeryLargeObjects.
         /// </summary>
-        internal static bool CanAllocate(long arraySize)
+        internal static bool IsAvailableManaged(long arraySize)
         {
             if (arraySize > maxArrayLength)
                 return false;
@@ -84,12 +87,49 @@ namespace KGySoft.WinForms
                 return true;
 
             // Using the total physical available memory (or 1.6GB on 32-bit systems, whichever is smaller) to determine free memory.
-            // Virtual memory is ignored even if can be used to avoid slowing down the system very much.
+            // Virtual memory is ignored, even if it can be used to avoid slowing down the system very much.
             if (maxMem - GC.GetTotalMemory(false) > arraySize)
                 return true;
 
+            // trying again with a forced garbage collection
             return maxMem - GC.GetTotalMemory(true) - minFreeMemory > arraySize;
         }
+
+        /// <summary>
+        /// Gets whether the specified size of (unmanaged) system memory is quickly available for allocation.
+        /// </summary>
+        internal static bool IsAvailableUnmanaged(long size)
+        {
+            // not guessing on non-Windows systems, going for the hard way
+            if (!OSUtils.IsWindows)
+                return true;
+
+            return GetAvailableMemory() >= size;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+#if NETFRAMEWORK
+        private static long GetTotalMemory()
+        {
+            var status = new MEMORYSTATUSEX { dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX)) };
+            if (!Kernel32.GlobalMemoryStatusEx(ref status))
+                return Int64.MaxValue;
+            return (long)status.ullTotalPhys;
+        }
+#endif
+
+        private static long GetAvailableMemory()
+        {
+            var status = new MEMORYSTATUSEX { dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX)) };
+            if (!Kernel32.GlobalMemoryStatusEx(ref status))
+                return Int64.MaxValue;
+            return (long)status.ullAvailPhys;
+        }
+
+        #endregion
 
         #endregion
     }

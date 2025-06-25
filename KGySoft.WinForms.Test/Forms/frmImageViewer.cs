@@ -77,17 +77,8 @@ namespace KGySoft.WinForms.Test.Forms
             };
 
             imageViewer.Image = pictureBox.Image = image;
-
-            //Image? prevPictureBoxImage = pictureBox.Image;
-            //Image? prevImageViewerImage = imageViewer.Image;
-
-            //// cloning the image is necessary to avoid "bitmap region is already locked"
-            //// because the ImageViewer accesses the image in a separate thread and PictureBox does not lock the image
-            ////pictureBox.Image = image;
-            //prevPictureBoxImage?.Dispose();
-
-            //imageViewer.Image = image is Bitmap bmp ? bmp.CloneCurrentFrame() : (Image?)image?.Clone();
-            //prevImageViewerImage?.Dispose();
+            if (!imageViewer.AutoZoom)
+                imageViewer.Zoom = 1.0f;
         }
     }
 }

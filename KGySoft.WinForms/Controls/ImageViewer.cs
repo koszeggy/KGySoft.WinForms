@@ -23,7 +23,9 @@ using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Threading;
 using System.Windows.Forms;
-using KGySoft.WinForms.Forms;
+
+using KGySoft.ComponentModel;
+using KGySoft.CoreLibraries;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -46,15 +48,6 @@ namespace KGySoft.WinForms.Controls
     /// <para>The <see cref="Zoom"/> property allows you to set an arbitrary zoom. The zoom can also be adjusted by the mouse (Ctrl+Mouse wheel).
     /// When the displayed image is larger than the control, the scrollbars are automatically shown. Pan the image by dragging it with the mouse or by using the arrow keys.
     /// You can also use the <see cref="AutoZoom"/> property to <see langword="true"/> to automatically adjust the zoom to fit the image to the control.</para>
-    /// <note type="important">Never assign the same <see cref="Bitmap"/> instance to a <see cref="PictureBox"/> and an <see cref="ImageViewer"/>.
-    /// Doing so may lead to an <see cref="InvalidOperationException"/> ("bitmap region is already locked"), because <see cref="ImageViewer"/> may access the <see cref="BitmapData"/>
-    /// of the <see cref="Bitmap"/> asynchronously while the <see cref="PictureBox"/> control may try to paint the image. Assigning the same image to multiple <see cref="ImageViewer"/> controls is safe.
-    /// Similarly, if you access the <see cref="BitmapData"/> of a <see cref="Bitmap"/> that is assigned to the <see cref="Image"/>
-    /// property, make sure you lock on the image until you access <see cref="BitmapData"/> instance. The <see cref="ImageViewer"/> control may process the image
-    /// on different threads asynchronously to generate the displayed image, and during this time it locks the <see cref="Image"/> instance.
-    /// To avoid the <see cref="InvalidOperationException"/>, you should also lock on the same <see cref="System.Drawing.Image"/> instance.
-    /// Though the latest coding standards don't recommend using publicly exposed synchronization root objects, careful locking as described above will not cause deadlocks.
-    /// Another option is if you clone the image before assigning it to the <see cref="Image"/> property, though this may cause a significant memory overhead for large images.</note>
     /// </remarks>
     public partial class ImageViewer : BaseControl
     {
@@ -89,7 +82,7 @@ namespace KGySoft.WinForms.Controls
         private Rectangle clientRectangle;
         private float zoom = 1f;
         private Size scrollbarSize;
-        private Size imageSize;
+        private Size imageSize; // must be used instead of Image.Size when the Image is not locked
         private PixelFormat pixelFormat;
 
         private bool isMetafile;
@@ -99,12 +92,13 @@ namespace KGySoft.WinForms.Controls
         private bool sbVerticalVisible;
         private bool isApplyingZoom;
         private bool isDragging;
-        private bool allowUnsafeCooperativeLocking;
+        private bool isIcon;
 
         private int scrollFractionVertical;
         private int scrollFractionHorizontal;
         private Size draggingOrigin;
         private Point scrollingOrigin;
+        private ImageViewerOptimizationOptions optimizations = ImageViewerOptimizationOptions.Default;
 
         #endregion
 
@@ -161,10 +155,12 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether the control automatically adjusts the zoom to fit the image to the control.
+        /// It is automatically set to <see langword="false"/> when <see cref="Zoom"/> is set (either programatically or by the user, using the mouse).
         /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         [Category("ImageViewer")]
-        [Description("Determines whether the control automatically adjusts the zoom to fit the image to the control.")]
+        [Description("Determines whether the control automatically adjusts the zoom to fit the image to the control. "
+            + "Gets disabled when Zoom is set or the user changes the zoom by the mouse.")]
         [DefaultValue(false)]
         public bool AutoZoom
         {
@@ -214,30 +210,33 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        // When true, the control may use less memory, but the Image data may be accessed on other threads asynchronously, which may lead to exceptions if Image is accessed concurrently.
-        // In this case Image is locked while it is being processed, so if you also want to access the Image on other threads, you need to cooperatively lock on the Image instance.
-        // Must be set to false if the Image is used in another Control (e.g. Button, PictureBox, PropertyGrid, etc.) as they do not support unsafe cooperative locking.
-        // In this case the Image is cloned internally before generating a good quality resized image asynchronously.
+        /// <summary>
+        /// Gets or sets optimization options for the <see cref="ImageViewer"/> control that affect the rendering performance and memory usage.
+        /// <br/>Default value: <see cref="ImageViewerOptimizationOptions.Default"/>.
+        /// </summary>
+        [TypeConverter(typeof(FlagsEnumConverter))]
         [Category("ImageViewer")]
-        [EditorBrowsable(EditorBrowsableState.Advanced)]
-        [DefaultValue(false)]
-        public bool AllowUnsafeCooperativeLocking
+        [Description("Gets or sets optimization options for the ImageViewer control that affect the rendering performance and memory usage.")]
+        [DefaultValue(ImageViewerOptimizationOptions.Default)]
+        public ImageViewerOptimizationOptions OptimizationOptions
         {
-            get => allowUnsafeCooperativeLocking;
+            get => optimizations;
             set
             {
-                if (allowUnsafeCooperativeLocking == value)
+                if (optimizations == value)
                     return;
 
-                allowUnsafeCooperativeLocking = value;
+                if (!value.AllFlagsDefined())
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.FlagsEnumOutOfRange(value));
 
-                // When going to safe processing, we cancel the current tasks to make sure that Image can be used safely immediately.
+                bool enablingSafeMode = (value & ImageViewerOptimizationOptions.UseUnsafeCooperativeLocking) == 0 && (optimizations & ImageViewerOptimizationOptions.UseUnsafeCooperativeLocking) != 0;
+                optimizations = value;
+
+                // Basically not forcing the new options immediately, except when going to safe processing mode.
+                // In such case we cancel the current tasks to make sure that Image data can be accessed safely immediately.
                 // If there is some image processing in progress, we invalidate the control so the pending repaint restarts in safe mode.
-                if (!value && displayImageGenerator.CancelPendingTasks())
+                if (enablingSafeMode && displayImageGenerator.CancelPendingTasks())
                     Invalidate();
-
-                // NOTE: when going to unsafe mode, the possibly created image clone can be freed.
-                // As we don't have strict exit conditions for that case, we let the possibly pending tasks finish. The clone will be discarded when the tasks finish.
             }
         }
 
@@ -271,6 +270,12 @@ namespace KGySoft.WinForms.Controls
                 return cp;
             }
         }
+
+        #endregion
+
+        #region Private Properties
+
+        private bool AllowUnsafeCooperativeLocking => (optimizations & ImageViewerOptimizationOptions.UseUnsafeCooperativeLocking) != 0 && !IsDesignMode;
 
         #endregion
 
@@ -513,6 +518,7 @@ namespace KGySoft.WinForms.Controls
             isMetafile = image is Metafile;
             imageSize = image?.Size ?? default;
             pixelFormat = image?.PixelFormat ?? default;
+            isIcon = !isMetafile && image?.RawFormat.Guid == ImageFormat.Icon.Guid;
             Invalidate(InvalidateFlags.All);
 
             // making sure image is not under or over-zoomed
@@ -703,7 +709,7 @@ namespace KGySoft.WinForms.Controls
                 // OnPaint can occur any time after invalidating.
                 // NOTE: Of course, to avoid the exception every participant must cooperate and lock on the image when accessing its bitmap data.
                 //       This not happens if the image used by 3rd party code (e.g. PictureBox, PropertyGrid) without locking on it.
-                bool useLock = image == toDraw && allowUnsafeCooperativeLocking;
+                bool useLock = image == toDraw && AllowUnsafeCooperativeLocking;
                 if (useLock)
                     Monitor.Enter(toDraw);
                 try

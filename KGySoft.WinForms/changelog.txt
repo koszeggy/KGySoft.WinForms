@@ -176,6 +176,7 @@
 + New BaseControl class: Migrated from the KGySoft.Drawing.ImagingTools project.
 + New OkCancelButtons class: Migrated from the KGySoft.Drawing.ImagingTools project.
 + New ImageViewer class: Migrated from the KGySoft.Drawing.ImagingTools project.
++ New ImageViewerOptimizationOptions enum
 
 ! KGySoft.WinForms.Forms namespace:
 ===================================

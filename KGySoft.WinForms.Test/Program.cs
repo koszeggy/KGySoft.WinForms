@@ -52,12 +52,12 @@ namespace KGySoft.WinForms.Test
                 td.Options = TaskDialogOptions.UseCommandLinks;
                 td.StandardButtons = TaskDialogStandardButtonFlags.Cancel;
                 td.MainInstruction = "Select a control to test";
-                td.Buttons.Add(new TaskDialogButton("ImageViewer"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedButton"));
+                td.Buttons.Add(new TaskDialogButton("ImageViewer"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedCheckBox"));
+                td.Buttons.Add(new TaskDialogButton("AdvancedRadioButton"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedLabel"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedProgressBar"));
-                td.Buttons.Add(new TaskDialogButton("AdvancedRadioButton"));
                 td.Buttons.Add(new TaskDialogButton("CommandLinkButton"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedTextBox"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedComboBox"));

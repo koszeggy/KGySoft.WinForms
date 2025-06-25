@@ -148,21 +148,11 @@ namespace KGySoft.WinForms.WinApi
         /// <summary>
         /// GlobalMemoryStatusEx: Retrieves information about the system's current usage of both physical and virtual memory.
         /// </summary>
-        internal static long GetTotalMemory()
-        {
-            #region Private Methods
-
-            [return: MarshalAs(UnmanagedType.Bool)]
-            [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-            static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
-
-            #endregion
-
-            var status = new MEMORYSTATUSEX { dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX)) };
-            if (!GlobalMemoryStatusEx(ref status))
-                throw new Win32Exception(Marshal.GetLastWin32Error());
-            return (long)status.ullTotalPhys;
-        }
+        /// <param name="lpBuffer">A pointer to a MEMORYSTATUSEX structure that receives information about current memory availability.</param>
+        /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</returns>
+        [return: MarshalAs(UnmanagedType.Bool)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        internal static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
 
         #endregion
     }
