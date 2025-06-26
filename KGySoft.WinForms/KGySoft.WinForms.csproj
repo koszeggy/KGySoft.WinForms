@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!--<TargetFrameworks>net35;net40;netcoreapp3.0;net5.0-windows;net7.0-windows</TargetFrameworks>-->
+    <!--<TargetFrameworks>net35;net40;net47;netcoreapp3.0;net5.0-windows;net7.0-windows</TargetFrameworks>-->
     <TargetFrameworks>net35;net40;net5.0-windows;net9.0-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>KGySoft.WinForms</RootNamespace>

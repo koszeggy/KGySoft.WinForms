@@ -519,6 +519,16 @@ namespace KGySoft.WinForms.WinApi
             return IntPtr.Size == 4 ? GetWindowLongPtr32(hWnd, nIndex) : GetWindowLongPtr64(hWnd, nIndex);
         }
 
+        /// <summary>
+        /// Retrieves the specified system metric or system configuration setting taking into account a provided DPI.
+        /// </summary>
+        /// <param name="nIndex">The system metric or configuration setting to be retrieved. See GetSystemMetrics for the possible values.</param>
+        /// <param name="dpi">The DPI to use for scaling the metric.</param>
+        /// <returns>If the function succeeds, the return value is nonzero.
+        /// If the function fails, the return value is zero. To get extended error information, call GetLastError.</returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        internal static extern int GetSystemMetricsForDpi(int nIndex, uint dpi);
+
         #endregion
     }
 }

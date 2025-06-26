@@ -140,6 +140,7 @@ namespace KGySoft.WinForms
         private static readonly Point systemInitialDpi = GetDpiForHdc(User32.GetDC(IntPtr.Zero));
         private static readonly PointF systemScale = new PointF(systemInitialDpi.X / DefaultDpi, systemInitialDpi.Y / DefaultDpi);
         private static readonly PointF defaultScale = new PointF(1f, 1f);
+        private static readonly Size scrollbarFallbackReferenceSize = new Size(16, 16);
 
         private static Font? defaultFont;
         private static Font? dialogFont;
@@ -263,11 +264,11 @@ namespace KGySoft.WinForms
             return new PointF(dpi.X / DefaultDpi, dpi.Y / DefaultDpi);
         }
 
-        public static PointF GetScale(IntPtr handle)
+        public static PointF GetScale(IntPtr hWnd)
         {
-            if (!isProcessPerMonitorAware || handle == IntPtr.Zero)
+            if (!isProcessPerMonitorAware || hWnd == IntPtr.Zero)
                 return systemScale;
-            Point dpi = GetDpiForHwnd(handle);
+            Point dpi = GetDpiForHwnd(hWnd);
             return new PointF(dpi.X / DefaultDpi, dpi.Y / DefaultDpi);
         }
 
@@ -328,6 +329,33 @@ namespace KGySoft.WinForms
                 return DefaultFont;
 #endif
             return font;
+        }
+
+        public static Size GetScrollbarSize(this Control control)
+        {
+            if (control == null!)
+                ThrowNull(nameof(control));
+
+            if (OSUtils.IsMono)
+                return scrollbarFallbackReferenceSize.Scale(control.GetScale());
+
+            int perMonitorDpiAwarenessVersion = PerMonitorDpiAwarenessVersion;
+            if (perMonitorDpiAwarenessVersion == 0)
+                return new Size(SystemInformation.VerticalScrollBarWidth, SystemInformation.HorizontalScrollBarHeight);
+
+            return GetScrollbarSizeForDpi(GetDpi(control), perMonitorDpiAwarenessVersion);
+        }
+
+        public static Size GetScrollbarSize(IntPtr hWnd)
+        {
+            if (OSUtils.IsMono)
+                return scrollbarFallbackReferenceSize.Scale(GetScale(hWnd));
+
+            int perMonitorDpiAwarenessVersion = PerMonitorDpiAwarenessVersion;
+            if (perMonitorDpiAwarenessVersion == 0 || hWnd == IntPtr.Zero)
+                return new Size(SystemInformation.VerticalScrollBarWidth, SystemInformation.HorizontalScrollBarHeight);
+
+            return GetScrollbarSizeForDpi(GetDpiForHwnd(hWnd), perMonitorDpiAwarenessVersion);
         }
 
         #endregion
@@ -393,6 +421,30 @@ namespace KGySoft.WinForms
 
             // Not per-monitor aware, or fallback when the WinAPI calls above fail.
             return systemInitialDpi;
+        }
+
+        private static Size GetScrollbarSizeForDpi(Point dpi, int perMonitorDpiAwarenessVersion)
+        {
+            Debug.Assert(IsThreadPerMonitorAware);
+
+            if (perMonitorDpiAwarenessVersion >= 2)
+            {
+#if NET47_OR_GREATER || NETCOREAPP
+                return new Size(SystemInformation.GetVerticalScrollBarWidthForDpi(dpi.X), SystemInformation.GetHorizontalScrollBarHeightForDpi(dpi.Y));
+#else
+                var result = new Size(User32.GetSystemMetricsForDpi(Constants.SM_CXVSCROLL, (uint)dpi.X),
+                    User32.GetSystemMetricsForDpi(Constants.SM_CYHSCROLL, (uint)dpi.Y));
+                if (result.Width > 0 && result.Height > 0)
+                    return result;
+#endif
+            }
+
+            // V1 awareness level
+            var referenceSize = new Size(SystemInformation.VerticalScrollBarWidth, SystemInformation.HorizontalScrollBarHeight);
+            if (dpi == systemInitialDpi)
+                return referenceSize;
+            PointF scale = new PointF(dpi.X / (float)systemInitialDpi.X, dpi.Y / (float)systemInitialDpi.Y);
+            return referenceSize.Scale(scale);
         }
 
         [DoesNotReturn]
