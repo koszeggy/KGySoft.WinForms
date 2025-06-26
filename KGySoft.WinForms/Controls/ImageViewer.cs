@@ -49,7 +49,7 @@ namespace KGySoft.WinForms.Controls
     /// When the displayed image is larger than the control, the scrollbars are automatically shown. Pan the image by dragging it with the mouse or by using the arrow keys.
     /// You can also use the <see cref="AutoZoom"/> property to <see langword="true"/> to automatically adjust the zoom to fit the image to the control.</para>
     /// </remarks>
-    public partial class ImageViewer : BaseControl
+    public partial class ImageViewer : BaseControl, IPerMonitorDpiAware
     {
         #region InvalidateFlags enum
 
@@ -99,6 +99,7 @@ namespace KGySoft.WinForms.Controls
         private Size draggingOrigin;
         private Point scrollingOrigin;
         private ImageViewerOptimizationOptions optimizations = ImageViewerOptimizationOptions.Default;
+        private PointF lastScale;
 
         #endregion
 
@@ -417,7 +418,7 @@ namespace KGySoft.WinForms.Controls
             InitializeComponent();
 
             SetStyle(ControlStyles.Selectable | ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
-            scrollbarSize = OSUtils.IsMono ? new Size(16, 16).Scale(this.GetScale()) : new Size(SystemInformation.VerticalScrollBarWidth, SystemInformation.HorizontalScrollBarHeight);
+            scrollbarSize = this.GetScrollbarSize();
             sbVertical.Width = scrollbarSize.Width;
             sbHorizontal.Height = scrollbarSize.Height;
 
@@ -425,6 +426,7 @@ namespace KGySoft.WinForms.Controls
             sbHorizontal.ValueChanged += ScrollbarValueChanged;
 
             displayImageGenerator = new DisplayImageGenerator(this);
+            this.RegisterPerMonitorAwarenessNotifications();
         }
 
         #endregion
@@ -499,6 +501,20 @@ namespace KGySoft.WinForms.Controls
         #region Protected Methods
 
         /// <inheritdoc />
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            CheckDpiChange();
+        }
+
+        /// <inheritdoc />
+        protected override void OnParentChanged(EventArgs e)
+        {
+            base.OnParentChanged(e);
+            CheckDpiChange();
+        }
+
+        /// <inheritdoc />
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
@@ -516,6 +532,27 @@ namespace KGySoft.WinForms.Controls
                 AdjustSizes();
             if (!targetRectangle.IsEmpty)
                 PaintImage(e.Graphics);
+        }
+
+        /// <inheritdoc />
+        protected override void WndProc(ref Message m)
+        {
+            switch (m.Msg)
+            {
+                case Constants.WM_PAINT:
+                    CheckDpiChange();
+                    base.WndProc(ref m);
+                    return;
+
+                case Constants.WM_DPICHANGED_BEFOREPARENT:
+                    base.WndProc(ref m);
+                    CheckDpiChange();
+                    return;
+
+                default:
+                    base.WndProc(ref m);
+                    return;
+            }
         }
 
         /// <inheritdoc />
@@ -932,9 +969,28 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        private void CheckDpiChange()
+        {
+            PointF scale = this.GetScale();
+            if (scale == lastScale || Disposing || IsDisposed)
+                return;
+
+            lastScale = scale;
+            scrollbarSize = this.GetScrollbarSize();
+            sbVertical.Width = scrollbarSize.Width;
+            sbHorizontal.Height = scrollbarSize.Height;
+            targetRectangle = Rectangle.Empty; // forces calling AdjustSizes on the next paint
+        }
+
         [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
         private bool ShouldSerializeCursor() => false;
         private bool ShouldSerializeZoom() => !autoZoom && !zoom.Equals(1f);
+
+        #endregion
+
+        #region Explicitly Implemented Interface Methods
+
+        void IPerMonitorDpiAware.ParentFormDpiChanged() => CheckDpiChange();
 
         #endregion
 
