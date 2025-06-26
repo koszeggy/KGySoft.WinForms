@@ -55,6 +55,8 @@ namespace KGySoft.WinForms.Controls
 
         private readonly InvokeMarshaller invoker;
 
+        private Exception? lastPaintError;
+
         #endregion
 
         #endregion
@@ -108,9 +110,15 @@ namespace KGySoft.WinForms.Controls
                     try
                     {
                         base.WndProc(ref m);
+                        lastPaintError = null; // resetting the last paint error if the paint was successful
                     }
                     catch (Exception e) when (!e.IsCritical())
                     {
+                        if (lastPaintError == e)
+                            throw;
+
+                        lastPaintError = e;
+
                         // In Mono sometimes an internal GDI+ exception happens here
                         Invalidate();
                     }
