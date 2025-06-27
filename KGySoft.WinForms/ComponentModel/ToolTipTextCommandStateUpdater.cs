@@ -67,14 +67,10 @@ namespace KGySoft.ComponentModel
         {
             for (Control c = ctrl; c != null; c = c.Parent)
             {
-                var containerFields = c.GetType().GetFields(BindingFlags.Instance | BindingFlags.NonPublic).Where(f => typeof(IContainer).IsAssignableFrom(f.FieldType));
-                foreach (var containerField in containerFields)
-                {
-                    var container = (IContainer?)Reflector.GetField(c, containerField);
-                    var toolTip = container?.Components?.OfType<ToolTip>().FirstOrDefault();
-                    if (toolTip != null)
-                        return toolTip;
-                }
+                FieldInfo? toolTipField = c.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).FirstOrDefault(f => typeof(ToolTip).IsAssignableFrom(f.FieldType));
+                ToolTip? toolTip = toolTipField != null ? (ToolTip?)Reflector.GetField(c, toolTipField) : null;
+                if (toolTip != null)
+                    return toolTip;
             }
 
             return null;
