@@ -33,6 +33,13 @@
 + New WinFormsModule class
 + New EventHandlerExtensions class
 + New AsyncTaskBase class: Migrated from the KGySoft.Drawing.ImagingTools project.
++ New LocalizationHelper class: can be used instead of the obsoleted Language class to localize WinForms
+  applications with auto-generated resources.
++ New LocalizationContext class
++ New DynamicStringLocalization enum
++ New LocalizationRequestedEventArgs class
++ New ICustomLocalizable interface
++ New IToolTipTargetProvider interface
 
 + KGySoft.ComponentModel namespace:
 ===================================
@@ -193,6 +200,8 @@
   + New DeviceScale property
   + New DeviceScaleChanged event: raised when the DPI changes and the application is per-monitor DPI aware.
   + New IsLoaded property
+  + New DynamicStringLocalization property
+  + New ApplyResources and ApplyStringResources methods
   + Scaling the small icon of the form properly when the DPI changes.
 ! DialogBaseForm class:
   ! The protected btnOk, btnCancel and pnlButtons fields have been replaced by read-only properties. The original

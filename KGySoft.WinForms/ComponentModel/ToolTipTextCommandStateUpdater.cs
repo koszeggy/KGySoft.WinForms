@@ -16,12 +16,9 @@
 #region Usings
 
 using System;
-using System.ComponentModel;
-using System.Linq;
-using System.Reflection;
 using System.Windows.Forms;
 
-using KGySoft.Reflection;
+using KGySoft.WinForms;
 
 #endregion
 
@@ -61,25 +58,6 @@ namespace KGySoft.ComponentModel
 
         #region Methods
 
-        #region Static Methods
-
-        private static ToolTip? GetToolTip(Control ctrl)
-        {
-            for (Control c = ctrl; c != null; c = c.Parent)
-            {
-                FieldInfo? toolTipField = c.GetType().GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic).FirstOrDefault(f => typeof(ToolTip).IsAssignableFrom(f.FieldType));
-                ToolTip? toolTip = toolTipField != null ? (ToolTip?)Reflector.GetField(c, toolTipField) : null;
-                if (toolTip != null)
-                    return toolTip;
-            }
-
-            return null;
-        }
-
-        #endregion
-
-        #region Instance Methods
-
         #region Public Methods
 
         public bool TryUpdateState(object commandSource, string stateName, object? value)
@@ -87,7 +65,7 @@ namespace KGySoft.ComponentModel
             if (stateName != ToolTipTextProperty || value is not string text || commandSource is not Control control)
                 return false;
 
-            GetToolTip(control)?.SetToolTip(control, text);
+            control.TryGetToolTip()?.SetToolTip(control, text);
             return true;
         }
 
@@ -98,8 +76,6 @@ namespace KGySoft.ComponentModel
         void IDisposable.Dispose()
         {
         }
-
-        #endregion
 
         #endregion
 

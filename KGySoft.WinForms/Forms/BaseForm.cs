@@ -24,6 +24,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
+using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.Libraries.Language;
 #if !NET5_0_OR_GREATER
@@ -100,6 +101,7 @@ namespace KGySoft.WinForms.Forms
         private MdiClient? mdiClient;
         private PointF deviceScale = ScaleHelper.SystemScale;
         private Icon? smallIcon;
+        private DynamicStringLocalization localizationMode;
 
         #endregion
 
@@ -192,16 +194,77 @@ namespace KGySoft.WinForms.Forms
 
         /// <summary>
         /// Gets or sets whether the form should translate its controls.
+        /// <br/>This property is obsolete. Use the <see cref="DynamicStringLocalization"/> property
+        /// or override the <see cref="ApplyResources">ApplyResources</see> and/or <see cref="ApplyStringResources">ApplyStringResources</see> methods.
         /// </summary>
         [Category("BaseForm")]
         [DefaultValue(false)]
         [Description("[OBSOLETE]Gets or sets whether the form should translate its controls.")]
-        [Obsolete("Old auto-translation does not work anymore, it just removes the possible translation postfixes.")]
+        [Obsolete("Old auto-translation does not work anymore, it just removes the possible translation postfixes. Use the LocalizationOptions property instead.")]
         [Browsable(false)]
         public bool TranslateControls
         {
             get => translateControls;
             set => translateControls = value;
+        }
+
+        /// <summary>
+        /// Gets or sets the dynamic string localization strategy of the form. It allows using potentially auto-generated string resources from .resx files.
+        /// </summary>
+        /// <remarks>
+        /// <note>This property offers a different localization strategy to the <c>Localizable</c> property of the Windows Forms designer, and it is not recommended to use them both together.</note>
+        /// <para>Unlike the <c>Localizable</c> property of the Windows Forms designer, this property affects the localization of the string properties only,
+        /// and basically determines the behavior of the default <see cref="ApplyStringResources"/> implementation. You still can apply non-string resources
+        /// without enabling <c>Localizable</c> by overriding the <see cref="ApplyResources"/> method, whose default implementation just calls <see cref="ApplyStringResources"/>.</para>
+        /// <para>When this property is set to <see cref="DynamicStringLocalization.Disabled"/>, no automatic localization occurs. To localize string resources
+        /// programmatically, you can override the <see cref="ApplyStringResources"/> method.</para>
+        /// <para>The <see cref="ApplyResources"/> method is called automatically when the form is loaded for the first time, but you can explicitly call it whenever
+        /// you need to re-apply the resources (or <see cref="ApplyResources"/> to re-apply the string resources only), for example when the display language changes.</para>
+        /// <para>When the value of this property is not <see cref="DynamicStringLocalization.Disabled"/>, then the base <see cref="ApplyStringResources"/> implementation
+        /// calls the <see cref="LocalizationHelper.ApplyStringResources">LocalizationHelper.ApplyStringResources</see> method, which traverses the controls of the form recursively,
+        /// and invokes the <see cref="LocalizationHelper.LocalizationRequested"/> event for each localizable string property of the controls. If this property is
+        /// set to <see cref="DynamicStringLocalization.Custom"/>, then you must handle the event to provide localization for the controls programmatically.
+        /// When the <see cref="LocalizationHelper.LocalizationRequested"/> event does not handle a request, using <see cref="DynamicStringLocalization.LocalScope"/>
+        /// or <see cref="DynamicStringLocalization.AssemblyScope"/> allow using .resx files placed in the <c>Resources</c> folder of the deployment directory
+        /// that can be automatically generated for the first time when a localization request is made for a culture that has no resource file yet.</para>
+        /// <para>Using <see cref="DynamicStringLocalization.LocalScope"/> or <see cref="DynamicStringLocalization.AssemblyScope"/> works only if the invariant resource set exists for the form or user control.
+        /// Only the properties that have an entry in the invariant resource set will be localized automatically.
+        /// <br/>See also the <see cref="KGySoft.WinForms.DynamicStringLocalization"/> enumeration for details.
+        /// </para>
+        /// </remarks>
+        /// <example>
+        /// TODO:
+        /// - creating the invariant resource set
+        ///   - how to use it as a compiled resource
+        ///   - how to use it as a .resx file
+        /// - Applying RTL
+        /// - how to handle the generated localizations
+        ///   - by a resource editor
+        ///   - from within the application, applying the translations at runtime
+        /// </example>
+        [Category("BaseForm")]
+        [DefaultValue(DynamicStringLocalization.Disabled)]
+        [Description("Specifies the dynamic string localization strategy of the form. LocalScope and AssemblyScope allow using potentially auto-generated .resx files "
+            + "and ensure that localization is automaticall re-applied when LanguageSettings.DisplayLanguage is changed. They need an existing invariant resource set to work. "
+            + "The Custom setting allows handling the LocalizationHelper.LocalizationRequested event to provide localization for the controls programmatically.")]
+        public DynamicStringLocalization DynamicStringLocalization
+        {
+            get => localizationMode;
+            set
+            {
+                if (localizationMode == value)
+                    return;
+                if (!value.IsDefined())
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
+                localizationMode = value;
+                LanguageSettings.DisplayLanguageChanged -= LanguageSettings_DisplayLanguageChanged;
+                if (value == DynamicStringLocalization.Disabled)
+                    return;
+
+                LanguageSettings.DisplayLanguageChanged += LanguageSettings_DisplayLanguageChanged;
+                if (isLoaded)
+                    ApplyStringResources();
+            }
         }
 
         /// <summary>
@@ -276,7 +339,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Gets whether the form has already been loaded. This property is <see langword="true"/> after the <see cref="Form.Load"/> event is raised for the first time,
         /// and remains <see langword="true"/> even if the form is shown as a dialog multiple times or the handle is recreated (e.g. because <see cref="Control.RightToLeft"/> changes).
-        /// Can be useful of we overload the <see cref="Form.OnLoad"/> method and want to avoid executing some initialization more than once.
+        /// Can be useful if we overload the <see cref="Form.OnLoad"/> method and want to avoid executing some initialization more than once.
         /// </summary>
         [Browsable(false)]
         protected bool IsLoaded => isLoaded;
@@ -330,7 +393,9 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region Public methods
+        #region Methods
+
+        #region Public Methods
 
         /// <summary>
         /// Shows the form as an MDI child of the specified caller form.
@@ -363,7 +428,7 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region Protected methods
+        #region Protected Methods
 
         /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
@@ -380,10 +445,33 @@ namespace KGySoft.WinForms.Forms
             isLoaded = true;
             base.OnLoad(e);
 
-#pragma warning disable CS0618 // Type or member is obsolete
             if (!loaded)
+            {
+#pragma warning disable CS0618 // Type or member is obsolete
                 PerformTranslate(this);
 #pragma warning restore CS0618 // Type or member is obsolete
+                ApplyResources();
+            }
+        }
+
+        /// <summary>
+        /// Applies the resources of the form. The default implementation just calls the <see cref="ApplyStringResources">ApplyStringResources</see> method.
+        /// Called when the form is loaded for the first time. In a derived form, this method can be overridden to apply additional (non-string) resources,
+        /// and it can be called whenever the form's resources should be re-applied, e.g. when the display language changes.
+        /// </summary>
+        protected virtual void ApplyResources() => ApplyStringResources();
+
+        /// <summary>
+        /// Applies the string resources of the form. If the <see cref="DynamicStringLocalization"/> property is not set to <see cref="DynamicStringLocalization.Disabled"/>,
+        /// the default implementation just calls the <see cref="LocalizationHelper.ApplyStringResources">LocalizationHelper.ApplyStringResources</see> method.
+        /// In a derived form, this method can be overridden to apply a custom string localization, and it can be called whenever the form's string resources
+        /// should be re-applied, e.g. when the display language changes.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="DynamicStringLocalization"/> property for more details.
+        /// </summary>
+        protected virtual void ApplyStringResources()
+        {
+            if (localizationMode != DynamicStringLocalization.Disabled)
+                LocalizationHelper.ApplyStringResources(this);
         }
 
         /// <inheritdoc />
@@ -408,6 +496,7 @@ namespace KGySoft.WinForms.Forms
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
+            LanguageSettings.DisplayLanguageChanged -= LanguageSettings_DisplayLanguageChanged;
             if (disposing)
             {
                 BaseToolTip.Dispose();
@@ -517,7 +606,7 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region Private methods
+        #region Private Methods
 
         /// <summary>
         /// Suspends the current form instance.
@@ -615,6 +704,14 @@ namespace KGySoft.WinForms.Forms
             if (smallIcon != null && IsHandleCreated)
                 User32.SendMessage(Handle, Constants.WM_SETICON, Constants.ICON_SMALL, smallIcon.Handle);
         }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void LanguageSettings_DisplayLanguageChanged(object? sender, EventArgs e) => ApplyStringResources();
+
+        #endregion
 
         #endregion
     }

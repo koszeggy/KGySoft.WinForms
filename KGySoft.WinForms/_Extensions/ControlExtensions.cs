@@ -18,8 +18,12 @@
 using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
 using System.Windows.Forms;
-
+using KGySoft.Collections;
+using KGySoft.Reflection;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Reflection;
 
@@ -42,6 +46,37 @@ namespace KGySoft.WinForms
         [Obsolete("SelectionPlusItems-related functionality")]public const string AllSelectedText = " (All)";
         [Obsolete("SelectionPlusItems-related functionality")]public const string NoneSelectedText = " (None)";
         [Obsolete("SelectionPlusItems-related functionality")]public const string UndefinedText = " (Undefined)";
+
+        #endregion
+
+        #region Fields
+
+        private static IThreadSafeCacheAccessor<Type, FieldAccessor?>? toolTipCache;
+
+        #endregion
+
+        #region Properties
+
+        private static IThreadSafeCacheAccessor<Type, FieldAccessor?> ToolTipCache
+        {
+            get
+            {
+                if (toolTipCache == null)
+                {
+                    var options = new LockFreeCacheOptions()
+                    {
+                        InitialCapacity = 4,
+                        ThresholdCapacity = 32,
+                        MergeInterval = TimeSpan.FromMilliseconds(100)
+                    };
+
+                    var cache = ThreadSafeCacheFactory.Create<Type, FieldAccessor?>(GetToolTipField, options);
+                    Interlocked.CompareExchange(ref toolTipCache, cache, null);
+                }
+
+                return toolTipCache;
+            }
+        }
 
         #endregion
 
@@ -290,6 +325,45 @@ namespace KGySoft.WinForms
                     e.Graphics.EndContainer(cstate);
                 }
             }
+        }
+
+        /// <summary>
+        /// Tries to find the first <see cref="ToolTip"/> component associated with the control or its parent controls.
+        /// Ignores private self ToolTips of custom controls (e.g. ToolStrip, DataGridView), but returns the first ToolTip of a parent Form or UserControl that is expected to use for child controls anyway.
+        /// </summary>
+        internal static ToolTip? TryGetToolTip(this Control ctrl)
+        {
+            for (Control? c = ctrl; c != null; c = c.Parent)
+            {
+                // checking forms and user controls only; otherwise, using the control only to traverse the hierarchy
+                if (c is not (Form or UserControl))
+                    continue;
+
+                FieldAccessor? toolTipField = ToolTipCache[c.GetType()];
+                if (toolTipField != null)
+                    return toolTipField.Get(c) as ToolTip;
+            }
+
+            return null;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private static FieldAccessor? GetToolTipField(Type type)
+        {
+            Debug.Assert(typeof(UserControl).IsAssignableFrom(type) || typeof(Form).IsAssignableFrom(type));
+
+            // looking for the first toolTip field in the type hierarchy not deeper than the Form/UserControl type, i.e. custom fields of derived forms and user controls only
+            for (Type t = type; t != typeof(Form) && t != typeof(UserControl); t = type.BaseType!)
+            {
+                FieldInfo? fi = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly).FirstOrDefault(f => typeof(ToolTip).IsAssignableFrom(f.FieldType));
+                if (fi != null)
+                    return FieldAccessor.GetAccessor(fi);
+            }
+
+            return null;
         }
 
         #endregion

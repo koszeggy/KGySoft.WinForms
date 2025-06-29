@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Resources;
 using System.Runtime.InteropServices;
 using System.Security;
 
@@ -43,3 +44,5 @@ using System.Security;
 #if !NET35
 [assembly: SecurityRules(SecurityRuleSet.Level1, SkipVerificationInFullTrust = true)]
 #endif
+
+[assembly: NeutralResourcesLanguage("en")]
