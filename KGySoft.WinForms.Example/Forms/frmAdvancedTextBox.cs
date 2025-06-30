@@ -2,7 +2,7 @@
 using System.Windows.Forms;
 using KGySoft.WinForms.Controls;
 
-namespace KGySoft.WinForms.Test.Forms
+namespace KGySoft.WinForms.Example.Forms
 {
     internal partial class frmAdvancedTextBox : ControlsTestBaseForm
     {

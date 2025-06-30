@@ -5,7 +5,7 @@
     <!--<TargetFrameworks>net35;net40;net47;net48;netcoreapp3.0;net7.0-windows</TargetFrameworks>-->
     <TargetFrameworks>net9.0-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <RootNamespace>KGySoft.WinForms.Test</RootNamespace>
+    <RootNamespace>KGySoft.WinForms.Example</RootNamespace>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <UseWindowsForms>true</UseWindowsForms>

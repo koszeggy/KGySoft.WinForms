@@ -25,7 +25,7 @@ using KGySoft.WinForms.Forms;
 
 #endregion
 
-namespace KGySoft.WinForms.Test.Forms
+namespace KGySoft.WinForms.Example.Forms
 {
     internal partial class ControlsTestBaseForm : BaseForm
     {

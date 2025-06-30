@@ -7,7 +7,7 @@ using KGySoft.WinForms.Controls;
 
 #nullable enable
 
-namespace KGySoft.WinForms.Test.Forms
+namespace KGySoft.WinForms.Example.Forms
 {
     internal partial class frmImageViewer : ControlsTestBaseForm
     {

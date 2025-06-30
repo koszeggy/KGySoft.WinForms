@@ -1,4 +1,4 @@
-﻿namespace KGySoft.WinForms.Test.Forms
+﻿namespace KGySoft.WinForms.Example.Forms
 {
     partial class frmAdvancedRadioButton
     {

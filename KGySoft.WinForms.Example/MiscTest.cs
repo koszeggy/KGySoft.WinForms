@@ -4,11 +4,11 @@ using System.Windows.Forms;
 #if !NET35
 using System.Runtime.Versioning;
 #endif
-using KGySoft.WinForms.Test.Forms;
+using KGySoft.WinForms.Example.Forms;
 using Microsoft.Win32;
 
 #nullable enable
-namespace KGySoft.WinForms.Test
+namespace KGySoft.WinForms.Example
 {
     internal partial class MiscTest : ControlsTestBaseForm
     {
