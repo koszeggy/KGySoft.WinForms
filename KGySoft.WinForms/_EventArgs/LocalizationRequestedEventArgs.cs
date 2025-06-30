@@ -29,6 +29,7 @@ namespace KGySoft.WinForms
         #region Fields
 
         private string key;
+        private object? target;
 
         #endregion
 
@@ -39,6 +40,12 @@ namespace KGySoft.WinForms
         /// Can be <see langword="null"/> if the request is not associated with any specific context.
         /// </summary>
         public LocalizationContext? Context { get; }
+
+        /// <summary>
+        /// Gets the target object of the localization request.
+        /// It is usually the control or object whose property is being localized, but can be <see langword="null"/> if the request is not associated with any specific target.
+        /// </summary>
+        public object? Target => target;
 
         /// <summary>
         /// Gets the key of the requested localization string.
@@ -56,9 +63,10 @@ namespace KGySoft.WinForms
 
         #region Constructors
 
-        internal LocalizationRequestedEventArgs(LocalizationContext context)
+        internal LocalizationRequestedEventArgs(LocalizationContext context, object target)
         {
             Context = context;
+            this.target = target;
             key = String.Empty; // actually will be set later
         }
 

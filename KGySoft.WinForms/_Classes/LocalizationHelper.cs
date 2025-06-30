@@ -217,7 +217,7 @@ namespace KGySoft.WinForms
                 return; // shortcut: no localization would be applied
 
             bool hasToolTipText = false;
-            var args = new LocalizationRequestedEventArgs(context);
+            var args = new LocalizationRequestedEventArgs(context, target);
             foreach (PropertyAccessor property in properties)
             {
                 string propertyName = property.MemberInfo.Name;
