@@ -32,7 +32,7 @@
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
             this.panel1 = new System.Windows.Forms.Panel();
-            this.fadingLabelDemo1 = new FadingLabelDemo();
+            this.fadingLabelDemo1 = new KGySoft.WinForms.Example.Controls.FadingLabelDemo();
             this.pnlTestArea.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.panel1.SuspendLayout();
@@ -119,6 +119,6 @@
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Panel panel1;
-        private FadingLabelDemo fadingLabelDemo1;
+        private KGySoft.WinForms.Example.Controls.FadingLabelDemo fadingLabelDemo1;
     }
 }

@@ -118,24 +118,24 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="textBox1.Text" xml:space="preserve">
-    <value>internal enum LabelStates
+    <value>internal enum LabelStatus
 {
     Normal,
     Disabled,
     Hovered
 }
 
-internal class FadingLabelDemo: Label, ISupportsFading&lt;LabelStates&gt;
+internal class FadingLabelDemo: Label, ISupportsFading&lt;LabelStatus&gt;
 {
-    private LabelStates state;
-    private FadingPainter&lt;LabelStates&gt; fadingPainter;
+    private LabelStatus state;
+    private FadingPainter&lt;LabelStatus&gt; fadingPainter;
     private bool isAdjustingPropertyForAppearance;
 
     public FadingLabelDemo()
     {
         FadingAnimationsEnabled = true;
         FadingAnimationDefaultSpeed = 500;
-        fadingPainter = new FadingPainter&lt;LabelStates&gt;(this, LabelStates.Normal);
+        fadingPainter = new FadingPainter&lt;LabelStatus&gt;(this, LabelStatus.Normal);
 
         // Double buffering should be disabled
         SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
@@ -154,7 +154,7 @@ internal class FadingLabelDemo: Label, ISupportsFading&lt;LabelStates&gt;
     // Try to change it in the Property Grid
     public bool FadingAnimationsEnabled { get; set; }
 
-    public LabelStates State
+    public LabelStatus State
     {
         get { return state; }
     }
@@ -162,7 +162,7 @@ internal class FadingLabelDemo: Label, ISupportsFading&lt;LabelStates&gt;
     // Try to change it in the Property Grid
     public int FadingAnimationDefaultSpeed { get; set; }
 
-    public int GetFadingAnimationSpeed(LabelStates stateFrom, LabelStates stateTo)
+    public int GetFadingAnimationSpeed(LabelStatus stateFrom, LabelStatus stateTo)
     {
         return FadingAnimationDefaultSpeed;
     }
@@ -180,7 +180,7 @@ internal class FadingLabelDemo: Label, ISupportsFading&lt;LabelStates&gt;
         fadingPainter.Paint(e);
     }
 
-    public void PaintState(LabelStates state, PaintEventArgs e)
+    public void PaintState(LabelStatus state, PaintEventArgs e)
     {
         // This is how to make a workaround for a property (here Enabled) that would raise Paint again when temporaly switched back
         bool origEnabled = Enabled;
@@ -188,8 +188,8 @@ internal class FadingLabelDemo: Label, ISupportsFading&lt;LabelStates&gt;
 
         try
         {
-            Enabled = state != LabelStates.Disabled;
-            if (state == LabelStates.Hovered)
+            Enabled = state != LabelStatus.Disabled;
+            if (state == LabelStatus.Hovered)
                 e.Graphics.Clear(ControlPaint.LightLight(BackColor));
             else
                 base.OnPaintBackground(e);
@@ -206,14 +206,14 @@ internal class FadingLabelDemo: Label, ISupportsFading&lt;LabelStates&gt;
     protected override void OnEnabledChanged(EventArgs e)
     {
         // Changing enabled will raise a Paint
-        state = Enabled ? LabelStates.Normal : LabelStates.Disabled;
+        state = Enabled ? LabelStatus.Normal : LabelStatus.Disabled;
         base.OnEnabledChanged(e);
     }
 
     protected override void OnMouseEnter(EventArgs e)
     {
         // Invalidating manually to raise a Paint
-        state = LabelStates.Hovered;
+        state = LabelStatus.Hovered;
         base.OnMouseEnter(e);
         Invalidate();
     }
@@ -221,16 +221,16 @@ internal class FadingLabelDemo: Label, ISupportsFading&lt;LabelStates&gt;
     protected override void OnMouseLeave(EventArgs e)
     {
         // Invalidating manually to raise a Paint
-        state = LabelStates.Normal;
+        state = LabelStatus.Normal;
         base.OnMouseLeave(e);
         Invalidate();
     }
 }</value>
   </data>
   <data name="fadingLabelDemo1.Text" xml:space="preserve">
-    <value>This is a simple control derived from Label using an enum type to indicate following states: Normal, Disabled, Hovered.
+    <value>This is a simple control derived from Label using an enum type to indicate following statuses: Normal, Disabled, Hovered.
 
-You can use any type for providing states that has an appropriate Equals method and that holds enough information to paint the control with the required state.</value>
+You can use any type for providing statuses that has an appropriate Equals method and that holds enough information to paint the control with the required state.</value>
   </data>
   <data name="lblInstuction.Text" xml:space="preserve">
     <value>Hover the label below with the mouse to see the fading effect. Click it to see its properties. Set its Enabled to see Enabling/Disabling fading.
