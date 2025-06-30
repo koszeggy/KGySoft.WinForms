@@ -194,10 +194,10 @@
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Label lblAdvancedTextBox;
         private System.Windows.Forms.Label lblSystem;
-        private Controls.AdvancedDateTimePicker advancedDateTimePicker2;
-        private Controls.AdvancedDateTimePicker advancedDateTimePicker1;
+        private KGySoft.WinForms.Controls.AdvancedDateTimePicker advancedDateTimePicker2;
+        private KGySoft.WinForms.Controls.AdvancedDateTimePicker advancedDateTimePicker1;
         private System.Windows.Forms.DateTimePicker dateTimePicker2;
-        private Controls.AdvancedDateTimePicker advancedDateTimePicker3;
+        private KGySoft.WinForms.Controls.AdvancedDateTimePicker advancedDateTimePicker3;
         private System.Windows.Forms.DateTimePicker dateTimePicker3;
         private System.Windows.Forms.Label label3;
     }

@@ -35,14 +35,14 @@
             pnlTestArea.Controls.Add(tableLayoutPanel1);
             pnlTestArea.Controls.Add(groupBox1);
             pnlTestArea.Size = new System.Drawing.Size(545, 450);
-            pnlTestArea.Controls.SetChildIndex(lblInstuction, 0);
+            pnlTestArea.Controls.SetChildIndex(lblInstruction, 0);
             pnlTestArea.Controls.SetChildIndex(groupBox1, 0);
             pnlTestArea.Controls.SetChildIndex(tableLayoutPanel1, 0);
             // 
             // lblInstuction
             // 
-            lblInstuction.Size = new System.Drawing.Size(545, 68);
-            lblInstuction.Text = "ImageViewer supports custom zooming (even by the mouse), as well as toggling smooth zooming.\r\n\r\nUse the predefined options or set the Image property to set an image.";
+            lblInstruction.Size = new System.Drawing.Size(545, 68);
+            lblInstruction.Text = "ImageViewer supports custom zooming (even by the mouse), as well as toggling smooth zooming.\r\n\r\nUse the predefined options or set the Image property to set an image.";
             // 
             // groupBox1
             // 
@@ -176,12 +176,12 @@
 
         private System.Windows.Forms.TableLayoutPanel tableLayoutPanel1;
         private System.Windows.Forms.GroupBox groupBox1;
-        private Controls.ImageViewer imageViewer;
+        private KGySoft.WinForms.Controls.ImageViewer imageViewer;
         private System.Windows.Forms.PictureBox pictureBox;
-        private Controls.AdvancedLabel advancedLabel2;
-        private Controls.AdvancedLabel advancedLabel1;
-        private Controls.AdvancedRadioButton rbMetafile;
-        private Controls.AdvancedRadioButton rbLargeBitmap;
-        private Controls.AdvancedRadioButton rbSmallBitmap;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel2;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel1;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton rbMetafile;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton rbLargeBitmap;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton rbSmallBitmap;
     }
 }

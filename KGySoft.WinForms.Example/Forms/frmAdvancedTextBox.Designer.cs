@@ -310,11 +310,11 @@
         #endregion
 
         private System.Windows.Forms.GroupBox gbTextBox;
-        private Controls.AdvancedTextBox advancedTextBox3;
+        private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox3;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.Label label4;
-        private Controls.AdvancedTextBox advancedTextBox2;
-        private Controls.AdvancedTextBox advancedTextBox1;
+        private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox2;
+        private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Label label2;
@@ -325,9 +325,9 @@
         private System.Windows.Forms.Label label5;
         private System.Windows.Forms.Label label3;
         private System.Windows.Forms.Label label6;
-        private Controls.DecimalTextBox decimalTextBox1;
+        private KGySoft.WinForms.Controls.DecimalTextBox decimalTextBox1;
         private System.Windows.Forms.Label label9;
-        private Controls.AdvancedTextBox advancedTextBox4;
+        private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox4;
         private System.Windows.Forms.TextBox textBox4;
         private System.Windows.Forms.Label label8;
         private System.Windows.Forms.TextBox txtValue;

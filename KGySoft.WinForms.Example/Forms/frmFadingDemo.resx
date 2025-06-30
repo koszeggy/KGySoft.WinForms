@@ -232,7 +232,7 @@ internal class FadingLabelDemo: Label, ISupportsFading&lt;LabelStatus&gt;
 
 You can use any type for providing statuses that has an appropriate Equals method and that holds enough information to paint the control with the required state.</value>
   </data>
-  <data name="lblInstuction.Text" xml:space="preserve">
+  <data name="lblInstruction.Text" xml:space="preserve">
     <value>Hover the label below with the mouse to see the fading effect. Click it to see its properties. Set its Enabled to see Enabling/Disabling fading.
 
 Fading works in Windows Vista and above with enabled themes (non-Classic Style). See the source code below in the text box.</value>

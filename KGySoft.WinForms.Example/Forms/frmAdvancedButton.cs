@@ -5,7 +5,7 @@
         public frmAdvancedButton()
         {
             InitializeComponent();
-            lblInstuction.SendToBack();
+            lblInstruction.SendToBack();
         }
     }
 }

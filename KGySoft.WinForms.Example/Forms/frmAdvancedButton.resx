@@ -152,7 +152,7 @@
         ZBkCAAAAAElFTkSuQmCC
 </value>
   </data>
-  <data name="lblInstuction.Text" xml:space="preserve">
+  <data name="lblInstruction.Text" xml:space="preserve">
     <value>AdvancedButton supports images also with System FlatStyle (on pre-Vista Windows FlatStyle atomatically changes internally to Standard if button has an image).
 Additionally, AdvancedButton supports IsElevated mode (shield icon), different RenderingQuality modes by both GDI and GDI+ (UseCompatibleTextRendering property) renderers.
 In Windows Vista and above AdvancedButton supports fading animations in every FlatStyle modes. Animations can be applied not only for standard animations such as defaulting or disabling but also for any visual change.</value>

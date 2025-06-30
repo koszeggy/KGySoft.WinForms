@@ -58,15 +58,15 @@
             this.pnlTestArea.Controls.Add(this.groupBox2);
             this.pnlTestArea.Margin = new System.Windows.Forms.Padding(4);
             this.pnlTestArea.Size = new System.Drawing.Size(623, 693);
-            this.pnlTestArea.Controls.SetChildIndex(this.lblInstuction, 0);
+            this.pnlTestArea.Controls.SetChildIndex(this.lblInstruction, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox2, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.gbCustomBackground, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox1, 0);
             // 
             // lblInstuction
             // 
-            this.lblInstuction.Size = new System.Drawing.Size(623, 79);
-            this.lblInstuction.Text = resources.GetString("lblInstuction.Text");
+            this.lblInstruction.Size = new System.Drawing.Size(623, 79);
+            this.lblInstruction.Text = resources.GetString("lblInstuction.Text");
             // 
             // gbCustomBackground
             // 

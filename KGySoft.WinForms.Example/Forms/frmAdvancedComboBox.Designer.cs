@@ -281,22 +281,22 @@
         #endregion
         private System.Windows.Forms.ComboBox comboBox1;
         private System.Windows.Forms.GroupBox gbComboBox;
-        private Controls.AdvancedComboBox advancedComboBox1;
+        private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox1;
         private System.Windows.Forms.Label label7;
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.Label label5;
-        private Controls.AdvancedComboBox advancedComboBox3;
+        private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox3;
         private System.Windows.Forms.Label label2;
         private System.Windows.Forms.ComboBox comboBox3;
-        private Controls.AdvancedComboBox advancedComboBox2;
+        private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox2;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.ComboBox comboBox2;
-        private Controls.AdvancedComboBox advancedComboBox4;
-        private Controls.AdvancedComboBox advancedComboBox5;
-        private Controls.AdvancedComboBox advancedComboBox6;
+        private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox4;
+        private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox5;
+        private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox6;
         private System.Windows.Forms.Label label3;
-        private Controls.AdvancedComboBox advancedComboBox7;
-        private Controls.AdvancedComboBox advancedComboBox8;
+        private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox7;
+        private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox8;
         private System.Windows.Forms.Label label4;
     }
 }

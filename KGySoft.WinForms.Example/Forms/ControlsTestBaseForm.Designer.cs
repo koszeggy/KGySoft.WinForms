@@ -30,7 +30,7 @@
         {
             this.components = new System.ComponentModel.Container();
             this.pnlTestArea = new System.Windows.Forms.Panel();
-            this.lblInstuction = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.lblInstruction = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.cmsGridMenu = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.miResetValue = new System.Windows.Forms.ToolStripMenuItem();
             this.splitter1 = new System.Windows.Forms.Splitter();
@@ -44,7 +44,7 @@
             // 
             // pnlTestArea
             // 
-            this.pnlTestArea.Controls.Add(this.lblInstuction);
+            this.pnlTestArea.Controls.Add(this.lblInstruction);
             this.pnlTestArea.Dock = System.Windows.Forms.DockStyle.Fill;
             this.pnlTestArea.Location = new System.Drawing.Point(0, 0);
             this.pnlTestArea.Name = "pnlTestArea";
@@ -53,18 +53,18 @@
             // 
             // lblInstuction
             // 
-            this.lblInstuction.AutoSize = true;
-            this.lblInstuction.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Flat;
-            this.lblInstuction.Dock = System.Windows.Forms.DockStyle.Top;
-            this.lblInstuction.EnabledBackColor = System.Drawing.SystemColors.Window;
-            this.lblInstuction.EnabledForeColor = System.Drawing.SystemColors.WindowText;
-            this.lblInstuction.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblInstuction.Location = new System.Drawing.Point(0, 0);
-            this.lblInstuction.Name = "lblInstuction";
-            this.lblInstuction.Padding = new System.Windows.Forms.Padding(5);
-            this.lblInstuction.Size = new System.Drawing.Size(214, 42);
-            this.lblInstuction.TabIndex = 0;
-            this.lblInstuction.Text = "Click the items to see their properties";
+            this.lblInstruction.AutoSize = true;
+            this.lblInstruction.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Flat;
+            this.lblInstruction.Dock = System.Windows.Forms.DockStyle.Top;
+            this.lblInstruction.EnabledBackColor = System.Drawing.SystemColors.Window;
+            this.lblInstruction.EnabledForeColor = System.Drawing.SystemColors.WindowText;
+            this.lblInstruction.Font = new System.Drawing.Font("Arial", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblInstruction.Location = new System.Drawing.Point(0, 0);
+            this.lblInstruction.Name = "lblInstruction";
+            this.lblInstruction.Padding = new System.Windows.Forms.Padding(5);
+            this.lblInstruction.Size = new System.Drawing.Size(214, 42);
+            this.lblInstruction.TabIndex = 0;
+            this.lblInstruction.Text = "Click the items to see their properties";
             // 
             // cmsGridMenu
             // 
@@ -144,11 +144,11 @@
         #endregion
         protected System.Windows.Forms.Panel pnlTestArea;
         private System.Windows.Forms.Splitter splitter1;
-        protected KGySoft.WinForms.Controls.AdvancedLabel lblInstuction;
+        protected KGySoft.WinForms.Controls.AdvancedLabel lblInstruction;
         private System.Windows.Forms.ContextMenuStrip cmsGridMenu;
         private System.Windows.Forms.ToolStripMenuItem miResetValue;
         private System.Windows.Forms.Panel pnlProperties;
         private System.Windows.Forms.PropertyGrid grdProperties;
-        private Controls.AdvancedLabel lblSelection;
+        private KGySoft.WinForms.Controls.AdvancedLabel lblSelection;
     }
 }

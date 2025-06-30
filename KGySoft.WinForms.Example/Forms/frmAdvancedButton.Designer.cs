@@ -68,8 +68,8 @@
             // 
             // lblInstuction
             // 
-            this.lblInstuction.Size = new System.Drawing.Size(407, 144);
-            this.lblInstuction.Text = resources.GetString("lblInstuction.Text");
+            this.lblInstruction.Size = new System.Drawing.Size(407, 144);
+            this.lblInstruction.Text = resources.GetString("lblInstuction.Text");
             // 
             // groupBox1
             // 

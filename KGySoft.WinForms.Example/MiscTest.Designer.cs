@@ -439,38 +439,38 @@
 
         #endregion
 
-        private Controls.AdvancedPanel advancedPanel1;
-        private Controls.AdvancedButton advancedButton1;
-        private Controls.CommandLinkButton commandLinkButton1;
+        private KGySoft.WinForms.Controls.AdvancedPanel advancedPanel1;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton1;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton1;
         private System.Windows.Forms.CheckBox checkBox1;
-        private Controls.AdvancedCheckBox advancedCheckBox1;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox1;
         private System.Windows.Forms.Label label1;
-        private Controls.AdvancedLabel advancedLabel1;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel1;
         private System.Windows.Forms.TextBox textBox1;
         private System.Windows.Forms.Button button1;
-        private Controls.AdvancedTextBox advancedTextBox1;
+        private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox1;
         private System.Windows.Forms.TextBox textBox2;
-        private Controls.AdvancedRadioButton advancedRadioButton1;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton1;
         private System.Windows.Forms.RadioButton radioButton1;
-        private Controls.AdvancedTextBox advancedTextBox2;
+        private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox2;
         private System.Windows.Forms.TextBox textBox3;
         private System.Windows.Forms.Label label2;
-        private Controls.AdvancedLabel advancedLabel2;
+        private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel2;
         private System.Windows.Forms.CheckBox checkBox2;
-        private Controls.AdvancedCheckBox advancedCheckBox2;
-        private Controls.AdvancedTextBox advancedTextBox3;
+        private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox2;
+        private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox3;
         private System.Windows.Forms.TextBox textBox4;
-        private Controls.AdvancedRadioButton advancedRadioButton2;
+        private KGySoft.WinForms.Controls.AdvancedRadioButton advancedRadioButton2;
         private System.Windows.Forms.RadioButton radioButton2;
-        private Controls.CommandLinkButton commandLinkButton2;
+        private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton2;
         private System.Windows.Forms.Button button2;
-        private Controls.AdvancedButton advancedButton2;
-        private Controls.AdvancedComboBox advancedComboBox2;
-        private Controls.AdvancedComboBox advancedComboBox1;
+        private KGySoft.WinForms.Controls.AdvancedButton advancedButton2;
+        private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox2;
+        private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox1;
         private System.Windows.Forms.ComboBox comboBox2;
         private System.Windows.Forms.ComboBox comboBox1;
-        private Controls.AdvancedDateTimePicker advancedDateTimePicker2;
-        private Controls.AdvancedDateTimePicker advancedDateTimePicker1;
+        private KGySoft.WinForms.Controls.AdvancedDateTimePicker advancedDateTimePicker2;
+        private KGySoft.WinForms.Controls.AdvancedDateTimePicker advancedDateTimePicker1;
         private System.Windows.Forms.DateTimePicker dateTimePicker2;
         private System.Windows.Forms.DateTimePicker dateTimePicker1;
     }

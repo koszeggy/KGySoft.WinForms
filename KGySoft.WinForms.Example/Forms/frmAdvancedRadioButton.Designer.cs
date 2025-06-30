@@ -67,14 +67,14 @@
             this.pnlTestArea.Controls.Add(this.ucCaptionedContainer1);
             this.pnlTestArea.Controls.Add(this.groupBox1);
             this.pnlTestArea.Size = new System.Drawing.Size(403, 436);
-            this.pnlTestArea.Controls.SetChildIndex(this.lblInstuction, 0);
+            this.pnlTestArea.Controls.SetChildIndex(this.lblInstruction, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox1, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.ucCaptionedContainer1, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox4, 0);
             // 
             // lblInstuction
             // 
-            this.lblInstuction.Size = new System.Drawing.Size(403, 15);
+            this.lblInstruction.Size = new System.Drawing.Size(403, 15);
             // 
             // radioButton1
             // 

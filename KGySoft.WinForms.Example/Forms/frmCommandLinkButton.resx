@@ -155,7 +155,7 @@
   <data name="commandLinkButton8.Description" xml:space="preserve">
     <value>This button is rendered in compatibility mode. This allows some customization such as different colors, fonts, text and image alignments, RightToLeft mode and animated custom images. In case of classic Windows themes equivalent with Popup mode.</value>
   </data>
-  <data name="lblInstuction.Text" xml:space="preserve">
+  <data name="lblInstruction.Text" xml:space="preserve">
     <value>CommandLinkButton is rendered natively in Windows Vista and above if FlatStyle is System.
 Other FlatStyle modes are fully supported, too.
 Supports AutoSize, Image in every FlatStyle mode.

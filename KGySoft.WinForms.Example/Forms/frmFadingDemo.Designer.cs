@@ -43,14 +43,14 @@
             this.pnlTestArea.Controls.Add(this.groupBox1);
             this.pnlTestArea.Controls.Add(this.panel1);
             this.pnlTestArea.Size = new System.Drawing.Size(512, 534);
-            this.pnlTestArea.Controls.SetChildIndex(this.lblInstuction, 0);
+            this.pnlTestArea.Controls.SetChildIndex(this.lblInstruction, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.panel1, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox1, 0);
             // 
             // lblInstuction
             // 
-            this.lblInstuction.Size = new System.Drawing.Size(512, 67);
-            this.lblInstuction.Text = resources.GetString("lblInstuction.Text");
+            this.lblInstruction.Size = new System.Drawing.Size(512, 67);
+            this.lblInstruction.Text = resources.GetString("lblInstuction.Text");
             // 
             // groupBox1
             // 
