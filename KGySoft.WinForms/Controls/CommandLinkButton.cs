@@ -431,6 +431,7 @@ namespace KGySoft.WinForms.Controls
         [Category("CommandLinkButton")]
         [Description("Gets or sets description text for the command link button.")]
         [Editor(typeof(MultilineStringEditor), typeof(UITypeEditor))]
+        [Localizable(true)]
         public string? Description
         {
             get => description;
