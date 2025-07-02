@@ -186,9 +186,14 @@ namespace KGySoft.WinForms
                 default:
                     foreach (Control child in control.Controls)
                     {
-                        // TODO: if child is BaseUserControl with local/assembly scope, then it should override the parent's context
+                        var childContext = context;
+                        if (child is BaseUserControl baseUserControl && (baseUserControl.DynamicStringLocalization == DynamicStringLocalization.LocalScope
+                            || baseUserControl.DynamicStringLocalization is DynamicStringLocalization.AssemblyScope && context.LocalizationScope != DynamicStringLocalization.AssemblyScope))
+                        {
+                            childContext = new LocalizationContext(child, context.LanguageHint);
+                        }
 
-                        ApplyStringResources(child, context);
+                        ApplyStringResources(child, childContext);
                     }
 
                     break;

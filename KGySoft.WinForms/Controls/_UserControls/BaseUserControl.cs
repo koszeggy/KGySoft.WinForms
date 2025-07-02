@@ -52,6 +52,21 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Events
+
+        /// <summary>
+        /// Occurs when the <see cref="DynamicStringLocalization"/> property changes.
+        /// </summary>
+        [Category("BaseUserControl")]
+        [Description("Occurs when the DynamicStringLocalization property changes.")]
+        public event EventHandler? DynamicStringLocalizationChanged
+        {
+            add => Events.AddHandler(nameof(DynamicStringLocalization), value);
+            remove => Events.RemoveHandler(nameof(DynamicStringLocalization), value);
+        }
+
+        #endregion
+
         #region Properties
 
         #region Public Properties
@@ -71,7 +86,7 @@ namespace KGySoft.WinForms.Controls
         [Category("BaseUserControl")]
         [DefaultValue(DynamicStringLocalization.Disabled)]
         [Description("Specifies the dynamic string localization strategy of the control. LocalScope and AssemblyScope allow using potentially auto-generated .resx files "
-            + "and ensure that localization is automaticall re-applied when LanguageSettings.DisplayLanguage is changed. They need an existing invariant resource set to work. "
+            + "and ensure that localization is automatically re-applied when LanguageSettings.DisplayLanguage is changed. They need an existing invariant resource set to work. "
             + "The Custom setting allows handling the LocalizationHelper.LocalizationRequested event to provide localization for the controls programmatically.")]
         public DynamicStringLocalization DynamicStringLocalization
         {
@@ -83,8 +98,9 @@ namespace KGySoft.WinForms.Controls
                 if (!value.IsDefined())
                     throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
                 localizationMode = value;
+                OnDynamicStringLocalizationChanged(EventArgs.Empty);
                 LanguageSettings.DisplayLanguageChanged -= LanguageSettings_DisplayLanguageChanged;
-                if (value == DynamicStringLocalization.Disabled)
+                if (IsDesignMode || value == DynamicStringLocalization.Disabled)
                     return;
 
                 LanguageSettings.DisplayLanguageChanged += LanguageSettings_DisplayLanguageChanged;
@@ -165,11 +181,22 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
+        /// Raises the <see cref="DynamicStringLocalizationChanged"/> event.
+        /// </summary>
+        /// <param name="e">Contains the arguments of the event.</param>
+        protected virtual void OnDynamicStringLocalizationChanged(EventArgs e)
+            => Events.GetHandler<EventHandler>(nameof(DynamicStringLocalization))?.Invoke(this, e);
+
+        /// <summary>
         /// Applies the resources of the user control. The default implementation just calls the <see cref="ApplyStringResources">ApplyStringResources</see> method.
         /// Called when the user control is loaded for the first time. In a derived control, this method can be overridden to apply additional (non-string) resources,
         /// and it can be called whenever the resources should be re-applied, e.g. when the display language changes.
         /// </summary>
-        protected virtual void ApplyResources() => ApplyStringResources();
+        protected virtual void ApplyResources()
+        {
+            if (!IsDesignMode)
+                ApplyStringResources();
+        }
 
         /// <summary>
         /// Applies the string resources of the user control. If the <see cref="DynamicStringLocalization"/> property is not set to <see cref="DynamicStringLocalization.Disabled"/>,
@@ -180,7 +207,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected virtual void ApplyStringResources()
         {
-            if (localizationMode != DynamicStringLocalization.Disabled && !HasLocalizedParent)
+            if (localizationMode != DynamicStringLocalization.Disabled && !IsDesignMode && !HasLocalizedParent)
                 LocalizationHelper.ApplyStringResources(this);
         }
 

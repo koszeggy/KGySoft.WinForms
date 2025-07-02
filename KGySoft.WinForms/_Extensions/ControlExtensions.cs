@@ -356,7 +356,7 @@ namespace KGySoft.WinForms
             Debug.Assert(typeof(UserControl).IsAssignableFrom(type) || typeof(Form).IsAssignableFrom(type));
 
             // looking for the first toolTip field in the type hierarchy not deeper than the Form/UserControl type, i.e. custom fields of derived forms and user controls only
-            for (Type t = type; t != typeof(Form) && t != typeof(UserControl); t = type.BaseType!)
+            for (Type t = type; t != typeof(Form) && t != typeof(UserControl); t = t.BaseType!)
             {
                 FieldInfo? fi = t.GetFields(BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.DeclaredOnly).FirstOrDefault(f => typeof(ToolTip).IsAssignableFrom(f.FieldType));
                 if (fi != null)

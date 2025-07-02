@@ -200,7 +200,7 @@
   + New DeviceScale property
   + New DeviceScaleChanged event: raised when the DPI changes and the application is per-monitor DPI aware.
   + New IsLoaded property
-  + New DynamicStringLocalization property
+  + New DynamicStringLocalization property and DynamicStringLocalizationChanged event
   + New ApplyResources and ApplyStringResources methods
   + Scaling the small icon of the form properly when the DPI changes.
 ! DialogBaseForm class:
