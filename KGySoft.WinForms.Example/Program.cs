@@ -28,17 +28,11 @@ namespace KGySoft.WinForms.Example
                 dlg.Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.UseCommandLinks;
                 dlg.Buttons.Add(new TaskDialogButton("btnControlsTest", "Controls Test"));
                 dlg.Buttons.Add(new TaskDialogButton("btnTaskDialogTest", "TaskDialog Test"));
+                dlg.Buttons.Add(new TaskDialogButton("btnMiscTests", "Misc Tests"));
 
                 dlg.Buttons["btnControlsTest"].Click += (sender, args) => ShowControlsTestMenu(((TaskDialogButton)sender).Parent);
                 dlg.Buttons["btnTaskDialogTest"].Click += (sender, args) => ShowTaskDialogTestMenu(((TaskDialogButton)sender).Parent);
-
-                //var btnMisc = new TaskDialogButton("Misc Tests");
-                //btnMisc.Click += (sender, args) =>
-                //{
-                //    using var frm = new MiscTest();
-                //    frm.ShowDialog();
-                //};
-                //dlg.Buttons.Add(btnMisc);
+                dlg.Buttons["btnMiscTests"].Click += (sender, args) => ShowMiscTestsMenu(((TaskDialogButton)sender).Parent);
 
                 dlg.Show();
             }
@@ -61,7 +55,6 @@ namespace KGySoft.WinForms.Example
                 td.Buttons.Add(new TaskDialogButton("AdvancedTextBox"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedComboBox"));
                 td.Buttons.Add(new TaskDialogButton("AdvancedDateTimePicker"));
-                td.Buttons.Add(new TaskDialogButton("FadingDemo", "Custom fading control demo"));
 
                 foreach (TaskDialogButton button in td.Buttons)
                 {
@@ -130,6 +123,40 @@ namespace KGySoft.WinForms.Example
 
                 dlg.Show(parent);
             }
+        }
+
+        private static void ShowMiscTestsMenu(TaskDialog parent)
+        {
+            using TaskDialog td = new TaskDialog();
+            td.Options = TaskDialogOptions.UseCommandLinks;
+            td.StandardButtons = TaskDialogStandardButtonFlags.Cancel;
+
+            td.Buttons.Add(new TaskDialogButton("FadingDemo", "Custom fading control demo"));
+            td.Buttons.Add(new TaskDialogButton("LocalizationExample", "Dynamic localization example"));
+
+            foreach (TaskDialogButton button in td.Buttons)
+            {
+                string name = button.Name;
+                if (String.IsNullOrEmpty(name))
+                    name = button.Text;
+
+                button.Click += (sender, args) =>
+                {
+                    using ControlsTestBaseForm frm = (ControlsTestBaseForm)Reflector.CreateInstance(Reflector.ResolveType($"{typeof(Program).Namespace}.Forms.frm{name}"));
+                    frm.ShowDialog();
+                };
+            }
+
+            //var btnMisc = new TaskDialogButton("Misc Tests");
+            //btnMisc.Click += (sender, args) =>
+            //{
+            //    using var frm = new MiscTest();
+            //    frm.ShowDialog();
+            //};
+            //td.Buttons.Add(btnMisc);
+
+            td.Show(parent);
+
         }
 
         private static void btnOptionsTest_Click(object sender, HandledEventArgs e)

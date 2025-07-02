@@ -23,18 +23,19 @@
     <ProjectReference Include="..\KGySoft.WinForms\KGySoft.WinForms.csproj" />
   </ItemGroup>
 
-  <!--<ItemGroup>
-    <Compile Update="Properties\Resources.Designer.cs">
-      <DesignTime>True</DesignTime>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-  </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Update="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    <EmbeddedResource Update="Application.StringResources.resx">
+      <LogicalName>KGySoft.WinForms.Example.StringResources.resources</LogicalName>
+      <Generator></Generator>
     </EmbeddedResource>
-  </ItemGroup>-->
+    <EmbeddedResource Update="Controls\LocalizableControlDemo.StringResources.resx">
+      <LogicalName>KGySoft.WinForms.Example.Controls.LocalizableControlDemo.StringResources.resources</LogicalName>
+      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Forms\frmLocalizationExample.StringResources.resx">
+      <LogicalName>KGySoft.WinForms.Example.Forms.frmLocalizationExample.StringResources.resources</LogicalName>
+      <Generator></Generator>
+    </EmbeddedResource>
+  </ItemGroup>
 
 </Project>
