@@ -63,7 +63,7 @@ namespace KGySoft.WinForms.Forms
             set
             {
                 okCancelButtons.CancelButtonVisible = value;
-                CancelButton = value ? okCancelButtons.CancelButton : null;
+                base.CancelButton = value ? okCancelButtons.CancelButton : null;
             }
         }
 
@@ -84,17 +84,29 @@ namespace KGySoft.WinForms.Forms
 
         #region Protected Properties
 
+        /// <summary>Gets the OK button.</summary>
+        [Browsable(false)]
+        protected Button OKButton => okCancelButtons.OKButton;
+
+        /// <summary>Gets the Cancel button.</summary>
+        [Browsable(false)]
+        protected new Button CancelButton => okCancelButtons.CancelButton;
+
+        /// <summary>Gets the Apply button.</summary>
+        [Browsable(false)]
+        protected Button ApplyButton => okCancelButtons.ApplyButton;
+
         // ReSharper disable InconsistentNaming - Justification: These were protected field names, they are kept for backward compatibility.
 
         /// <summary>Gets the OK button.</summary>
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        protected Button btnOK => okCancelButtons.OKButton;
+        protected Button btnOK => OKButton;
 
-        /// <summary>Gets the OK button.</summary>
+        /// <summary>Gets the Cancel button.</summary>
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
-        protected Button btnCancel => okCancelButtons.CancelButton;
+        protected Button btnCancel => CancelButton;
 
         /// <summary>Gets buttons panel.</summary>
         [Browsable(false)]
@@ -116,7 +128,7 @@ namespace KGySoft.WinForms.Forms
         {
             InitializeComponent();
             AcceptButton = okCancelButtons.OKButton;
-            CancelButton = okCancelButtons.CancelButton;
+            base.CancelButton = okCancelButtons.CancelButton;
             okCancelButtons.OKButton.Click += btnOK_Click;
             okCancelButtons.CancelButton.Click += btnCancel_Click;
         }
@@ -172,9 +184,9 @@ namespace KGySoft.WinForms.Forms
 
         #region Event handlers
 
-        private void btnOK_Click(object sender, EventArgs e) => OKPressed();
+        private void btnOK_Click(object? sender, EventArgs e) => OKPressed();
 
-        private void btnCancel_Click(object sender, EventArgs e) => CancelPressed();
+        private void btnCancel_Click(object? sender, EventArgs e) => CancelPressed();
 
         #endregion
 
