@@ -167,6 +167,9 @@
   <data name="TaskDialog_PropertyChangeFormat" xml:space="preserve">
     <value>Changing property '{0}' is not allowed while the dialog is displayed.</value>
   </data>
+  <data name="Localization_InvalidResourceFormat" xml:space="preserve">
+    <value>Localization of key {0} failed because the format string {1} arguments: {2}</value>
+  </data>
   <data name="TaskDialogStandardButtonFlags.OK" xml:space="preserve">
     <value>&amp;OK</value>
   </data>

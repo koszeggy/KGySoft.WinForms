@@ -182,6 +182,13 @@ namespace KGySoft.WinForms
 
         #endregion
 
+        #region Localization
+
+        /// <summary>Localization of key {0} failed because the format string {1} arguments: {2}</summary>
+        internal static string LocalizationInvalidResource(string key, int count, string format) => Get("Localization_InvalidResourceFormat", key, count, format);
+
+        #endregion
+
         #endregion
 
         #region Private Methods
