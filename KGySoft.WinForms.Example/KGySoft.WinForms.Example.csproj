@@ -11,6 +11,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <OutputType>WinExe</OutputType>
     <ApplicationManifest>app.manifest</ApplicationManifest>
+    <Nullable>Enable</Nullable>
 
     <NoWarn>$(NoWarn);WFO1000</NoWarn>
   </PropertyGroup>
@@ -26,15 +27,16 @@
   <ItemGroup>
     <EmbeddedResource Update="Application.StringResources.resx">
       <LogicalName>KGySoft.WinForms.Example.StringResources.resources</LogicalName>
-      <Generator></Generator>
     </EmbeddedResource>
     <EmbeddedResource Update="Controls\LocalizableControlDemo.StringResources.resx">
       <LogicalName>KGySoft.WinForms.Example.Controls.LocalizableControlDemo.StringResources.resources</LogicalName>
-      <Generator></Generator>
+    </EmbeddedResource>
+    <EmbeddedResource Update="Forms\frmEditResources.StringResources.resx">
+      <SubType>Designer</SubType>
+      <LogicalName>KGySoft.WinForms.Example.Forms.frmEditResources.StringResources.resources</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Update="Forms\frmLocalizationExample.StringResources.resx">
       <LogicalName>KGySoft.WinForms.Example.Forms.frmLocalizationExample.StringResources.resources</LogicalName>
-      <Generator></Generator>
     </EmbeddedResource>
   </ItemGroup>
 

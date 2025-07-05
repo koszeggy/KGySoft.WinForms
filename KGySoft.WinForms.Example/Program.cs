@@ -23,6 +23,7 @@ namespace KGySoft.WinForms.Example
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
             using (TaskDialog dlg = new TaskDialog())
             {
                 dlg.Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.UseCommandLinks;

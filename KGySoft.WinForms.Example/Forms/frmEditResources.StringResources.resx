@@ -117,68 +117,45 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="btnLocalizableControl.Text" xml:space="preserve">
-    <value>DynamicStringLocalization = Disabled (or Disabled)</value>
-  </data>
-  <data name="btnLocalizableControl.ToolTipText" xml:space="preserve">
-    <value>When BaseUserControl.DynamicStringLocalization is Disabled or Custom, it can inherit the Local/Assembly scope of a parent user control or form.
-
-In this case, the form has a LocalScope localization setting, whereas the user control has no scoped dynamic string localization, so its texts are taken from the form's resource sets, if present.</value>
-  </data>
-  <data name="btnLocalizableControl.Description" xml:space="preserve">
-    <value>This user control uses no scoped localization, so it inherits the LocalScope settings of the parent form, using form-level resources.</value>
-  </data>
-  <data name="lblInstruction.Text" xml:space="preserve">
-    <value>DynamicStringLocalization is set to LocalScope for this form, meaning, every localizable text element is applied dynamically from a form-specific resource set, inlcuding this text. If you see a [T] prefix before the text, your Windows locale uses a non-English UI culture, and an untranslated resource set has just been generated for that language.
-
-You see 3 user controls below, all have different DynamicStringLocalization settings. Feel free to change them after clicking their blank border area and see the changes.
-
-Also, feel free to edit the resources by the Edit Resources button. You can override even the compiled English resources, and apply the changes at runtime.</value>
-  </data>
-  <data name="lblLocalizableControlCaption.Text" xml:space="preserve">
-    <value>This is the Form-level string resource for lblLocalizableControlCaption.Text</value>
-  </data>
-  <data name="lblLanguage.Text" xml:space="preserve">
-    <value>Language:</value>
-  </data>
-  <data name="cmbLanguage.ToolTipText" xml:space="preserve">
-    <value>If you select a language that has no localization yet, the new resources are automatically generated in the Resources folder of the built application as .resx files.
-
-Untranslated entries are copied from the invariant resource set and get a [T] prefix.
-
-The new resource sets are saved on language change or when you exit the application, and can be saved also on demand.</value>
-  </data>
-  <data name="frmLocalizationExample.Text" xml:space="preserve">
-    <value>Localization Example</value>
-  </data>
-  <data name="chbCustom.Text" xml:space="preserve">
-    <value>Custom Override</value>
-  </data>
-  <data name="chbFilter.Text" xml:space="preserve">
-    <value>Existing Only</value>
-  </data>
-  <data name="chbFilter.ToolTipText" xml:space="preserve">
-    <value>When checked, the Languages selector shows the languages with existing localizations only.
-Uncheck to allow generating localization for a new language.</value>
-  </data>
-  <data name="chbCustom.ToolTipText" xml:space="preserve">
-    <value>Check to subscribe LocalizationHelper.LocalizationRequested, and provide a custom localization programmatically.
-
-This example implementation just returns some information of the localization context.
-
-Note that enabling this option provides texts for all localizable string properties of the form.
-Disabling this option will not clear the additional texts that have no resource entries (e.g. tool tip texts).</value>
-  </data>
-  <data name="btnEdit.Text" xml:space="preserve">
-    <value>Edit Resources...</value>
-  </data>
-  <data name="btnEdit.ToolTipText" xml:space="preserve">
-    <value>Edits the resources of the selected language in a new form.</value>
-  </data>
   <data name="btnApply.Text" xml:space="preserve">
-    <value>Apply</value>
+    <value>&amp;Apply</value>
   </data>
   <data name="btnApply.ToolTipText" xml:space="preserve">
-    <value>Click to apply the selected language</value>
+    <value>Sets the edited language as the display language, and applies the changes without closing the dialog.</value>
+  </data>
+  <data name="btnCancel.Text" xml:space="preserve">
+    <value>&amp;Cancel</value>
+  </data>
+  <data name="btnOK.Text" xml:space="preserve">
+    <value>&amp;Save &amp;&amp; Exit</value>
+  </data>
+  <data name="btnOK.ToolTipText" xml:space="preserve">
+    <value>Saves the edited resources and closes the dialog. Applies the changes only if the edited language is the same as the display language.</value>
+  </data>
+  <data name="btnCancel.ToolTipText" xml:space="preserve">
+    <value>Discards the changes. If the display language was edited, resets the lastly saved resources.</value>
+  </data>
+  <data name="EditResources.Text.Format" xml:space="preserve">
+    <value>Editing Resources - [{0}/{1}]</value>
+    <comment>This resource is not a property. It is applied manually in the overridden ApplyStringResources of the form by calling LocalizationHelper.GetString</comment>
+  </data>
+  <data name="gbResourceSetName.Text" xml:space="preserve">
+    <value>Resource Entries</value>
+  </data>
+  <data name="gbResourceEntries.Text" xml:space="preserve">
+    <value>Resource Set Name</value>
+  </data>
+  <data name="colResourceKey.HeaderText" xml:space="preserve">
+    <value>Key</value>
+  </data>
+  <data name="colTranslatedText.HeaderText" xml:space="preserve">
+    <value>Translated Text</value>
+  </data>
+  <data name="colOriginalText.HeaderText" xml:space="preserve">
+    <value>English Text</value>
+  </data>
+  <data name="SaveError.Format" xml:space="preserve">
+    <value>Failed to save the resources due to an error: {0}</value>
+    <comment>This is also a custom resource, which is retrieved manually</comment>
   </data>
 </root>
