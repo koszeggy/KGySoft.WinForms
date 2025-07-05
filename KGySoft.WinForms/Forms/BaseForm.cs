@@ -367,7 +367,7 @@ namespace KGySoft.WinForms.Forms
 #if !NET5_0_OR_GREATER
         static BaseForm()
         {
-            if (!OSUtils.IsWindows || OSUtils.IsMono)
+            if (!OSHelper.IsWindows || OSHelper.IsMono)
                 return;
 
             // Not using Accessors because it's obtained only once.
@@ -589,7 +589,7 @@ namespace KGySoft.WinForms.Forms
             switch (m.Msg)
             {
 #if !NET5_0_OR_GREATER
-                case Constants.WM_NCHITTEST when OSUtils.IsWindows && !OSUtils.IsMono:
+                case Constants.WM_NCHITTEST when OSHelper.IsWindows && !OSHelper.IsMono:
                     WmNCHitTest(ref m);
                     return;
 #endif

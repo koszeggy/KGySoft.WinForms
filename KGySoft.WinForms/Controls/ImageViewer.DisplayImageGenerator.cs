@@ -26,7 +26,6 @@ using KGySoft.Drawing;
 using KGySoft.Drawing.Imaging;
 using KGySoft.Reflection;
 using KGySoft.Threading;
-using KGySoft.WinForms.WinApi;
 
 #endregion
 

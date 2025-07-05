@@ -56,7 +56,7 @@ namespace KGySoft.WinForms
                 {
                     maxMemoryForGC = Math.Min(
                         IntPtr.Size == 4 ? 1_600_000_000 : Int64.MaxValue,
-                        OSUtils.IsWindows ? GetTotalMemory() : Int64.MaxValue);
+                        OSHelper.IsWindows ? GetTotalMemory() : Int64.MaxValue);
                 }
 
                 return maxMemoryForGC.Value;

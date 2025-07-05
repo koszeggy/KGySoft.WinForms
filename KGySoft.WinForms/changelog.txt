@@ -40,6 +40,7 @@
 + New LocalizationRequestedEventArgs class
 + New ICustomLocalizable interface
 + New IToolTipTargetProvider interface
++ New OSHelper class
 
 + KGySoft.ComponentModel namespace:
 ===================================

@@ -20,7 +20,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
@@ -1144,10 +1143,7 @@ namespace KGySoft.WinForms.Controls
                     base.Image = currentImage;
 
                     if (!OSHelper.IsWindowsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
-                    {
                         base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
-                        return true;
-                    }
 
                     return true;
                 }

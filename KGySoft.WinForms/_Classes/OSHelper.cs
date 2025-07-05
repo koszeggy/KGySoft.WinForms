@@ -23,7 +23,7 @@ using Microsoft.Win32;
 
 #endregion
 
-namespace KGySoft.WinForms.WinApi
+namespace KGySoft.WinForms
 {
     public static class OSHelper
     {

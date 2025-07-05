@@ -24,7 +24,6 @@ using System.Windows.Forms;
 
 using KGySoft.Collections;
 using KGySoft.Drawing;
-using KGySoft.WinForms.WinApi;
 
 #endregion
 
@@ -78,8 +77,8 @@ namespace KGySoft.WinForms
 
         #region Properties
 
-        internal static Cursor HandOpen => GetCreateCursor() ?? System.Windows.Forms.Cursors.Hand;
-        internal static Cursor HandGrab => GetCreateCursor() ?? System.Windows.Forms.Cursors.NoMove2D;
+        internal static Cursor HandOpen => GetCreateCursor() ?? Cursors.Hand;
+        internal static Cursor HandGrab => GetCreateCursor() ?? Cursors.NoMove2D;
 
         #endregion
 

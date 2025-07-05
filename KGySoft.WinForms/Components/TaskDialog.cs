@@ -25,7 +25,6 @@ using System.Windows.Forms;
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.WinForms.Forms;
-using KGySoft.WinForms.WinApi;
 
 #endregion
 
