@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -60,7 +61,6 @@ namespace KGySoft.WinForms
 
         #region Events
 
-        // NOTE: Typically it is not recommended to add multiple handlers to this event. Still, subscribers can check if LocalizationRequestedEventArgs.Value is not null, which means that a subscriber has already set the value for the given key.
         /// <summary>
         /// Occurs when the localization of a string is requested. Can be used to redirect the localization requests to a custom resource manager,
         /// or to set the value for a given key programmatically.
@@ -265,13 +265,59 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
+        /// Gets a localized string for the specified <paramref name="key"/> using the specified <paramref name="context"/> and formatting arguments.
+        /// It invokes the <see cref="LocalizationRequested"/> event to retrieve the string resource format. If the event is not handled,
+        /// and a resource set is available for the specified context, it retrieves the string from that resource set.
+        /// </summary>
+        /// <param name="key">The key of the requested string resource. When <paramref name="args"/> has values, the key is expected to be a format string.</param>
+        /// <param name="context">The localization context to use for the operation. If <see langword="null"/>, no context is used.</param>
+        /// <param name="args">The formatting arguments to be applied to the localized string format.</param>
+        /// <returns>The localized and formatted string for the specified <paramref name="key"/> if found; otherwise, <see langword="null"/>.</returns>
+        public static string? GetString(string key, LocalizationContext? context, params object?[]? args)
+        {
+            #region Local Methods
+
+            static string SafeFormat(string format, object?[] args)
+            {
+                int i = Array.IndexOf(args, null);
+                if (i >= 0)
+                {
+                    string nullRef = PublicResources.Null;
+                    for (; i < args.Length; i++)
+                        args[i] ??= nullRef;
+                }
+
+                return String.Format(LanguageSettings.FormattingLanguage, format, args);
+            }
+
+            #endregion
+
+            string? format = GetString(key, context);
+            if (format == null)
+                return null;
+            if (args == null)
+                return format;
+
+            try
+            {
+                return SafeFormat(format, args);
+            }
+            catch (FormatException)
+            {
+                return Res.LocalizationInvalidResource(key, args.Length, format);
+            }
+        }
+
+        /// <summary>
         /// Gets a resource set for the specified <paramref name="context"/> if available. The result can be freely edited.
         /// </summary>
         /// <param name="context">The localization context to use for the operation. To retrieve a resource set,
         /// the <see cref="LocalizationContext.LocalizationScope"/> must <see cref="DynamicStringLocalization.LocalScope"/> or <see cref="DynamicStringLocalization.AssemblyScope"/>.</param>
+        /// <param name="culture">The culture for which the resource set is requested. If <see langword="null"/>, the <see cref="LocalizationContext.LanguageHint"/> is used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
         /// <returns>An <see cref="IExpandoResourceSet"/> instance if a resource set is available for the specified context; otherwise, <see langword="null"/>.</returns>
         /// <exception cref="ArgumentNullException"><paramref name="context"/> is <see langword="null"/>.</exception>
-        public static IExpandoResourceSet? GetResourceSet(LocalizationContext context)
+        public static IExpandoResourceSet? GetResourceSet(LocalizationContext context, CultureInfo? culture = null)
         {
             if (context == null)
                 throw new ArgumentNullException(nameof(context), PublicResources.ArgumentNull);
@@ -279,54 +325,117 @@ namespace KGySoft.WinForms
             if (context.LocalizationScope is not (DynamicStringLocalization.LocalScope or DynamicStringLocalization.AssemblyScope))
                 return null;
 
-            return ResourceManagersCache[context.CacheKey].GetExpandoResourceSet(context.LanguageHint, ResourceSetRetrieval.CreateIfNotExists);
+            return ResourceManagersCache[context.CacheKey].GetExpandoResourceSet(culture ?? context.LanguageHint, ResourceSetRetrieval.CreateIfNotExists, true);
         }
 
-        // TODO: if these are needed, change the type of resourceManagersCache from LockingDictionary to IThreadSafeCacheAccessor
+        /// <summary>
+        /// Saves all pending scoped resources to the corresponding resource files.
+        /// Can be useful after calling <see cref="GetResourceSet">GetResourceSet</see> if the result was edited.
+        /// </summary>
+        /// <remarks>
+        /// <note>This method affects resources managed by the <see cref="LocalizationHelper"/> class.
+        /// This includes resources of <see cref="BaseForm"/> and <see cref="BaseUserControl"/> instances when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
+        /// property is <see cref="DynamicStringLocalization.LocalScope"/> or <see cref="DynamicStringLocalization.AssemblyScope"/>.
+        /// If you use <see cref="DynamicResourceManager"/> managers directly whose <see cref="DynamicResourceManager.UseLanguageSettings"/>
+        /// property is <see langword="true"/>, use the <see cref="LanguageSettings.SavePendingResources">LanguageSettings.SavePendingResources</see> method instead.</note>
+        /// </remarks>
+        public static void SavePendingScopedResources()
+        {
+            LockingDictionary<string, DynamicResourceManager>? cache = resourceManagersCache;
+            if (cache == null)
+                return;
 
-        //public static void SavePendingScopedResources()
-        //{
-        //    LockingDictionary<string, DynamicResourceManager>? cache = resourceManagersCache;
-        //    if (cache == null)
-        //        return;
+            cache.Lock();
+            try
+            {
+                foreach (DynamicResourceManager resourceManager in cache.Values)
+                {
+                    if (resourceManager.IsDisposed)
+                        return;
+                    resourceManager.SaveAllResources(false, resourceManager.CompatibleFormat);
+                }
+            }
+            finally
+            {
+                cache.Unlock();
+            }
+        }
 
-        //    cache.Lock();
-        //    try
-        //    {
-        //        foreach (DynamicResourceManager resourceManager in cache.Values)
-        //        {
-        //            if (resourceManager.IsDisposed)
-        //                return;
-        //            resourceManager.SaveAllResources(false, resourceManager.CompatibleFormat);
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        cache.Unlock();
-        //    }
-        //}
+        /// <summary>
+        /// Releases the loaded resource sets of all scoped resources. Resource sets will be reloaded on the next request.
+        /// Can be useful after calling <see cref="GetResourceSet">GetResourceSet</see> if the result was edited and the changes should be discarded.
+        /// </summary>
+        /// <remarks>
+        /// <para>This method may have no effect, if an auto save operation occurred since the last <see cref="GetResourceSet">GetResourceSet</see> call.
+        /// Auto save occurs when <see cref="LanguageSettings.DisplayLanguage">LanguageSettings.DisplayLanguage</see> changes or when
+        /// localization is requested for many different <see cref="LocalizationContext"/>s in a row, and the resources of some contexts are dropped from the internal cache.</para>
+        /// <note>This method affects resources managed by the <see cref="LocalizationHelper"/> class.
+        /// This includes resources of <see cref="BaseForm"/> and <see cref="BaseUserControl"/> instances when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
+        /// property is <see cref="DynamicStringLocalization.LocalScope"/> or <see cref="DynamicStringLocalization.AssemblyScope"/>.
+        /// If you use <see cref="DynamicResourceManager"/> managers directly whose <see cref="DynamicResourceManager.UseLanguageSettings"/>
+        /// property is <see langword="true"/>, use the <see cref="LanguageSettings.ReleaseAllResources">LanguageSettings.ReleaseAllResources</see> method instead.</note>
+        /// </remarks>
+        public static void ReleaseAllScopedResources()
+        {
+            LockingDictionary<string, DynamicResourceManager>? cache = resourceManagersCache;
+            if (cache == null)
+                return;
 
-        //public static void ReleaseAllScopedResources()
-        //{
-        //    LockingDictionary<string, DynamicResourceManager>? cache = resourceManagersCache;
-        //    if (cache == null)
-        //        return;
+            cache.Lock();
+            try
+            {
+                foreach (DynamicResourceManager resourceManager in cache.Values)
+                {
+                    if (resourceManager.IsDisposed)
+                        return;
+                    resourceManager.ReleaseAllResources();
+                }
+            }
+            finally
+            {
+                cache.Unlock();
+            }
+        }
 
-        //    cache.Lock();
-        //    try
-        //    {
-        //        foreach (DynamicResourceManager resourceManager in cache.Values)
-        //        {
-        //            if (resourceManager.IsDisposed)
-        //                return;
-        //            resourceManager.ReleaseAllResources();
-        //        }
-        //    }
-        //    finally
-        //    {
-        //        cache.Unlock();
-        //    }
-        //}
+        /// <summary>
+        /// Gets the base name of the resource file for the specified <paramref name="type"/>.
+        /// That is, the name of the resource file without the culture name and the .resx extension.
+        /// </summary>
+        /// <param name="type">The type for which the resource base name is requested.
+        /// This is usually a form or user control type, whose <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
+        /// property is set to <see cref="DynamicStringLocalization.LocalScope"/>.</param>
+        /// <returns>The base name of the resource file for the specified <paramref name="type"/>.</returns>
+        /// <remarks>
+        /// <para>You can use this method to retrieve the base name of resource files associated with a <see cref="LocalizationContext"/>
+        /// with <see cref="DynamicStringLocalization.LocalScope"/>.
+        /// </para>
+        /// </remarks>
+        public static string GetResourceBaseName(Type type)
+        {
+            if (type == null)
+                throw new ArgumentNullException(nameof(type), PublicResources.ArgumentNull);
+            return type.FullName + resourcesPostfix;
+        }
+
+        /// <summary>
+        /// Gets the base name of the resource file for the specified <paramref name="assembly"/>.
+        /// That is, the name of the resource file without the culture name and the .resx extension.
+        /// </summary>
+        /// <param name="assembly">The assembly for which the resource base name is requested.
+        /// This is usually the assembly of a project containing forms or user controls, whose <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
+        /// property is set to <see cref="DynamicStringLocalization.AssemblyScope"/>.</param>
+        /// <returns>The base name of the resource file for the specified <paramref name="assembly"/>.</returns>
+        /// <remarks>
+        /// <para>You can use this method to retrieve the base name of resource files associated with a <see cref="LocalizationContext"/>
+        /// with <see cref="DynamicStringLocalization.AssemblyScope"/>.
+        /// </para>
+        /// </remarks>
+        public static string GetResourceBaseName(Assembly assembly)
+        {
+            if (assembly == null)
+                throw new ArgumentNullException(nameof(assembly), PublicResources.ArgumentNull);
+            return assembly.GetName().Name + resourcesPostfix;
+        }
 
         #endregion
 
@@ -353,7 +462,7 @@ namespace KGySoft.WinForms
             {
                 SafeMode = true,
                 ThrowException = false,
-                //CompatibleFormat = true, //TODO: try if the new VS 2022 resource editor supports this
+                CompatibleFormat = true,
                 AutoSave = AutoSaveOptions.LanguageChange | AutoSaveOptions.DomainUnload | AutoSaveOptions.Dispose
             };
         }
