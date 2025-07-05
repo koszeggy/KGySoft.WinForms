@@ -101,7 +101,7 @@ namespace KGySoft.WinForms
         internal static bool IsAvailableUnmanaged(long size)
         {
             // not guessing on non-Windows systems, going for the hard way
-            if (!OSUtils.IsWindows)
+            if (!OSHelper.IsWindows)
                 return true;
 
             return GetAvailableMemory() >= size;

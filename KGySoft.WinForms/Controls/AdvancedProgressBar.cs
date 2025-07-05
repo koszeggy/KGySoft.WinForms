@@ -99,7 +99,7 @@ namespace KGySoft.WinForms.Controls
                 if (!Enum<ProgressBarState>.IsDefined(value))
                     throw new ArgumentOutOfRangeException("value");
 
-                if (IsHandleCreated && OSUtils.IsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles)
+                if (IsHandleCreated && OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles)
                 {
                     // changing state while progress bar is animating may prevent changing color in system mode
                     // workaround: adjusting value forward and back fixes the problem
@@ -197,7 +197,7 @@ namespace KGySoft.WinForms.Controls
                 base.Value = value;
 
                 // in system mode paused/error state the stat must be reset, otherwise, the value may not change visually
-                if (IsHandleCreated && state != ProgressBarState.Normal && !IsClassicAppearance && style == AdvancedProgressBarStyle.System && OSUtils.IsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles)
+                if (IsHandleCreated && state != ProgressBarState.Normal && !IsClassicAppearance && style == AdvancedProgressBarStyle.System && OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles)
                 {
                     ProgressBarState currentState = state;
                     State = ProgressBarState.Normal;
@@ -369,7 +369,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-            if (OSUtils.IsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles)
+            if (OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles)
                 User32.SendMessage(Handle, Constants.PBM_SETSTATE, (IntPtr)(state + 1), IntPtr.Zero);
             ResetAnimation(true);
         }

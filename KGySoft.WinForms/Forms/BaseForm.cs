@@ -322,7 +322,7 @@ namespace KGySoft.WinForms.Forms
                     return;
                 }
 
-                if (!OSUtils.IsWindows || !ScaleHelper.IsThreadPerMonitorAware)
+                if (!OSHelper.IsWindows || !ScaleHelper.IsThreadPerMonitorAware)
                     return;
 
                 // Fixing the small icon if the DPI of the form is different from the system DPI
@@ -393,7 +393,7 @@ namespace KGySoft.WinForms.Forms
             };
 
 #if !NET35
-            if (!OSUtils.IsWindows11OrLater)
+            if (!OSHelper.IsWindows11OrLater)
 #endif
             {
                 BaseToolTip.AutoPopDelay = Int16.MaxValue;
@@ -721,7 +721,7 @@ namespace KGySoft.WinForms.Forms
 
         private void ResetSmallIcon()
         {
-            if (smallIcon == null || !OSUtils.IsWindows || !ScaleHelper.IsThreadPerMonitorAware)
+            if (smallIcon == null || !OSHelper.IsWindows || !ScaleHelper.IsThreadPerMonitorAware)
                 return;
 
             smallIcon.Dispose();

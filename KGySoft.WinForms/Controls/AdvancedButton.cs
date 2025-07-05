@@ -1056,7 +1056,7 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckDefaultAnimation()
         {
-            if (!OSUtils.IsVistaOrLater || !VisualStyleHelper.RenderWithVisualStyles
+            if (!OSHelper.IsWindowsVistaOrLater || !VisualStyleHelper.RenderWithVisualStyles
                 || !VisualStyleHelper.HasDefaultAnimation((int)BUTTONPARTS.BP_PUSHBUTTON, (int)PUSHBUTTONSTATES.PBS_DEFAULTED, (int)PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING))
             {
                 return;
@@ -1109,7 +1109,7 @@ namespace KGySoft.WinForms.Controls
                 base.FlatStyle = lastFlatStyle = FlatStyle.System;
 
             // Image > Elevated > no image
-            if (base.FlatStyle == FlatStyle.System && OSUtils.IsVistaOrLater)
+            if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater)
                 this.SetSystemSize(new Size(Int32.MinValue, Int32.MinValue));
 
             Invalidate();
@@ -1120,7 +1120,7 @@ namespace KGySoft.WinForms.Controls
                 currentImage = base.Image;
                 if (base.FlatStyle == FlatStyle.System)
                 {
-                    if (!OSUtils.IsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
+                    if (!OSHelper.IsWindowsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
                     {
                         base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
                         return true;
@@ -1139,11 +1139,11 @@ namespace KGySoft.WinForms.Controls
             {
                 currentImage = SecurityShieldImage;
 
-                if (base.FlatStyle != FlatStyle.System || !OSUtils.IsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
+                if (base.FlatStyle != FlatStyle.System || !OSHelper.IsWindowsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
                 {
                     base.Image = currentImage;
 
-                    if (!OSUtils.IsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
+                    if (!OSHelper.IsWindowsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
                     {
                         base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
                         return true;
@@ -1154,7 +1154,7 @@ namespace KGySoft.WinForms.Controls
 
                 User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, new IntPtr(1));
             }
-            else if (base.FlatStyle == FlatStyle.System && OSUtils.IsVistaOrLater)
+            else if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater)
             {
                 User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, IntPtr.Zero);
             }
@@ -1167,7 +1167,7 @@ namespace KGySoft.WinForms.Controls
             CheckDefaultAnimation();
 
             // Images are supported only in Vista and above in System mode when Application.EnableVisualStyles was called
-            if (base.FlatStyle == FlatStyle.System && (base.Image != null || isElevated) && (!OSUtils.IsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles))
+            if (base.FlatStyle == FlatStyle.System && (base.Image != null || isElevated) && (!OSHelper.IsWindowsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles))
             {
                 // note: this will not change the reported FlatStyle in designer
                 base.FlatStyle = lastFlatStyle = FlatStyle.Standard;

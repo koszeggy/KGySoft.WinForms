@@ -47,7 +47,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets the amount of the delta value of a single mouse wheel rotation increment.
         /// </summary>
-        protected static readonly int MouseWheelScrollDelta = OSUtils.IsMono && OSUtils.IsWindows ? 120 : SystemInformation.MouseWheelScrollDelta;
+        protected static readonly int MouseWheelScrollDelta = OSHelper.IsMono && OSHelper.IsWindows ? 120 : SystemInformation.MouseWheelScrollDelta;
 
         #endregion
 

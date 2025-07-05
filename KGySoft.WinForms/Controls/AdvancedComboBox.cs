@@ -561,7 +561,7 @@ namespace KGySoft.WinForms.Controls
         #region Private Properties
 
         private bool DrawByVisualStylesWhenDisabled => systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles
-            && OSUtils.IsVistaOrLater && DropDownStyle == ComboBoxStyle.DropDownList && FlatStyle is FlatStyle.System or FlatStyle.Standard;
+            && OSHelper.IsWindowsVistaOrLater && DropDownStyle == ComboBoxStyle.DropDownList && FlatStyle is FlatStyle.System or FlatStyle.Standard;
 
         #endregion
 
@@ -1045,7 +1045,7 @@ namespace KGySoft.WinForms.Controls
             // System DropDownList mode: not clearing with background color but drawing the disabled background by visual styles
             if (DrawByVisualStylesWhenDisabled)
             {
-                Debug.Assert(OSUtils.IsVistaOrLater);
+                Debug.Assert(OSHelper.IsWindowsVistaOrLater);
                 VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_READONLY, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, clientRect);
 
                 var part = rtl ? COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;

@@ -328,7 +328,7 @@ namespace KGySoft.WinForms.Forms
                 {
                     if (VisualStyleHelper.RenderWithVisualStyles)
                     {
-                        if (OSUtils.IsVistaOrLater)
+                        if (OSHelper.IsWindowsVistaOrLater)
                         {
                             // ISSUE: the following throws an exception because only FontProperty.GlyphFont is accepted by VisualStyleRenderer.GetFont
                             //var renderer = new VisualStyleRenderer(classTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 0);
@@ -368,7 +368,7 @@ namespace KGySoft.WinForms.Forms
             {
                 if (mainInstructionsColor.IsEmpty)
                 {
-                    var color = OSUtils.IsVistaOrLater
+                    var color = OSHelper.IsWindowsVistaOrLater
                         ? VisualStyleHelper.GetTextColor(VisualStyleHelper.TaskDialogTheme, Constants.TDLG_MAININSTRUCTIONPANE, 1, mainInstructionsDefaultThemedColor)
                         : mainInstructionsDefaultThemedColor;
 
@@ -807,7 +807,7 @@ namespace KGySoft.WinForms.Forms
 
             // Modal forms on Windows: when changing RTL, the DialogResult is set to Cancel in older framework targets, causing the dialog to close.
             // To make it work the same way on all platforms, we set it to Ignore, signaling the check in OnFormClosing.
-            if (isRtlChanging && OSUtils.IsWindows && !OSUtils.IsMono)
+            if (isRtlChanging && OSHelper.IsWindows && !OSHelper.IsMono)
                 DialogResult = DialogResult.Ignore;
 
             // size constraints
@@ -1663,7 +1663,7 @@ namespace KGySoft.WinForms.Forms
             }
 
             // progress bar
-            if (!OSUtils.IsVistaOrLater)
+            if (!OSHelper.IsWindowsVistaOrLater)
                 pbProgress.Style = AdvancedProgressBarStyle.ThemedShiny;
         }
 
@@ -2109,7 +2109,7 @@ namespace KGySoft.WinForms.Forms
         TaskDialogResult ITaskDialog.Execute(TaskDialog taskDialog, IntPtr owner, out int selectedButtonIndex, out int selectedRadioButtonIndex, out bool checkBoxChecked)
         {
             host = taskDialog;
-            executeNonModal = owner == IntPtr.Zero && OSUtils.IsWindows && !OSUtils.IsMono;
+            executeNonModal = owner == IntPtr.Zero && OSHelper.IsWindows && !OSHelper.IsMono;
             if (owner != IntPtr.Zero)
                 ownerWindow = new Win32Window { Handle = owner };
             

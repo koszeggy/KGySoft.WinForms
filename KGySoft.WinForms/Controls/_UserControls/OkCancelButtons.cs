@@ -133,7 +133,7 @@ namespace KGySoft.WinForms.Controls
         {
             // Fixing high DPI appearance on Mono
             PointF scale;
-            if (OSUtils.IsMono && (scale = this.GetScale()) != ScaleHelper.DefaultScale)
+            if (OSHelper.IsMono && (scale = this.GetScale()) != ScaleHelper.DefaultScale)
             {
                 Height = (int)(35 * scale.Y);
                 var referenceButtonSize = new Size(75, 23);

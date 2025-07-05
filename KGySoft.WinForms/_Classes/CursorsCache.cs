@@ -87,7 +87,7 @@ namespace KGySoft.WinForms
 
         private static Cursor? GetCreateCursor([CallerMemberName] string resourceName = null!)
         {
-            if (!OSUtils.IsWindows)
+            if (!OSHelper.IsWindows)
                 return null;
             if (!cursors.TryGetValue(resourceName, out CursorInfo? info))
                 cursors[resourceName] = info = new CursorInfo((Icon)Properties.Resources.ResourceManager.GetObject(resourceName, CultureInfo.InvariantCulture)!);

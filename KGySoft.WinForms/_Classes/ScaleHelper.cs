@@ -136,7 +136,7 @@ namespace KGySoft.WinForms
 
         #region Fields
 
-        private static readonly bool isProcessPerMonitorAware = OSUtils.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
+        private static readonly bool isProcessPerMonitorAware = OSHelper.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
         private static readonly Point systemInitialDpi = GetDpiForHdc(User32.GetDC(IntPtr.Zero));
         private static readonly PointF systemScale = new PointF(systemInitialDpi.X / DefaultDpi, systemInitialDpi.Y / DefaultDpi);
         private static readonly PointF defaultScale = new PointF(1f, 1f);
@@ -164,7 +164,7 @@ namespace KGySoft.WinForms
                 if (!isProcessPerMonitorAware)
                     return false;
 
-                if (!OSUtils.IsWindows10Build1607OrLater)
+                if (!OSHelper.IsWindows10Build1607OrLater)
                     return true;
 
                 IntPtr dpiAwareness = User32.GetThreadDpiAwarenessContext();
@@ -179,7 +179,7 @@ namespace KGySoft.WinForms
             {
                 if (!isProcessPerMonitorAware)
                     return 0;
-                if (!OSUtils.IsWindows10Build1607OrLater)
+                if (!OSHelper.IsWindows10Build1607OrLater)
                     return 1;
 
                 IntPtr dpiAwareness = User32.GetThreadDpiAwarenessContext();
@@ -336,7 +336,7 @@ namespace KGySoft.WinForms
             if (control == null!)
                 ThrowNull(nameof(control));
 
-            if (OSUtils.IsMono)
+            if (OSHelper.IsMono)
                 return scrollbarFallbackReferenceSize.Scale(control.GetScale());
 
             int perMonitorDpiAwarenessVersion = PerMonitorDpiAwarenessVersion;
@@ -348,7 +348,7 @@ namespace KGySoft.WinForms
 
         public static Size GetScrollbarSize(IntPtr hWnd)
         {
-            if (OSUtils.IsMono)
+            if (OSHelper.IsMono)
                 return scrollbarFallbackReferenceSize.Scale(GetScale(hWnd));
 
             int perMonitorDpiAwarenessVersion = PerMonitorDpiAwarenessVersion;
@@ -403,7 +403,7 @@ namespace KGySoft.WinForms
             if (IsThreadPerMonitorAware)
             {
                 // Windows 10 1607 or later
-                if (OSUtils.IsWindows10Build1607OrLater)
+                if (OSHelper.IsWindows10Build1607OrLater)
                 {
                     // NOTE: this always returns a single value, so we assume the same DPI in both dimensions.
                     var dpi = (int)User32.GetDpiForWindow(hwnd);

@@ -252,7 +252,7 @@ namespace KGySoft.WinForms.Components
 
         #region Static Properties
 
-        internal static Icon DefaultIcon => defaultIcon ??= OSUtils.IsVistaOrLater ? Icons.FromFile("imageres", 116) : Resources.TaskDialogIcon;
+        internal static Icon DefaultIcon => defaultIcon ??= OSHelper.IsWindowsVistaOrLater ? Icons.FromFile("imageres", 116) : Resources.TaskDialogIcon;
 
         #endregion
 

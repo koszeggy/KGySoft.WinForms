@@ -242,7 +242,7 @@ namespace KGySoft.WinForms.Forms
                 Size imageSize;
                 if (VisualStyleHelper.RenderWithVisualStyles)
                 {
-                    if (OSUtils.IsVistaOrLater)
+                    if (OSHelper.IsWindowsVistaOrLater)
                         PaintNativeButton(g, out imageSize);
                     else
                         PaintThemedButton(g, out imageSize);

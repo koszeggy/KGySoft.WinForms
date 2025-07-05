@@ -68,7 +68,7 @@ namespace KGySoft.WinForms.WinApi
 
         public ThemingActivationContext(bool enable)
         {
-            if (!enable || !OSUtils.IsWindowsXpOrLater || !IsThemingAvailable)
+            if (!enable || !OSHelper.IsWindowsXpOrLater || !IsThemingAvailable)
                 return;
 
             if (!Kernel32.ActivateActCtx(activationContext, out cookie))

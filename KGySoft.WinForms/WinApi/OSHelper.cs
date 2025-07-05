@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: OSUtils.cs
+//  File: OSHelper.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -25,7 +25,7 @@ using Microsoft.Win32;
 
 namespace KGySoft.WinForms.WinApi
 {
-    internal static class OSUtils
+    public static class OSHelper
     {
         #region Fields
 
@@ -33,10 +33,11 @@ namespace KGySoft.WinForms.WinApi
         private static bool? isVistaOrLater;
         private static bool? isWin10OrLater;
         private static bool? isWin10Build1607OrLater;
+        private static bool? isWin7OrLater;
+        private static bool? isWin8OrLater;
         private static bool? isWin81OrLater;
         private static bool? isWin11OrLater;
         private static bool? isWindows;
-        private static bool? isLinux;
         private static bool? isMono;
         private static Version? windowsVersion;
 
@@ -44,20 +45,25 @@ namespace KGySoft.WinForms.WinApi
 
         #region Properties
 
-        internal static bool IsWindows => isWindows ??= Environment.OSVersion.Platform is PlatformID.Win32NT or PlatformID.Win32Windows;
-        internal static bool IsLinux => isLinux ??= Environment.OSVersion.Platform is PlatformID.Unix or (PlatformID)128;
-        internal static bool IsMono => isMono ??= Type.GetType("Mono.Runtime") != null;
+        public static bool IsWindows => isWindows ??= Environment.OSVersion.Platform is PlatformID.Win32NT or PlatformID.Win32Windows;
+        public static bool IsMono => isMono ??= Type.GetType("Mono.Runtime") != null;
 
-        internal static bool IsWindowsXpOrLater
+        public static bool IsWindowsXpOrLater
             => isXpOrLater ??= GetWindowsVersion() is Version version && version >= new Version(5, 1, 2600);
 
-        internal static bool IsVistaOrLater
+        public static bool IsWindowsVistaOrLater
             => isVistaOrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 0, 5243);
 
-        internal static bool IsWindows81OrLater
+        public static bool IsWindows7OrLater
+            => isWin7OrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 1, 7600);
+
+        public static bool IsWindows8OrLater
+            => isWin8OrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 2, 9200);
+
+        public static bool IsWindows81OrLater
             => isWin81OrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 3, 9600);
 
-        internal static bool IsWindows10OrLater
+        public static bool IsWindows10OrLater
             => isWin10OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 10240);
 
         /// <summary>
@@ -66,14 +72,14 @@ namespace KGySoft.WinForms.WinApi
         internal static bool IsWindows10Build1607OrLater
             => isWin10Build1607OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 14393);
 
-        internal static bool IsWindows11OrLater
+        public static bool IsWindows11OrLater
             => isWin11OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 22000);
 
         #endregion
 
         #region Methods
 
-        private static Version? GetWindowsVersion()
+        public static Version? GetWindowsVersion()
         {
             if (windowsVersion is not null)
                 return windowsVersion;

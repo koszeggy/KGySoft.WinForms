@@ -94,14 +94,14 @@ namespace KGySoft.WinForms.Controls
             /// These formats are not supported by Graphics even though a Bitmap can use them.
             /// On Linux/Mono some formats are completely unsupported, but they do not appear here.
             /// </summary>
-            private static readonly PixelFormat[] unsupportedFormats = OSUtils.IsWindows
+            private static readonly PixelFormat[] unsupportedFormats = OSHelper.IsWindows
                 ? new[] { PixelFormat.Format16bppGrayScale }
                 : new[] { PixelFormat.Format16bppRgb555, PixelFormat.Format16bppRgb565 };
 
             /// <summary>
             /// These formats are so slow that it is still faster to generate a 32bpp clone first than display them directly.
             /// </summary>
-            private static readonly PixelFormat[] slowFormats = OSUtils.IsWindows
+            private static readonly PixelFormat[] slowFormats = OSHelper.IsWindows
                 ? new[] { PixelFormat.Format48bppRgb, PixelFormat.Format64bppArgb, PixelFormat.Format64bppArgb }
                 : Reflector.EmptyArray<PixelFormat>();
 
