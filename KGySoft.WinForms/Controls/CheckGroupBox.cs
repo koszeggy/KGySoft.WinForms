@@ -33,9 +33,9 @@ using KGySoft.CoreLibraries;
 
 #endregion
 
-namespace KGySoft.Drawing.ImagingTools.View.Controls
+namespace KGySoft.WinForms.Controls
 {
-    internal partial class CheckGroupBox : GroupBox, ICustomLocalizable
+    public partial class CheckGroupBox : GroupBox, ICustomLocalizable, IToolTipTargetProvider
     {
         #region Events
 
@@ -92,8 +92,8 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
 
             // Vista or later: using System FlatStyle so animation is enabled with theming and text is not misplaced with classic themes
             bool visualStylesEnabled = Application.RenderWithVisualStyles;
-            checkBox.FlatStyle = OSUtils.IsMono ? FlatStyle.Standard
-                : OSUtils.IsVistaOrLater ? FlatStyle.System
+            checkBox.FlatStyle = OSHelper.IsMono ? FlatStyle.Standard
+                : OSHelper.IsWindowsVistaOrLater ? FlatStyle.System
                 // Windows XP: Using standard style with themes so CheckBox color can be set correctly, and using System with classic theme for good placement
                 : visualStylesEnabled ? FlatStyle.Standard : FlatStyle.System;
 
@@ -103,9 +103,6 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
 
             // making sure there is enough space before the CheckBox at every DPI
             base.Text = "   ";
-
-            // Making sure that text color is correct with themes; may not work with System style (relevant for Windows XP where GroupBox caption has a special color)
-            checkBox.ForeColor = ThemeColors.GroupBoxText;
         }
 
         #endregion
@@ -121,7 +118,7 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
                 return;
 
             // Linux/Mono workaround: prevent disabling ErrorProvider's user control when the content is disabled
-            if (!OSUtils.IsWindows && e.Control.GetType().DeclaringType == typeof(ErrorProvider))
+            if (!OSHelper.IsWindows && e.Control.GetType().DeclaringType == typeof(ErrorProvider))
                 return;
 
             // when not in design mode, adding custom controls to a panel so we can toggle its Enabled with preserving their original state
@@ -197,26 +194,19 @@ namespace KGySoft.Drawing.ImagingTools.View.Controls
 
         #region Explicitly Implemented Interface Methods
 
-        void ICustomLocalizable.ApplyStringResources(ToolTip? toolTip)
+        bool ICustomLocalizable.ApplyStringResources(LocalizationContext context)
         {
-            string? name = Name;
-            if (String.IsNullOrEmpty(name))
-                return;
-
             // Self properties
-            Res.ApplyStringResources(this, name);
-
-            // tool tip: forwarding to the check box
-            if (toolTip != null)
-            {
-                string? value = Res.GetStringOrNull(name + "." + ControlExtensions.ToolTipPropertyName);
-                toolTip.SetToolTip(checkBox, value);
-            }
+            LocalizationHelper.LocalizeStringProperties(this, Name, context);
 
             // children: only contentPanel controls so checkBox is skipped (otherwise, could be overwritten by checkbox.Name)
             foreach (Control child in contentPanel.Controls)
-                child.ApplyStringResources(toolTip);
+                LocalizationHelper.ApplyStringResources(child, context);
+
+            return true;
         }
+
+        Control IToolTipTargetProvider.GetToolTipTarget() => checkBox;
 
         #endregion
 

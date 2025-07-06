@@ -185,6 +185,7 @@
 + New OkCancelButtons class: Migrated from the KGySoft.Drawing.ImagingTools project.
 + New ImageViewer class: Migrated from the KGySoft.Drawing.ImagingTools project.
 + New ImageViewerOptimizationOptions enum
++ New CheckGroupBox class: Migrated from the KGySoft.Drawing.ImagingTools project.
 
 ! KGySoft.WinForms.Forms namespace:
 ===================================

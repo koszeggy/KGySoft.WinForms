@@ -1,4 +1,4 @@
-﻿namespace KGySoft.Drawing.ImagingTools.View.Controls
+﻿namespace KGySoft.WinForms.Controls
 {
     partial class CheckGroupBox
     {
@@ -14,7 +14,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.checkBox = new KGySoft.Drawing.ImagingTools.View.Controls.AdvancedCheckBox();
+            this.checkBox = new KGySoft.WinForms.Controls.AdvancedCheckBox();
             this.contentPanel = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
