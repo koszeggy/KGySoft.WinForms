@@ -16,7 +16,7 @@
 #region Usings
 
 using System;
-#if NETFRAMEWORK || NETCOREAPP3_0
+#if !NET5_0_OR_GREATER
 using System.Collections.Specialized;
 #endif
 using System.Drawing;
@@ -132,16 +132,6 @@ namespace KGySoft.WinForms.Reflection
 
         #region Methods
 
-        #region Field Accessors
-
-        internal static void SetCurrentChanged(this ErrorProvider errorProvider, EventHandler currentChanged)
-            => SetFieldValue(errorProvider, "currentChanged", currentChanged);
-
-        internal static BindingManagerBase? GetErrorManager(this ErrorProvider errorProvider)
-            => GetFieldValue<BindingManagerBase?>(errorProvider, "errorManager");
-
-        #endregion
-
         #region Internal Methods
 
         #region Control
@@ -209,6 +199,12 @@ namespace KGySoft.WinForms.Reflection
 
         #region Error Provider
 
+        internal static void SetCurrentChanged(this ErrorProvider errorProvider, EventHandler currentChanged)
+            => SetFieldValue(errorProvider, "currentChanged", currentChanged);
+
+        internal static BindingManagerBase? GetErrorManager(this ErrorProvider errorProvider)
+            => GetFieldValue<BindingManagerBase?>(errorProvider, "errorManager");
+
         internal static void UnwireEvents(this ErrorProvider errorProvider, BindingManagerBase listManager)
             => TryInvokeMethod(errorProvider, "UnwireEvents", listManager);
 
@@ -228,7 +224,7 @@ namespace KGySoft.WinForms.Reflection
 
         #region Form
 
-#if NETFRAMEWORK || NETCOREAPP3_0
+#if !NET5_0_OR_GREATER
         internal static BitVector32 FormState(this Form form)
         {
             var formState = GetFieldValue<BitVector32>(form, "formState", false);

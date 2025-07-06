@@ -11,7 +11,7 @@
 
 + Assembly changes:
 ===================
-+ Targeting also .NET Framework 4.7, .NET 5.0 and 7.0.
++ Targeting also .NET Framework 4.7, .NET Core 3.1, .NET 5.0 and 7.0.
 
 ! KGySoft.Libraries.Language namespace
 ======================================

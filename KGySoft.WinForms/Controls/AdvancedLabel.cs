@@ -36,7 +36,7 @@ using KGySoft.WinForms.WinApi;
 
 #region Suppressions
 
-#if NETCOREAPP3_0
+#if NETCOREAPP3_0 || NETCOREAPP3_1
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type. - false alarm in .NET Core 3.0 for Match[Collection]
 #pragma warning disable CS8602 // Dereference of a possibly null reference. - false alarm in .NET Core 3.0 for Match[Collection]
 #endif

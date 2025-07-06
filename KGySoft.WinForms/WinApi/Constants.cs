@@ -53,7 +53,7 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_ERASEBKGND = 0x0014;
         internal const int WM_SETICON = 0x0080;
         internal const int WM_NCCALCSIZE = 0x0083;
-#if NETFRAMEWORK || NETCOREAPP3_0
+#if !NET5_0_OR_GREATER
         internal const int WM_NCHITTEST = 0x0084;
 #endif
         internal const int WM_NCPAINT = 0x0085;
