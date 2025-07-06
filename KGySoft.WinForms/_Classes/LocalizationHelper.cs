@@ -153,6 +153,21 @@ namespace KGySoft.WinForms
                 }
             }
 
+#if !NETCOREAPP3_1_OR_GREATER
+            static void ApplyMenuResources(Menu.MenuItemCollection items, LocalizationContext context)
+            {
+                foreach (MenuItem item in items)
+                {
+                    // to self
+                    LocalizeStringProperties(item, item.Name ?? String.Empty, context);
+
+                    // to children
+                    if (item.MenuItems.Count > 0)
+                        ApplyMenuResources(item.MenuItems, context);
+                }
+            }
+#endif
+
             #endregion
 
             context ??= new LocalizationContext(control);
@@ -168,11 +183,23 @@ namespace KGySoft.WinForms
                     return;
             }
 
-            // to self
+            // applying localization to self properties...
             LocalizeStringProperties(control, name, context);
 
-            // to children
-            switch (control) // NOTE: Apply LocalizationContext.GetScope for the same non-control sub-element types as well
+            // ...to context menu...
+            if (control.ContextMenuStrip is ContextMenuStrip cms)
+                ApplyToolStripResources(cms.Items, context);
+#if !NETCOREAPP3_1_OR_GREATER
+            else if (control.ContextMenu is ContextMenu contextMenu)
+                ApplyMenuResources(contextMenu.MenuItems, context);
+
+            // ... to main menu...
+            if (control is Form { Menu: not null } form)
+                ApplyMenuResources(form.Menu.MenuItems, context);
+#endif
+
+            // ... and to children
+            switch (control) // NOTE: Apply LocalizationContext.ctor.GetScope for the same non-control sub-element types as well
             {
                 case ToolStrip toolStrip:
                     ApplyToolStripResources(toolStrip.Items, context);
@@ -182,6 +209,33 @@ namespace KGySoft.WinForms
                     foreach (DataGridViewColumn item in dataGridView.Columns)
                         LocalizeStringProperties(item, item.Name, context);
                     break;
+
+                case ListView listView:
+                    foreach (ColumnHeader header in listView.Columns)
+                        LocalizeStringProperties(header, header.Name ?? String.Empty, context);
+                    foreach (ListViewGroup group in listView.Groups)
+                        // we could also access the default group by reflection, but its name is always null, so it doesn't make sense to auto-localize it
+                        LocalizeStringProperties(group, group.Name ?? String.Empty, context);
+                    break;
+
+#if !NETCOREAPP3_1_OR_GREATER
+                case ToolBar toolBar:
+                    foreach (ToolBarButton item in toolBar.Buttons)
+                    {
+                        LocalizeStringProperties(item, item.Name ?? String.Empty, context);
+                        if (item.DropDownMenu != null)
+                            ApplyMenuResources(item.DropDownMenu.MenuItems, context);
+                    }
+                    break;
+
+                case DataGrid dataGrid:
+                    foreach (DataGridTableStyle tableStyle in dataGrid.TableStyles)
+                    {
+                        foreach (DataGridColumnStyle item in tableStyle.GridColumnStyles)
+                            LocalizeStringProperties(item, item.MappingName, context);
+                    }
+                    break;
+#endif
 
                 default:
                     foreach (Control child in control.Controls)
@@ -469,10 +523,13 @@ namespace KGySoft.WinForms
 
         private static PropertyAccessor[]? GetLocalizableStringProperties(Type type)
         {
-            // Getting string properties only. The resource manager in this class works in safe mode anyway.
+            // Getting localizable and browsable string properties only.
             var result = type.GetProperties(BindingFlags.Public | BindingFlags.Instance)
-                    .Where(p => p.PropertyType == typeof(string)
-                            && Attribute.GetCustomAttribute(p, typeof(LocalizableAttribute)) is LocalizableAttribute la && la.IsLocalizable).ToArray();
+                .Where(p => p.PropertyType == typeof(string)
+                    && (Attribute.GetCustomAttribute(p, typeof(LocalizableAttribute)) is LocalizableAttribute la && la.IsLocalizable
+                        && Attribute.GetCustomAttribute(p, typeof(BrowsableAttribute)) is null or BrowsableAttribute { Browsable: true }
+                        || p.DeclaringType == typeof(ListViewGroup) && p.Name == nameof(ListViewGroup.Header)
+                    )).ToArray();
             return result.Length == 0 ? null : result.Select(PropertyAccessor.GetAccessor).ToArray();
         }
 

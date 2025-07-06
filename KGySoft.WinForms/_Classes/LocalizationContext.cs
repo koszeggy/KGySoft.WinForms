@@ -105,9 +105,17 @@ namespace KGySoft.WinForms
             {
                 Control? control = root switch // NOTE: see the switch in ApplyStringResources as well
                 {
+                    ContextMenuStrip cms => cms.SourceControl ?? cms,
                     Control c => c,
-                    ToolStripItem i => i.Owner,
+                    ToolStripItem mi => mi.Owner is ContextMenuStrip cms ? cms.SourceControl ?? cms : mi.Owner,
                     DataGridViewColumn col => col.DataGridView,
+                    ListViewGroup g => g.ListView,
+                    ColumnHeader h => h.ListView,
+#if !NETCOREAPP3_1_OR_GREATER
+                    MenuItem mi => mi.GetMainMenu()?.GetForm() ?? mi.GetContextMenu()?.SourceControl,
+                    ToolBarButton tbb => tbb.Parent,
+                    DataGridColumnStyle col => col.DataGridTableStyle?.DataGrid,
+#endif
                     _ => null
                 };
 
