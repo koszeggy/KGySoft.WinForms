@@ -26,7 +26,7 @@ using KGySoft.CoreLibraries;
 
 #region Suppressions
 
-#if NETCOREAPP3_0
+#if NETCOREAPP3_0 || NETCOREAPP3_1
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type. - Controls items are never null
 #pragma warning disable CS8604 // Possible null reference argument. - Controls items are never null
 #endif
@@ -35,10 +35,16 @@ using KGySoft.CoreLibraries;
 
 namespace KGySoft.WinForms.Controls
 {
+    /// <summary>
+    /// Represents a <see cref="GroupBox"/> control with a <see cref="CheckBox"/> that can be checked or unchecked to enable or disable the content of the group box.
+    /// </summary>
     public partial class CheckGroupBox : GroupBox, ICustomLocalizable, IToolTipTargetProvider
     {
         #region Events
 
+        /// <summary>
+        /// Occurs when the <see cref="CheckBox"/> is checked or unchecked.
+        /// </summary>
         internal event EventHandler CheckedChanged
         {
             add => Events.AddHandler(nameof(CheckedChanged), value);
@@ -51,13 +57,23 @@ namespace KGySoft.WinForms.Controls
 
         #region Public Properties
 
+        /// <summary>
+        /// Gets or sets the text of the <see cref="CheckGroupBox"/>. That is, the text of the <see cref="CheckBox"/> control.
+        /// </summary>
         [Localizable(true)]
-        public new string Text
+        [AllowNull]
+        public override string Text
         {
             get => checkBox.Text;
             set => checkBox.Text = value;
         }
 
+        /// <summary>
+        /// Gets or sets whether the <see cref="CheckBox"/> of the <see cref="CheckGroupBox"/> control is checked.
+        /// When checked, the content of the group box is enabled, otherwise it is disabled.
+        /// <br/>Default value: <see langword="true"/>.
+        /// </summary>
+        [Category("CheckGroupBox")]
         [DefaultValue(true)]
         public bool Checked
         {
@@ -69,12 +85,18 @@ namespace KGySoft.WinForms.Controls
 
         #region Internal Properties
 
-        internal CheckBox CheckBox => checkBox;
+        /// <summary>
+        /// Gets the <see cref="AdvancedCheckBox"/> control, which serves as the checkbox of the <see cref="CheckGroupBox"/> control.
+        /// </summary>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public AdvancedCheckBox CheckBox => checkBox;
 
         #endregion
 
         #region Protected Properties
 
+        /// <inheritdoc />
         protected override Padding DefaultPadding => new Padding(3, 5, 3, 3);
 
         #endregion
@@ -83,22 +105,15 @@ namespace KGySoft.WinForms.Controls
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CheckGroupBox"/> class.
+        /// </summary>
         [SuppressMessage("ReSharper", "LocalizableElement", Justification = "Whitespace")]
         public CheckGroupBox()
         {
             InitializeComponent();
             Controls.Add(checkBox);
             checkBox.SizeChanged += CheckBox_SizeChanged;
-
-            // Vista or later: using System FlatStyle so animation is enabled with theming and text is not misplaced with classic themes
-            bool visualStylesEnabled = Application.RenderWithVisualStyles;
-            checkBox.FlatStyle = OSHelper.IsMono ? FlatStyle.Standard
-                : OSHelper.IsWindowsVistaOrLater ? FlatStyle.System
-                // Windows XP: Using standard style with themes so CheckBox color can be set correctly, and using System with classic theme for good placement
-                : visualStylesEnabled ? FlatStyle.Standard : FlatStyle.System;
-
-            // GroupBox.FlatStyle must be the same as CheckBox; otherwise, System checkbox appearance may be transparent (strikethrough by GroupBox line) - not in every OS
-            FlatStyle = checkBox.FlatStyle;
             checkBox.CheckedChanged += CheckBox_CheckedChanged;
 
             // making sure there is enough space before the CheckBox at every DPI
@@ -111,6 +126,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
+        /// <inheritdoc />
         protected override void OnControlAdded(ControlEventArgs e)
         {
             base.OnControlAdded(e);
@@ -126,14 +142,20 @@ namespace KGySoft.WinForms.Controls
             e.Control.Parent = contentPanel;
         }
 
+        /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
             ResetCheckBoxLocation();
         }
 
+        /// <summary>
+        /// Raises the <see cref="CheckedChanged"/> event.
+        /// </summary>
+        /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
         protected virtual void OnCheckedChanged(EventArgs e) => (Events[nameof(CheckedChanged)] as EventHandler)?.Invoke(this, e);
 
+        /// <inheritdoc />
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
@@ -141,12 +163,14 @@ namespace KGySoft.WinForms.Controls
                 ResetCheckBoxLocation();
         }
 
+        /// <inheritdoc />
         protected override void OnRightToLeftChanged(EventArgs e)
         {
             base.OnRightToLeftChanged(e);
             ResetCheckBoxLocation();
         }
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing)
