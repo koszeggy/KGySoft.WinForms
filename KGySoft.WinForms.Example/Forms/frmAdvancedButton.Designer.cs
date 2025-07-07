@@ -41,7 +41,7 @@
             this.advancedButton6 = new KGySoft.WinForms.Controls.AdvancedButton();
             this.advancedButton5 = new KGySoft.WinForms.Controls.AdvancedButton();
             this.advancedButton4 = new KGySoft.WinForms.Controls.AdvancedButton();
-            this.ucCaptionedContainer1 = new KGySoft.WinForms.Controls.ucCaptionedContainer();
+            this.checkGroupBox1 = new KGySoft.WinForms.Controls.CheckGroupBox();
             this.advancedButton13 = new KGySoft.WinForms.Controls.AdvancedButton();
             this.advancedButton12 = new KGySoft.WinForms.Controls.AdvancedButton();
             this.advancedButton11 = new KGySoft.WinForms.Controls.AdvancedButton();
@@ -53,23 +53,23 @@
             this.pnlTestArea.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
-            this.ucCaptionedContainer1.PanelContent.SuspendLayout();
+            this.checkGroupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlTestArea
             // 
             this.pnlTestArea.Controls.Add(this.groupBox2);
-            this.pnlTestArea.Controls.Add(this.ucCaptionedContainer1);
+            this.pnlTestArea.Controls.Add(this.checkGroupBox1);
             this.pnlTestArea.Controls.Add(this.groupBox1);
-            this.pnlTestArea.Size = new System.Drawing.Size(407, 519);
+            this.pnlTestArea.Size = new System.Drawing.Size(409, 519);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox1, 0);
-            this.pnlTestArea.Controls.SetChildIndex(this.ucCaptionedContainer1, 0);
+            this.pnlTestArea.Controls.SetChildIndex(this.checkGroupBox1, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox2, 0);
             // 
-            // lblInstuction
+            // lblInstruction
             // 
             this.lblInstruction.Size = new System.Drawing.Size(407, 144);
-            this.lblInstruction.Text = resources.GetString("lblInstuction.Text");
+            this.lblInstruction.Text = resources.GetString("lblInstruction.Text");
             // 
             // groupBox1
             // 
@@ -78,9 +78,9 @@
             this.groupBox1.Controls.Add(this.advancedButton1);
             this.groupBox1.Controls.Add(this.button1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox1.Location = new System.Drawing.Point(0, 27);
+            this.groupBox1.Location = new System.Drawing.Point(0, 28);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(407, 117);
+            this.groupBox1.Size = new System.Drawing.Size(409, 117);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "Image in FlatStyle=System mode";
@@ -92,7 +92,7 @@
             this.advancedButton3.IsElevated = true;
             this.advancedButton3.Location = new System.Drawing.Point(3, 85);
             this.advancedButton3.Name = "advancedButton3";
-            this.advancedButton3.Size = new System.Drawing.Size(401, 23);
+            this.advancedButton3.Size = new System.Drawing.Size(403, 23);
             this.advancedButton3.TabIndex = 3;
             this.advancedButton3.Text = "Elevated mode (FlatStyle = Standard)";
             this.advancedButton3.UseVisualStyleBackColor = true;
@@ -105,7 +105,7 @@
             this.advancedButton2.IsElevated = true;
             this.advancedButton2.Location = new System.Drawing.Point(3, 62);
             this.advancedButton2.Name = "advancedButton2";
-            this.advancedButton2.Size = new System.Drawing.Size(401, 23);
+            this.advancedButton2.Size = new System.Drawing.Size(403, 23);
             this.advancedButton2.TabIndex = 2;
             this.advancedButton2.Text = "Elevated mode (FlatStyle = System)";
             this.advancedButton2.UseVisualStyleBackColor = true;
@@ -118,7 +118,7 @@
             this.advancedButton1.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.advancedButton1.Location = new System.Drawing.Point(3, 39);
             this.advancedButton1.Name = "advancedButton1";
-            this.advancedButton1.Size = new System.Drawing.Size(401, 23);
+            this.advancedButton1.Size = new System.Drawing.Size(403, 23);
             this.advancedButton1.TabIndex = 1;
             this.advancedButton1.Text = "AdvancedButton: FlatStyle is System (in Vista and above) and Image is visible";
             this.advancedButton1.UseVisualStyleBackColor = true;
@@ -131,7 +131,7 @@
             this.button1.ImageAlign = System.Drawing.ContentAlignment.MiddleRight;
             this.button1.Location = new System.Drawing.Point(3, 16);
             this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(401, 23);
+            this.button1.Size = new System.Drawing.Size(403, 23);
             this.button1.TabIndex = 0;
             this.button1.Text = "Standard button: Image is invisible";
             this.button1.UseVisualStyleBackColor = true;
@@ -145,9 +145,9 @@
             this.groupBox2.Controls.Add(this.advancedButton5);
             this.groupBox2.Controls.Add(this.advancedButton4);
             this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox2.Location = new System.Drawing.Point(0, 269);
+            this.groupBox2.Location = new System.Drawing.Point(0, 270);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(407, 110);
+            this.groupBox2.Size = new System.Drawing.Size(409, 110);
             this.groupBox2.TabIndex = 3;
             this.groupBox2.TabStop = false;
             this.groupBox2.Text = "TextRenderingQuality";
@@ -213,31 +213,28 @@
             this.advancedButton4.TextRenderingQuality = KGySoft.WinForms.Controls.RenderingQuality.Low;
             this.advancedButton4.UseVisualStyleBackColor = true;
             // 
-            // ucCaptionedContainer1
+            // checkGroupBox1
             // 
-            this.ucCaptionedContainer1.Caption = "Fading animations (Vista and above), disabled colors (uncheck to disable)";
-            this.ucCaptionedContainer1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.ucCaptionedContainer1.Location = new System.Drawing.Point(0, 144);
-            this.ucCaptionedContainer1.Name = "ucCaptionedContainer1";
-            // 
-            // ucCaptionedContainer1.ContentPanel
-            // 
-            this.ucCaptionedContainer1.PanelContent.Controls.Add(this.advancedButton13);
-            this.ucCaptionedContainer1.PanelContent.Controls.Add(this.advancedButton12);
-            this.ucCaptionedContainer1.PanelContent.Controls.Add(this.advancedButton11);
-            this.ucCaptionedContainer1.PanelContent.Controls.Add(this.advancedButton10);
-            this.ucCaptionedContainer1.PanelContent.Controls.Add(this.button5);
-            this.ucCaptionedContainer1.PanelContent.Controls.Add(this.button4);
-            this.ucCaptionedContainer1.PanelContent.Controls.Add(this.button3);
-            this.ucCaptionedContainer1.PanelContent.Controls.Add(this.button2);
-            this.ucCaptionedContainer1.ShowCheckBox = true;
-            this.ucCaptionedContainer1.Size = new System.Drawing.Size(407, 125);
-            this.ucCaptionedContainer1.TabIndex = 2;
+            this.checkGroupBox1.Controls.Add(this.advancedButton13);
+            this.checkGroupBox1.Controls.Add(this.advancedButton12);
+            this.checkGroupBox1.Controls.Add(this.advancedButton11);
+            this.checkGroupBox1.Controls.Add(this.advancedButton10);
+            this.checkGroupBox1.Controls.Add(this.button5);
+            this.checkGroupBox1.Controls.Add(this.button4);
+            this.checkGroupBox1.Controls.Add(this.button3);
+            this.checkGroupBox1.Controls.Add(this.button2);
+            this.checkGroupBox1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.checkGroupBox1.Location = new System.Drawing.Point(0, 145);
+            this.checkGroupBox1.Name = "checkGroupBox1";
+            this.checkGroupBox1.Size = new System.Drawing.Size(409, 125);
+            this.checkGroupBox1.TabIndex = 2;
+            this.checkGroupBox1.TabStop = false;
+            this.checkGroupBox1.Text = "Fading animations (Vista and above), disabled colors (uncheck to disable)";
             // 
             // advancedButton13
             // 
             this.advancedButton13.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.advancedButton13.Location = new System.Drawing.Point(187, 75);
+            this.advancedButton13.Location = new System.Drawing.Point(186, 91);
             this.advancedButton13.Name = "advancedButton13";
             this.advancedButton13.Size = new System.Drawing.Size(199, 23);
             this.advancedButton13.TabIndex = 7;
@@ -247,7 +244,7 @@
             // advancedButton12
             // 
             this.advancedButton12.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.advancedButton12.Location = new System.Drawing.Point(187, 51);
+            this.advancedButton12.Location = new System.Drawing.Point(186, 67);
             this.advancedButton12.Name = "advancedButton12";
             this.advancedButton12.Size = new System.Drawing.Size(199, 23);
             this.advancedButton12.TabIndex = 6;
@@ -256,7 +253,7 @@
             // 
             // advancedButton11
             // 
-            this.advancedButton11.Location = new System.Drawing.Point(187, 27);
+            this.advancedButton11.Location = new System.Drawing.Point(186, 43);
             this.advancedButton11.Name = "advancedButton11";
             this.advancedButton11.Size = new System.Drawing.Size(199, 23);
             this.advancedButton11.TabIndex = 5;
@@ -266,7 +263,7 @@
             // advancedButton10
             // 
             this.advancedButton10.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.advancedButton10.Location = new System.Drawing.Point(187, 3);
+            this.advancedButton10.Location = new System.Drawing.Point(186, 19);
             this.advancedButton10.Name = "advancedButton10";
             this.advancedButton10.Size = new System.Drawing.Size(199, 23);
             this.advancedButton10.TabIndex = 4;
@@ -276,7 +273,7 @@
             // button5
             // 
             this.button5.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
-            this.button5.Location = new System.Drawing.Point(7, 75);
+            this.button5.Location = new System.Drawing.Point(6, 91);
             this.button5.Name = "button5";
             this.button5.Size = new System.Drawing.Size(146, 23);
             this.button5.TabIndex = 3;
@@ -286,7 +283,7 @@
             // button4
             // 
             this.button4.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
-            this.button4.Location = new System.Drawing.Point(7, 51);
+            this.button4.Location = new System.Drawing.Point(6, 67);
             this.button4.Name = "button4";
             this.button4.Size = new System.Drawing.Size(146, 23);
             this.button4.TabIndex = 2;
@@ -295,7 +292,7 @@
             // 
             // button3
             // 
-            this.button3.Location = new System.Drawing.Point(7, 27);
+            this.button3.Location = new System.Drawing.Point(6, 43);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(146, 23);
             this.button3.TabIndex = 1;
@@ -305,7 +302,7 @@
             // button2
             // 
             this.button2.FlatStyle = System.Windows.Forms.FlatStyle.System;
-            this.button2.Location = new System.Drawing.Point(7, 3);
+            this.button2.Location = new System.Drawing.Point(6, 19);
             this.button2.Name = "button2";
             this.button2.Size = new System.Drawing.Size(146, 23);
             this.button2.TabIndex = 0;
@@ -323,7 +320,8 @@
             this.pnlTestArea.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox2.ResumeLayout(false);
-            this.ucCaptionedContainer1.PanelContent.ResumeLayout(false);
+            this.checkGroupBox1.ResumeLayout(false);
+            this.checkGroupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -339,7 +337,7 @@
         private KGySoft.WinForms.Controls.AdvancedButton advancedButton6;
         private KGySoft.WinForms.Controls.AdvancedButton advancedButton5;
         private KGySoft.WinForms.Controls.AdvancedButton advancedButton4;
-        private KGySoft.WinForms.Controls.ucCaptionedContainer ucCaptionedContainer1;
+        private KGySoft.WinForms.Controls.CheckGroupBox checkGroupBox1;
         private KGySoft.WinForms.Controls.AdvancedButton advancedButton13;
         private KGySoft.WinForms.Controls.AdvancedButton advancedButton12;
         private KGySoft.WinForms.Controls.AdvancedButton advancedButton11;
