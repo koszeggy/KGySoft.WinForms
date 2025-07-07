@@ -18,6 +18,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Windows.Forms;
 
 using KGySoft.CoreLibraries;
@@ -40,6 +41,12 @@ namespace KGySoft.WinForms.Controls
     /// </summary>
     public partial class CheckGroupBox : GroupBox, ICustomLocalizable, IToolTipTargetProvider
     {
+        #region Fields
+
+        private bool isInitialized;
+
+        #endregion
+
         #region Events
 
         /// <summary>
@@ -134,19 +141,28 @@ namespace KGySoft.WinForms.Controls
                 return;
 
             // Linux/Mono workaround: prevent disabling ErrorProvider's user control when the content is disabled
-            if (!OSHelper.IsWindows && e.Control.GetType().DeclaringType == typeof(ErrorProvider))
+            if ((!OSHelper.IsWindows || OSHelper.IsMono) && e.Control.GetType().DeclaringType == typeof(ErrorProvider))
                 return;
 
-            // when not in design mode, adding custom controls to a panel so we can toggle its Enabled with preserving their original state
+            // When not in design mode, adding custom controls to a panel so we can toggle its Enabled with preserving their original state.
+            // Also, translating the control's location so it appears in the same place as in the designer. Doing it only after initialization is complete,
+            // because in the designer the child controls' location may be set after adding them to the group box.
             contentPanel.Parent ??= this;
             e.Control.Parent = contentPanel;
+            if (isInitialized)
+                e.Control.Location = new Point(e.Control.Left - contentPanel.Left, e.Control.Top - contentPanel.Top);
         }
 
         /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
+            if (isInitialized)
+                return;
+            isInitialized = true;
             ResetCheckBoxLocation();
+            foreach (Control control in contentPanel.Controls)
+                control.Location = new Point(control.Left - contentPanel.Left, control.Top - contentPanel.Top);
         }
 
         /// <summary>
@@ -176,6 +192,8 @@ namespace KGySoft.WinForms.Controls
             if (disposing)
             {
                 components?.Dispose();
+                if (contentPanel.Parent == null)
+                    contentPanel.Dispose();
                 Events.Dispose();
             }
 
@@ -190,10 +208,10 @@ namespace KGySoft.WinForms.Controls
 
         private void ResetCheckBoxLocation()
         {
-            // Skipping if the handle is not created yet (GetScale uses the Handle).
+            // Skipping if the handle has never been created yet (GetScale uses the Handle).
             // Without this, the focus rectangle may not be rendered when pressing TAB, and not even the ShowFocusCues is called.
             // Can happen if the CheckBox is unchecked and the GroupBox is inside a user control.
-            if (!IsHandleCreated)
+            if (!isInitialized)
                 return;
 
             checkBox.Left = RightToLeft == RightToLeft.No
