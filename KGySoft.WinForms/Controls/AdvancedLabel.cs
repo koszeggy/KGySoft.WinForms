@@ -90,7 +90,6 @@ namespace KGySoft.WinForms.Controls
         private AdvancedBorderStyle borderStyle;
         private int borderWidth;
         private RenderingQuality textRenderingQuality;
-        private FlatStyle lastFlatStyle = FlatStyle.Standard;
         private Size lastProposedSize;
 
         // NOTE: Unlike in AdvancedTextBox and AdvancedComboBox, we never set the base colors, because we handle all non-System drawings in the reimplemented OnPaint.
@@ -579,23 +578,6 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             }
         }
 
-        /// <summary>
-        /// Gets or sets the flat style appearance of the button control.
-        /// </summary>
-        public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
-        {
-            get => base.FlatStyle;
-            set
-            {
-                if (base.FlatStyle == value && lastFlatStyle == value)
-                    return;
-
-                base.FlatStyle = value;
-                lastFlatStyle = value;
-                OnFlatStyleChanged();
-            }
-        }
-
         #endregion
 
         #region Explicitly Implemented Interface Properties
@@ -648,7 +630,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 return preferredSize;
 
             TextFormatFlags formatFlags = this.GetFormatFlags();
-            bool useGdi = base.FlatStyle == FlatStyle.System || !UseCompatibleTextRendering;
+            bool useGdi = FlatStyle == FlatStyle.System || !UseCompatibleTextRendering;
 
             Size padding = GetBordersAndPadding();
             Size proposedTextSize = proposedSize - padding;
@@ -770,14 +752,6 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
-            // adjusting FlatStyle if needed (in System mode this is in WndProc)
-            if (base.FlatStyle != lastFlatStyle)
-            {
-                lastFlatStyle = base.FlatStyle;
-                OnFlatStyleChanged();
-                return;
-            }
-
             try
             {
                 fadingPainter.State ??= GetAppearance();
@@ -854,14 +828,6 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                     break;
 
                 case Constants.WM_PAINT:
-                    // FlatStyle is not overridable property so in case of native rendering reacting for its change here.
-                    // (On custom rendering, this is handled in OnPaint)
-                    if (base.FlatStyle != lastFlatStyle)
-                    {
-                        lastFlatStyle = base.FlatStyle;
-                        OnFlatStyleChanged();
-                    }
-
                     CheckDpiChange();
                     break;
 
@@ -1089,15 +1055,6 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             PerformLayout();
         }
 
-        private void OnFlatStyleChanged()
-        {
-            ResetSizeCache();
-            CheckStyles();
-            Invalidate();
-            if (AutoSize)
-                ResetSize();
-        }
-
         private void CheckStyles()
         {
             if (fadingAnimationsEnabled && FadingPainterInternal.IsSupported)
@@ -1107,7 +1064,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 return;
             }
 
-            if (base.FlatStyle != FlatStyle.System)
+            if (FlatStyle != FlatStyle.System)
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
         }
 

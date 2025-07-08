@@ -440,7 +440,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the flat style appearance of the button control.
+        /// Gets or sets the flat style appearance of the checkbox.
         /// </summary>
         public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
         {
