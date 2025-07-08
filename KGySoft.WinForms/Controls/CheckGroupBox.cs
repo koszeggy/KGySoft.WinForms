@@ -22,6 +22,7 @@ using System.Drawing;
 using System.Windows.Forms;
 
 using KGySoft.CoreLibraries;
+using KGySoft.WinForms.WinApi;
 
 #endregion
 
@@ -44,6 +45,8 @@ namespace KGySoft.WinForms.Controls
         #region Fields
 
         private bool isInitialized;
+        private bool isRendering;
+        private bool changingBaseText;
 
         #endregion
 
@@ -62,8 +65,6 @@ namespace KGySoft.WinForms.Controls
 
         #region Properties
 
-        #region Public Properties
-
         /// <summary>
         /// Gets or sets the text of the <see cref="CheckGroupBox"/>. That is, the text of the <see cref="CheckBox"/> control.
         /// </summary>
@@ -71,7 +72,7 @@ namespace KGySoft.WinForms.Controls
         [AllowNull]
         public override string Text
         {
-            get => checkBox.Text;
+            get => isRendering ? base.Text : checkBox.Text;
             set => checkBox.Text = value;
         }
 
@@ -88,9 +89,25 @@ namespace KGySoft.WinForms.Controls
             set => checkBox.Checked = value;
         }
 
-        #endregion
+        /// <summary>
+        /// Gets or sets the flat style appearance of the <see cref="CheckBox"/> and the <see cref="GroupBox"/>.
+        /// </summary>
+        [DefaultValue(FlatStyle.Standard)]
+        [Description("Gets or sets the flat style appearance of the check box and the group box.")]
+        public new FlatStyle FlatStyle
+        {
+            get => base.FlatStyle;
+            set
+            {
+                if (value == base.FlatStyle)
+                    return;
 
-        #region Internal Properties
+                // validation is performed by the base class
+                base.FlatStyle = value;
+                checkBox.FlatStyle = value;
+                checkBox.Invalidate();
+            }
+        }
 
         /// <summary>
         /// Gets the <see cref="AdvancedCheckBox"/> control, which serves as the checkbox of the <see cref="CheckGroupBox"/> control.
@@ -101,30 +118,18 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region Protected Properties
-
-        /// <inheritdoc />
-        protected override Padding DefaultPadding => new Padding(3, 5, 3, 3);
-
-        #endregion
-
-        #endregion
-
         #region Constructors
 
         /// <summary>
         /// Initializes a new instance of the <see cref="CheckGroupBox"/> class.
         /// </summary>
-        [SuppressMessage("ReSharper", "LocalizableElement", Justification = "Whitespace")]
         public CheckGroupBox()
         {
             InitializeComponent();
             Controls.Add(checkBox);
             checkBox.SizeChanged += CheckBox_SizeChanged;
             checkBox.CheckedChanged += CheckBox_CheckedChanged;
-
-            // making sure there is enough space before the CheckBox at every DPI
-            base.Text = "   ";
+            checkBox.TextChanged += CheckBox_TextChanged;
         }
 
         #endregion
@@ -157,12 +162,27 @@ namespace KGySoft.WinForms.Controls
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
+
+            // Making sure there is enough space before the CheckBox at every DPI
+            // Needed to reset each time when the handle is recreated, because otherwise the base.Text is set to the CheckBox's text
+            changingBaseText = true;
+            base.Text = @"   ";
+            changingBaseText = false;
             if (isInitialized)
                 return;
+
             isInitialized = true;
             ResetCheckBoxLocation();
             foreach (Control control in contentPanel.Controls)
                 control.Location = new Point(control.Left - contentPanel.Left, control.Top - contentPanel.Top);
+        }
+
+        /// <inheritdoc />
+        protected override void OnTextChanged(EventArgs e)
+        {
+            if (changingBaseText)
+                return;
+            base.OnTextChanged(e);
         }
 
         /// <summary>
@@ -187,6 +207,29 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <inheritdoc />
+        protected override void WndProc(ref Message m)
+        {
+            switch (m.Msg)
+            {
+                case Constants.WM_PAINT:
+                    isRendering = true;
+                    try
+                    {
+                        base.WndProc(ref m);
+                    }
+                    finally
+                    {
+                        isRendering = false;
+                    }
+                    break;
+
+                default:
+                    base.WndProc(ref m);
+                    break;
+            }
+        }
+
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             if (disposing)
@@ -199,6 +242,7 @@ namespace KGySoft.WinForms.Controls
 
             checkBox.CheckedChanged -= CheckBox_CheckedChanged;
             checkBox.SizeChanged -= CheckBox_SizeChanged;
+            checkBox.TextChanged -= CheckBox_TextChanged;
             base.Dispose(disposing);
         }
 
@@ -231,6 +275,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         private void CheckBox_SizeChanged(object? sender, EventArgs e) => ResetCheckBoxLocation();
+        private void CheckBox_TextChanged(object? sender, EventArgs e) => OnTextChanged(e);
 
         #endregion
 
