@@ -16,9 +16,9 @@
         private void InitializeComponent()
         {
             this.pnlButtons = new System.Windows.Forms.FlowLayoutPanel();
-            this.btnApply = new System.Windows.Forms.Button();
-            this.btnCancel = new System.Windows.Forms.Button();
-            this.btnOK = new System.Windows.Forms.Button();
+            this.btnApply = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.btnCancel = new KGySoft.WinForms.Controls.AdvancedButton();
+            this.btnOK = new KGySoft.WinForms.Controls.AdvancedButton();
             this.pnlButtons.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -39,43 +39,43 @@
             // 
             this.btnApply.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnApply.AutoSize = true;
-            this.btnApply.BackColor = System.Drawing.SystemColors.Control;
-            this.btnApply.FlatStyle = System.Windows.Forms.FlatStyle.System;
+            this.btnApply.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnApply.Location = new System.Drawing.Point(176, 6);
+            this.btnApply.MinimumSize = new System.Drawing.Size(75, 23);
             this.btnApply.Name = "btnApply";
             this.btnApply.Size = new System.Drawing.Size(75, 23);
             this.btnApply.TabIndex = 2;
             this.btnApply.Text = "&Apply";
-            this.btnApply.UseVisualStyleBackColor = false;
+            this.btnApply.UseVisualStyleBackColor = true;
             this.btnApply.Visible = false;
             // 
             // btnCancel
             // 
             this.btnCancel.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnCancel.AutoSize = true;
-            this.btnCancel.BackColor = System.Drawing.SystemColors.Control;
+            this.btnCancel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnCancel.DialogResult = System.Windows.Forms.DialogResult.Cancel;
-            this.btnCancel.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnCancel.Location = new System.Drawing.Point(95, 6);
+            this.btnCancel.MinimumSize = new System.Drawing.Size(75, 23);
             this.btnCancel.Name = "btnCancel";
             this.btnCancel.Size = new System.Drawing.Size(75, 23);
             this.btnCancel.TabIndex = 1;
             this.btnCancel.Text = "&Cancel";
-            this.btnCancel.UseVisualStyleBackColor = false;
+            this.btnCancel.UseVisualStyleBackColor = true;
             // 
             // btnOK
             // 
             this.btnOK.Anchor = System.Windows.Forms.AnchorStyles.None;
             this.btnOK.AutoSize = true;
-            this.btnOK.BackColor = System.Drawing.SystemColors.Control;
+            this.btnOK.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.btnOK.DialogResult = System.Windows.Forms.DialogResult.OK;
-            this.btnOK.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.btnOK.Location = new System.Drawing.Point(14, 6);
+            this.btnOK.MinimumSize = new System.Drawing.Size(75, 23);
             this.btnOK.Name = "btnOK";
             this.btnOK.Size = new System.Drawing.Size(75, 23);
             this.btnOK.TabIndex = 0;
             this.btnOK.Text = "&OK";
-            this.btnOK.UseVisualStyleBackColor = false;
+            this.btnOK.UseVisualStyleBackColor = true;
             // 
             // OkCancelButtons
             // 
@@ -92,9 +92,9 @@
         }
 
         #endregion
-        private System.Windows.Forms.Button btnOK;
-        private System.Windows.Forms.Button btnCancel;
+        private KGySoft.WinForms.Controls.AdvancedButton btnOK;
+        private KGySoft.WinForms.Controls.AdvancedButton btnCancel;
         private System.Windows.Forms.FlowLayoutPanel pnlButtons;
-        private System.Windows.Forms.Button btnApply;
+        private KGySoft.WinForms.Controls.AdvancedButton btnApply;
     }
 }
