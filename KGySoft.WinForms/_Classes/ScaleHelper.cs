@@ -73,15 +73,20 @@ namespace KGySoft.WinForms
 
             protected override void WndProc(ref Message m)
             {
-                if (m.Msg == Constants.WM_DPICHANGED)
+                switch (m.Msg)
                 {
-                    if (childControl is IPerMonitorDpiAware dpiAwareControl)
-                        dpiAwareControl.ParentFormDpiChanged();
-                    else
-                        childControl.Invalidate();
-                }
+                    case Constants.WM_DPICHANGED:
+                        base.WndProc(ref m);
+                        if (childControl is IPerMonitorDpiAware dpiAwareControl)
+                            dpiAwareControl.ParentFormDpiChanged();
+                        else
+                            childControl.Invalidate();
+                        break;
 
-                base.WndProc(ref m);
+                    default:
+                        base.WndProc(ref m);
+                        break;
+                }
             }
 
             #endregion
