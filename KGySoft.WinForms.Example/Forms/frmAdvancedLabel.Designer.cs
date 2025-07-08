@@ -55,7 +55,7 @@
             this.groupBox5 = new System.Windows.Forms.GroupBox();
             this.linkLabel1 = new System.Windows.Forms.LinkLabel();
             this.advancedLabel18 = new KGySoft.WinForms.Controls.AdvancedLabel();
-            this.ucCaptionedContainer1 = new KGySoft.WinForms.Controls.ucCaptionedContainer();
+            this.checkGroupBox1 = new KGySoft.WinForms.Controls.CheckGroupBox();
             this.advancedLabel11 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.label5 = new System.Windows.Forms.Label();
             this.pnlTestArea.SuspendLayout();
@@ -63,21 +63,21 @@
             this.groupBox2.SuspendLayout();
             this.groupBox4.SuspendLayout();
             this.groupBox5.SuspendLayout();
-            this.ucCaptionedContainer1.PanelContent.SuspendLayout();
+            this.checkGroupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlTestArea
             // 
             this.pnlTestArea.Controls.Add(this.groupBox5);
             this.pnlTestArea.Controls.Add(this.groupBox4);
-            this.pnlTestArea.Controls.Add(this.ucCaptionedContainer1);
+            this.pnlTestArea.Controls.Add(this.checkGroupBox1);
             this.pnlTestArea.Controls.Add(this.groupBox2);
             this.pnlTestArea.Controls.Add(this.groupBox1);
             this.pnlTestArea.Size = new System.Drawing.Size(450, 534);
             this.pnlTestArea.Controls.SetChildIndex(this.lblInstruction, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox1, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox2, 0);
-            this.pnlTestArea.Controls.SetChildIndex(this.ucCaptionedContainer1, 0);
+            this.pnlTestArea.Controls.SetChildIndex(this.checkGroupBox1, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox4, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox5, 0);
             // 
@@ -104,6 +104,7 @@
             this.advancedLabel1.AutoSize = true;
             this.advancedLabel1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(192)))), ((int)(((byte)(255)))), ((int)(((byte)(192)))));
             this.advancedLabel1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.advancedLabel1.ForeColor = System.Drawing.Color.Green;
             this.advancedLabel1.Location = new System.Drawing.Point(3, 29);
             this.advancedLabel1.Name = "advancedLabel1";
             this.advancedLabel1.Size = new System.Drawing.Size(444, 39);
@@ -115,6 +116,7 @@
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.FromArgb(((int)(((byte)(255)))), ((int)(((byte)(192)))), ((int)(((byte)(192)))));
             this.label1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.label1.ForeColor = System.Drawing.Color.Maroon;
             this.label1.Location = new System.Drawing.Point(3, 16);
             this.label1.Name = "label1";
             this.label1.Size = new System.Drawing.Size(1145, 13);
@@ -361,7 +363,7 @@
             this.linkLabel1.TabStop = true;
             this.linkLabel1.Text = "Note that regular LinkLabel supports links, too; however, it is unable to auto de" +
     "tect hyperlinks in the text so links should be set manually. Not mentioning the " +
-    "ugly hand cursor...";
+    "ugly hand cursor in older frameworks...";
             // 
             // advancedLabel18
             // 
@@ -378,25 +380,21 @@
             this.advancedLabel18.TabStop = true;
             this.advancedLabel18.UseCompatibleTextRendering = true;
             // 
-            // ucCaptionedContainer1
+            // checkGroupBox1
             // 
-            this.ucCaptionedContainer1.Caption = "Disabled colors (check to enable, uncheck to disable)";
-            this.ucCaptionedContainer1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.ucCaptionedContainer1.Location = new System.Drawing.Point(0, 300);
-            this.ucCaptionedContainer1.Name = "ucCaptionedContainer1";
-            // 
-            // ucCaptionedContainer1.ContentPanel
-            // 
-            this.ucCaptionedContainer1.PanelContent.Controls.Add(this.advancedLabel11);
-            this.ucCaptionedContainer1.PanelContent.Controls.Add(this.label5);
-            this.ucCaptionedContainer1.ShowCheckBox = true;
-            this.ucCaptionedContainer1.Size = new System.Drawing.Size(450, 65);
-            this.ucCaptionedContainer1.TabIndex = 7;
+            this.checkGroupBox1.Text = "Disabled colors (check to enable, uncheck to disable)";
+            this.checkGroupBox1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.checkGroupBox1.Location = new System.Drawing.Point(0, 300);
+            this.checkGroupBox1.Name = "checkGroupBox1";
+            this.checkGroupBox1.Controls.Add(this.advancedLabel11);
+            this.checkGroupBox1.Controls.Add(this.label5);
+            this.checkGroupBox1.Size = new System.Drawing.Size(450, 65);
+            this.checkGroupBox1.TabIndex = 7;
             // 
             // advancedLabel11
             // 
             this.advancedLabel11.AutoSize = true;
-            this.advancedLabel11.Location = new System.Drawing.Point(3, 25);
+            this.advancedLabel11.Location = new System.Drawing.Point(3, 33);
             this.advancedLabel11.Name = "advancedLabel11";
             this.advancedLabel11.Size = new System.Drawing.Size(272, 13);
             this.advancedLabel11.TabIndex = 5;
@@ -405,7 +403,7 @@
             // label5
             // 
             this.label5.AutoSize = true;
-            this.label5.Location = new System.Drawing.Point(3, 8);
+            this.label5.Location = new System.Drawing.Point(3, 16);
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(203, 13);
             this.label5.TabIndex = 4;
@@ -428,8 +426,8 @@
             this.groupBox4.PerformLayout();
             this.groupBox5.ResumeLayout(false);
             this.groupBox5.PerformLayout();
-            this.ucCaptionedContainer1.PanelContent.ResumeLayout(false);
-            this.ucCaptionedContainer1.PanelContent.PerformLayout();
+            this.checkGroupBox1.ResumeLayout(false);
+            this.checkGroupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -460,7 +458,7 @@
         private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel14;
         private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel13;
         private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel12;
-        private KGySoft.WinForms.Controls.ucCaptionedContainer ucCaptionedContainer1;
+        private KGySoft.WinForms.Controls.CheckGroupBox checkGroupBox1;
         private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel11;
         private System.Windows.Forms.Label label5;
         private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel18;

@@ -25,7 +25,6 @@ using KGySoft.WinForms.Controls.Design;
 
 #endregion
 
-
 namespace KGySoft.WinForms.Controls
 {
 
@@ -37,7 +36,8 @@ namespace KGySoft.WinForms.Controls
     //[DesignerSerializer(typeof(ucCaptionedContainerSerializer), typeof(CodeDomSerializer))]
     [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
-    [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
+    [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore. "
+        + "If you would use it for the check box, it is recommended to use the CheckGroupBox control instead.")]
     public partial class ucCaptionedContainer: ucCaptionedBase
     {
         #region Fields

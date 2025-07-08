@@ -5,8 +5,6 @@ using KGySoft.Drawing;
 
 using KGySoft.WinForms.Controls;
 
-#nullable enable
-
 namespace KGySoft.WinForms.Example.Forms
 {
     internal partial class frmImageViewer : ControlsTestBaseForm
@@ -62,7 +60,7 @@ namespace KGySoft.WinForms.Example.Forms
             }
         }
 
-        private void AdvancedRadioButton_CheckedChanged(object sender, System.EventArgs e)
+        private void AdvancedRadioButton_CheckedChanged(object sender, EventArgs e)
         {
             var radioButton = (AdvancedRadioButton)sender;
             if (!radioButton.Checked)

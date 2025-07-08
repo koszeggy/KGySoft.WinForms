@@ -29,47 +29,52 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvancedDateTimePicker));
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.checkGroupBox1 = new KGySoft.WinForms.Controls.CheckGroupBox();
             this.advancedDateTimePicker3 = new KGySoft.WinForms.Controls.AdvancedDateTimePicker();
             this.dateTimePicker3 = new System.Windows.Forms.DateTimePicker();
-            this.label3 = new System.Windows.Forms.Label();
+            this.label3 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.advancedDateTimePicker2 = new KGySoft.WinForms.Controls.AdvancedDateTimePicker();
             this.advancedDateTimePicker1 = new KGySoft.WinForms.Controls.AdvancedDateTimePicker();
             this.dateTimePicker2 = new System.Windows.Forms.DateTimePicker();
             this.dateTimePicker1 = new System.Windows.Forms.DateTimePicker();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.lblAdvancedTextBox = new System.Windows.Forms.Label();
-            this.lblSystem = new System.Windows.Forms.Label();
+            this.label2 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.label1 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.lblAdvancedTextBox = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.lblSystem = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.pnlTestArea.SuspendLayout();
-            this.groupBox1.SuspendLayout();
+            this.checkGroupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlTestArea
             // 
-            this.pnlTestArea.Controls.Add(this.groupBox1);
+            this.pnlTestArea.Controls.Add(this.checkGroupBox1);
             this.pnlTestArea.Size = new System.Drawing.Size(505, 253);
             // 
-            // groupBox1
+            // lblInstruction
             // 
-            this.groupBox1.Controls.Add(this.advancedDateTimePicker3);
-            this.groupBox1.Controls.Add(this.dateTimePicker3);
-            this.groupBox1.Controls.Add(this.label3);
-            this.groupBox1.Controls.Add(this.advancedDateTimePicker2);
-            this.groupBox1.Controls.Add(this.advancedDateTimePicker1);
-            this.groupBox1.Controls.Add(this.dateTimePicker2);
-            this.groupBox1.Controls.Add(this.dateTimePicker1);
-            this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.label1);
-            this.groupBox1.Controls.Add(this.lblAdvancedTextBox);
-            this.groupBox1.Controls.Add(this.lblSystem);
-            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox1.Location = new System.Drawing.Point(0, 92);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(505, 120);
-            this.groupBox1.TabIndex = 1;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "AdvancedDateTimePicker";
+            this.lblInstruction.Size = new System.Drawing.Size(407, 144);
+            this.lblInstruction.Text = resources.GetString("lblInstruction.Text");
+            // 
+            // checkGroupBox1
+            // 
+            this.checkGroupBox1.Controls.Add(this.advancedDateTimePicker3);
+            this.checkGroupBox1.Controls.Add(this.dateTimePicker3);
+            this.checkGroupBox1.Controls.Add(this.label3);
+            this.checkGroupBox1.Controls.Add(this.advancedDateTimePicker2);
+            this.checkGroupBox1.Controls.Add(this.advancedDateTimePicker1);
+            this.checkGroupBox1.Controls.Add(this.dateTimePicker2);
+            this.checkGroupBox1.Controls.Add(this.dateTimePicker1);
+            this.checkGroupBox1.Controls.Add(this.label2);
+            this.checkGroupBox1.Controls.Add(this.label1);
+            this.checkGroupBox1.Controls.Add(this.lblAdvancedTextBox);
+            this.checkGroupBox1.Controls.Add(this.lblSystem);
+            this.checkGroupBox1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.checkGroupBox1.Location = new System.Drawing.Point(0, 92);
+            this.checkGroupBox1.Name = "checkGroupBox1";
+            this.checkGroupBox1.Size = new System.Drawing.Size(505, 120);
+            this.checkGroupBox1.TabIndex = 1;
+            this.checkGroupBox1.TabStop = false;
+            this.checkGroupBox1.Text = "AdvancedDateTimePicker";
             // 
             // advancedDateTimePicker3
             // 
@@ -175,30 +180,29 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(723, 253);
-            this.InstructionsText = resources.GetString("$this.InstructionsText");
             this.Name = "frmAdvancedDateTimePicker";
             this.Text = "frmAdvancedDateTimePicker";
             this.pnlTestArea.ResumeLayout(false);
             this.pnlTestArea.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
+            this.checkGroupBox1.ResumeLayout(false);
+            this.checkGroupBox1.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
 
-        private System.Windows.Forms.GroupBox groupBox1;
+        private KGySoft.WinForms.Controls.CheckGroupBox checkGroupBox1;
         private System.Windows.Forms.DateTimePicker dateTimePicker1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label lblAdvancedTextBox;
-        private System.Windows.Forms.Label lblSystem;
+        private KGySoft.WinForms.Controls.AdvancedLabel label2;
+        private KGySoft.WinForms.Controls.AdvancedLabel label1;
+        private KGySoft.WinForms.Controls.AdvancedLabel lblAdvancedTextBox;
+        private KGySoft.WinForms.Controls.AdvancedLabel lblSystem;
         private KGySoft.WinForms.Controls.AdvancedDateTimePicker advancedDateTimePicker2;
         private KGySoft.WinForms.Controls.AdvancedDateTimePicker advancedDateTimePicker1;
         private System.Windows.Forms.DateTimePicker dateTimePicker2;
         private KGySoft.WinForms.Controls.AdvancedDateTimePicker advancedDateTimePicker3;
         private System.Windows.Forms.DateTimePicker dateTimePicker3;
-        private System.Windows.Forms.Label label3;
+        private KGySoft.WinForms.Controls.AdvancedLabel label3;
     }
 }

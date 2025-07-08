@@ -42,7 +42,8 @@
             // lblInstuction
             // 
             lblInstruction.Size = new System.Drawing.Size(545, 68);
-            lblInstruction.Text = "ImageViewer supports custom zooming (even by the mouse), as well as toggling smooth zooming.\r\n\r\nUse the predefined options or set the Image property to set an image.";
+            lblInstruction.Text = "ImageViewer supports custom zooming and panning, as well as toggling smoothing (even for metafiles).\r\n"
+                + "Use the predefined options or click the controls to set their properties.";
             // 
             // groupBox1
             // 
@@ -120,7 +121,7 @@
             advancedLabel2.Name = "advancedLabel2";
             advancedLabel2.Size = new System.Drawing.Size(267, 47);
             advancedLabel2.TabIndex = 5;
-            advancedLabel2.Text = "KGy SOFT ImageViewer\r\nSee AutoZoom, Zoom, SmoothZooming.\r\nUse Ctrl+Mouse Wheel to zoom by the mouse";
+            advancedLabel2.Text = "KGy SOFT ImageViewer\r\nSee AutoZoom, Zoom, SmoothingEnabled.\r\nUse Ctrl+Mouse Wheel to zoom by the mouse";
             // 
             // advancedLabel1
             // 
@@ -158,8 +159,6 @@
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             ClientSize = new System.Drawing.Size(820, 450);
-            InstructionsText = "ImageViewer supports custom zooming and panning, as well as toggling smoothing (even for metafiles).\r\n"
-                + "Use the predefined options or click the controls to set their properties.";
             Name = "frmImageViewer";
             Text = "frmImageViewer";
             pnlTestArea.ResumeLayout(false);

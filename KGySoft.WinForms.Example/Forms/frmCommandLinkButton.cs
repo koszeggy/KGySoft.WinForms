@@ -8,7 +8,7 @@ namespace KGySoft.WinForms.Example.Forms
         public frmCommandLinkButton()
         {
             InitializeComponent();
-            this.gbCustomBackground.BackgroundImage = Icons.Shield.ToBitmap();
+            gbCustomBackground.BackgroundImage = Icons.Shield.ToBitmap();
         }
     }
 }

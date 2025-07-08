@@ -30,24 +30,24 @@
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvancedComboBox));
             this.comboBox1 = new System.Windows.Forms.ComboBox();
-            this.gbComboBox = new System.Windows.Forms.GroupBox();
+            this.gbComboBox = new KGySoft.WinForms.Controls.CheckGroupBox();
             this.advancedComboBox7 = new KGySoft.WinForms.Controls.AdvancedComboBox();
             this.advancedComboBox8 = new KGySoft.WinForms.Controls.AdvancedComboBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.label4 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.advancedComboBox4 = new KGySoft.WinForms.Controls.AdvancedComboBox();
             this.advancedComboBox5 = new KGySoft.WinForms.Controls.AdvancedComboBox();
             this.advancedComboBox6 = new KGySoft.WinForms.Controls.AdvancedComboBox();
-            this.label3 = new System.Windows.Forms.Label();
+            this.label3 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.advancedComboBox3 = new KGySoft.WinForms.Controls.AdvancedComboBox();
-            this.label2 = new System.Windows.Forms.Label();
+            this.label2 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.comboBox3 = new System.Windows.Forms.ComboBox();
             this.advancedComboBox2 = new KGySoft.WinForms.Controls.AdvancedComboBox();
-            this.label1 = new System.Windows.Forms.Label();
+            this.label1 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.comboBox2 = new System.Windows.Forms.ComboBox();
             this.advancedComboBox1 = new KGySoft.WinForms.Controls.AdvancedComboBox();
-            this.label7 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
-            this.label5 = new System.Windows.Forms.Label();
+            this.label7 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.label6 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.label5 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.pnlTestArea.SuspendLayout();
             this.gbComboBox.SuspendLayout();
             this.SuspendLayout();
@@ -56,6 +56,11 @@
             // 
             this.pnlTestArea.Controls.Add(this.gbComboBox);
             this.pnlTestArea.Size = new System.Drawing.Size(493, 499);
+            // 
+            // lblInstruction
+            // 
+            this.lblInstruction.Size = new System.Drawing.Size(407, 144);
+            this.lblInstruction.Text = resources.GetString("lblInstruction.Text");
             // 
             // comboBox1
             // 
@@ -267,7 +272,6 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(711, 499);
-            this.InstructionsText = resources.GetString("$this.InstructionsText");
             this.Name = "frmAdvancedComboBox";
             this.Text = "frmAdvancedComboBox";
             this.pnlTestArea.ResumeLayout(false);
@@ -280,23 +284,23 @@
 
         #endregion
         private System.Windows.Forms.ComboBox comboBox1;
-        private System.Windows.Forms.GroupBox gbComboBox;
+        private KGySoft.WinForms.Controls.CheckGroupBox gbComboBox;
         private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox1;
-        private System.Windows.Forms.Label label7;
-        private System.Windows.Forms.Label label6;
-        private System.Windows.Forms.Label label5;
+        private KGySoft.WinForms.Controls.AdvancedLabel label7;
+        private KGySoft.WinForms.Controls.AdvancedLabel label6;
+        private KGySoft.WinForms.Controls.AdvancedLabel label5;
         private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox3;
-        private System.Windows.Forms.Label label2;
+        private KGySoft.WinForms.Controls.AdvancedLabel label2;
         private System.Windows.Forms.ComboBox comboBox3;
         private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox2;
-        private System.Windows.Forms.Label label1;
+        private KGySoft.WinForms.Controls.AdvancedLabel label1;
         private System.Windows.Forms.ComboBox comboBox2;
         private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox4;
         private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox5;
         private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox6;
-        private System.Windows.Forms.Label label3;
+        private KGySoft.WinForms.Controls.AdvancedLabel label3;
         private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox7;
         private KGySoft.WinForms.Controls.AdvancedComboBox advancedComboBox8;
-        private System.Windows.Forms.Label label4;
+        private KGySoft.WinForms.Controls.AdvancedLabel label4;
     }
 }

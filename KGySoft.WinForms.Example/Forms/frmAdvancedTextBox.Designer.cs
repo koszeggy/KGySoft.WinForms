@@ -29,29 +29,29 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmAdvancedTextBox));
-            this.gbTextBox = new System.Windows.Forms.GroupBox();
+            this.gbTextBox = new KGySoft.WinForms.Controls.CheckGroupBox();
             this.advancedTextBox4 = new KGySoft.WinForms.Controls.AdvancedTextBox();
             this.textBox4 = new System.Windows.Forms.TextBox();
-            this.label8 = new System.Windows.Forms.Label();
+            this.label8 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.advancedTextBox3 = new KGySoft.WinForms.Controls.AdvancedTextBox();
             this.textBox3 = new System.Windows.Forms.TextBox();
-            this.label4 = new System.Windows.Forms.Label();
+            this.label4 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.advancedTextBox2 = new KGySoft.WinForms.Controls.AdvancedTextBox();
             this.advancedTextBox1 = new KGySoft.WinForms.Controls.AdvancedTextBox();
             this.textBox2 = new System.Windows.Forms.TextBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.label1 = new System.Windows.Forms.Label();
-            this.lblAdvancedTextBox = new System.Windows.Forms.Label();
-            this.lblSystem = new System.Windows.Forms.Label();
+            this.label2 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.label1 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.lblAdvancedTextBox = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.lblSystem = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.gbDecimalTextBox = new System.Windows.Forms.GroupBox();
             this.txtValue = new System.Windows.Forms.TextBox();
-            this.lblValue = new System.Windows.Forms.Label();
-            this.label9 = new System.Windows.Forms.Label();
-            this.label3 = new System.Windows.Forms.Label();
-            this.label6 = new System.Windows.Forms.Label();
+            this.lblValue = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.label9 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.label3 = new KGySoft.WinForms.Controls.AdvancedLabel();
+            this.label6 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.decimalTextBox1 = new KGySoft.WinForms.Controls.DecimalTextBox();
-            this.label5 = new System.Windows.Forms.Label();
+            this.label5 = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.pnlTestArea.SuspendLayout();
             this.gbTextBox.SuspendLayout();
             this.gbDecimalTextBox.SuspendLayout();
@@ -62,6 +62,11 @@
             this.pnlTestArea.Controls.Add(this.gbDecimalTextBox);
             this.pnlTestArea.Controls.Add(this.gbTextBox);
             this.pnlTestArea.Size = new System.Drawing.Size(309, 416);
+            // 
+            // lblInstruction
+            // 
+            this.lblInstruction.Size = new System.Drawing.Size(407, 144);
+            this.lblInstruction.Text = resources.GetString("lblInstruction.Text");
             // 
             // gbTextBox
             // 
@@ -85,7 +90,7 @@
             this.gbTextBox.Size = new System.Drawing.Size(309, 174);
             this.gbTextBox.TabIndex = 3;
             this.gbTextBox.TabStop = false;
-            this.gbTextBox.Text = "TextBox";
+            this.gbTextBox.Text = "TextBox (uncheck to test disabled colors)";
             // 
             // advancedTextBox4
             // 
@@ -294,7 +299,6 @@
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(527, 416);
-            this.InstructionsText = resources.GetString("$this.InstructionsText");
             this.Name = "frmAdvancedTextBox";
             this.Text = "frmAdvancedTextBox";
             this.pnlTestArea.ResumeLayout(false);
@@ -309,28 +313,28 @@
 
         #endregion
 
-        private System.Windows.Forms.GroupBox gbTextBox;
+        private KGySoft.WinForms.Controls.CheckGroupBox gbTextBox;
         private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox3;
         private System.Windows.Forms.TextBox textBox3;
-        private System.Windows.Forms.Label label4;
+        private KGySoft.WinForms.Controls.AdvancedLabel label4;
         private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox2;
         private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox1;
         private System.Windows.Forms.TextBox textBox2;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Label label2;
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.Label lblAdvancedTextBox;
-        private System.Windows.Forms.Label lblSystem;
+        private KGySoft.WinForms.Controls.AdvancedLabel label2;
+        private KGySoft.WinForms.Controls.AdvancedLabel label1;
+        private KGySoft.WinForms.Controls.AdvancedLabel lblAdvancedTextBox;
+        private KGySoft.WinForms.Controls.AdvancedLabel lblSystem;
         private System.Windows.Forms.GroupBox gbDecimalTextBox;
-        private System.Windows.Forms.Label label5;
-        private System.Windows.Forms.Label label3;
-        private System.Windows.Forms.Label label6;
+        private KGySoft.WinForms.Controls.AdvancedLabel label5;
+        private KGySoft.WinForms.Controls.AdvancedLabel label3;
+        private KGySoft.WinForms.Controls.AdvancedLabel label6;
         private KGySoft.WinForms.Controls.DecimalTextBox decimalTextBox1;
-        private System.Windows.Forms.Label label9;
+        private KGySoft.WinForms.Controls.AdvancedLabel label9;
         private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox4;
         private System.Windows.Forms.TextBox textBox4;
-        private System.Windows.Forms.Label label8;
+        private KGySoft.WinForms.Controls.AdvancedLabel label8;
         private System.Windows.Forms.TextBox txtValue;
-        private System.Windows.Forms.Label lblValue;
+        private KGySoft.WinForms.Controls.AdvancedLabel lblValue;
     }
 }

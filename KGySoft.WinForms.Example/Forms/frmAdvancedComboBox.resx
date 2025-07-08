@@ -117,8 +117,8 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="$this.InstructionsText" xml:space="preserve">
-    <value>AdvancedComboBox allows custom colors in disabled mode and supports proper ReadOnly mode. Select the parent GroupBox and set its Enabled to test disabled colors.
+  <data name="lblInstruction.Text" xml:space="preserve">
+    <value>AdvancedComboBox allows custom colors in disabled mode and supports proper ReadOnly mode. Uncheck the check box of the parent combo box to test disabled colors.
 
 It also fixes Suggest AutoAppendMode in Simple mode, where selecting an item clears the text in the original ComboBox</value>
   </data>

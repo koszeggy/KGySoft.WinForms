@@ -159,6 +159,6 @@
     <value>CommandLinkButton is rendered natively in Windows Vista and above if FlatStyle is System.
 Other FlatStyle modes are fully supported, too.
 Supports AutoSize, Image in every FlatStyle mode.
-In non-System FlatStyle mode supports different colors, RightToLeft, TextAlign, ImageAlign, AutoEllipsis, RenderingQuality (check UseCompatibleTextMode, too)</value>
+In non-System FlatStyle mode supports different colors, RightToLeft, TextAlign, ImageAlign, AutoEllipsis, TextRenderingQuality (check UseCompatibleTextRendering, too)</value>
   </data>
 </root>

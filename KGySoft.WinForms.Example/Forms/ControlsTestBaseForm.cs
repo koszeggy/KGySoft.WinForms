@@ -21,6 +21,7 @@ using System.Drawing;
 using System.Drawing.Design;
 using System.Linq;
 using System.Windows.Forms;
+using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Forms;
 
 #endregion
@@ -33,18 +34,6 @@ namespace KGySoft.WinForms.Example.Forms
 
         private const int WM_MOUSEACTIVATE = 0x0021;
         private const int WM_LBUTTONDOWN = 0x201;
-
-        #endregion
-
-        #region Properties
-
-        [DefaultValue("Click the items to see their properties")]
-        [Editor("System.ComponentModel.Design.MultilineStringEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
-        public string InstructionsText
-        {
-            get => lblInstruction.Text;
-            set => lblInstruction.Text = value;
-        }
 
         #endregion
 
@@ -67,7 +56,7 @@ namespace KGySoft.WinForms.Example.Forms
         {
             #region Local Methods
 
-            static Control FindControl(Control parent, Point cursorPosition)
+            static Control? FindControl(Control parent, Point cursorPosition)
             {
                 if (!parent.HasChildren)
                     return parent;
@@ -91,9 +80,12 @@ namespace KGySoft.WinForms.Example.Forms
             {
                 case WM_LBUTTONDOWN: // when clicking over the disabled pnlTestArea (so the form gets the mouse down event)
                 case WM_MOUSEACTIVATE when (m.LParam.ToInt32() >> 16) == WM_LBUTTONDOWN: // when clicking over a child control, even disabled ones
-                    Control child = FindControl(this, Cursor.Position);
+                    Control? child = FindControl(this, Cursor.Position);
                     if (child == null || child == grdProperties || grdProperties.Contains(child))
                         break;
+
+                    if (child.Parent is CheckGroupBox)
+                        child = child.Parent; // CheckBox or the content panel of CheckGroupBox
 
                     // selecting a single object
                     if ((ModifierKeys & Keys.Shift) == 0)

@@ -117,7 +117,7 @@
   <resheader name="writer">
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <data name="$this.InstructionsText" xml:space="preserve">
+  <data name="lblInstruction.Text" xml:space="preserve">
     <value>The system DateTimePicker doesn't support custom colors in the editor control at all - its BackColor and ForeColor properties are not even browsable.
 
 AdvancedDateTimePicker offers custom coloring, though only when the control is not in focus. The focused control can only have a custom back color when visual styles are not enabled.</value>

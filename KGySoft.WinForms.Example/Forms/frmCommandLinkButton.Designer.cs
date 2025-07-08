@@ -66,7 +66,7 @@
             // lblInstuction
             // 
             this.lblInstruction.Size = new System.Drawing.Size(623, 79);
-            this.lblInstruction.Text = resources.GetString("lblInstuction.Text");
+            this.lblInstruction.Text = resources.GetString("lblInstruction.Text");
             // 
             // gbCustomBackground
             // 

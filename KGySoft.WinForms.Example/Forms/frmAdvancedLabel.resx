@@ -112,13 +112,13 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="advancedLabel1.Text" xml:space="preserve">
-    <value>This is an AdvancedLabel. AutoSize, Dock=Top. Auto sizing works as expected as the label automatically wraps and its height is correctly set. Please note that when Dock=Fill, AutoSize should be turned off as before.</value>
+    <value>This is an AdvancedLabel. AutoSize, Dock=Top. Auto sizing works as expected as the label automatically wraps and its height is correctly set. Please note that when Dock=Fill, AutoSize should be turned off, just like for a regular Label.</value>
   </data>
   <data name="label1.Text" xml:space="preserve">
     <value>This is a regular Label, AutoSize, Dock=Top. Unfortunately, auto sizing does not work as it is expected (unless label is used in special parent, such as TableLayoutPanel) because the label won't wrap. Instead, it expands itself beyond the limits.</value>
