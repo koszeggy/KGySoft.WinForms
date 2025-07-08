@@ -1,9 +1,31 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: FadingLabelDemo.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.Windows.Forms;
+
 using KGySoft.WinForms.Controls;
+
+#endregion
 
 namespace KGySoft.WinForms.Example.Controls
 {
+    #region Enumerations
+
     internal enum LabelStatus
     {
         Normal,
@@ -11,11 +33,32 @@ namespace KGySoft.WinForms.Example.Controls
         Hovered
     }
 
-    internal class FadingLabelDemo: Label, ISupportsFading<LabelStatus>
+    #endregion
+
+    internal class FadingLabelDemo : Label, ISupportsFading<LabelStatus>
     {
+        #region Fields
+
         private LabelStatus state;
         private FadingPainter<LabelStatus> fadingPainter;
         private bool isAdjustingPropertyForAppearance;
+
+        #endregion
+
+        #region Properties
+
+        public bool FadingAnimationsEnabled { get; set; }
+
+        public LabelStatus State
+        {
+            get { return state; }
+        }
+
+        public int FadingAnimationDefaultSpeed { get; set; }
+
+        #endregion
+
+        #region Constructors
 
         public FadingLabelDemo()
         {
@@ -27,43 +70,15 @@ namespace KGySoft.WinForms.Example.Controls
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
         }
 
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                fadingPainter.Dispose();
-            }
+        #endregion
 
-            base.Dispose(disposing);
-        }
+        #region Methods
 
-        // Try to change it in the Property Grid
-        public bool FadingAnimationsEnabled { get; set; }
-
-        public LabelStatus State
-        {
-            get { return state; }
-        }
-
-        // Try to change it in the Property Grid
-        public int FadingAnimationDefaultSpeed { get; set; }
+        #region Public Methods
 
         public int GetFadingAnimationSpeed(LabelStatus stateFrom, LabelStatus stateTo)
         {
             return FadingAnimationDefaultSpeed;
-        }
-
-        protected override void OnPaintBackground(PaintEventArgs pevent)
-        {
-            // do not paint background here
-        }
-
-        protected override void OnPaint(PaintEventArgs e)
-        {
-            if (isAdjustingPropertyForAppearance)
-                return;
-
-            fadingPainter.Paint(e);
         }
 
         public void PaintState(LabelStatus state, PaintEventArgs e)
@@ -89,6 +104,33 @@ namespace KGySoft.WinForms.Example.Controls
             }
         }
 
+        #endregion
+
+        #region Protected Methods
+
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                fadingPainter.Dispose();
+            }
+
+            base.Dispose(disposing);
+        }
+
+        protected override void OnPaintBackground(PaintEventArgs pevent)
+        {
+            // do not paint background here
+        }
+
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            if (isAdjustingPropertyForAppearance)
+                return;
+
+            fadingPainter.Paint(e);
+        }
+
         protected override void OnEnabledChanged(EventArgs e)
         {
             // Changing enabled will raise a Paint
@@ -111,5 +153,9 @@ namespace KGySoft.WinForms.Example.Controls
             base.OnMouseLeave(e);
             Invalidate();
         }
+
+        #endregion
+
+        #endregion
     }
 }

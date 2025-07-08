@@ -1,22 +1,53 @@
-﻿using System;
+﻿#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: frmImageViewer.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using KGySoft.Drawing;
 
+using KGySoft.Drawing;
 using KGySoft.WinForms.Controls;
+
+#endregion
 
 namespace KGySoft.WinForms.Example.Forms
 {
     internal partial class frmImageViewer : ControlsTestBaseForm
     {
+        #region Fields
+
         private Bitmap? smallBitmap;
         private Bitmap? largeBitmap;
         private Metafile? metafile;
+
+        #endregion
+
+        #region Constructors
 
         public frmImageViewer()
         {
             InitializeComponent();
         }
+
+        #endregion
+
+        #region Methods
+
+        #region Static Methods
 
         private static Metafile GenerateMetafile()
         {
@@ -44,6 +75,12 @@ namespace KGySoft.WinForms.Example.Forms
             return result;
         }
 
+        #endregion
+
+        #region Instance Methods
+
+        #region Protected Methods
+
         /// <summary>
         /// Clean up any resources being used.
         /// </summary>
@@ -59,6 +96,10 @@ namespace KGySoft.WinForms.Example.Forms
                 metafile?.Dispose();
             }
         }
+
+        #endregion
+
+        #region Event handlers
 
         private void AdvancedRadioButton_CheckedChanged(object sender, EventArgs e)
         {
@@ -78,5 +119,11 @@ namespace KGySoft.WinForms.Example.Forms
             if (!imageViewer.AutoZoom)
                 imageViewer.Zoom = 1.0f;
         }
+
+        #endregion
+
+        #endregion
+
+        #endregion
     }
 }
