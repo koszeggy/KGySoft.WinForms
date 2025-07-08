@@ -20,7 +20,7 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
-
+using System.Windows.Forms.VisualStyles;
 using KGySoft.CoreLibraries;
 using KGySoft.WinForms.WinApi;
 
@@ -47,6 +47,8 @@ namespace KGySoft.WinForms.Controls
         private bool isInitialized;
         private bool isRendering;
         private bool changingBaseText;
+
+        private Color explicitForeColor;
 
         #endregion
 
@@ -87,6 +89,23 @@ namespace KGySoft.WinForms.Controls
         {
             get => checkBox.Checked;
             set => checkBox.Checked = value;
+        }
+
+        /// <inheritdoc />
+        public override Color ForeColor
+        {
+            get => explicitForeColor.IsEmpty ? base.ForeColor : explicitForeColor;
+            set
+            {
+                if (explicitForeColor == value)
+                    return;
+
+                base.ForeColor = value;
+                if (value.IsEmpty)
+                    OnForeColorChanged(EventArgs.Empty);
+                explicitForeColor = value;
+                ResetCheckBoxColor();
+            }
         }
 
         /// <summary>
@@ -130,6 +149,8 @@ namespace KGySoft.WinForms.Controls
             checkBox.SizeChanged += CheckBox_SizeChanged;
             checkBox.CheckedChanged += CheckBox_CheckedChanged;
             checkBox.TextChanged += CheckBox_TextChanged;
+            ResetCheckBoxColor();
+            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
 
         #endregion
@@ -232,6 +253,10 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
+            VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
+            checkBox.CheckedChanged -= CheckBox_CheckedChanged;
+            checkBox.SizeChanged -= CheckBox_SizeChanged;
+            checkBox.TextChanged -= CheckBox_TextChanged;
             if (disposing)
             {
                 components?.Dispose();
@@ -240,9 +265,6 @@ namespace KGySoft.WinForms.Controls
                 Events.Dispose();
             }
 
-            checkBox.CheckedChanged -= CheckBox_CheckedChanged;
-            checkBox.SizeChanged -= CheckBox_SizeChanged;
-            checkBox.TextChanged -= CheckBox_TextChanged;
             base.Dispose(disposing);
         }
 
@@ -263,6 +285,10 @@ namespace KGySoft.WinForms.Controls
                 : Width - checkBox.Width - (int)(10 * this.GetScale().X);
         }
 
+        private void ResetCheckBoxColor() => checkBox.EnabledForeColor = !explicitForeColor.IsEmpty ? explicitForeColor
+            : VisualStyleHelper.RenderWithVisualStyles ? VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_GROUPBOX, (int)GroupBoxState.Normal, default)
+            : default;
+
         #endregion
 
         #region Event handlers
@@ -276,6 +302,7 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckBox_SizeChanged(object? sender, EventArgs e) => ResetCheckBoxLocation();
         private void CheckBox_TextChanged(object? sender, EventArgs e) => OnTextChanged(e);
+        private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e) => ResetCheckBoxColor();
 
         #endregion
 
