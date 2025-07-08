@@ -797,9 +797,11 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             if (dpiChanging || !AutoScaleFont)
                 return;
 
-#if NET7_0_OR_GREATER
+#if NET6_0_OR_GREATER
             // The parent is rescaling its font due to DPI change without (or before the first) WM_DPICHANGED_BEFOREPARENT message.
-            // Occurs in .NET 7+ when the DPI of the primary display was changed after starting the application, but before opening the parent form.
+            // Occurs in .NET 6+ when the DPI of the primary display was changed after starting the application, but before opening the parent form.
+            // Actually works in .NET 7+ only, because in .NET 6 all DeviceDpi are already the new DPI, while Parent.Font is still the old one, despite the event.
+            // We accept the broken behavior in .NET 6, because the standard controls are also broken the same way, and we don't need to target .NET 7 specifically just because of this.
             int deviceDpi = DeviceDpi;
             if (Parent is Control parent && parent.DeviceDpi != deviceDpi || TopLevelControl is Control top && top.DeviceDpi != deviceDpi)
                 return;

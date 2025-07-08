@@ -42,6 +42,16 @@ namespace KGySoft.WinForms.WinApi
         [DllImport("Gdi32.dll", SetLastError = true)]
         public static extern IntPtr GetStockObject(int i);
 
+        /// <summary>
+        /// The DeleteObject function deletes a logical pen, brush, font, bitmap, region, or palette, freeing all system resources associated with the object.
+        /// After the object is deleted, the specified handle is no longer valid.
+        /// </summary>
+        /// <param name="ho">A handle to a logical pen, brush, font, bitmap, region, or palette.</param>
+        /// <returns>If the function succeeds, the return value is nonzero.
+        /// If the specified handle is not valid or is currently selected into a DC, the return value is zero.</returns>
+        [DllImport("Gdi32.dll")]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        public static extern bool DeleteObject(IntPtr ho);
 
         #endregion
     }

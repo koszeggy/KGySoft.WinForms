@@ -148,7 +148,6 @@
             // 
             // advancedTextBox2
             // 
-            this.advancedTextBox2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
             this.advancedTextBox2.Location = new System.Drawing.Point(189, 63);
             this.advancedTextBox2.Name = "advancedTextBox2";
             this.advancedTextBox2.ReadOnly = true;

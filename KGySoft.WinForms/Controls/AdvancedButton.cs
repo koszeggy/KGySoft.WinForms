@@ -535,6 +535,32 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        /// <inheritdoc />
+        public override Size MinimumSize
+        {
+            get => base.MinimumSize;
+            set
+            {
+                if (base.MinimumSize == value)
+                    return;
+                ResetSizeCache();
+                base.MinimumSize = value;
+            }
+        }
+
+        /// <inheritdoc />
+        public override Size MaximumSize
+        {
+            get => base.MaximumSize;
+            set
+            {
+                if (base.MaximumSize == value)
+                    return;
+                ResetSizeCache();
+                base.MaximumSize = value;
+            }
+        }
+
         #endregion
 
         #region Protected Properties
@@ -834,9 +860,11 @@ namespace KGySoft.WinForms.Controls
             if (dpiChanging || !AutoScaleFont)
                 return;
 
-#if NET7_0_OR_GREATER
+#if NET6_0_OR_GREATER
             // The parent is rescaling its font due to DPI change without (or before the first) WM_DPICHANGED_BEFOREPARENT message.
-            // Occurs in .NET 7+ when the DPI of the primary display was changed after starting the application, but before opening the parent form.
+            // Occurs in .NET 6+ when the DPI of the primary display was changed after starting the application, but before opening the parent form.
+            // Actually works in .NET 7+ only, because in .NET 6 all DeviceDpi are already the new DPI, while Parent.Font is still the old one, despite the event.
+            // We accept the broken behavior in .NET 6, because the standard controls are also broken the same way, and we don't need to target .NET 7 specifically just because of this.
             int deviceDpi = DeviceDpi;
             if (Parent is Control parent && parent.DeviceDpi != deviceDpi || TopLevelControl is Control top && top.DeviceDpi != deviceDpi)
                 return;
@@ -1249,8 +1277,19 @@ namespace KGySoft.WinForms.Controls
             // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
             if (Equals(oldFont, newFont.Font))
             {
-                if (ReferenceEquals(oldFont, newFont.Font) || !oldFont.IsDisposed())
+                if (ReferenceEquals(oldFont, newFont.Font))
                     return;
+
+                // Non-reference equality: we are alright if the old font is not disposed...
+                // ...except in .NET Core 3.0 - .NET 5.0 when FlatStyle is System and using v1 per-monitor DPI awareness, in which case the font gets corrupted
+#if NETCOREAPP && !NET6_0_OR_GREATER
+                if (!oldFont.IsDisposed() && !(base.FlatStyle == FlatStyle.System && OSHelper.IsWindows && !OSHelper.IsMono && ScaleHelper.PerMonitorDpiAwarenessVersion == 1))
+#else
+                if (!oldFont.IsDisposed())
+#endif
+                {
+                    return;
+                }
 
                 suppressFontChanged = true;
                 try
