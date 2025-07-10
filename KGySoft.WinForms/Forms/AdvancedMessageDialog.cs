@@ -27,6 +27,7 @@ using System.Windows.Forms;
 
 using KGySoft.Drawing;
 using KGySoft.Libraries.Language;
+using KGySoft.WinForms.Components;
 
 #endregion
 
@@ -38,18 +39,6 @@ namespace KGySoft.WinForms.Forms
     [Obsolete("Use KGySoft.WinForms.Components.TaskDialog instead.")]
     public sealed partial class AdvancedMessageDialog : BaseForm
     {
-        #region Constants
-
-        private const string TextOk = "&OK__Dialogs";
-        private const string TextYes = "&Yes__Dialogs";
-        private const string TextNo = "&No__Dialogs";
-        private const string TextCancel = "&Cancel__Dialogs";
-        private const string TextAbort = "&Abort__Dialogs";
-        private const string TextRetry = "&Retry__Dialogs";
-        private const string TextIgnore = "&Ignore__Dialogs";
-
-        #endregion
-
         #region Fields
 
         private string screenshot = String.Empty; // path of the screenshot
@@ -76,6 +65,8 @@ namespace KGySoft.WinForms.Forms
 
         #region Static Properties
 
+        #region Public Properties
+        
         /// <summary>
         /// Gets or sets log directory for saving logs and screenshots.
         /// </summary>
@@ -85,6 +76,20 @@ namespace KGySoft.WinForms.Forms
         /// An optional custom error handler that can be used to handle exceptions in a custom way (e.g. log into a database or file).
         /// </summary>
         public static Action<Exception>? CustomErrorHandler = null;
+
+        #endregion
+
+        #region Private Properties
+
+        private static string TextOk => Res.Get(TaskDialogStandardButtonFlags.OK);
+        private static string TextYes => Res.Get(TaskDialogStandardButtonFlags.Yes);
+        private static string TextNo => Res.Get(TaskDialogStandardButtonFlags.No);
+        private static string TextCancel => Res.Get(TaskDialogStandardButtonFlags.Cancel);
+        private static string TextAbort => "&Abort"; //Res.Get(TaskDialogStandardButtonFlags.Cancel);
+        private static string TextRetry => Res.Get(TaskDialogStandardButtonFlags.Retry);
+        private static string TextIgnore => "&Ignore"; //Res.Get(TaskDialogStandardButtonFlags.Cancel);
+
+        #endregion
 
         #endregion
 

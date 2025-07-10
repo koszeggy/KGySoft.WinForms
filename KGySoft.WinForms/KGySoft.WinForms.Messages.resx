@@ -107,6 +107,18 @@
   <data name="BaseForm_MdiClientNotFound" xml:space="preserve">
     <value>MDI Client area not found.</value>
   </data>
+  <data name="Dialogs_InfoCaption" xml:space="preserve">
+    <value>Information</value>
+  </data>
+  <data name="Dialogs_WarningCaption" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="Dialogs_ErrorCaption" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Dialogs_ConfirmationCaption" xml:space="preserve">
+    <value>Confirmation</value>
+  </data>
   <data name="TaskDialog_ShowDetails" xml:space="preserve">
     <value>See &amp;details</value>
   </data>

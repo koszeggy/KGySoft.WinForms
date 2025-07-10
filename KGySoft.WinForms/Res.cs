@@ -59,6 +59,22 @@ namespace KGySoft.WinForms
 
         #endregion
 
+        #region Dialogs
+
+        /// <summary>Information</summary>
+        internal static string DialogsInfoCaption => Get("Dialogs_InfoCaption");
+
+        /// <summary>Warning</summary>
+        internal static string DialogsWarningCaption => Get("Dialogs_WarningCaption");
+
+        /// <summary>Error</summary>
+        internal static string DialogsErrorCaption => Get("Dialogs_ErrorCaption");
+
+        /// <summary>Confirmation</summary>
+        internal static string DialogsConfirmationCaption => Get("Dialogs_ConfirmationCaption");
+
+        #endregion
+
         #region TaskDialog
 
         /// <summary>See &amp;details</summary>

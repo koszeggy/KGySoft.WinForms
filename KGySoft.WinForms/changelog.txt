@@ -18,12 +18,14 @@
 ! Every type in this namespace has been marked as obsolete. This is a legacy namespace from the old
   KGySoft.Language.dll dependency. The old translation mechanism doesn't translate anything anymore, just removes
   the possible distinction postfixes if present. To localize your application in a similar way with auto-generated
-  resources, use the DynamicResourceManager class from the KGySoft.CoreLibraries package. For more details see:
+  resources, use the new LocalizationHelper class in the KGySoft.WinForms namespace, or the
+  DynamicResourceManager class from the KGySoft.CoreLibraries package. For more details see:
   DynamicResourceManager class: https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm
-  Application example: https://github.com/koszeggy/KGySoft.Drawing.Tools#localization
 
 ! Language class: It has been made obsolete. See the note above.
+  ! The RedirectTranslate event has been removed. Use the LocalizationHelper.LocalizationRequested event instead.
 ! ICustomTranslated interface: It has been made obsolete. See the note above.
+! The RedirectTranslateEventArgs class has been removed.
 
 ! KGySoft.WinForms namespace:
 =============================
@@ -210,6 +212,17 @@
     members are still available, but they have been concealed by the EditorBrowsableState.Never attribute.
   ! The type of the pnlButtons member has been changed to OkCancelButtons (used to be TableLayoutPanel).
   + New ShowOKButton, ShowCancelButton and ShowApplyButton properties
+! Dialogs class:
+  ! The UseAdvancedDialogs property has been made obsolete. Use the new UseTaskDialogs property instead.
+  ! InfoMessage(string)/WarningMessage(string)/ErrorMessage(string)/ConfirmMessage(string)/
+    ConfirmMessage(bool,string) overloads: They no longer perform any translation, but expect the caller to use
+    already localized strings.
+  ! InfoMessage(string,object[])/WarningMessage(string,object[])/ErrorMessage(string,object[])/
+    ConfirmMessage(string,object[])/ConfirmMessage(bool,string,object[]) overloads: They are now obsolete.
+    They no longer perform any translation, just remove the possible distinction postfixes if present.
+  + New InfoMessage/WarningMessage/ErrorMessage/ConfirmMessage overloads to provide an owner window.
+  + New CancellableConfirmMessage methods instead of the obsoleted DialogResult-returning ConfirmMessage overloads.
+  + New UseTaskDialogs property: it allows to use the TaskDialog class instead of the standard MessageBox dialogs.
 + New DeviceScaleChangedEventArgs class
 
 
@@ -243,6 +256,13 @@
 ! KGySoft.Controls.Interop namespace:
 =====================================
 ! The namespace has been removed and its AdvancedWinformsHost WPF control does not belong to this assembly anymore.
+
+! KGySoft.Libraries.Language namespace
+======================================
+! The ActiveLanguage property has been removed. Use LanguageSettings.DisplayLanguage from the KGySoft.CoreLibraries
+  package instead.
+! The FormattingLanguage property has been removed. Use LanguageSettings.FormattingLanguage from the
+  KGySoft.CoreLibraries package instead.
 
 + KGySoft.WinForms namespace:
 =============================
