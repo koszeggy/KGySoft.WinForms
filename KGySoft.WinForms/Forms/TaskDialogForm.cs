@@ -1389,6 +1389,11 @@ namespace KGySoft.WinForms.Forms
             try
             {
                 // setting form width
+                // This forces to create the handle. May cause some resets and additional DPI changes, but it's still better than handling
+                // the side effects of the deferred handle creation (e.g. the ResumeLayout in ResetHeights may change the screen,
+                // recursive reentrancy in OnDeviceScaleChanged when setting MinimumSize in ResetConstraints, etc.).
+                // NOTE: we could force the handle creation earlier (in Execute), but due to a strange bug in .NET 5.0 it causes
+                // that OnLoad and OnShown are not called, causing some issues, e.g. the timer is not initialized and system sounds are not played.
                 Screen screen = Screen.FromControl(this);
                 Rectangle screenBounds = screen.WorkingArea;
                 int screenWidth = screenBounds.Width;
@@ -2114,11 +2119,6 @@ namespace KGySoft.WinForms.Forms
                 ownerWindow = new Win32Window { Handle = owner };
             
             FirstInit();
-
-            // This forces to create the handle. May cause some resets and additional DPI changes, but it's still better than handling
-            // the side effects of the deferred handle creation (e.g. the ResumeLayout in ResetHeights may change the screen,
-            // recursive reentrancy in OnDeviceScaleChanged when setting MinimumSize in ResetConstraints, etc.).
-            host.Handle = Handle;
             ResetSettings();
 
             // showing the dialog
