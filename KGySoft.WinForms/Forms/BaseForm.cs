@@ -528,7 +528,7 @@ namespace KGySoft.WinForms.Forms
         /// Translates controls and tooltips of given control.
         /// </summary>
         /// <param name="control"></param>
-        [Obsolete("Translation does not works anymore, it just removes the possible postfixes.")]
+        [Obsolete("Translation does not work anymore, it just removes the possible postfixes.")]
         protected void PerformTranslate(Control control)
         {
             if (translateControls)

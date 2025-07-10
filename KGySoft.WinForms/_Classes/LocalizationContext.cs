@@ -28,9 +28,14 @@ using KGySoft.WinForms.Forms;
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Represents the context of a localization operation that can be useful when handling the <see cref="LocalizationHelper.LocalizationRequested"/> event,
-    /// and can determine the automatic localization behavior of controls.
+    /// Represents the context of a localization operation that provides information for the <see cref="LocalizationHelper.LocalizationRequested"/> event,
+    /// and can determine source of the resources for dynamic automatic localization.
     /// </summary>
+    /// <remarks>
+    /// <note>To make dynamic localization work without handling the <see cref="LocalizationHelper.LocalizationRequested"/> event,
+    /// you need to create at least one resource set for the invariant language. See the <see cref="BaseForm.DynamicStringLocalization">BaseForm.DynamicStringLocalization</see>
+    /// property for details.</note>
+    /// </remarks>
     public sealed class LocalizationContext
     {
         #region Fields

@@ -20,6 +20,10 @@ using System.ComponentModel;
 using System.Globalization;
 using System.Text;
 
+using KGySoft.WinForms;
+using KGySoft.WinForms.Controls;
+using KGySoft.WinForms.Forms;
+
 #endregion
 
 #pragma warning disable CS1574 // the documentation contains types that are not available in every target
@@ -37,14 +41,15 @@ namespace KGySoft.Libraries.Language
     /// instead of looking up real keys from resources, it took the original untranslated terms and used them as keys to look them up
     /// in localized resources. To avoid conflicts, it supported so-called "distinction postfixes". Though it worked from
     /// .resx files, the system-provided culture hierarchy was omitted, only neutral (non-specific) cultures were supported.
-    /// To overcome all these issues and still use .resx-based dynamically generated localizations use the
+    /// To overcome all these issues and still use .resx-based dynamically generated localizations you can use the
+    /// <see cref="LocalizationHelper"/> class (recommended when you use the <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
+    /// property of <see cref="BaseForm"/> or <see cref="BaseUserControl"/> classes), or the
     /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note>
     /// </remarks>
-    /// <seealso cref="Translate(string)"/>
-    /// <seealso cref="Translate(string,object[])"/>
-    /// <seealso cref="DistinctionSeparator"/>
-    /// <seealso cref="ICustomTranslated"/>
-    [Obsolete("Use DynamicResourceManager from KGySoft.CoreLibraries instead")]
+    /// <seealso cref="LocalizationHelper"/>
+    /// <seealso cref="LocalizationHelper.GetString(string,LocalizationContext)"/>
+    /// <seealso cref="BaseForm.DynamicStringLocalization"/>
+    [Obsolete("Use LocalizationHelper, or the DynamicResourceManager class from KGySoft.CoreLibraries instead")]
     public static class Language
     {
         #region Constants
@@ -66,7 +71,8 @@ namespace KGySoft.Libraries.Language
         /// Translates the given invariant text to the currently set <see cref="ActiveLanguage"/>.
         /// </summary>
         /// <param name="text">The text to translate.</param>
-        /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possible distinction postfixes. Use the
+        /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possibly existing distinction postfix. Use the
+        /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method or the
         /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
         public static string Translate(string? text)
         {
@@ -113,12 +119,12 @@ namespace KGySoft.Libraries.Language
         /// <param name="text">Invariant text with placeholders.</param>
         /// <param name="args">Arguments for placeholders.</param>
         /// <returns></returns>
-        /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possible distinction postfixes. Use the
+        /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possibly existing distinction postfix. Use the
+        /// <see cref="LocalizationHelper.GetString(string,LocalizationContext,object[])">LocalizationHelper.GetString</see> method or the
         /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
-        public static string Translate(string text, params object[] args)
-        {
-            return String.Format(LanguageSettings.FormattingLanguage, Translate(text), args);
-        }
+        public static string Translate(string text, params object[]? args) => args is null || args.Length == 0
+            ? Translate(text)
+            : String.Format(LanguageSettings.FormattingLanguage, Translate(text), args);
 
         /// <summary>
         /// Translates the invariant text containing placeholders to the currently
@@ -128,12 +134,12 @@ namespace KGySoft.Libraries.Language
         /// <param name="text">Invariant text with placeholders.</param>
         /// <param name="args">Arguments for placeholders.</param>
         /// <returns></returns>
-        /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possible distinction postfixes. Use the
+        /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possibly existing distinction postfix. Use the
+        /// <see cref="LocalizationHelper.GetString(CultureInfo,string,LocalizationContext,object[])">LocalizationHelper.GetString</see> method or the
         /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
-        public static string Translate(CultureInfo formattingCulture, string text, params object[] args)
-        {
-            return String.Format(formattingCulture, Translate(text), args);
-        }
+        public static string Translate(CultureInfo formattingCulture, string text, params object[]? args) => args is null || args.Length == 0
+            ? Translate(text)
+            : String.Format(formattingCulture, Translate(text), args);
 
         /// <summary>
         /// Saves the dictionary if <see cref="ActiveLanguage"/> is not the invariant culture.
