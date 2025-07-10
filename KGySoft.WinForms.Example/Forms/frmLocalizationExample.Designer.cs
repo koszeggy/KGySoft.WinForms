@@ -164,7 +164,7 @@
             // 
             AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
             AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            ClientSize = new System.Drawing.Size(784, 511);
+            ClientSize = new System.Drawing.Size(784, 530);
             DynamicStringLocalization = DynamicStringLocalization.LocalScope;
             Name = "frmLocalizationExample";
             RightToLeftLayout = true;

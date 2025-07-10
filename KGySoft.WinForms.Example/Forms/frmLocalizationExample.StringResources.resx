@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="btnLocalizableControl.Text" xml:space="preserve">
-    <value>DynamicStringLocalization = Disabled (or Disabled)</value>
+    <value>DynamicStringLocalization = Disabled (or Custom)</value>
   </data>
   <data name="btnLocalizableControl.ToolTipText" xml:space="preserve">
     <value>When BaseUserControl.DynamicStringLocalization is Disabled or Custom, it can inherit the Local/Assembly scope of a parent user control or form.
@@ -129,9 +129,9 @@ In this case, the form has a LocalScope localization setting, whereas the user c
     <value>This user control uses no scoped localization, so it inherits the LocalScope settings of the parent form, using form-level resources.</value>
   </data>
   <data name="lblInstruction.Text" xml:space="preserve">
-    <value>DynamicStringLocalization is set to LocalScope for this form, meaning, every localizable text element is applied dynamically from a form-specific resource set, inlcuding this text. If you see a [T] prefix before the text, your Windows locale uses a non-English UI culture, and an untranslated resource set has just been generated for that language.
+    <value>DynamicStringLocalization is set to LocalScope on this form, meaning, every localizable text element is applied dynamically from a form-specific resource set, including this text. If you see a [T] prefix before the text, your Windows locale uses a non-English UI culture, and an untranslated resource set has just been generated for that language.
 
-You see 3 user controls below, all have different DynamicStringLocalization settings. Feel free to change them after clicking their blank border area and see the changes.
+You see 3 user controls below, all have different DynamicStringLocalization settings. Feel free to change them by clicking their blank border area and setting the DynamicStringLocalization property.
 
 Also, feel free to edit the resources by the Edit Resources button. You can override even the compiled English resources, and apply the changes at runtime.</value>
   </data>

@@ -107,8 +107,8 @@ namespace KGySoft.WinForms.Example.Forms
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
-            // Changing RightToLeft causes the dialog close. We let it happen because the parent may also change,
-            // and if we cancel the closing here, then the dialog may turn a non-modal form. Reopening is handled in parent form
+            // Changing RightToLeft in .NET Framework and .NET Core 3.0-.NET 6.0 causes the dialog close. We let it happen because the parent may also change,
+            // and if we cancel the closing here, then the dialog may turn a non-modal form. Reopening is handled in the parent form.
             if (isRtlChanging)
             {
                 if (DialogResult != DialogResult.Retry)

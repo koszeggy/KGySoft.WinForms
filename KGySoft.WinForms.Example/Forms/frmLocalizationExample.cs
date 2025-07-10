@@ -36,6 +36,8 @@ namespace KGySoft.WinForms.Example.Forms
 
         private readonly LocalizationExampleViewModel viewModel = new();
 
+        private bool isRtlChanging;
+
         #endregion
 
         #region Constructors
@@ -78,6 +80,21 @@ namespace KGySoft.WinForms.Example.Forms
             ApplyViewModel();
         }
 
+        protected override void OnFormClosing(FormClosingEventArgs e)
+        {
+            // Changing RightToLeft in .NET Framework and .NET Core 3.0-.NET 6.0 causes the dialog close.
+            // Here we prevent it from happening. If the parent form can also be recreated, we should handle
+            // the reopening in the parent form. See frmEditResources for an example.
+            if (isRtlChanging)
+            {
+                e.Cancel = true;
+                DialogResult = DialogResult.None;
+                isRtlChanging = false;
+            }
+
+            base.OnFormClosing(e);
+        }
+
         protected override void Dispose(bool disposing)
         {
             LanguageSettings.DisplayLanguageChanged -= LanguageSettings_DisplayLanguageChanged;
@@ -94,7 +111,19 @@ namespace KGySoft.WinForms.Example.Forms
 
         #region Private Methods
 
-        private void ApplyRightToLeft() => RightToLeft = LanguageSettings.DisplayLanguage.TextInfo.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
+        private void ApplyRightToLeft()
+        {
+            if (!OSHelper.IsMono && IsHandleCreated)
+                isRtlChanging = true;
+
+            RightToLeft = LanguageSettings.DisplayLanguage.TextInfo.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
+
+            // Modal forms on Windows: when changing RTL, the DialogResult is set to Cancel in older framework targets, causing the dialog to close.
+            // To make it work the same way on all platforms, we set it to Retry, signaling the check in OnClosing that the dialog should be reopened.
+            // Without the reopening, the dialog would turn into a non-modal form, allowing the user to interact with the caller form.
+            if (Modal && !OSHelper.IsMono && OSHelper.IsWindows)
+                DialogResult = DialogResult.Retry;
+        }
 
         private void ApplyViewModel()
         {
