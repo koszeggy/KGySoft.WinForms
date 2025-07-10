@@ -1,20 +1,53 @@
+#region Copyright
+
+///////////////////////////////////////////////////////////////////////////////
+//  File: Program.cs
+///////////////////////////////////////////////////////////////////////////////
+//  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
+//
+//  You should have received a copy of the LICENSE file at the top-level
+//  directory of this distribution.
+//
+//  Please refer to the LICENSE file if you want to use this source code.
+///////////////////////////////////////////////////////////////////////////////
+
+#endregion
+
+#region Usings
+
+#region Used Namespaces
+
 using System;
 using System.ComponentModel;
 using System.Drawing;
 using System.Windows.Forms;
+
 using KGySoft.Drawing;
 using KGySoft.Reflection;
 using KGySoft.WinForms.Components;
 using KGySoft.WinForms.Example.Forms;
+using KGySoft.WinForms.Forms;
+
+#endregion
+
+#region Used Aliases
 
 using TaskDialog = KGySoft.WinForms.Components.TaskDialog;
 using TaskDialogButton = KGySoft.WinForms.Components.TaskDialogButton;
 using TaskDialogRadioButton = KGySoft.WinForms.Components.TaskDialogRadioButton;
 
+#endregion
+
+#endregion
+
 namespace KGySoft.WinForms.Example
 {
     static class Program
     {
+        #region Methods
+
+        #region Private Methods
+
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
@@ -68,7 +101,7 @@ namespace KGySoft.WinForms.Example
                         using (ControlsTestBaseForm frm = (ControlsTestBaseForm)Reflector.CreateInstance(Reflector.ResolveType($"{typeof(Program).Namespace}.Forms.frm{name}")))
                         {
                             frm.ShowDialog();
-                        }                        
+                        }
                     };
                 }
 
@@ -143,10 +176,14 @@ namespace KGySoft.WinForms.Example
 
                 button.Click += (sender, args) =>
                 {
-                    using ControlsTestBaseForm frm = (ControlsTestBaseForm)Reflector.CreateInstance(Reflector.ResolveType($"{typeof(Program).Namespace}.Forms.frm{name}"));
+                    using Form frm = (Form)Reflector.CreateInstance(Reflector.ResolveType($"{typeof(Program).Namespace}.Forms.frm{name}"));
                     frm.ShowDialog();
                 };
             }
+
+            var btnDialogsTest = new TaskDialogButton("Dialogs Test");
+            btnDialogsTest.Click += btnDialogsTest_Click;
+            td.Buttons.Add(btnDialogsTest);
 
             //var btnMisc = new TaskDialogButton("Misc Tests");
             //btnMisc.Click += (sender, args) =>
@@ -159,6 +196,10 @@ namespace KGySoft.WinForms.Example
             td.Show(parent);
 
         }
+
+        #endregion
+
+        #region Event handlers
 
         private static void btnOptionsTest_Click(object sender, HandledEventArgs e)
         {
@@ -218,7 +259,7 @@ namespace KGySoft.WinForms.Example
         private static void btnProgressBar_Click(object sender, HandledEventArgs e)
         {
             TaskDialog senderDialog = ((TaskDialogButton)sender).Parent;
-            char[] states = new[] { '|', '/', '-', '\\'  };
+            char[] states = new[] { '|', '/', '-', '\\' };
 
             using (TaskDialog dlg = new TaskDialog())
             {
@@ -347,7 +388,7 @@ namespace KGySoft.WinForms.Example
             const string mainInstruction = "This is the MainInstruction. When not set, Message is displayed here.";
             const string message = "This is the Message. When not set, it takes no place.\nCan contain <a href=\"https://kgysoft.net\">links</a>.";
             const string detailsText = "This is the DetailsText. When set, an expando button appears. It can take place either under Message or under FooterText, depending on Options.\n"
-                + "Use the radio buttons to change its place.\nCan contain <a href=\"https://kgysoft.net\">links</a>.";
+                    + "Use the radio buttons to change its place.\nCan contain <a href=\"https://kgysoft.net\">links</a>.";
             const string footerText = "This is FooterText. When set, this footer area appears. It can have a different icon from the main icon.\nCan contain <a href=\"https://kgysoft.net\">links</a>.";
             const string checkBoxText = "This is CheckBoxText. When set, this check box appears.";
             const string showDetailsText = "This is ShowDetailsText. When not set, shows HideDetailsText or a default text.";
@@ -357,7 +398,7 @@ namespace KGySoft.WinForms.Example
             {
                 dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
                 dlg.Icon = TaskDialogStandardIcons.Information;
-                dlg.CustomFooterIcon =  Icons.Application;
+                dlg.CustomFooterIcon = Icons.Application;
                 dlg.Width = 300;
 
                 dlg.Caption = caption;
@@ -647,5 +688,61 @@ namespace KGySoft.WinForms.Example
 
             dlg.Show(senderDialog);
         }
+
+        private static void btnDialogsTest_Click(object sender, HandledEventArgs e)
+        {
+            const string sampleMessage = "Sample message";
+            Dialogs.AutoRightToLeftLayout = true; // effective only if the current thread's UI culture is an RTL language (you can change it by the localization example)
+
+            TaskDialog senderDialog = ((TaskDialogButton)sender).Parent!;
+            using TaskDialog dlg = new TaskDialog
+            {
+                Caption = "Dialogs Test",
+                MainInstruction = "Select a control type by the radio buttons and check out the possible options",
+                Message = "• You can use the static UseTaskDialogs (or the obsolete UseAdvancedDialogs) property to display alternative dialog types\r\n"
+                    + "• Both the MessageBox and TaskDialog options support Windows system sounds, default button selection, high DPI resolutions and copying the content by Ctrl+C\r\n"
+                    + "• If the static AutoRightToLeftLayout property is true, then the MessageBox and TaskDialog options use right-to-left layout if the current thread's UI culture is an RTL language\r\n"
+                    + "• The AdvancedMessageDialog supports none of above, though the message can be selected and copied manually",
+                Options = TaskDialogOptions.UseCommandLinks,
+                StandardButtons = TaskDialogStandardButtonFlags.Close,
+                RadioButtons =
+                {
+                    new TaskDialogRadioButton("MessageBox") { Checked = true },
+                    new TaskDialogRadioButton("TaskDialog"),
+                    new TaskDialogRadioButton("AdvancedMessageDialog (obsolete)")
+                },
+                Buttons =
+                {
+                    new TaskDialogButton("btnInformation", "Information Dialog"),
+                    new TaskDialogButton("btnWarning", "Warning Dialog"),
+                    new TaskDialogButton("btnError", "Error Dialog"),
+                    new TaskDialogButton("btnConfirmation", "Confirmation Dialog"),
+                    new TaskDialogButton("btnCancellableConfirmation", "Cancellable Confirmation Dialog")
+                }
+            };
+
+#pragma warning disable CS0618 // Type or member is obsolete (Dialogs.UseAdvancedDialogs)
+            dlg.RadioButtons[0].Selected += (_, _) => Dialogs.UseTaskDialogs = Dialogs.UseAdvancedDialogs = false;
+            dlg.RadioButtons[1].Selected += (_, _) => Dialogs.UseAdvancedDialogs = !(Dialogs.UseTaskDialogs = true);
+            dlg.RadioButtons[2].Selected += (_, _) => Dialogs.UseTaskDialogs = !(Dialogs.UseAdvancedDialogs = true);
+#pragma warning restore CS0618 // Type or member is obsolete
+
+            dlg.Buttons["btnInformation"].Click += (_, _) => Dialogs.InfoMessage(sampleMessage);
+            dlg.Buttons["btnWarning"].Click += (_, _) => Dialogs.WarningMessage(sampleMessage);
+            dlg.Buttons["btnError"].Click += (_, _) => Dialogs.ErrorMessage(sampleMessage);
+            dlg.Buttons["btnConfirmation"].Click += (_, _) => Dialogs.InfoMessage(Dialogs.ConfirmMessage(sampleMessage) ? "You clicked Yes" : "You clicked No");
+            dlg.Buttons["btnCancellableConfirmation"].Click += (_, _) => Dialogs.InfoMessage(Dialogs.CancellableConfirmMessage(sampleMessage, MessageBoxDefaultButton.Button3) switch
+            {
+                true => "You selected Yes",
+                false => "You selected No",
+                null => "You selected Cancel or closed the dialog"
+            });
+
+            dlg.Show(senderDialog);
+        }
+
+        #endregion
+
+        #endregion
     }
 }

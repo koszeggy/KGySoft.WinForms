@@ -145,6 +145,7 @@ namespace KGySoft.WinForms.Example.Forms
             saveBinding.Error += (_, e) =>
             {
                 // If the save operation fails, we show the error, also with localization, and prevent closing the dialog.
+                Dialogs.AutoRightToLeftLayout = true; // would be enough to set only once, in the application startup
                 Dialogs.ErrorMessage(LocalizationHelper.GetString(resSaveErrorFormat, customLocalizationContext, e.Error.Message)!);
                 e.Handled = true;
                 DialogResult = DialogResult.None; // prevent closing the dialog

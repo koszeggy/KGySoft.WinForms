@@ -1,4 +1,4 @@
-﻿namespace KGySoft.WinForms.Example
+﻿namespace KGySoft.WinForms.Example.Forms
 {
     partial class MiscTest
     {

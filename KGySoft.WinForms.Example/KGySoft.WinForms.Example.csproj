@@ -13,7 +13,7 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Nullable>Enable</Nullable>
 
-    <NoWarn>$(NoWarn);WFO1000</NoWarn>
+    <NoWarn>$(NoWarn);WFO1000;CA1304</NoWarn>
   </PropertyGroup>
 
   <!-- .NET Framework only references -->
