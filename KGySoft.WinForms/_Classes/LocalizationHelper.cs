@@ -328,10 +328,23 @@ namespace KGySoft.WinForms
         /// <param name="args">The formatting arguments to be applied to the localized string format.</param>
         /// <returns>The localized and formatted string for the specified <paramref name="key"/> if found; otherwise, <see langword="null"/>.</returns>
         public static string? GetString(string key, LocalizationContext? context, params object?[]? args)
+            => GetString(null, key, context, args);
+
+        /// <summary>
+        /// Gets a localized string for the specified <paramref name="key"/> using the specified <paramref name="formattingCulture"/>, <paramref name="context"/> and formatting arguments.
+        /// It invokes the <see cref="LocalizationRequested"/> event to retrieve the string resource format. If the event is not handled,
+        /// and a resource set is available for the specified context, it retrieves the string from that resource set.
+        /// </summary>
+        /// <param name="formattingCulture">The culture to use for formatting the string resource. If <see langword="null"/>, the current thread's culture is used.</param>
+        /// <param name="key">The key of the requested string resource. When <paramref name="args"/> has values, the key is expected to be a format string.</param>
+        /// <param name="context">The localization context to use for the operation. If <see langword="null"/>, no context is used.</param>
+        /// <param name="args">The formatting arguments to be applied to the localized string format.</param>
+        /// <returns>The localized and formatted string for the specified <paramref name="key"/> if found; otherwise, <see langword="null"/>.</returns>
+        public static string? GetString(CultureInfo? formattingCulture, string key, LocalizationContext? context, params object?[]? args)
         {
             #region Local Methods
 
-            static string SafeFormat(string format, object?[] args)
+            static string SafeFormat(CultureInfo formattingCulture, string format, object?[] args)
             {
                 int i = Array.IndexOf(args, null);
                 if (i >= 0)
@@ -341,7 +354,7 @@ namespace KGySoft.WinForms
                         args[i] ??= nullRef;
                 }
 
-                return String.Format(LanguageSettings.FormattingLanguage, format, args);
+                return String.Format(formattingCulture, format, args);
             }
 
             #endregion
@@ -354,7 +367,7 @@ namespace KGySoft.WinForms
 
             try
             {
-                return SafeFormat(format, args);
+                return SafeFormat(formattingCulture ?? LanguageSettings.FormattingLanguage, format, args);
             }
             catch (FormatException)
             {
