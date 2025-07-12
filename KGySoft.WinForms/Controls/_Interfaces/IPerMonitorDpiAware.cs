@@ -19,6 +19,7 @@ namespace KGySoft.WinForms.Controls
     {
         #region Methods
 
+        void ParentFormDpiChanging();
         void ParentFormDpiChanged();
 
         #endregion

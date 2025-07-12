@@ -76,6 +76,7 @@ namespace KGySoft.WinForms.Controls
         #region Instance Fields
 
         private readonly DisplayImageGenerator displayImageGenerator;
+        private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
 
         private Image? image;
         private Rectangle targetRectangle;
@@ -990,7 +991,13 @@ namespace KGySoft.WinForms.Controls
 
         #region Explicitly Implemented Interface Methods
 
-        void IPerMonitorDpiAware.ParentFormDpiChanged() => CheckDpiChange();
+        void IPerMonitorDpiAware.ParentFormDpiChanging()
+        {
+            if (isPerMonitorDpiAwarenessV1)
+                CheckDpiChange();
+        }
+
+        void IPerMonitorDpiAware.ParentFormDpiChanged() { }
 
         #endregion
 

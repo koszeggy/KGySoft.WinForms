@@ -244,6 +244,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Explicitly Implemented Interface Methods
 
+        void IPerMonitorDpiAware.ParentFormDpiChanging() { }
         void IPerMonitorDpiAware.ParentFormDpiChanged() => ResetSizes();
 
         #endregion

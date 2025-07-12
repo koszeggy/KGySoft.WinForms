@@ -165,7 +165,7 @@ namespace KGySoft.WinForms.Forms
 
             public override Size GetPreferredSize(Size proposedSize)
             {
-                using Graphics g = Graphics.FromHwnd(Handle);
+                using Graphics g = Graphics.FromHwnd(IsHandleCreated ? Handle : IntPtr.Zero);
                 g.SetTextRenderingQuality(TextRenderingQuality, UseCompatibleTextRendering);
                 var imageSize = GetImageSize();
                 return LayoutUtils.UnionSizes(imageSize, GetTextSize(g, imageSize, null, proposedSize) + new Size(0, 1)) // +1 for focus rectangle

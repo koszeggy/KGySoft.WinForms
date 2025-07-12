@@ -75,10 +75,11 @@ namespace KGySoft.WinForms.Controls
 
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
         private readonly FadingPainterInternal fadingPainter;
+        private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
 
         private bool isElevated;
         private bool isImageUpToDate = true;
-        private bool dpiChanging;
+        private bool isAlternativeDefaultImage;
         private Image? currentImage; // the actual displayed image, including the shield icon when base.Image is null
         private FlatStyle lastFlatStyle = FlatStyle.Standard; // the explicitly set or the detected flat style changed in base
         private FlatStyle reportedFlatStyle = FlatStyle.Standard; // the flat style that is reported by the control (can be different when base does not support System)
@@ -100,13 +101,13 @@ namespace KGySoft.WinForms.Controls
         private int fadingAnimationDefaultSpeed = 500;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
         private Timer? defaultAnimationTimer;
-        private bool isAlternativeDefaultImage;
         private Bitmap? cachedSecurityShieldImage; // an instance from IconsCache, should not be disposed
         private ScalingFont? font; // The explicitly set font.
         private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
         private PointF lastScale;
         private bool suppressFontChanged;
         private bool autoScaleFont = true;
+        private int dpiChangingCount;
 
         #endregion
 
@@ -328,11 +329,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 ResetSizeCache();
-
-                // Workaround for .NET Framework 4.7+ behavior when V2 awareness is set both in the app.config and the manifest file:
-                // The base WM_DPICHANGED_BEFOREPARENT handling sets the Font property, in which case we want to avoid setting font if it was null.
-                // .NET Core 3.0+ behaves differently: sets the Font only in base and even calls OnFontChanged but does not set the derived property.
-                if (dpiChanging && AutoScaleFont)
+                if (dpiChangingCount > 0 && AutoScaleFont)
                     return;
 
                 PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
@@ -739,23 +736,31 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
-                    dpiChanging = true;
+                    dpiChangingCount += 1;
                     try
                     {
                         base.WndProc(ref m);
                     }
                     finally
                     {
-                        dpiChanging = false;
+                        dpiChangingCount -= 1;
                     }
 
                     // This autoscales font when needed
                     CheckDpiChange();
                     return;
 
-                // Known issue: Security shield icon size is not updated with non-V2 awareness
+                // Known issue: Security shield icon size is not updated with non-V2 awareness (System FlatStyle)
                 case Constants.WM_DPICHANGED_AFTERPARENT:
-                    base.WndProc(ref m);
+                    dpiChangingCount += 1;
+                    try
+                    {
+                        base.WndProc(ref m);
+                    }
+                    finally
+                    {
+                        dpiChangingCount -= 1;
+                    }
 
                     // System FlatStyle: the WM_DPICHANGED_AFTERPARENT resets the elevated icon, but we want to prevent that if an image is set.
                     // Doing it even if IsElevated is false, because if it was true before, then the shield icon is still displayed.
@@ -770,10 +775,15 @@ namespace KGySoft.WinForms.Controls
                         // .NET Framework: The Elevated icon size is not updated, so we need to recreate the handle
                         // Would not be needed for .NET Framework 4.7+ when app.config awareness is also set to V2.
                         else if (isElevated && Created)
+                        {
                             RecreateHandle();
+                            return;
+                        }
 #endif
                     }
 
+                    if (AutoSize)
+                        PerformLayout();
                     return;
 
                 default:
@@ -835,9 +845,19 @@ namespace KGySoft.WinForms.Controls
             base.OnParentChanged(e);
 
             // Setting default font from new parent font without scaling (using current scaling of the new parent), and then
-            // calling CheckDpiChange so if there is an explicitly set font, it will be scaled to the new parent.
+            // calling CheckDpiChange to perform the actual scaling if needed.
             if (font == null)
-                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), this.GetScale());
+            {
+                Control? parent = Parent;
+                if (parent == null)
+                    return;
+                
+                PointF parentScale = parent.GetScale();
+                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), parentScale);
+                if (this.GetScale() != parentScale)
+                    lastScale = PointF.Empty;
+            }
+
             CheckDpiChange();
         }
 
@@ -857,25 +877,29 @@ namespace KGySoft.WinForms.Controls
             base.OnParentFontChanged(e);
 
             // if the parent control is rescaling its font due to DPI change, then ignoring the event (we do our scaling in CheckDpiChange)
-            if (dpiChanging || !AutoScaleFont)
+            if (dpiChangingCount > 0 || !AutoScaleFont)
                 return;
 
-#if NET6_0_OR_GREATER
-            // The parent is rescaling its font due to DPI change without (or before the first) WM_DPICHANGED_BEFOREPARENT message.
-            // Occurs in .NET 6+ when the DPI of the primary display was changed after starting the application, but before opening the parent form.
-            // Actually works in .NET 7+ only, because in .NET 6 all DeviceDpi are already the new DPI, while Parent.Font is still the old one, despite the event.
-            // We accept the broken behavior in .NET 6, because the standard controls are also broken the same way, and we don't need to target .NET 7 specifically just because of this.
-            int deviceDpi = DeviceDpi;
-            if (Parent is Control parent && parent.DeviceDpi != deviceDpi || TopLevelControl is Control top && top.DeviceDpi != deviceDpi)
+#if NET47_OR_GREATER || NETCOREAPP
+            // The parent is rescaling its font out of a WM_DPICHANGED event (occurs typically in .NET 7+ during form handle creation)
+            if (this.IsParentScalingWhileCreated())
                 return;
 #endif
 
             // but if the parent font is changing not because of scaling, then we reset our default font as well
-            defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), this.GetScale());
+            Control parent = Parent!;
+            PointF parentScale = parent.GetScale();
+            defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), parentScale);
 
-            // if font is null, setting default font from new parent font without scaling
-            if (font == null)
-                SetFont(defaultFont);
+            if (font != null)
+                return;
+
+            // setting default font from new parent font without scaling
+            SetFont(defaultFont);
+
+            // the parent has different scale: invalidating lastScale, so CheckDpiChange will adjust the scale if needed
+            if (this.GetScale() != parentScale)
+                lastScale = PointF.Empty;
         }
 
         /// <inheritdoc />
@@ -1232,7 +1256,9 @@ namespace KGySoft.WinForms.Controls
         private void CheckDpiChange()
         {
             PointF scale = this.GetScale();
-            if (scale == lastScale || Disposing || IsDisposed)
+
+            // The Font check is needed for .NET 6, where WinForms' (bad) auto font scaling may occur without notification
+            if ((scale == lastScale && (!AutoScaleFont || (font ?? defaultFont)?.Font.Equals(Font) == true)) || Disposing || IsDisposed)
                 return;
 
             if (!lastScale.IsEmpty)
@@ -1283,7 +1309,7 @@ namespace KGySoft.WinForms.Controls
                 // Non-reference equality: we are alright if the old font is not disposed...
                 // ...except in .NET Core 3.0 - .NET 5.0 when FlatStyle is System and using v1 per-monitor DPI awareness, in which case the font gets corrupted
 #if NETCOREAPP && !NET6_0_OR_GREATER
-                if (!oldFont.IsDisposed() && !(base.FlatStyle == FlatStyle.System && OSHelper.IsWindows && !OSHelper.IsMono && ScaleHelper.PerMonitorDpiAwarenessVersion == 1))
+                if (!oldFont.IsDisposed() && !(isPerMonitorDpiAwarenessV1 && base.FlatStyle == FlatStyle.System && OSHelper.IsWindows && !OSHelper.IsMono))
 #else
                 if (!oldFont.IsDisposed())
 #endif
@@ -1316,7 +1342,20 @@ namespace KGySoft.WinForms.Controls
         void ISupportsFading<ControlAppearanceState>.PaintState(ControlAppearanceState state, PaintEventArgs e)
             => OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
 
-        void IPerMonitorDpiAware.ParentFormDpiChanged() => CheckDpiChange();
+        void IPerMonitorDpiAware.ParentFormDpiChanging()
+        {
+            dpiChangingCount += 1;
+            if (isPerMonitorDpiAwarenessV1)
+                CheckDpiChange();
+        }
+
+        void IPerMonitorDpiAware.ParentFormDpiChanged()
+        {
+            Debug.Assert(dpiChangingCount > 0);
+            dpiChangingCount -= 1;
+            if (isPerMonitorDpiAwarenessV1 && AutoSize)
+                PerformLayout();
+        }
 
         #endregion
 

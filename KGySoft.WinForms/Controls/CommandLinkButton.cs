@@ -110,6 +110,7 @@ namespace KGySoft.WinForms.Controls
 
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
         private readonly FadingPainterInternal fadingPainter;
+        private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
 
         // Unlike in AdvancedButton, we always have default fonts, even when AutoScaleFont is not set, because the fonts are not inherited from the parent.
         private readonly ScalingFont defaultTextFont;
@@ -121,7 +122,7 @@ namespace KGySoft.WinForms.Controls
         private bool isElevated;
         private bool useDefaultGlyph = true;
         private bool isImageUpToDate = true;
-        private bool dpiChanging;
+        private int dpiChangingCount;
         //private bool isLoaded; // see the commented OnCreateControl
         private string? description;
 
@@ -524,7 +525,7 @@ namespace KGySoft.WinForms.Controls
                 // Workaround for .NET Framework 4.7+ behavior when V2 awareness is set both in the app.config and the manifest file:
                 // The base WM_DPICHANGED_BEFOREPARENT handling sets the Font property, in which case we want to avoid setting textFont if it was null.
                 // .NET Core 3.0+ behaves differently: sets the Font only in base and even calls OnFontChanged but does not set the derived property.
-                if (dpiChanging && AutoScaleFont)
+                if (dpiChangingCount > 0 && AutoScaleFont)
                     return;
 
                 PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
@@ -1303,37 +1304,50 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
-                    dpiChanging = true;
+                    dpiChangingCount += 1;
                     try
                     {
                         base.WndProc(ref m);
                     }
                     finally
                     {
-                        dpiChanging = false;
+                        dpiChangingCount -= 1;
                     }
 
                     CheckDpiChange();
                     return;
 
                 // Known issue: Security shield icon size is not updated with non-V2 awareness
-                case Constants.WM_DPICHANGED_AFTERPARENT when IsNativeRendering:
-                    base.WndProc(ref m);
-
-                    // Without this the custom image is replaced by the shield icon on DPI change if it was ever displayed,
-                    if (isElevated && base.Image != null)
+                case Constants.WM_DPICHANGED_AFTERPARENT:
+                    dpiChangingCount += 1;
+                    try
                     {
-                        isImageUpToDate = false;
-                        Invalidate();
+                        base.WndProc(ref m);
                     }
-#if NETFRAMEWORK
-                    // .NET Framework: Font, Glyph and Elevated icon size is not updated on DPI change, so we need to recreate the handle
-                    // Note: Would not be needed for .NET Framework 4.7+ when V2 awareness is set both in the app.config and the manifest
-                    if (Created)
-                        RecreateHandle();
-                    isImageUpToDate = false;
-#endif
+                    finally
+                    {
+                        dpiChangingCount -= 1;
+                    }
 
+                    if (IsNativeRendering)
+                    {
+                        // Without this the custom image is replaced by the shield icon on DPI change if it was ever displayed
+                        if (isElevated && base.Image != null)
+                        {
+                            isImageUpToDate = false;
+                            Invalidate();
+                        }
+#if NETFRAMEWORK
+                        // .NET Framework: Font, Glyph and Elevated icon size is not updated on DPI change, so we need to recreate the handle
+                        // Note: Would not be needed for .NET Framework 4.7+ when V2 awareness is set both in the app.config and the manifest
+                        if (Created)
+                            RecreateHandle();
+                        isImageUpToDate = false;
+#endif
+                    }
+
+                    if (AutoSize)
+                        PerformLayout();
                     return;
 
                 default:
@@ -2381,7 +2395,20 @@ namespace KGySoft.WinForms.Controls
         void ISupportsFading<ControlAppearanceState>.PaintState(ControlAppearanceState state, PaintEventArgs e)
             => OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
 
-        void IPerMonitorDpiAware.ParentFormDpiChanged() => CheckDpiChange();
+        void IPerMonitorDpiAware.ParentFormDpiChanging()
+        {
+            dpiChangingCount += 1;
+            if (isPerMonitorDpiAwarenessV1)
+                CheckDpiChange();
+        }
+
+        void IPerMonitorDpiAware.ParentFormDpiChanged()
+        {
+            Debug.Assert(dpiChangingCount > 0);
+            dpiChangingCount -= 1;
+            if (isPerMonitorDpiAwarenessV1 && AutoSize)
+                PerformLayout();
+        }
 
         #endregion
 

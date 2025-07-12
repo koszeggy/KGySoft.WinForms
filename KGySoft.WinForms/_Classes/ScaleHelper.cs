@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.CompilerServices;
@@ -39,6 +40,7 @@ namespace KGySoft.WinForms
             #region Fields
 
             private readonly Control childControl;
+            private readonly List<Control> parents = new();
 
             private Form? parentForm;
 
@@ -49,9 +51,8 @@ namespace KGySoft.WinForms
             internal FormDpiChangeNotifier(Control host)
             {
                 childControl = host;
-                host.ParentChanged += Host_ParentChanged;
                 host.Disposed += Host_Disposed;
-                ResetParent();
+                ResetParents();
             }
 
             #endregion
@@ -63,7 +64,8 @@ namespace KGySoft.WinForms
             public void Dispose()
             {
                 ReleaseHandle();
-                childControl.ParentChanged -= Host_ParentChanged;
+                foreach (var control in parents)
+                    control.ParentChanged -= Control_ParentChanged;
                 childControl.Disposed -= Host_Disposed;
             }
 
@@ -76,11 +78,13 @@ namespace KGySoft.WinForms
                 switch (m.Msg)
                 {
                     case Constants.WM_DPICHANGED:
-                        base.WndProc(ref m);
-                        if (childControl is IPerMonitorDpiAware dpiAwareControl)
-                            dpiAwareControl.ParentFormDpiChanged();
+                        var dpiAwareControl = childControl as IPerMonitorDpiAware;
+                        if (dpiAwareControl != null)
+                            dpiAwareControl.ParentFormDpiChanging();
                         else
                             childControl.Invalidate();
+                        base.WndProc(ref m);
+                        dpiAwareControl?.ParentFormDpiChanged();
                         break;
 
                     default:
@@ -93,20 +97,44 @@ namespace KGySoft.WinForms
 
             #region Private Methods
 
-            private void Host_ParentChanged(object? sender, EventArgs e) => ResetParent();
+            private void Control_ParentChanged(object? sender, EventArgs e) => ResetParents();
 
-            private void ResetParent()
+            private void ResetParents()
             {
-                Form? newForm = childControl.FindForm();
+                // Checking just HandleCreated of the parent form is not enough, because (typically in .NET 7+) the form's HandleCreated event
+                // is raised only after scaling all controls. Hence, we handle FontChanged as well (which is called when the controls are scaled
+                // during the form creation), so can detect that the parent form's handle creation earlier, before the first WM_DPICHANGED message arrives.
+                foreach (Control control in parents)
+                    control.ParentChanged -= Control_ParentChanged;
+                if (parents.Count > 1)
+                    parents[1].FontChanged -= Parent_FontChanged;
+                parents.Clear();
+
+                Form? currentForm = null;
+                for (Control? c = childControl; c != null; c = c.Parent)
+                {
+                    if ((currentForm = c as Form) != null)
+                        break;
+                    parents.Add(c);
+                    c.ParentChanged += Control_ParentChanged;
+                }
+
+                if (parents.Count > 1)
+                    parents[1].FontChanged += Parent_FontChanged;
+
+                if (ReferenceEquals(currentForm, parentForm))
+                    return;
+
                 if (parentForm != null)
                 {
                     ReleaseHandle();
                     parentForm.HandleCreated -= ParentForm_HandleCreated;
+                    parentForm = null;
                 }
 
-                if (newForm != null)
+                if (currentForm != null)
                 {
-                    parentForm = newForm;
+                    parentForm = currentForm;
                     parentForm.HandleCreated += ParentForm_HandleCreated;
                     if (parentForm.IsHandleCreated)
                         AssignHandle(parentForm.Handle);
@@ -119,9 +147,20 @@ namespace KGySoft.WinForms
 
             private void ParentForm_HandleCreated(object? sender, EventArgs e)
             {
+                Form form = (Form)sender!;
+                if (Handle == form.Handle)
+                    return;
                 ReleaseHandle();
-                if (sender is Form form)
-                    AssignHandle(form.Handle);
+                AssignHandle(form.Handle);
+            }
+
+            private void Parent_FontChanged(object? sender, EventArgs e)
+            {
+                Form? form = childControl.FindForm();
+                if (form?.IsHandleCreated != true || Handle == form.Handle)
+                    return;
+                ReleaseHandle();
+                AssignHandle(form.Handle);
             }
 
             private void Host_Disposed(object? sender, EventArgs e) => Dispose();
@@ -370,12 +409,33 @@ namespace KGySoft.WinForms
         internal static void RegisterPerMonitorAwarenessNotifications(this Control control)
         {
             // Registering the notifier is required only for V1 awareness level. V2 provides direct notifications for the controls.
-            if (PerMonitorDpiAwarenessVersion != 1)
+            if (!IsThreadPerMonitorAware)
                 return;
 
             // No need to store a reference - the notifier will be disposed when the control is disposed.
             var _ = new FormDpiChangeNotifier(control);
         }
+
+#if NET47_OR_GREATER || NETCOREAPP
+        internal static bool IsParentScalingWhileCreated(this Control control)
+        {
+            // Skipping if the control is already created (not just the handle), or when the top-level control is not just being created.
+            if (control.Created)
+                return false;
+            Control? top = control.TopLevelControl;
+            if (top?.Created != false || !top.IsHandleCreated)
+                return false;
+
+            int deviceDpi = control.DeviceDpi;
+            for (Control? c = control.Parent; c != null; c = c.Parent)
+            {
+                if (c.DeviceDpi != deviceDpi)
+                    return true;
+            }
+
+            return false;
+        } 
+#endif
 
         #endregion
 
@@ -389,11 +449,7 @@ namespace KGySoft.WinForms
                 return systemInitialDpi;
 
             if (!control.IsHandleCreated)
-            {
-                control = control.TopLevelControl ?? control;
-                if (!control.IsHandleCreated)
-                    return systemInitialDpi;
-            }
+                return systemInitialDpi;
 
             // NOTE: we could use control.DeviceDpi here on .NET Framework 4.7 or later, but it fails in some cases:
             // .NET Framework: if app.config is not set to per-monitor DPI aware (even though it's set in the manifest) OR Windows 10 compatibility mode is not set in the manifest
