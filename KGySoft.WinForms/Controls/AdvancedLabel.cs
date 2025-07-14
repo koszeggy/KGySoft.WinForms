@@ -521,11 +521,11 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                     return;
 
                 autoScaleFont = value;
-                PointF scale = value ? this.GetScale() : ScaleHelper.SystemScale;
-                font?.ResetFrom(font.Font, scale);
+                font?.ResetFrom(font.Font, value ? this.GetScale() : ScaleHelper.SystemScale);
                 if (value)
                 {
-                    defaultFont = new ScalingFont(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
+                    Control? parent = Parent;
+                    defaultFont = new ScalingFont(ScaleHelper.GetFontOrDefault(parent?.Font), parent?.GetScale() ?? ScaleHelper.SystemScale);
 
                     // theoretically this would not be needed, but in .NET 6+ the default font handling gets broken after the first DPI change
                     SetFont(font ?? defaultFont);
@@ -554,19 +554,20 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 if (dpiChangingCount > 0 && AutoScaleFont)
                     return;
 
-                PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
-
                 // resetting the default font; or null, when AutoScaleFont is false
                 if (value is null)
                 {
                     font?.Dispose();
                     font = null;
-                    defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
+                    Control? parent = Parent;
+                    PointF parentScale = parent?.GetScale() ?? ScaleHelper.SystemScale;
+                    defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(parent?.Font), parentScale);
                     SetFont(defaultFont);
                     return;
                 }
 
                 // setting a font explicitly
+                PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
                 if (font == null)
                     font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
                 else
@@ -774,20 +775,16 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         protected override void OnParentChanged(EventArgs e)
         {
             base.OnParentChanged(e);
-            if (!AutoScaleFont)
+            Control? parent = Parent;
+            if (parent == null)
                 return;
 
-            // Setting default font from new parent font without scaling (using current scaling of the new parent), and then
-            // calling CheckDpiChange to perform the actual scaling if needed.
+            // Setting default font from new parent font without scaling
             if (font == null)
             {
-                Control? parent = Parent;
-                if (parent == null)
-                    return;
-
-                PointF parentScale = parent.GetScale();
-                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), parentScale);
-                if (this.GetScale() != parentScale)
+                PointF topScale = this.GetTopScale();
+                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), topScale);
+                if (this.GetScale() != topScale)
                     lastScale = PointF.Empty;
             }
 
@@ -832,17 +829,20 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             switch (m.Msg)
             {
                 case Constants.WM_NCCALCSIZE:
+                    base.WndProc(ref m);
                     if (m.WParam == IntPtr.Zero || m.WParam == new IntPtr(1))
                         NCHelper.CalcSizeNC(m.LParam, borderWidth);
-                    break;
+                    return;
 
                 case Constants.WM_NCPAINT:
+                    base.WndProc(ref m);
                     NCHelper.DrawBorderNC(m.HWnd, Size, borderStyle);
-                    break;
+                    return;
 
                 case Constants.WM_PAINT:
                     CheckDpiChange();
-                    break;
+                    base.WndProc(ref m);
+                    return;
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
                     dpiChangingCount += 1;
@@ -872,9 +872,11 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                     if (AutoSize)
                         PerformLayout();
                     return;
-            }
 
-            base.WndProc(ref m);
+                default:
+                    base.WndProc(ref m);
+                    return;
+            }
         }
 
         /// <inheritdoc />

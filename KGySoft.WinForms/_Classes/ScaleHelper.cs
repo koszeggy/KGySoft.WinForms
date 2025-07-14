@@ -419,11 +419,11 @@ namespace KGySoft.WinForms
 #if NET47_OR_GREATER || NETCOREAPP
         internal static bool IsParentScalingWhileCreated(this Control control)
         {
-            // Skipping if the control is already created (not just the handle), or when the top-level control is not just being created.
+            // Skipping if the control is already created (not the handle), or when the handle of top-level control is not created yet.
             if (control.Created)
                 return false;
             Control? top = control.TopLevelControl;
-            if (top?.Created != false || !top.IsHandleCreated)
+            if (top?.IsHandleCreated != true)
                 return false;
 
             int deviceDpi = control.DeviceDpi;
@@ -434,8 +434,28 @@ namespace KGySoft.WinForms
             }
 
             return false;
-        } 
+        }
 #endif
+
+        /// <summary>
+        /// Gets the scale of the top-level control or the parent control if there is no top-level control.
+        /// Should be used to determine the effective scale of the parent font from OnParentChanged.
+        /// </summary>
+        internal static PointF GetTopScale(this Control control)
+        {
+            if (!isProcessPerMonitorAware)
+                return systemScale;
+
+            // ISSUE: Typically in .NET 7+, the Parent.Font in OnParentChanged can be a scaled font with an unmatching DeviceDpi (and GetScale). Hence, using the top level control's scaling if possible.
+            Control reference = control.TopLevelControl ?? control.Parent ?? control;
+#if NET47_OR_GREATER || NETCOREAPP
+            // ISSUE 2: When using V1 awareness level, the top-level control's DeviceDpi and GetScale may be inconsistent, in which case the parent font matches the top level DeviceDpi. Hence, preferring DeviceDpi rather than GetScale.
+            float scale = reference.DeviceDpi / DefaultDpi;
+            return new PointF(scale, scale);
+#else
+            return reference.GetScale();
+#endif
+        }
 
         #endregion
 
