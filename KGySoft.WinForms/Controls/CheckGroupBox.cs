@@ -244,6 +244,11 @@ namespace KGySoft.WinForms.Controls
                     }
                     break;
 
+                case Constants.WM_DPICHANGED_AFTERPARENT:
+                    base.WndProc(ref m);
+                    checkBox.Top = 0;
+                    break;
+
                 default:
                     base.WndProc(ref m);
                     break;
