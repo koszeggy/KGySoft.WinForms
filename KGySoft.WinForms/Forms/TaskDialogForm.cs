@@ -595,6 +595,8 @@ namespace KGySoft.WinForms.Forms
         protected override void OnDeviceScaleChanged(DeviceScaleChangedEventArgs e)
         {
             base.OnDeviceScaleChanged(e);
+            if (dialogState != TaskDialogStatus.Showing)
+                return;
             Configuration cfg = GetConfiguration();
             PointF scale = e.NewScale;
             isResizing = true;
@@ -824,7 +826,7 @@ namespace KGySoft.WinForms.Forms
             ResetPaddings(scale, true);
 
             // set theme
-            ResetTheme(scale);
+            ResetTheme();
 
             // set texts
             ResetCaption();
@@ -885,7 +887,7 @@ namespace KGySoft.WinForms.Forms
             foreach (AdvancedButton button in pnlButtons.Controls)
             {
                 // NOTE: FlowLayoutPanel does not like if the unconstrained dimension of MaximumSize is 0 here.
-                // Strange, it works well when setting MaximumSize = (0, y) before adding the button it to the panel.
+                // Strange, it works well when setting MaximumSize = (0, y) before adding the button to the panel.
                 button.MinimumSize = buttonReferenceSize.Scale(scale);
                 button.MaximumSize = new Size(Int32.MaxValue, buttonReferenceSize.Height.Scale(scale.Y));
             }
@@ -1610,7 +1612,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetTheme(PointF scale)
+        private void ResetTheme()
         {
             // clearing caches
             btnShowHideDetails.ResetTheme();
@@ -1620,8 +1622,9 @@ namespace KGySoft.WinForms.Forms
             // font
             if (!String.IsNullOrEmpty(host.MainInstruction))
             {
-                // MainInstructionsFont always returns the system scale size so scaling if needed
+                // MainInstructionsFont always returns the system scale size so scaling if needed. Not using the form's scale because if the label is not created yet, its scale can be different.
                 Font font = MainInstructionsFont;
+                PointF scale = lblMainInstruction.GetScale();
                 lblMainInstruction.Font = scale == ScaleHelper.SystemScale ? font : new ScalingFont(font, ScaleHelper.SystemScale).GetScaled(scale);
             }
             else
@@ -1742,7 +1745,7 @@ namespace KGySoft.WinForms.Forms
                     Height += 14;
 
                 isSpecialHeadColors = requireSpecialHeadColors;
-                ResetTheme(scale);
+                ResetTheme();
                 pnlMainInstruction.Invalidate();
                 ResetHeights(GetConfiguration());
             }
@@ -2649,7 +2652,7 @@ namespace KGySoft.WinForms.Forms
             PointF scale = this.GetScale();
             Configuration cfg = GetConfiguration();
             mainInstructionsColor = Color.Empty;
-            ResetTheme(scale);
+            ResetTheme();
             ResetWidths(cfg, scale);
             ResetHeights(cfg);
         }
