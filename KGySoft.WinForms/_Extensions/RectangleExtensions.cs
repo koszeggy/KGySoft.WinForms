@@ -28,7 +28,7 @@ namespace KGySoft.WinForms
 
         internal static Point GetCenter(this Rectangle rect) => rect.Location + new Size(rect.Size.Width / 2, rect.Size.Height / 2);
 
-        public static Rectangle FromCenter(Point center, Size size) => new(center.X - size.Width / 2, center.Y - size.Height / 2, size.Width, size.Height);
+        internal static Rectangle FromCenter(Point center, Size size) => new(center.X - size.Width / 2, center.Y - size.Height / 2, size.Width, size.Height);
 
         internal static Rectangle EnsureScreen(this Rectangle suggestedBounds, Screen screen, bool forceSingleScreen)
         {
