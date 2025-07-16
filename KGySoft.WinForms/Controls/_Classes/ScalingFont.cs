@@ -38,7 +38,14 @@ namespace KGySoft.WinForms.Controls
 
         #region Properties
 
-        internal Font Font => scaledFont;
+        internal Font Font
+        {
+            get
+            {
+                EnsureValid();
+                return scaledFont;
+            }
+        }
 
         #endregion
 
@@ -203,6 +210,28 @@ namespace KGySoft.WinForms.Controls
                 systemScaleFont.Dispose();
             systemScaleFont = ScaleFrom(scaledFont, scale);
             disposeSystemScaleFont = true;
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void EnsureValid()
+        {
+            // Controls may dispose the even the explicitly set font when performing a scaling operation.
+            // Happens often in older frameworks, especially with per-monitor DPI awareness level V1.
+            if (!scaledFont.IsDisposed())
+                return;
+
+            bool areSame = ReferenceEquals(systemScaleFont, scaledFont);
+            scaledFont = CloneWithPoints(scaledFont);
+            disposeScaledFont = true;
+
+            if (!areSame)
+                return;
+
+            disposeSystemScaleFont = false;
+            systemScaleFont = scaledFont;
         }
 
         #endregion

@@ -645,7 +645,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
 
                 if (String.IsNullOrEmpty(base.Text))
                 {
-                    preferredSize = g.MeasureString("0", base.Font, 0).Ceiling();
+                    preferredSize = TextRenderer.MeasureText(g, "0", base.Font);
                     preferredSize.Width = 0;
                 }
                 else

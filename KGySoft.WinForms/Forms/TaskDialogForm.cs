@@ -315,11 +315,10 @@ namespace KGySoft.WinForms.Forms
             lblDetailsFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             lblFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
-            if (SystemFonts.MessageBoxFont is Font font)
-                Font = font;
-
+            
             Debug.Assert(!IsHandleCreated);
-            defaultFont = new ScalingFont(Font, ScaleHelper.SystemScale);
+            defaultFont = new ScalingFont(SystemFonts.MessageBoxFont ?? ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
+            Font = defaultFont.Font;
         }
 
         #endregion
