@@ -256,6 +256,8 @@ namespace KGySoft.WinForms.Forms
 
         #region Instance Fields
 
+        private readonly ScalingFont defaultFont;
+
         private TaskDialogStatus dialogState = TaskDialogStatus.Initializing;
         private TaskDialog host = null!;
         private IWin32Window? ownerWindow;
@@ -315,6 +317,9 @@ namespace KGySoft.WinForms.Forms
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
             if (SystemFonts.MessageBoxFont is Font font)
                 Font = font;
+
+            Debug.Assert(!IsHandleCreated);
+            defaultFont = new ScalingFont(Font, ScaleHelper.SystemScale);
         }
 
         #endregion
@@ -647,6 +652,7 @@ namespace KGySoft.WinForms.Forms
             {
                 components?.Dispose();
                 mainInstructionsFont?.Dispose();
+                defaultFont.Dispose();
             }
 
             base.Dispose(disposing);
@@ -803,6 +809,9 @@ namespace KGySoft.WinForms.Forms
             SuspendLayout();
             try
             {
+                defaultFont.Scale(DeviceScale);
+                Font = defaultFont.Font;
+
                 // size constraints
                 ResetConstraints();
 
