@@ -447,14 +447,7 @@ namespace KGySoft.WinForms
                 return systemScale;
 
             // ISSUE: Typically in .NET 7+, the Parent.Font in OnParentChanged can be a scaled font with an unmatching DeviceDpi (and GetScale). Hence, using the top level control's scaling if possible.
-            Control reference = control.TopLevelControl ?? control.Parent ?? control;
-#if NET47_OR_GREATER || NETCOREAPP
-            // ISSUE 2: When using V1 awareness level, the top-level control's DeviceDpi and GetScale may be inconsistent, in which case the parent font matches the top level DeviceDpi. Hence, preferring DeviceDpi rather than GetScale.
-            float scale = reference.DeviceDpi / DefaultDpi;
-            return new PointF(scale, scale);
-#else
-            return reference.GetScale();
-#endif
+            return (control.TopLevelControl ?? control.Parent ?? control).GetScale();
         }
 
         #endregion
