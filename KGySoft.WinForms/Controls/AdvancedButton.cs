@@ -226,7 +226,11 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public new Image? Image // it is also detected when base.Image changes but reacting onto that in OnPaint has a performance cost
         {
-            get => base.Image;
+            get
+            {
+                CheckImage();
+                return base.Image;
+            }
             set
             {
                 base.Image = value;
@@ -682,6 +686,7 @@ namespace KGySoft.WinForms.Controls
 
             using (Graphics g = Graphics.FromHwnd(IsHandleCreated ? Handle : IntPtr.Zero))
             {
+                CheckImage();
                 g.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
                 preferredSize = LayoutUtils.UnionSizes(((ISupportButtonAdapter)this).Adapter.GetPreferredSizeCore(g, proposedConstraints, GetAppearance()) + Padding.Size, MinimumSize);
             }
