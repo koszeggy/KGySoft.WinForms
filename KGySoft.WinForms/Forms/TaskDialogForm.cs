@@ -278,7 +278,7 @@ namespace KGySoft.WinForms.Forms
         private bool isResettingVisibilities;
         private bool isResetHeightPending;
         private bool isCheckboxChecking;
-        private bool isRtlChanging;
+        private bool isReopening;
         private bool executeNonModal;
         private Point location;
 
@@ -467,10 +467,10 @@ namespace KGySoft.WinForms.Forms
             if (isLoaded) // can happen when RightToLeft changes
             {
                 Debug.Assert(dialogState == TaskDialogStatus.Showing);
-                if (!isRtlChanging)
+                if (!isReopening)
                     return;
 
-                isRtlChanging = false;
+                isReopening = false;
                 Location = location;
                 return;
             }
@@ -582,13 +582,13 @@ namespace KGySoft.WinForms.Forms
                 if (args.Cancel)
                     selectedCustomButtonIndex = -1;
             }
-            else if (isRtlChanging)
+            else if (isReopening)
             {
-                // Changing RightToLeft causes the dialog close. We let it happen because the parent may also change,
-                // and if we cancel the closing here, then a dialog may turn a non-modal form. Reopening as a dialog is handled in ITaskDialog.Execute
+                // Changing RightToLeft or ShowInTaskbar causes the dialog to close. We let it happen because the parent's RTL may also change,
+                // and if we cancel the closing here, then a dialog may turn to a non-modal form. Reopening as a dialog is handled in ITaskDialog.Execute
                 if (DialogResult != DialogResult.Ignore)
                 {
-                    isRtlChanging = false;
+                    isReopening = false;
                     dialogState = TaskDialogStatus.Closing;
                 }
                 else
@@ -604,7 +604,7 @@ namespace KGySoft.WinForms.Forms
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
-            if (isRtlChanging)
+            if (isReopening)
                 return;
 
             dialogState = TaskDialogStatus.Closed;
@@ -729,20 +729,25 @@ namespace KGySoft.WinForms.Forms
                 ShowIcon = showIcon;
             bool showInTaskbar = executeNonModal || (host.Options & TaskDialogOptions.ForceShowInTaskbar) != TaskDialogOptions.None;
             if (ShowInTaskbar != showInTaskbar)
+            {
                 ShowInTaskbar = showInTaskbar;
+                if (dialogState == TaskDialogStatus.Showing)
+                    isReopening = true;
+            }
+
             HyperlinkResolveMode resolve = useLinks ? HyperlinkResolveMode.ResolveHrefsOnly : HyperlinkResolveMode.None;
             lblMessage.ResolveHyperlinks = resolve;
             lblDetailsMain.ResolveHyperlinks = resolve;
             lblFooter.ResolveHyperlinks = resolve;
             lblDetailsFooter.ResolveHyperlinks = resolve;
             var rtl = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
-            isRtlChanging = dialogState == TaskDialogStatus.Showing && rtl != RightToLeft;
+            isReopening |= dialogState == TaskDialogStatus.Showing && rtl != RightToLeft;
             RightToLeft = rtl;
             pnlFooterIcon.Padding = cfg.IsRightToLeft ? footerPanelPaddingRtl : footerPanelPaddingLtr;
 
-            // Modal forms on Windows: when changing RTL, the DialogResult is set to Cancel in older framework targets, causing the dialog to close.
-            // To make it work the same way on all platforms, we set it to Ignore, signaling the check in OnFormClosing.
-            if (isRtlChanging && OSHelper.IsWindows && !OSHelper.IsMono)
+            // Modal forms on Windows: when changing RTL or ShowInTaskbar, the DialogResult is set to Cancel in older framework targets, causing the dialog to close.
+            // To make it work the same way on all platforms, we set the DialogResult to Ignore (Cancel is used by standard buttons), signaling the check in OnFormClosing.
+            if (isReopening && OSHelper.IsWindows && !OSHelper.IsMono)
                 DialogResult = DialogResult.Ignore;
 
             // visibilities
@@ -2114,13 +2119,13 @@ namespace KGySoft.WinForms.Forms
                     ShowDialog(ownerWindow);
 
                 // the handle of the owner may change, too
-                if (isRtlChanging && ownerWindow != null)
+                if (isReopening && ownerWindow != null)
                 {
                     IntPtr newOwner = User32.GetActiveWindow();
                     if (newOwner != IntPtr.Zero)
                         ownerWindow = new Win32Window { Handle = User32.GetActiveWindow() };
                 }
-            } while (isRtlChanging);
+            } while (isReopening);
 
             // mapping result
             TaskDialogResult result;
