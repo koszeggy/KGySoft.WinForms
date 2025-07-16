@@ -385,7 +385,6 @@ namespace KGySoft.WinForms.Forms
             // TaskDialogForm
             // 
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.None;
-            this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(360, 300);
             this.Controls.Add(this.lblDetailsFooter);
             this.Controls.Add(this.pnlDividerDetailsFooterTop);

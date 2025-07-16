@@ -176,6 +176,7 @@ namespace KGySoft.WinForms.Forms
             internal bool IsRightToLeft { get; set; }
             internal bool IsDetailsExpanded { get; set; }
             internal bool IsDetailsInFooter { get; set; }
+            internal bool IsExpanding { get; set; }
 
             #endregion
 
@@ -655,7 +656,7 @@ namespace KGySoft.WinForms.Forms
 
         #region Private Methods
 
-        private Configuration GetConfiguration()
+        private Configuration GetConfiguration(bool? isExpanding = null)
         {
             Configuration result = new Configuration
             {
@@ -670,7 +671,8 @@ namespace KGySoft.WinForms.Forms
                 HasVerification = !String.IsNullOrEmpty(host.CheckBoxText),
                 HasProgressBar = host.ProgressBarStyle != TaskDialogProgressBarStyle.None,
                 IsRightToLeft = (host.Options & TaskDialogOptions.RightToLeftLayout) != TaskDialogOptions.None,
-                IsDetailsExpanded = (host.Options & TaskDialogOptions.DetailsExpanded) != TaskDialogOptions.None,
+                IsExpanding = isExpanding == true,
+                IsDetailsExpanded = isExpanding ?? (host.Options & TaskDialogOptions.DetailsExpanded) != TaskDialogOptions.None,
                 IsDetailsInFooter = (host.Options & TaskDialogOptions.ExpandFooterArea) != TaskDialogOptions.None
             };
 
@@ -900,6 +902,10 @@ namespace KGySoft.WinForms.Forms
             {
                 lblDetailsMain.FadingAnimationOptions = FadingOptions.StandardEffects;
                 lblDetailsFooter.FadingAnimationOptions = FadingOptions.StandardEffects;
+                if (cfg.IsExpanding && cfg.IsDetailsVisibleInMain)
+                    lblDetailsMain.FadingAnimationOptions |= FadingOptions.Appearing;
+                if (cfg.IsExpanding && cfg.IsDetailsVisibleInFooter)
+                    lblDetailsFooter.FadingAnimationOptions |= FadingOptions.Appearing;
                 pnlMainInstruction.Visible = cfg.HasMainInstruction;
                 lblMessage.Visible = cfg.HasMessage;
                 lblDetailsMain.Visible = cfg.HasDetails && !isDetailsInFooter && isDetailsExpanded;
@@ -953,22 +959,9 @@ namespace KGySoft.WinForms.Forms
                 pnlDividerControlsBottom.Visible = cfg.HasMainControls && (cfg.HasFooter || cfg.IsDetailsVisibleInFooter);
                 pnlDividerFooterTop.Visible = cfg.HasMainControls && cfg.HasFooter;
                 pnlFooter.Visible = cfg.HasFooter;
-
-                // prevent scrollbar flickering
-                if (dialogState != TaskDialogStatus.Initializing && !pnlDividerFooterBottom.Visible && cfg.HasFooter && cfg.IsDetailsVisibleInFooter)
-                    Height += pnlDividerFooterBottom.Height;
                 pnlDividerFooterBottom.Visible = cfg.HasFooter && cfg.IsDetailsVisibleInFooter;
-
-                // prevent scrollbar flickering
-                if (dialogState != TaskDialogStatus.Initializing && !pnlDividerDetailsFooterTop.Visible && cfg.IsDetailsVisibleInFooter)
-                    Height += pnlDividerDetailsFooterTop.Height;
                 pnlDividerDetailsFooterTop.Visible = cfg.IsDetailsVisibleInFooter;
-
-                // prevent scrollbar flickering
-                if (dialogState != TaskDialogStatus.Initializing && !lblDetailsFooter.Visible && cfg.IsDetailsVisibleInFooter)
-                    Height += lblDetailsFooter.Height;
                 lblDetailsFooter.Visible = cfg.IsDetailsVisibleInFooter;
-
                 if (dialogState != TaskDialogStatus.Initializing)
                     FixControlOrder();
             }
@@ -1248,14 +1241,14 @@ namespace KGySoft.WinForms.Forms
             if (isResettingVisibilities)
                 return;
 
+            if (isResettingHeight)
+            {
+                isResetHeightPending = true;
+                return;
+            }
+
             while (true)
             {
-                if (isResettingHeight)
-                {
-                    isResetHeightPending = true;
-                    return;
-                }
-
                 Screen screen = Screen.FromControl(this);
                 Rectangle screenBounds = screen.WorkingArea;
                 int screenHeight = screenBounds.Height;
@@ -1266,6 +1259,7 @@ namespace KGySoft.WinForms.Forms
                     try
                     {
                         // adjusting main instruction and icon height
+                        pnlMainIconBackground.Height = pnlMainIconBackground.MinimumSize.Height;
                         if (cfg.HasMainInstruction)
                         {
                             if (isSpecialHeadColors)
@@ -1304,42 +1298,42 @@ namespace KGySoft.WinForms.Forms
                             pnlProgressBar.Height = pbProgress.Height + pnlProgressBar.Padding.Vertical;
 
                         // pnlMain(Content) height (AutoSize does not work correctly)
-                        int desiredHeight;
+                        int mainControlsHeight;
                         if (cfg.HasCommandLinks)
-                            desiredHeight = pnlCommandLinks.Top + pnlCommandLinks.Height;
+                            mainControlsHeight = pnlCommandLinks.Top + pnlCommandLinks.Height;
                         else if (cfg.HasRadioButtons)
-                            desiredHeight = pnlRadioButtons.Top + pnlRadioButtons.Height;
+                            mainControlsHeight = pnlRadioButtons.Top + pnlRadioButtons.Height;
                         else if (cfg.HasProgressBar)
-                            desiredHeight = pnlProgressBar.Top + pnlProgressBar.Height;
+                            mainControlsHeight = pnlProgressBar.Top + pnlProgressBar.Height;
                         else if (cfg.HasMainText)
-                            desiredHeight = pnlMainTexts.Top + pnlMainTexts.Height;
+                            mainControlsHeight = pnlMainTexts.Top + pnlMainTexts.Height;
                         else if (cfg.HasMainInstruction)
-                            desiredHeight = pnlMainInstruction.Top + pnlMainInstruction.Height + pnlMainTexts.MinimumSize.Height;
+                            mainControlsHeight = pnlMainInstruction.Top + pnlMainInstruction.Height + pnlMainTexts.MinimumSize.Height;
                         else
-                            desiredHeight = pnlMainTexts.MinimumSize.Height;
+                            mainControlsHeight = pnlMainTexts.MinimumSize.Height;
 
-                        pnlMain.Height = pnlMainContent.Height = Math.Max(desiredHeight, pnlMainTexts.MinimumSize.Height);
+                        pnlMain.Height = pnlMainContent.Height = Math.Max(mainControlsHeight, pnlMainTexts.MinimumSize.Height);
 
                         // pnlMainControls.Height (AutoSize works after all, but causes for a moment to shrink the whole main window)
                         if (cfg.HasMainControls)
                         {
-                            desiredHeight = 0;
+                            mainControlsHeight = 0;
                             if (cfg.HasVerification || cfg.HasDetails)
                             {
                                 if (cfg.HasDetails)
-                                    desiredHeight = btnShowHideDetails.Height + btnShowHideDetails.Margin.Vertical;
+                                    mainControlsHeight = btnShowHideDetails.Height + btnShowHideDetails.Margin.Vertical;
 
                                 if (cfg.HasVerification)
-                                    desiredHeight += chbCheckBox.Height + chbCheckBox.Margin.Vertical;
+                                    mainControlsHeight += chbCheckBox.Height + chbCheckBox.Margin.Vertical;
 
-                                desiredHeight += pnlChecks.Margin.Vertical;
-                                pnlChecks.Height = desiredHeight;
+                                mainControlsHeight += pnlChecks.Margin.Vertical;
+                                pnlChecks.Height = mainControlsHeight;
                             }
 
                             if (cfg.HasButtons)
-                                desiredHeight = Math.Max(desiredHeight, pnlButtons.GetPreferredSize(new Size(pnlButtons.Width, 0)).Height + pnlButtons.Margin.Vertical);
+                                mainControlsHeight = Math.Max(mainControlsHeight, pnlButtons.GetPreferredSize(new Size(pnlButtons.Width, 0)).Height + pnlButtons.Margin.Vertical);
 
-                            pnlMainControls.Height = desiredHeight;
+                            pnlMainControls.Height = mainControlsHeight;
                         }
 
                         // pnlFooter.Height (AutoSize works after all, but causes for a moment to shrink the whole main window)
@@ -1367,7 +1361,8 @@ namespace KGySoft.WinForms.Forms
                     else
                         desiredClientHeight = pnlMain.Height - pnlMain.Top;
 
-                    SetHeight(Math.Min(desiredClientHeight + heightClientDiff, screenHeight), suggestedCenter, screen);
+                    int desiredHeight = desiredClientHeight + heightClientDiff;
+                    SetHeight(Math.Min(desiredHeight, screenHeight), suggestedCenter, screen, desiredHeight > screenHeight);
                 }
                 finally
                 {
@@ -1516,11 +1511,12 @@ namespace KGySoft.WinForms.Forms
             Bounds = new Rectangle(suggestedCenter.Value.X - width / 2, suggestedCenter.Value.Y - Height / 2, width, Height).EnsureScreen(screen, adjustExceeding);
         }
 
-        private void SetHeight(int height, Point? suggestedCenter, Screen screen)
+        private void SetHeight(int height, Point? suggestedCenter, Screen screen, bool showScrollbar)
         {
             bool adjustExceeding = suggestedCenter == null;
             suggestedCenter ??= new Point(Left + Width / 2, Top + Height / 2);
             Bounds = new Rectangle(suggestedCenter.Value.X - Width / 2, suggestedCenter.Value.Y - height / 2, Width, height).EnsureScreen(screen, adjustExceeding);
+            AutoScroll = showScrollbar; // this may cause triggering Control_SizeChanged, causing a new resize session
         }
 
         private void AddStandardButton(TaskDialogStandardButtonFlags standardButton)
@@ -1739,10 +1735,6 @@ namespace KGySoft.WinForms.Forms
             if (dialogState != TaskDialogStatus.Initializing &&
                 (isSpecialHeadColors != requireSpecialHeadColors || requireSpecialHeadColors))
             {
-                // if changing to special colors, increasing height by the padding difference in advance to prevent the flickering of the scrollbars.
-                if (isSpecialHeadColors != requireSpecialHeadColors && requireSpecialHeadColors)
-                    Height += (mainInstructionSpecialColorsReferencePadding.Vertical - mainInstructionReferencePadding.Vertical + 1).Scale(scale.Y);
-
                 isSpecialHeadColors = requireSpecialHeadColors;
                 ResetTheme();
                 pnlMainInstruction.Invalidate();
@@ -1839,7 +1831,6 @@ namespace KGySoft.WinForms.Forms
 
                 if (control.Visible)
                 {
-                    // Adjusting form height to prevent scrollbar flickering
                     if (control.AutoSize)
                     {
                         if ((preferredSize = control.GetPreferredSize(new Size(control.Width, 0))).Height > origSize.Height)
@@ -1847,8 +1838,6 @@ namespace KGySoft.WinForms.Forms
                             // possible divider visibility change
                             if (visibilityChange)
                                 preferredSize.Height += 2;
-
-                            Height += preferredSize.Height - origSize.Height;
                         }
                     }
                     else
@@ -1869,11 +1858,6 @@ namespace KGySoft.WinForms.Forms
                 control.Size = preferredSize;
             if (visibilityChange || origSize != preferredSize)
                 ResetHeights(cfg ?? GetConfiguration());
-
-            // workaround: hide scrollbar if it gets accidentally visible
-            int screenHeight = Screen.FromControl(this).WorkingArea.Height;
-            if (Height < screenHeight)
-                AdjustFormScrollbars(false);
         }
 
         private void UpdateButtonIcon(Control control, TaskDialogButton taskDialogButton)
@@ -1891,10 +1875,7 @@ namespace KGySoft.WinForms.Forms
                         ResetCommandLinkIcon(commandLinkButton, taskDialogButton.CustomIcon);
                     else if (commandLinkButton.Image != null)
                         ResetCommandLinkIcon(commandLinkButton, null);
-
-                    // Adjusting form height to prevent scrollbar flickering
-                    if ((preferredSize = control.GetPreferredSize(new Size(control.Width, 0))).Height > origSize.Height)
-                        Height += preferredSize.Height - origSize.Height;
+                    preferredSize = control.GetPreferredSize(new Size(control.Width, 0));
                 }
                 else
                 {
@@ -1921,11 +1902,6 @@ namespace KGySoft.WinForms.Forms
                 control.Size = preferredSize;
             if (origSize != preferredSize)
                 ResetHeights(GetConfiguration());
-
-            // workaround: hide scrollbar if it gets accidentally visible
-            int screenHeight = Screen.FromControl(this).WorkingArea.Height;
-            if (Height < screenHeight)
-                AdjustFormScrollbars(false);
         }
 
         /// <summary>
@@ -2286,17 +2262,7 @@ namespace KGySoft.WinForms.Forms
                 case TaskDialog.PropertyProgressBarStyle:
                     if (host.ProgressBarStyle == TaskDialogProgressBarStyle.None || !pbProgress.Visible)
                     {
-                        // turning off progress bar
-                        if (host.ProgressBarStyle == TaskDialogProgressBarStyle.None)
-                            pnlProgressBar.Visible = false;
-                        // turning on progress bar
-                        else
-                        {
-                            // preventing flickering scrollbar is possible
-                            Height += pnlProgressBar.Height;
-                            pnlProgressBar.Visible = true;
-                        }
-
+                        pnlProgressBar.Visible = host.ProgressBarStyle != TaskDialogProgressBarStyle.None;
                         ResetHeights(GetConfiguration());
                     }
 
@@ -2501,112 +2467,11 @@ namespace KGySoft.WinForms.Forms
             if (String.IsNullOrEmpty(host.DetailsText) || isResizing)
                 return;
 
-            int diff;
-            int detailsHeight;
-            Rectangle screen = Screen.FromControl(this).WorkingArea;
-            int screenHeight = screen.Height;
-            bool resetHeightsNeeded = false;
+            Debug.Assert(dialogState != TaskDialogStatus.Initializing);
+            Configuration cfg = GetConfiguration(isDetailsExpanded);
 
-            // details in main text area
-            if ((host.Options & TaskDialogOptions.ExpandFooterArea) == TaskDialogOptions.None)
-            {
-                detailsHeight = lblDetailsMain.GetPreferredSize(new Size(pnlMainTexts.Width - pnlMainTexts.Padding.Horizontal, 0)).Height;
-
-                // counting icon height only when it is non-themed or there is no main instruction
-                int iconHeight = 0;
-                bool hasMainInstruction = !String.IsNullOrEmpty(host.MainInstruction);
-                if ((host.Icon != TaskDialogStandardIcons.None || host.CustomIcon != null) && !(hasMainInstruction && host.Icon.In(iconsWithColoredHeader)))
-                    iconHeight = pnlMainIconBackground.MinimumSize.Height;
-
-                int minHeight = Math.Max(pnlMainTexts.MinimumSize.Height, iconHeight - (hasMainInstruction ? lblMainInstruction.Height : 0));
-                int mainTextHeight = Math.Max(minHeight,
-                    (isDetailsExpanded ? detailsHeight : 0)
-                    + (!String.IsNullOrEmpty(host.Message) ? lblMessage.Height : 0)
-                    + pnlMainTexts.Padding.Vertical);
-                diff = mainTextHeight - Math.Max(pnlMainTexts.Height, minHeight);
-                int formHeight = Math.Min(Height + diff, screenHeight);
-                resetHeightsNeeded = Height >= screenHeight || Height + diff > screenHeight;
-
-                // when expanding, setting form height first to prevent appearing scrollbars for a moment
-                if (isDetailsExpanded && !resetHeightsNeeded)
-                    Height = formHeight;
-
-                isResizing = true;
-                try
-                {
-                    pnlMainTexts.Height = mainTextHeight;
-                    if (!resetHeightsNeeded)
-                        pnlMain.Height = pnlMainContent.Height += diff;
-                    lblDetailsMain.FadingAnimationOptions = FadingOptions.StandardEffects;
-                    if (isDetailsExpanded && dialogState != TaskDialogStatus.Initializing)
-                        lblDetailsMain.FadingAnimationOptions |= FadingOptions.Appearing;
-                    lblDetailsMain.Visible = isDetailsExpanded;
-
-                    // when collapsing, setting form height at the end to prevent appearing scrollbars for a moment
-                    if (!isDetailsExpanded && !resetHeightsNeeded)
-                        Height = formHeight;
-                }
-                finally
-                {
-                    isResizing = false;
-                }
-            }
-            // details in footer
-            else
-            {
-                SuspendLayout();
-                try
-                {
-                    FixControlOrder();
-                    detailsHeight = lblDetailsFooter.GetPreferredSize(new Size(ClientSize.Width, 0)).Height;
-                    diff = detailsHeight + pnlDividerDetailsFooterTop.Height;
-                    bool hasFooter = !String.IsNullOrEmpty(host.FooterText);
-                    diff += hasFooter ? pnlDividerFooterBottom.Height : pnlDividerControlsBottom.Height;
-                    resetHeightsNeeded = Height >= screenHeight || Height + diff > screenHeight;
-
-                    // when expanding, setting form height first to prevent appearing scrollbars for a moment
-                    isResizing = true;
-                    try
-                    {
-                        if (isDetailsExpanded && !resetHeightsNeeded)
-                            Height = Math.Min(Height + diff, screenHeight);
-
-                        pnlDividerDetailsFooterTop.Visible = isDetailsExpanded;
-                        if (hasFooter)
-                            pnlDividerFooterBottom.Visible = isDetailsExpanded;
-                        else
-                            pnlDividerControlsBottom.Visible = isDetailsExpanded;
-
-                        lblDetailsFooter.FadingAnimationOptions = FadingOptions.StandardEffects;
-                        if (isDetailsExpanded && dialogState != TaskDialogStatus.Initializing)
-                            lblDetailsFooter.FadingAnimationOptions |= FadingOptions.Appearing;
-                        lblDetailsFooter.Visible = isDetailsExpanded;
-
-                        // when collapsing, setting form height at the end to prevent appearing scrollbars for a moment
-                        if (!isDetailsExpanded && !resetHeightsNeeded)
-                            Height = Math.Min(Height - diff, screenHeight);
-                    }
-                    finally
-                    {
-                        isResizing = false;
-                    }
-                }
-                finally
-                {
-                    ResumeLayout(!resetHeightsNeeded);
-                }
-            }
-
-            // resetting heights are needed when form scrollbar is visible or will appear/disappear
-            Configuration cfg = GetConfiguration();
-            if (resetHeightsNeeded)
-                ResetHeights(cfg);
-            else if (Top - screen.Top + Height > screenHeight)
-                Top = screenHeight + screen.Top - Height;
-
-            // workaround: hide scrollbar if it gets accidentally visible
-            if (Height < screenHeight)
-                AdjustFormScrollbars(false);
+            ResetVisibilities(cfg);
+            ResetHeights(cfg);
 
             // turning off appearance animation if details are not physically visible
             if (cfg.IsDetailsVisibleInMain)
@@ -2622,7 +2487,7 @@ namespace KGySoft.WinForms.Forms
             }
 
             // invoking host change
-            host.OnDetailsVisibleChanged(new TaskDialogDetailsVisibleChangedEventArgs(btnShowHideDetails.IsExpanded));
+            host.OnDetailsVisibleChanged(new TaskDialogDetailsVisibleChangedEventArgs(isDetailsExpanded));
         }
 
         private void Control_SizeChanged(object? sender, EventArgs e)
