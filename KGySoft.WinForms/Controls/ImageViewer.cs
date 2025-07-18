@@ -529,9 +529,9 @@ namespace KGySoft.WinForms.Controls
             if (image == null || e.ClipRectangle.Width <= 0 || e.ClipRectangle.Height <= 0)
                 return;
 
-            if (targetRectangle.IsEmpty)
+            if (targetRectangle.IsEmpty())
                 AdjustSizes();
-            if (!targetRectangle.IsEmpty)
+            if (!targetRectangle.IsEmpty())
                 PaintImage(e.Graphics);
         }
 

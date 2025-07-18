@@ -43,6 +43,7 @@
 + New ICustomLocalizable interface
 + New IToolTipTargetProvider interface
 + New OSHelper class
++ New RectangleExtensions class
 
 + KGySoft.ComponentModel namespace:
 ===================================

@@ -103,7 +103,7 @@ namespace KGySoft.WinForms.Controls
                     case Constants.WM_PAINT when !parent.Enabled:
                         User32.ValidateRect(m.HWnd, IntPtr.Zero);
                         Rectangle bounds = User32.GetClientRect(m.HWnd, out var rect) ? rect.ToRectangle() : Rectangle.Empty;
-                        if (!bounds.IsEmpty)
+                        if (!bounds.IsEmpty())
                         {
                             using var g = Graphics.FromHwnd(m.HWnd);
                             parent.DrawDisabledTextBox(g, bounds);
@@ -850,8 +850,8 @@ namespace KGySoft.WinForms.Controls
 
                     if (systemDrawDropDownListMode && (DropDownStyle == ComboBoxStyle.DropDownList || nativeEditorChild == null))
                     {
-                        var bounds = User32.GetClientRect(m.HWnd, out var rect) ? rect.ToRectangle() : Rectangle.Empty;
-                        if (!bounds.IsEmpty)
+                        var bounds = User32.GetClientRect(m.HWnd, out RECT rect) ? rect.ToRectangle() : Rectangle.Empty;
+                        if (!bounds.IsEmpty())
                         {
                             using var g = Graphics.FromHwnd(m.HWnd);
                             DrawDisabledTextBox(g, bounds);

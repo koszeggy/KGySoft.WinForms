@@ -22,15 +22,37 @@ using System.Windows.Forms;
 
 namespace KGySoft.WinForms
 {
-    internal static class RectangleExtensions
+    /// <summary>
+    /// Provides extension methods for the <see cref="Rectangle"/> structure.
+    /// </summary>
+    public static class RectangleExtensions
     {
         #region Methods
 
-        internal static Point GetCenter(this Rectangle rect) => rect.Location + new Size(rect.Size.Width / 2, rect.Size.Height / 2);
+        /// <summary>
+        /// Gets the center point of the rectangle.
+        /// </summary>
+        /// <param name="rect">The rectangle to get the center point of.</param>
+        /// <returns>The center point of the rectangle.</returns>
+        public static Point GetCenter(this Rectangle rect) => rect.Location + new Size(rect.Size.Width / 2, rect.Size.Height / 2);
 
-        internal static Rectangle FromCenter(Point center, Size size) => new(center.X - size.Width / 2, center.Y - size.Height / 2, size.Width, size.Height);
+        /// <summary>
+        /// Creates a <see cref="Rectangle"/> with the specified center point and size.
+        /// </summary>
+        /// <param name="center">The <see cref="Point"/> representing the center of the rectangle.</param>
+        /// <param name="size">The <see cref="Size"/> representing the width and height of the rectangle.</param>
+        /// <returns>A <see cref="Rectangle"/> with the specified center and size.</returns>
+        public static Rectangle FromCenter(Point center, Size size) => new(center.X - size.Width / 2, center.Y - size.Height / 2, size.Width, size.Height);
 
-        internal static Rectangle EnsureScreen(this Rectangle suggestedBounds, Screen screen, bool forceSingleScreen)
+        /// <summary>
+        /// Adjusts the specified rectangle to ensure it is positioned within the given screen's working area.
+        /// </summary>
+        /// <param name="suggestedBounds">The initial rectangle bounds to be adjusted.</param>
+        /// <param name="screen">The screen within which the rectangle should be positioned.</param>
+        /// <param name="forceSingleScreen"><see langword="true"/> to ensure the rectangle is entirely contained within the specified screen if possible;
+        /// <see langword="false"/> to ensure that the largest part of the rectangle is on the specified screen.</param>
+        /// <returns>The adjusted <see cref="Rectangle"/>.</returns>
+        public static Rectangle EnsureScreen(this Rectangle suggestedBounds, Screen screen, bool forceSingleScreen)
         {
             Rectangle screenBounds;
             if (!forceSingleScreen)
@@ -81,7 +103,12 @@ namespace KGySoft.WinForms
             return FromCenter(screen.Bounds.GetCenter(), suggestedBounds.Size);
         }
 
-        #endregion
+        /// <summary>
+        /// Gets whether the rectangle has zero Width OR Height.
+        /// Not just faster than the IsEmpty property but also works better when Intersect returns a non-default practically zero rectangle.
+        /// </summary>
+        public static bool IsEmpty(this Rectangle rect) => rect.Width == 0 || rect.Height == 0;
 
+        #endregion
     }
 }
