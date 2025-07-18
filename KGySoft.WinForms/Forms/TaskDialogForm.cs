@@ -558,12 +558,37 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
+#if NET47_OR_GREATER || NETCOREAPP
+        protected override void OnDpiChanged(DpiChangedEventArgs e)
+        {
+            e.Cancel = true;
+            base.OnDpiChanged(e);
+        }
+#endif
+
+        protected override void OnDeviceScaleChanging(DeviceScaleChangingEventArgs e)
+        {
+            // On .NET 8+ this is preinitialized to true due to AutoScaleMode = None, though we prefer getting the default suggested bounds in DeviceScaleChanged
+            e.Handled = false;
+            base.OnDeviceScaleChanging(e);
+        }
+
         protected override void OnDeviceScaleChanged(DeviceScaleChangedEventArgs e)
         {
             base.OnDeviceScaleChanged(e);
             if (dialogState != TaskDialogStatus.Showing)
                 return;
-            ResetLayout(GetConfiguration(), e.SuggestedBounds.GetCenter());
+            if (ScaleHelper.PerMonitorDpiAwarenessVersion > 1)
+                ResetLayout(GetConfiguration(), e.SuggestedBounds);
+        }
+
+        protected override void OnDeviceScaleAutoResized(EventArgs e)
+        {
+            base.OnDeviceScaleAutoResized(e);
+            if (dialogState != TaskDialogStatus.Showing)
+                return;
+            if (ScaleHelper.PerMonitorDpiAwarenessVersion == 1)
+                ResetLayout(GetConfiguration(), Bounds);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -800,7 +825,7 @@ namespace KGySoft.WinForms.Forms
             isResizing = false;
         }
 
-        private void ResetLayout(Configuration cfg, Point? suggestedCenter = null)
+        private void ResetLayout(Configuration cfg, Rectangle? suggestedBounds = null)
         {
             Debug.Assert(IsHandleCreated && Created);
             Debug.Assert(DeviceScale == this.GetScale());
@@ -829,8 +854,8 @@ namespace KGySoft.WinForms.Forms
             }
 
             // setting sizes
-            ResetWidths(cfg, suggestedCenter);
-            ResetHeights(cfg, suggestedCenter);
+            ResetWidths(cfg, suggestedBounds);
+            ResetHeights(cfg, suggestedBounds);
         }
 
         private void ResetConstraints()
@@ -1248,7 +1273,7 @@ namespace KGySoft.WinForms.Forms
             defaultButton?.Select();
         }
 
-        private void ResetHeights(Configuration cfg, Point? suggestedCenter = null)
+        private void ResetHeights(Configuration cfg, Rectangle? suggestedBounds = null)
         {
             // ResetHeights is always called after resetting visibilities
             if (isResettingVisibilities)
@@ -1262,7 +1287,7 @@ namespace KGySoft.WinForms.Forms
 
             while (true)
             {
-                Screen screen = Screen.FromControl(this);
+                Screen screen = suggestedBounds.HasValue ? Screen.FromRectangle(suggestedBounds.Value) : Screen.FromControl(this);
                 Rectangle screenBounds = screen.WorkingArea;
                 int screenHeight = screenBounds.Height;
                 isResettingHeight = true;
@@ -1375,7 +1400,7 @@ namespace KGySoft.WinForms.Forms
                         desiredClientHeight = pnlMain.Height - pnlMain.Top;
 
                     int desiredHeight = desiredClientHeight + heightClientDiff;
-                    SetHeight(Math.Min(desiredHeight, screenHeight), suggestedCenter, screen, desiredHeight > screenHeight);
+                    SetHeight(Math.Min(desiredHeight, screenHeight), suggestedBounds, screen, desiredHeight > screenHeight);
                 }
                 finally
                 {
@@ -1388,7 +1413,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetWidths(Configuration cfg, Point? suggestedCenter = null)
+        private void ResetWidths(Configuration cfg, Rectangle? suggestedBounds = null)
         {
             isResizing = true;
             PointF scale = DeviceScale;
@@ -1400,14 +1425,14 @@ namespace KGySoft.WinForms.Forms
                 // recursive reentrancy in OnDeviceScaleChanged when setting MinimumSize in ResetConstraints, etc.).
                 // NOTE: we could force the handle creation earlier (in Execute), but due to a strange bug in .NET 5.0 it causes
                 // that OnLoad and OnShown are not called, causing some issues, e.g. the timer is not initialized and system sounds are not played.
-                Screen screen = Screen.FromControl(this);
+                Screen screen = suggestedBounds.HasValue ? Screen.FromRectangle(suggestedBounds.Value) : Screen.FromControl(this);
                 Rectangle screenBounds = screen.WorkingArea;
                 int screenWidth = screenBounds.Width;
                 int minimumWidth = cfg.DluToPixelsX(formReferenceMinWidth).Scale(scale.X);
                 if (host.Width > 0)
                 {
                     int desiredWidth = Math.Max(minimumWidth, cfg.DluToPixelsX(host.Width).Scale(scale.X));
-                    SetWidth(Math.Min(desiredWidth, screenWidth), suggestedCenter, screen);
+                    SetWidth(Math.Min(desiredWidth, screenWidth), suggestedBounds, screen);
                 }
                 // auto width
                 else
@@ -1480,7 +1505,7 @@ namespace KGySoft.WinForms.Forms
                     }
 
                     int widthClientDiff = Width - ClientSize.Width;
-                    SetWidth(Math.Min(desiredWidth + widthClientDiff, screenWidth), suggestedCenter, screen);
+                    SetWidth(Math.Min(desiredWidth + widthClientDiff, screenWidth), suggestedBounds, screen);
                 }
 
                 // setting pnlChecks minimum width (It always has priority regardless of form width. Its maximum size is smaller than minimum form size so it is ok)
@@ -1517,18 +1542,28 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void SetWidth(int width, Point? suggestedCenter, Screen screen)
+        private void SetWidth(int width, Rectangle? suggestedBounds, Screen screen)
         {
-            bool adjustExceeding = suggestedCenter == null;
-            suggestedCenter ??= new Point(Left + Width / 2, Top + Height / 2);
-            Bounds = new Rectangle(suggestedCenter.Value.X - width / 2, suggestedCenter.Value.Y - Height / 2, width, Height).EnsureScreen(screen, adjustExceeding);
+            Rectangle origBounds = Bounds;
+            Rectangle newBounds = suggestedBounds ?? Bounds;
+            Point cursor;
+            int origin = suggestedBounds.HasValue && Bounds.Contains(cursor = Cursor.Position) ? cursor.X : origBounds.GetCenter().X;
+            newBounds.X = origin - (int)((float)(origin - origBounds.X) / origBounds.Width * width);
+            newBounds.Width = width;
+            newBounds.Height = origBounds.Height; // keeping the original height
+            Bounds = newBounds.EnsureScreen(screen, suggestedBounds == null);
         }
 
-        private void SetHeight(int height, Point? suggestedCenter, Screen screen, bool showScrollbar)
+        private void SetHeight(int height, Rectangle? suggestedBounds, Screen screen, bool showScrollbar)
         {
-            bool adjustExceeding = suggestedCenter == null;
-            suggestedCenter ??= new Point(Left + Width / 2, Top + Height / 2);
-            Bounds = new Rectangle(suggestedCenter.Value.X - Width / 2, suggestedCenter.Value.Y - height / 2, Width, height).EnsureScreen(screen, adjustExceeding);
+            Rectangle origBounds = Bounds;
+            Rectangle newBounds = suggestedBounds ?? Bounds;
+            Point cursor;
+            int origin = suggestedBounds.HasValue && Bounds.Contains(cursor = Cursor.Position) ? cursor.Y : origBounds.GetCenter().Y;
+            newBounds.Y = origin - (int)((float)(origin - origBounds.Y) / origBounds.Height * height);
+            newBounds.Width = origBounds.Width; // keeping the original width
+            newBounds.Height = height;
+            Bounds = newBounds.EnsureScreen(screen, suggestedBounds == null);
             AutoScroll = showScrollbar; // this may cause triggering Control_SizeChanged, causing a new resize session
         }
 

@@ -204,6 +204,9 @@ namespace KGySoft.WinForms.Forms
         /// the <see cref="Form.OnGetDpiScaledSize">OnGetDpiScaledSize</see> method. If a derived form returns <see langword="true"/> from an overridden <see cref="Form.OnGetDpiScaledSize">OnGetDpiScaledSize</see>
         /// method, the <see cref="DeviceScaleChangingEventArgs.DesiredSize"/> may already contain a custom size, which is indicated by the <see cref="HandledEventArgs.Handled"/> property being <see langword="true"/>.
         /// To revoke such custom resizing and apply the default scaling behavior instead, set the <see cref="HandledEventArgs.Handled"/> property to <see langword="false"/>.</para>
+        /// <para>On more recent targeted platforms, the <see cref="HandledEventArgs.Handled"/> may already be initialized to <see langword="true"/>, depending on the <see cref="ContainerControl.AutoScaleMode"/>
+        /// property of the form. For example, if <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.None"/>, this is how the original form size is preserved by default.
+        /// By setting the <see cref="HandledEventArgs.Handled"/> property to <see langword="false"/>, you can fall back to the default auto-scaling behavior of the form.</para>
         /// <note>When using per-monitor DPI awareness V1, this event is not raised, and even if you set a custom size in the <see cref="DeviceScaleChanged"/> event,
         /// Windows may forcibly reset the suggested size after setting the custom bounds. To apply a custom size with per-monitor DPI awareness V1, use the <see cref="DeviceScaleAutoResized"/> event instead.</note>
         /// </remarks>
@@ -700,7 +703,7 @@ namespace KGySoft.WinForms.Forms
                         Rectangle before = Bounds;
                         OnDeviceScaleChanged(new DeviceScaleChangedEventArgs(suggestedBounds, scale, oldScale));
                         Rectangle after = Bounds;
-                        if (isPerMonitorDpiAwarenessV1 || before == after && suggestedBounds.Size != after.Size)
+                        if (isPerMonitorDpiAwarenessV1 || before == after)
                             dpiChangeSuggestedSize = suggestedBounds.Size;
                     }
 

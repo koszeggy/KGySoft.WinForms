@@ -60,17 +60,26 @@ namespace KGySoft.WinForms
                 if (Screen.FromRectangle(suggestedBounds).Equals(screen))
                     return suggestedBounds;
 
-                // if the suggested bounds is not on the given screen, then we perform the minimum adjustment to ensure that it is on the given screen
+                // If the suggested rectangle not on the given screen, then we perform some adjustment.
+                // Due to typical mouse dragging scenario we prefer horizontal adjustment in the first place,
+                // so we check if ensuring half, 2/3, 3/4 or the whole the rectangle is on the given screen horizontally solves the problem.
                 screenBounds = screen.WorkingArea;
-                int minimumWidth = suggestedBounds.Width / 2 + 1;
-                if (Rectangle.Intersect(screenBounds, suggestedBounds).Width < minimumWidth)
+                foreach (int minimumWidth in new[] { suggestedBounds.Width / 2 + 1, suggestedBounds.Width * 2 / 3, suggestedBounds.Width * 3 / 4 })
                 {
-                    if (suggestedBounds.Left < screenBounds.Left)
-                        suggestedBounds.X = screenBounds.Left + minimumWidth - suggestedBounds.Width;
-                    else if (suggestedBounds.Right > screenBounds.Right)
-                        suggestedBounds.X = screenBounds.Right - minimumWidth;
+                    if (Rectangle.Intersect(screenBounds, suggestedBounds).Width < minimumWidth)
+                    {
+                        if (suggestedBounds.Left < screenBounds.Left)
+                            suggestedBounds.X = screenBounds.Left + minimumWidth - suggestedBounds.Width;
+                        else if (suggestedBounds.Right > screenBounds.Right)
+                            suggestedBounds.X = screenBounds.Right - minimumWidth;
+
+                        if (Screen.FromRectangle(suggestedBounds).Equals(screen))
+                            return suggestedBounds;
+                    }
                 }
 
+                // After the adjustments above at least the 3/4 of the rectangle should be on the given screen horizontally,
+                // so vertically we ensure only the half of the rectangle.
                 int minimumHeight = suggestedBounds.Height / 2 + 1;
                 if (Rectangle.Intersect(screenBounds, suggestedBounds).Height < minimumHeight)
                 {
@@ -84,7 +93,7 @@ namespace KGySoft.WinForms
                     return suggestedBounds;
             }
 
-            // the suggested bounds is not on the given screen, then adjusting it, ensuring that it is entirely on the given screen
+            // the suggested rectangle is not on the given screen, so ensuring that it is entirely on the given screen
             screenBounds = screen.WorkingArea;
             if (suggestedBounds.Left < screenBounds.Left)
                 suggestedBounds.X = screenBounds.Left;
@@ -99,7 +108,8 @@ namespace KGySoft.WinForms
             if (Screen.FromRectangle(suggestedBounds).Equals(screen))
                 return suggestedBounds;
 
-            // if the bounds is still not on the given screen, then we need to center it on the screen - this time using the screen bounds instead of the working area
+            // If the rectangle is still not on the given screen, then it must be (much) bigger than the screen.
+            // In this case we center it on the screen - this time using the screen bounds instead of the working area.
             return FromCenter(screen.Bounds.GetCenter(), suggestedBounds.Size);
         }
 
