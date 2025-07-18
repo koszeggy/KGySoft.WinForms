@@ -40,11 +40,6 @@ namespace KGySoft.WinForms.Forms
         public PointF PreviousScale { get; }
 
         /// <summary>
-        /// Gets the relative change of the scale factor to the previous one.
-        /// </summary>
-        public PointF ScaleChange { get; }
-
-        /// <summary>
         /// Gets the suggested bounds of the form after scaling.
         /// </summary>
         public Rectangle SuggestedBounds { get; }
@@ -53,12 +48,11 @@ namespace KGySoft.WinForms.Forms
 
         #region Constructors
         
-        internal DeviceScaleChangedEventArgs(Rectangle suggestedBounds, PointF newScale, PointF previousScale, PointF scaleChange)
+        internal DeviceScaleChangedEventArgs(Rectangle suggestedBounds, PointF newScale, PointF previousScale)
         {
             SuggestedBounds = suggestedBounds;
             NewScale = newScale;
             PreviousScale = previousScale;
-            ScaleChange = scaleChange;
         }
         
         #endregion

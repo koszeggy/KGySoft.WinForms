@@ -529,6 +529,18 @@ namespace KGySoft.WinForms.WinApi
         [DllImport("user32.dll", SetLastError = true)]
         internal static extern int GetSystemMetricsForDpi(int nIndex, uint dpi);
 
+        /// <summary>
+        /// In high-DPI displays, enables automatic display scaling of the non-client area portions of the specified top-level window.
+        /// Must be called during the initialization of that window.
+        /// Note  Applications running at a DPI_AWARENESS_CONTEXT of DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 automatically scale their non-client areas by default.
+        /// They do not need to call this function.
+        /// </summary>
+        /// <param name="hwnd">The window that should have automatic scaling enabled.</param>
+        /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero. To get extended error information, call GetLastError.</returns>
+        [DllImport("user32.dll", SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        internal static extern bool EnableNonClientDpiScaling(IntPtr hwnd);
+
         #endregion
     }
 }

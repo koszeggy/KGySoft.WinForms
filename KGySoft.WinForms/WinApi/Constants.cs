@@ -51,7 +51,9 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_SETTEXT = 0x000C;
         internal const int WM_PAINT = 0x000F;
         internal const int WM_ERASEBKGND = 0x0014;
+        internal const int WM_WINDOWPOSCHANGED = 0x0047;
         internal const int WM_SETICON = 0x0080;
+        internal const int WM_NCCREATE = 0x0081;
         internal const int WM_NCCALCSIZE = 0x0083;
 #if !NET5_0_OR_GREATER
         internal const int WM_NCHITTEST = 0x0084;
@@ -66,14 +68,16 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_LBUTTONUP = 0x0202;
         internal const int WM_LBUTTONDBLCLK = 0x0203;
         internal const int WM_MOUSEHWHEEL = 0x020E;
+        internal const int WM_EXITSIZEMOVE = 0x0232;
+        internal const int WM_DPICHANGED = 0x02E0;
+        internal const int WM_DPICHANGED_BEFOREPARENT = 0x02E2;
+        internal const int WM_DPICHANGED_AFTERPARENT = 0x02E3;
+        internal const int WM_GETDPISCALEDSIZE = 0x02E4;
         internal const int WM_CUT = 0x0300;
         internal const int WM_PASTE = 0x0302;
         internal const int WM_CLEAR = 0x0303;
         internal const int WM_UNDO = 0x0304;
         internal const int WM_USER = 0x0400;
-        internal const int WM_DPICHANGED = 0x02E0;
-        internal const int WM_DPICHANGED_BEFOREPARENT = 0x02E2;
-        internal const int WM_DPICHANGED_AFTERPARENT = 0x02E3;
 
         internal const nint ICON_SMALL = 0;
         internal const nint ICON_BIG = 1;
