@@ -296,6 +296,9 @@ namespace KGySoft.WinForms.Forms
         private static IEqualityComparer<SystemTextIds>? Comparer => null;
 #endif
 
+        // Not using SystemDefault rendering quality because GDI and GDI+ may have different default rendering quality, which is very noticeable when the messages can contain links.
+        private static RenderingQuality RenderingQuality => SystemInformation.FontSmoothingType >= Constants.FontSmoothingType_ClearType ? RenderingQuality.High : RenderingQuality.Low;
+
         #endregion
 
         #region Constructors
@@ -1042,6 +1045,7 @@ namespace KGySoft.WinForms.Forms
 
             int index = 0;
             bool checkedSet = false;
+            RenderingQuality renderingQuality = RenderingQuality;
             foreach (TaskDialogRadioButton radioButton in host.RadioButtons)
             {
                 AdvancedRadioButton rb = new AdvancedRadioButton
@@ -1052,7 +1056,8 @@ namespace KGySoft.WinForms.Forms
                     Checked = !checkedSet && radioButton.Checked,
                     Enabled = radioButton.Enabled,
                     Dock = DockStyle.Top,
-                    Tag = radioButton
+                    Tag = radioButton,
+                    TextRenderingQuality = renderingQuality
                 };
 
                 rb.CheckedChanged += RadioButton_CheckedChanged;
@@ -1105,6 +1110,7 @@ namespace KGySoft.WinForms.Forms
                 if (!cfg.HasCommandLinks && host.Buttons.Count > 0)
                 {
                     int index = 0;
+                    RenderingQuality renderingQuality = RenderingQuality;
                     foreach (TaskDialogButton button in host.Buttons)
                     {
                         AdvancedButton btn = new AdvancedButton
@@ -1116,7 +1122,8 @@ namespace KGySoft.WinForms.Forms
                             Enabled = button.Enabled,
                             TextImageRelation = TextImageRelation.ImageBeforeText,
                             Tag = button,
-                            IsElevated = button.IsElevated
+                            IsElevated = button.IsElevated,
+                            TextRenderingQuality = renderingQuality
                         };
 
                         btn.Click += Button_Click;
@@ -1180,6 +1187,7 @@ namespace KGySoft.WinForms.Forms
                 return;
 
             int index = 0;
+            RenderingQuality renderingQuality = RenderingQuality;
             foreach (TaskDialogButton button in host.Buttons)
             {
                 string text = button.Text ?? String.Empty;
@@ -1200,7 +1208,8 @@ namespace KGySoft.WinForms.Forms
                     Tag = button,
                     Dock = DockStyle.Top,
                     IsElevated = button.IsElevated,
-                    UseDefaultGlyph = (host.Options & TaskDialogOptions.UseCommandLinks) != TaskDialogOptions.None
+                    UseDefaultGlyph = (host.Options & TaskDialogOptions.UseCommandLinks) != TaskDialogOptions.None,
+                    TextRenderingQuality = renderingQuality
                 };
 
                 btn.Click += Button_Click;
@@ -1573,6 +1582,7 @@ namespace KGySoft.WinForms.Forms
             {
                 UseVisualStyleBackColor = true,
                 AutoSize = false,
+                TextRenderingQuality = RenderingQuality
             };
             if ((host.Options & TaskDialogOptions.TranslateStandardButtons) != TaskDialogOptions.None)
                 btn.Text = Res.Get(standardButton);
@@ -1665,6 +1675,16 @@ namespace KGySoft.WinForms.Forms
             }
             else
                 lblMainInstruction.Font = Font;
+
+            RenderingQuality renderingQuality = RenderingQuality;
+            lblMainInstruction.TextRenderingQuality = lblMessage.TextRenderingQuality = lblDetailsMain.TextRenderingQuality = btnShowHideDetails.TextRenderingQuality =
+                chbCheckBox.TextRenderingQuality = lblFooter.TextRenderingQuality = lblDetailsFooter.TextRenderingQuality = renderingQuality;
+            foreach (AdvancedButton button in pnlButtons.Controls.Cast<AdvancedButton>())
+                button.TextRenderingQuality = renderingQuality;
+            foreach (CommandLinkButton commandLink in pnlCommandLinks.Controls.Cast<CommandLinkButton>())
+                commandLink.TextRenderingQuality = renderingQuality;
+            foreach (AdvancedRadioButton radioButton in pnlRadioButtons.Controls.Cast<AdvancedRadioButton>())
+                radioButton.TextRenderingQuality = renderingQuality;
 
             // colors
             bool isThemed = VisualStyleHelper.RenderWithVisualStyles;
