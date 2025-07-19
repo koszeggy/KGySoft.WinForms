@@ -566,14 +566,14 @@ namespace KGySoft.WinForms.Forms
         }
 #endif
 
-        protected override void OnDeviceScaleChanging(DeviceScaleChangingEventArgs e)
+        protected override void OnDeviceScaleGetNewSize(DeviceScaleGetNewSizeEventArgs e)
         {
             // On .NET 8+ this is preinitialized to true due to AutoScaleMode = None, though we prefer getting the default suggested bounds in DeviceScaleChanged
             e.Handled = false;
-            base.OnDeviceScaleChanging(e);
+            base.OnDeviceScaleGetNewSize(e);
         }
 
-        protected override void OnDeviceScaleChanged(DeviceScaleChangedEventArgs e)
+        protected override void OnDeviceScaleChanged(DeviceScaleChangeEventArgs e)
         {
             base.OnDeviceScaleChanged(e);
             if (dialogState != TaskDialogStatus.Showing)

@@ -166,8 +166,26 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Occurs with per-monitor DPI awareness, when the scale of the form's display device changes. Similar to the <see cref="Form.DpiChanged"/> event,
-        /// but this is available for all .NET versions, and the event arguments contain the scale of the display rather than DPI values.
+        /// Occurs with per-monitor DPI awareness, when the scale of the form's display device changes, before performing the default processing of the corresponding Windows message.
+        /// On platform targets where the <see cref="Form.DpiChanged"/> event exists, this event is raised before <see cref="Form.DpiChanged"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>This event is raised only on Windows 8.1 or later, when the application has per-monitor DPI awareness.</para>
+        /// <para>On platform targets where the <see cref="Form.DpiChanged"/> event is also available, this event is raised before <see cref="Form.DpiChanged"/>.</para>
+        /// <note>See also the <strong>Remarks</strong> section of the <see cref="DeviceScaleChanged"/> event for more details</note>
+        /// </remarks>
+        [Category("BaseForm")]
+        [Description("Occurs with per-monitor DPI awareness, when the scale of the form's display device changes, "
+            + "before performing the default processing of the corresponding Windows message.")]
+        public event EventHandler<DeviceScaleChangeEventArgs>? DeviceScaleChanging
+        {
+            add => Events.AddHandler(nameof(DeviceScaleChanging), value);
+            remove => Events.RemoveHandler(nameof(DeviceScaleChanging), value);
+        }
+
+        /// <summary>
+        /// Occurs with per-monitor DPI awareness, when the scale of the form's display device changes, after performing the default processing of the corresponding Windows message.
+        /// On platform targets where the <see cref="Form.DpiChanged"/> event exists, this event is raised after <see cref="Form.DpiChanged"/>.
         /// </summary>
         /// <remarks>
         /// <para>This event is raised only on Windows 8.1 or later, when the application has per-monitor DPI awareness.</para>
@@ -175,7 +193,7 @@ namespace KGySoft.WinForms.Forms
         /// If you want to prevent auto-scaling by <see cref="Form.DpiChanged"/>, subscribe <see cref="Form.DpiChanged"/> as well (or override <see cref="Form.OnDpiChanged">OnDpiChanged</see>),
         /// and set <see cref="CancelEventArgs.Cancel"/> in the event arguments to <see langword="true"/>.
         /// In contrast, the arguments of the <see cref="DeviceScaleChanged"/> event cannot be canceled, but this event does not do anything automatically if not subscribed.</para>
-        /// <para>Unlike in the <see cref="Form.OnGetDpiScaledSize"/> event arguments, the <see cref="DeviceScaleChangedEventArgs.SuggestedBounds">DeviceScaleChangedEventArgs.SuggestedBounds</see> property
+        /// <para>Unlike in the <see cref="Form.OnGetDpiScaledSize"/> event arguments, the <see cref="DeviceScaleChangeEventArgs.SuggestedBounds">DeviceScaleChangedEventArgs.SuggestedBounds</see> property
         /// contains a scaled size even if <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.None"/>.
         /// The suggested bounds still can be ignored by the subscriber of the event.</para>
         /// <note>You don't need to set the size of the form when handling this event. If you don't set the size, the suggested bounds will be applied automatically.
@@ -183,26 +201,26 @@ namespace KGySoft.WinForms.Forms
         /// To apply a custom size with per-monitor DPI awareness V1, use the <see cref="DeviceScaleAutoResized"/> event.</note>
         /// </remarks>
         [Category("BaseForm")]
-        [Description("Occurs with per-monitor DPI awareness, when the scale of the form's display device changes. Similar to the DpiChanged event, "
-            + "but this is available for all .NET versions, and the event arguments contain the scale of the display rather than DPI values.")]
-        public event EventHandler<DeviceScaleChangedEventArgs>? DeviceScaleChanged
+        [Description("Occurs with per-monitor DPI awareness, when the scale of the form's display device changes, "
+            + "after performing the default processing of the corresponding Windows message.")]
+        public event EventHandler<DeviceScaleChangeEventArgs>? DeviceScaleChanged
         {
             add => Events.AddHandler(nameof(DeviceScaleChanged), value);
             remove => Events.RemoveHandler(nameof(DeviceScaleChanged), value);
         }
 
         /// <summary>
-        /// Occurs with per-monitor DPI awareness V2, before calculating the suggested bounds for the <see cref="DeviceScaleChanged"/> event.
+        /// Occurs with per-monitor DPI awareness V2, before calculating the suggested bounds for the <see cref="DeviceScaleChanging "/> and <see cref="DeviceScaleChanged"/> events.
         /// Similar to the <see cref="Form.OnGetDpiScaledSize"/> method, but this is available also as an event for all .NET versions, and does not cache the result.
         /// </summary>
         /// <remarks>
         /// <para>This event is raised only on Windows 10 Build 1703 or later, when the application has per-monitor DPI awareness V2.</para>
-        /// <para>By default, the <see cref="DeviceScaleChangingEventArgs.DesiredSize"/> property is initialized to the original size of the form.
-        /// To apply a custom size, change the <see cref="DeviceScaleChangingEventArgs.DesiredSize"/> property, and set the <see cref="HandledEventArgs.Handled"/> property to <see langword="true"/>.
+        /// <para>By default, the <see cref="DeviceScaleGetNewSizeEventArgs.DesiredSize"/> property is initialized to the original size of the form.
+        /// To apply a custom size, change the <see cref="DeviceScaleGetNewSizeEventArgs.DesiredSize"/> property, and set the <see cref="HandledEventArgs.Handled"/> property to <see langword="true"/>.
         /// If you just set the <see cref="HandledEventArgs.Handled"/> property to <see langword="true"/>, the original size will be applied as the desired size.</para>
         /// <para>On platform targets where the <see cref="Form.OnGetDpiScaledSize">OnGetDpiScaledSize</see> method is also available, this event is raised after calling
         /// the <see cref="Form.OnGetDpiScaledSize">OnGetDpiScaledSize</see> method. If a derived form returns <see langword="true"/> from an overridden <see cref="Form.OnGetDpiScaledSize">OnGetDpiScaledSize</see>
-        /// method, the <see cref="DeviceScaleChangingEventArgs.DesiredSize"/> may already contain a custom size, which is indicated by the <see cref="HandledEventArgs.Handled"/> property being <see langword="true"/>.
+        /// method, the <see cref="DeviceScaleGetNewSizeEventArgs.DesiredSize"/> may already contain a custom size, which is indicated by the <see cref="HandledEventArgs.Handled"/> property being <see langword="true"/>.
         /// To revoke such custom resizing and apply the default scaling behavior instead, set the <see cref="HandledEventArgs.Handled"/> property to <see langword="false"/>.</para>
         /// <para>On more recent targeted platforms, the <see cref="HandledEventArgs.Handled"/> may already be initialized to <see langword="true"/>, depending on the <see cref="ContainerControl.AutoScaleMode"/>
         /// property of the form. For example, if <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.None"/>, this is how the original form size is preserved by default.
@@ -213,28 +231,29 @@ namespace KGySoft.WinForms.Forms
         [Category("BaseForm")]
         [Description("Occurs with per-monitor DPI awareness V2, before calculating the suggested bounds for the DeviceScaleChanged event. Similar to the OnGetDpiScaledSize method, "
             + "but this is available also as an event for all .NET versions, and does not cache the result.")]
-        public event EventHandler<DeviceScaleChangingEventArgs>? DeviceScaleChanging
+        public event EventHandler<DeviceScaleGetNewSizeEventArgs>? DeviceScaleGetNewSize
         {
-            add => Events.AddHandler(nameof(DeviceScaleChanging), value);
-            remove => Events.RemoveHandler(nameof(DeviceScaleChanging), value);
+            add => Events.AddHandler(nameof(DeviceScaleGetNewSize), value);
+            remove => Events.RemoveHandler(nameof(DeviceScaleGetNewSize), value);
         }
 
         /// <summary>
         /// Occurs with per-monitor DPI awareness, when the form is resized automatically after the <see cref="DeviceScaleChanged"/> event.
         /// </summary>
         /// <remarks>
-        /// <para>This event is raised after Windows applied the suggested size indicated by the <see cref="DeviceScaleChangedEventArgs.SuggestedBounds"/> property
+        /// <para>This event is raised after Windows applied the suggested size indicated by the <see cref="DeviceScaleChangeEventArgs.SuggestedBounds"/> property
         /// in the event arguments of the <see cref="DeviceScaleChanged"/> event.</para>
-        /// <para>When using per-monitor DPI awareness V2, this event is not raised if you set custom bounds in the <see cref="DeviceScaleChanged"/> event.
-        /// If a new custom size can be calculated in advance, it is recommended to handle the <see cref="DeviceScaleChanging"/> event instead of
-        /// setting custom bounds in the <see cref="DeviceScaleChanged"/> event. This event still can be used to manually scale the contents of the form, for example.</para>
+        /// <para>When using per-monitor DPI awareness V2, this event is not raised if you set custom bounds in the <see cref="DeviceScaleChanging"/> or <see cref="DeviceScaleChanged"/> events.
+        /// If a new custom size can be calculated in advance, it is recommended to handle the <see cref="DeviceScaleGetNewSize"/> event instead of setting custom bounds
+        /// in the <see cref="DeviceScaleChanging"/> or <see cref="DeviceScaleChanged"/> events. This event still can be used to manually scale the contents of the form, for example.</para>
         /// <para>When using per-monitor DPI awareness V1, Windows always (re)applies the non-customizable "suggested" size after the <see cref="DeviceScaleChanged"/> event,
-        /// even if you set custom bounds in the <see cref="DeviceScaleChanged"/> event. This event is raised when it is already safe to apply a new custom size.
+        /// even if you set custom bounds in the <see cref="DeviceScaleChanging"/> or <see cref="DeviceScaleChanged"/> events. This event is raised when it is already safe to apply a new custom size.
         /// When you drag the form to a different display, this event might be raised only after the user finished dragging the form.</para>
         /// </remarks>
         [Category("BaseForm")]
         [Description("Occurs with per-monitor DPI awareness, when the form is resized automatically after the DeviceScaleChanged event. "
-            + "This event may not be raised if you manually set the bounds of the form in the DeviceScaleChanged event handler.")]
+            + "This event may not be raised if the application is executed with per-monitor DPI awareness V2, "
+            + "and you manually set the bounds of the form in the DeviceScaleChanged event handler.")]
         public event EventHandler? DeviceScaleAutoResized
         {
             add => Events.AddHandler(nameof(DeviceScaleAutoResized), value);
@@ -625,20 +644,28 @@ namespace KGySoft.WinForms.Forms
             => Events.GetHandler<EventHandler>(nameof(Resumed))?.Invoke(this, e);
 
         /// <summary>
-        /// Raises the <see cref="DeviceScaleChanged"/> event.
-        /// <br/>See the <strong>Remarks</strong> section of the <see cref="DeviceScaleChanged"/> event for more details.
-        /// </summary>
-        /// <param name="e">Contains the arguments of the event.</param>
-        protected virtual void OnDeviceScaleChanged(DeviceScaleChangedEventArgs e)
-            => Events.GetHandler<EventHandler<DeviceScaleChangedEventArgs>>(nameof(DeviceScaleChanged))?.Invoke(this, e);
-
-        /// <summary>
         /// Raises the <see cref="DeviceScaleChanging"/> event.
         /// <br/>See the <strong>Remarks</strong> section of the <see cref="DeviceScaleChanging"/> event for more details.
         /// </summary>
         /// <param name="e">Contains the arguments of the event.</param>
-        protected virtual void OnDeviceScaleChanging(DeviceScaleChangingEventArgs e)
-            => Events.GetHandler<EventHandler<DeviceScaleChangingEventArgs>>(nameof(DeviceScaleChanging))?.Invoke(this, e);
+        protected virtual void OnDeviceScaleChanging(DeviceScaleChangeEventArgs e)
+            => Events.GetHandler<EventHandler<DeviceScaleChangeEventArgs>>(nameof(DeviceScaleChanging))?.Invoke(this, e);
+
+        /// <summary>
+        /// Raises the <see cref="DeviceScaleChanged"/> event.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="DeviceScaleChanged"/> event for more details.
+        /// </summary>
+        /// <param name="e">Contains the arguments of the event.</param>
+        protected virtual void OnDeviceScaleChanged(DeviceScaleChangeEventArgs e)
+            => Events.GetHandler<EventHandler<DeviceScaleChangeEventArgs>>(nameof(DeviceScaleChanged))?.Invoke(this, e);
+
+        /// <summary>
+        /// Raises the <see cref="DeviceScaleGetNewSize"/> event.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="DeviceScaleGetNewSize"/> event for more details.
+        /// </summary>
+        /// <param name="e">Contains the arguments of the event.</param>
+        protected virtual void OnDeviceScaleGetNewSize(DeviceScaleGetNewSizeEventArgs e)
+            => Events.GetHandler<EventHandler<DeviceScaleGetNewSizeEventArgs>>(nameof(DeviceScaleGetNewSize))?.Invoke(this, e);
 
         /// <summary>
         /// Raises the <see cref="DeviceScaleAutoResized"/> event.
@@ -682,8 +709,8 @@ namespace KGySoft.WinForms.Forms
                     {
                         var scale = new PointF(m.WParam.LOWORD() / ScaleHelper.DefaultDpi, m.WParam.HIWORD() / ScaleHelper.DefaultDpi);
                         SIZE* suggestedSize = (SIZE*)m.LParam;
-                        var args = new DeviceScaleChangingEventArgs(suggestedSize->ToSize(), scale, deviceScale,  m.Result != IntPtr.Zero);
-                        OnDeviceScaleChanging(args);
+                        var args = new DeviceScaleGetNewSizeEventArgs(suggestedSize->ToSize(), scale, deviceScale,  m.Result != IntPtr.Zero);
+                        OnDeviceScaleGetNewSize(args);
                         m.Result = new IntPtr(args.Handled ? 1 : 0);
                         if (args.Handled)
                             *suggestedSize = new SIZE(args.DesiredSize);
@@ -698,10 +725,12 @@ namespace KGySoft.WinForms.Forms
                         var scale = new PointF(m.WParam.LOWORD() / ScaleHelper.DefaultDpi, m.WParam.HIWORD() / ScaleHelper.DefaultDpi);
                         deviceScale = scale;
                         var suggestedBounds = ((RECT*)m.LParam)->ToRectangle();
+                        var args = new DeviceScaleChangeEventArgs(suggestedBounds, scale, oldScale);
+                        OnDeviceScaleChanging(args);
                         base.WndProc(ref m);
                         ResetSmallIcon();
                         Rectangle before = Bounds;
-                        OnDeviceScaleChanged(new DeviceScaleChangedEventArgs(suggestedBounds, scale, oldScale));
+                        OnDeviceScaleChanged(args);
                         Rectangle after = Bounds;
                         if (isPerMonitorDpiAwarenessV1 || before == after)
                             dpiChangeSuggestedSize = suggestedBounds.Size;

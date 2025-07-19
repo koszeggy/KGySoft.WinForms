@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: DeviceScaleChangedEventArgs.cs
+//  File: DeviceScaleChangeEventArgs.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -23,9 +23,9 @@ using System.Drawing;
 namespace KGySoft.WinForms.Forms
 {
     /// <summary>
-    /// Represents the event data for the <see cref="BaseForm.DeviceScaleChanged"/> event.
+    /// Represents the event data for the <see cref="BaseForm.DeviceScaleChanging"/> and <see cref="BaseForm.DeviceScaleChanged"/> events.
     /// </summary>
-    public sealed class DeviceScaleChangedEventArgs : EventArgs
+    public sealed class DeviceScaleChangeEventArgs : EventArgs
     {
         #region Properties
 
@@ -48,7 +48,7 @@ namespace KGySoft.WinForms.Forms
 
         #region Constructors
         
-        internal DeviceScaleChangedEventArgs(Rectangle suggestedBounds, PointF newScale, PointF previousScale)
+        internal DeviceScaleChangeEventArgs(Rectangle suggestedBounds, PointF newScale, PointF previousScale)
         {
             SuggestedBounds = suggestedBounds;
             NewScale = newScale;

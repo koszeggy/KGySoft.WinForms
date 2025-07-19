@@ -203,7 +203,8 @@
   + New IsDesignMode property
   + New InvokeOnUIThread method: a safer and more convenient way to invoke a delegate on the UI thread.
   + New DeviceScale property
-  + New DeviceScaleChanging event: raised before the DPI changes, allowing to adjust the form size.
+  + New DeviceScaleGetNewSize event: raised before the DPI changes, allowing to adjust the form size.
+  + New DeviceScaleChanging event: raised when the DPI changes and the application is per-monitor DPI aware.
   + New DeviceScaleChanged event: raised when the DPI changes and the application is per-monitor DPI aware.
   + New DeviceScaleAutoResized event: raised when the form is resized automatically after the DPI change.
   + New IsLoaded property
@@ -226,8 +227,8 @@
   + New InfoMessage/WarningMessage/ErrorMessage/ConfirmMessage overloads to provide an owner window.
   + New CancellableConfirmMessage methods instead of the obsoleted DialogResult-returning ConfirmMessage overloads.
   + New UseTaskDialogs property: it allows to use the TaskDialog class instead of the standard MessageBox dialogs.
-+ New DeviceScaleChangingEventArgs class
-+ New DeviceScaleChangedEventArgs class
++ New DeviceScaleGetNewSizeEventArgs class
++ New DeviceScaleChangeEventArgs class
 
 
 ~~~~~~~~~

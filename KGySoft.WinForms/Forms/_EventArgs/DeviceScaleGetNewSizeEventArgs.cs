@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: DeviceScaleChangingEventArgs.cs
+//  File: DeviceScaleGetNewSizeEventArgs.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2025 - All Rights Reserved
 //
@@ -24,10 +24,10 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms.Forms
 {
     /// <summary>
-    /// Represents the event data for the <see cref="BaseForm.DeviceScaleChanging"/> event.
+    /// Represents the event data for the <see cref="BaseForm.DeviceScaleGetNewSize"/> event.
     /// To apply a custom size, change <see cref="DesiredSize"/>, and set the <see cref="HandledEventArgs.Handled"/> property to <see langword="true"/>.
     /// </summary>
-    public sealed class DeviceScaleChangingEventArgs : HandledEventArgs
+    public sealed class DeviceScaleGetNewSizeEventArgs : HandledEventArgs
     {
         #region Properties
 
@@ -56,7 +56,7 @@ namespace KGySoft.WinForms.Forms
 
         #region Constructors
 
-        internal DeviceScaleChangingEventArgs(Size desiredSize, PointF newScale, PointF previousScale, bool handled)
+        internal DeviceScaleGetNewSizeEventArgs(Size desiredSize, PointF newScale, PointF previousScale, bool handled)
             : base(handled)
         {
             DesiredSize = desiredSize;
