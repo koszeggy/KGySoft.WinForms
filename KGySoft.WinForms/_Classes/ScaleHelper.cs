@@ -22,6 +22,7 @@ using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 using KGySoft.WinForms.Controls;
+using KGySoft.WinForms.Forms;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -52,7 +53,7 @@ namespace KGySoft.WinForms
             {
                 childControl = host;
                 host.Disposed += Host_Disposed;
-                ResetParents();
+                ResetParents(true);
             }
 
             #endregion
@@ -63,10 +64,8 @@ namespace KGySoft.WinForms
 
             public void Dispose()
             {
-                ReleaseHandle();
-                foreach (var control in parents)
-                    control.ParentChanged -= Control_ParentChanged;
                 childControl.Disposed -= Host_Disposed;
+                ResetParents(false);
             }
 
             #endregion
@@ -78,13 +77,9 @@ namespace KGySoft.WinForms
                 switch (m.Msg)
                 {
                     case Constants.WM_DPICHANGED:
-                        var dpiAwareControl = childControl as IPerMonitorDpiAware;
-                        if (dpiAwareControl != null)
-                            dpiAwareControl.ParentFormDpiChanging();
-                        else
-                            childControl.Invalidate();
+                        OnBeforeParentFormDpiChange();
                         base.WndProc(ref m);
-                        dpiAwareControl?.ParentFormDpiChanged();
+                        OnAfterParentFormDpiChange();
                         break;
 
                     default:
@@ -97,66 +92,115 @@ namespace KGySoft.WinForms
 
             #region Private Methods
 
-            private void Control_ParentChanged(object? sender, EventArgs e) => ResetParents();
-
-            private void ResetParents()
+            private void ResetParents(bool registerCurrentParents)
             {
                 // Checking just HandleCreated of the parent form is not enough, because (typically in .NET 7+) the form's HandleCreated event
                 // is raised only after scaling all controls. Hence, we handle FontChanged as well (which is called when the controls are scaled
                 // during the form creation), so can detect that the parent form's handle creation earlier, before the first WM_DPICHANGED message arrives.
+                // Not needed when the parent form is a BaseForm, because subscribing to DeviceScaleChanging/DeviceScaleChanged events can be done before having a handle.
                 foreach (Control control in parents)
                     control.ParentChanged -= Control_ParentChanged;
-                if (parents.Count > 1)
+                if (parents.Count > 1 && parentForm != null)
                     parents[1].FontChanged -= Parent_FontChanged;
                 parents.Clear();
 
                 Form? currentForm = null;
-                for (Control? c = childControl; c != null; c = c.Parent)
+                if (registerCurrentParents)
                 {
-                    if ((currentForm = c as Form) != null)
-                        break;
-                    parents.Add(c);
-                    c.ParentChanged += Control_ParentChanged;
+                    for (Control? c = childControl; c != null; c = c.Parent)
+                    {
+                        if ((currentForm = c as Form) != null)
+                            break;
+                        parents.Add(c);
+                        c.ParentChanged += Control_ParentChanged;
+                    }
+
+                    if (parents.Count > 1 && currentForm != null && currentForm is not BaseForm)
+                        parents[1].FontChanged += Parent_FontChanged;
+
+                    if (ReferenceEquals(currentForm, parentForm))
+                        return;
                 }
 
-                if (parents.Count > 1)
-                    parents[1].FontChanged += Parent_FontChanged;
+                if (parentForm != null)
+                    ReleaseParentForm();
 
-                if (ReferenceEquals(currentForm, parentForm))
+                if (currentForm != null)
+                    RegisterParentForm(currentForm);
+            }
+
+            private void RegisterParentForm(Form form)
+            {
+                parentForm = form;
+
+                // BaseForm simplification: using DeviceScaleChanging/DeviceScaleChanged events instead of hooking the form's WndProc.
+                // Not needed for functionality, but helps to avoid building up deep call stacks due to chaining, caused by multiple notification registrations.
+                if (form is BaseForm baseForm)
+                {
+                    baseForm.DeviceScaleChanging += BaseForm_DeviceScaleChanging;
+                    baseForm.DeviceScaleChanged += BaseForm_DeviceScaleChanged;
+                    return;
+                }
+
+                // We reach this point when an IPerMonitorDpiAware implementing control is hosted in a non-BaseForm parent form.
+                // To be able to call the Before/After notifications, we need to hook the form's WndProc. In case of many controls, this can lead to deep call stacks.
+                parentForm.HandleCreated += ParentForm_HandleCreated;
+                if (parentForm.IsHandleCreated)
+                    AssignHandle(parentForm.Handle);
+            }
+
+            private void ReleaseParentForm()
+            {
+                if (parentForm == null)
                     return;
 
-                if (parentForm != null)
+                if (parentForm is BaseForm baseForm)
+                {
+                    baseForm.DeviceScaleChanging += BaseForm_DeviceScaleChanging;
+                    baseForm.DeviceScaleChanged += BaseForm_DeviceScaleChanged;
+                }
+                else
                 {
                     ReleaseHandle();
                     parentForm.HandleCreated -= ParentForm_HandleCreated;
-                    parentForm = null;
                 }
 
-                if (currentForm != null)
-                {
-                    parentForm = currentForm;
-                    parentForm.HandleCreated += ParentForm_HandleCreated;
-                    if (parentForm.IsHandleCreated)
-                        AssignHandle(parentForm.Handle);
-                }
+                parentForm = null;
             }
+
+            private void OnBeforeParentFormDpiChange()
+            {
+                if (childControl is IPerMonitorDpiAware dpiAwareControl)
+                    dpiAwareControl.ParentFormDpiChanging();
+                else
+                    childControl.Invalidate();
+            }
+
+            private void OnAfterParentFormDpiChange() => (childControl as IPerMonitorDpiAware)?.ParentFormDpiChanged();
 
             #endregion
 
             #region Event handlers
 
+            private void Control_ParentChanged(object? sender, EventArgs e) => ResetParents(true);
+
             private void ParentForm_HandleCreated(object? sender, EventArgs e)
             {
                 Form form = (Form)sender!;
+                Debug.Assert(form is not BaseForm, "Not expected to be subscribed when parent form is a BaseForm");
                 if (Handle == form.Handle)
                     return;
                 ReleaseHandle();
                 AssignHandle(form.Handle);
             }
 
+            private void BaseForm_DeviceScaleChanging(object sender, DeviceScaleChangeEventArgs e) => OnBeforeParentFormDpiChange();
+            private void BaseForm_DeviceScaleChanged(object sender, DeviceScaleChangeEventArgs e) => OnAfterParentFormDpiChange();
+
             private void Parent_FontChanged(object? sender, EventArgs e)
             {
-                Form? form = childControl.FindForm();
+                Debug.Assert(parentForm != null && parentForm is not BaseForm, "Not expected to be subscribed when parent form is a BaseForm");
+                Form? form = parentForm;
                 if (form?.IsHandleCreated != true || Handle == form.Handle)
                     return;
                 ReleaseHandle();
