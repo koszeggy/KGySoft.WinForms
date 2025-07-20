@@ -197,6 +197,10 @@
     change as the code referencing the field is still working, but the field is no longer visible in the IDE. Use
     the new ToolTip property instead.
   ! The default timings of BaseToolTip field (ToolTip property) have been changed.
+  ! The CalledMdiChildClosed event is now obsolete. Use OwnedMdiChildClosed instead.
+  ! The OnCalledMdiChildClosed method is now obsolete. Use OnOwnedMdiChildClosed instead.
+  ! The PaintMdiClientArea event is now obsolete. Use the new MdiClient property instead.
+  + New MdiClient, OwnedMdiChildren, SuspendingMdiChild properties
   + New ToolTip property
   + Event subscriptions to self events are automatically removed when the form is disposed.
   + New CommandBindings property
@@ -211,6 +215,7 @@
   + New DynamicStringLocalization property and DynamicStringLocalizationChanged event
   + New ApplyResources and ApplyStringResources methods
   + Scaling the small icon of the form properly when the DPI changes.
+  + Scaling the header text of the form properly when the DPI changes, even with per-monitor DPI awareness V1.
 ! DialogBaseForm class:
   ! The protected btnOk, btnCancel and pnlButtons fields have been replaced by read-only properties. The original
     members are still available, but they have been concealed by the EditorBrowsableState.Never attribute.
@@ -229,6 +234,7 @@
   + New UseTaskDialogs property: it allows to use the TaskDialog class instead of the standard MessageBox dialogs.
 + New DeviceScaleGetNewSizeEventArgs class
 + New DeviceScaleChangeEventArgs class
++ New OwnedMdiChildClosedEventArgs class
 
 
 ~~~~~~~~~
@@ -269,9 +275,11 @@
 ! The FormattingLanguage property has been removed. Use LanguageSettings.FormattingLanguage from the
   KGySoft.CoreLibraries package instead.
 
-+ KGySoft.WinForms namespace:
+! KGySoft.WinForms namespace:
 =============================
-+ BaseForm class:
+! BaseForm class:
+  ! The MainMdiParent property has been removed.
+  ! The first parameter of the ShowMdiChild method has changed from the caller BaseForm to the child Form to show.
   + New CommandBindings property
   ...
 

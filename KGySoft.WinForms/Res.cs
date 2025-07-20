@@ -54,8 +54,14 @@ namespace KGySoft.WinForms
         /// <summary>The form must be an MDI container. Set IsMdiContainer before accessing this member.</summary>
         internal static string BaseFormNotMdiContainer => Get("BaseForm_NotMdiContainer");
 
-        /// <summary>MDI Client area not found.</summary>
-        internal static string BaseFormMdiClientNotFound => Get("BaseForm_MdiClientNotFound");
+        /// <summary>This form must be either an MDI parent or an MDI child.</summary>
+        internal static string BaseFormMdiContainerNotFound => Get("BaseForm_MdiContainerNotFound");
+
+        /// <summary>Cannot suspend an MDI parent.</summary>
+        internal static string BaseFormCannotSuspendMdiParent => Get("BaseForm_CannotSuspendMdiParent");
+
+        /// <summary>This form is already suspended by another MDI child.</summary>
+        internal static string BaseFormAlreadySuspended => Get("BaseForm_AlreadySuspended");
 
         #endregion
 

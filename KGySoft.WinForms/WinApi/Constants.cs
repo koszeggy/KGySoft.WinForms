@@ -51,6 +51,7 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_SETTEXT = 0x000C;
         internal const int WM_PAINT = 0x000F;
         internal const int WM_ERASEBKGND = 0x0014;
+        internal const int WM_WINDOWPOSCHANGING = 0x0046;
         internal const int WM_WINDOWPOSCHANGED = 0x0047;
         internal const int WM_SETICON = 0x0080;
         internal const int WM_NCCREATE = 0x0081;
@@ -162,8 +163,12 @@ namespace KGySoft.WinForms.WinApi
 
         internal const int ControlStates_Modal = 0x00000020;
 
+#if NETFRAMEWORK && !NET47_OR_GREATER
         internal const int SM_CXVSCROLL = 2;
         internal const int SM_CYHSCROLL = 3;
+#endif
+
+        internal const int FontSmoothingType_ClearType = 2;
 
         #endregion
     }

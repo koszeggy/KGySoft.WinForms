@@ -104,8 +104,14 @@
   <data name="BaseForm_NotMdiContainer" xml:space="preserve">
     <value>The form must be an MDI container. Set IsMdiContainer before accessing this member.</value>
   </data>
-  <data name="BaseForm_MdiClientNotFound" xml:space="preserve">
-    <value>MDI Client area not found.</value>
+  <data name="BaseForm_MdiContainerNotFound" xml:space="preserve">
+    <value>This form must be either an MDI parent or an MDI child.</value>
+  </data>
+  <data name="BaseForm_CannotSuspendMdiParent" xml:space="preserve">
+    <value>Cannot suspend an MDI parent.</value>
+  </data>
+  <data name="BaseForm_AlreadySuspended" xml:space="preserve">
+    <value>This form is already suspended by another MDI child.</value>
   </data>
   <data name="Dialogs_InfoCaption" xml:space="preserve">
     <value>Information</value>

@@ -16,11 +16,13 @@
 #region Usings
 
 using System;
+using System.Collections.Generic;
 #if !NET5_0_OR_GREATER
 using System.Collections.Specialized;
 #endif
 using System.ComponentModel;
 using System.Drawing;
+using System.Linq;
 using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
@@ -53,13 +55,14 @@ namespace KGySoft.WinForms.Forms
     /// <list type="bullet">
     /// <item>Removes all event subscriptions when the form is disposed. To do that for the events of derived forms as well,
     /// use the <see cref="Component.Events"/> property in your derived event <see langword="add"/>/<see langword="remove"/> accessors.</item>
-    /// <item><see cref="ToolTip"/> property to create tool tips for the controls on the form.</item>
+    /// <item>Advanced per-monitor high DPI support on all target platforms. See the <see cref="DeviceScale"/> property
+    /// and the <see cref="DeviceScaleChanged"/>, <see cref="DeviceScaleChanging"/> and <see cref="DeviceScaleAutoResized"/> events.</item>
     /// <item><see cref="CommandBindings"/> property. See the <a href="https://kgysoft.net/corelibraries#command-binding" target="_blank">online documentation</a> for details.</item>
-    /// <item>Advanced MDI application support, see <see cref="ShowMdiChild"/> method and <see cref="CalledMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
+    /// <item>Advanced MDI application support, see the <see cref="ShowMdiChild"/> method and <see cref="OwnedMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
     /// <item>Fixes a <a href="https://github.com/dotnet/winforms/issues/1504" target="_blank">resizing bug</a> that exists in .NET Framework and .NET Core 3.x that can occur with multiple displays.</item>
+    /// <item><see cref="ToolTip"/> property to create tool tips for the controls on the form.</item>
     /// <item>An <see cref="IsDesignMode"/> property that works even during initialization, when <see cref="Component.DesignMode"/> would return <see langword="false"/>.</item>
     /// <item><see cref="InvokeOnUIThread">InvokeOnUIThread</see> method.</item>
-    /// <item>Fixes the small icon of the form if the application is per-monitor DPI aware and the DPI of the form is different from the DPI of the primary display.</item>
     /// </list>
     /// </remarks>
     public class BaseForm : Form
@@ -96,9 +99,8 @@ namespace KGySoft.WinForms.Forms
 
         private bool translateControls;
         private bool isLoaded;
-        private bool suspended;
-        private bool resumeCaller;
-        private BaseForm? callerMdiForm;
+        private Form? suspendingMdiChild;
+        private HashSet<Form>? ownedMdiChildren;
         private MdiClient? mdiClient;
         private PointF deviceScale = ScaleHelper.SystemScale;
         private Size? dpiChangeSuggestedSize;
@@ -114,10 +116,16 @@ namespace KGySoft.WinForms.Forms
         #region Events
 
         /// <summary>
-        /// Occurs when an MDI child showed by a <see cref="ShowMdiChild"/> call is closed.
+        /// Occurs when an MDI child shown by a <see cref="ShowMdiChild">ShowMdiChild</see> method call is closed.
         /// </summary>
+        /// <remarks>
+        /// <note type="warning">This event is now obsolete. Its sender is not this form but the one that was closed.
+        /// It is cleaner to use the new <see cref="OwnedMdiChildClosed"/> event instead.</note>
+        /// </remarks>
         [Category("BaseForm")]
-        [Description("Occurs when an MDI child showed by a ShowMdiChild call is closed.")]
+        [Description("Occurs when an MDI child shown by a ShowMdiChild call is closed.")]
+        [Obsolete("Use the OwnedMdiChildClosed event instead.")]
+        [Browsable(false)]
         public event FormClosedEventHandler? CalledMdiChildClosed
         {
             add => Events.AddHandler(nameof(CalledMdiChildClosed), value);
@@ -125,20 +133,37 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Occurs when MDI area of the form has to be repainted. <see cref="Form.IsMdiContainer"/> must be true to access this event.
+        /// Occurs when an MDI child shown by the <see cref="ShowMdiChild">ShowMdiChild</see> method is closed.
         /// </summary>
         [Category("BaseForm")]
+        [Description("Occurs when an MDI child shown by a ShowMdiChild call is closed.")]
+        public event EventHandler<OwnedMdiChildClosedEventArgs>? OwnedMdiChildClosed
+        {
+            add => Events.AddHandler(nameof(OwnedMdiChildClosed), value);
+            remove => Events.RemoveHandler(nameof(OwnedMdiChildClosed), value);
+        }
+
+        /// <summary>
+        /// Occurs when MDI area of the form has to be repainted. <see cref="Form.IsMdiContainer"/> must be true to access this event.
+        /// </summary>
+        /// <remarks>
+        /// <note type="warning">This event is now obsolete. Its sender is not this form but the <see cref="System.Windows.Forms.MdiClient"/> instance,
+        /// whose <see cref="Control.Paint"/> event is subscribed when you subscribe this event. It is cleaner to use the new <see cref="MdiClient"/> property instead.</note>
+        /// </remarks>
+        [Category("BaseForm")]
         [Description("Occurs when MDI area of the form has to be repainted. IsMdiContainer must be true to access this event.")]
+        [Obsolete("Use the Paint event of the MdiClient property instead.")]
+        [Browsable(false)]
         public event PaintEventHandler? PaintMdiClientArea
         {
             add
             {
-                MdiClient client = GetMdiClient();
+                MdiClient client = MdiClient ?? throw new InvalidOperationException(Res.BaseFormNotMdiContainer);
                 client.Paint += value;
             }
             remove
             {
-                MdiClient client = GetMdiClient();
+                MdiClient client = MdiClient ?? throw new InvalidOperationException(Res.BaseFormNotMdiContainer);
                 client.Paint -= value;
             }
         }
@@ -354,10 +379,10 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Gets whether the form is suspended by a called MDI child.
+        /// Gets whether the form is suspended by an owned MDI child.
         /// </summary>
         [Browsable(false)]
-        public bool IsSuspended => suspended;
+        public bool IsSuspended => suspendingMdiChild != null;
 
         /// <summary>
         /// Gets the command bindings of this form. The <see cref="O:KGySoft.ComponentModel.CommandBindingsCollection.Add">Add</see> methods also add
@@ -430,6 +455,55 @@ namespace KGySoft.WinForms.Forms
         [Browsable(false)]
         protected bool IsLoaded => isLoaded;
 
+        /// <summary>
+        /// Gets the corresponding MDI client of the form, or <see langword="null"/>, if this form is neither an MDI container nor an MDI child.
+        /// </summary>
+        [Browsable(false)]
+        protected MdiClient? MdiClient
+        {
+            get
+            {
+                #region Local Methods
+
+                static MdiClient? GetMdiClient(Form mdiParent)
+                {
+                    foreach (Control? child in mdiParent.Controls)
+                    {
+                        if (child is MdiClient mdiClient)
+                            return mdiClient;
+                    }
+
+                    return null;
+                }
+
+                #endregion
+
+                return mdiClient?.IsDisposed == false
+                    ? mdiClient
+                    : mdiClient = IsMdiContainer ? GetMdiClient(this) : MdiParent is Form mdiParent ? GetMdiClient(mdiParent) : null;
+            }
+        }
+
+        /// <summary>
+        /// Gets the MDI child that is suspending this form by a <see cref="ShowMdiChild">ShowMdiChild</see> call,
+        /// or <see langword="null"/> if this form is not suspended. When this property is not <see langword="null"/>,
+        /// the returned form is among the elements of the <see cref="OwnedMdiChildren"/> property.
+        /// </summary>
+        [Browsable(false)]
+        protected Form? SuspendingMdiChild => suspendingMdiChild;
+
+        /// <summary>
+        /// Gets the forms that were shown as MDI children by the <see cref="ShowMdiChild">ShowMdiChild</see> method.
+        /// </summary>
+        /// <remarks>
+        /// <note>Please note that this property is different from <see cref="Form.MdiChildren"/>, which returns all MDI children of an MDI container form.
+        /// This property returns the forms that were shown by the <see cref="ShowMdiChild">ShowMdiChild</see> method. If this form is an MDI container,
+        /// the result may contain fewer forms than <see cref="Form.MdiChildren"/>. And if this form is an MDI child, the <see cref="Form.MdiChildren"/> property is always empty,
+        /// whereas this property still may contain items. If this form is currently suspended, the <see cref="SuspendingMdiChild"/> property
+        /// returns the blocker form, which is an element of this property.</note>
+        /// </remarks>
+        protected Form[] OwnedMdiChildren => ownedMdiChildren?.ToArray() ?? [];
+
         #endregion
 
         #endregion
@@ -484,33 +558,58 @@ namespace KGySoft.WinForms.Forms
         #region Public Methods
 
         /// <summary>
-        /// Shows the form as an MDI child of the specified caller form.
+        /// Shows the form as an MDI child, owned by of this <see cref="BaseForm"/>.
+        /// This <see cref="BaseForm"/> must be either an MDI container or another MDI child.
         /// </summary>
-        /// <param name="child">The child to show</param>
-        /// <param name="suspendCaller">When true, suspends the caller form (dialog effect).
-        /// Because shown form is not a dialog form, execution of caller will not be suspended.
-        /// If user needs to react of closing the child form, then either subscribe to caller's
-        /// <see cref="CalledMdiChildClosed"/> event or override its <see cref="OnCalledMdiChildClosed"/> method.</param>
-        public void ShowMdiChild(Form child, bool suspendCaller)
+        /// <param name="child">The child to show as an MDI child.</param>
+        /// <param name="suspendCaller">When <see langword="true"/>, and the current <see cref="BaseForm"/> is also an MDI child,
+        /// the current form will be suspended until the child is closed as if this form was the owner of the new MDI child. This parameter is optional.
+        /// Default value: <see langword="false"/>.</param>
+        /// <remarks>
+        /// <para>Normally MDI children cannot be opened as dialogs. By setting <paramref name="suspendCaller"/> to <see langword="true"/>,
+        /// a dialog-like behavior can be achieved, as the caller will be suspended until the child is closed.
+        /// The child will not be a modal form, so you still will be able to interact with the parent form and other non-suspended child forms.</para>
+        /// <para>As the <paramref name="child"/> form is not opened as a real dialog, this call returns immediately after the child is shown.
+        /// You can use the <see cref="OwnedMdiChildClosed"/> event or the <see cref="OnOwnedMdiChildClosed"/> method to get notified when the <paramref name="child"/> form is closed.</para>
+        /// </remarks>
+        /// <exception cref="ArgumentNullException"><paramref name="child"/> is <see langword="null"/>.</exception>
+        /// <exception cref="InvalidOperationException">This form is neither an MDI container nor an MDI child that can own the new child.
+        /// <br/>-or-
+        /// <br/><paramref name="suspendCaller"/> is <see langword="true"/> when this form is already suspended.</exception>
+        public void ShowMdiChild(Form child, bool suspendCaller = false)
         {
-            child.MdiParent = this;
-            if (child is BaseForm baseChild)
+            if (child == null)
+                throw new ArgumentNullException(nameof(child), PublicResources.ArgumentNull);
+            Form mdiParent = MdiParent ?? (IsMdiContainer ? this : throw new InvalidOperationException(Res.BaseFormMdiContainerNotFound));
+            if (suspendCaller && mdiParent == this)
+                throw new InvalidOperationException(Res.BaseFormCannotSuspendMdiParent);
+            if (suspendCaller && IsSuspended)
+                throw new InvalidOperationException(Res.BaseFormAlreadySuspended);
+
+            child.FormClosed += MdiChild_FormClosed;
+            ownedMdiChildren ??= new HashSet<Form>();
+            try
             {
-                baseChild.callerMdiForm = this;
-                baseChild.resumeCaller = suspendCaller;
+                ownedMdiChildren.Add(child);
                 if (suspendCaller)
-                    Suspend();
+                    Suspend(child);
+                child.MdiParent = mdiParent;
+                child.Show();
             }
-            Show();
+            catch (Exception)
+            {
+                child.FormClosed -= MdiChild_FormClosed;
+                ownedMdiChildren?.Remove(child);
+                if (IsSuspended)
+                    Resume();
+                throw;
+            }
         }
 
         /// <summary>
-        /// Invalidates the MDI client area. Applicable only if the <see cref="Form.IsMdiContainer"/> is <see langword="true"/> for this form.
+        /// Invalidates the MDI client area. Has effect only if the <see cref="Form.IsMdiContainer"/> or <see cref="Form.IsMdiChild"/> is <see langword="true"/> for this form.
         /// </summary>
-        public void InvalidateMdiClientArea()
-        {
-            GetMdiClient().Invalidate(false);
-        }
+        public void InvalidateMdiClientArea() => MdiClient?.Invalidate();
 
         #endregion
 
@@ -540,6 +639,13 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
+        /// <inheritdoc />
+        protected override void OnParentChanged(EventArgs e)
+        {
+            mdiClient = null;
+            base.OnParentChanged(e);
+        }
+
         /// <summary>
         /// Applies the resources of the form. The default implementation just calls the <see cref="ApplyStringResources">ApplyStringResources</see> method.
         /// Called when the form is loaded for the first time. In a derived form, this method can be overridden to apply additional (non-string) resources,
@@ -564,21 +670,6 @@ namespace KGySoft.WinForms.Forms
                 LocalizationHelper.ApplyStringResources(this);
         }
 
-        /// <inheritdoc />
-        protected override void OnFormClosed(FormClosedEventArgs e)
-        {
-            base.OnFormClosed(e);
-            if (callerMdiForm != null)
-            {
-                callerMdiForm.OnCalledMdiChildClosed(this, e);
-
-                if (callerMdiForm.suspended && resumeCaller)
-                    callerMdiForm.Resume();
-
-                callerMdiForm = null;
-            }
-        }
-
         /// <summary>
         /// Disposes the form and its resources.
         /// </summary>
@@ -593,6 +684,12 @@ namespace KGySoft.WinForms.Forms
                 commandBindings.Dispose();
                 Events.Dispose();
                 smallIcon?.Dispose();
+                if (ownedMdiChildren != null)
+                {
+                    foreach (Form mdiChild in ownedMdiChildren)
+                        mdiChild.FormClosed -= MdiChild_FormClosed;
+                    ownedMdiChildren = null;
+                }
             }
 
             mdiClient = null;
@@ -601,7 +698,11 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Translates controls and tooltips of given control.
         /// </summary>
-        /// <param name="control"></param>
+        /// <param name="control">The control to translate</param>
+        /// <remarks>
+        /// <note type="warning">This method is obsolete. It does not perform any translation anymore, it just removes the possible postfixes from the control's text properties.
+        /// Use the <see cref="DynamicStringLocalization"/> property and the <see cref="ApplyStringResources">ApplyStringResources</see> method instead.</note>
+        /// </remarks>
         [Obsolete("Translation does not work anymore, it just removes the possible postfixes.")]
         protected void PerformTranslate(Control control)
         {
@@ -623,11 +724,21 @@ namespace KGySoft.WinForms.Forms
 
         /// <summary>
         /// Raises the <see cref="CalledMdiChildClosed"/> event.
+        /// <br/>This method is obsolete along with the <see cref="CalledMdiChildClosed"/> event.
+        /// Use the <see cref="OwnedMdiChildClosed"/> event and the <see cref="OnOwnedMdiChildClosed"/> method instead.
         /// </summary>
         /// <param name="sender">The closed form, which is the sender of the provided arguments.</param>
         /// <param name="e">Arguments of the closed form.</param>
-        protected virtual void OnCalledMdiChildClosed(BaseForm sender, FormClosedEventArgs e)
+        [Obsolete("The CalledMdiChildClosed event is now obsolete. Use the OwnedMdiChildClosed event and the OnCalledMdiChildClosed method instead.")]
+        protected virtual void OnCalledMdiChildClosed(object sender, FormClosedEventArgs e)
             => Events.GetHandler<FormClosedEventHandler>(nameof(CalledMdiChildClosed))?.Invoke(sender, e);
+
+        /// <summary>
+        /// Raises the <see cref="OwnedMdiChildClosed"/> event.
+        /// </summary>
+        /// <param name="e">Contains the arguments of the event.</param>
+        protected virtual void OnOwnedMdiChildClosed(OwnedMdiChildClosedEventArgs e)
+            => Events.GetHandler<EventHandler<OwnedMdiChildClosedEventArgs>>(nameof(OwnedMdiChildClosed))?.Invoke(this, e);
 
         /// <summary>
         /// Raises the <see cref="Suspended"/> event.
@@ -752,6 +863,12 @@ namespace KGySoft.WinForms.Forms
                         OnDeviceScaleAutoResized(EventArgs.Empty);
                     return;
 
+                case Constants.WM_WINDOWPOSCHANGING when IsSuspended:
+                    // preventing bringing the disabled form to the front
+                    unsafe { ((WINDOWPOS*)m.LParam)->flags |= Constants.SWP_NOZORDER; }
+                    base.WndProc(ref m);
+                    return;
+
                 default:
                     base.WndProc(ref m);
                     return;
@@ -773,32 +890,38 @@ namespace KGySoft.WinForms.Forms
 
         #region Private Methods
 
-        /// <summary>
-        /// Suspends the current form instance.
-        /// </summary>
-        private void Suspend()
+        private void Suspend(Form suspendingChild)
         {
-            if (!suspended)
+            Debug.Assert(!IsSuspended && !IsMdiContainer && IsMdiChild);
+
+            // Sending this form back to be just above the topmost disabled MDI child (if any), preventing "click-through" issues with the disabled form.
+            // Using MdiClient.Controls instead of MdiParent.MdiChildren because the latter does not reflect the Z-order of the MDI children.
+            Control.ControlCollection children = MdiClient!.Controls;
+            int? firstDisabledIndex = null;
+            for (int i = 0; i < children.Count; i++)
             {
-                suspended = true;
-                if (!IsMdiContainer)
-                    Enabled = false;
-                OnSuspended(EventArgs.Empty);
+                if (children[i].Enabled)
+                    continue;
+                firstDisabledIndex = i;
+                break;
             }
+
+            if (firstDisabledIndex > 0)
+                children.SetChildIndex(this, firstDisabledIndex.Value - 1);
+            else
+                SendToBack();
+            suspendingMdiChild = suspendingChild;
+            Enabled = false;
+            OnSuspended(EventArgs.Empty);
         }
 
-        /// <summary>
-        /// Resumes the current form instance.
-        /// </summary>
         private void Resume()
         {
-            if (suspended)
-            {
-                suspended = false;
-                if (!IsMdiContainer)
-                    Enabled = true;
-                OnResumed(EventArgs.Empty);
-            }
+            Debug.Assert(IsSuspended);
+            suspendingMdiChild = null;
+            Enabled = true;
+            Activate();
+            OnResumed(EventArgs.Empty);
         }
 
         [Obsolete]
@@ -806,25 +929,6 @@ namespace KGySoft.WinForms.Forms
         {
             if (BaseToolTip.GetToolTip(control)?.Length > 0)
                 BaseToolTip.SetToolTip(control, Language.Translate(BaseToolTip.GetToolTip(control)));
-        }
-
-        private MdiClient GetMdiClient()
-        {
-            if (mdiClient != null && !mdiClient.IsDisposed)
-                return mdiClient;
-
-            if (!IsMdiContainer)
-                throw new InvalidOperationException(Res.BaseFormNotMdiContainer);
-            MdiClient? result = null;
-            foreach (Control? child in Controls)
-            {
-                result = child as MdiClient;
-                if (result != null)
-                    break;
-            }
-
-            mdiClient = result ?? throw new InvalidOperationException(Res.BaseFormMdiClientNotFound);
-            return result;
         }
 
 #if !NET5_0_OR_GREATER
@@ -875,6 +979,27 @@ namespace KGySoft.WinForms.Forms
         #region Event Handlers
 
         private void LanguageSettings_DisplayLanguageChanged(object? sender, EventArgs e) => ApplyStringResources();
+
+        private void MdiChild_FormClosed(object? sender, FormClosedEventArgs e)
+        {
+            if (sender is not Form mdiChild)
+                return;
+
+            mdiChild.FormClosed -= MdiChild_FormClosed;
+            try
+            {
+                ownedMdiChildren?.Remove(mdiChild);
+#pragma warning disable CS0618 // Type or member is obsolete
+                OnCalledMdiChildClosed(sender, e);
+#pragma warning restore CS0618 // Type or member is obsolete
+                OnOwnedMdiChildClosed(new OwnedMdiChildClosedEventArgs(mdiChild, e.CloseReason));
+            }
+            finally
+            {
+                if (mdiChild == suspendingMdiChild)
+                    Resume();
+            }
+        }
 
         #endregion
 
