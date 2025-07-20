@@ -56,7 +56,7 @@ namespace KGySoft.WinForms.Example
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-
+            
             using (TaskDialog dlg = new TaskDialog())
             {
                 dlg.Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.UseCommandLinks;
@@ -167,6 +167,7 @@ namespace KGySoft.WinForms.Example
 
             td.Buttons.Add(new TaskDialogButton("FadingDemo", "Custom fading control demo"));
             td.Buttons.Add(new TaskDialogButton("LocalizationExample", "Dynamic localization example"));
+            td.Buttons.Add(new TaskDialogButton("MdiDemo", "MDI Form Example"));
 
             foreach (TaskDialogButton button in td.Buttons)
             {
@@ -703,7 +704,7 @@ namespace KGySoft.WinForms.Example
                     + "• Both the MessageBox and TaskDialog options support Windows system sounds, default button selection, high DPI resolutions and copying the content by Ctrl+C\r\n"
                     + "• If the static AutoRightToLeftLayout property is true, then the MessageBox and TaskDialog options use right-to-left layout if the current thread's UI culture is an RTL language\r\n"
                     + "• The AdvancedMessageDialog supports none of above, though the message can be selected and copied manually",
-                Options = TaskDialogOptions.UseCommandLinks,
+                Options = TaskDialogOptions.UseCommandLinks | TaskDialogOptions.AllowCancel,
                 StandardButtons = TaskDialogStandardButtonFlags.Close,
                 RadioButtons =
                 {
