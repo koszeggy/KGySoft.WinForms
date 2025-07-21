@@ -172,8 +172,8 @@ namespace KGySoft.WinForms.Controls
         protected override void OnLoad(EventArgs e)
         {
             bool loaded = isLoaded;
-            isLoaded = true;
             base.OnLoad(e);
+            isLoaded = true;
 
             // isLoaded can be true if handle was recreated
             if (!loaded)

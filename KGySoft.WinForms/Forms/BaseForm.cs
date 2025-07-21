@@ -618,17 +618,43 @@ namespace KGySoft.WinForms.Forms
         /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
         {
+            PointF oldScale = deviceScale;
             deviceScale = this.GetScale();
+            Rectangle before = Bounds;
             base.OnHandleCreated(e);
+            Rectangle after = Bounds;
+            if (!ScaleHelper.IsThreadPerMonitorAware || oldScale == deviceScale)
+                return;
+
             ResetSmallIcon();
+
+            // Can occur when opening the form on a screen, whose scale differs from the scale of the primary display,
+            // or when the scale of the primary display was changed after starting the application, but before opening the form.
+            // In this case there is no WM_DPICHANGED message, so we need to raise the event manually.
+            // This also signals the IPerMonitorDpiAware implementer child controls classes that DPI is changed.
+            PointF scaleFactor = PointF.Empty; // remains empty if the form was scaled in base
+            Rectangle suggestedBounds = before != after
+                ? after
+                : new Rectangle(before.Location, before.Size.Scale(scaleFactor = new PointF(deviceScale.X / oldScale.X, deviceScale.Y / oldScale.Y)));
+            var args = new DeviceScaleChangeEventArgs(suggestedBounds.EnsureScreen(Screen.FromRectangle(before), false), deviceScale, oldScale);
+            OnDeviceScaleChanging(args);
+            before = Bounds;
+            OnDeviceScaleChanged(args);
+            after = Bounds;
+
+            // Base performs the scaling only in .NET 7+. When there was no automatic scaling, we scale the form manually.
+            if (!scaleFactor.IsEmpty && before == after)
+                Scale(new SizeF(scaleFactor.X, scaleFactor.Y));
+            if (scaleFactor.IsEmpty || !scaleFactor.IsEmpty && before == after)
+                OnDeviceScaleAutoResized(EventArgs.Empty);
         }
 
         /// <inheritdoc />
         protected override void OnLoad(EventArgs e)
         {
             bool loaded = isLoaded;
-            isLoaded = true;
             base.OnLoad(e);
+            isLoaded = true;
 
             if (!loaded)
             {
@@ -820,7 +846,7 @@ namespace KGySoft.WinForms.Forms
                     {
                         var scale = new PointF(m.WParam.LOWORD() / ScaleHelper.DefaultDpi, m.WParam.HIWORD() / ScaleHelper.DefaultDpi);
                         SIZE* suggestedSize = (SIZE*)m.LParam;
-                        var args = new DeviceScaleGetNewSizeEventArgs(suggestedSize->ToSize(), scale, deviceScale,  m.Result != IntPtr.Zero);
+                        var args = new DeviceScaleGetNewSizeEventArgs(suggestedSize->ToSize(), scale, deviceScale, m.Result != IntPtr.Zero);
                         OnDeviceScaleGetNewSize(args);
                         m.Result = new IntPtr(args.Handled ? 1 : 0);
                         if (args.Handled)
@@ -839,12 +865,32 @@ namespace KGySoft.WinForms.Forms
                         var args = new DeviceScaleChangeEventArgs(suggestedBounds, scale, oldScale);
                         OnDeviceScaleChanging(args);
                         base.WndProc(ref m);
+                        if (m.Result != IntPtr.Zero)
+                        {
+                            m.Result = IntPtr.Zero; // Framework 4.7+ sets it to 1 when targeting lower version than 4.7
+                            DefWndProc(ref m);
+                        }
+
                         ResetSmallIcon();
                         Rectangle before = Bounds;
                         OnDeviceScaleChanged(args);
                         Rectangle after = Bounds;
-                        if (isPerMonitorDpiAwarenessV1 || before == after)
+                        if (isPerMonitorDpiAwarenessV1 || before == after || !IsLoaded)
                             dpiChangeSuggestedSize = suggestedBounds.Size;
+
+#if NETFRAMEWORK
+                        // If form is not loaded yet, suggested bounds are not automatically applied on .NET Framework (4.7+: applied only when awareness version is V2)
+                        // This fixes over/undersized forms when the DPI is changed before the form is shown.
+#if NET47_OR_GREATER
+                        if (isPerMonitorDpiAwarenessV1 && !IsLoaded && Bounds != suggestedBounds && before == after)
+#else
+                        if (!IsLoaded && Bounds != suggestedBounds && before == after)
+#endif
+                        {
+                            Scale(new SizeF(scale.X / oldScale.X, scale.Y / oldScale.Y));
+                            dpiChangeSuggestedSize = Size; //OnDeviceScaleAutoResized(EventArgs.Empty);
+                    }
+#endif
                     }
 
                     return;
