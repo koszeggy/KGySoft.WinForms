@@ -256,8 +256,6 @@ namespace KGySoft.WinForms.Forms
 
         #region Instance Fields
 
-        private readonly ScalingFont defaultFont;
-
         private TaskDialogStatus dialogState = TaskDialogStatus.Initializing;
         private TaskDialog host = null!;
         private IWin32Window? ownerWindow;
@@ -318,10 +316,8 @@ namespace KGySoft.WinForms.Forms
             lblDetailsFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             lblFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
-            
-            Debug.Assert(!IsHandleCreated);
-            defaultFont = new ScalingFont(SystemFonts.MessageBoxFont ?? ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
-            Font = defaultFont.Font;
+            if (SystemFonts.MessageBoxFont is Font font)
+                Font = font;
         }
 
         #endregion
@@ -679,7 +675,6 @@ namespace KGySoft.WinForms.Forms
             {
                 components?.Dispose();
                 mainInstructionsFont?.Dispose();
-                defaultFont.Dispose();
             }
 
             base.Dispose(disposing);
@@ -828,7 +823,7 @@ namespace KGySoft.WinForms.Forms
             isResizing = false;
         }
 
-        private void ResetLayout(Configuration cfg, Rectangle? suggestedBounds = null)
+        private void ResetLayout(Configuration cfg, Rectangle suggestedBounds = default)
         {
             Debug.Assert(IsHandleCreated && Created);
             Debug.Assert(DeviceScale == this.GetScale());
@@ -836,9 +831,6 @@ namespace KGySoft.WinForms.Forms
             SuspendLayout();
             try
             {
-                defaultFont.Scale(DeviceScale);
-                Font = defaultFont.Font;
-
                 // size constraints
                 ResetConstraints();
 
@@ -1282,7 +1274,7 @@ namespace KGySoft.WinForms.Forms
             defaultButton?.Select();
         }
 
-        private void ResetHeights(Configuration cfg, Rectangle? suggestedBounds = null)
+        private void ResetHeights(Configuration cfg, Rectangle suggestedBounds = default)
         {
             // ResetHeights is always called after resetting visibilities
             if (isResettingVisibilities)
@@ -1296,7 +1288,7 @@ namespace KGySoft.WinForms.Forms
 
             while (true)
             {
-                Screen screen = suggestedBounds.HasValue ? Screen.FromRectangle(suggestedBounds.Value) : Screen.FromControl(this);
+                Screen screen = !suggestedBounds.IsEmpty() ? Screen.FromRectangle(suggestedBounds) : Screen.FromControl(this);
                 Rectangle screenBounds = screen.WorkingArea;
                 int screenHeight = screenBounds.Height;
                 isResettingHeight = true;
@@ -1422,7 +1414,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetWidths(Configuration cfg, Rectangle? suggestedBounds = null)
+        private void ResetWidths(Configuration cfg, Rectangle suggestedBounds = default)
         {
             isResizing = true;
             PointF scale = DeviceScale;
@@ -1434,7 +1426,7 @@ namespace KGySoft.WinForms.Forms
                 // recursive reentrancy in OnDeviceScaleChanged when setting MinimumSize in ResetConstraints, etc.).
                 // NOTE: we could force the handle creation earlier (in Execute), but due to a strange bug in .NET 5.0 it causes
                 // that OnLoad and OnShown are not called, causing some issues, e.g. the timer is not initialized and system sounds are not played.
-                Screen screen = suggestedBounds.HasValue ? Screen.FromRectangle(suggestedBounds.Value) : Screen.FromControl(this);
+                Screen screen = !suggestedBounds.IsEmpty() ? Screen.FromRectangle(suggestedBounds) : Screen.FromControl(this);
                 Rectangle screenBounds = screen.WorkingArea;
                 int screenWidth = screenBounds.Width;
                 int minimumWidth = cfg.DluToPixelsX(formReferenceMinWidth).Scale(scale.X);
@@ -1551,28 +1543,28 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void SetWidth(int width, Rectangle? suggestedBounds, Screen screen)
+        private void SetWidth(int width, Rectangle suggestedBounds, Screen screen)
         {
             Rectangle origBounds = Bounds;
-            Rectangle newBounds = suggestedBounds ?? Bounds;
+            Rectangle newBounds = suggestedBounds.IsEmpty() ? Bounds : suggestedBounds;
             Point cursor;
-            int origin = suggestedBounds.HasValue && Bounds.Contains(cursor = Cursor.Position) ? cursor.X : origBounds.GetCenter().X;
+            int origin = !suggestedBounds.IsEmpty() && Bounds.Contains(cursor = Cursor.Position) ? cursor.X : origBounds.GetCenter().X;
             newBounds.X = origin - (int)((float)(origin - origBounds.X) / origBounds.Width * width);
             newBounds.Width = width;
             newBounds.Height = origBounds.Height; // keeping the original height
-            Bounds = newBounds.EnsureScreen(screen, suggestedBounds == null);
+            Bounds = newBounds.EnsureScreen(screen, suggestedBounds.IsEmpty());
         }
 
-        private void SetHeight(int height, Rectangle? suggestedBounds, Screen screen, bool showScrollbar)
+        private void SetHeight(int height, Rectangle suggestedBounds, Screen screen, bool showScrollbar)
         {
             Rectangle origBounds = Bounds;
-            Rectangle newBounds = suggestedBounds ?? Bounds;
+            Rectangle newBounds = suggestedBounds.IsEmpty() ? Bounds : suggestedBounds;
             Point cursor;
-            int origin = suggestedBounds.HasValue && Bounds.Contains(cursor = Cursor.Position) ? cursor.Y : origBounds.GetCenter().Y;
+            int origin = !suggestedBounds.IsEmpty() && Bounds.Contains(cursor = Cursor.Position) ? cursor.Y : origBounds.GetCenter().Y;
             newBounds.Y = origin - (int)((float)(origin - origBounds.Y) / origBounds.Height * height);
             newBounds.Width = origBounds.Width; // keeping the original width
             newBounds.Height = height;
-            Bounds = newBounds.EnsureScreen(screen, suggestedBounds == null);
+            Bounds = newBounds.EnsureScreen(screen, suggestedBounds.IsEmpty());
             AutoScroll = showScrollbar; // this may cause triggering Control_SizeChanged, causing a new resize session
         }
 
