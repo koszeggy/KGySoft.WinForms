@@ -27,34 +27,56 @@ namespace KGySoft.WinForms.Forms
     /// </summary>
     public sealed class DeviceScaleChangeEventArgs : EventArgs
     {
+        #region Fields
+
+        private PointF newScale;
+        private PointF previousScale;
+        private Rectangle suggestedBounds;
+
+        #endregion
+
         #region Properties
 
         /// <summary>
         /// Gets the new scale factor.
         /// </summary>
-        public PointF NewScale { get; }
+        public PointF NewScale => newScale;
 
         /// <summary>
         /// Gets the previous scale factor.
         /// </summary>
-        public PointF PreviousScale { get; }
+        public PointF PreviousScale => previousScale;
 
         /// <summary>
         /// Gets the suggested bounds of the form after scaling.
+        /// It may return an empty rectangle if the event is raised before the form is shown.
+        /// This typically happens when the form is shown on a display with a different scale factor from the primary display.
         /// </summary>
-        public Rectangle SuggestedBounds { get; }
+        public Rectangle SuggestedBounds => suggestedBounds;
 
         #endregion
 
         #region Constructors
-        
+
         internal DeviceScaleChangeEventArgs(Rectangle suggestedBounds, PointF newScale, PointF previousScale)
         {
-            SuggestedBounds = suggestedBounds;
-            NewScale = newScale;
-            PreviousScale = previousScale;
+            this.suggestedBounds = suggestedBounds;
+            this.newScale = newScale;
+            this.previousScale = previousScale;
         }
-        
+
+        #endregion
+
+        #region Methods
+
+        internal DeviceScaleChangeEventArgs Reset(Rectangle bounds, PointF deviceScale, PointF oldScale)
+        {
+            suggestedBounds = bounds;
+            newScale = deviceScale;
+            previousScale = oldScale;
+            return this;
+        }
+
         #endregion
     }
 }

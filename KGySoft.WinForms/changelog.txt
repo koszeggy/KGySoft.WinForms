@@ -206,6 +206,8 @@
   + New CommandBindings property
   + New IsDesignMode property
   + New InvokeOnUIThread method: a safer and more convenient way to invoke a delegate on the UI thread.
+  + New AutoScaleFont property to allow automatic scaling of the font when the DPI changes even on platforms where
+    this is not supported by default.
   + New DeviceScale property
   + New DeviceScaleGetNewSize event: raised before the DPI changes, allowing to adjust the form size.
   + New DeviceScaleChanging event: raised when the DPI changes and the application is per-monitor DPI aware.

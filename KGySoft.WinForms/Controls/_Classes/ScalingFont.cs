@@ -47,6 +47,8 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        internal PointF CurrentScale => scale;
+
         #endregion
 
         #region Constructors

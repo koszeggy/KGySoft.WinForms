@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Collections.Specialized;
 #endif
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
@@ -29,6 +30,7 @@ using KGySoft.ComponentModel;
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.Libraries.Language;
+using KGySoft.WinForms.Controls;
 #if !NET5_0_OR_GREATER
 using KGySoft.Reflection;
 using KGySoft.WinForms.Reflection;
@@ -57,6 +59,12 @@ namespace KGySoft.WinForms.Forms
     /// use the <see cref="Component.Events"/> property in your derived event <see langword="add"/>/<see langword="remove"/> accessors.</item>
     /// <item>Advanced per-monitor high DPI support on all target platforms. See the <see cref="DeviceScale"/> property
     /// and the <see cref="DeviceScaleChanged"/>, <see cref="DeviceScaleChanging"/> and <see cref="DeviceScaleAutoResized"/> events.</item>
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// Note that it affects font scaling only (which may indirectly affect also size and content scaling if <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.Font"/>),
+    /// but basically auto-sizing behavior still depends on the current platform.</item>
+    /// <item>The default font is set to <see cref="ScaleHelper.DefaultFont">ScaleHelper.DefaultFont</see>. It makes a difference only when targeting .NET Framework
+    /// and the application is high-DPI aware (even without per-monitor awareness), in which case the form is opened with proper scaling
+    /// when  <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.Font"/>.</item>
     /// <item><see cref="CommandBindings"/> property. See the <a href="https://kgysoft.net/corelibraries#command-binding" target="_blank">online documentation</a> for details.</item>
     /// <item>Advanced MDI application support, see the <see cref="ShowMdiChild"/> method and <see cref="OwnedMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
     /// <item>Fixes a <a href="https://github.com/dotnet/winforms/issues/1504" target="_blank">resizing bug</a> that exists in .NET Framework and .NET Core 3.x that can occur with multiple displays.</item>
@@ -65,7 +73,7 @@ namespace KGySoft.WinForms.Forms
     /// <item><see cref="InvokeOnUIThread">InvokeOnUIThread</see> method.</item>
     /// </list>
     /// </remarks>
-    public class BaseForm : Form
+    public class BaseForm : Form, IPerMonitorDpiAware
     {
         #region Fields
 
@@ -99,13 +107,25 @@ namespace KGySoft.WinForms.Forms
 
         private bool translateControls;
         private bool isLoaded;
+        private bool autoScaleFont = true;
         private Form? suspendingMdiChild;
         private HashSet<Form>? ownedMdiChildren;
         private MdiClient? mdiClient;
-        private PointF deviceScale = ScaleHelper.SystemScale;
-        private Size? dpiChangeSuggestedSize;
-        private Icon? smallIcon;
         private DynamicStringLocalization localizationMode;
+
+        private ScalingFont? font; // The explicitly set font.
+        private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent/default font is used.
+
+        private PointF deviceScale = ScaleHelper.SystemScale;
+        private PointF previousScale;
+        private Icon? smallIcon;
+        private int dpiChangedTopLevelCount; // Reentrancy count for WM_DPICHANGED message processing when this form is a top-level form.
+        private Rectangle dpiChangedSuggestedBounds; // must be a field to handle reentrancy and for the triggering conditions of the DeviceScaleAutoResized event
+        private bool isOnAutoResizedPending;
+
+        private bool suppressFontChanged;
+        private PointF lastScaleAsChild; // Plays a role when this form is not a top-level form, i.e. when it is an MDI child. Otherwise, DeviceScale is used.
+        private int dpiChangingAsChildCount; // Plays a role when this form is an MDI child. Otherwise, DPI changes are processed in WndProc.
 
         #endregion
 
@@ -247,7 +267,7 @@ namespace KGySoft.WinForms.Forms
         /// the <see cref="Form.OnGetDpiScaledSize">OnGetDpiScaledSize</see> method. If a derived form returns <see langword="true"/> from an overridden <see cref="Form.OnGetDpiScaledSize">OnGetDpiScaledSize</see>
         /// method, the <see cref="DeviceScaleGetNewSizeEventArgs.DesiredSize"/> may already contain a custom size, which is indicated by the <see cref="HandledEventArgs.Handled"/> property being <see langword="true"/>.
         /// To revoke such custom resizing and apply the default scaling behavior instead, set the <see cref="HandledEventArgs.Handled"/> property to <see langword="false"/>.</para>
-        /// <para>On more recent targeted platforms, the <see cref="HandledEventArgs.Handled"/> may already be initialized to <see langword="true"/>, depending on the <see cref="ContainerControl.AutoScaleMode"/>
+        /// <para>On more recent target platforms, the <see cref="HandledEventArgs.Handled"/> property may already be initialized to <see langword="true"/>, depending on the <see cref="ContainerControl.AutoScaleMode"/>
         /// property of the form. For example, if <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.None"/>, this is how the original form size is preserved by default.
         /// By setting the <see cref="HandledEventArgs.Handled"/> property to <see langword="false"/>, you can fall back to the default auto-scaling behavior of the form.</para>
         /// <note>When using per-monitor DPI awareness V1, this event is not raised, and even if you set a custom size in the <see cref="DeviceScaleChanged"/> event,
@@ -425,9 +445,93 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 // Fixing the small icon if the DPI of the form is different from the system DPI
-                smallIcon = value.Resize(this.ScaleSize(IconsHelper.SmallIconReferenceSize));
+                Debug.Assert(deviceScale == this.GetScale());
+                smallIcon = value.Resize(IconsHelper.SmallIconReferenceSize.Scale(deviceScale));
                 if (IsHandleCreated)
                     User32.SendMessage(Handle, Constants.WM_SETICON, Constants.ICON_SMALL, smallIcon.Handle);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// <br/>Default value: <see langword="true"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>When <see langword="true"/>, the <see cref="Font"/> is automatically scaled to the current DPI of the corresponding display on every executing platform.
+        /// If this is an MDI child form, it also ensures that without an explicitly set font it is inherited from <see cref="Control.Parent"/>, which would be the normal behavior, but is broken in .NET 6+ and above.</para>
+        /// <para>When <see langword="false"/>, the <see cref="Font"/> may or may not be scaled, and the font of a possible parent MDI container
+        /// may or may not be applied correctly, depending on the default behavior of the executing platform.</para>
+        /// <note>Please note that this property directly affects autoscaling the <see cref="Font"/> property only. It still may indirectly affect scaling
+        /// the whole form and its contents, if the <see cref="ContainerControl.AutoScaleMode"/> property is <see cref="AutoScaleMode.Font"/>.
+        /// Scaling the size on DPI change can also be controlled by the <see cref="DeviceScaleGetNewSize"/> event,
+        /// or can be set on the <see cref="DeviceScaleChanged"/> or <see cref="DeviceScaleAutoResized"/> events.</note>
+        /// </remarks>
+        [Category("BaseForm")]
+        [DefaultValue(true)]
+        [Description("True to auto scale Font when DPI changes and inherit the font when it's not explicitly set; False to rely on the default behavior of the current executing platform.")]
+        public bool AutoScaleFont
+        {
+            get => autoScaleFont;
+            set
+            {
+                Debug.Assert(AutoScaleFont ^ defaultFont == null);
+                if (autoScaleFont == value)
+                    return;
+
+                autoScaleFont = value;
+                Debug.Assert(deviceScale == this.GetScale());
+                font?.ResetFrom(font.Font, value ? deviceScale : ScaleHelper.SystemScale);
+                if (value)
+                {
+                    Control? parent = Parent;
+                    defaultFont = new ScalingFont(ScaleHelper.GetFontOrDefault(parent?.Font), parent?.GetScale() ?? ScaleHelper.SystemScale);
+
+                    // theoretically this would not be needed, but in .NET 6+ the default font handling gets broken after the first DPI change
+                    SetFont(font ?? defaultFont);
+                    return;
+                }
+
+                defaultFont?.Dispose();
+                defaultFont = null;
+                if (font == null)
+                    base.Font = null!;
+            }
+        }
+
+        /// <inheritdoc />
+        [AllowNull]
+        public override Font Font
+        {
+            get => base.Font;
+            set
+            {
+                Debug.Assert(AutoScaleFont ^ defaultFont == null);
+                if (ReferenceEquals(base.Font, value))
+                    return;
+
+                if (dpiChangingAsChildCount > 0 && AutoScaleFont)
+                    return;
+
+                // resetting the default font; or null, when AutoScaleFont is false
+                if (value is null)
+                {
+                    font?.Dispose();
+                    font = null;
+                    Control? parent = Parent;
+                    PointF parentScale = parent?.GetScale() ?? ScaleHelper.SystemScale;
+                    defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(parent?.Font), parentScale);
+                    SetFont(defaultFont);
+                    return;
+                }
+
+                // setting a font explicitly
+                Debug.Assert(deviceScale == this.GetScale());
+                PointF scale = AutoScaleFont ? deviceScale : ScaleHelper.SystemScale;
+                if (font == null)
+                    font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
+                else
+                    font.ResetFrom(ScaleHelper.GetFontOrDefault(value), scale);
+                SetFont(font);
             }
         }
 
@@ -534,6 +638,9 @@ namespace KGySoft.WinForms.Forms
         {
             invoker = new InvokeMarshaller(this);
             StartPosition = FormStartPosition.CenterScreen; // kept for compatibility, CenterParent would actually be better
+            defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
+            SetFont(defaultFont);
+            this.RegisterPerMonitorAwarenessNotifications();
             BaseToolTip = new ToolTip
             {
                 InitialDelay = 500,
@@ -546,7 +653,6 @@ namespace KGySoft.WinForms.Forms
             {
                 BaseToolTip.AutoPopDelay = Int16.MaxValue;
             }
-
         }
 
         #endregion
@@ -618,35 +724,21 @@ namespace KGySoft.WinForms.Forms
         /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
         {
-            PointF oldScale = deviceScale;
+            previousScale = deviceScale;
             deviceScale = this.GetScale();
-            Rectangle before = Bounds;
             base.OnHandleCreated(e);
-            Rectangle after = Bounds;
-            if (!ScaleHelper.IsThreadPerMonitorAware || oldScale == deviceScale)
+            if (!ScaleHelper.IsThreadPerMonitorAware || previousScale == deviceScale)
                 return;
 
             ResetSmallIcon();
 
-            // Can occur when opening the form on a screen, whose scale differs from the scale of the primary display,
-            // or when the scale of the primary display was changed after starting the application, but before opening the form.
-            // In this case there is no WM_DPICHANGED message, so we need to raise the event manually.
-            // This also signals the IPerMonitorDpiAware implementer child controls classes that DPI is changed.
-            PointF scaleFactor = PointF.Empty; // remains empty if the form was scaled in base
-            Rectangle suggestedBounds = before != after
-                ? after
-                : new Rectangle(before.Location, before.Size.Scale(scaleFactor = new PointF(deviceScale.X / oldScale.X, deviceScale.Y / oldScale.Y)));
-            var args = new DeviceScaleChangeEventArgs(suggestedBounds.EnsureScreen(Screen.FromRectangle(before), false), deviceScale, oldScale);
+            var args = new DeviceScaleChangeEventArgs(default, deviceScale, previousScale);
             OnDeviceScaleChanging(args);
-            before = Bounds;
+            if (IsMdiChild)
+                CheckDpiChangeAsMdiChild();
+            else
+                CheckDpiChangeAsTopLevelForm();
             OnDeviceScaleChanged(args);
-            after = Bounds;
-
-            // Base performs the scaling only in .NET 7+. When there was no automatic scaling, we scale the form manually.
-            if (!scaleFactor.IsEmpty && before == after)
-                Scale(new SizeF(scaleFactor.X, scaleFactor.Y));
-            if (scaleFactor.IsEmpty || !scaleFactor.IsEmpty && before == after)
-                OnDeviceScaleAutoResized(EventArgs.Empty);
         }
 
         /// <inheritdoc />
@@ -666,10 +758,65 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <inheritdoc />
+        protected override void OnFontChanged(EventArgs e)
+        {
+            if (suppressFontChanged)
+                return;
+            base.OnFontChanged(e);
+        }
+
+        /// <inheritdoc />
         protected override void OnParentChanged(EventArgs e)
         {
             mdiClient = null;
             base.OnParentChanged(e);
+            Control? parent = Parent;
+            if (parent == null || !IsMdiChild)
+                return;
+
+            // If we have a parent it means this is an MDI child form. Setting default font from new parent font without scaling.
+            if (font == null)
+            {
+                PointF topScale = this.GetTopScale();
+                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), topScale);
+                Debug.Assert(deviceScale == this.GetScale());
+                if (deviceScale != topScale)
+                    lastScaleAsChild = PointF.Empty;
+            }
+
+            CheckDpiChangeAsMdiChild();
+        }
+
+        /// <inheritdoc />
+        protected override void OnParentFontChanged(EventArgs e)
+        {
+            base.OnParentFontChanged(e);
+
+            // if the parent control is rescaling its font due to DPI change, then ignoring the event (we do our scaling in CheckDpiChange)
+            if (dpiChangingAsChildCount > 0 || !AutoScaleFont)
+                return;
+
+#if NET47_OR_GREATER || NETCOREAPP
+            // The parent is rescaling its font out of a WM_DPICHANGED event (occurs typically in .NET 7+ during form handle creation)
+            if (this.IsParentScalingWhileCreated())
+                return;
+#endif
+
+            // but if the parent font is changing not because of scaling, then we reset our default font as well
+            Control parent = Parent!;
+            PointF parentScale = parent.GetScale();
+            defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), parentScale);
+
+            if (font != null)
+                return;
+
+            // setting default font from new parent font without scaling
+            SetFont(defaultFont);
+
+            // the parent has different scale: invalidating lastScale, so CheckDpiChange will adjust the scale if needed
+            Debug.Assert(deviceScale == this.GetScale());
+            if (deviceScale != parentScale)
+                lastScaleAsChild = PointF.Empty;
         }
 
         /// <summary>
@@ -710,6 +857,10 @@ namespace KGySoft.WinForms.Forms
                 commandBindings.Dispose();
                 Events.Dispose();
                 smallIcon?.Dispose();
+                font?.Dispose();
+                defaultFont?.Dispose();
+                font = null;
+                defaultFont = null;
                 if (ownedMdiChildren != null)
                 {
                     foreach (Form mdiChild in ownedMdiChildren)
@@ -718,6 +869,7 @@ namespace KGySoft.WinForms.Forms
                 }
             }
 
+            autoScaleFont = false;
             mdiClient = null;
         }
 
@@ -840,6 +992,14 @@ namespace KGySoft.WinForms.Forms
                     base.WndProc(ref m);
                     break;
 
+                case Constants.WM_PAINT:
+                    if (IsMdiChild)
+                        CheckDpiChangeAsMdiChild();
+                    else
+                        CheckDpiChangeAsTopLevelForm();
+                    base.WndProc(ref m);
+                    return;
+
                 case Constants.WM_GETDPISCALEDSIZE:
                     base.WndProc(ref m);
                     unsafe
@@ -856,13 +1016,14 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 case Constants.WM_DPICHANGED:
-                    unsafe
+                    // Starting to process every recursive call immediately, so the pointers of m are valid, and base.WndProc is safe to call.
+                    dpiChangedTopLevelCount += 1;
+                    try
                     {
-                        PointF oldScale = deviceScale;
-                        var scale = new PointF(m.WParam.LOWORD() / ScaleHelper.DefaultDpi, m.WParam.HIWORD() / ScaleHelper.DefaultDpi);
-                        deviceScale = scale;
-                        var suggestedBounds = ((RECT*)m.LParam)->ToRectangle();
-                        var args = new DeviceScaleChangeEventArgs(suggestedBounds, scale, oldScale);
+                        previousScale = deviceScale;
+                        deviceScale = new PointF(m.WParam.LOWORD() / ScaleHelper.DefaultDpi, m.WParam.HIWORD() / ScaleHelper.DefaultDpi);
+                        unsafe { dpiChangedSuggestedBounds = ((RECT*)m.LParam)->ToRectangle(); }
+                        var args = new DeviceScaleChangeEventArgs(dpiChangedSuggestedBounds, deviceScale, previousScale);
                         OnDeviceScaleChanging(args);
                         base.WndProc(ref m);
                         if (m.Result != IntPtr.Zero)
@@ -871,48 +1032,76 @@ namespace KGySoft.WinForms.Forms
                             DefWndProc(ref m);
                         }
 
-                        ResetSmallIcon();
-                        Rectangle before = Bounds;
-                        OnDeviceScaleChanged(args);
-                        Rectangle after = Bounds;
-                        if (isPerMonitorDpiAwarenessV1 || before == after || !IsLoaded)
-                            dpiChangeSuggestedSize = suggestedBounds.Size;
-
-#if NETFRAMEWORK
-                        // If form is not loaded yet, suggested bounds are not automatically applied on .NET Framework (4.7+: applied only when awareness version is V2)
-                        // This fixes over/undersized forms when the DPI is changed before the form is shown.
-#if NET47_OR_GREATER
-                        if (isPerMonitorDpiAwarenessV1 && !IsLoaded && Bounds != suggestedBounds && before == after)
-#else
-                        if (!IsLoaded && Bounds != suggestedBounds && before == after)
-#endif
+                        // Detecting if base.WndProc caused reentrancy (or OnDeviceScaleChanging, but that would be a very unclean usage), triggering another DPI change.
+                        // If so, we return from here, and going on from the outermost call, because possible scaling by Font does not work from recursion.
+                        if (dpiChangedTopLevelCount > 1)
                         {
-                            Scale(new SizeF(scale.X / oldScale.X, scale.Y / oldScale.Y));
-                            dpiChangeSuggestedSize = Size; //OnDeviceScaleAutoResized(EventArgs.Empty);
+                            OnDeviceScaleChanged(args); // to ensure the same amount of Changed and Changing calls
+                            return;
+                        }
+
+                        // From this point m and the local variables above may be outdated, referring to a previous DPI change.
+                        // We must use fields or update the local variables.
+                        ResetSmallIcon();
+                        Rectangle before;
+                        do
+                        {
+                            // This can also cause reentrancy if AutoScaleFont is true, AutoScaleMode is Font, and the targeted platform did not scale
+                            // in base.WndProc on older platforms. The reentrancy is handled above, but each time we exit from an inner call,
+                            // we must check if the current font scaling is still valid.
+                            before = Bounds;
+                            CheckDpiChangeAsTopLevelForm();
+                        } while (autoScaleFont && (font ?? defaultFont)?.CurrentScale != deviceScale);
+
+                        OnDeviceScaleChanged(args.Reset(dpiChangedSuggestedBounds, deviceScale, previousScale));
+                        Rectangle after = Bounds;
+
+                        // If neither us, nor the DeviceScaleChanged event handlers changed the size, we can expect Windows to apply the suggested bounds
+                        // in a later WM_WINDOWPOSCHANGED message (V1 awareness: it always happens).
+                        if (isPerMonitorDpiAwarenessV1 || before == after)
+                            isOnAutoResizedPending = true;
                     }
-#endif
+                    finally
+                    {
+                        dpiChangedTopLevelCount -= 1;
                     }
 
                     return;
 
-                case Constants.WM_WINDOWPOSCHANGED when dpiChangeSuggestedSize == Size && (!isPerMonitorDpiAwarenessV1 || ActiveForm != this):
+                case Constants.WM_WINDOWPOSCHANGED when isOnAutoResizedPending && dpiChangedSuggestedBounds.Size == Size && (!isPerMonitorDpiAwarenessV1 || ActiveForm != this):
                     base.WndProc(ref m);
-                    dpiChangeSuggestedSize = null;
+                    isOnAutoResizedPending = false;
                     OnDeviceScaleAutoResized(EventArgs.Empty);
                     return;
 
                 case Constants.WM_EXITSIZEMOVE:
                     base.WndProc(ref m);
-                    bool raiseAutoResized = isPerMonitorDpiAwarenessV1 && dpiChangeSuggestedSize == Size;
-                    dpiChangeSuggestedSize = null;
+                    bool raiseAutoResized = isPerMonitorDpiAwarenessV1 && isOnAutoResizedPending && dpiChangedSuggestedBounds.Size == Size;
+                    isOnAutoResizedPending = false;
                     if (raiseAutoResized)
                         OnDeviceScaleAutoResized(EventArgs.Empty);
                     return;
 
                 case Constants.WM_WINDOWPOSCHANGING when IsSuspended:
-                    // preventing bringing the disabled form to the front
+                    // preventing bringing the disabled MDI child form to the front
                     unsafe { ((WINDOWPOS*)m.LParam)->flags |= Constants.SWP_NOZORDER; }
                     base.WndProc(ref m);
+                    return;
+
+                case Constants.WM_DPICHANGED_BEFOREPARENT:
+                    // Yes, even a form can receive this message when it is an MDI child form.
+                    dpiChangingAsChildCount += 1;
+                    try
+                    {
+                        base.WndProc(ref m);
+                    }
+                    finally
+                    {
+                        dpiChangingAsChildCount -= 1;
+                    }
+
+                    if (IsMdiChild)
+                        CheckDpiChangeAsMdiChild();
                     return;
 
                 default:
@@ -920,6 +1109,12 @@ namespace KGySoft.WinForms.Forms
                     return;
             }
         }
+
+        /// <inheritdoc />
+        protected override Rectangle GetScaledBounds(Rectangle bounds, SizeF factor, BoundsSpecified specified)
+            => dpiChangedTopLevelCount > 0 && !dpiChangedSuggestedBounds.IsEmpty()
+                ? dpiChangedSuggestedBounds
+                : base.GetScaledBounds(bounds, factor, specified);
 
         /// <summary>
         /// Invokes the specified <paramref name="callback"/> on the thread that the control was created on.
@@ -1015,9 +1210,114 @@ namespace KGySoft.WinForms.Forms
                 return;
 
             smallIcon.Dispose();
-            smallIcon = base.Icon?.Resize(this.ScaleSize(IconsHelper.SmallIconReferenceSize));
+            Debug.Assert(deviceScale == this.GetScale());
+            smallIcon = base.Icon?.Resize(IconsHelper.SmallIconReferenceSize.Scale(deviceScale));
             if (smallIcon != null && IsHandleCreated)
                 User32.SendMessage(Handle, Constants.WM_SETICON, Constants.ICON_SMALL, smallIcon.Handle);
+        }
+
+        private bool ShouldSerializeFont() => font != null;
+
+        private void CheckDpiChangeAsMdiChild()
+        {
+            Debug.Assert(IsMdiChild);
+            PointF scale = this.GetScale();
+
+            // TODO: GetScaledSize/Changing/Changed/AutoResized events, reset small icon
+            deviceScale = scale;
+
+            // TODO: is the .NET 6 bug relevant here?
+            //// The Font check is needed for .NET 6, where WinForms' (bad) auto font scaling may occur without notification
+            //if ((scale == lastScaleAsChild && (!AutoScaleFont || (font ?? defaultFont)?.Font.Equals(Font) == true)) || Disposing || IsDisposed)
+            //    return;
+            
+            if (scale == lastScaleAsChild || Disposing || IsDisposed)
+                return;
+
+            lastScaleAsChild = scale;
+            if (!AutoScaleFont)
+                return;
+
+            if (font is ScalingFont explicitFont)
+                explicitFont.Scale(scale);
+            else
+                defaultFont!.Scale(scale);
+            SetFont(font ?? defaultFont);
+        }
+
+        private void CheckDpiChangeAsTopLevelForm()
+        {
+            // The Font check is needed because if reentrancy occurs in the WM_DPICHANGED message, the currently set Font may be wrong.
+            // May occur before the form is loaded when initialization jumps between displays, depending on the StartPosition value,
+            // or when user changes the bounds manually in the DeviceScaleChanged event.
+            if (!AutoScaleFont || ((font ?? defaultFont) is ScalingFont f && f.CurrentScale == deviceScale && f.Font.Equals(Font)) || Disposing || IsDisposed)
+                return;
+
+            if (font is ScalingFont explicitFont)
+                explicitFont.Scale(deviceScale);
+            else
+                defaultFont!.Scale(deviceScale);
+
+            SetFont(font ?? defaultFont);
+        }
+
+        private void SetFont(ScalingFont? newFont)
+        {
+            if (newFont == null)
+            {
+                base.Font = null!;
+                return;
+            }
+
+            Font oldFont = base.Font;
+
+            // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
+            // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
+            if (Equals(oldFont, newFont.Font))
+            {
+                if (ReferenceEquals(oldFont, newFont.Font))
+                    return;
+
+                // Non-reference equality: we are alright if the old font is not disposed...
+                // ...except in .NET Core 3.0 - .NET 5.0 when using v1 per-monitor DPI awareness, in which case the font does not change the size.
+#if NETCOREAPP && !NET6_0_OR_GREATER
+                if (!oldFont.IsDisposed() && !(isPerMonitorDpiAwarenessV1 && OSHelper.IsWindows && !OSHelper.IsMono))
+#else
+                if (!oldFont.IsDisposed())
+#endif
+                {
+                    return;
+                }
+
+                suppressFontChanged = true;
+                try
+                {
+                    base.Font = null!;
+                }
+                finally
+                {
+                    suppressFontChanged = false;
+                }
+            }
+
+            base.Font = newFont.Font;
+        }
+
+        #endregion
+
+        #region Explicitly Implemented Interface Methods
+
+        void IPerMonitorDpiAware.ParentFormDpiChanging()
+        {
+            dpiChangingAsChildCount += 1;
+            if (isPerMonitorDpiAwarenessV1 && IsMdiChild)
+                CheckDpiChangeAsMdiChild();
+        }
+
+        void IPerMonitorDpiAware.ParentFormDpiChanged()
+        {
+            Debug.Assert(dpiChangingAsChildCount > 0);
+            dpiChangingAsChildCount -= 1;
         }
 
         #endregion
