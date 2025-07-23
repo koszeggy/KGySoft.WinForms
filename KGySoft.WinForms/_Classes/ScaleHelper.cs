@@ -43,7 +43,7 @@ namespace KGySoft.WinForms
             private readonly Control childControl;
             private readonly List<Control> parents = new();
 
-            private Form? parentForm;
+            private Form? topLevelForm;
 
             #endregion
 
@@ -100,38 +100,42 @@ namespace KGySoft.WinForms
                 // Not needed when the parent form is a BaseForm, because subscribing to DeviceScaleChanging/DeviceScaleChanged events can be done before having a handle.
                 foreach (Control control in parents)
                     control.ParentChanged -= Control_ParentChanged;
-                if (parents.Count > 1 && parentForm != null)
+                if (parents.Count > 1 && topLevelForm != null)
                     parents[1].FontChanged -= Parent_FontChanged;
                 parents.Clear();
 
-                Form? currentForm = null;
+                Form? topForm = null;
                 if (registerCurrentParents)
                 {
                     for (Control? c = childControl; c != null; c = c.Parent)
                     {
-                        if ((currentForm = c as Form) != null)
+                        if (c is Form { Parent: null } form)
+                        {
+                            topForm = form;
                             break;
+                        }
+
                         parents.Add(c);
                         c.ParentChanged += Control_ParentChanged;
                     }
 
-                    if (parents.Count > 1 && currentForm != null && currentForm is not BaseForm)
+                    if (parents.Count > 1 && topForm != null && topForm is not BaseForm)
                         parents[1].FontChanged += Parent_FontChanged;
 
-                    if (ReferenceEquals(currentForm, parentForm))
+                    if (ReferenceEquals(topForm, topLevelForm))
                         return;
                 }
 
-                if (parentForm != null)
+                if (topLevelForm != null)
                     ReleaseParentForm();
 
-                if (currentForm != null)
-                    RegisterParentForm(currentForm);
+                if (topForm != null)
+                    RegisterParentForm(topForm);
             }
 
             private void RegisterParentForm(Form form)
             {
-                parentForm = form;
+                topLevelForm = form;
 
                 // BaseForm simplification: using DeviceScaleChanging/DeviceScaleChanged events instead of hooking the form's WndProc.
                 // Not needed for functionality, but helps to avoid building up deep call stacks due to chaining, caused by multiple notification registrations.
@@ -144,17 +148,17 @@ namespace KGySoft.WinForms
 
                 // We reach this point when an IPerMonitorDpiAware implementing control is hosted in a non-BaseForm parent form.
                 // To be able to call the Before/After notifications, we need to hook the form's WndProc. In case of many controls, this can lead to deep call stacks.
-                parentForm.HandleCreated += ParentForm_HandleCreated;
-                if (parentForm.IsHandleCreated)
-                    AssignHandle(parentForm.Handle);
+                topLevelForm.HandleCreated += ParentForm_HandleCreated;
+                if (topLevelForm.IsHandleCreated)
+                    AssignHandle(topLevelForm.Handle);
             }
 
             private void ReleaseParentForm()
             {
-                if (parentForm == null)
+                if (topLevelForm == null)
                     return;
 
-                if (parentForm is BaseForm baseForm)
+                if (topLevelForm is BaseForm baseForm)
                 {
                     baseForm.DeviceScaleChanging += BaseForm_DeviceScaleChanging;
                     baseForm.DeviceScaleChanged += BaseForm_DeviceScaleChanged;
@@ -162,10 +166,10 @@ namespace KGySoft.WinForms
                 else
                 {
                     ReleaseHandle();
-                    parentForm.HandleCreated -= ParentForm_HandleCreated;
+                    topLevelForm.HandleCreated -= ParentForm_HandleCreated;
                 }
 
-                parentForm = null;
+                topLevelForm = null;
             }
 
             private void OnBeforeParentFormDpiChange()
@@ -194,13 +198,13 @@ namespace KGySoft.WinForms
                 AssignHandle(form.Handle);
             }
 
-            private void BaseForm_DeviceScaleChanging(object sender, DeviceScaleChangeEventArgs e) => OnBeforeParentFormDpiChange();
-            private void BaseForm_DeviceScaleChanged(object sender, DeviceScaleChangeEventArgs e) => OnAfterParentFormDpiChange();
+            private void BaseForm_DeviceScaleChanging(object? sender, DeviceScaleChangeEventArgs e) => OnBeforeParentFormDpiChange();
+            private void BaseForm_DeviceScaleChanged(object? sender, DeviceScaleChangeEventArgs e) => OnAfterParentFormDpiChange();
 
             private void Parent_FontChanged(object? sender, EventArgs e)
             {
-                Debug.Assert(parentForm != null && parentForm is not BaseForm, "Not expected to be subscribed when parent form is a BaseForm");
-                Form? form = parentForm;
+                Debug.Assert(topLevelForm != null && topLevelForm is not BaseForm, "Not expected to be subscribed when parent form is a BaseForm");
+                Form? form = topLevelForm;
                 if (form?.IsHandleCreated != true || Handle == form.Handle)
                     return;
                 ReleaseHandle();
@@ -236,7 +240,7 @@ namespace KGySoft.WinForms
         #endregion
 
         #region Properties
-
+        
         #region Public Properties
 
         public static PointF DefaultScale => defaultScale;
@@ -279,15 +283,11 @@ namespace KGySoft.WinForms
             }
         }
 
-        #endregion
-
-        #region Internal Properties
-
-#if NETFRAMEWORK
-        internal static Font DefaultFont
+        public static Font DefaultFont
         {
             get
             {
+#if NETFRAMEWORK
                 if (defaultFont == null)
                 {
                     if (IsDefaultSystemScale)
@@ -315,15 +315,19 @@ namespace KGySoft.WinForms
                 }
 
                 return defaultFont;
+#else
+                return defaultFont ??= Control.DefaultFont;
+#endif
             }
         }
 
-#else
-        internal static Font DefaultFont => defaultFont ??= Control.DefaultFont;
-#endif
-        internal static Font DialogFont => dialogFont ??= SystemFonts.DialogFont;
+        public static bool IsDefaultSystemScale => systemScale == defaultScale;
 
-        internal static bool IsDefaultSystemScale => systemScale == defaultScale;
+        #endregion
+        
+        #region Internal Properties
+        
+        internal static Font DialogFont => dialogFont ??= SystemFonts.DialogFont;
 
         #endregion
 
@@ -452,7 +456,6 @@ namespace KGySoft.WinForms
 
         internal static void RegisterPerMonitorAwarenessNotifications(this Control control)
         {
-            // Registering the notifier is required only for V1 awareness level. V2 provides direct notifications for the controls.
             if (!IsThreadPerMonitorAware)
                 return;
 
