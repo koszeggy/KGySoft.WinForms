@@ -119,10 +119,9 @@ namespace KGySoft.WinForms.Forms
         private PointF deviceScale = ScaleHelper.SystemScale;
         private PointF previousScale;
         private Icon? smallIcon;
-        private int dpiChangedTopLevelCount; // Reentrancy count for WM_DPICHANGED message processing when this form is a top-level form.
+        private int dpiChangeRecursionCount; // Reentrancy count for WM_DPICHANGED[_BEFOREPARENT] messages processing.
         private Rectangle dpiChangedSuggestedBounds; // must be a field to handle reentrancy and for the triggering conditions of the DeviceScaleAutoResized event
         private bool isOnAutoResizedPending;
-
         private bool suppressFontChanged;
         private PointF lastScaleAsChild; // Plays a role when this form is not a top-level form, i.e. when it is an MDI child. Otherwise, DeviceScale is used.
         private int dpiChangingAsChildCount; // Plays a role when this form is an MDI child. Otherwise, DPI changes are processed in WndProc.
@@ -1017,7 +1016,7 @@ namespace KGySoft.WinForms.Forms
 
                 case Constants.WM_DPICHANGED:
                     // Starting to process every recursive call immediately, so the pointers of m are valid, and base.WndProc is safe to call.
-                    dpiChangedTopLevelCount += 1;
+                    dpiChangeRecursionCount += 1;
                     try
                     {
                         previousScale = deviceScale;
@@ -1034,7 +1033,7 @@ namespace KGySoft.WinForms.Forms
 
                         // Detecting if base.WndProc caused reentrancy (or OnDeviceScaleChanging, but that would be a very unclean usage), triggering another DPI change.
                         // If so, we return from here, and going on from the outermost call, because possible scaling by Font does not work from recursion.
-                        if (dpiChangedTopLevelCount > 1)
+                        if (dpiChangeRecursionCount > 1)
                         {
                             OnDeviceScaleChanged(args); // to ensure the same amount of Changed and Changing calls
                             return;
@@ -1063,7 +1062,7 @@ namespace KGySoft.WinForms.Forms
                     }
                     finally
                     {
-                        dpiChangedTopLevelCount -= 1;
+                        dpiChangeRecursionCount -= 1;
                     }
 
                     return;
@@ -1089,7 +1088,46 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
-                    // Yes, even a form can receive this message when it is an MDI child form.
+                    Debug.Assert(IsMdiChild);
+                    dpiChangeRecursionCount += 1;
+                    dpiChangingAsChildCount += 1;
+                    try
+                    {
+                        // Though CheckDpiChangeAsMdiChild also has OnDeviceScaleChanging and OnDeviceScaleChanged calls, we must call them from here
+                        // to wrap the base.WndProc call. The inner Changing/Changed events will not be called, because we reset deviceScale here.
+                        previousScale = deviceScale;
+                        deviceScale = this.GetScale();
+                        var args = new DeviceScaleChangeEventArgs(default, deviceScale, previousScale);
+                        OnDeviceScaleChanging(args);
+                        base.WndProc(ref m);
+
+                        // Detecting if base.WndProc caused reentrancy (though it requires something like changing the top-level form's font), triggering another DPI change.
+                        // If so, we return from here, and going on from the outermost call, because possible scaling by Font does not work from recursion.
+                        if (dpiChangeRecursionCount > 1)
+                        {
+                            OnDeviceScaleChanged(args); // to ensure the same amount of Changed and Changing calls
+                            return;
+                        }
+
+                        ResetSmallIcon();
+                        do
+                        {
+                            // This can also cause reentrancy (though quite unlikely) if something nasty happens when the font changes (e.g. blowing up the container form).
+                            // The reentrancy is handled above, but each time we exit from an inner call, we must check if the current font scaling is still valid.
+                            CheckDpiChangeAsMdiChild();
+                        } while (autoScaleFont && (font ?? defaultFont)?.CurrentScale != deviceScale);
+                        
+                        OnDeviceScaleChanged(args.Reset(default, deviceScale, previousScale));
+                    }
+                    finally
+                    {
+                        dpiChangeRecursionCount -= 1;
+                        dpiChangingAsChildCount -= 1;
+                    }
+                    return;
+
+                case Constants.WM_DPICHANGED_AFTERPARENT:
+                    Debug.Assert(IsMdiChild);
                     dpiChangingAsChildCount += 1;
                     try
                     {
@@ -1099,9 +1137,6 @@ namespace KGySoft.WinForms.Forms
                     {
                         dpiChangingAsChildCount -= 1;
                     }
-
-                    if (IsMdiChild)
-                        CheckDpiChangeAsMdiChild();
                     return;
 
                 default:
@@ -1112,7 +1147,7 @@ namespace KGySoft.WinForms.Forms
 
         /// <inheritdoc />
         protected override Rectangle GetScaledBounds(Rectangle bounds, SizeF factor, BoundsSpecified specified)
-            => dpiChangedTopLevelCount > 0 && !dpiChangedSuggestedBounds.IsEmpty()
+            => dpiChangeRecursionCount > 0 && !dpiChangedSuggestedBounds.IsEmpty()
                 ? dpiChangedSuggestedBounds
                 : base.GetScaledBounds(bounds, factor, specified);
 
@@ -1223,8 +1258,11 @@ namespace KGySoft.WinForms.Forms
             Debug.Assert(IsMdiChild);
             PointF scale = this.GetScale();
 
-            // TODO: GetScaledSize/Changing/Changed/AutoResized events, reset small icon
+            var oldScale = deviceScale;
             deviceScale = scale;
+            var args = oldScale == deviceScale ? null : new DeviceScaleChangeEventArgs(default, deviceScale, oldScale);
+            if (args != null)
+                OnDeviceScaleChanging(args);
 
             // TODO: is the .NET 6 bug relevant here?
             //// The Font check is needed for .NET 6, where WinForms' (bad) auto font scaling may occur without notification
@@ -1235,14 +1273,17 @@ namespace KGySoft.WinForms.Forms
                 return;
 
             lastScaleAsChild = scale;
-            if (!AutoScaleFont)
-                return;
-
+            if (AutoScaleFont)
+            {
             if (font is ScalingFont explicitFont)
                 explicitFont.Scale(scale);
             else
                 defaultFont!.Scale(scale);
             SetFont(font ?? defaultFont);
+        }
+
+            if (args != null)
+                OnDeviceScaleChanged(args);
         }
 
         private void CheckDpiChangeAsTopLevelForm()
