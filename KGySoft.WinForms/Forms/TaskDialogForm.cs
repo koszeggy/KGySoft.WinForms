@@ -273,13 +273,13 @@ namespace KGySoft.WinForms.Forms
         private bool isRadioButtonChecking;
         private bool isForcedClosing;
         private bool altF4Pressed;
-        private bool isResizing;
         private bool isResettingHeight;
         private bool isResettingVisibilities;
         private bool isResetHeightPending;
         private bool isCheckboxChecking;
         private bool isReopening;
         private bool executeNonModal;
+        private bool isResettingScrollbar;
         private Point location;
 
         #endregion
@@ -790,7 +790,6 @@ namespace KGySoft.WinForms.Forms
 
             // setting texts
             ResetCaption();
-            isResizing = true;
             lblMainInstruction.Text = cfg.HasMainInstruction ? host.MainInstruction : String.Empty;
             lblMessage.Text = cfg.HasMessage ? host.Message : String.Empty;
             lblDetailsFooter.Text = cfg.HasDetails && isDetailsInFooter ? host.DetailsText : String.Empty;
@@ -798,7 +797,6 @@ namespace KGySoft.WinForms.Forms
             ResetShowHideDetailsText();
             chbCheckBox.Text = cfg.HasVerification ? host.CheckBoxText : String.Empty;
             lblFooter.Text = cfg.HasFooter ? host.FooterText : String.Empty;
-            isResizing = false;
 
             // setting progress bar
             if (cfg.HasProgressBar)
@@ -817,10 +815,8 @@ namespace KGySoft.WinForms.Forms
             ResetCommandLinks(cfg);
             ResetDefaultButton(cfg);
 
-            // Adjusting expando button (this can resize height)
-            isResizing = true;
+            // Adjusting expando button (this can change height)
             btnShowHideDetails.IsExpanded = isDetailsExpanded;
-            isResizing = false;
         }
 
         private void ResetLayout(Configuration cfg, Rectangle suggestedBounds = default)
@@ -835,7 +831,7 @@ namespace KGySoft.WinForms.Forms
                 ResetConstraints();
 
                 // icons
-                ResetMainIcon(cfg);
+                ResetMainIcon(cfg, suggestedBounds);
                 ResetFooterIcon(cfg);
                 ResetButtonIcons(cfg);
                 ResetCommandLinkIcons(cfg);
@@ -1416,131 +1412,123 @@ namespace KGySoft.WinForms.Forms
 
         private void ResetWidths(Configuration cfg, Rectangle suggestedBounds = default)
         {
-            isResizing = true;
             PointF scale = DeviceScale;
-            try
+            // setting form width
+            // This forces to create the handle. May cause some resets and additional DPI changes, but it's still better than handling
+            // the side effects of the deferred handle creation (e.g. the ResumeLayout in ResetHeights may change the screen,
+            // recursive reentrancy in OnDeviceScaleChanged when setting MinimumSize in ResetConstraints, etc.).
+            // NOTE: we could force the handle creation earlier (in Execute), but due to a strange bug in .NET 5.0 it causes
+            // that OnLoad and OnShown are not called, causing some issues, e.g. the timer is not initialized and system sounds are not played.
+            Screen screen = !suggestedBounds.IsEmpty() ? Screen.FromRectangle(suggestedBounds) : Screen.FromControl(this);
+            Rectangle screenBounds = screen.WorkingArea;
+            int screenWidth = screenBounds.Width;
+            int minimumWidth = cfg.DluToPixelsX(formReferenceMinWidth).Scale(scale.X);
+            if (host.Width > 0)
             {
-                // setting form width
-                // This forces to create the handle. May cause some resets and additional DPI changes, but it's still better than handling
-                // the side effects of the deferred handle creation (e.g. the ResumeLayout in ResetHeights may change the screen,
-                // recursive reentrancy in OnDeviceScaleChanged when setting MinimumSize in ResetConstraints, etc.).
-                // NOTE: we could force the handle creation earlier (in Execute), but due to a strange bug in .NET 5.0 it causes
-                // that OnLoad and OnShown are not called, causing some issues, e.g. the timer is not initialized and system sounds are not played.
-                Screen screen = !suggestedBounds.IsEmpty() ? Screen.FromRectangle(suggestedBounds) : Screen.FromControl(this);
-                Rectangle screenBounds = screen.WorkingArea;
-                int screenWidth = screenBounds.Width;
-                int minimumWidth = cfg.DluToPixelsX(formReferenceMinWidth).Scale(scale.X);
-                if (host.Width > 0)
-                {
-                    int desiredWidth = Math.Max(minimumWidth, cfg.DluToPixelsX(host.Width).Scale(scale.X));
-                    SetWidth(Math.Min(desiredWidth, screenWidth), suggestedBounds, screen);
-                }
-                // auto width
-                else
-                {
-                    // regular buttons: up to screen width
-                    int desiredWidth = minimumWidth;
-                    if (cfg.HasButtons)
-                    {
-                        // setting button sizes without limits to get desired size
-                        pnlButtons.SuspendLayout();
-                        try
-                        {
-                            foreach (Button button in pnlButtons.Controls)
-                                button.Size = button.GetPreferredSize(Size.Empty);
-                        }
-                        finally
-                        {
-                            pnlButtons.ResumeLayout();
-                        }
-
-                        int preferredWidth = pnlButtons.GetPreferredSize(Size.Empty).Width + pnlButtons.Margin.Horizontal + pnlButtons.Padding.Horizontal;
-                        if (cfg.HasVerification || cfg.HasDetails)
-                            preferredWidth += checkBoxAndExpandoColumnReferenceWidth.Scale(scale.X);
-                        if (preferredWidth > desiredWidth)
-                            desiredWidth = preferredWidth;
-                    }
-
-                    // lblMessage, lblDetailsMain, command links text: up to 280 DLU
-                    int maxWidth = cfg.DluToPixelsX(messageReferenceMaxWidth).Scale(scale.X);
-                    if (desiredWidth < maxWidth)
-                    {
-                        // message
-                        if (cfg.HasMessage)
-                        {
-                            int preferredWidth = lblMessage.GetPreferredSize(Size.Empty).Width + pnlMainTexts.Padding.Horizontal;
-                            if (cfg.HasMainIcon)
-                                preferredWidth += pnlMainIcon.Width;
-
-                            if (preferredWidth > desiredWidth)
-                                desiredWidth = Math.Min(preferredWidth, maxWidth);
-                        }
-
-                        // details in main (regardless visibility)
-                        if (cfg.HasDetails && !isDetailsInFooter && desiredWidth < maxWidth)
-                        {
-                            int preferredWidth = lblDetailsMain.GetPreferredSize(Size.Empty).Width + pnlMainTexts.Padding.Horizontal;
-                            if (cfg.HasMainIcon)
-                                preferredWidth += pnlMainIcon.Width;
-
-                            if (preferredWidth > desiredWidth)
-                                desiredWidth = Math.Min(preferredWidth, maxWidth);
-                        }
-
-                        // command link buttons
-                        if (cfg.HasCommandLinks && desiredWidth < maxWidth)
-                        {
-                            foreach (CommandLinkButton commandLinkButton in pnlCommandLinks.Controls)
-                            {
-                                int preferredWidth = commandLinkButton.GetPreferredSize(Size.Empty).Width + pnlCommandLinks.Padding.Horizontal;
-                                if (cfg.HasMainIcon)
-                                    preferredWidth += pnlMainIcon.Width;
-
-                                if (preferredWidth > desiredWidth)
-                                    desiredWidth = Math.Min(preferredWidth, maxWidth);
-
-                                if (desiredWidth == maxWidth)
-                                    break;
-                            }
-                        }
-                    }
-
-                    int widthClientDiff = Width - ClientSize.Width;
-                    SetWidth(Math.Min(desiredWidth + widthClientDiff, screenWidth), suggestedBounds, screen);
-                }
-
-                // setting pnlChecks minimum width (It always has priority regardless of form width. Its maximum size is smaller than minimum form size so it is ok)
-                if (cfg.HasVerification || cfg.HasDetails)
-                    ResetChecksWidth(cfg, true);
-
-                // resetting button sizes along with max size so they will not be wider than text
+                int desiredWidth = Math.Max(minimumWidth, cfg.DluToPixelsX(host.Width).Scale(scale.X));
+                SetWidth(Math.Min(desiredWidth, screenWidth), suggestedBounds, screen);
+            }
+            // auto width
+            else
+            {
+                // regular buttons: up to screen width
+                int desiredWidth = minimumWidth;
                 if (cfg.HasButtons)
                 {
-                    Size maxButtonSize = new Size(pnlButtons.Width - pnlButtons.Padding.Horizontal, 0);
-
+                    // setting button sizes without limits to get desired size
                     pnlButtons.SuspendLayout();
                     try
                     {
                         foreach (Button button in pnlButtons.Controls)
-                        {
-                            button.MaximumSize = maxButtonSize;
-                            button.Size = button.GetPreferredSize(maxButtonSize);
-                        }
+                            button.Size = button.GetPreferredSize(Size.Empty);
                     }
                     finally
                     {
                         pnlButtons.ResumeLayout();
                     }
+
+                    int preferredWidth = pnlButtons.GetPreferredSize(Size.Empty).Width + pnlButtons.Margin.Horizontal + pnlButtons.Padding.Horizontal;
+                    if (cfg.HasVerification || cfg.HasDetails)
+                        preferredWidth += checkBoxAndExpandoColumnReferenceWidth.Scale(scale.X);
+                    if (preferredWidth > desiredWidth)
+                        desiredWidth = preferredWidth;
                 }
 
-                // reset pnlChecks maximum width
-                if (cfg.HasVerification || cfg.HasDetails)
-                    ResetChecksWidth(cfg, false);
+                // lblMessage, lblDetailsMain, command links text: up to 280 DLU
+                int maxWidth = cfg.DluToPixelsX(messageReferenceMaxWidth).Scale(scale.X);
+                if (desiredWidth < maxWidth)
+                {
+                    // message
+                    if (cfg.HasMessage)
+                    {
+                        int preferredWidth = lblMessage.GetPreferredSize(Size.Empty).Width + pnlMainTexts.Padding.Horizontal;
+                        if (cfg.HasMainIcon)
+                            preferredWidth += pnlMainIcon.Width;
+
+                        if (preferredWidth > desiredWidth)
+                            desiredWidth = Math.Min(preferredWidth, maxWidth);
+                    }
+
+                    // details in main (regardless visibility)
+                    if (cfg.HasDetails && !isDetailsInFooter && desiredWidth < maxWidth)
+                    {
+                        int preferredWidth = lblDetailsMain.GetPreferredSize(Size.Empty).Width + pnlMainTexts.Padding.Horizontal;
+                        if (cfg.HasMainIcon)
+                            preferredWidth += pnlMainIcon.Width;
+
+                        if (preferredWidth > desiredWidth)
+                            desiredWidth = Math.Min(preferredWidth, maxWidth);
+                    }
+
+                    // command link buttons
+                    if (cfg.HasCommandLinks && desiredWidth < maxWidth)
+                    {
+                        foreach (CommandLinkButton commandLinkButton in pnlCommandLinks.Controls)
+                        {
+                            int preferredWidth = commandLinkButton.GetPreferredSize(Size.Empty).Width + pnlCommandLinks.Padding.Horizontal;
+                            if (cfg.HasMainIcon)
+                                preferredWidth += pnlMainIcon.Width;
+
+                            if (preferredWidth > desiredWidth)
+                                desiredWidth = Math.Min(preferredWidth, maxWidth);
+
+                            if (desiredWidth == maxWidth)
+                                break;
+                        }
+                    }
+                }
+
+                int widthClientDiff = Width - ClientSize.Width;
+                SetWidth(Math.Min(desiredWidth + widthClientDiff, screenWidth), suggestedBounds, screen);
             }
-            finally
+
+            // setting pnlChecks minimum width (It always has priority regardless of form width. Its maximum size is smaller than minimum form size so it is ok)
+            if (cfg.HasVerification || cfg.HasDetails)
+                ResetChecksWidth(cfg, true);
+
+            // resetting button sizes along with max size so they will not be wider than text
+            if (cfg.HasButtons)
             {
-                isResizing = false;
+                Size maxButtonSize = new Size(pnlButtons.Width - pnlButtons.Padding.Horizontal, 0);
+
+                pnlButtons.SuspendLayout();
+                try
+                {
+                    foreach (Button button in pnlButtons.Controls)
+                    {
+                        button.MaximumSize = maxButtonSize;
+                        button.Size = button.GetPreferredSize(maxButtonSize);
+                    }
+                }
+                finally
+                {
+                    pnlButtons.ResumeLayout();
+                }
             }
+
+            // reset pnlChecks maximum width
+            if (cfg.HasVerification || cfg.HasDetails)
+                ResetChecksWidth(cfg, false);
         }
 
         private void SetWidth(int width, Rectangle suggestedBounds, Screen screen)
@@ -1565,7 +1553,16 @@ namespace KGySoft.WinForms.Forms
             newBounds.Width = origBounds.Width; // keeping the original width
             newBounds.Height = height;
             Bounds = newBounds.EnsureScreen(screen, suggestedBounds.IsEmpty());
-            AutoScroll = showScrollbar; // this may cause triggering Control_SizeChanged, causing a new resize session
+            Debug.Assert(!isResettingScrollbar);
+            isResettingScrollbar = true;
+            try
+            {
+                AutoScroll = showScrollbar; // this may cause triggering Control_SizeChanged, causing a new resize session
+            }
+            finally
+            {
+                isResettingScrollbar = false;
+            }
         }
 
         private void AddStandardButton(TaskDialogStandardButtonFlags standardButton)
@@ -1761,7 +1758,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetMainIcon(Configuration cfg)
+        private void ResetMainIcon(Configuration cfg, Rectangle suggestedBounds = default)
         {
             bool hasMainIcon = cfg.HasMainIcon;
             PointF scale = DeviceScale;
@@ -1798,7 +1795,7 @@ namespace KGySoft.WinForms.Forms
                 isSpecialHeadColors = requireSpecialHeadColors;
                 ResetTheme();
                 pnlMainInstruction.Invalidate();
-                ResetHeights(cfg);
+                ResetHeights(cfg, suggestedBounds);
             }
             else
                 isSpecialHeadColors = requireSpecialHeadColors;
@@ -1906,10 +1903,7 @@ namespace KGySoft.WinForms.Forms
             }
             finally
             {
-                // control is actually resized here
-                isResizing = true;
                 ResumeLayout();
-                isResizing = false;
             }
 
             if (control.AutoSize)
@@ -1950,10 +1944,7 @@ namespace KGySoft.WinForms.Forms
             }
             finally
             {
-                // control is actually resized here
-                isResizing = true;
                 ResumeLayout();
-                isResizing = false;
             }
 
             if (control.AutoSize)
@@ -2245,7 +2236,7 @@ namespace KGySoft.WinForms.Forms
                 case TaskDialog.PropertyShowDetailsText:
                 case TaskDialog.PropertyHideDetailsText:
                     if (((btnShowHideDetails.IsExpanded && propName == TaskDialog.PropertyHideDetailsText)
-                        || (!btnShowHideDetails.IsExpanded && propName == TaskDialog.PropertyShowDetailsText))
+                            || (!btnShowHideDetails.IsExpanded && propName == TaskDialog.PropertyShowDetailsText))
                         && (!String.IsNullOrEmpty(host.ShowDetailsText) && !String.IsNullOrEmpty(host.HideDetailsText)))
                     {
                         UpdateText(btnShowHideDetails, propName == TaskDialog.PropertyShowDetailsText ? host.ShowDetailsText : host.HideDetailsText, false, false);
@@ -2524,10 +2515,9 @@ namespace KGySoft.WinForms.Forms
         private void btnShowHideDetails_ExpandedChanged(object? sender, EventArgs e)
         {
             isDetailsExpanded = btnShowHideDetails.IsExpanded;
-            if (String.IsNullOrEmpty(host.DetailsText) || isResizing)
+            if (String.IsNullOrEmpty(host.DetailsText) || dialogState == TaskDialogStatus.Initializing)
                 return;
 
-            Debug.Assert(dialogState != TaskDialogStatus.Initializing);
             Configuration cfg = GetConfiguration(isDetailsExpanded);
 
             ResetVisibilities(cfg);
@@ -2553,7 +2543,7 @@ namespace KGySoft.WinForms.Forms
         private void Control_SizeChanged(object? sender, EventArgs e)
         {
             // watching this event to recalculate sizes if scrollbar of the form appears/disappears
-            if (!Visible || isResizing || WindowState == FormWindowState.Minimized)
+            if (!isResettingScrollbar)
                 return;
 
             ResetHeights(GetConfiguration());
