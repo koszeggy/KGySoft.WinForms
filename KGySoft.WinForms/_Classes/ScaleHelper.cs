@@ -198,14 +198,14 @@ namespace KGySoft.WinForms
                         return;
                 }
 
-                if (topForm != topLevelForm)
+                if (topForm != topLevelForm && topForm != childControl)
                 {
                     ReleaseForm(ref topLevelForm, ref topLevelFormListener);
                     if (topForm != null)
                         topLevelForm = RegisterForm(topForm, ref topLevelFormListener);
                 }
 
-                if (childForm != mdiChildForm)
+                if (childForm != mdiChildForm && childForm != childControl)
                 {
                     ReleaseForm(ref mdiChildForm, ref mdiChildFormListener);
                     if (childForm != null)
@@ -239,8 +239,8 @@ namespace KGySoft.WinForms
 
                 if (form is BaseForm baseForm)
                 {
-                    baseForm.DeviceScaleChanging += BaseForm_DeviceScaleChanging;
-                    baseForm.DeviceScaleChanged += BaseForm_DeviceScaleChanged;
+                    baseForm.DeviceScaleChanging -= BaseForm_DeviceScaleChanging;
+                    baseForm.DeviceScaleChanged -= BaseForm_DeviceScaleChanged;
                 }
                 else
                     nativeListener?.Dispose();
