@@ -1429,6 +1429,7 @@ namespace KGySoft.WinForms.Forms
 
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {
+            Debug.Assert(IsMdiChild);
             dpiChangingAsChildCount += 1;
             if (isPerMonitorDpiAwarenessV1 && IsMdiChild)
                 CheckDpiChangeAsMdiChild();
@@ -1436,8 +1437,13 @@ namespace KGySoft.WinForms.Forms
 
         void IPerMonitorDpiAware.ParentFormDpiChanged()
         {
+            Debug.Assert(IsMdiChild);
             Debug.Assert(dpiChangingAsChildCount > 0);
             dpiChangingAsChildCount -= 1;
+#if !NET6_0_OR_GREATER
+            // On .NET 6- the layout may not be updated automatically after a DPI change if both the MDI parent and MDI child scales the font automatically.
+            PerformLayout();
+#endif
         }
 
         #endregion
