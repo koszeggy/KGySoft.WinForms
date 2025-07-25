@@ -73,8 +73,56 @@ namespace KGySoft.WinForms.Forms
     /// <item><see cref="InvokeOnUIThread">InvokeOnUIThread</see> method.</item>
     /// </list>
     /// </remarks>
-    public class BaseForm : Form, IPerMonitorDpiAware
+    public class BaseForm : Form, IPerMonitorDpiAware, IObservableParent
     {
+        #region Nested Classes
+
+        /// <summary>
+        /// Represents a collection of controls contained within a <see cref="BaseForm"/>.
+        /// </summary>
+        protected new class ControlCollection : Form.ControlCollection
+        {
+            #region Fields
+            
+            private readonly BaseForm owner;
+
+            #endregion
+
+            #region Constructors
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ControlCollection"/> class with the specified owner.
+            /// </summary>
+            /// <param name="owner">The <see cref="BaseForm"/> that owns this collection.</param>
+            public ControlCollection(BaseForm owner)
+                : base(owner ?? throw new ArgumentNullException(nameof(owner), PublicResources.ArgumentNull))
+            {
+                this.owner = owner;
+            }
+
+            #endregion
+
+            #region Methods
+
+            /// <inheritdoc />
+            public override void Add(Control value)
+            {
+                owner.isAddingControl = true;
+                try
+                {
+                    base.Add(value);
+                }
+                finally
+                {
+                    owner.isAddingControl = false;
+                }
+            }
+
+            #endregion
+        }
+
+        #endregion
+
         #region Fields
 
         #region Static Fields
@@ -121,10 +169,12 @@ namespace KGySoft.WinForms.Forms
         private Icon? smallIcon;
         private int dpiChangeRecursionCount; // Reentrancy count for WM_DPICHANGED[_BEFOREPARENT] messages processing.
         private Rectangle dpiChangedSuggestedBounds; // must be a field to handle reentrancy and for the triggering conditions of the DeviceScaleAutoResized event
-        private bool isOnAutoResizedPending;
-        private bool suppressFontChanged;
         private PointF lastScaleAsChild; // Plays a role when this form is not a top-level form, i.e. when it is an MDI child. Otherwise, DeviceScale is used.
         private int dpiChangingAsChildCount; // Plays a role when this form is an MDI child. Otherwise, DPI changes are processed in WndProc.
+        private bool isOnAutoResizedPending;
+        private bool suppressFontChanged;
+        private bool isAddingControl;
+        private bool isChangingFont;
 
         #endregion
 
@@ -412,7 +462,7 @@ namespace KGySoft.WinForms.Forms
         public CommandBindingsCollection CommandBindings => commandBindings;
 
         /// <summary>
-        /// Gets the current scale of the form's display device. Before showing the form, or when per-monitor DPI awareness is not enabled,
+        /// Gets the current scale of the form's display device. Before loading the form, or when per-monitor DPI awareness is not enabled,
         /// this property returns the system scale of the primary display, which is the same as the <see cref="ScaleHelper.SystemScale">ScaleHelper.SystemScale</see> property.
         /// </summary>
         /// <remarks>
@@ -609,6 +659,13 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
+        #region Explicitly Implemented Interface Properties
+
+        bool IObservableParent.IsAddingControl => isAddingControl;
+        bool IObservableParent.IsChangingFont => isChangingFont;
+
+        #endregion
+
         #endregion
 
         #region Constructors
@@ -698,7 +755,19 @@ namespace KGySoft.WinForms.Forms
                 ownedMdiChildren.Add(child);
                 if (suspendCaller)
                     Suspend(child);
-                child.MdiParent = mdiParent;
+                {
+                    if (mdiParent is BaseForm bf)
+                        bf.isAddingControl = true;
+                }
+                try
+                {
+                    child.MdiParent = mdiParent;
+                }
+                finally
+                {
+                    if (mdiParent is BaseForm bf)
+                        bf.isAddingControl = false;
+                }
                 child.Show();
             }
             catch (Exception)
@@ -719,6 +788,9 @@ namespace KGySoft.WinForms.Forms
         #endregion
 
         #region Protected Methods
+
+        /// <inheritdoc />
+        protected override Control.ControlCollection CreateControlsInstance() => new ControlCollection(this);
 
         /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
@@ -776,10 +848,10 @@ namespace KGySoft.WinForms.Forms
             // If we have a parent it means this is an MDI child form. Setting default font from new parent font without scaling.
             if (font == null)
             {
-                PointF topScale = this.GetTopScale();
-                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), topScale);
+                PointF scale = this.GetScaleForParentChanged();
+                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), scale);
                 Debug.Assert(deviceScale == this.GetScale());
-                if (deviceScale != topScale)
+                if (deviceScale != scale)
                     lastScaleAsChild = PointF.Empty;
             }
 
@@ -802,9 +874,8 @@ namespace KGySoft.WinForms.Forms
 #endif
 
             // but if the parent font is changing not because of scaling, then we reset our default font as well
-            Control parent = Parent!;
-            PointF parentScale = parent.GetScale();
-            defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), parentScale);
+            PointF scale = this.GetScaleForParentFontChanged();
+            defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
 
             if (font != null)
                 return;
@@ -814,7 +885,7 @@ namespace KGySoft.WinForms.Forms
 
             // the parent has different scale: invalidating lastScale, so CheckDpiChange will adjust the scale if needed
             Debug.Assert(deviceScale == this.GetScale());
-            if (deviceScale != parentScale)
+            if (deviceScale != scale)
                 lastScaleAsChild = PointF.Empty;
         }
 
@@ -1067,15 +1138,20 @@ namespace KGySoft.WinForms.Forms
 
                     return;
 
-                case Constants.WM_WINDOWPOSCHANGED when isOnAutoResizedPending && dpiChangedSuggestedBounds.Size == Size && (!isPerMonitorDpiAwarenessV1 || ActiveForm != this):
+                case Constants.WM_WINDOWPOSCHANGED when isOnAutoResizedPending && dpiChangedSuggestedBounds.Size == Size:
                     base.WndProc(ref m);
-                    isOnAutoResizedPending = false;
-                    OnDeviceScaleAutoResized(EventArgs.Empty);
+                    dpiChangedSuggestedBounds = Rectangle.Empty;
+                    if (!isPerMonitorDpiAwarenessV1 || ActiveForm != this)
+                    {
+                        isOnAutoResizedPending = false;
+                        OnDeviceScaleAutoResized(EventArgs.Empty);
+                    }
+
                     return;
 
                 case Constants.WM_EXITSIZEMOVE:
                     base.WndProc(ref m);
-                    bool raiseAutoResized = isPerMonitorDpiAwarenessV1 && isOnAutoResizedPending && dpiChangedSuggestedBounds.Size == Size;
+                    bool raiseAutoResized = isPerMonitorDpiAwarenessV1 && isOnAutoResizedPending;
                     isOnAutoResizedPending = false;
                     if (raiseAutoResized)
                         OnDeviceScaleAutoResized(EventArgs.Empty);
@@ -1264,23 +1340,18 @@ namespace KGySoft.WinForms.Forms
             if (args != null)
                 OnDeviceScaleChanging(args);
 
-            // TODO: is the .NET 6 bug relevant here?
-            //// The Font check is needed for .NET 6, where WinForms' (bad) auto font scaling may occur without notification
-            //if ((scale == lastScaleAsChild && (!AutoScaleFont || (font ?? defaultFont)?.Font.Equals(Font) == true)) || Disposing || IsDisposed)
-            //    return;
-            
-            if (scale == lastScaleAsChild || Disposing || IsDisposed)
+            if ((scale == lastScaleAsChild && (!AutoScaleFont || (font ?? defaultFont)?.Font.Equals(Font) == true)) || Disposing || IsDisposed)
                 return;
 
             lastScaleAsChild = scale;
             if (AutoScaleFont)
             {
-            if (font is ScalingFont explicitFont)
-                explicitFont.Scale(scale);
-            else
-                defaultFont!.Scale(scale);
-            SetFont(font ?? defaultFont);
-        }
+                if (font is ScalingFont explicitFont)
+                    explicitFont.Scale(scale);
+                else
+                    defaultFont!.Scale(scale);
+                SetFont(font ?? defaultFont);
+            }
 
             if (args != null)
                 OnDeviceScaleChanged(args);
@@ -1304,44 +1375,52 @@ namespace KGySoft.WinForms.Forms
 
         private void SetFont(ScalingFont? newFont)
         {
-            if (newFont == null)
+            isChangingFont = true;
+            try
             {
-                base.Font = null!;
-                return;
-            }
-
-            Font oldFont = base.Font;
-
-            // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
-            // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
-            if (Equals(oldFont, newFont.Font))
-            {
-                if (ReferenceEquals(oldFont, newFont.Font))
-                    return;
-
-                // Non-reference equality: we are alright if the old font is not disposed...
-                // ...except in .NET Core 3.0 - .NET 5.0 when using v1 per-monitor DPI awareness, in which case the font does not change the size.
-#if NETCOREAPP && !NET6_0_OR_GREATER
-                if (!oldFont.IsDisposed() && !(isPerMonitorDpiAwarenessV1 && OSHelper.IsWindows && !OSHelper.IsMono))
-#else
-                if (!oldFont.IsDisposed())
-#endif
-                {
-                    return;
-                }
-
-                suppressFontChanged = true;
-                try
+                if (newFont == null)
                 {
                     base.Font = null!;
+                    return;
                 }
-                finally
-                {
-                    suppressFontChanged = false;
-                }
-            }
 
-            base.Font = newFont.Font;
+                Font oldFont = base.Font;
+
+                // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
+                // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
+                if (Equals(oldFont, newFont.Font))
+                {
+                    if (ReferenceEquals(oldFont, newFont.Font))
+                        return;
+
+                    // Non-reference equality: we are alright if the old font is not disposed...
+                    // ...except in .NET Core 3.0 - .NET 5.0 when using v1 per-monitor DPI awareness, in which case the font does not change the size.
+#if NETCOREAPP && !NET6_0_OR_GREATER
+                    if (!oldFont.IsDisposed() && !(isPerMonitorDpiAwarenessV1 && OSHelper.IsWindows && !OSHelper.IsMono))
+#else
+                    if (!oldFont.IsDisposed())
+#endif
+                    {
+                        return;
+                    }
+
+                    suppressFontChanged = true;
+                    try
+                    {
+                        base.Font = null!;
+                    }
+                    finally
+                    {
+                        suppressFontChanged = false;
+                    }
+                }
+
+                base.Font = newFont.Font;
+            }
+            finally
+            {
+                isChangingFont = false;
+            }
         }
 
         #endregion

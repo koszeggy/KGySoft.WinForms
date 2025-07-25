@@ -412,9 +412,9 @@ namespace KGySoft.WinForms.Controls
             // Setting default font from new parent font without scaling
             if (font == null)
             {
-                PointF topScale = this.GetTopScale();
-                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), topScale);
-                if (this.GetScale() != topScale)
+                PointF scale = this.GetScaleForParentChanged();
+                defaultFont?.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), scale);
+                if (this.GetScale() != scale)
                     lastScale = PointF.Empty;
             }
 
@@ -437,9 +437,8 @@ namespace KGySoft.WinForms.Controls
 #endif
 
             // but if the parent font is changing not because of scaling, then we reset our default font as well
-            Control parent = Parent!;
-            PointF parentScale = parent.GetScale();
-            defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(parent.Font), parentScale);
+            PointF scale = this.GetScaleForParentFontChanged();
+            defaultFont!.ResetFrom(ScaleHelper.GetFontOrDefault(Parent?.Font), scale);
 
             if (font != null)
                 return;
@@ -448,7 +447,7 @@ namespace KGySoft.WinForms.Controls
             SetFont(defaultFont);
 
             // the parent has different scale: invalidating lastScale, so CheckDpiChange will adjust the scale if needed
-            if (this.GetScale() != parentScale)
+            if (this.GetScale() != scale)
                 lastScale = PointF.Empty;
         }
 

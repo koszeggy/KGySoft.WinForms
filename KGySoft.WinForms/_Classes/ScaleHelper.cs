@@ -42,61 +42,61 @@ namespace KGySoft.WinForms
 
             private sealed class FormNativeListener : NativeWindow, IDisposable
             {
-            #region Fields
-
-            private readonly Control childControl;
+                #region Fields
+                
+                private readonly Control childControl;
                 private readonly Form form;
 
-            #endregion
+                #endregion
 
-            #region Constructors
+                #region Constructors
 
                 internal FormNativeListener(Control control, Form form)
-            {
+                {
                     childControl = control;
                     this.form = form;
                     form.HandleCreated += Form_HandleCreated;
                     if (form.IsHandleCreated)
                         AssignHandle(form.Handle);
-            }
+                }
 
-            #endregion
+                #endregion
 
-            #region Methods
+                #region Methods
 
-            #region Public Methods
+                #region Public Methods
 
-            public void Dispose()
-            {
+                public void Dispose()
+                {
                     ReleaseHandle();
                     form.HandleCreated -= Form_HandleCreated;
-            }
+                }
 
-            #endregion
+                #endregion
 
-            #region Protected Methods
+                #region Protected Methods
 
-            protected override void WndProc(ref Message m)
-            {
-                switch (m.Msg)
+                protected override void WndProc(ref Message m)
                 {
+                    switch (m.Msg)
+                    {
                         case Constants.WM_DPICHANGED: // when form is a top-level form
                         case Constants.WM_DPICHANGED_BEFOREPARENT or Constants.WM_DPICHANGED_AFTERPARENT: // when form is an MDI child form
                             if (childControl is IPerMonitorDpiAware dpiAwareControl)
                                 dpiAwareControl.ParentFormDpiChanging();
                             else
                                 childControl.Invalidate();
-                        base.WndProc(ref m);
+                            base.WndProc(ref m);
                             (childControl as IPerMonitorDpiAware)?.ParentFormDpiChanged();
-                        break;
+                            break;
 
-                    default:
-                        base.WndProc(ref m);
-                        break;
+                        default:
+                            base.WndProc(ref m);
+                            break;
+                    }
                 }
-            }
 
-            #endregion
+                #endregion
 
                 #region Event Handlers
 
@@ -175,12 +175,12 @@ namespace KGySoft.WinForms
                         if (c is Form form)
                         {
                             if (form.Parent == null)
-                            topForm = form;
+                                topForm = form;
                             else
                             {
                                 Debug.Assert(childForm == null, "Nested MDI forms are not expected");
                                 childForm = form;
-                        }
+                            }
                         }
 
                         // If we have two forms, it means topForm is and MDI parent form: no need to subscribe its parent change
@@ -201,12 +201,12 @@ namespace KGySoft.WinForms
                 if (topForm != topLevelForm)
                 {
                     ReleaseForm(ref topLevelForm, ref topLevelFormListener);
-                if (topForm != null)
+                    if (topForm != null)
                         topLevelForm = RegisterForm(topForm, ref topLevelFormListener);
-            }
+                }
 
                 if (childForm != mdiChildForm)
-            {
+                {
                     ReleaseForm(ref mdiChildForm, ref mdiChildFormListener);
                     if (childForm != null)
                         mdiChildForm = RegisterForm(childForm, ref mdiChildFormListener);
@@ -225,9 +225,9 @@ namespace KGySoft.WinForms
                 else
                 {
                     // We are here when an IPerMonitorDpiAware implementing control is hosted in a non-BaseForm parent form.
-                // To be able to call the Before/After notifications, we need to hook the form's WndProc. In case of many controls, this can lead to deep call stacks.
+                    // To be able to call the Before/After notifications, we need to hook the form's WndProc. In case of many controls, this can lead to deep call stacks.
                     nativeListener = new FormNativeListener(childControl, form);
-            }
+                }
 
                 return form;
             }
@@ -531,10 +531,10 @@ namespace KGySoft.WinForms
         internal static bool IsParentScalingWhileCreated(this Control control)
         {
             // Skipping if the control is already created (not the handle), or when the handle of top-level control is not created yet.
-            if (control.Created)
+            if (control.Created || control is Form)
                 return false;
-            Control? top = control.TopLevelControl;
-            if (top?.IsHandleCreated != true)
+            Control? parentForm = control.FindForm();
+            if (parentForm?.IsHandleCreated != true)
                 return false;
 
             int deviceDpi = control.DeviceDpi;
@@ -542,6 +542,10 @@ namespace KGySoft.WinForms
             {
                 if (c.DeviceDpi != deviceDpi)
                     return true;
+
+                // stopping at the first Form parent, because an already existing MDI parent would corrupt the result
+                if (c == parentForm)
+                    break;
             }
 
             return false;
@@ -552,13 +556,41 @@ namespace KGySoft.WinForms
         /// Gets the scale of the top-level control or the parent control if there is no top-level control.
         /// Should be used to determine the effective scale of the parent font from OnParentChanged.
         /// </summary>
-        internal static PointF GetTopScale(this Control control)
+        internal static PointF GetScaleForParentChanged(this Control control)
         {
             if (!isProcessPerMonitorAware)
                 return systemScale;
 
             // ISSUE: Typically in .NET 7+, the Parent.Font in OnParentChanged can be a scaled font with an unmatching DeviceDpi (and GetScale). Hence, using the top level control's scaling if possible.
             return (control.TopLevelControl ?? control.Parent ?? control).GetScale();
+        }
+
+        internal static PointF GetScaleForParentFontChanged(this Control control)
+        {
+            if (!isProcessPerMonitorAware)
+                return systemScale;
+
+            // ISSUE: We need to find the root control that triggered the font change and use the scale of that control.
+            // The root cause can be either a font change or a parent change.
+            Control? parent = control.Parent;
+            if (parent == null)
+                return control.GetScale();
+
+            // For now, we only check if an IObservableParent is adding a control, and stop crawling up if a parent has a different font.
+            Font parentFont = parent.Font;
+            for (Control? c = parent; c != null; c = c.Parent)
+            {
+                if (c is IObservableParent op && (op.IsAddingControl || op.IsChangingFont))
+                    return c.GetScale();
+
+                // Important: we only know that we should stop the search when a different font is found, but cannot be sure
+                // that we already passed the triggering control (e.g. if it resets default font), so not returning c.GetScale() here.
+                if (!parentFont.Equals(c.Font))
+                    break;
+            }
+
+            // Here we cannot be sure which parent triggered the font change, so we just return the scale of the direct parent.
+            return parent.GetScale();
         }
 
         #endregion

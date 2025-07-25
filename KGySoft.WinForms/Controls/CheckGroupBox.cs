@@ -21,7 +21,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
-using KGySoft.CoreLibraries;
+
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -40,13 +40,75 @@ namespace KGySoft.WinForms.Controls
     /// <summary>
     /// Represents a <see cref="GroupBox"/> control with a <see cref="CheckBox"/> that can be checked or unchecked to enable or disable the content of the group box.
     /// </summary>
-    public partial class CheckGroupBox : GroupBox, ICustomLocalizable, IToolTipTargetProvider
+    public partial class CheckGroupBox : GroupBox, ICustomLocalizable, IToolTipTargetProvider, IObservableParent
     {
+        #region Nested Classes
+
+        /// <summary>
+        /// Represents a collection of controls contained within a <see cref="CheckGroupBox"/>.
+        /// </summary>
+        protected new class ControlCollection : Control.ControlCollection
+        {
+            #region Fields
+
+            private readonly CheckGroupBox owner;
+
+            #endregion
+
+            #region Constructors
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ControlCollection"/> class with the specified owner.
+            /// </summary>
+            /// <param name="owner">The <see cref="CheckGroupBox"/> that owns this collection.</param>
+            public ControlCollection(CheckGroupBox owner)
+                : base(owner ?? throw new ArgumentNullException(nameof(owner), PublicResources.ArgumentNull))
+            {
+                this.owner = owner;
+            }
+
+            #endregion
+
+            #region Methods
+
+            /// <inheritdoc />
+            public override void Add(Control value)
+            {
+                owner.isAddingControl = true;
+                try
+                {
+                    if (owner.DesignMode || value == owner.checkBox || value == owner.contentPanel
+                        // Linux/Mono workaround: prevent disabling ErrorProvider's user control when the content is disabled
+                        || (!OSHelper.IsWindows || OSHelper.IsMono) && value.GetType().DeclaringType == typeof(ErrorProvider))
+                    {
+                        base.Add(value);
+                    }
+                    else
+                    {
+                        // When not in design mode, adding custom controls to a panel so we can toggle its Enabled with preserving their original state.
+                        // Also, translating the control's location so it appears in the same place as in the designer. Doing it only after initialization is complete,
+                        // because in the designer the child controls' location may be set after adding them to the group box.
+                        owner.contentPanel.Parent ??= owner;
+                        owner.contentPanel.Controls.Add(value);
+                    }
+                }
+                finally
+                {
+                    owner.isAddingControl = false;
+                }
+            }
+
+            #endregion
+        }
+
+        #endregion
+
         #region Fields
 
         private bool isInitialized;
         private bool isRendering;
         private bool changingBaseText;
+        private bool isAddingControl;
 
         private Color explicitForeColor;
 
@@ -66,6 +128,8 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Properties
+        
+        #region Public Properties
 
         /// <summary>
         /// Gets or sets the text of the <see cref="CheckGroupBox"/>. That is, the text of the <see cref="CheckBox"/> control.
@@ -137,6 +201,15 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Explicitly Implemented Interface Properties
+
+        bool IObservableParent.IsAddingControl => isAddingControl;
+        bool IObservableParent.IsChangingFont => false;
+
+        #endregion
+
+        #endregion
+
         #region Constructors
 
         /// <summary>
@@ -160,24 +233,7 @@ namespace KGySoft.WinForms.Controls
         #region Protected Methods
 
         /// <inheritdoc />
-        protected override void OnControlAdded(ControlEventArgs e)
-        {
-            base.OnControlAdded(e);
-            if (DesignMode || e.Control.In(checkBox, contentPanel))
-                return;
-
-            // Linux/Mono workaround: prevent disabling ErrorProvider's user control when the content is disabled
-            if ((!OSHelper.IsWindows || OSHelper.IsMono) && e.Control.GetType().DeclaringType == typeof(ErrorProvider))
-                return;
-
-            // When not in design mode, adding custom controls to a panel so we can toggle its Enabled with preserving their original state.
-            // Also, translating the control's location so it appears in the same place as in the designer. Doing it only after initialization is complete,
-            // because in the designer the child controls' location may be set after adding them to the group box.
-            contentPanel.Parent ??= this;
-            e.Control.Parent = contentPanel;
-            if (isInitialized)
-                e.Control.Location = new Point(e.Control.Left - contentPanel.Left, e.Control.Top - contentPanel.Top);
-        }
+        protected override Control.ControlCollection CreateControlsInstance() => new ControlCollection(this);
 
         /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
