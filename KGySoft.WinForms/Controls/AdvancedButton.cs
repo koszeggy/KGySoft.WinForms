@@ -329,12 +329,11 @@ namespace KGySoft.WinForms.Controls
             set
             {
                 Debug.Assert(AutoScaleFont ^ defaultFont == null);
-                if (ReferenceEquals(base.Font, value))
-                    return;
-
-                ResetSizeCache();
                 if (dpiChangingCount > 0 && AutoScaleFont)
                     return;
+
+                if (!ReferenceEquals(base.Font, value))
+                    ResetSizeCache();
 
                 // resetting the default font; or null, when AutoScaleFont is false
                 if (value is null)
@@ -348,7 +347,7 @@ namespace KGySoft.WinForms.Controls
                     return;
                 }
 
-                // setting a font explicitly
+                // setting a font explicitly - always setting base.Font, even if it is the same as value
                 PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
                 if (font == null)
                     font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
@@ -1228,8 +1227,13 @@ namespace KGySoft.WinForms.Controls
             if (!ignoreCheckImage)
                 CheckImage();
 
-            if (base.FlatStyle == FlatStyle.System && isElevated && base.Image.EqualsByContent(SecurityShieldImage))
-                base.Image = null;
+            if (base.FlatStyle == FlatStyle.System)
+            {
+                if (AutoScaleFont)
+                    SetFont(font ?? defaultFont);
+                if (isElevated && base.Image.EqualsByContent(SecurityShieldImage))
+                    base.Image = null;
+            }
 
             CheckStyles();
             ResetSizeCache();
@@ -1291,32 +1295,38 @@ namespace KGySoft.WinForms.Controls
             ResetSizeCache();
         }
 
-        private void SetFont(ScalingFont? newFont)
+        private void SetFont(ScalingFont? value)
         {
-            if (newFont == null)
+            if (value == null)
             {
                 base.Font = null!;
                 return;
             }
 
+            // explicitly set fonts must be forcibly set in base.Font
+            bool force = ReferenceEquals(font, value) || base.FlatStyle == FlatStyle.System;
             Font oldFont = base.Font;
+            Font newFont = value.Font;
 
             // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
             // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
-            if (Equals(oldFont, newFont.Font))
+            if (Equals(oldFont, newFont))
             {
-                if (ReferenceEquals(oldFont, newFont.Font))
-                    return;
-
-                // Non-reference equality: we are alright if the old font is not disposed...
-                // ...except in .NET Core 3.0 - .NET 5.0 when FlatStyle is System and using v1 per-monitor DPI awareness, in which case the font gets corrupted
-#if NETCOREAPP && !NET6_0_OR_GREATER
-                if (!oldFont.IsDisposed() && !(isPerMonitorDpiAwarenessV1 && base.FlatStyle == FlatStyle.System && OSHelper.IsWindows && !OSHelper.IsMono))
-#else
-                if (!oldFont.IsDisposed())
-#endif
+                if (!force)
                 {
-                    return;
+                    if (ReferenceEquals(oldFont, newFont))
+                        return;
+
+                    // Non-reference equality: we are alright if the old font is not disposed...
+                    // ...except in .NET Core 3.0 - .NET 5.0 when FlatStyle is System and using v1 per-monitor DPI awareness, in which case the font gets corrupted
+#if NETCOREAPP && !NET6_0_OR_GREATER
+                    if (!oldFont.IsDisposed() && !(isPerMonitorDpiAwarenessV1 && base.FlatStyle == FlatStyle.System && OSHelper.IsWindows && !OSHelper.IsMono))
+#else
+                    if (!oldFont.IsDisposed())
+#endif
+                    {
+                        return;
+                    }
                 }
 
                 suppressFontChanged = true;
@@ -1330,7 +1340,7 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            base.Font = newFont.Font;
+            base.Font = newFont;
         }
 
         #endregion

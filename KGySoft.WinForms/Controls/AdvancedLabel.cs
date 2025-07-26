@@ -547,12 +547,11 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             set
             {
                 Debug.Assert(AutoScaleFont ^ defaultFont == null);
-                if (ReferenceEquals(base.Font, value))
-                    return;
-
-                ResetSizeCache();
                 if (dpiChangingCount > 0 && AutoScaleFont)
                     return;
+
+                if (!ReferenceEquals(base.Font, value))
+                    ResetSizeCache();
 
                 // resetting the default font; or null, when AutoScaleFont is false
                 if (value is null)
@@ -566,7 +565,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                     return;
                 }
 
-                // setting a font explicitly
+                // setting a font explicitly - always setting base.Font, even if it is the same as value
                 PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
                 if (font == null)
                     font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
@@ -1157,21 +1156,24 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             SetFont(font ?? defaultFont);
         }
 
-        private void SetFont(ScalingFont? newFont)
+        private void SetFont(ScalingFont? value)
         {
-            if (newFont == null)
+            if (value == null)
             {
                 base.Font = null!;
                 return;
             }
 
+            // explicitly set fonts must be forcibly set in base.Font
+            bool force = ReferenceEquals(font, value);
             Font oldFont = base.Font;
+            Font newFont = value.Font;
 
             // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
             // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
-            if (Equals(oldFont, newFont.Font))
+            if (Equals(oldFont, newFont))
             {
-                if (ReferenceEquals(oldFont, newFont.Font) || !oldFont.IsDisposed())
+                if (!force && (ReferenceEquals(oldFont, newFont) || !oldFont.IsDisposed()))
                     return;
 
                 suppressFontChanged = true;
@@ -1185,7 +1187,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 }
             }
 
-            base.Font = newFont.Font;
+            base.Font = newFont;
         }
 
         private void InvalidateNC()

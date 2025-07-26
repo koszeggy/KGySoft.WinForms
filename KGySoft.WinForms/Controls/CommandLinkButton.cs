@@ -518,15 +518,11 @@ namespace KGySoft.WinForms.Controls
             get => (textFont ?? defaultTextFont).Font;
             set
             {
-                if (ReferenceEquals(textFont?.Font, value))
-                    return;
-                ResetSizeCache();
-
-                // Workaround for .NET Framework 4.7+ behavior when V2 awareness is set both in the app.config and the manifest file:
-                // The base WM_DPICHANGED_BEFOREPARENT handling sets the Font property, in which case we want to avoid setting textFont if it was null.
-                // .NET Core 3.0+ behaves differently: sets the Font only in base and even calls OnFontChanged but does not set the derived property.
                 if (dpiChangingCount > 0 && AutoScaleFont)
                     return;
+
+                if (!ReferenceEquals(textFont?.Font, value))
+                    ResetSizeCache();
 
                 PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
 
@@ -2351,21 +2347,24 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private void SetFont(ScalingFont? newFont)
+        private void SetFont(ScalingFont? value)
         {
-            if (newFont == null)
+            if (value == null)
             {
                 base.Font = null!;
                 return;
             }
 
+            // explicitly set text font must be forcibly set in base.Font
+            bool force = ReferenceEquals(textFont, value);
             Font oldFont = base.Font;
+            Font newFont = value.Font;
 
             // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
             // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
-            if (Equals(oldFont, newFont.Font))
+            if (Equals(oldFont, newFont))
             {
-                if (ReferenceEquals(oldFont, newFont.Font) || !oldFont.IsDisposed())
+                if (!force && (ReferenceEquals(oldFont, newFont) || !oldFont.IsDisposed()))
                     return;
 
                 suppressFontChanged = true;
@@ -2379,7 +2378,7 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            base.Font = newFont.Font;
+            base.Font = newFont;
         }
 
         #endregion

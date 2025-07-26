@@ -418,9 +418,6 @@ namespace KGySoft.WinForms.Controls
             set
             {
                 Debug.Assert(AutoScaleFont ^ defaultFont == null);
-                if (ReferenceEquals(base.Font, value))
-                    return;
-
                 if (dpiChangingCount > 0 && AutoScaleFont)
                     return;
 
@@ -436,7 +433,7 @@ namespace KGySoft.WinForms.Controls
                     return;
                 }
 
-                // setting a font explicitly
+                // setting a font explicitly - always setting base.Font, even if it is the same as value
                 PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
                 if (font == null)
                     font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
@@ -874,6 +871,18 @@ namespace KGySoft.WinForms.Controls
                     CheckDpiChange();
                     return;
 
+                case Constants.WM_DPICHANGED_AFTERPARENT:
+                    dpiChangingCount += 1;
+                    try
+                    {
+                        base.WndProc(ref m);
+                    }
+                    finally
+                    {
+                        dpiChangingCount -= 1;
+                    }
+                    return;
+
                 default:
                     base.WndProc(ref m);
                     return;
@@ -1107,56 +1116,36 @@ namespace KGySoft.WinForms.Controls
             SetFont(font ?? defaultFont);
         }
 
-        private void SetFont(ScalingFont? newFont)
+        private void SetFont(ScalingFont? value)
         {
-            try
+            if (value == null)
             {
-                if (newFont == null)
+                base.Font = null!;
+                return;
+            }
+
+            Font oldFont = base.Font;
+            Font newFont = value.Font;
+
+            // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
+            // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
+            // No optimization with reference equality for the AdvancedComboBox, because it can happen that the displayed font size is different
+            // from the one that the base.Font property returns. Occurs typically in .NET 6+ when handles are created early,
+            // and the system scale wad changed after starting the application.
+            if (Equals(oldFont, newFont))
+            {
+                suppressFontChanged = true;
+                try
                 {
                     base.Font = null!;
-                    return;
                 }
-
-                Font oldFont = base.Font;
-
-                // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
-                // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
-                if (Equals(oldFont, newFont.Font))
+                finally
                 {
-                    if (ReferenceEquals(oldFont, newFont.Font))
-                        return;
-
-                    // Non-reference equality: we are alright if the old font is not disposed...
-                    // ...except in .NET Core 3.0 - .NET 5.0 when using v1 per-monitor DPI awareness, in which case the font gets corrupted in DropDownList mode
-                    // or just does not change the size in other modes.
-#if NETCOREAPP && !NET6_0_OR_GREATER
-                    if (!oldFont.IsDisposed() && !(isPerMonitorDpiAwarenessV1 && OSHelper.IsWindows && !OSHelper.IsMono))
-#else
-                    if (!oldFont.IsDisposed())
-#endif
-                    {
-                        return;
-                    }
-
-                    suppressFontChanged = true;
-                    try
-                    {
-                        base.Font = null!;
-                    }
-                    finally
-                    {
-                        suppressFontChanged = false;
-                    }
+                    suppressFontChanged = false;
                 }
+            }
 
-                base.Font = newFont.Font;
-            }
-            finally
-            {
-                // Workaround: After font change, the text gets selected even if the control is not focused.
-                if (IsHandleCreated && DropDownStyle != ComboBoxStyle.DropDownList && !Focused)
-                    SelectionLength = 0;
-            }
+            base.Font = newFont;
         }
 
         #endregion

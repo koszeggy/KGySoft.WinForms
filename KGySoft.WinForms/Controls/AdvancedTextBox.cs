@@ -254,9 +254,6 @@ namespace KGySoft.WinForms.Controls
             set
             {
                 Debug.Assert(AutoScaleFont ^ defaultFont == null);
-                if (ReferenceEquals(base.Font, value))
-                    return;
-
                 if (dpiChangingCount > 0 && AutoScaleFont)
                     return;
 
@@ -272,7 +269,7 @@ namespace KGySoft.WinForms.Controls
                     return;
                 }
 
-                // setting a font explicitly
+                // setting a font explicitly - always setting base.Font, even if it is the same as value
                 PointF scale = AutoScaleFont ? this.GetScale() : ScaleHelper.SystemScale;
                 if (font == null)
                     font = new ScalingFont(ScaleHelper.GetFontOrDefault(value), scale);
@@ -393,6 +390,18 @@ namespace KGySoft.WinForms.Controls
                     }
 
                     CheckDpiChange();
+                    return;
+
+                case Constants.WM_DPICHANGED_AFTERPARENT:
+                    dpiChangingCount += 1;
+                    try
+                    {
+                        base.WndProc(ref m);
+                    }
+                    finally
+                    {
+                        dpiChangingCount -= 1;
+                    }
                     return;
 
                 default:
@@ -579,34 +588,24 @@ namespace KGySoft.WinForms.Controls
             SetFont(font ?? defaultFont);
         }
 
-        private void SetFont(ScalingFont? newFont)
+        private void SetFont(ScalingFont? value)
         {
-            if (newFont == null)
+            if (value == null)
             {
                 base.Font = null!;
                 return;
             }
 
             Font oldFont = base.Font;
+            Font newFont = value.Font;
 
             // If base.Font equals to newFont.Font, then setting the new one does nothing. This matters if the old font is already
             // disposed or when the control is in a broken state so it displays some default font. In such cases we must set null first.
-            if (Equals(oldFont, newFont.Font))
+            // No optimization with reference equality for the AdvancedTextBox, because it can happen that the displayed font size is different
+            // from the one that the base.Font property returns. Occurs typically in .NET 6/7/8 if Form.StartPosition is WindowsDefaultLocation
+            // and the form is opened on a different screen with a different DPI than the owner form's screen.
+            if (Equals(oldFont, newFont))
             {
-                if (ReferenceEquals(oldFont, newFont.Font))
-                    return;
-
-                // Non-reference equality: we are alright if the old font is not disposed...
-                // ...except in .NET Core 3.0 - .NET 5.0 when using v1 per-monitor DPI awareness, in which case the font does not change the size.
-#if NETCOREAPP && !NET6_0_OR_GREATER
-                if (!oldFont.IsDisposed() && !(isPerMonitorDpiAwarenessV1 && OSHelper.IsWindows && !OSHelper.IsMono))
-#else
-                if (!oldFont.IsDisposed())
-#endif
-                {
-                    return;
-                }
-
                 suppressFontChanged = true;
                 try
                 {
@@ -618,7 +617,7 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            base.Font = newFont.Font;
+            base.Font = newFont;
         }
 
         #endregion
