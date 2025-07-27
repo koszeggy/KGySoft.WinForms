@@ -814,15 +814,25 @@ namespace KGySoft.WinForms.Forms
         {
             bool loaded = isLoaded;
             base.OnLoad(e);
-            isLoaded = true;
+            if (loaded)
+                return;
 
-            if (!loaded)
+            isLoaded = true;
+#if NETFRAMEWORK
+            // Possible bug in .NET Framework: if the StartPosition is WindowsDefaultBounds or WindowsDefaultLocation,
+            // the form may have an unmatching scale from its screen, which fixes itself when moving or resizing the form for the first time.
+            if (IsHandleCreated && OSHelper.IsWindows81OrLater && StartPosition is FormStartPosition.WindowsDefaultBounds or FormStartPosition.WindowsDefaultLocation
+                && DeviceScale != Screen.FromRectangle(Bounds).GetScale())
             {
-#pragma warning disable CS0618 // Type or member is obsolete
-                PerformTranslate(this);
-#pragma warning restore CS0618 // Type or member is obsolete
-                ApplyResources();
+                // Bounds = Bounds and SetBoundsCore are "too smart" and recognize that there is no change. SWP_DRAWFRAME is needed to force the change.
+                User32.SetWindowPos(Handle, IntPtr.Zero, Left, Top, Width, Height, Constants.SWP_NOZORDER | Constants.SWP_DRAWFRAME);
             }
+#endif
+
+#pragma warning disable CS0618 // Type or member is obsolete
+            PerformTranslate(this);
+#pragma warning restore CS0618 // Type or member is obsolete
+            ApplyResources();
         }
 
         /// <inheritdoc />

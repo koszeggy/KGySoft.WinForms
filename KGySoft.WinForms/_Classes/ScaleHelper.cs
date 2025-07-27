@@ -458,6 +458,23 @@ namespace KGySoft.WinForms
             return new PointF(graphics.DpiX / DefaultDpi, graphics.DpiY / DefaultDpi);
         }
 
+        public static PointF GetScale(this Screen screen)
+        {
+            if (screen == null!)
+                ThrowNull(nameof(screen));
+
+            if (!IsThreadPerMonitorAware)
+                return systemScale;
+
+            // Unfortunately screen.Handle (HMONITOR) is not exposed publicly so we retrieve it by WinAPI.
+            var rect = new RECT(screen.Bounds);
+            IntPtr hMonitor = User32.MonitorFromRect(ref rect, Constants.MONITOR_DEFAULTTONEAREST);
+            if (ShCore.TryGetDpiForMonitor(hMonitor, MONITOR_DPI_TYPE.MDT_EFFECTIVE_DPI, out uint dpiX, out uint dpiY))
+                return new PointF(dpiX / DefaultDpi, dpiY / DefaultDpi);
+
+            return systemScale;
+        }
+
         public static Size ScaleSize(this Control control, Size size) => size.Scale(control.GetScale());
         public static int ScaleWidth(this Control control, int width) => width.Scale(control.GetScale().X);
         public static int ScaleHeight(this Control control, int height) => height.Scale(control.GetScale().Y);
