@@ -1221,6 +1221,11 @@ namespace KGySoft.WinForms.Forms
                     }
                     return;
 
+                case Constants.WM_SETICON when m.WParam is Constants.ICON_SMALL && smallIcon != null && m.LParam != smallIcon.Handle:
+                    m.LParam = smallIcon.Handle;
+                    base.WndProc(ref m);
+                    return;
+
                 default:
                     base.WndProc(ref m);
                     return;
@@ -1390,8 +1395,8 @@ namespace KGySoft.WinForms.Forms
                     return;
                 }
 
-                // explicitly set fonts must be forcibly set in base.Font
-                bool force = ReferenceEquals(font, value);
+                // explicitly set fonts must be forcibly set in base.Font for non-top-level forms
+                bool force = IsMdiChild && ReferenceEquals(font, value);
                 Font oldFont = base.Font;
                 Font newFont = value.Font;
 
