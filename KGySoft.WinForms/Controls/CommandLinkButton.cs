@@ -226,11 +226,11 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether fading animations are enabled for the control.
-        /// Animations work in Windows Vista and above, with non-classic themes.
+        /// Animations work on Windows Vista and above, with non-classic themes.
         /// </summary>
         [Category("CommandLinkButton")]
         [DefaultValue(true)]
-        [Description("Gets or sets whether fading animations are enabled for the control. Animations work in Windows Vista and above, with non-classic themes.")]
+        [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above, with non-classic themes.")]
         public bool FadingAnimationsEnabled
         {
             get => fadingAnimationsEnabled;
@@ -1422,7 +1422,7 @@ namespace KGySoft.WinForms.Controls
             {
                 // We tolerate one exception if we can recover from it in the next paint.
                 // But if exceptions are thrown in two consecutive paints, we let the second one propagate.
-                // A recoverable exception may occur in Windows 7 when switching from Aero to classic or high contrast theme,
+                // A recoverable exception may occur on Windows 7 when switching from Aero to classic or high contrast theme,
                 // when visual styles are turned off in the middle of the painting session.
                 if (hasPaintError)
                     throw;
@@ -1992,7 +1992,7 @@ namespace KGySoft.WinForms.Controls
                 bool isRightToLeft = RightToLeft == RightToLeft.Yes;
                 bool isNonNativeSize = bounds.Size != VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, true);
                 bool isCustomDrawnArrow = isSimpleArrow
-                    && (VisualStyleHelper.HighContrast // high contrast with visual styles in Windows 10 or later: always drawing the arrow manually so it matches the theme colors
+                    && (VisualStyleHelper.HighContrast // high contrast with visual styles on Windows 10 or later: always drawing the arrow manually so it matches the theme colors
                         || isNonNativeSize
                         || !state.Enabled && DisabledForeColor != ThemedDisabledColor
                         || state.Enabled && (ForeColor != ThemedForeColor || HighlightTextColor != ThemedHoveredColor || PressedTextColor != ThemedPressedColor));

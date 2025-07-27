@@ -280,11 +280,11 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether fading animations are enabled for the control.
-        /// Animations work in Windows Vista and above, with non-classic themes.
+        /// Animations work on Windows Vista and above, with non-classic themes.
         /// </summary>
         [Category("AdvancedCheckBox")]
         [DefaultValue(true)]
-        [Description("Gets or sets whether fading animations are enabled for the control. Animations work in Windows Vista and above, with non-classic themes.")]
+        [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above, with non-classic themes.")]
         public bool FadingAnimationsEnabled
         {
             get => fadingAnimationsEnabled;

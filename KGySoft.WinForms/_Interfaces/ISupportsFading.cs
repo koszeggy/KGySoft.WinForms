@@ -41,7 +41,7 @@ namespace KGySoft.WinForms
 
         /// <summary>
         /// Gets or sets whether fading animations are enabled for the control.
-        /// Animations work in Windows Vista and above, with non-classic themes.
+        /// Animations work on Windows Vista and above, with non-classic themes.
         /// </summary>
         bool FadingAnimationsEnabled { get; set; }
 
