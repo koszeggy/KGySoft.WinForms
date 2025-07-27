@@ -161,20 +161,6 @@ namespace KGySoft.WinForms.Controls
             return scaledFont;
         }
 
-        internal void Reset()
-        {
-            bool areSame = ReferenceEquals(systemScaleFont, scaledFont);
-            var newSystemFont = CloneWithPoints(systemScaleFont);
-            var newScaledFont = areSame ? newSystemFont : CloneWithPoints(scaledFont);
-            if (disposeSystemScaleFont)
-                systemScaleFont.Dispose();
-            if (disposeScaledFont && !areSame)
-                scaledFont.Dispose();
-
-            systemScaleFont = newSystemFont;
-            scaledFont = newScaledFont;
-        }
-
         internal void ResetFrom(Font newFont, PointF newScale)
         {
             if (ReferenceEquals(newFont, scaledFont) && scale == newScale)
@@ -220,8 +206,8 @@ namespace KGySoft.WinForms.Controls
 
         private void EnsureValid()
         {
-            // Controls may dispose the even the explicitly set font when performing a scaling operation.
-            // Happens often in older frameworks, especially with per-monitor DPI awareness level V1.
+            // Controls may dispose even the explicitly set fonts when performing a scaling operation.
+            // Happens often in older frameworks, especially with per-monitor DPI awareness.
             if (!scaledFont.IsDisposed())
                 return;
 

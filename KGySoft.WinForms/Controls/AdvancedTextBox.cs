@@ -516,30 +516,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Methods
 
-        private void CheckStyles()
-        {
-            SetStyle(ControlStyles.UserPaint, !Enabled && DisabledForeColor != defaultDisabledForeColor);
-            if (Enabled)
-            {
-                // Without this font text may change to weird style when control is re-enabled.
-                // Occurs when some property changed (e.g. RightToLeft) while the control was disabled.
-                // ScalingFont.Reset is used to clone the original font; otherwise, if any auto-rescale occurred by the system previously,
-                // nullifying the Font property would dispose the original font, and then setting it back would throw an exception.
-                var previousFont = new ScalingFont(base.Font, ScaleHelper.SystemScale);
-                previousFont.Reset();
-                suppressFontChanged = true;
-                try
-                {
-                    base.Font = null!;
-                }
-                finally
-                {
-                    suppressFontChanged = false;
-                }
-
-                base.Font = previousFont.Font;
-            }
-        }
+        private void CheckStyles() => SetStyle(ControlStyles.UserPaint, !Enabled && DisabledForeColor != defaultDisabledForeColor);
 
         private int GetFirstVisibleLine() => User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, IntPtr.Zero, IntPtr.Zero).ToInt32();
 

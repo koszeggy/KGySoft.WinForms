@@ -122,6 +122,7 @@ namespace KGySoft.WinForms.Controls
         private bool isElevated;
         private bool useDefaultGlyph = true;
         private bool isImageUpToDate = true;
+        private bool hasPaintError;
         private int dpiChangingCount;
         //private bool isLoaded; // see the commented OnCreateControl
         private string? description;
@@ -1415,11 +1416,17 @@ namespace KGySoft.WinForms.Controls
             {
                 fadingPainter.State ??= GetAppearance();
                 fadingPainter.Paint(e);
+                hasPaintError = false;
             }
             catch (Exception ex) when (!ex.IsCritical())
             {
-                // May occur in Windows 7 when switching from Aero to classic or high contrast theme,
+                // We tolerate one exception if we can recover from it in the next paint.
+                // But if exceptions are thrown in two consecutive paints, we let the second one propagate.
+                // A recoverable exception may occur in Windows 7 when switching from Aero to classic or high contrast theme,
                 // when visual styles are turned off in the middle of the painting session.
+                if (hasPaintError)
+                    throw;
+                hasPaintError = true;
                 ResetCaches();
                 CheckDpiChange();
                 Invalidate();

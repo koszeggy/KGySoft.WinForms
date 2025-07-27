@@ -80,6 +80,7 @@ namespace KGySoft.WinForms.Controls
         private bool isElevated;
         private bool isImageUpToDate = true;
         private bool isAlternativeDefaultImage;
+        private bool hasPaintError;
         private Image? currentImage; // the actual displayed image, including the shield icon when base.Image is null
         private FlatStyle lastFlatStyle = FlatStyle.Standard; // the explicitly set or the detected flat style changed in base
         private FlatStyle reportedFlatStyle = FlatStyle.Standard; // the flat style that is reported by the control (can be different when base does not support System)
@@ -826,15 +827,18 @@ namespace KGySoft.WinForms.Controls
             {
                 fadingPainter.State ??= GetAppearance();
                 fadingPainter.Paint(e);
+                hasPaintError = false;
             }
             catch (Exception ex) when (!ex.IsCritical())
             {
+                // We tolerate one exception if we can recover from it in the next paint. May occur on Windows 7 when the theme is changed.
+                // But if exceptions are thrown in two consecutive paints, we let the second one propagate.
+                if (hasPaintError)
+                    throw;
+                hasPaintError = true;
                 ResetScale();
-                font?.Reset();
-                defaultFont?.Reset();
                 CheckDpiChange();
-                if (AutoScaleFont)
-                    SetFont(font ?? defaultFont);
+                Invalidate();
             }
         }
 

@@ -93,6 +93,7 @@ namespace KGySoft.WinForms.Controls
         private bool left;
         private bool maskPaint;
         private bool entered;
+        private bool hasPaintError;
 
         private bool suppressFontChanged;
         private bool autoScaleFont = true;
@@ -612,15 +613,18 @@ namespace KGySoft.WinForms.Controls
             {
                 fadingPainter.State ??= GetAppearance();
                 fadingPainter.Paint(e);
+                hasPaintError = false;
             }
             catch (Exception ex) when (!ex.IsCritical())
             {
+                // We tolerate one exception if we can recover from it in the next paint.
+                // But if exceptions are thrown in two consecutive paints, we let the second one propagate.
+                if (hasPaintError)
+                    throw;
+                hasPaintError = true;
                 lastScale = PointF.Empty;
-                font?.Reset();
-                defaultFont?.Reset();
                 CheckDpiChange();
-                if (AutoScaleFont)
-                    SetFont(font ?? defaultFont);
+                Invalidate();
             }
         }
 
