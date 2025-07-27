@@ -161,6 +161,7 @@
             this.IsMdiContainer = true;
             this.MainMenuStrip = this.msMenu;
             this.Name = "frmMdiDemo";
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterParent;
             this.Text = "MDI Application Demo";
             this.gbLog.ResumeLayout(false);
             this.gbLog.PerformLayout();

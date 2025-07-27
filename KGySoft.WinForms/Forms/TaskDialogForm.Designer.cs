@@ -400,6 +400,7 @@ namespace KGySoft.WinForms.Forms
             this.MaximizeBox = false;
             this.Name = "TaskDialogForm";
             this.RightToLeftLayout = true;
+            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "TaskDialogForm";
             this.pnlMain.ResumeLayout(false);
             this.pnlMain.PerformLayout();

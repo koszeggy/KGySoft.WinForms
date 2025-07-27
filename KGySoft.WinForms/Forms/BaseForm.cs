@@ -690,7 +690,6 @@ namespace KGySoft.WinForms.Forms
         public BaseForm()
         {
             invoker = new InvokeMarshaller(this);
-            StartPosition = FormStartPosition.CenterScreen; // kept for compatibility, CenterParent would actually be better
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             SetFont(defaultFont);
             this.RegisterPerMonitorAwarenessNotifications();

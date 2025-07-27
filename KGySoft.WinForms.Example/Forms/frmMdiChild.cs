@@ -41,7 +41,6 @@ namespace KGySoft.WinForms.Example.Forms
         public frmMdiChild()
         {
             InitializeComponent();
-            StartPosition = FormStartPosition.WindowsDefaultLocation; // because the base default is CenterParent, which would open the children on top of each other
             msMenu.Visible = false; // to show only the merged menu in the MDI parent
             InitCommandBindings();
         }

@@ -200,6 +200,8 @@
   ! The CalledMdiChildClosed event is now obsolete. Use OwnedMdiChildClosed instead.
   ! The OnCalledMdiChildClosed method is now obsolete. Use OnOwnedMdiChildClosed instead.
   ! The PaintMdiClientArea event is now obsolete. Use the new MdiClient property instead.
+  ! The default value of StartPosition been changed back to WindowsDefaultLocation to match with regular Form. The
+    previous default value was CenterScreen.
   + New MdiClient, OwnedMdiChildren, SuspendingMdiChild properties
   + New ToolTip property
   + Event subscriptions to self events are automatically removed when the form is disposed.
@@ -222,6 +224,8 @@
   ! The protected btnOk, btnCancel and pnlButtons fields have been replaced by read-only properties. The original
     members are still available, but they have been concealed by the EditorBrowsableState.Never attribute.
   ! The type of the pnlButtons member has been changed to OkCancelButtons (used to be TableLayoutPanel).
+  ! The default value of StartPosition been changed back to WindowsDefaultLocation to match with regular Form. The
+    previous default value was CenterScreen.
   + New ShowOKButton, ShowCancelButton and ShowApplyButton properties
 ! Dialogs class:
   ! The UseAdvancedDialogs property has been made obsolete. Use the new UseTaskDialogs property instead.
