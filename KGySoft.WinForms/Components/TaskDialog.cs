@@ -37,11 +37,20 @@ namespace KGySoft.WinForms.Components
     #endregion
 
     /// <summary>
-    /// Represents a task dialog window that is able to display regular buttons, Vista-like command options,
-    /// radio buttons and progress bar. Can work in compatibility mode so dialog can be use even with Windows XP or when visual styles are not available.
-    /// <note><see cref="TaskDialog"/> implements <see cref="IDisposable"/>. When task a dialog is disposed, it frees
-    /// every event subscriptions so it is not needed to unsubscribe events explicitly.</note>
+    /// Represents a task dialog window that is able to display regular buttons, Vista-like command links,
+    /// radio buttons and progress bar. Can work in compatibility mode so the dialog can be used even with Windows XP or when visual styles are not available.
     /// </summary>
+    /// <remarks>
+    /// <note type="warning">.NET 5 also introduced task dialogs, so when targeting .NET 5 or later, referencing <see cref="TaskDialog"/>, <see cref="TaskDialogControl"/>,
+    /// <see cref="TaskDialogButton"/> and <see cref="TaskDialogRadioButton"/> button classes may require to use fully qualified names or aliases
+    /// like <c>using TaskDialog = KGySoft.WinForms.Components.TaskDialog;</c> to avoid ambiguity with the recently added WinForms classes.
+    /// Please also note that the <see cref="System.Windows.Forms.TaskDialog">System.Windows.Forms.TaskDialog</see> cannot be used on Windows XP, on Linux/Mono, or when visual styles are not enabled.</note>
+    /// <note>But you might want to choose the KGy SOFT version even when running on Windows Vista or later with visual styles enabled for the additional features
+    /// like custom images on the buttons and command links. If you set <see cref="ForceCompatibilityMode"/> to <see langword="true"/>, then always the alternative implementation
+    /// is used, allowing some small improvements to the native version such as tool tips for regular buttons and radio buttons, more detailed info when copying the
+    /// content to the clipboard by <c>Ctrl+C</c>, fixing possible color issues in high contrast mode, etc.</note>
+    /// </remarks>
+    /// <example>TODO</example>
     public sealed class TaskDialog : IWin32Window, IDisposable
     {
         #region Constants
