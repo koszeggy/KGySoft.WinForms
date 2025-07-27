@@ -31,7 +31,7 @@
             this.msMenu = new System.Windows.Forms.MenuStrip();
             this.miChildMenu = new System.Windows.Forms.ToolStripMenuItem();
             this.miOpenChildNormally = new System.Windows.Forms.ToolStripMenuItem();
-            this.miOpenChildAsDialog = new System.Windows.Forms.ToolStripMenuItem();
+            this.miOpenChildWithSuspendingParent = new System.Windows.Forms.ToolStripMenuItem();
             this.lblStatus = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.miCloseOwnedChildrenNow = new System.Windows.Forms.ToolStripMenuItem();
             this.miCloseOwnedChildrenWhenClosed = new System.Windows.Forms.ToolStripMenuItem();
@@ -53,7 +53,7 @@
             this.miChildMenu.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Text;
             this.miChildMenu.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
             this.miOpenChildNormally,
-            this.miOpenChildAsDialog,
+            this.miOpenChildWithSuspendingParent,
             this.toolStripMenuItem1,
             this.miCloseOwnedChildrenWhenClosed,
             this.miCloseOwnedChildrenNow});
@@ -68,11 +68,11 @@
             this.miOpenChildNormally.Size = new System.Drawing.Size(265, 22);
             this.miOpenChildNormally.Text = "Open Child Normally";
             // 
-            // miOpenChildAsDialog
+            // miOpenChildWithSuspendingParent
             // 
-            this.miOpenChildAsDialog.Name = "miOpenChildAsDialog";
-            this.miOpenChildAsDialog.Size = new System.Drawing.Size(265, 22);
-            this.miOpenChildAsDialog.Text = "Open Child as Dialog";
+            this.miOpenChildWithSuspendingParent.Name = "miOpenChildWithSuspendingParent";
+            this.miOpenChildWithSuspendingParent.Size = new System.Drawing.Size(265, 22);
+            this.miOpenChildWithSuspendingParent.Text = "Open Child with Suspending Parent";
             // 
             // lblStatus
             // 
@@ -108,7 +108,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(241, 103);
+            this.ClientSize = new System.Drawing.Size(275, 100);
             this.Controls.Add(this.lblStatus);
             this.Controls.Add(this.msMenu);
             this.MainMenuStrip = this.msMenu;
@@ -126,7 +126,7 @@
         private System.Windows.Forms.MenuStrip msMenu;
         private System.Windows.Forms.ToolStripMenuItem miChildMenu;
         private System.Windows.Forms.ToolStripMenuItem miOpenChildNormally;
-        private System.Windows.Forms.ToolStripMenuItem miOpenChildAsDialog;
+        private System.Windows.Forms.ToolStripMenuItem miOpenChildWithSuspendingParent;
         private WinForms.Controls.AdvancedLabel lblStatus;
         private System.Windows.Forms.ToolStripSeparator toolStripMenuItem1;
         private System.Windows.Forms.ToolStripMenuItem miCloseOwnedChildrenNow;
