@@ -49,14 +49,14 @@
             this.advancedCheckBox1 = new KGySoft.WinForms.Controls.AdvancedCheckBox();
             this.label1 = new System.Windows.Forms.Label();
             this.advancedLabel1 = new KGySoft.WinForms.Controls.AdvancedLabel();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.txtLog = new KGySoft.WinForms.Controls.AdvancedTextBox();
             this.pnlTestArea.SuspendLayout();
             this.advancedPanel1.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlTestArea
             // 
-            this.pnlTestArea.Controls.Add(this.textBox1);
+            this.pnlTestArea.Controls.Add(this.txtLog);
             this.pnlTestArea.Controls.Add(this.advancedPanel1);
             this.pnlTestArea.Size = new System.Drawing.Size(421, 439);
             // 
@@ -413,14 +413,14 @@
             // 
             // textBox1
             // 
-            this.textBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.textBox1.Location = new System.Drawing.Point(0, 323);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.ScrollBars = System.Windows.Forms.ScrollBars.Both;
-            this.textBox1.Size = new System.Drawing.Size(421, 116);
-            this.textBox1.TabIndex = 1;
-            this.textBox1.WordWrap = false;
+            this.txtLog.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txtLog.Location = new System.Drawing.Point(0, 323);
+            this.txtLog.Multiline = true;
+            this.txtLog.Name = "txtLog";
+            this.txtLog.ScrollBars = System.Windows.Forms.ScrollBars.Both;
+            this.txtLog.Size = new System.Drawing.Size(421, 116);
+            this.txtLog.TabIndex = 1;
+            this.txtLog.WordWrap = false;
             // 
             // MiscTest
             // 
@@ -446,7 +446,7 @@
         private KGySoft.WinForms.Controls.AdvancedCheckBox advancedCheckBox1;
         private System.Windows.Forms.Label label1;
         private KGySoft.WinForms.Controls.AdvancedLabel advancedLabel1;
-        private System.Windows.Forms.TextBox textBox1;
+        private KGySoft.WinForms.Controls.AdvancedTextBox txtLog;
         private System.Windows.Forms.Button button1;
         private KGySoft.WinForms.Controls.AdvancedTextBox advancedTextBox1;
         private System.Windows.Forms.TextBox textBox2;

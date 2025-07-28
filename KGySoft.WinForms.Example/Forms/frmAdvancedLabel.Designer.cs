@@ -87,14 +87,12 @@
             // 
             // groupBox1
             // 
-            this.groupBox1.AutoSize = true;
             this.groupBox1.Controls.Add(this.advancedLabel1);
             this.groupBox1.Controls.Add(this.label1);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(0, 27);
-            this.groupBox1.MinimumSize = new System.Drawing.Size(0, 100);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(450, 100);
+            this.groupBox1.Size = new System.Drawing.Size(450, 80);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "AutoSize";
@@ -356,6 +354,7 @@
             // linkLabel1
             // 
             this.linkLabel1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.linkLabel1.LinkArea = new System.Windows.Forms.LinkArea(28, 8);
             this.linkLabel1.Location = new System.Drawing.Point(3, 46);
             this.linkLabel1.Name = "linkLabel1";
             this.linkLabel1.Size = new System.Drawing.Size(444, 51);
@@ -407,13 +406,13 @@
             this.label5.Name = "label5";
             this.label5.Size = new System.Drawing.Size(203, 13);
             this.label5.TabIndex = 4;
-            this.label5.Text = "Disabled Label: Its disabled color is static.";
+            this.label5.Text = "Disabled Label: Its disabled color is based on the back color.";
             // 
             // frmAdvancedLabel
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(668, 534);
+            this.ClientSize = new System.Drawing.Size(668, 520);
             this.Name = "frmAdvancedLabel";
             this.Text = "frmAdvancedLabel";
             this.pnlTestArea.ResumeLayout(false);

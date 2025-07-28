@@ -86,8 +86,8 @@
             this.radioButton1.Name = "radioButton1";
             this.radioButton1.Size = new System.Drawing.Size(399, 17);
             this.radioButton1.TabIndex = 0;
-            this.radioButton1.Text = "Regular radioButton has similar auto sizing problem as Label: it simply does not " +
-    "wraps when docked (unless Dock=Fill).";
+            this.radioButton1.Text = "Regular RadioButton has similar auto sizing problem as Label: it simply does not " +
+    "wrap when docked (unless Dock is Fill).";
             this.radioButton1.UseVisualStyleBackColor = false;
             // 
             // groupBox1
@@ -97,7 +97,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(0, 28);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(405, 100);
+            this.groupBox1.Size = new System.Drawing.Size(405, 80);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "AutoSize";

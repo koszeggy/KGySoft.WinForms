@@ -87,7 +87,7 @@
             this.checkBox1.Size = new System.Drawing.Size(387, 17);
             this.checkBox1.TabIndex = 0;
             this.checkBox1.Text = "Regular CheckBox has similar auto sizing problem as Label: it simply does not wra" +
-    "ps when docked (unless Dock=Fill).";
+    "p when docked (unless Dock is Fill).";
             this.checkBox1.UseVisualStyleBackColor = false;
             // 
             // groupBox1
@@ -97,7 +97,7 @@
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
             this.groupBox1.Location = new System.Drawing.Point(0, 28);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(393, 100);
+            this.groupBox1.Size = new System.Drawing.Size(393, 80);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
             this.groupBox1.Text = "AutoSize";

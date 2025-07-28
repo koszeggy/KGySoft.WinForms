@@ -88,7 +88,7 @@
             this.gbTextBox.Location = new System.Drawing.Point(0, 0);
             this.gbTextBox.Name = "gbTextBox";
             this.gbTextBox.Size = new System.Drawing.Size(309, 174);
-            this.gbTextBox.TabIndex = 3;
+            this.gbTextBox.TabIndex = 1;
             this.gbTextBox.TabStop = false;
             this.gbTextBox.Text = "TextBox (uncheck to test disabled colors)";
             // 
@@ -97,7 +97,7 @@
             this.advancedTextBox4.Location = new System.Drawing.Point(189, 91);
             this.advancedTextBox4.Name = "advancedTextBox4";
             this.advancedTextBox4.Size = new System.Drawing.Size(100, 20);
-            this.advancedTextBox4.TabIndex = 16;
+            this.advancedTextBox4.TabIndex = 6;
             this.advancedTextBox4.Text = "Text";
             this.advancedTextBox4.UseSystemPasswordChar = true;
             // 
@@ -106,7 +106,7 @@
             this.textBox4.Location = new System.Drawing.Point(72, 91);
             this.textBox4.Name = "textBox4";
             this.textBox4.Size = new System.Drawing.Size(100, 20);
-            this.textBox4.TabIndex = 15;
+            this.textBox4.TabIndex = 2;
             this.textBox4.Text = "Text";
             this.textBox4.UseSystemPasswordChar = true;
             // 
@@ -125,7 +125,7 @@
             this.advancedTextBox3.Multiline = true;
             this.advancedTextBox3.Name = "advancedTextBox3";
             this.advancedTextBox3.Size = new System.Drawing.Size(100, 47);
-            this.advancedTextBox3.TabIndex = 13;
+            this.advancedTextBox3.TabIndex = 7;
             this.advancedTextBox3.Text = "Text";
             // 
             // textBox3
@@ -134,7 +134,7 @@
             this.textBox3.Multiline = true;
             this.textBox3.Name = "textBox3";
             this.textBox3.Size = new System.Drawing.Size(100, 47);
-            this.textBox3.TabIndex = 12;
+            this.textBox3.TabIndex = 3;
             this.textBox3.Text = "Text";
             // 
             // label4
@@ -152,7 +152,7 @@
             this.advancedTextBox2.Name = "advancedTextBox2";
             this.advancedTextBox2.ReadOnly = true;
             this.advancedTextBox2.Size = new System.Drawing.Size(100, 20);
-            this.advancedTextBox2.TabIndex = 8;
+            this.advancedTextBox2.TabIndex = 5;
             this.advancedTextBox2.Text = "Text";
             // 
             // advancedTextBox1
@@ -160,7 +160,7 @@
             this.advancedTextBox1.Location = new System.Drawing.Point(189, 37);
             this.advancedTextBox1.Name = "advancedTextBox1";
             this.advancedTextBox1.Size = new System.Drawing.Size(100, 20);
-            this.advancedTextBox1.TabIndex = 7;
+            this.advancedTextBox1.TabIndex = 4;
             this.advancedTextBox1.Text = "Text";
             // 
             // textBox2
@@ -169,7 +169,7 @@
             this.textBox2.Name = "textBox2";
             this.textBox2.ReadOnly = true;
             this.textBox2.Size = new System.Drawing.Size(100, 20);
-            this.textBox2.TabIndex = 6;
+            this.textBox2.TabIndex = 1;
             this.textBox2.Text = "Text";
             // 
             // textBox1
@@ -177,7 +177,7 @@
             this.textBox1.Location = new System.Drawing.Point(72, 37);
             this.textBox1.Name = "textBox1";
             this.textBox1.Size = new System.Drawing.Size(100, 20);
-            this.textBox1.TabIndex = 5;
+            this.textBox1.TabIndex = 0;
             this.textBox1.Text = "Text";
             // 
             // label2
@@ -229,7 +229,7 @@
             this.gbDecimalTextBox.Location = new System.Drawing.Point(0, 174);
             this.gbDecimalTextBox.Name = "gbDecimalTextBox";
             this.gbDecimalTextBox.Size = new System.Drawing.Size(309, 106);
-            this.gbDecimalTextBox.TabIndex = 4;
+            this.gbDecimalTextBox.TabIndex = 2;
             this.gbDecimalTextBox.TabStop = false;
             this.gbDecimalTextBox.Text = "DecimalTextBox";
             // 
@@ -238,7 +238,7 @@
             this.txtValue.Location = new System.Drawing.Point(189, 36);
             this.txtValue.Name = "txtValue";
             this.txtValue.Size = new System.Drawing.Size(100, 20);
-            this.txtValue.TabIndex = 12;
+            this.txtValue.TabIndex = 1;
             // 
             // lblValue
             // 
@@ -282,7 +282,7 @@
             this.decimalTextBox1.Location = new System.Drawing.Point(72, 36);
             this.decimalTextBox1.Name = "decimalTextBox1";
             this.decimalTextBox1.Size = new System.Drawing.Size(100, 20);
-            this.decimalTextBox1.TabIndex = 5;
+            this.decimalTextBox1.TabIndex = 0;
             // 
             // label5
             // 
@@ -297,7 +297,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(527, 416);
+            this.ClientSize = new System.Drawing.Size(540, 400);
             this.Name = "frmAdvancedTextBox";
             this.Text = "frmAdvancedTextBox";
             this.pnlTestArea.ResumeLayout(false);

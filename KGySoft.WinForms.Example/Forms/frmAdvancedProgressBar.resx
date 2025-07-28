@@ -118,7 +118,7 @@
     <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="lblInstruction.Text" xml:space="preserve">
-    <value>AdvancedProgressBar supports different states and rendering styles. In System style Paused and Error states are supported in Windows Vista and above. With Windows classic themes Shiny and Flat styles fallback to Classic style.
+    <value>AdvancedProgressBar supports different states and rendering styles. With System style Paused and Error states are supported on Windows Vista and above. With Windows classic themes Shiny and Flat styles default to Classic style.
 In non-System modes (or, with classic themes) colors are customizable.</value>
   </data>
 </root>

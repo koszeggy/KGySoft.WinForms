@@ -235,6 +235,6 @@ You can use any type for providing statuses that has an appropriate Equals metho
   <data name="lblInstruction.Text" xml:space="preserve">
     <value>Hover the label below with the mouse to see the fading effect. Click it to see its properties. Set its Enabled to see Enabling/Disabling fading.
 
-Fading works in Windows Vista and above with enabled themes (non-Classic Style). See the source code below in the text box.</value>
+Fading works on Windows Vista and above with enabled themes (non-Classic Style). See the source code below in the text box.</value>
   </data>
 </root>

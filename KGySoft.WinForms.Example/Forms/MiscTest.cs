@@ -94,7 +94,7 @@ namespace KGySoft.WinForms.Example.Forms
 
         private void AddLine(string s, [CallerMemberName]string? caller = null)
         {
-            textBox1.AppendText($"{caller}: {s}{Environment.NewLine}");
+            txtLog.AppendText($"{caller}: {s}{Environment.NewLine}");
         }
 
         #endregion

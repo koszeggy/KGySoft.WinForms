@@ -18,9 +18,9 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
-using System.Drawing.Design;
 using System.Linq;
 using System.Windows.Forms;
+
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Forms;
 
@@ -42,8 +42,11 @@ namespace KGySoft.WinForms.Example.Forms
         public ControlsTestBaseForm()
         {
             InitializeComponent();
-            if (LicenseManager.UsageMode != LicenseUsageMode.Designtime && SystemFonts.MessageBoxFont is Font font)
-                base.Font = font;
+            AutoScaleFont = Program.AutoScaleFont;
+            AutoScaleMode = Program.AutoScaleMode;
+            StartPosition = Program.StartPosition;
+            if (!IsDesignMode && SystemFonts.MessageBoxFont is Font font)
+                Font = font;
         }
 
         #endregion
@@ -113,6 +116,7 @@ namespace KGySoft.WinForms.Example.Forms
         {
             base.OnLoad(e);
             lblInstruction.SendToBack();
+            Text += @$" AutoScaleFont: {AutoScaleFont}";
         }
 
         protected override void OnEnabledChanged(EventArgs e)
@@ -132,7 +136,7 @@ namespace KGySoft.WinForms.Example.Forms
             if (!(selectedObjects?.Length > 0))
                 return;
 
-            PropertyDescriptor descriptor = grdProperties.SelectedGridItem?.PropertyDescriptor;
+            PropertyDescriptor? descriptor = grdProperties.SelectedGridItem?.PropertyDescriptor;
             if (descriptor == null)
                 return;
 
@@ -148,7 +152,7 @@ namespace KGySoft.WinForms.Example.Forms
                 return;
 
             // If the property is not resettable (e.g. Image), we set it to its default value
-            object defaultValue = descriptor.Attributes.OfType<DefaultValueAttribute>().FirstOrDefault() is DefaultValueAttribute d ? d.Value
+            object? defaultValue = descriptor.Attributes.OfType<DefaultValueAttribute>().FirstOrDefault() is DefaultValueAttribute d ? d.Value
                 : descriptor.PropertyType.IsValueType ? Activator.CreateInstance(descriptor.PropertyType)
                 : null;
 
@@ -159,7 +163,7 @@ namespace KGySoft.WinForms.Example.Forms
         private void grdProperties_SelectedObjectsChanged(object sender, EventArgs e)
         {
             var selectedObjects = grdProperties.SelectedObjects;
-            lblSelection.Text = $"{(selectedObjects.Length == 1 ? (selectedObjects[0] as Control)?.Name ?? grdProperties.SelectedObject : $"{selectedObjects.Length} controls selected")}";
+            lblSelection.Text = @$"{(selectedObjects.Length == 1 ? (selectedObjects[0] as Control)?.Name ?? grdProperties.SelectedObject : $"{selectedObjects.Length} controls selected")}";
         }
 
         #endregion

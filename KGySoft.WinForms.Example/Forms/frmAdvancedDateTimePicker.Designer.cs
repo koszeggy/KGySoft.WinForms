@@ -84,7 +84,7 @@
             this.advancedDateTimePicker3.ShowCheckBox = true;
             this.advancedDateTimePicker3.ShowUpDown = true;
             this.advancedDateTimePicker3.Size = new System.Drawing.Size(200, 20);
-            this.advancedDateTimePicker3.TabIndex = 14;
+            this.advancedDateTimePicker3.TabIndex = 5;
             // 
             // dateTimePicker3
             // 
@@ -94,7 +94,7 @@
             this.dateTimePicker3.ShowCheckBox = true;
             this.dateTimePicker3.ShowUpDown = true;
             this.dateTimePicker3.Size = new System.Drawing.Size(200, 20);
-            this.dateTimePicker3.TabIndex = 13;
+            this.dateTimePicker3.TabIndex = 2;
             // 
             // label3
             // 
@@ -112,7 +112,7 @@
             this.advancedDateTimePicker2.RightToLeftLayout = true;
             this.advancedDateTimePicker2.ShowCheckBox = true;
             this.advancedDateTimePicker2.Size = new System.Drawing.Size(200, 20);
-            this.advancedDateTimePicker2.TabIndex = 11;
+            this.advancedDateTimePicker2.TabIndex = 4;
             // 
             // advancedDateTimePicker1
             // 
@@ -120,7 +120,7 @@
             this.advancedDateTimePicker1.Name = "advancedDateTimePicker1";
             this.advancedDateTimePicker1.RightToLeftLayout = true;
             this.advancedDateTimePicker1.Size = new System.Drawing.Size(200, 20);
-            this.advancedDateTimePicker1.TabIndex = 10;
+            this.advancedDateTimePicker1.TabIndex = 3;
             // 
             // dateTimePicker2
             // 
@@ -129,7 +129,7 @@
             this.dateTimePicker2.RightToLeftLayout = true;
             this.dateTimePicker2.ShowCheckBox = true;
             this.dateTimePicker2.Size = new System.Drawing.Size(200, 20);
-            this.dateTimePicker2.TabIndex = 9;
+            this.dateTimePicker2.TabIndex = 1;
             // 
             // dateTimePicker1
             // 
@@ -137,7 +137,7 @@
             this.dateTimePicker1.Name = "dateTimePicker1";
             this.dateTimePicker1.RightToLeftLayout = true;
             this.dateTimePicker1.Size = new System.Drawing.Size(200, 20);
-            this.dateTimePicker1.TabIndex = 8;
+            this.dateTimePicker1.TabIndex = 0;
             // 
             // label2
             // 
@@ -179,7 +179,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(723, 253);
+            this.ClientSize = new System.Drawing.Size(760, 250);
             this.Name = "frmAdvancedDateTimePicker";
             this.Text = "frmAdvancedDateTimePicker";
             this.pnlTestArea.ResumeLayout(false);

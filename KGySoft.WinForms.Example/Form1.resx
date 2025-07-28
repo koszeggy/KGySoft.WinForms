@@ -112,52 +112,12 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
-  <assembly alias="System.Drawing" name="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
-  <data name="advancedButton1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
-        JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAA6vAAAOrwFxEUPuAAACSElE
-        QVQ4T6WTXUhTYRjHT3cRQXRhBF0sLCIoSrFlFKGVVA7S1seFBS4TRUwUK3XqzFCjyfxqoKjHNE2dlelx
-        hsvZB1tMmEJudtgs6BglgrCtiwiKbf7jecPOLowCL57zXv1+z+fhlnwBbi1Bn3Utj52IDGP/JAwP7Khp
-        fwmd8TluGMzIrR7E1XITLhf14EJBJ85e47Ei4AgKhvDX+P4D8H9bxoJ/GR8Ww5iZD2P3qdv/J/CJXniv
-        xELUxGDWITL4oUXCrpOV/xZQZoKxMI6fr65j+vx2vPGG0TX6HjuTIgTU82owlS2mx/yG65IwqVZg3BVC
-        +9NZRB+/JQtoYKvB1DOVTZkJHh5xQ5gKodk0BUVihSygaa/Ac9ISCqt4Fk5PgPVMZVNmggccQTR127Ht
-        qE4W0KoI/vjFz0BB6of18whU6Tngh94iITWLRZswhx5bEHX8BLYeKZcFtGeCqzp5CPN98ARcEKQ+NE5X
-        4pI2B+YXM7DY3oHjOLSN+XC35RmiDpXJAjqSO708zJ9M8Hx1s7fVXYsaWyHyhIs4l5+B7iev0XR/lEmq
-        7w1hs7JUFtCFDUu9f2BerEetowRFYxpkDJyGqnkP4pJTUaAzIldbzySb4rSygM7TvmhlcJfXiAZnBcqs
-        WcgeTIG6Q4nEBgXi9VugTDsBVVo+ElIysTG2RBbQbbe6DKxsvaMYNy0aZD5KhrrjAI41RjM4Xh/F3oOl
-        O7D38Bls2B8hoB+DbpvOky6MjoT2TKuiadPAqGcqmzITvH5fsSxYS/wCB1XXC90e2wcAAAAASUVORK5C
-        YII=
-</value>
-  </data>
-  <data name="button1.Image" type="System.Drawing.Bitmap, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
-    <value>
-        iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAALGPC/xhBQAAACBjSFJNAAB6
-        JgAAgIQAAPoAAACA6AAAdTAAAOpgAAA6mAAAF3CculE8AAAACXBIWXMAAA6vAAAOrwFxEUPuAAACSElE
-        QVQ4T6WTXUhTYRjHT3cRQXRhBF0sLCIoSrFlFKGVVA7S1seFBS4TRUwUK3XqzFCjyfxqoKjHNE2dlelx
-        hsvZB1tMmEJudtgs6BglgrCtiwiKbf7jecPOLowCL57zXv1+z+fhlnwBbi1Bn3Utj52IDGP/JAwP7Khp
-        fwmd8TluGMzIrR7E1XITLhf14EJBJ85e47Ei4AgKhvDX+P4D8H9bxoJ/GR8Ww5iZD2P3qdv/J/CJXniv
-        xELUxGDWITL4oUXCrpOV/xZQZoKxMI6fr65j+vx2vPGG0TX6HjuTIgTU82owlS2mx/yG65IwqVZg3BVC
-        +9NZRB+/JQtoYKvB1DOVTZkJHh5xQ5gKodk0BUVihSygaa/Ac9ISCqt4Fk5PgPVMZVNmggccQTR127Ht
-        qE4W0KoI/vjFz0BB6of18whU6Tngh94iITWLRZswhx5bEHX8BLYeKZcFtGeCqzp5CPN98ARcEKQ+NE5X
-        4pI2B+YXM7DY3oHjOLSN+XC35RmiDpXJAjqSO708zJ9M8Hx1s7fVXYsaWyHyhIs4l5+B7iev0XR/lEmq
-        7w1hs7JUFtCFDUu9f2BerEetowRFYxpkDJyGqnkP4pJTUaAzIldbzySb4rSygM7TvmhlcJfXiAZnBcqs
-        WcgeTIG6Q4nEBgXi9VugTDsBVVo+ElIysTG2RBbQbbe6DKxsvaMYNy0aZD5KhrrjAI41RjM4Xh/F3oOl
-        O7D38Bls2B8hoB+DbpvOky6MjoT2TKuiadPAqGcqmzITvH5fsSxYS/wCB1XXC90e2wcAAAAASUVORK5C
-        YII=
-</value>
-  </data>
-  <data name="BaseToolTip.TrayLocation" type="System.Drawing.Point, System.Drawing">
+  <metadata name="BaseToolTip.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>17, 17</value>
-  </data>
-  <data name="lblInstruction.Text" xml:space="preserve">
-    <value>AdvancedButton supports images also with System FlatStyle (on pre-Vista Windows FlatStyle atomatically changes internally to Standard if button has an image).
-Additionally, AdvancedButton supports IsElevated mode (shield icon), different RenderingQuality modes by both GDI and GDI+ (UseCompatibleTextRendering property) renderers.
-On Windows Vista and above AdvancedButton supports fading animations with any FlatStyle. Animations can be applied not only for standard animations like defaulting or disabling but also for any visual change.</value>
-  </data>
+  </metadata>
 </root>

@@ -13,12 +13,6 @@
 
 #endregion
 
-#region Usings
-
-using KGySoft.Drawing;
-
-#endregion
-
 namespace KGySoft.WinForms.Example.Forms
 {
     internal partial class frmCommandLinkButton : ControlsTestBaseForm
@@ -28,7 +22,6 @@ namespace KGySoft.WinForms.Example.Forms
         public frmCommandLinkButton()
         {
             InitializeComponent();
-            gbCustomBackground.BackgroundImage = Icons.Shield.ToBitmap();
         }
 
         #endregion
