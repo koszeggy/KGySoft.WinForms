@@ -18,6 +18,8 @@
 using System.Drawing;
 using System.Windows.Forms;
 
+using KGySoft.WinForms.Reflection;
+
 #endregion
 
 namespace KGySoft.WinForms.Controls
@@ -41,10 +43,10 @@ namespace KGySoft.WinForms.Controls
         {
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
-            ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
-            LayoutData layout = PaintPopupLayout(state, false, VisualStyleHelper.HighContrast ? 2 : 1).Layout(g);
+            ColorData colors = ColorData.Calculate(this, g, state);
+            LayoutData layout = PaintPopupLayout(state, false, colors.HighContrast ? 2 : 1).Layout(g);
             Rectangle clientRectangle = ButtonInstance.ClientRectangle;
-            PaintButtonBackground(e, clientRectangle, colors.ButtonFace);
+            PaintButtonBackground(e, clientRectangle, null);
 
             if (state.IsDefault)
                 clientRectangle.Inflate(-1, -1);
@@ -60,16 +62,16 @@ namespace KGySoft.WinForms.Controls
         {
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
-            ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
-            LayoutData layout = PaintPopupLayout(state, state.CheckState == CheckState.Unchecked, VisualStyleHelper.HighContrast ? 2 : 1).Layout(g);
+            ColorData colors = ColorData.Calculate(this, e.Graphics, state);
+            LayoutData layout = PaintPopupLayout(state, state.CheckState == CheckState.Unchecked, colors.HighContrast ? 2 : 1).Layout(g);
             Rectangle clientRectangle = ButtonInstance.ClientRectangle;
             if (state.CheckState == CheckState.Indeterminate)
             {
-                using Brush brush = CreateDitherBrush(colors.Highlight, colors.ButtonFace);
-                e.Graphics.FillRectangle(brush, clientRectangle);
+                using Brush brush = CreateDitherBrush(colors.Highlight, state.BackColor);
+                PaintButtonBackground(e, clientRectangle, brush);
             }
             else
-                PaintButtonBackground(e, clientRectangle, colors.ButtonFace);
+                ButtonInstance.PaintBackground(e, clientRectangle, colors.ButtonFace, clientRectangle.Location);
 
             if (state.IsDefault)
                 clientRectangle.Inflate(-1, -1);
@@ -99,16 +101,16 @@ namespace KGySoft.WinForms.Controls
         {
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
-            ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+            ColorData colors = ColorData.Calculate(this, g, state);
             LayoutData layout = PaintPopupLayout(state, state.CheckState == CheckState.Unchecked, 1).Layout(g);
             Rectangle clientRectangle = ButtonInstance.ClientRectangle;
             if (state.CheckState == CheckState.Indeterminate)
             {
-                using Brush brush = CreateDitherBrush(colors.Highlight, colors.ButtonFace);
-                e.Graphics.FillRectangle(brush, clientRectangle);
+                using Brush brush = CreateDitherBrush(colors.Highlight, state.BackColor);
+                PaintButtonBackground(e, clientRectangle, brush);
             }
             else
-                PaintButtonBackground(e, clientRectangle, colors.ButtonFace);
+                ButtonInstance.PaintBackground(e, clientRectangle, colors.ButtonFace, clientRectangle.Location);
 
             if (state.IsDefault)
                 clientRectangle.Inflate(-1, -1);
@@ -124,6 +126,12 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Protected Methods
+
+        protected override bool IsHighContrastHighlighted(ControlAppearanceState state)
+        {
+            bool isUp = !state.Pressed && !state.Hovered;
+            return (!isUp || state.CheckState != CheckState.Indeterminate) && base.IsHighContrastHighlighted(state);
+        }
 
         protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state) => PaintPopupLayout(state, false, 0);
 

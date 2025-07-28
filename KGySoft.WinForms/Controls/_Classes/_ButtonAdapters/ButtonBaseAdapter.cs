@@ -15,6 +15,8 @@
 
 #region Usings
 
+using KGySoft.WinForms.Reflection;
+
 #region Used Namespaces
 
 using System;
@@ -44,16 +46,17 @@ namespace KGySoft.WinForms.Controls
         {
             #region Fields
 
-            internal Color ButtonFace;
+            internal Color ButtonFace; // state.BackColor or SystemColors.Highlight, depending on IsHighContrastHighlighted
             internal Color ButtonShadow;
             internal Color ButtonShadowDark;
             internal Color ContrastButtonShadow;
-            internal Color WindowText;
+            internal Color WindowText; // state.ForeColor or SystemColors.HighlightText, depending on IsHighContrastHighlighted
             internal Color Highlight;
             internal Color LowHighlight;
             internal Color LowButtonFace;
             internal Color WindowFrame;
             internal bool HighContrast;
+            internal bool IsHighContrastHighlighted;
 
             #endregion
 
@@ -61,11 +64,13 @@ namespace KGySoft.WinForms.Controls
 
             #region Internal Methods
 
-            internal static ColorData Calculate(Graphics graphics, Color backColor, Color foreColor)
+            internal static ColorData Calculate(ButtonBaseAdapter adapter, Graphics graphics, ControlAppearanceState state)
             {
                 ColorData colors = new ColorData();
+                Color backColor = state.BackColor;
+                Color foreColor = state.ForeColor;
                 colors.HighContrast = VisualStyleHelper.HighContrast;
-
+                colors.IsHighContrastHighlighted = adapter.IsHighContrastHighlighted(state);
                 colors.ButtonFace = backColor;
 
                 if (backColor == SystemColors.Control)
@@ -112,27 +117,17 @@ namespace KGySoft.WinForms.Controls
                     colors.Highlight = colors.LowHighlight;
 
                 colors.WindowFrame = foreColor;
+                colors.WindowText = colors.IsHighContrastHighlighted
+                    ? SystemColors.HighlightText
+                    : foreColor;
 
-                if (colors.ButtonFace.GetBrightness() < .5)
-                    colors.ContrastButtonShadow = colors.LowHighlight;
-                else
-                    colors.ContrastButtonShadow = colors.ButtonShadow;
+                colors.ContrastButtonShadow = colors.ButtonFace.GetBrightness() < .5
+                    ? colors.LowHighlight
+                    : colors.ButtonShadow;
 
-                //if (!enabled && disabledTextDim)
-                //{
-                //    colors.windowText = colors.buttonShadow;
-                //}
-                //else
-                //{
-                colors.WindowText = colors.WindowFrame;
-                //}
+                if (colors.IsHighContrastHighlighted)
+                    colors.ButtonFace = SystemColors.Highlight;
 
-                //IntPtr hdc = this.graphics.GetHdc();
-
-                //try
-                //{
-                //using (WindowsGraphics g = WindowsGraphics.FromHdc(hdc))
-                //    {
                 colors.ButtonFace = graphics.GetNearestColor(colors.ButtonFace);
                 colors.ButtonShadow = graphics.GetNearestColor(colors.ButtonShadow);
                 colors.ButtonShadowDark = graphics.GetNearestColor(colors.ButtonShadowDark);
@@ -142,15 +137,8 @@ namespace KGySoft.WinForms.Controls
                 colors.LowHighlight = graphics.GetNearestColor(colors.LowHighlight);
                 colors.LowButtonFace = graphics.GetNearestColor(colors.LowButtonFace);
                 colors.WindowFrame = graphics.GetNearestColor(colors.WindowFrame);
-                //}
-                //}
-                //finally
-                //{
-                //    this.graphics.ReleaseHdc();
-                //}
 
                 return colors;
-
             }
 
             #endregion
@@ -821,8 +809,8 @@ namespace KGySoft.WinForms.Controls
         #region Properties
 
         protected virtual int ButtonBorderSize => 4;
-
         protected ButtonBase ButtonInstance => control;
+        protected bool ShowFocusCues => ((ISupportButtonAdapter)control).ShowFocusCues;
 
         #endregion
 
@@ -835,9 +823,6 @@ namespace KGySoft.WinForms.Controls
         #region Methods
 
         #region Static Methods
-
-        protected static void PaintButtonBackground(PaintEventArgs e, Rectangle bounds, Color backColor)
-            => e.Graphics.FillRectangle(backColor.GetBrush(), bounds);
 
         protected static Brush CreateDitherBrush(Color color1, Color color2)
         {
@@ -958,7 +943,19 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
+        protected virtual bool IsHighContrastHighlighted(ControlAppearanceState state)
+            => VisualStyleHelper.HighContrast && VisualStyleHelper.RenderWithVisualStyles
+                && !state.Pressed && (state.Focused || state.Hovered || (state.IsDefault && state.Enabled));
+
         protected abstract LayoutOptions Layout(Graphics graphics, ControlAppearanceState state);
+
+        protected void PaintButtonBackground(PaintStateEventArgs e, Rectangle bounds, Brush? backBrush)
+        {
+            if (backBrush != null)
+                e.Graphics.FillRectangle(backBrush, bounds);
+            else
+                ButtonInstance.PaintBackground(e, bounds, e.State.BackColor);
+        }
 
         protected void PaintField(PaintStateEventArgs e, LayoutData layout, ColorData colors, bool drawFocus)
         {
@@ -987,7 +984,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private void DrawFocus(Graphics g, LayoutData layout, ControlAppearanceState state)
         {
-            if (!control.Focused || !((ISupportButtonAdapter)control).ShowFocusCues)
+            if (!state.Focused || !ShowFocusCues)
                 return;
 
             Rectangle r = layout.Focus;
@@ -1068,15 +1065,14 @@ namespace KGySoft.WinForms.Controls
                     g.DrawString(state.Text, control.Font, state.ForeColor.GetBrush(), r, stringFormat);
                 }
                 else
-                    g.DrawString(state.Text, control.Font, state.ForeColor.GetBrush(), r, stringFormat);
+                    g.DrawString(state.Text, control.Font, colors.WindowText.GetBrush(), r, stringFormat);
             }
             else
             {
                 // Draw text using GDI (.NET Framework 2.0+ feature).
-
                 if (disabledText3D && !state.Enabled)
                 {
-                    Color disabledColor = state.ForeColor; // here: DisabledForeColor
+                    Color disabledColor = state.ForeColor; // now this is DisabledForeColor
                     if (VisualStyleHelper.RenderWithVisualStyles)
                     {
                         //don't draw chiseled text if themed as win32 app does.
@@ -1092,7 +1088,7 @@ namespace KGySoft.WinForms.Controls
                     }
                 }
                 else
-                    TextRenderer.DrawText(g, state.Text, control.Font, r, state.ForeColor, formatFlags);
+                    TextRenderer.DrawText(g, state.Text, control.Font, r, colors.WindowText, formatFlags);
             }
         }
 

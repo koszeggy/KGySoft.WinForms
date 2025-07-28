@@ -50,7 +50,7 @@ namespace KGySoft.WinForms.Controls
             else
             {
                 ControlAppearanceState state = e.State;
-                ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+                ColorData colors = ColorData.Calculate(this, e.Graphics, state);
                 if (state.Enabled)
                     PaintFlatWorker(e, colors.WindowText, colors.Highlight, colors.WindowFrame, colors);
                 else
@@ -65,7 +65,7 @@ namespace KGySoft.WinForms.Controls
             else
             {
                 ControlAppearanceState state = e.State;
-                ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+                ColorData colors = ColorData.Calculate(this, e.Graphics, state);
                 if (state.Enabled)
                     PaintFlatWorker(e, colors.WindowText, colors.LowHighlight, colors.WindowFrame, colors);
                 else
@@ -80,7 +80,7 @@ namespace KGySoft.WinForms.Controls
             else
             {
                 ControlAppearanceState state = e.State;
-                ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+                ColorData colors = ColorData.Calculate(this, e.Graphics, state);
                 if (state.Enabled)
                     PaintFlatWorker(e, colors.WindowText, colors.Highlight, colors.WindowFrame, colors);
                 else
@@ -110,7 +110,7 @@ namespace KGySoft.WinForms.Controls
         {
             ControlAppearanceState state = e.State;
             LayoutData layout = Layout(e.Graphics, state).Layout(e.Graphics);
-            PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
+            PaintButtonBackground(e, ButtonInstance.ClientRectangle, null);
             PaintImage(e, layout);
             DrawCheckFlat(e, layout, checkColor, colors.HighContrast ? colors.ButtonFace : checkBackground, checkBorder);
             AdjustFocusRectangle(state, layout);

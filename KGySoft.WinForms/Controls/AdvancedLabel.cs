@@ -30,6 +30,7 @@ using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
 using KGySoft.CoreLibraries;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -916,19 +917,14 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
 
             try
             {
-                if (!state.Visible || state.BackColor == Color.Transparent)
+                if (!state.Visible)
                 {
                     this.PaintTransparentBackground(e);
-                    if (!state.Visible)
                         return;
                 }
 
                 Rectangle backRect = ClientRectangle;
-                if (state.BackColor != Color.Transparent)
-                    e.Graphics.FillRectangle(state.BackColor.GetBrush(), backRect);
-
-                if (!state.Visible)
-                    return;
+                this.PaintBackground(e, backRect, state.BackColor);
 
                 // drawing image
                 Image? image = Image;

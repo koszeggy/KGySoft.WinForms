@@ -317,7 +317,7 @@ namespace KGySoft.WinForms
                     e.Graphics.TranslateTransform(-c.Left, -c.Top);
                     rectangle.Offset(c.Left, c.Top);
                     PaintEventArgs pe = new PaintEventArgs(e.Graphics, rectangle);
-                    parent.PaintBackground(pe, rectangle, parent.BackColor, Point.Empty);
+                    parent.PaintBackground(pe, rectangle, parent.BackColor);
                     parent.OnPaint(pe);
                 }
                 finally

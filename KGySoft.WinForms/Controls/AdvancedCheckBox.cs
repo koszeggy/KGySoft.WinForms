@@ -828,6 +828,7 @@ namespace KGySoft.WinForms.Controls
             else
                 this.SetShowToolTip(false);
 
+            //OnPaintBackground(e);
             if (GetStyle(ControlStyles.UserPaint))
             {
                 this.Animate();
@@ -906,6 +907,7 @@ namespace KGySoft.WinForms.Controls
                 Hovered = isHovered,
                 Pressed = isPressed,
                 IsDefault = IsDefault,
+                Focused = Focused,
                 CheckState = CheckState,
                 Text = base.Text,
                 Visible = Visible,

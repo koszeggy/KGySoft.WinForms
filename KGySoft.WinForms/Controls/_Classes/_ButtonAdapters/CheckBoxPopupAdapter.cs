@@ -95,9 +95,9 @@ namespace KGySoft.WinForms.Controls
             {
                 Graphics g = e.Graphics;
                 ControlAppearanceState state = e.State;
-                ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+                ColorData colors = ColorData.Calculate(this, e.Graphics, state);
                 LayoutData layout = PaintPopupLayout(state, true).Layout(g);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, null);
                 PaintImage(e, layout);
                 DrawCheckBackground(e, layout.CheckBounds, colors.ButtonFace, true, colors);
                 DrawPopupBorder(g, layout.CheckBounds, colors);
@@ -115,9 +115,9 @@ namespace KGySoft.WinForms.Controls
             else
             {
                 ControlAppearanceState state = e.State;
-                ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+                ColorData colors = ColorData.Calculate(this, e.Graphics, state);
                 LayoutData layout = PaintPopupLayout(state, true).Layout(g);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, null);
                 PaintImage(e, layout);
                 DrawCheckBackground(e, layout.CheckBounds, colors.HighContrast ? colors.ButtonFace : colors.Highlight, true, colors);
                 DrawPopupBorder(g, layout.CheckBounds, colors);
@@ -146,9 +146,9 @@ namespace KGySoft.WinForms.Controls
             {
                 Graphics g = e.Graphics;
                 ControlAppearanceState state = e.State;
-                ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+                ColorData colors = ColorData.Calculate(this, e.Graphics, state);
                 LayoutData layout = PaintPopupLayout(state, false).Layout(g);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, null);
                 PaintImage(e, layout);
                 DrawCheckBackground(e, layout.CheckBounds, colors.HighContrast ? colors.ButtonFace : colors.Highlight, true, colors);
                 DrawFlatBorder(g, layout.CheckBounds, colors.ButtonShadow);

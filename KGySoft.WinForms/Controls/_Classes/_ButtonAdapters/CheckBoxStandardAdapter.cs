@@ -67,9 +67,9 @@ namespace KGySoft.WinForms.Controls
             {
                 Graphics g = e.Graphics;
                 ControlAppearanceState state = e.State;
-                ColorData colors = ColorData.Calculate(g, state.BackColor, state.ForeColor);
+                ColorData colors = ColorData.Calculate(this, g, state);
                 LayoutData layout = Layout(g, state).Layout(g);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, null);
 
                 if (!layout.Options.DotNetOneButtonCompat)
                     layout.TextBounds.Offset(-1, -1);

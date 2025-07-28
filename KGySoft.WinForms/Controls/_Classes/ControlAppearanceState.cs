@@ -61,6 +61,11 @@ namespace KGySoft.WinForms.Controls
         public bool Hovered { get; internal set; }
 
         /// <summary>
+        /// Gets whether the control should be painted in focused state.
+        /// </summary>
+        public bool Focused { get; internal set; }
+
+        /// <summary>
         /// Gets whether the control should be painted as a default button.
         /// </summary>
         public bool IsDefault { get; internal set; }

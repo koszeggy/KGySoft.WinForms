@@ -60,9 +60,9 @@ namespace KGySoft.WinForms.Controls
             else
             {
                 ControlAppearanceState state = e.State;
-                ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+                ColorData colors = ColorData.Calculate(this, e.Graphics, state);
                 LayoutData layout = Layout(e.Graphics, state).Layout(e.Graphics);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, colors.ButtonFace);
+                PaintButtonBackground(e, ButtonInstance.ClientRectangle, null);
                 PaintImage(e, layout);
                 DrawCheckBox(e, layout);
                 AdjustFocusRectangle(state, layout);

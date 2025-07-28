@@ -1662,6 +1662,7 @@ namespace KGySoft.WinForms.Controls
                 Hovered = isHovered,
                 Pressed = isPressed,
                 IsDefault = IsDefault,
+                Focused = Focused,
                 Text = base.Text,
                 Visible = Visible,
                 CustomState = new CustomAppearanceState
@@ -1819,7 +1820,7 @@ namespace KGySoft.WinForms.Controls
                 else // normal state
                 {
                     // no drawing needed in normal state unless if focused or default
-                    if (state.Enabled && (Focused || state.IsDefault))
+                    if (state.Enabled && (state.Focused || state.IsDefault))
                     {
                         Pen selectedFramePen = (!FadingPainterInternal.IsSupported || state.SystemStateId == (int)COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING
                             ? selectedFrameColorAlternative
@@ -1832,7 +1833,7 @@ namespace KGySoft.WinForms.Controls
             // Image
             PaintImage(e, image);
 
-            if (state.Enabled && Focused && ShowFocusCues)
+            if (state.Enabled && state.Focused && ShowFocusCues)
                 DrawFocusRectangle(e);
         }
 
@@ -1843,7 +1844,7 @@ namespace KGySoft.WinForms.Controls
 
             // Background
             Pen selectedFramePen = SystemPens.WindowFrame;
-            e.Graphics.FillRectangle(state.BackColor.GetBrush(), backRect);
+            this.PaintBackground(e, backRect, state.BackColor);
 
             if (state.Pressed)
             {
@@ -1856,19 +1857,19 @@ namespace KGySoft.WinForms.Controls
                 ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.Raised);
 
                 // with classic state selection is drawn even if button is hovered
-                if (state.Enabled && (Focused || state.IsDefault))
+                if (state.Enabled && (state.Focused || state.IsDefault))
                     e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
             }
             else // normal state
             {
-                if (state.Enabled && (Focused || state.IsDefault))
+                if (state.Enabled && (state.Focused || state.IsDefault))
                     e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
             }
 
             // Image
             PaintImage(e, image);
 
-            if (state.Enabled && Focused && ShowFocusCues)
+            if (state.Enabled && state.Focused && ShowFocusCues)
                 DrawFocusRectangle(e);
         }
 
@@ -1902,17 +1903,14 @@ namespace KGySoft.WinForms.Controls
                             ? SystemColors.ControlLightLight
                             : ControlPaint.LightLight(backColor);
 
-                        float percentage = 0.9f;
-                        if (backColor.GetBrightness() < 0.5f)
-                            percentage = 1.2f;
-
+                        float percentage = backColor.GetBrightness() < 0.5f ? 1.2f : 0.8f;
                         backColor = Color.FromArgb(Adjust255(percentage, backColor.R), Adjust255(percentage, backColor.G), Adjust255(percentage, backColor.B));
                     }
                 }
             }
             else if (state.Hovered)
             {
-                if (borderWidth != 0 && Focused)
+                if (borderWidth != 0 && state.Focused)
                     borderWidth++;
 
                 if (!FlatAppearance.MouseOverBackColor.IsEmpty)
@@ -1921,7 +1919,10 @@ namespace KGySoft.WinForms.Controls
                 {
                     float percentage = 0.9f;
                     if (backColor.GetBrightness() < 0.5f)
+                    {
+                        backColor = ControlPaint.Light(backColor);
                         percentage = 1.2f;
+                    }
 
                     backColor = Color.FromArgb(Adjust255(percentage, backColor.R), Adjust255(percentage, backColor.G), Adjust255(percentage, backColor.B));
                 }
@@ -1929,7 +1930,7 @@ namespace KGySoft.WinForms.Controls
             else // normal state
             {
                 // no matter if button is enabled or not, border is the same
-                if (Focused)
+                if (state.Focused)
                 {
                     if (borderWidth != 0)
                         borderWidth++;
@@ -1938,7 +1939,7 @@ namespace KGySoft.WinForms.Controls
                     borderWidth++;
             }
 
-            e.Graphics.FillRectangle(state.BackColor.GetBrush(), backRect);
+            this.PaintBackground(e, backRect, state.BackColor);
             if (backColor != state.BackColor)
             {
                 backRect.Inflate(-(borderWidth / 2 + 3), -(borderWidth / 2 + 2));
@@ -1955,7 +1956,7 @@ namespace KGySoft.WinForms.Controls
             // Image
             PaintImage(e, image);
 
-            if (state.Enabled && Focused && ShowFocusCues)
+            if (state.Enabled && state.Focused && ShowFocusCues)
             {
                 Color focusColor = VisualStyleHelper.HighContrast ? SystemColors.WindowText
                     : (BackColor.GetBrightness() < 0.5f ? ControlPaint.Light(state.BackColor) : ControlPaint.Dark(state.BackColor));

@@ -15,6 +15,7 @@
 
 #region Usings
 
+using System;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
@@ -238,12 +239,12 @@ namespace KGySoft.WinForms.Controls
             bounds.Inflate(-ButtonBorderSize, -ButtonBorderSize);
             if (!ButtonInstance.UseVisualStyleBackColor)
             {
-                Color backColor = state.BackColor;
+                bool isHighContrastHighlighted = up && IsHighContrastHighlighted(state);
+                Color backColor = isHighContrastHighlighted ? SystemColors.Highlight : state.BackColor;
                 if (backColor.A > 0)
                 {
-                    if (backColor.A == 0xff)
+                    if (backColor.A == Byte.MaxValue)
                         backColor = e.Graphics.GetNearestColor(backColor);
-
                     e.Graphics.FillRectangle(backColor.GetBrush(), bounds);
                 }
             }
@@ -257,7 +258,7 @@ namespace KGySoft.WinForms.Controls
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
             up = up && (state.CheckState == CheckState.Unchecked);
-            ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+            ColorData colors = ColorData.Calculate(this, e.Graphics, state);
             bool renderWithVisualStyles = VisualStyleHelper.RenderWithVisualStyles;
             LayoutData layout = renderWithVisualStyles
                 ? PaintLayout(state, true).Layout(g)
@@ -275,15 +276,26 @@ namespace KGySoft.WinForms.Controls
 
                 if (state.CheckState == CheckState.Indeterminate)
                 {
-                    using Brush brush = CreateDitherBrush(colors.Highlight, colors.ButtonFace);
-                    e.Graphics.FillRectangle(brush, clientRectangle);
+                    using Brush brush = CreateDitherBrush(colors.Highlight, state.BackColor);
+                    PaintButtonBackground(e, clientRectangle, brush);
                 }
                 else
-                    PaintButtonBackground(e, clientRectangle, colors.ButtonFace);
+                    PaintButtonBackground(e, clientRectangle, null);
             }
             
             PaintImage(e, layout);
-            PaintField(e, layout, colors, true);
+            if (up & IsHighContrastHighlighted(state))
+            {
+                PaintField(e, layout, colors, false);
+
+                // Drawing focus rectangle of HighlightText color
+                // NOTE: not quite the same as ControlPaint.DrawHighContrastFocusRectangle in the original code, which is an internal method, because the public
+                // ControlPaint.DrawFocusRectangle ignores foreColor. It still makes a different from the default PaintField below, which passes state.BackColor.
+                if (state.Focused && ShowFocusCues)
+                    ControlPaint.DrawFocusRectangle(g, layout.Focus, SystemColors.HighlightText, SystemColors.Highlight);
+            }
+            else
+                PaintField(e, layout, colors, true);
             
             if (!renderWithVisualStyles)
             {

@@ -83,6 +83,8 @@ namespace KGySoft.WinForms.Controls
 
         #region Instance Methods
 
+        #region Internal Methods
+        
         internal override LayoutOptions CommonLayout(ControlAppearanceState state)
         {
             LayoutOptions options = base.CommonLayout(state);
@@ -104,7 +106,11 @@ namespace KGySoft.WinForms.Controls
             return preferredSizeCore;
         }
 
+        #endregion
+
         #region Protected Methods
+
+        protected override bool IsHighContrastHighlighted(ControlAppearanceState state) => false;
 
         protected abstract ButtonBaseAdapter CreateButtonAdapter();
 

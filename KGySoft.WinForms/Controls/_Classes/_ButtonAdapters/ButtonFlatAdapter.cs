@@ -107,7 +107,7 @@ namespace KGySoft.WinForms.Controls
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
             bool flag = (ButtonInstance.FlatAppearance.BorderSize != 1) || !ButtonInstance.FlatAppearance.BorderColor.IsEmpty;
-            ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+            ColorData colors = ColorData.Calculate(this, e.Graphics, state);
             LayoutData layout = PaintFlatLayout(state, !ButtonInstance.FlatAppearance.CheckedBackColor.IsEmpty || (VisualStyleHelper.HighContrast ? (state.CheckState != CheckState.Indeterminate) : (state.CheckState == CheckState.Unchecked)),
                 (!flag && VisualStyleHelper.HighContrast) && (state.CheckState == CheckState.Checked), ButtonInstance.FlatAppearance.BorderSize).Layout(g);
             if (!ButtonInstance.FlatAppearance.BorderColor.IsEmpty)
@@ -133,16 +133,15 @@ namespace KGySoft.WinForms.Controls
             }
 
             PaintBackground(e, clientRectangle, backColor);
-            ISupportButtonAdapter host = (ISupportButtonAdapter)ButtonInstance;
             if (state.IsDefault)
                 clientRectangle.Inflate(-1, -1);
 
             PaintImage(e, layout);
             PaintField(e, layout, colors, false);
 
-            if (ButtonInstance.Focused && host.ShowFocusCues)
+            if (state.Focused && ShowFocusCues)
                 DrawFlatFocus(g, layout.Focus, colors.HighContrast ? colors.WindowText : colors.ContrastButtonShadow);
-            if ((!state.IsDefault || !ButtonInstance.Focused) || (ButtonInstance.FlatAppearance.BorderSize != 0))
+            if ((!state.IsDefault || !state.Focused) || (ButtonInstance.FlatAppearance.BorderSize != 0))
                 DrawDefaultBorder(g, clientRectangle, colors.WindowFrame, state.IsDefault);
             if (flag)
             {
@@ -171,7 +170,7 @@ namespace KGySoft.WinForms.Controls
             {
                 Graphics g = e.Graphics;
                 bool hasBorder = (ButtonInstance.FlatAppearance.BorderSize != 1) || !ButtonInstance.FlatAppearance.BorderColor.IsEmpty;
-                ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+                ColorData colors = ColorData.Calculate(this, e.Graphics, state);
                 LayoutData layout = PaintFlatLayout(state, !ButtonInstance.FlatAppearance.CheckedBackColor.IsEmpty || (state.CheckState == CheckState.Unchecked),
                     false, ButtonInstance.FlatAppearance.BorderSize).Layout(g);
                 if (!ButtonInstance.FlatAppearance.BorderColor.IsEmpty)
@@ -193,17 +192,17 @@ namespace KGySoft.WinForms.Controls
                 else
                     backColor = colors.LowButtonFace;
 
+                Debug.Assert(!colors.IsHighContrastHighlighted, "PaintUp should be used in high contrast");
                 PaintBackground(e, clientRectangle, backColor);
-                ISupportButtonAdapter host = (ISupportButtonAdapter)ButtonInstance;
                 
                 if (state.IsDefault)
                     clientRectangle.Inflate(-1, -1);
                 PaintImage(e, layout);
                 PaintField(e, layout, colors, false);
-                
-                if (ButtonInstance.Focused && host.ShowFocusCues)
+
+                if (state.Focused && ShowFocusCues)
                     DrawFlatFocus(g, layout.Focus, colors.ContrastButtonShadow);
-                if ((!state.IsDefault || !ButtonInstance.Focused) || (ButtonInstance.FlatAppearance.BorderSize != 0))
+                if ((!state.IsDefault || !state.Focused) || (ButtonInstance.FlatAppearance.BorderSize != 0))
                     DrawDefaultBorder(g, clientRectangle, colors.WindowFrame, state.IsDefault);
                 if (hasBorder)
                 {
@@ -224,7 +223,7 @@ namespace KGySoft.WinForms.Controls
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
             bool hasBorder = (ButtonInstance.FlatAppearance.BorderSize != 1) || !ButtonInstance.FlatAppearance.BorderColor.IsEmpty;
-            ColorData colors = ColorData.Calculate(e.Graphics, state.BackColor, state.ForeColor);
+            ColorData colors = ColorData.Calculate(this, e.Graphics, state);
             LayoutData layout = PaintFlatLayout(state,
                     !ButtonInstance.FlatAppearance.CheckedBackColor.IsEmpty || (VisualStyleHelper.HighContrast ? (state.CheckState != CheckState.Indeterminate) : (state.CheckState == CheckState.Unchecked)),
                     (!hasBorder && VisualStyleHelper.HighContrast) && (state.CheckState == CheckState.Checked), ButtonInstance.FlatAppearance.BorderSize).Layout(g);
@@ -260,16 +259,15 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            PaintBackground(e, clientRectangle, backColor);
-            ISupportButtonAdapter host = (ISupportButtonAdapter)ButtonInstance;
+            PaintBackground(e, clientRectangle, colors.IsHighContrastHighlighted ? SystemColors.Highlight : backColor);
             
             if (state.IsDefault)
                 clientRectangle.Inflate(-1, -1);
             PaintImage(e, layout);
             PaintField(e, layout, colors, false);
-            if (ButtonInstance.Focused && host.ShowFocusCues)
+            if (state.Focused && ShowFocusCues)
                 DrawFlatFocus(g, layout.Focus, colors.HighContrast ? colors.WindowText : colors.ContrastButtonShadow);
-            if ((!state.IsDefault || !ButtonInstance.Focused) || (ButtonInstance.FlatAppearance.BorderSize != 0))
+            if ((!state.IsDefault || !state.Focused) || (ButtonInstance.FlatAppearance.BorderSize != 0))
                 DrawDefaultBorder(g, clientRectangle, colors.WindowFrame, state.IsDefault);
             if (hasBorder)
             {

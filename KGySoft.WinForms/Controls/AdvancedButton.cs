@@ -1073,6 +1073,7 @@ namespace KGySoft.WinForms.Controls
                 Hovered = isHovered,
                 Pressed = isPressed,
                 IsDefault = IsDefault,
+                Focused = Focused,
                 Text = base.Text,
                 Visible = Visible,
             };

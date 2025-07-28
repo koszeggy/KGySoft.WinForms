@@ -932,6 +932,7 @@ namespace KGySoft.WinForms.Controls
                 Hovered = isHovered,
                 Pressed = isPressed,
                 IsDefault = IsDefault,
+                Focused = Focused,
                 CheckState = Checked ? CheckState.Checked : CheckState.Unchecked,
                 Text = base.Text,
                 Visible = Visible,
