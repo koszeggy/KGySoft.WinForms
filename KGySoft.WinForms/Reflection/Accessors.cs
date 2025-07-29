@@ -20,6 +20,7 @@ using System;
 using System.Collections.Specialized;
 #endif
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
@@ -27,6 +28,8 @@ using System.Windows.Forms;
 
 using KGySoft.Collections;
 using KGySoft.CoreLibraries;
+using KGySoft.Drawing;
+using KGySoft.Drawing.Imaging;
 using KGySoft.Reflection;
 
 #endregion
@@ -158,10 +161,22 @@ namespace KGySoft.WinForms.Reflection
         internal static bool ShowKeyboardCues(this Control control) => (bool)GetPropertyValue(control, "ShowKeyboardCues")!;
 
         internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor)
-            => TryInvokeMethod(c, "PaintBackground", [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color)], e, rectangle, backColor);
+        {
+            if (TryInvokeMethod(c, "PaintBackground", [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color)], e, rectangle, backColor))
+                return;
+
+            // fallback solution (e.g. on Mono): painting a solid background
+            e.Graphics.FillRectangle((backColor.A == Byte.MaxValue ? backColor : backColor.ToColor32().ToOpaque().ToColor()).GetBrush(), rectangle);
+        }
 
         internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset)
-            => TryInvokeMethod(c, "PaintBackground", [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point)], e, rectangle, backColor, scrollOffset);
+        {
+            if (TryInvokeMethod(c, "PaintBackground", [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point)], e, rectangle, backColor, scrollOffset))
+                return;
+
+            // fallback solution (e.g. on Mono): painting a solid background
+            e.Graphics.FillRectangle((backColor.A == Byte.MaxValue ? backColor : backColor.ToColor32().ToOpaque().ToColor()).GetBrush(), rectangle);
+        }
 
         internal static void OnPaint(this Control control, PaintEventArgs e) => InvokeMethod(control, "OnPaint", e);
 
@@ -220,8 +235,41 @@ namespace KGySoft.WinForms.Reflection
                 g, backgroundImage, backColor, backgroundImageLayout, bounds, clipRect, scrollOffset, rightToLeft);
 
         internal static void DrawImageColorized(this Graphics graphics, Image image, Rectangle destination, Color replaceBlack)
-            => TryInvokeMethod(typeof(ControlPaint), "DrawImageColorized", [typeof(Graphics), typeof(Image), typeof(Rectangle), typeof(Color)],
-                graphics, image, destination, replaceBlack);
+        {
+            if (TryInvokeMethod(typeof(ControlPaint), "DrawImageColorized", [typeof(Graphics), typeof(Image), typeof(Rectangle), typeof(Color)],
+                    graphics, image, destination, replaceBlack))
+            {
+                return;
+            }
+
+            // fallback solution: manually drawing the recolored image
+            Bitmap? recolored = null;
+            try
+            {
+                if (replaceBlack.ToArgb() != Color.Black.ToArgb())
+                {
+                    recolored = new Bitmap(image);
+                    recolored.ReplaceColor(Color.Black, replaceBlack);
+                }
+
+                graphics.DrawImage(recolored ?? image, destination, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
+            }
+            finally
+            {
+                recolored?.Dispose();
+            }
+        }
+
+        internal static void DrawHighContrastFocusRectangle(this Graphics graphics, Rectangle rectangle, Color color)
+        {
+            if (TryInvokeMethod(typeof(ControlPaint), "DrawHighContrastFocusRectangle", [typeof(Graphics), typeof(Rectangle), typeof(Color)], graphics, rectangle, color))
+                return;
+
+            // fallback solution: manually drawing a simple focus rectangle, ignoring such fine details like rounding, etc.
+            using Pen pen = new(color);
+            pen.DashStyle = DashStyle.Dot;
+            graphics.DrawRectangle(pen, rectangle.X, rectangle.Y, rectangle.Width - 1, rectangle.Height - 1);
+        }
 
         #endregion
 
@@ -330,16 +378,24 @@ namespace KGySoft.WinForms.Reflection
             return method.Invoke(instance, parameters);
         }
 
-        private static object? TryInvokeMethod(object instance, string methodName, Type[] parameterTypes, params object?[] parameters)
+        // NOTE: now this method is used for void methods only, so it can return bool to indicate success
+        private static bool TryInvokeMethod(object instance, string methodName, Type[] parameterTypes, params object?[] parameters)
         {
             var method = GetMethodByTypes(instance.GetType(), methodName, new TypesKey(parameterTypes));
-            return method?.Invoke(instance, parameters);
+            if (method == null)
+                return false;
+            method.Invoke(instance, parameters);
+            return true;
         }
 
-        private static object? TryInvokeMethod(Type type, string methodName, Type[] parameterTypes, params object?[] parameters)
+        // NOTE: now this method is used for void methods only, so it can return bool to indicate success
+        private static bool TryInvokeMethod(Type type, string methodName, Type[] parameterTypes, params object?[] parameters)
         {
             var method = GetMethodByTypes(type, methodName, new TypesKey(parameterTypes));
-            return method?.Invoke(null, parameters);
+            if (method == null)
+                return false;
+            method.Invoke(null, parameters);
+            return true;
         }
 
         private static FieldAccessor? GetField(Type type, Type? fieldType, string? fieldNamePattern)
