@@ -1359,6 +1359,14 @@ namespace KGySoft.WinForms.Controls
         void ISupportsFading<ControlAppearanceState>.PaintState(ControlAppearanceState state, PaintEventArgs e)
             => OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
 
+        int ISupportsFadingInternal.GetStandardAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo, int defaultSpeed)
+            => FlatStyle switch
+            {
+                // disabling animation when the popup border or text offset changes
+                FlatStyle.Popup => stateFrom.Hovered != stateTo.Hovered || stateFrom.Pressed != stateTo.Pressed ? 0 : defaultSpeed,
+                _ => defaultSpeed
+            };
+
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {
             dpiChangingCount += 1;

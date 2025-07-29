@@ -31,5 +31,11 @@ namespace KGySoft.WinForms
         FadingOptions FadingAnimationOptions { get; }
 
         #endregion
+
+        #region Methods
+        
+        int GetStandardAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo, int defaultSpeed);
+
+        #endregion
     }
 }

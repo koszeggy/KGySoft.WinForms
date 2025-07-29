@@ -1833,7 +1833,8 @@ namespace KGySoft.WinForms.Controls
             // Image
             PaintImage(e, image);
 
-            if (state.Enabled && state.Focused && ShowFocusCues)
+            // System FlatStyle does not animate the focus rectangle, so we don't take Focused from state to behave the same way
+            if (state.Enabled && /*state.*/Focused && ShowFocusCues)
                 DrawFocusRectangle(e);
         }
 
@@ -1857,19 +1858,20 @@ namespace KGySoft.WinForms.Controls
                 ControlPaint.DrawBorder3D(e.Graphics, backRect, Border3DStyle.Raised);
 
                 // with classic state selection is drawn even if button is hovered
-                if (state.Enabled && (state.Focused || state.IsDefault))
+                if (state.Enabled && (Focused || state.IsDefault))
                     e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
             }
             else // normal state
             {
-                if (state.Enabled && (state.Focused || state.IsDefault))
+                if (state.Enabled && (Focused || state.IsDefault))
                     e.Graphics.DrawPath(selectedFramePen, SelectionBorder);
             }
 
             // Image
             PaintImage(e, image);
 
-            if (state.Enabled && state.Focused && ShowFocusCues)
+            // Not taking Focused from state so it will not participate in fading animations (we allow it only for flat appearance)
+            if (state.Enabled && Focused && ShowFocusCues)
                 DrawFocusRectangle(e);
         }
 
@@ -2401,6 +2403,14 @@ namespace KGySoft.WinForms.Controls
 
         void ISupportsFading<ControlAppearanceState>.PaintState(ControlAppearanceState state, PaintEventArgs e)
             => OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
+
+        int ISupportsFadingInternal.GetStandardAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo, int defaultSpeed)
+            => FlatStyle switch
+            {
+                // disabling animation when the popup border or text offset changes
+                FlatStyle.Popup => stateFrom.Hovered != stateTo.Hovered || stateFrom.Pressed != stateTo.Pressed ? 0 : defaultSpeed,
+                _ => defaultSpeed
+            };
 
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {

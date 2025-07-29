@@ -90,7 +90,7 @@ namespace KGySoft.WinForms.Controls
         private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
-        private bool maskPaint;
+        private bool ignoreNextPaint;
         private bool hasPaintError;
 
         private bool suppressFontChanged;
@@ -586,9 +586,10 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            if (maskPaint)
+            if (ignoreNextPaint)
             {
-                maskPaint = false;
+                ignoreNextPaint = false;
+                Invalidate();
                 return;
             }
 
@@ -738,10 +739,10 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            // masking next paint if check state will change; otherwise, because of double paints,
-            // no animation is performed due to wrong transitions (unchecked hot -> unchecked pressed -> unchecked hot (masked) -> checked hot)
-            if (isPressed && isHovered && Appearance == Appearance.Normal)
-                maskPaint = true;
+            // ignoring next paint if check state will change; otherwise, because of double paints,
+            // no animation is performed due to wrong transitions (unchecked hot -> unchecked pressed -> unchecked hot (ignored) -> checked hot)
+            if (isPressed && isHovered)
+                ignoreNextPaint = true;
 
             isPressed = false;
             isMouseDown = false;
@@ -784,11 +785,9 @@ namespace KGySoft.WinForms.Controls
             {
                 isPressed = false;
 
-                // masking next paint if check state will change; otherwise, because of double paints,
-                // no animation is performed due to wrong transitions (unchecked hot -> unchecked pressed -> unchecked hot (masked) -> checked hot)
-                if (Appearance == Appearance.Normal)
-                    maskPaint = true;
-                //Invalidate();
+                // ignoring next paint if check state will change; otherwise, because of double paints,
+                // no animation is performed due to wrong transitions (unchecked hot -> unchecked pressed -> unchecked hot (ignored) -> checked hot)
+                ignoreNextPaint = true;
             }
 
             base.OnKeyUp(e);
@@ -889,7 +888,7 @@ namespace KGySoft.WinForms.Controls
 
         private ControlAppearanceState GetAppearance()
         {
-            int partId = (int)(Appearance == Appearance.Normal ? BUTTONPARTS.BP_CHECKBOX : BUTTONPARTS.BP_PUSHBUTTON);
+            int partId = (int)(Appearance == Appearance.Normal || FlatStyle != FlatStyle.Standard ? BUTTONPARTS.BP_CHECKBOX : BUTTONPARTS.BP_PUSHBUTTON);
             int stateId = GetSystemState();
             bool isEnabled = Enabled;
             Color foreColor = ForeColor;
@@ -916,7 +915,8 @@ namespace KGySoft.WinForms.Controls
 
         private int GetSystemState()
         {
-            if (Appearance == Appearance.Normal)
+            // For non-standard FlatStyles, we use CheckBox states even for Button appearance so we will have nonzero transition speeds for CheckState changes.
+            if (Appearance == Appearance.Normal || FlatStyle != FlatStyle.Standard)
             {
                 CheckBoxState result = CheckBoxState.UncheckedNormal;
                 if (!Enabled)
@@ -937,13 +937,15 @@ namespace KGySoft.WinForms.Controls
             if (!Enabled)
                 return (int)PUSHBUTTONSTATES.PBS_DISABLED;
 
-            if (isPressed || CheckState != CheckState.Unchecked)
+            // NOTE: The base CheckBox renders both checked and intermediate states as pressed, making them indistinguishable.
+            // Mapping the checked state to HOT, so a checked button remains distinguishable even in high contrast mode with visual styles.
+            if (isPressed || CheckState == CheckState.Indeterminate)
                 return (int)PUSHBUTTONSTATES.PBS_PRESSED;
 
-            if (isHovered)
+            if (isHovered || CheckState == CheckState.Checked)
                 return (int)PUSHBUTTONSTATES.PBS_HOT;
 
-            if (IsDefault)
+            if (Focused)
                 return (int)PUSHBUTTONSTATES.PBS_DEFAULTED;
 
             return (int)PUSHBUTTONSTATES.PBS_NORMAL;
@@ -1040,6 +1042,15 @@ namespace KGySoft.WinForms.Controls
 
         void ISupportsFading<ControlAppearanceState>.PaintState(ControlAppearanceState state, PaintEventArgs e)
             => OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
+
+        int ISupportsFadingInternal.GetStandardAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo, int defaultSpeed)
+            => FlatStyle switch
+            {
+                // disabling animation when the popup border or text offset changes
+                FlatStyle.Popup => stateFrom.Hovered != stateTo.Hovered || Appearance == Appearance.Button && (stateFrom.Pressed != stateTo.Pressed || stateFrom.CheckState != stateTo.CheckState) ? 0 : defaultSpeed,
+                FlatStyle.Flat => Appearance == Appearance.Button && stateFrom.CheckState != stateTo.CheckState ? 0 : defaultSpeed,
+                _ => defaultSpeed,
+            };
 
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {

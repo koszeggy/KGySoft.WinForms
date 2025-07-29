@@ -127,7 +127,7 @@ namespace KGySoft.WinForms.Controls
                         break;
 
                     case CheckState.Indeterminate:
-                        backColor = MixedColor(colors.HighContrast ? colors.ButtonShadow : colors.LowHighlight, colors.ButtonFace);
+                        backColor = MixedColor(colors.HighContrast ? colors.ButtonShadow : colors.LowHighlight, colors.BackColor);
                         break;
                 }
             }
@@ -188,7 +188,7 @@ namespace KGySoft.WinForms.Controls
                         backColor = colors.LowButtonFace;
                 }
                 else if (state.CheckState == CheckState.Indeterminate)
-                    backColor = MixedColor(colors.ButtonFace, colors.LowButtonFace);
+                    backColor = MixedColor(colors.BackColor, colors.LowButtonFace);
                 else
                     backColor = colors.LowButtonFace;
 
@@ -241,7 +241,7 @@ namespace KGySoft.WinForms.Controls
                         break;
 
                     case CheckState.Indeterminate:
-                        backColor = MixedColor(ButtonInstance.FlatAppearance.CheckedBackColor, colors.ButtonFace);
+                        backColor = MixedColor(ButtonInstance.FlatAppearance.CheckedBackColor, colors.BackColor);
                         break;
                 }
             }
@@ -254,7 +254,7 @@ namespace KGySoft.WinForms.Controls
                         break;
 
                     case CheckState.Indeterminate:
-                        backColor = MixedColor(colors.Highlight, colors.ButtonFace);
+                        backColor = MixedColor(colors.Highlight, colors.BackColor);
                         break;
                 }
             }

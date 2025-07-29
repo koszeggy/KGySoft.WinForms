@@ -36,6 +36,7 @@ using ContentAlignment = System.Drawing.ContentAlignment;
 
 namespace KGySoft.WinForms.Controls
 {
+    // This class with its derived classes were taken from the .NET Framework source code and have been modified to support fading animations and to fix some issues.
     internal abstract class ButtonBaseAdapter
     {
         #region Nested classes
@@ -46,11 +47,13 @@ namespace KGySoft.WinForms.Controls
         {
             #region Fields
 
-            internal Color ButtonFace; // state.BackColor or SystemColors.Highlight, depending on IsHighContrastHighlighted
+            internal Color BackColor; // original state.BackColor with no high contrast adjustments
+            internal Color ForeColor; // original state.ForeColor with no high contrast adjustments
+            internal Color ButtonFace; // state.BackColor or SystemColors.Highlight for buttons, depending on IsHighContrastHighlighted
             internal Color ButtonShadow;
             internal Color ButtonShadowDark;
             internal Color ContrastButtonShadow;
-            internal Color WindowText; // state.ForeColor or SystemColors.HighlightText, depending on IsHighContrastHighlighted
+            internal Color WindowText; // state.ForeColor or SystemColors.HighlightText for buttons, depending on IsHighContrastHighlighted
             internal Color Highlight;
             internal Color LowHighlight;
             internal Color LowButtonFace;
@@ -67,8 +70,8 @@ namespace KGySoft.WinForms.Controls
             internal static ColorData Calculate(ButtonBaseAdapter adapter, Graphics graphics, ControlAppearanceState state)
             {
                 ColorData colors = new ColorData();
-                Color backColor = state.BackColor;
-                Color foreColor = state.ForeColor;
+                Color backColor = colors.BackColor = state.BackColor;
+                Color foreColor = colors.ForeColor = state.ForeColor;
                 colors.HighContrast = VisualStyleHelper.HighContrast;
                 colors.IsHighContrastHighlighted = adapter.IsHighContrastHighlighted(state);
                 colors.ButtonFace = backColor;
@@ -962,8 +965,12 @@ namespace KGySoft.WinForms.Controls
             Graphics g = e.Graphics;
             ControlAppearanceState state = e.State;
             DrawText(g, layout, colors, state);
-            if (drawFocus)
-                DrawFocus(g, layout, state);
+
+            // Taking Focused from state would allow fading the focus rectangle as well.
+            // Only RadioButton does that with System FlayStyle, whereas Button and CheckBox do not.
+            // We never allow fading the regular focus rectangle (only for flat buttons)
+            if (drawFocus && /*state.Focused*/ButtonInstance.Focused)
+                DrawFocus(g, layout, colors);
         }
 
         protected void PaintImage(PaintStateEventArgs e, LayoutData layout)
@@ -982,15 +989,17 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Draws the focus rectangle if the control has focus.
         /// </summary>
-        private void DrawFocus(Graphics g, LayoutData layout, ControlAppearanceState state)
+        private void DrawFocus(Graphics g, LayoutData layout, ColorData colors)
         {
-            if (!state.Focused || !ShowFocusCues)
+            if (!ShowFocusCues)
                 return;
-
             Rectangle r = layout.Focus;
             for (int i = 0; i < layout.FocusWidth; i++)
             {
-                ControlPaint.DrawFocusRectangle(g, r, state.ForeColor, state.BackColor);
+                if (colors.IsHighContrastHighlighted)
+                    g.DrawHighContrastFocusRectangle(r, colors.WindowText);
+                else
+                    ControlPaint.DrawFocusRectangle(g, r, colors.WindowText, colors.ButtonFace);
                 r.Inflate(-1, -1);
             }
         }

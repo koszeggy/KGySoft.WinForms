@@ -91,7 +91,7 @@ namespace KGySoft.WinForms.Controls
         private int fadingAnimationDefaultSpeed = 500;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
         private bool left;
-        private bool maskPaint;
+        private bool ignoreNextPaint;
         private bool entered;
         private bool hasPaintError;
 
@@ -588,22 +588,23 @@ namespace KGySoft.WinForms.Controls
             }
 
             // when focus is changed with cursor multiple paints occur that may cause flickering
-            // leave -> focused (masked) -> not focused
-            // entered -> not focused unchecked (masked) -> not focused checked (masked) -> focused
+            // leave -> focused (ignored) -> not focused
+            // entered -> not focused unchecked (ignored) -> not focused checked (ignored) -> focused
             if (left || entered)
             {
                 bool focused = Focused;
                 if (left && focused || entered && !focused)
-                    maskPaint = true;
+                    ignoreNextPaint = true;
 
                 left = false;
-                if (focused) // clearing entered only when focused because 2 paints have to be masked
+                if (focused) // clearing entered only when focused because 2 paints have to be ignored
                     entered = false;
             }
 
-            if (maskPaint)
+            if (ignoreNextPaint)
             {
-                maskPaint = false;
+                ignoreNextPaint = false;
+                Invalidate();
                 return;
             }
 
@@ -914,7 +915,7 @@ namespace KGySoft.WinForms.Controls
 
         private ControlAppearanceState GetAppearance()
         {
-            int partId = (int)(Appearance == Appearance.Normal ? BUTTONPARTS.BP_RADIOBUTTON : BUTTONPARTS.BP_PUSHBUTTON);
+            int partId = (int)(Appearance == Appearance.Normal || FlatStyle != FlatStyle.Standard ? BUTTONPARTS.BP_RADIOBUTTON : BUTTONPARTS.BP_PUSHBUTTON);
             int stateId = GetSystemState();
             bool isEnabled = Enabled;
             Color foreColor = ForeColor;
@@ -941,7 +942,8 @@ namespace KGySoft.WinForms.Controls
 
         private int GetSystemState()
         {
-            if (Appearance == Appearance.Normal)
+            // For non-standard FlatStyles, we use RadioButton states even for Button appearance so we will have nonzero transition speeds for Checked changes.
+            if (Appearance == Appearance.Normal || FlatStyle != FlatStyle.Standard)
             {
                 RadioButtonState result = RadioButtonState.UncheckedNormal;
                 if (!Enabled)
@@ -960,13 +962,15 @@ namespace KGySoft.WinForms.Controls
             if (!Enabled)
                 return (int)PUSHBUTTONSTATES.PBS_DISABLED;
 
-            if (isPressed || Checked)
+            // NOTE: The base RadioButton renders checked state with Button appearance as pressed, which is not distinguishable from normal state
+            // in high contrast mode when visual styles are enabled, so using the HOT state for a checked radio button instead.
+            if (isPressed)
                 return (int)PUSHBUTTONSTATES.PBS_PRESSED;
 
-            if (isHovered)
+            if (isHovered || Checked)
                 return (int)PUSHBUTTONSTATES.PBS_HOT;
 
-            if (IsDefault)
+            if (Focused)
                 return (int)PUSHBUTTONSTATES.PBS_DEFAULTED;
 
             return (int)PUSHBUTTONSTATES.PBS_NORMAL;
@@ -1063,6 +1067,15 @@ namespace KGySoft.WinForms.Controls
 
         void ISupportsFading<ControlAppearanceState>.PaintState(ControlAppearanceState state, PaintEventArgs e)
             => OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
+
+        int ISupportsFadingInternal.GetStandardAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo, int defaultSpeed)
+            => FlatStyle switch
+            {
+                // disabling animation when the popup border or text offset changes
+                FlatStyle.Popup => stateFrom.Hovered != stateTo.Hovered || Appearance == Appearance.Button && (stateFrom.Pressed != stateTo.Pressed || stateFrom.CheckState != stateTo.CheckState) ? 0 : defaultSpeed,
+                FlatStyle.Flat => Appearance == Appearance.Button && stateFrom.CheckState != stateTo.CheckState ? 0 : defaultSpeed,
+                _ => defaultSpeed,
+            };
 
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {

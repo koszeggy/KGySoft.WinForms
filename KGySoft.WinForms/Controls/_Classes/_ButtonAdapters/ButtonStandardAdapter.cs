@@ -21,7 +21,6 @@ using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
 using KGySoft.WinForms.Reflection;
-using KGySoft.WinForms.WinApi;
 
 #endregion
 
@@ -42,21 +41,9 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Methods
 
-        private static PUSHBUTTONSTATES DetermineState(bool up, ControlAppearanceState state)
-        {
-            if (!up)
-                return PUSHBUTTONSTATES.PBS_PRESSED;
-
-            PUSHBUTTONSTATES result = (PUSHBUTTONSTATES)state.SystemStateId;
-            if (result == PUSHBUTTONSTATES.PBS_DEFAULTED_ANIMATING && !OSHelper.IsWindowsVistaOrLater)
-                result = PUSHBUTTONSTATES.PBS_DEFAULTED;
-
-            return result;
-        }
-
         private static void Draw3DBorderHighContrastRaised(Graphics g, ref Rectangle bounds, ColorData colors)
         {
-            bool stockColor = colors.ButtonFace.ToKnownColor() == SystemColors.Control.ToKnownColor();
+            bool stockColor = colors.BackColor.ToKnownColor() == SystemColors.Control.ToKnownColor();
 
             // Draw counter-clock-wise.
             Point p1 = new Point(bounds.X + bounds.Width - 1, bounds.Y);  // upper inner right.
@@ -68,7 +55,7 @@ namespace KGySoft.WinForms.Controls
             Pen penBottomRight = (stockColor ? SystemColors.ControlDarkDark : colors.ButtonShadowDark).GetPen();
             Pen insetPen = stockColor
                 ? (VisualStyleHelper.HighContrast ? SystemColors.ControlLight : SystemColors.Control).GetPen()
-                : (VisualStyleHelper.HighContrast ? colors.Highlight : colors.ButtonFace).GetPen();
+                : (VisualStyleHelper.HighContrast ? colors.Highlight : colors.BackColor).GetPen();
             Pen bottomRightInsetPen = (stockColor ? SystemColors.ControlDark : colors.ButtonShadow).GetPen();
 
             // top + left
@@ -98,7 +85,6 @@ namespace KGySoft.WinForms.Controls
 
         private static void Draw3DBorderNormal(Graphics g, ref Rectangle bounds, ColorData colors)
         {
-
             // Draw counter-clock-wise.
             Point p1 = new Point(bounds.X + bounds.Width - 1, bounds.Y);  // upper inner right.
             Point p2 = new Point(bounds.X, bounds.Y);  // upper left.
@@ -117,7 +103,7 @@ namespace KGySoft.WinForms.Controls
             g.DrawLine(pen, p4, p1); // right (bottom-up)
 
             // Draw inset
-            pen = colors.ButtonFace.GetPen();
+            pen = colors.BackColor.GetPen();
             p1.Offset(-1, 2);
             p2.Offset(1, 1);
             p3.Offset(1, -1);
@@ -128,9 +114,9 @@ namespace KGySoft.WinForms.Controls
             g.DrawLine(pen, p2, p3); // left(up-down)
 
             // bottom + right inset
-            pen = colors.ButtonFace.ToKnownColor() == SystemColors.Control.ToKnownColor()
+            pen = colors.BackColor.ToKnownColor() == SystemColors.Control.ToKnownColor()
                 ? SystemPens.ControlLight
-                : colors.ButtonFace.GetPen();
+                : colors.BackColor.GetPen();
 
             p1.Offset(0, -1); // need to paint last pixel too.
             g.DrawLine(pen, p3, p4); // bottom(left-right)
@@ -139,7 +125,7 @@ namespace KGySoft.WinForms.Controls
 
         private static void Draw3DBorderRaised(Graphics g, ref Rectangle bounds, ColorData colors)
         {
-            bool stockColor = colors.ButtonFace.ToKnownColor() == SystemColors.Control.ToKnownColor();
+            bool stockColor = colors.BackColor.ToKnownColor() == SystemColors.Control.ToKnownColor();
 
             // Draw counter-clock-wise.
             Point p1 = new Point(bounds.X + bounds.Width - 1, bounds.Y);  // upper inner right.
@@ -168,7 +154,7 @@ namespace KGySoft.WinForms.Controls
 
             pen = (stockColor
                 ? VisualStyleHelper.HighContrast ? SystemColors.ControlLight : SystemColors.Control
-                : colors.ButtonFace).GetPen();
+                : colors.BackColor).GetPen();
 
             // top + left inset
             g.DrawLine(pen, p1, p2); // top (right-left)
@@ -213,6 +199,9 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
+        protected override bool IsHighContrastHighlighted(ControlAppearanceState state)
+            => state.CheckState == CheckState.Unchecked && base.IsHighContrastHighlighted(state);
+
         protected override LayoutOptions Layout(Graphics graphics, ControlAppearanceState state) => PaintLayout(state, false);
 
         #endregion
@@ -231,11 +220,10 @@ namespace KGySoft.WinForms.Controls
         private void PaintThemedButtonBackground(PaintStateEventArgs e, Rectangle bounds, bool up)
         {
             ControlAppearanceState state = e.State;
-            PUSHBUTTONSTATES buttonState = DetermineState(up, state);
-            if (ButtonRenderer.IsBackgroundPartiallyTransparent((PushButtonState)buttonState))
+            if (ButtonRenderer.IsBackgroundPartiallyTransparent((PushButtonState)state.SystemStateId))
                 ButtonRenderer.DrawParentBackground(e.Graphics, bounds, ButtonInstance);
 
-            VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, (int)buttonState, ButtonInstance.ClientRectangle);
+            VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, ButtonInstance.ClientRectangle);
             bounds.Inflate(-ButtonBorderSize, -ButtonBorderSize);
             if (!ButtonInstance.UseVisualStyleBackColor)
             {
@@ -276,26 +264,17 @@ namespace KGySoft.WinForms.Controls
 
                 if (state.CheckState == CheckState.Indeterminate)
                 {
-                    using Brush brush = CreateDitherBrush(colors.Highlight, state.BackColor);
+                    using Brush brush = CreateDitherBrush(colors.Highlight, colors.BackColor);
                     PaintButtonBackground(e, clientRectangle, brush);
                 }
                 else
                     PaintButtonBackground(e, clientRectangle, null);
             }
-            
-            PaintImage(e, layout);
-            if (up & IsHighContrastHighlighted(state))
-            {
-                PaintField(e, layout, colors, false);
 
-                // Drawing focus rectangle of HighlightText color
-                // NOTE: not quite the same as ControlPaint.DrawHighContrastFocusRectangle in the original code, which is an internal method, because the public
-                // ControlPaint.DrawFocusRectangle ignores foreColor. It still makes a different from the default PaintField below, which passes state.BackColor.
-                if (state.Focused && ShowFocusCues)
-                    ControlPaint.DrawFocusRectangle(g, layout.Focus, SystemColors.HighlightText, SystemColors.Highlight);
-            }
-            else
-                PaintField(e, layout, colors, true);
+            PaintImage(e, layout);
+
+            // The original code may call ControlPaint.DrawHighContrastFocusRectangle here, which is handled in DrawFocus called from PaintField.
+            PaintField(e, layout, colors, true);
             
             if (!renderWithVisualStyles)
             {

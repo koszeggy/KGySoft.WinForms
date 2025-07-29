@@ -306,19 +306,20 @@ namespace KGySoft.WinForms.Controls
                 return isEnabledChangeOnly ? base.GetSpeed(prevState, newState) : 0;
             }
 
-            if (speedCache.TryGetValue(((long)newState.SystemPartId << 32) | (uint)(prevState.SystemStateId << 16) | (uint)newState.SystemStateId, out int speed))
-                return speed;
+            if (!speedCache.TryGetValue(((long)newState.SystemPartId << 32) | (uint)(prevState.SystemStateId << 16) | (uint)newState.SystemStateId, out int speed))
+            {
+                IntPtr hTheme = UxTheme.OpenThemeDataGlobal(className);
+                if (!UxTheme.TryGetThemeTransitionDuration(hTheme, newState.SystemPartId, prevState.SystemStateId, newState.SystemStateId, Constants.TMT_TRANSITIONDURATIONS, out speed))
+                    return base.GetSpeed(prevState, newState);
 
-            IntPtr hTheme = UxTheme.OpenThemeDataGlobal(className);
-            if (!UxTheme.TryGetThemeTransitionDuration(hTheme, newState.SystemPartId, prevState.SystemStateId, newState.SystemStateId, Constants.TMT_TRANSITIONDURATIONS, out speed))
-                return base.GetSpeed(prevState, newState);
+                // if speed is 0, trying other direction (eg. default and default_animating states)
+                if (speed == 0)
+                    UxTheme.TryGetThemeTransitionDuration(hTheme, newState.SystemPartId, newState.SystemStateId, prevState.SystemStateId, Constants.TMT_TRANSITIONDURATIONS, out speed);
 
-            // if speed is 0, trying other direction (eg. default and default_animating states)
-            if (speed == 0)
-                UxTheme.TryGetThemeTransitionDuration(hTheme, newState.SystemPartId, newState.SystemStateId, prevState.SystemStateId, Constants.TMT_TRANSITIONDURATIONS, out speed);
+                speedCache[((long)newState.SystemPartId << 32) | (uint)(prevState.SystemStateId << 16) | (uint)newState.SystemStateId] = speed;
+            }
 
-            speedCache[((long)newState.SystemPartId << 32) | (uint)(prevState.SystemStateId << 16) | (uint)newState.SystemStateId] = speed;
-            return speed;
+            return Host.GetStandardAnimationSpeed(prevState, newState, speed);
         }
 
         /// <summary>

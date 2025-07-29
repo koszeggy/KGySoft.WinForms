@@ -1207,6 +1207,8 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         void ISupportsFading<ControlAppearanceState>.PaintState(ControlAppearanceState state, PaintEventArgs e)
             => OnPaintState(new PaintStateEventArgs(e.Graphics, e.ClipRectangle, state));
 
+        int ISupportsFadingInternal.GetStandardAnimationSpeed(ControlAppearanceState stateFrom, ControlAppearanceState stateTo, int defaultSpeed) => defaultSpeed;
+
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {
             dpiChangingCount += 1;

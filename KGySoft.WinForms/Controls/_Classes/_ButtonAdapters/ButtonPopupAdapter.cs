@@ -54,8 +54,8 @@ namespace KGySoft.WinForms.Controls
             PaintImage(e, layout);
             PaintField(e, layout, colors, true);
             clientRectangle.Inflate(1, 1);
-            DrawDefaultBorder(g, clientRectangle, colors.HighContrast ? colors.WindowText : colors.WindowFrame, state.IsDefault);
-            ControlPaint.DrawBorder(g, clientRectangle, colors.HighContrast ? colors.WindowText : colors.ButtonShadow, ButtonBorderStyle.Solid);
+            DrawDefaultBorder(g, clientRectangle, colors.HighContrast ? colors.ForeColor : colors.WindowFrame, state.IsDefault);
+            ControlPaint.DrawBorder(g, clientRectangle, colors.HighContrast ? colors.ForeColor : colors.ButtonShadow, ButtonBorderStyle.Solid);
         }
 
         internal override void PaintOver(PaintStateEventArgs e)
@@ -67,7 +67,7 @@ namespace KGySoft.WinForms.Controls
             Rectangle clientRectangle = ButtonInstance.ClientRectangle;
             if (state.CheckState == CheckState.Indeterminate)
             {
-                using Brush brush = CreateDitherBrush(colors.Highlight, state.BackColor);
+                using Brush brush = CreateDitherBrush(colors.Highlight, colors.BackColor);
                 PaintButtonBackground(e, clientRectangle, brush);
             }
             else
@@ -77,7 +77,7 @@ namespace KGySoft.WinForms.Controls
                 clientRectangle.Inflate(-1, -1);
             PaintImage(e, layout);
             PaintField(e, layout, colors, true);
-            DrawDefaultBorder(g, clientRectangle, colors.HighContrast ? colors.WindowText : colors.ButtonShadow, state.IsDefault);
+            DrawDefaultBorder(g, clientRectangle, colors.HighContrast ? colors.ForeColor : colors.ButtonShadow, state.IsDefault);
             if (VisualStyleHelper.HighContrast)
             {
                 Pen pen = colors.WindowFrame.GetPen();
@@ -106,7 +106,7 @@ namespace KGySoft.WinForms.Controls
             Rectangle clientRectangle = ButtonInstance.ClientRectangle;
             if (state.CheckState == CheckState.Indeterminate)
             {
-                using Brush brush = CreateDitherBrush(colors.Highlight, state.BackColor);
+                using Brush brush = CreateDitherBrush(colors.Highlight, colors.BackColor);
                 PaintButtonBackground(e, clientRectangle, brush);
             }
             else
@@ -116,9 +116,9 @@ namespace KGySoft.WinForms.Controls
                 clientRectangle.Inflate(-1, -1);
             PaintImage(e, layout);
             PaintField(e, layout, colors, true);
-            DrawDefaultBorder(g, clientRectangle, colors.HighContrast ? colors.WindowText : colors.ButtonShadow, state.IsDefault);
+            DrawDefaultBorder(g, clientRectangle, colors.HighContrast ? colors.ForeColor : colors.ButtonShadow, state.IsDefault);
             if (state.CheckState == CheckState.Unchecked)
-                DrawFlatBorder(g, clientRectangle, colors.HighContrast ? colors.WindowText : colors.ButtonShadow);
+                DrawFlatBorder(g, clientRectangle, colors.HighContrast ? colors.ForeColor : colors.ButtonShadow);
             else
                 Draw3DLiteBorder(g, clientRectangle, colors, false);
         }
