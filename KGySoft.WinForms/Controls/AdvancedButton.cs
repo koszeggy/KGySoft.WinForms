@@ -81,6 +81,7 @@ namespace KGySoft.WinForms.Controls
         private bool isImageUpToDate = true;
         private bool isAlternativeDefaultImage;
         private bool hasPaintError;
+        private bool isLoaded;
         private Image? currentImage; // the actual displayed image, including the shield icon when base.Image is null
         private FlatStyle lastFlatStyle = FlatStyle.Standard; // the explicitly set or the detected flat style changed in base
         private FlatStyle reportedFlatStyle = FlatStyle.Standard; // the flat style that is reported by the control (can be different when base does not support System)
@@ -218,7 +219,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 base.FlatStyle = lastFlatStyle = reportedFlatStyle = value;
-                OnFlatStyleChanged(false);
+                OnFlatStyleChanged(true);
             }
         }
 
@@ -711,6 +712,20 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <inheritdoc />
+        protected override void OnCreateControl()
+        {
+            base.OnCreateControl();
+            isLoaded = true;
+        }
+
+        /// <inheritdoc />
+        protected override void OnHandleDestroyed(EventArgs e)
+        {
+            isLoaded = false;
+            base.OnHandleDestroyed(e);
+        }
+
+        /// <inheritdoc />
         protected override void OnEnabledChanged(EventArgs e)
         {
             base.OnEnabledChanged(e);
@@ -731,7 +746,7 @@ namespace KGySoft.WinForms.Controls
                     if (base.FlatStyle != lastFlatStyle)
                     {
                         lastFlatStyle = reportedFlatStyle = base.FlatStyle;
-                        OnFlatStyleChanged(true);
+                        OnFlatStyleChanged(false);
                     }
 
                     CheckDpiChange();
@@ -806,7 +821,7 @@ namespace KGySoft.WinForms.Controls
             if (base.FlatStyle != lastFlatStyle)
             {
                 lastFlatStyle = reportedFlatStyle = base.FlatStyle;
-                OnFlatStyleChanged(true);
+                OnFlatStyleChanged(false);
                 invalidated = true;
             }
 
@@ -1143,13 +1158,14 @@ namespace KGySoft.WinForms.Controls
                 isAlternativeDefaultImage = false;
             }
         }
-
+        
         /// <summary>
         /// Checks image consistency. Returns true if image update has been performed.
         /// </summary>
         private bool CheckImage()
         {
-            if (!IsHandleCreated && base.FlatStyle == FlatStyle.System)
+            // While isLoaded is true, it is dangerous to change the FlatStyle, because it may cause an exception when the control is created.
+            if ((!IsHandleCreated || !isLoaded) && base.FlatStyle == FlatStyle.System)
                 return true;
 
             // if image is up-to-date checking consistency only (to handle setting base.Image)
@@ -1166,7 +1182,7 @@ namespace KGySoft.WinForms.Controls
                 base.FlatStyle = lastFlatStyle = FlatStyle.System;
 
             // Image > Elevated > no image
-            if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater)
+            if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater && !OSHelper.IsMono)
                 this.SetSystemSize(new Size(Int32.MinValue, Int32.MinValue));
 
             Invalidate();
@@ -1183,7 +1199,7 @@ namespace KGySoft.WinForms.Controls
                         return true;
                     }
 
-                    Bitmap bmp = base.Image as Bitmap ?? new Bitmap(base.Image);
+                    Bitmap bmp = base.Image as Bitmap ?? new Bitmap(base.Image); // TODO
                     User32.SendMessage(Handle, Constants.BM_SETIMAGE, new IntPtr(1), bmp.GetHicon());
                 }
 
@@ -1206,9 +1222,10 @@ namespace KGySoft.WinForms.Controls
                     return true;
                 }
 
-                User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, new IntPtr(1));
+                if (IsHandleCreated)
+                    User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, new IntPtr(1));
             }
-            else if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater)
+            else if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater && IsHandleCreated)
             {
                 User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, IntPtr.Zero);
             }
@@ -1216,7 +1233,7 @@ namespace KGySoft.WinForms.Controls
             return true;
         }
 
-        private void OnFlatStyleChanged(bool ignoreCheckImage)
+        private void OnFlatStyleChanged(bool checkImage)
         {
             CheckDefaultAnimation();
 
@@ -1229,7 +1246,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             isImageUpToDate = false;
-            if (!ignoreCheckImage)
+            if (checkImage)
                 CheckImage();
 
             if (base.FlatStyle == FlatStyle.System)
