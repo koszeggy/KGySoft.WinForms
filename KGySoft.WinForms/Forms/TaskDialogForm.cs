@@ -886,40 +886,31 @@ namespace KGySoft.WinForms.Forms
             ResetRadioButtonPaddings(cfg);
         }
 
-        private void ResetChecksWidth(Configuration cfg, bool minSize)
+        private void ResetChecksWidth(Configuration cfg)
         {
-            if (!minSize && !cfg.HasButtons)
+            // already 100% width is occupied by either the checkbox and the expando button, or the buttons
+            if (!cfg.HasButtons || !cfg.HasDetails && !cfg.HasVerification)
                 return;
 
-            int maxWidth = pnlMainControls.Width / 2;
+            // Mimicking native TaskDialog behavior: if we show the expando button, the checkbox and the expando button are not
+            // allowed to occupy more than half of the available width.
+            int maxWidth = !cfg.HasDetails ? pnlMainControls.Width : pnlMainControls.Width / 2;
             int desiredWidth = 0;
 
-            // not calculating the minimum size requirement if there are no custom buttons and not the minimum size is set
-            if (minSize || !cfg.HasCommandLinks)
-            {
-                // setting minimum size so buttons may consume the rest place: counting desiredWidth from checks
-                if (cfg.HasVerification)
-                    desiredWidth = chbCheckBox.GetPreferredSize(Size.Empty).Width + chbCheckBox.Margin.Horizontal + pnlChecks.Margin.Horizontal;
+            // counting initial desiredWidth from checkbox
+            if (cfg.HasVerification)
+                desiredWidth = chbCheckBox.GetPreferredSize(Size.Empty).Width + chbCheckBox.Margin.Horizontal + pnlChecks.Margin.Horizontal;
 
-                // Expando texts are calculated even if invisible, so checks panel is not rearranged when details text appears
-                if (desiredWidth < maxWidth)
-                    desiredWidth = Math.Max(desiredWidth, btnShowHideDetails.GetPreferredSize(Size.Empty).Width) + btnShowHideDetails.Margin.Horizontal + pnlChecks.Margin.Horizontal;
-            }
+            // Expando texts are calculated even if invisible, so checks panel is not rearranged when details text appears
+            if (desiredWidth < maxWidth)
+                desiredWidth = Math.Max(desiredWidth, btnShowHideDetails.GetPreferredSize(Size.Empty).Width) + btnShowHideDetails.Margin.Horizontal + pnlChecks.Margin.Horizontal;
 
-            if (!minSize)
-            {
-                // Sharing the remaining size that is not needed by the buttons.
-                // This may provide enough place for changing show/hide details or checkbox text, and also for changing button texts/elevated statuses
-                // Counting desiredWidth from buttons. Precondition: form width and buttons width is calculated now.
-                int buttonsDesiredWidth = pnlButtons.Width + pnlButtons.Margin.Horizontal;
+            // Including button sizes. Precondition: form width and button widths are calculated now.
+            int buttonsDesiredWidth = pnlButtons.Width + pnlButtons.Margin.Horizontal;
 
-                if (cfg.HasCommandLinks)
-                    // There are no custom buttons: offering the maximum remaining size to the checkbox and the expando button
-                    desiredWidth = ClientSize.Width - buttonsDesiredWidth;
-                else
-                    // halving the remaining size between buttons and the checkbox/expando button
-                    desiredWidth = (desiredWidth + ClientSize.Width - buttonsDesiredWidth) / 2;
-            }
+            // There isn't enough place for everyone without wrapping
+            if (desiredWidth + buttonsDesiredWidth > pnlMainControls.Width)
+                maxWidth /= 2;
 
             pnlMainControls.ColumnStyles[0].Width = Math.Min(maxWidth, desiredWidth);
         }
@@ -981,7 +972,7 @@ namespace KGySoft.WinForms.Forms
                         }
 
                         if (dialogState != TaskDialogStatus.Initializing)
-                            ResetChecksWidth(cfg, false);
+                            ResetChecksWidth(cfg);
                     }
                 }
 
@@ -1502,10 +1493,6 @@ namespace KGySoft.WinForms.Forms
                 SetWidth(Math.Min(desiredWidth + widthClientDiff, screenWidth), suggestedBounds, screen);
             }
 
-            // setting pnlChecks minimum width (It always has priority regardless of form width. Its maximum size is smaller than minimum form size so it is ok)
-            if (cfg.HasVerification || cfg.HasDetails)
-                ResetChecksWidth(cfg, true);
-
             // resetting button sizes along with max size so they will not be wider than text
             if (cfg.HasButtons)
             {
@@ -1526,9 +1513,8 @@ namespace KGySoft.WinForms.Forms
                 }
             }
 
-            // reset pnlChecks maximum width
             if (cfg.HasVerification || cfg.HasDetails)
-                ResetChecksWidth(cfg, false);
+                ResetChecksWidth(cfg);
         }
 
         private void SetWidth(int width, Rectangle suggestedBounds, Screen screen)
