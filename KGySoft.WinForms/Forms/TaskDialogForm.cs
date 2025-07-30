@@ -336,13 +336,9 @@ namespace KGySoft.WinForms.Forms
                     {
                         if (OSHelper.IsWindowsVistaOrLater)
                         {
-                            // ISSUE: the following throws an exception because only FontProperty.GlyphFont is accepted by VisualStyleRenderer.GetFont
-                            //var renderer = new VisualStyleRenderer(classTaskDialog, Constants.TDLG_MAININSTRUCTIONPANE, 0);
-                            //using Graphics g = Graphics.FromHwnd(Handle);
-                            //mainInstructionsFont = renderer.GetFont(g, (FontProperty)Constants.TMT_FONT);
-
                             try
                             {
+                                // VisualStyleRenderer throws an exception because only FontProperty.GlyphFont is accepted by VisualStyleRenderer.GetFont
                                 mainInstructionsFont = VisualStyleHelper.GetFont(VisualStyleHelper.TaskDialogTheme, Constants.TDLG_MAININSTRUCTIONPANE)
                                     ?? new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
                             }
@@ -726,6 +722,10 @@ namespace KGySoft.WinForms.Forms
                 StartPosition = FormStartPosition.CenterParent;
             else
                 StartPosition = FormStartPosition.CenterScreen;
+
+            pbProgress.Style = !VisualStyleHelper.InitializedWithVisualStyles || OSHelper.IsMono && !OSHelper.IsWindows ? AdvancedProgressBarStyle.Classic
+                : OSHelper.IsWindowsVistaOrLater ? AdvancedProgressBarStyle.System
+                : AdvancedProgressBarStyle.ThemedShiny;
 
             dialogStarted = DateTime.UtcNow; // for full compatibility it should be in ResetSettings
         }
@@ -1714,10 +1714,6 @@ namespace KGySoft.WinForms.Forms
                 lblMainInstruction.ForeColor = foreColor;
                 pnlMainIconBackground.BackColor = pnlMain.BackColor;
             }
-
-            // progress bar
-            if (!OSHelper.IsWindowsVistaOrLater)
-                pbProgress.Style = AdvancedProgressBarStyle.ThemedShiny;
         }
 
         private void ResetMainIconConfiguration(Configuration cfg)
