@@ -184,9 +184,9 @@ namespace KGySoft.WinForms.Example
             td.Options = TaskDialogOptions.UseCommandLinks;
             td.StandardButtons = TaskDialogStandardButtonFlags.Cancel;
 
-            td.Buttons.Add(new TaskDialogButton("FadingDemo", "Custom fading control demo"));
             td.Buttons.Add(new TaskDialogButton("LocalizationExample", "Dynamic localization example"));
             td.Buttons.Add(new TaskDialogButton("MdiDemo", "MDI Form Example"));
+            td.Buttons.Add(new TaskDialogButton("FadingDemo", "Custom fading control demo"));
 
             foreach (TaskDialogButton button in td.Buttons)
             {

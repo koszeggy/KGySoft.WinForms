@@ -31,26 +31,26 @@
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmFadingDemo));
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.textBox1 = new System.Windows.Forms.TextBox();
-            this.panel1 = new System.Windows.Forms.Panel();
-            this.fadingLabelDemo1 = new KGySoft.WinForms.Example.Controls.FadingLabelDemo();
+            this.checkGroupBox1 = new KGySoft.WinForms.Controls.CheckGroupBox();
+            this.fadingPaintControl1 = new KGySoft.WinForms.Example.Controls.FadingPaintControl();
             this.pnlTestArea.SuspendLayout();
             this.groupBox1.SuspendLayout();
-            this.panel1.SuspendLayout();
+            this.checkGroupBox1.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlTestArea
             // 
             this.pnlTestArea.Controls.Add(this.groupBox1);
-            this.pnlTestArea.Controls.Add(this.panel1);
+            this.pnlTestArea.Controls.Add(this.checkGroupBox1);
             this.pnlTestArea.Size = new System.Drawing.Size(512, 534);
             this.pnlTestArea.Controls.SetChildIndex(this.lblInstruction, 0);
-            this.pnlTestArea.Controls.SetChildIndex(this.panel1, 0);
+            this.pnlTestArea.Controls.SetChildIndex(this.checkGroupBox1, 0);
             this.pnlTestArea.Controls.SetChildIndex(this.groupBox1, 0);
             // 
-            // lblInstuction
+            // lblInstruction
             // 
             this.lblInstruction.Size = new System.Drawing.Size(512, 67);
-            this.lblInstruction.Text = resources.GetString("lblInstuction.Text");
+            this.lblInstruction.Text = resources.GetString("lblInstruction.Text");
             // 
             // groupBox1
             // 
@@ -77,26 +77,26 @@
             this.textBox1.Text = resources.GetString("textBox1.Text");
             this.textBox1.WordWrap = false;
             // 
-            // panel1
+            // checkGroupBox1
             // 
-            this.panel1.Controls.Add(this.fadingLabelDemo1);
-            this.panel1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.panel1.Location = new System.Drawing.Point(0, 67);
-            this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(512, 124);
-            this.panel1.TabIndex = 3;
+            this.checkGroupBox1.Controls.Add(this.fadingPaintControl1);
+            this.checkGroupBox1.Dock = System.Windows.Forms.DockStyle.Top;
+            this.checkGroupBox1.Location = new System.Drawing.Point(0, 67);
+            this.checkGroupBox1.Name = "checkGroupBox1";
+            this.checkGroupBox1.Size = new System.Drawing.Size(512, 124);
+            this.checkGroupBox1.Text = "Enabled";
+            this.checkGroupBox1.TabIndex = 3;
             // 
             // fadingLabelDemo1
             // 
-            this.fadingLabelDemo1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.fadingLabelDemo1.FadingAnimationDefaultSpeed = 500;
-            this.fadingLabelDemo1.FadingAnimationsEnabled = true;
-            this.fadingLabelDemo1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.fadingLabelDemo1.Location = new System.Drawing.Point(0, 0);
-            this.fadingLabelDemo1.Name = "fadingLabelDemo1";
-            this.fadingLabelDemo1.Size = new System.Drawing.Size(512, 124);
-            this.fadingLabelDemo1.TabIndex = 2;
-            this.fadingLabelDemo1.Text = resources.GetString("fadingLabelDemo1.Text");
+            this.fadingPaintControl1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.fadingPaintControl1.FadingAnimationDefaultSpeed = 500;
+            this.fadingPaintControl1.FadingAnimationsEnabled = true;
+            this.fadingPaintControl1.Font = new System.Drawing.Font("Tahoma", 12F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.fadingPaintControl1.Location = new System.Drawing.Point(0, 0);
+            this.fadingPaintControl1.Name = "fadingPaintControl1";
+            this.fadingPaintControl1.Size = new System.Drawing.Size(512, 124);
+            this.fadingPaintControl1.TabIndex = 2;
             // 
             // frmFadingDemo
             // 
@@ -109,7 +109,7 @@
             this.pnlTestArea.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
-            this.panel1.ResumeLayout(false);
+            this.checkGroupBox1.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -118,7 +118,7 @@
 
         private System.Windows.Forms.GroupBox groupBox1;
         private System.Windows.Forms.TextBox textBox1;
-        private System.Windows.Forms.Panel panel1;
-        private KGySoft.WinForms.Example.Controls.FadingLabelDemo fadingLabelDemo1;
+        private KGySoft.WinForms.Controls.CheckGroupBox checkGroupBox1;
+        private KGySoft.WinForms.Example.Controls.FadingPaintControl fadingPaintControl1;
     }
 }

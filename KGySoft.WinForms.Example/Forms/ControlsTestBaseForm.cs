@@ -87,8 +87,8 @@ namespace KGySoft.WinForms.Example.Forms
                     if (child == null || child == grdProperties || grdProperties.Contains(child))
                         break;
 
-                    if (child.Parent is CheckGroupBox)
-                        child = child.Parent; // CheckBox or the content panel of CheckGroupBox
+                    //if (child.Parent is CheckGroupBox)
+                    //    child = child.Parent; // CheckBox or the content panel of CheckGroupBox
 
                     // selecting a single object
                     if ((ModifierKeys & Keys.Shift) == 0)

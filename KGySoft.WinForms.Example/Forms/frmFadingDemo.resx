@@ -112,128 +112,132 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <data name="textBox1.Text" xml:space="preserve">
-    <value>internal enum LabelStatus
+    <value>// These properties are participating in fading animation
+internal struct FadingPaintState
 {
-    Normal,
-    Disabled,
-    Hovered
+    internal Color ForeColor { get; set; }
+    internal Color BackColor { get; set; }
+    internal string FadingText { get; set; }
 }
 
-internal class FadingLabelDemo: Label, ISupportsFading&lt;LabelStatus&gt;
+internal class FadingPaintControl : Control, ISupportsFading&lt;FadingPaintState&gt;
 {
-    private LabelStatus state;
-    private FadingPainter&lt;LabelStatus&gt; fadingPainter;
-    private bool isAdjustingPropertyForAppearance;
+    private readonly FadingPainter&lt;FadingPaintState&gt; fadingPainter;
 
-    public FadingLabelDemo()
+    private string nonFadingText;
+    private bool isHovered;
+    
+    public bool FadingAnimationsEnabled { get; set; }
+    public int FadingAnimationDefaultSpeed { get; set; }
+
+    public override string Text
+    {
+        get =&gt; base.Text;
+        set
+        {
+            base.Text = value;
+            Invalidate();
+        }
+    }
+
+    public string NonFadingText
+    {
+        get =&gt; nonFadingText;
+        set
+        {
+            nonFadingText = value;
+            Invalidate();
+        }
+    }
+
+    private Color EffectiveForeColor =&gt; !Enabled ? SystemColors.GrayText
+        : isHovered ? SystemColors.HighlightText
+        : ForeColor;
+
+    FadingPaintState ISupportsFading&lt;FadingPaintState&gt;.State =&gt; GetAppearance();
+
+    public FadingPaintControl()
     {
         FadingAnimationsEnabled = true;
         FadingAnimationDefaultSpeed = 500;
-        fadingPainter = new FadingPainter&lt;LabelStatus&gt;(this, LabelStatus.Normal);
+        fadingPainter = new FadingPainter&lt;FadingPaintState&gt;(this, GetAppearance());
 
-        // Double buffering should be disabled
+        // Double buffering should be disabled to be able to use buffered animations. A double buffer will be used internally by FadingPainter.
         SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
+
+        Text = @"This control uses fading animations when its hovered status, ForeColor, BackColor or Text changes.";
+        NonFadingText = "This text does not participate in fading animations";
+    }
+
+    public int GetFadingAnimationSpeed(FadingPaintState stateFrom, FadingPaintState stateTo) =&gt; FadingAnimationDefaultSpeed;
+
+    // Every painting should be performed here. You can turn it into an explicit implementation and add a protected OnPaintState with an event.
+    public void PaintState(FadingPaintState state, PaintEventArgs e)
+    {
+        // Take every property from state that should participate in fading animation.
+        e.Graphics.Clear(state.BackColor);
+        var flags = TextFormatFlags.HorizontalCenter | TextFormatFlags.VerticalCenter | TextFormatFlags.WordBreak | TextFormatFlags.LeftAndRightPadding;
+
+        Rectangle bounds = ClientRectangle;
+        bounds.Height /= 2;
+
+        // This is the fading text. Text and color is taken from state. You can include Font to animate Font change as well.
+        TextRenderer.DrawText(e.Graphics, state.FadingText, Font, bounds, state.ForeColor, flags);
+        bounds.Y += bounds.Height;
+
+        // Using NonFadingText and EffectiveForeColor directly from the control, so their change is updated immediately.
+        TextRenderer.DrawText(e.Graphics, NonFadingText, Font, bounds, EffectiveForeColor, flags);
     }
 
     protected override void Dispose(bool disposing)
     {
         if (disposing)
-        {
             fadingPainter.Dispose();
-        }
-
         base.Dispose(disposing);
-    }
-
-    // Try to change it in the Property Grid
-    public bool FadingAnimationsEnabled { get; set; }
-
-    public LabelStatus State
-    {
-        get { return state; }
-    }
-
-    // Try to change it in the Property Grid
-    public int FadingAnimationDefaultSpeed { get; set; }
-
-    public int GetFadingAnimationSpeed(LabelStatus stateFrom, LabelStatus stateTo)
-    {
-        return FadingAnimationDefaultSpeed;
     }
 
     protected override void OnPaintBackground(PaintEventArgs pevent)
     {
-        // do not paint background here
+        // Do not paint the background here if it participates in fading animation. Include it into PaintState instead.
     }
 
     protected override void OnPaint(PaintEventArgs e)
     {
-        if (isAdjustingPropertyForAppearance)
-            return;
-
+        // do not call base, just call fadingPainter.Paint(e) to invoke PaintState.
         fadingPainter.Paint(e);
-    }
-
-    public void PaintState(LabelStatus state, PaintEventArgs e)
-    {
-        // This is how to make a workaround for a property (here Enabled) that would raise Paint again when temporaly switched back
-        bool origEnabled = Enabled;
-        isAdjustingPropertyForAppearance = true;
-
-        try
-        {
-            Enabled = state != LabelStatus.Disabled;
-            if (state == LabelStatus.Hovered)
-                e.Graphics.Clear(ControlPaint.LightLight(BackColor));
-            else
-                base.OnPaintBackground(e);
-
-            base.OnPaint(e);
-        }
-        finally
-        {
-            Enabled = origEnabled;
-            isAdjustingPropertyForAppearance = false;
-        }
-    }
-
-    protected override void OnEnabledChanged(EventArgs e)
-    {
-        // Changing enabled will raise a Paint
-        state = Enabled ? LabelStatus.Normal : LabelStatus.Disabled;
-        base.OnEnabledChanged(e);
     }
 
     protected override void OnMouseEnter(EventArgs e)
     {
-        // Invalidating manually to raise a Paint
-        state = LabelStatus.Hovered;
         base.OnMouseEnter(e);
+        isHovered = true;
         Invalidate();
     }
 
     protected override void OnMouseLeave(EventArgs e)
     {
-        // Invalidating manually to raise a Paint
-        state = LabelStatus.Normal;
         base.OnMouseLeave(e);
+        isHovered = false;
         Invalidate();
     }
-}</value>
-  </data>
-  <data name="fadingLabelDemo1.Text" xml:space="preserve">
-    <value>This is a simple control derived from Label using an enum type to indicate following statuses: Normal, Disabled, Hovered.
 
-You can use any type for providing statuses that has an appropriate Equals method and that holds enough information to paint the control with the required state.</value>
+    private FadingPaintState GetAppearance() =&gt; new FadingPaintState
+    {
+        BackColor = isHovered ? SystemColors.Highlight : BackColor,
+        ForeColor = EffectiveForeColor,
+        FadingText = Text
+    };
+}
+</value>
   </data>
   <data name="lblInstruction.Text" xml:space="preserve">
-    <value>Hover the label below with the mouse to see the fading effect. Click it to see its properties. Set its Enabled to see Enabling/Disabling fading.
+    <value>Hover the control below by the mouse, or change its BackColor/ForeColor/Enabled/Text properties to see the fading effect.
 
 Fading works on Windows Vista and above with enabled themes (non-Classic Style). See the source code below in the text box.</value>
   </data>
