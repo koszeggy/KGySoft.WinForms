@@ -160,16 +160,7 @@ namespace KGySoft.WinForms.Reflection
 
         internal static bool ShowKeyboardCues(this Control control) => (bool)GetPropertyValue(control, "ShowKeyboardCues")!;
 
-        internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor)
-        {
-            if (TryInvokeMethod(c, "PaintBackground", [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color)], e, rectangle, backColor))
-                return;
-
-            // fallback solution (e.g. on Mono): painting a solid background
-            e.Graphics.FillRectangle((backColor.A == Byte.MaxValue ? backColor : backColor.ToColor32().ToOpaque().ToColor()).GetBrush(), rectangle);
-        }
-
-        internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset)
+        internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset = default)
         {
             if (TryInvokeMethod(c, "PaintBackground", [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point)], e, rectangle, backColor, scrollOffset))
                 return;
