@@ -29,10 +29,6 @@ using KGySoft.WinForms.WinApi;
 
 namespace KGySoft.WinForms.Controls
 {
-    // TODO: Blocks
-    ///// <item><description>Block appearance with every non-system styles (see <see cref="DisplayBlocks"/>)</description></item>
-    // TODO: Text
-    // TODO: Taskbar progress/state
     /// <summary>
     /// Represents a progress bar with advanced capabilities.
     /// <remarks>
@@ -88,16 +84,14 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(ProgressBarState.Normal)]
         public ProgressBarState State
         {
-            get =>
-                //return (ProgressBarState)(int)User32.SendMessage(Handle, Constants.PBM_GETSTATE, IntPtr.Zero, IntPtr.Zero) - 1;
-                state;
+            get => state;
             set
             {
                 if (state == value)
                     return;
 
                 if (!Enum<ProgressBarState>.IsDefined(value))
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 if (IsHandleCreated && OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles)
                 {
@@ -135,7 +129,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 if (!Enum<AdvancedProgressBarStyle>.IsDefined(value))
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 style = value;
                 SetStyle(ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, style != AdvancedProgressBarStyle.System);
@@ -178,7 +172,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 if (value < 0)
-                    throw new ArgumentOutOfRangeException("value");
+                    throw new ArgumentOutOfRangeException(nameof(value));
 
                 base.MarqueeAnimationSpeed = value;
                 ResetAnimation(false);
@@ -408,7 +402,7 @@ namespace KGySoft.WinForms.Controls
             switch (m.Msg)
             {
                 case Constants.WM_TIMER:
-                    // When built-in timer works, using that to avoid double invalidatings
+                    // When built-in timer works, using that to avoid double invalidations
                     // Unfortunately in custom drawn marquee mode it runs only once so it does not work.
                     if (isMarquee || style == AdvancedProgressBarStyle.System)
                     {
@@ -626,16 +620,16 @@ namespace KGySoft.WinForms.Controls
             DrawHighlight(g, new Rectangle(1, 1, Width - 2, Height - 2), BackColor);
         }
 
-        private void DrawShinyBar(Graphics g)
+        private void DrawShinyBar(Graphics graphics)
         {
             Rectangle rect = ClientRectangle;
             rect.Inflate(-1, -1);
             rect = GetBarRect(rect);
-            DrawBar(g, rect);
-            DrawShadows(g, rect, 20, 100);
-            DrawHighlight(g, rect, GetActualForeColor());
+            DrawBar(graphics, rect);
+            DrawShadows(graphics, rect, 20, 100);
+            DrawHighlight(graphics, rect, GetActualForeColor());
             if (state == ProgressBarState.Normal)
-                DrawGlow(g, rect);
+                DrawGlow(graphics, rect);
         }
 
         private void DrawShinyMarquee(Graphics graphics)
@@ -694,41 +688,16 @@ namespace KGySoft.WinForms.Controls
                 return;
 
             highlightColor = Color.FromArgb((highlightColor.R + 255) / 2, (highlightColor.G + 255) / 2, (highlightColor.B + 255) / 2);
-            //try
-            //{
-            //using (GraphicsPath path = DrawingHelper.RoundedRect(rect, 2, 2, 0, 0))
-            //{
-            //    //rect.Intersect(clipRect);
-            //    //g.SetClip(path);
-            //    g.SetClip(clipRect);
-            //using (Brush brush = new LinearGradientBrush(rect, Color.FromArgb(220, Color.White), Color.FromArgb(92, Color.White), LinearGradientMode.Vertical))
             using (Brush brush = new LinearGradientBrush(rect, highlightColor, Color.FromArgb(92, highlightColor), LinearGradientMode.Vertical))
-            {
-                //g.FillPath(brush, path);
                 g.FillRectangle(brush, rect);
-            }
-            //}
 
             height = Math.Min(4, (clipRect.Height - 2) / 3);
             if (height <= 0)
                 return;
 
             rect = new Rectangle(clipRect.Left, clipRect.Height - height, clipRect.Width, height);
-            //using (GraphicsPath path = DrawingHelper.RoundedRect(rect, 0, 0, 2, 2))
-            //{
-            //    g.SetClip(path);
             using (Brush brush = new LinearGradientBrush(rect, Color.Transparent, Color.FromArgb(64, /*this.HighlightColor*/Color.White), LinearGradientMode.Vertical))
-            {
-                //g.FillPath(brush, path);
                 g.FillRectangle(brush, rect);
-            }
-            //}
-
-            //}
-            //finally
-            //{
-            //    g.ResetClip();
-            //}
         }
 
         private void DrawGlow(Graphics g, Rectangle clipRect)
@@ -745,26 +714,11 @@ namespace KGySoft.WinForms.Controls
                 };
 
                 brush.Blend = blend;
-
-                //Rectangle clip = new Rectangle(1, 2, this.Width - 3, this.Height - 3);
-                //clip.Width = (int)(Value * 1.0F / (Maximum - Minimum) * this.Width);
                 g.FillRectangle(brush, rect);
-                //using (LinearGradientBrush lgb = new LinearGradientBrush(rect, Color.White, Color.White, LinearGradientMode.Horizontal))
-                //{
-                //    ColorBlend cb = new ColorBlend(4);
-                //    cb.Colors = new Color[] { Color.Transparent, /*this.GlowColor*/Color.FromArgb(128, ControlPaint.LightLight(ForeColor)), /*this.GlowColor*/Color.FromArgb(128, ControlPaint.LightLight(ForeColor)), Color.Transparent };
-                //    cb.Positions = new float[] { 0.0F, 0.5F, 0.6F, 1.0F };
-                //    lgb.InterpolationColors = cb;
-
-                //    //Rectangle clip = new Rectangle(1, 2, this.Width - 3, this.Height - 3);
-                //    //clip.Width = (int)(Value * 1.0F / (Maximum - Minimum) * this.Width);
-                //    g.FillRectangle(lgb, rect);
-                //}
-
             }
             finally
             {
-                g.ResetClip();
+                g.SetClip(ClientRectangle);
             }
         }
 
