@@ -16,11 +16,13 @@
 #region Usings
 
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
 using System.Linq;
 using System.Windows.Forms;
 
+using KGySoft.Reflection;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Forms;
 
@@ -87,8 +89,8 @@ namespace KGySoft.WinForms.Example.Forms
                     if (child == null || child == grdProperties || grdProperties.Contains(child))
                         break;
 
-                    //if (child.Parent is CheckGroupBox)
-                    //    child = child.Parent; // CheckBox or the content panel of CheckGroupBox
+                    if (child.Parent is CheckGroupBox)
+                        child = child.Parent; // CheckBox or the content panel of CheckGroupBox
 
                     // selecting a single object
                     if ((ModifierKeys & Keys.Shift) == 0)
@@ -132,24 +134,71 @@ namespace KGySoft.WinForms.Example.Forms
 
         private void miResetValue_Click(object sender, EventArgs e)
         {
-            object[] selectedObjects = grdProperties.SelectedObjects;
-            if (!(selectedObjects?.Length > 0))
-                return;
+            #region Local Methods
+
+            // Gets the actual selected object(s)
+            static object? GetSelectedObject(PropertyGrid grid)
+            {
+                object[] selectedObjects = grid.SelectedObjects;
+
+                // when multiple objects are selected, the descriptor is a MergePropertyDescriptor that expects an array of objects
+                var result = selectedObjects.Length switch { 0 => null, 1 => selectedObjects[0], _ => selectedObjects };
+                
+                GridItem? selectedItem = grid.SelectedGridItem;
+                if (result == null || selectedItem?.Parent?.GridItemType != GridItemType.Property)
+                    return result;
+
+                // Non-root property: the actual instance is a child property value of the root object.
+                // Unfortunately, the GridItem does not expose a public API to get the actual object, but if we are lucky, we can just return the internal Instance property.
+                if (Reflector.TryGetProperty(selectedItem, "Instance", out object? value))
+                    return value;
+
+                // Fallback solution by using public API if possible (may fail when multiple objects are selected, see below)
+                var parents = new Stack<GridItem>();
+                for (GridItem parent = selectedItem.Parent; parent.GridItemType == GridItemType.Property; parent = parent.Parent)
+                    parents.Push(parent);
+
+                foreach (GridItem gridItem in parents)
+                {
+                    PropertyDescriptor? descriptor = gridItem.PropertyDescriptor;
+                    if (descriptor == null)
+                        return null;
+
+                    // ISSUE: MergePropertyDescriptor.GetValue works differently than SetValue and ResetValue: instead of returning an array of objects,
+                    // it returns a single object if the result is the same for all selected objects; otherwise, it returns null.
+                    // So trying to call its internal GetValues method. If it's not available, trying to fall back to the default GetValue method, maybe it works as expected on other platforms.
+                    if (selectedObjects.Length > 1)
+                    {
+                        if (Reflector.TryInvokeMethod(descriptor, "GetValues", out object? getObjectsResult, result) && getObjectsResult is Array)
+                        {
+                            result = getObjectsResult;
+                            continue;
+                        }
+                    }
+
+                    result = gridItem.PropertyDescriptor?.GetValue(result);
+                    if (result == null)
+                        return null;
+                }
+
+                return result;
+            }
+
+            #endregion
 
             PropertyDescriptor? descriptor = grdProperties.SelectedGridItem?.PropertyDescriptor;
-            if (descriptor == null)
+            if (descriptor?.IsReadOnly != false)
                 return;
 
-            // when multiple objects are selected, the descriptor is a MergePropertyDescriptor that expects an array of objects
-            object selectedObject = selectedObjects.Length == 1 ? selectedObjects[0] : selectedObjects;
+            object? selectedObject = GetSelectedObject(grdProperties);
+            if (selectedObject == null)
+                return;
+
             if (descriptor.CanResetValue(selectedObject))
             {
                 descriptor.ResetValue(selectedObject);
                 return;
             }
-
-            if (descriptor.IsReadOnly)
-                return;
 
             // If the property is not resettable (e.g. Image), we set it to its default value
             object? defaultValue = descriptor.Attributes.OfType<DefaultValueAttribute>().FirstOrDefault() is DefaultValueAttribute d ? d.Value
