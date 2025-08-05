@@ -42,6 +42,10 @@ namespace KGySoft.WinForms.Forms
     /// <summary>
     /// Provides static methods for showing common dialogs.
     /// </summary>
+    /// <remarks>
+    /// <note type="tip">If your application uses per-monitor DPI awareness, it is recommended to set the <see cref="UseTaskDialogs"/> property
+    /// to <see langword="true"/> in the startup code of your application.</note>
+    /// </remarks>
     public static class Dialogs
     {
         #region Properties
@@ -55,9 +59,14 @@ namespace KGySoft.WinForms.Forms
         public static bool UseAdvancedDialogs { get; set; }
 
         /// <summary>
-        /// Gets or sets whether a <see cref="TaskDialog"/> instance is used for message dialogs.
+        /// Gets or sets whether a <see cref="TaskDialog"/> instance should be used when calling the message dialog methods of this class.
         /// <br/>Default value: <see langword="false"/>.
         /// </summary>
+        /// <remarks>
+        /// <para>The default value is <see langword="false"/> to maintain backward compatibility with previous versions,
+        /// but it is recommended to set this property to <see langword="true"/> in new applications, especially if your application uses per-monitor DPI awareness.</para>
+        /// <para>It is safe to set this property to <see langword="true"/> even if visual styles are not enabled or the application is not running on Windows Vista or later.</para>
+        /// </remarks>
         public static bool UseTaskDialogs { get; set; }
 
         /// <summary>

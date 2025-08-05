@@ -638,7 +638,7 @@ namespace KGySoft.WinForms.Example
                     },
                     new TaskDialogRadioButton("rbCommandLinks", "Show as command links")
                     {
-                        Description = "When this option is selected, icons preserve their native size." + Environment.NewLine
+                        Description = "When this option is selected, icons preserve their native size to a certain degree." + Environment.NewLine
                             + "For multi-resolution icons, the preferred custom icon size is 32x32 on 100% DPI." + Environment.NewLine
                             + "Elevated buttons still use the 16x16 icon size on 100% DPI to maintain compatibility with the native task dialogs."
                     },
