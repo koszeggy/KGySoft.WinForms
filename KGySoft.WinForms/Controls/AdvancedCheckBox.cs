@@ -1006,16 +1006,15 @@ namespace KGySoft.WinForms.Controls
                     // ...except in .NET Core 3.0 - .NET 5.0 when FlatStyle is System and using v1 per-monitor DPI awareness, in which case the font gets corrupted
 #if NETCOREAPP && !NET6_0_OR_GREATER
                     if (!oldFont.IsDisposed() && !(isPerMonitorDpiAwarenessV1 && base.FlatStyle == FlatStyle.System && OSHelper.IsWindows && !OSHelper.IsMono))
+#else
+                    if (!oldFont.IsDisposed())
+#endif 
                     {
                         ResetSizeCache();
                         if (AutoSize)
                             PerformLayout();
                         return;
                     }
-#else
-                    if (!oldFont.IsDisposed())
-                        return;
-#endif 
                 }
 
                 suppressFontChanged = true;
