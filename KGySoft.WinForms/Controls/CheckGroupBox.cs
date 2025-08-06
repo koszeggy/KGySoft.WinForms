@@ -44,6 +44,8 @@ namespace KGySoft.WinForms.Controls
     {
         #region Nested Classes
 
+        #region ControlCollection class
+
         /// <summary>
         /// Represents a collection of controls contained within a <see cref="CheckGroupBox"/>.
         /// </summary>
@@ -72,8 +74,10 @@ namespace KGySoft.WinForms.Controls
             #region Methods
 
             /// <inheritdoc />
-            public override void Add(Control value)
+            public override void Add(Control? value)
             {
+                if (value == null)
+                    return;
                 owner.isAddingControl = true;
                 try
                 {
@@ -100,6 +104,86 @@ namespace KGySoft.WinForms.Controls
 
             #endregion
         }
+
+        #endregion
+
+        #region CheckBox class
+
+        private sealed class GroupBoxCheckBox : AdvancedCheckBox
+        {
+            #region Fields
+
+            private CheckGroupBox? owner;
+
+            #endregion
+
+            #region Properties
+
+            private CheckGroupBox? Owner => owner ??= Parent as CheckGroupBox;
+
+            #endregion
+
+            #region Methods
+
+            protected override void OnHandleCreated(EventArgs e)
+            {
+                base.OnHandleCreated(e);
+                if (Owner?.IsHandleCreated == true)
+                    Owner.ResetBaseText(); // only when both self and owner handles are created
+            }
+
+            protected override void WndProc(ref Message m)
+            {
+                switch (m.Msg)
+                {
+                    case Constants.WM_PAINT when Owner is CheckGroupBox checkGroupBox:
+                        checkGroupBox.isRendering = true;
+                        try
+                        {
+                            base.WndProc(ref m);
+                        }
+                        finally
+                        {
+                            checkGroupBox.isRendering = false;
+                        }
+
+                        break;
+
+                    default:
+                        base.WndProc(ref m);
+                        break;
+                }
+            }
+
+            protected override void OnCheckedChanged(EventArgs e)
+            {
+                base.OnCheckedChanged(e);
+                Owner?.OnCheckedChanged(e);
+            }
+
+            protected override void OnSizeChanged(EventArgs e)
+            {
+                base.OnSizeChanged(e);
+                Owner?.CheckBoxSizeChanged();
+            }
+
+            protected override void OnTextChanged(EventArgs e)
+            {
+                base.OnTextChanged(e);
+                Owner?.OnTextChanged(e);
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #endregion
+
+        #region Constants
+
+        private const int referenceIndent = 10; // The reference indent for the CheckBox, used to calculate its Left position (or Right position in RTL mode)
+        private const int referencePlaceholderPadding = 4; // The additional padding for the CheckBox's text when the base.Text is set to spaces, used to calculate its width
 
         #endregion
 
@@ -199,6 +283,15 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public AdvancedCheckBox CheckBox => checkBox;
 
+        /// <summary>
+        /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
+        /// </summary>
+        public new bool UseCompatibleTextRendering
+        {
+            get => base.UseCompatibleTextRendering;
+            set => checkBox.UseCompatibleTextRendering = base.UseCompatibleTextRendering = value;
+        }
+
         #endregion
 
         #region Explicitly Implemented Interface Properties
@@ -220,10 +313,6 @@ namespace KGySoft.WinForms.Controls
             InitializeComponent();
             contentPanel.SetDoubleBuffered(true); // to avoid rendering issues when the background is transparent - see https://github.com/dotnet/winforms/issues/13784
             Controls.Add(checkBox);
-            checkBox.SizeChanged += CheckBox_SizeChanged;
-            checkBox.CheckedChanged += CheckBox_CheckedChanged;
-            checkBox.TextChanged += CheckBox_TextChanged;
-            ResetCheckBoxColor();
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
 
@@ -240,16 +329,15 @@ namespace KGySoft.WinForms.Controls
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
-
-            // Making sure there is enough space before the CheckBox at every DPI
-            // Needed to reset each time when the handle is recreated, because otherwise the base.Text is set to the CheckBox's text
-            changingBaseText = true;
-            base.Text = @"   ";
-            changingBaseText = false;
+            
+            // Needed to be reset each time when the handle is recreated, because otherwise the base.Text is set to the CheckBox's text
+            if (checkBox.IsHandleCreated)
+                ResetBaseText(); // needed only when both self and checkBox handles are created
             if (isInitialized)
                 return;
 
             isInitialized = true;
+            ResetCheckBoxColor();
             ResetCheckBoxLocation();
             foreach (Control control in contentPanel.Controls)
                 control.Location = new Point(control.Left - contentPanel.Left, control.Top - contentPanel.Top);
@@ -267,7 +355,11 @@ namespace KGySoft.WinForms.Controls
         /// Raises the <see cref="CheckedChanged"/> event.
         /// </summary>
         /// <param name="e">The <see cref="EventArgs"/> instance containing the event data.</param>
-        protected virtual void OnCheckedChanged(EventArgs e) => (Events[nameof(CheckedChanged)] as EventHandler)?.Invoke(this, e);
+        protected virtual void OnCheckedChanged(EventArgs e)
+        {
+            contentPanel.Enabled = checkBox.Checked;
+            (Events[nameof(CheckedChanged)] as EventHandler)?.Invoke(this, e);
+        }
 
         /// <inheritdoc />
         protected override void OnSizeChanged(EventArgs e)
@@ -316,9 +408,6 @@ namespace KGySoft.WinForms.Controls
         protected override void Dispose(bool disposing)
         {
             VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
-            checkBox.CheckedChanged -= CheckBox_CheckedChanged;
-            checkBox.SizeChanged -= CheckBox_SizeChanged;
-            checkBox.TextChanged -= CheckBox_TextChanged;
             if (disposing)
             {
                 components?.Dispose();
@@ -342,29 +431,67 @@ namespace KGySoft.WinForms.Controls
             if (!isInitialized)
                 return;
 
+            int indent = referenceIndent.Scale(this.GetScale().X);
             checkBox.Left = RightToLeft == RightToLeft.No
-                ? (int)(10 * this.GetScale().X)
-                : Width - checkBox.Width - (int)(10 * this.GetScale().X);
+                ? indent
+                : Width - checkBox.Width - indent;
         }
 
         private void ResetCheckBoxColor() => checkBox.EnabledForeColor = !explicitForeColor.IsEmpty ? explicitForeColor
             : VisualStyleHelper.RenderWithVisualStyles ? VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_GROUPBOX, (int)GroupBoxState.Normal, default)
             : default;
 
-        #endregion
-
-        #region Event handlers
-
-        private void CheckBox_CheckedChanged(object? sender, EventArgs e)
+        private void CheckBoxSizeChanged()
         {
-            // Toggling the Enabled state of the content. This method preserves the original Enabled state of the controls.
-            contentPanel.Enabled = checkBox.Checked;
-            OnCheckedChanged(EventArgs.Empty);
+            ResetCheckBoxLocation();
+            ResetBaseText();
         }
 
-        private void CheckBox_SizeChanged(object? sender, EventArgs e) => ResetCheckBoxLocation();
-        private void CheckBox_TextChanged(object? sender, EventArgs e) => OnTextChanged(e);
-        private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e) => ResetCheckBoxColor();
+        /// <summary>
+        /// Setting base.Text to as many spaces as the CheckBox's text width so even a transparent CheckBox will not have double text and crossed-out text from the frame.
+        /// </summary>
+        private void ResetBaseText()
+        {
+            if (!IsHandleCreated)
+                return;
+
+            Font font = checkBox.Font;
+            int desiredWidth = checkBox.Width + referencePlaceholderPadding.Scale(this.GetScale().X);
+            using Graphics g = CreateGraphics();
+
+            // Initial measurement: set the same number of spaces as the CheckBox's text length. Most likely it will be smaller than the desired width,
+            // but we can use it to guess a good length.
+            int len = checkBox.Text.Length;
+            string spaces = new String(' ', Math.Max(1, len));
+            int actualWidth = UseCompatibleTextRendering ? (int)g.MeasureString(spaces, font).Width : TextRenderer.MeasureText(g, spaces, font).Width;
+
+            if (actualWidth != desiredWidth)
+            {
+                len = (int)(len * (float)desiredWidth / actualWidth) + 1;
+
+                // len should be quite close to the desired space count now, but refining it
+                spaces = new String(' ', len);
+                actualWidth = UseCompatibleTextRendering ? (int)g.MeasureString(spaces, font).Width : TextRenderer.MeasureText(g, spaces, font).Width;
+
+                while (actualWidth > desiredWidth && len > 1)
+                {
+                    len -= 1;
+                    spaces = new String(' ', len);
+                    actualWidth = UseCompatibleTextRendering ? (int)g.MeasureString(spaces, font).Width : TextRenderer.MeasureText(g, spaces, font).Width;
+                }
+
+                while (actualWidth < desiredWidth)
+                {
+                    len += 1;
+                    spaces = new String(' ', len);
+                    actualWidth = UseCompatibleTextRendering ? (int)g.MeasureString(spaces, font).Width : TextRenderer.MeasureText(g, spaces, font).Width;
+                }
+            }
+
+            changingBaseText = true;
+            base.Text = spaces;
+            changingBaseText = false;
+        }
 
         #endregion
 
@@ -383,6 +510,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         Control IToolTipTargetProvider.GetToolTipTarget() => checkBox;
+
+        #endregion
+
+        #region Event Handlers
+
+        private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e) => ResetCheckBoxColor();
 
         #endregion
 

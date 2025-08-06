@@ -14,7 +14,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.checkBox = new KGySoft.WinForms.Controls.AdvancedCheckBox();
+            this.checkBox = new GroupBoxCheckBox();
             this.contentPanel = new System.Windows.Forms.Panel();
             this.SuspendLayout();
             // 
@@ -41,7 +41,7 @@
         }
         #endregion
 
-        private AdvancedCheckBox checkBox;
+        private GroupBoxCheckBox checkBox;
         private System.Windows.Forms.Panel contentPanel;
     }
 }
