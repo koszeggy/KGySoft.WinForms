@@ -218,6 +218,7 @@ namespace KGySoft.WinForms.Controls
         public CheckGroupBox()
         {
             InitializeComponent();
+            contentPanel.SetDoubleBuffered(true); // to avoid rendering issues when the background is transparent - see https://github.com/dotnet/winforms/issues/13784
             Controls.Add(checkBox);
             checkBox.SizeChanged += CheckBox_SizeChanged;
             checkBox.CheckedChanged += CheckBox_CheckedChanged;

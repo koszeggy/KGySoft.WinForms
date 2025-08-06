@@ -60,13 +60,16 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets whether the fading painter is enabled.
         /// </summary>
-        protected virtual bool Enabled => operating && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported;
+        protected virtual bool Enabled
+#if NETFRAMEWORK
+            => operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported;
+#else
+            => operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported && CanUseSystemPaint();
+#endif
 
         #endregion
 
         #endregion
-
-        #region Construction and Destruction
 
         #region Constructors
 
@@ -80,58 +83,12 @@ namespace KGySoft.WinForms.Controls
             if (host == null)
                 throw new ArgumentNullException(nameof(host));
 
-            if (!(host is Control))
-                throw new ArgumentException("Host should be a Control class.", nameof(host));
-
+            Debug.Assert(host is Control);
             operating = FadingPainterInternal.IsSupported && UxTheme.BufferedPaintInit();
             State = initialState;
             this.host = host;
             HookEvents();
         }
-
-        #endregion
-
-        #region Destructor
-
-        ~FadingPainter()
-        {
-            Dispose(false);
-        }
-
-        #endregion
-
-        #region Explicit Disposing
-
-        /// <inheritdoc />
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Disposes the resources used by the <see cref="FadingPainter{TState}"/> class.
-        /// </summary>
-        /// <param name="disposing"><see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (disposed)
-                return;
-
-            UnhookEvents();
-            if (operating)
-            {
-                if (Control.IsHandleCreated)
-                    UxTheme.BufferedPaintStopAllAnimations(Control.Handle);
-                UxTheme.BufferedPaintUnInit();
-            }
-
-            if (disposing)
-                host = null!;
-            disposed = true;
-        }
-
-        #endregion
 
         #endregion
 
@@ -182,6 +139,13 @@ namespace KGySoft.WinForms.Controls
             }
 
             PaintCore(e, host.State);
+        }
+
+        /// <inheritdoc />
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -343,6 +307,28 @@ namespace KGySoft.WinForms.Controls
                 UxTheme.BufferedPaintStopAllAnimations(host.Handle);
         }
 
+        /// <summary>
+        /// Disposes the resources used by the <see cref="FadingPainter{TState}"/> class.
+        /// </summary>
+        /// <param name="disposing"><see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+                return;
+
+            UnhookEvents();
+            if (operating)
+            {
+                if (Control.IsHandleCreated)
+                    UxTheme.BufferedPaintStopAllAnimations(Control.Handle);
+                UxTheme.BufferedPaintUnInit();
+            }
+
+            if (disposing)
+                host = null!;
+            disposed = true;
+        }
+
         #endregion
 
         #region Private Methods
@@ -358,6 +344,25 @@ namespace KGySoft.WinForms.Controls
             VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_SystemColorsChanged;
             Control.SizeChanged -= Control_SizeChanged;
         }
+
+#if NETCOREAPP
+        private bool CanUseSystemPaint()
+        {
+            if (Control.BackColor.A == Byte.MaxValue)
+                return true;
+
+            // alpha background color: paint can be corrupted with no double buffering if a parent has a background image - see https://github.com/dotnet/winforms/issues/13784
+            for (Control? parent = Control.Parent; parent != null; parent = parent.Parent)
+            {
+                if (parent.BackgroundImage != null)
+                    return false;
+                if (parent.BackColor.A == Byte.MaxValue)
+                    return true;
+            }
+
+            return true;
+        }
+#endif
 
         #endregion
 
