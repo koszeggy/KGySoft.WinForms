@@ -681,7 +681,7 @@ namespace KGySoft.WinForms.Controls
                 return relation;
             }
 
-            void CalcCheckmarkRectangle(LayoutData layout)
+            private void CalcCheckmarkRectangle(LayoutData layout)
             {
                 int checkSizeFull = FullCheckSize;
                 layout.CheckBounds = new Rectangle(Client.X, Client.Y, checkSizeFull, checkSizeFull);

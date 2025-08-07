@@ -93,7 +93,7 @@ namespace KGySoft.WinForms.Controls
             options.PaddingSize = 0;
             options.MaxFocus = false;
             options.FocusOddEvenFixup = true;
-            options.CheckSize = standardCheckSize;
+            options.CheckSize = standardCheckSize.Scale(options.Scale.X);
             return options;
         }
 

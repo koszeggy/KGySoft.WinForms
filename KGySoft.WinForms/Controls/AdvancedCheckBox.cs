@@ -744,43 +744,59 @@ namespace KGySoft.WinForms.Controls
             if (isPressed && isHovered)
                 ignoreNextPaint = true;
 
+            bool prevPressed = isPressed;
             isPressed = false;
             isMouseDown = false;
             base.OnMouseUp(e);
+
+            // workaround for base ResetFlagsandPaint call, which calls Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
+            if (isPressed != prevPressed)
+                Invalidate();
         }
 
         /// <inheritdoc />
         protected override void OnMouseDown(MouseEventArgs e)
         {
+            bool prevPressed = isPressed;
             isPressed = e.Button == MouseButtons.Left;
             isMouseDown = isPressed;
             base.OnMouseDown(e);
+
+            // workaround for base Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
+            if (isPressed != prevPressed)
+                Invalidate();
         }
 
         /// <inheritdoc />
         protected override void OnMouseMove(MouseEventArgs mevent)
         {
+            bool prevPressed = isPressed;
             if (isMouseDown)
                 isPressed = mevent.X >= 0 && mevent.X < Width && mevent.Y >= 0 && mevent.Y < Height;
 
             base.OnMouseMove(mevent);
+
+            // workaround for base Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
+            if (isPressed != prevPressed)
+                Invalidate();
         }
 
         /// <inheritdoc />
         protected override void OnKeyDown(KeyEventArgs e)
         {
+            bool prevPressed = isPressed;
             if (e.KeyData == Keys.Space && !isPressed)
-            {
                 isPressed = true;
-                //Invalidate();
-            }
 
             base.OnKeyDown(e);
+            if (isPressed != prevPressed)
+                Invalidate(); // workaround for base Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
         }
 
         /// <inheritdoc />
         protected override void OnKeyUp(KeyEventArgs e)
         {
+            bool prevPressed = isPressed;
             if (e.KeyData == Keys.Space && isPressed)
             {
                 isPressed = false;
@@ -791,6 +807,8 @@ namespace KGySoft.WinForms.Controls
             }
 
             base.OnKeyUp(e);
+            if (isPressed != prevPressed)
+                Invalidate(); // workaround for base ResetFlagsandPaint call, which calls Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
         }
 
         /// <inheritdoc />

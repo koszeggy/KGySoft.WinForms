@@ -114,9 +114,8 @@ namespace KGySoft.WinForms.Controls
             LayoutOptions options = CommonLayout(state);
             options.CheckPaddingSize = 1;
             options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
-            options.CheckSize = VisualStyleHelper.RenderWithVisualStyles && (CheckBoxInstance.HasDefaultScaling() || options.PerMonitorDpiAwarenessLevel != 1)
-                ? VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, graphics, state.SystemPartId, state.SystemStateId, false).Width
-                : options.CheckSize.Scale(options.Scale.X);
+            if (VisualStyleHelper.RenderWithVisualStyles && (CheckBoxInstance.HasDefaultScaling() || options.PerMonitorDpiAwarenessLevel != 1))
+                options.CheckSize = VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, graphics, state.SystemPartId, state.SystemStateId, false).Width;
 
             return options;
         }
