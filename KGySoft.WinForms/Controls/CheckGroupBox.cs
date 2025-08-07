@@ -132,26 +132,22 @@ namespace KGySoft.WinForms.Controls
                     Owner.ResetBaseText(); // only when both self and owner handles are created
             }
 
-            protected override void WndProc(ref Message m)
+            protected override void OnPaint(PaintEventArgs e)
             {
-                switch (m.Msg)
+                if (Owner is not CheckGroupBox checkGroupBox)
                 {
-                    case Constants.WM_PAINT when Owner is CheckGroupBox checkGroupBox:
-                        checkGroupBox.isRendering = true;
-                        try
-                        {
-                            base.WndProc(ref m);
-                        }
-                        finally
-                        {
-                            checkGroupBox.isRendering = false;
-                        }
+                    base.OnPaint(e);
+                    return;
+                }
 
-                        break;
-
-                    default:
-                        base.WndProc(ref m);
-                        break;
+                checkGroupBox.isRendering = true;
+                try
+                {
+                    base.OnPaint(e);
+                }
+                finally
+                {
+                    checkGroupBox.isRendering = false;
                 }
             }
 
@@ -171,6 +167,86 @@ namespace KGySoft.WinForms.Controls
             {
                 base.OnTextChanged(e);
                 Owner?.OnTextChanged(e);
+            }
+
+            #endregion
+        }
+
+        #endregion
+
+        #region ContentPanel class
+
+        private sealed class ContentPanel : Panel
+        {
+            #region Fields
+
+            private CheckGroupBox? owner;
+
+            #endregion
+
+            #region Properties
+
+            #region Public Properties
+            
+            public override Rectangle DisplayRectangle => Owner?.DisplayRectangle ?? base.DisplayRectangle;
+
+            #endregion
+
+            #region Private Properties
+
+            private CheckGroupBox? Owner => owner ??= Parent as CheckGroupBox;
+
+            #endregion
+
+            #endregion
+
+            #region Constructors
+
+            internal ContentPanel()
+            {
+                DoubleBuffered = true; // to avoid rendering issues when the background is transparent - see https://github.com/dotnet/winforms/issues/13784
+            }
+
+            #endregion
+
+            #region Methods
+
+            protected override void OnPaintBackground(PaintEventArgs e)
+            {
+                if (Owner is not CheckGroupBox checkGroupBox)
+                {
+                    base.OnPaintBackground(e);
+                    return;
+                }
+
+                checkGroupBox.isRendering = true;
+                try
+                {
+                    base.OnPaintBackground(e);
+                }
+                finally
+                {
+                    checkGroupBox.isRendering = false;
+                }
+            }
+
+            protected override void OnPaint(PaintEventArgs e)
+            {
+                if (Owner is not CheckGroupBox checkGroupBox)
+                {
+                    base.OnPaint(e);
+                    return;
+                }
+
+                checkGroupBox.isRendering = true;
+                try
+                {
+                    base.OnPaint(e);
+                }
+                finally
+                {
+                    checkGroupBox.isRendering = false;
+                }
             }
 
             #endregion
@@ -311,7 +387,6 @@ namespace KGySoft.WinForms.Controls
         public CheckGroupBox()
         {
             InitializeComponent();
-            contentPanel.SetDoubleBuffered(true); // to avoid rendering issues when the background is transparent - see https://github.com/dotnet/winforms/issues/13784
             Controls.Add(checkBox);
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
@@ -339,8 +414,6 @@ namespace KGySoft.WinForms.Controls
             isInitialized = true;
             ResetCheckBoxColor();
             ResetCheckBoxLocation();
-            foreach (Control control in contentPanel.Controls)
-                control.Location = new Point(control.Left - contentPanel.Left, control.Top - contentPanel.Top);
         }
 
         /// <inheritdoc />
@@ -364,6 +437,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnSizeChanged(EventArgs e)
         {
+            contentPanel.Size = ClientRectangle.Size;
             base.OnSizeChanged(e);
             if (RightToLeft == RightToLeft.Yes)
                 ResetCheckBoxLocation();
@@ -381,18 +455,6 @@ namespace KGySoft.WinForms.Controls
         {
             switch (m.Msg)
             {
-                case Constants.WM_PAINT:
-                    isRendering = true;
-                    try
-                    {
-                        base.WndProc(ref m);
-                    }
-                    finally
-                    {
-                        isRendering = false;
-                    }
-                    break;
-
                 case Constants.WM_DPICHANGED_AFTERPARENT:
                     base.WndProc(ref m);
                     checkBox.Top = 0;
@@ -401,6 +463,20 @@ namespace KGySoft.WinForms.Controls
                 default:
                     base.WndProc(ref m);
                     break;
+            }
+        }
+
+        /// <inheritdoc />
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            isRendering = true;
+            try
+            {
+                base.OnPaint(e);
+            }
+            finally
+            {
+                isRendering = false;
             }
         }
 

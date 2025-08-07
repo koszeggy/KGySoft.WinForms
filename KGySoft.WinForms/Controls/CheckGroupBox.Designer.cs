@@ -14,8 +14,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.checkBox = new GroupBoxCheckBox();
-            this.contentPanel = new System.Windows.Forms.Panel();
+            this.checkBox = new KGySoft.WinForms.Controls.CheckGroupBox.GroupBoxCheckBox();
+            this.contentPanel = new KGySoft.WinForms.Controls.CheckGroupBox.ContentPanel();
             this.SuspendLayout();
             // 
             // checkBox
@@ -23,25 +23,27 @@
             this.checkBox.AutoSize = true;
             this.checkBox.Checked = true;
             this.checkBox.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkBox.DisabledBackColor = System.Drawing.Color.Transparent;
+            this.checkBox.EnabledBackColor = System.Drawing.Color.Transparent;
             this.checkBox.Location = new System.Drawing.Point(0, 0);
             this.checkBox.Name = "checkBox";
             this.checkBox.Size = new System.Drawing.Size(104, 24);
             this.checkBox.TabIndex = 0;
-            this.checkBox.UseVisualStyleBackColor = true;
+            this.checkBox.UseVisualStyleBackColor = false;
             // 
             // contentPanel
             // 
-            this.contentPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.contentPanel.BackColor = System.Drawing.Color.Transparent;
             this.contentPanel.Location = new System.Drawing.Point(0, 0);
             this.contentPanel.Name = "contentPanel";
             this.contentPanel.Size = new System.Drawing.Size(200, 100);
-            this.contentPanel.TabIndex = 0;
+            this.contentPanel.TabIndex = 1;
             this.ResumeLayout(false);
 
         }
         #endregion
 
         private GroupBoxCheckBox checkBox;
-        private System.Windows.Forms.Panel contentPanel;
+        private ContentPanel contentPanel;
     }
 }
