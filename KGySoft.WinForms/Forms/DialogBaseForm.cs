@@ -18,7 +18,6 @@
 using System;
 using System.ComponentModel;
 using System.Windows.Forms;
-using KGySoft.WinForms.Controls;
 
 #endregion
 
@@ -42,11 +41,11 @@ namespace KGySoft.WinForms.Forms
         [Description("Gets or sets whether the OK button is visible.")]
         public bool ShowOKButton
         {
-            get => okCancelButtons.OKButtonVisible;
+            get => pnlButtons.OKButtonVisible;
             set
             {
-                okCancelButtons.OKButtonVisible = value;
-                AcceptButton = value ? okCancelButtons.OKButton : null;
+                pnlButtons.OKButtonVisible = value;
+                AcceptButton = value ? pnlButtons.OKButton : null;
             }
         }
 
@@ -59,11 +58,11 @@ namespace KGySoft.WinForms.Forms
         [Description("Gets or sets whether the Cancel button is visible.")]
         public bool ShowCancelButton
         {
-            get => okCancelButtons.CancelButtonVisible;
+            get => pnlButtons.CancelButtonVisible;
             set
             {
-                okCancelButtons.CancelButtonVisible = value;
-                base.CancelButton = value ? okCancelButtons.CancelButton : null;
+                pnlButtons.CancelButtonVisible = value;
+                base.CancelButton = value ? pnlButtons.CancelButton : null;
             }
         }
 
@@ -76,8 +75,8 @@ namespace KGySoft.WinForms.Forms
         [Description("Gets or sets whether the Apply button is visible.")]
         public bool ShowApplyButton
         {
-            get => okCancelButtons.ApplyButtonVisible;
-            set => okCancelButtons.ApplyButtonVisible = value;
+            get => pnlButtons.ApplyButtonVisible;
+            set => pnlButtons.ApplyButtonVisible = value;
         }
 
         #endregion
@@ -86,15 +85,15 @@ namespace KGySoft.WinForms.Forms
 
         /// <summary>Gets the OK button.</summary>
         [Browsable(false)]
-        protected Button OKButton => okCancelButtons.OKButton;
+        protected Button OKButton => pnlButtons.OKButton;
 
         /// <summary>Gets the Cancel button.</summary>
         [Browsable(false)]
-        protected new Button CancelButton => okCancelButtons.CancelButton;
+        protected new Button CancelButton => pnlButtons.CancelButton;
 
         /// <summary>Gets the Apply button.</summary>
         [Browsable(false)]
-        protected Button ApplyButton => okCancelButtons.ApplyButton;
+        protected Button ApplyButton => pnlButtons.ApplyButton;
 
         // ReSharper disable InconsistentNaming - Justification: These were protected field names, they are kept for backward compatibility.
 
@@ -107,11 +106,6 @@ namespace KGySoft.WinForms.Forms
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected Button btnCancel => CancelButton;
-
-        /// <summary>Gets buttons panel.</summary>
-        [Browsable(false)]
-        [EditorBrowsable(EditorBrowsableState.Never)]
-        protected OkCancelButtons pnlButtons => okCancelButtons;
 
         // ReSharper restore InconsistentNaming
 
@@ -127,10 +121,10 @@ namespace KGySoft.WinForms.Forms
         public DialogBaseForm()
         {
             InitializeComponent();
-            AcceptButton = okCancelButtons.OKButton;
-            base.CancelButton = okCancelButtons.CancelButton;
-            okCancelButtons.OKButton.Click += btnOK_Click;
-            okCancelButtons.CancelButton.Click += btnCancel_Click;
+            AcceptButton = pnlButtons.OKButton;
+            base.CancelButton = pnlButtons.CancelButton;
+            pnlButtons.OKButton.Click += btnOK_Click;
+            pnlButtons.CancelButton.Click += btnCancel_Click;
         }
 
         #endregion
@@ -155,8 +149,8 @@ namespace KGySoft.WinForms.Forms
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            okCancelButtons.OKButton.Click -= btnOK_Click;
-            okCancelButtons.CancelButton.Click -= btnCancel_Click;
+            pnlButtons.OKButton.Click -= btnOK_Click;
+            pnlButtons.CancelButton.Click -= btnCancel_Click;
             if (disposing)
                 components?.Dispose();
             base.Dispose(disposing);

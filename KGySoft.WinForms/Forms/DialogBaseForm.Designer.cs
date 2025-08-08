@@ -15,24 +15,24 @@ namespace KGySoft.WinForms.Forms
 		/// </summary>
 		private void InitializeComponent()
 		{
-            this.okCancelButtons = new KGySoft.WinForms.Controls.OkCancelButtons();
+            this.pnlButtons = new KGySoft.WinForms.Controls.OkCancelButtons();
             this.SuspendLayout();
             // 
-            // okCancelButtons
+            // pnlButtons
             // 
-            this.okCancelButtons.BackColor = System.Drawing.Color.Transparent;
-            this.okCancelButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.okCancelButtons.Location = new System.Drawing.Point(0, 115);
-            this.okCancelButtons.Name = "okCancelButtons";
-            this.okCancelButtons.Size = new System.Drawing.Size(287, 35);
-            this.okCancelButtons.TabIndex = 0;
+            this.pnlButtons.BackColor = System.Drawing.Color.Transparent;
+            this.pnlButtons.Dock = System.Windows.Forms.DockStyle.Bottom;
+            this.pnlButtons.Location = new System.Drawing.Point(0, 115);
+            this.pnlButtons.Name = "pnlButtons";
+            this.pnlButtons.Size = new System.Drawing.Size(287, 35);
+            this.pnlButtons.TabIndex = 0;
             // 
             // DialogBaseForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(287, 150);
-            this.Controls.Add(this.okCancelButtons);
+            this.Controls.Add(this.pnlButtons);
             this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
             this.MaximizeBox = false;
             this.MinimizeBox = false;
@@ -44,6 +44,6 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        private Controls.OkCancelButtons okCancelButtons;
+        protected Controls.OkCancelButtons pnlButtons;
     }
 }

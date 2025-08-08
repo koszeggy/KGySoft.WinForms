@@ -205,6 +205,8 @@
   ! The PaintMdiClientArea event is now obsolete. Use the new MdiClient property instead.
   ! The default value of StartPosition been changed back to WindowsDefaultLocation to match with regular Form. The
     previous default value was CenterScreen.
+  ! The InputBox class has been removed (actually it was made internal as it was never meant to be public). Use the
+    static Dialogs.InputDialog methods, which are the intended way to use input dialogs.
   + New MdiClient, OwnedMdiChildren, SuspendingMdiChild properties
   + New ToolTip property
   + Event subscriptions to self events are automatically removed when the form is disposed.
@@ -224,7 +226,7 @@
   + Scaling the small icon of the form properly when the DPI changes.
   + Scaling the header text of the form properly when the DPI changes, even with per-monitor DPI awareness V1.
 ! DialogBaseForm class:
-  ! The protected btnOk, btnCancel and pnlButtons fields have been replaced by read-only properties. The original
+  ! The protected btnOk, and btnCancel fields have been replaced by read-only properties. The original
     members are still available, but they have been concealed by the EditorBrowsableState.Never attribute.
   ! The type of the pnlButtons member has been changed to OkCancelButtons (used to be TableLayoutPanel).
   ! The default value of StartPosition been changed back to WindowsDefaultLocation to match with regular Form. The
