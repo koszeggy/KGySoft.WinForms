@@ -99,8 +99,8 @@ namespace KGySoft.WinForms.Forms
         /// as <see cref="BaseForm"/> or <see cref="BaseUserControl"/> when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
         /// property is set to <see cref="DynamicStringLocalization.AssemblyScope"/> or <see cref="DynamicStringLocalization.LocalScope"/>, you can use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method.
-        /// To localize the window caption and buttons, set the <see cref="LanguageSettings.DynamicResourceManagersSource">LanguageSettings.DynamicResourceManagersSource</see>
-        /// property to <see cref="ResourceManagerSources.CompiledAndResX"/> in the startup code of your application, and translate the
+        /// To localize the window caption and buttons, set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
+        /// property to <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
         /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
@@ -143,8 +143,8 @@ namespace KGySoft.WinForms.Forms
         /// as <see cref="BaseForm"/> or <see cref="BaseUserControl"/> when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
         /// property is set to <see cref="DynamicStringLocalization.AssemblyScope"/> or <see cref="DynamicStringLocalization.LocalScope"/>, you can use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method.
-        /// To localize the window caption and buttons, set the <see cref="LanguageSettings.DynamicResourceManagersSource">LanguageSettings.DynamicResourceManagersSource</see>
-        /// property to <see cref="ResourceManagerSources.CompiledAndResX"/> in the startup code of your application, and translate the
+        /// To localize the window caption and buttons, set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
+        /// property to <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
         /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
@@ -187,8 +187,8 @@ namespace KGySoft.WinForms.Forms
         /// as <see cref="BaseForm"/> or <see cref="BaseUserControl"/> when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
         /// property is set to <see cref="DynamicStringLocalization.AssemblyScope"/> or <see cref="DynamicStringLocalization.LocalScope"/>, you can use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method.
-        /// To localize the window caption and buttons, set the <see cref="LanguageSettings.DynamicResourceManagersSource">LanguageSettings.DynamicResourceManagersSource</see>
-        /// property to <see cref="ResourceManagerSources.CompiledAndResX"/> in the startup code of your application, and translate the
+        /// To localize the window caption and buttons, set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
+        /// property to <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
         /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
@@ -232,8 +232,8 @@ namespace KGySoft.WinForms.Forms
         /// as <see cref="BaseForm"/> or <see cref="BaseUserControl"/> when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
         /// property is set to <see cref="DynamicStringLocalization.AssemblyScope"/> or <see cref="DynamicStringLocalization.LocalScope"/>, you can use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method.
-        /// To localize the window caption and buttons, set the <see cref="LanguageSettings.DynamicResourceManagersSource">LanguageSettings.DynamicResourceManagersSource</see>
-        /// property to <see cref="ResourceManagerSources.CompiledAndResX"/> in the startup code of your application, and translate the
+        /// To localize the window caption and buttons, set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
+        /// property to <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
         /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>

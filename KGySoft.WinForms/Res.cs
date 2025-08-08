@@ -79,6 +79,30 @@ namespace KGySoft.WinForms
         /// <summary>Confirmation</summary>
         internal static string DialogsConfirmationCaption => Get("Dialogs_ConfirmationCaption");
 
+        /// <summary>&amp;OK</summary>
+        internal static string DialogsOKButtonText => Get("Dialogs_OKButtonText");
+
+        /// <summary>&amp;Cancel</summary>
+        internal static string DialogsCancelButtonText => Get("Dialogs_CancelButtonText");
+
+        /// <summary>&amp;Apply</summary>
+        internal static string DialogsApplyButtonText => Get("Dialogs_ApplyButtonText");
+
+        /// <summary>&amp;Yes</summary>
+        internal static string DialogsYesButtonText => Get("Dialogs_YesButtonText");
+
+        /// <summary>&amp;No</summary>
+        internal static string DialogsNoButtonText => Get("Dialogs_NoButtonText");
+
+        /// <summary>&amp;Abort</summary>
+        internal static string DialogsAbortButtonText => Get("Dialogs_AbortButtonText");
+
+        /// <summary>&amp;Retry</summary>
+        internal static string DialogsRetryButtonText => Get("Dialogs_RetryButtonText");
+
+        /// <summary>&amp;Ignore</summary>
+        internal static string DialogsIgnoreButtonText => Get("Dialogs_IgnoreButtonText");
+
         #endregion
 
         #region TaskDialog

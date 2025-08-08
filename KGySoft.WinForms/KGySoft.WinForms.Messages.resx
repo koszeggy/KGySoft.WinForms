@@ -125,6 +125,30 @@
   <data name="Dialogs_ConfirmationCaption" xml:space="preserve">
     <value>Confirmation</value>
   </data>
+  <data name="Dialogs_OKButtonText" xml:space="preserve">
+    <value>&amp;OK</value>
+  </data>
+  <data name="Dialogs_CancelButtonText" xml:space="preserve">
+    <value>&amp;Cancel</value>
+  </data>
+  <data name="Dialogs_ApplyButtonText" xml:space="preserve">
+    <value>&amp;Apply</value>
+  </data>
+  <data name="Dialogs_YesButtonText" xml:space="preserve">
+    <value>&amp;Yes</value>
+  </data>
+  <data name="Dialogs_NoButtonText" xml:space="preserve">
+    <value>&amp;No</value>
+  </data>
+  <data name="Dialogs_AbortButtonText" xml:space="preserve">
+    <value>&amp;Abort</value>
+  </data>
+  <data name="Dialogs_RetryButtonText" xml:space="preserve">
+    <value>&amp;Retry</value>
+  </data>
+  <data name="Dialogs_IgnoreButtonText" xml:space="preserve">
+    <value>&amp;Ignore</value>
+  </data>
   <data name="TaskDialog_ShowDetails" xml:space="preserve">
     <value>See &amp;details</value>
   </data>

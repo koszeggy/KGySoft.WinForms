@@ -81,13 +81,13 @@ namespace KGySoft.WinForms.Forms
 
         #region Private Properties
 
-        private static string TextOk => Res.Get(TaskDialogStandardButtonFlags.OK);
-        private static string TextYes => Res.Get(TaskDialogStandardButtonFlags.Yes);
-        private static string TextNo => Res.Get(TaskDialogStandardButtonFlags.No);
-        private static string TextCancel => Res.Get(TaskDialogStandardButtonFlags.Cancel);
-        private static string TextAbort => "&Abort"; //Res.Get(TaskDialogStandardButtonFlags.Cancel);
-        private static string TextRetry => Res.Get(TaskDialogStandardButtonFlags.Retry);
-        private static string TextIgnore => "&Ignore"; //Res.Get(TaskDialogStandardButtonFlags.Cancel);
+        private static string TextOk => Res.DialogsOKButtonText;
+        private static string TextYes => Res.DialogsYesButtonText;
+        private static string TextNo => Res.DialogsNoButtonText;
+        private static string TextCancel => Res.DialogsCancelButtonText;
+        private static string TextAbort => Res.DialogsAbortButtonText;
+        private static string TextRetry => Res.DialogsRetryButtonText;
+        private static string TextIgnore => Res.DialogsIgnoreButtonText;
 
         #endregion
 
