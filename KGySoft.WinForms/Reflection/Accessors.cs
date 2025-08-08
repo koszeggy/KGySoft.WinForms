@@ -114,7 +114,7 @@ namespace KGySoft.WinForms.Reflection
 
         #region Control
 
-        internal static object PaintEvent
+        internal static object? PaintEvent
         {
             get
             {
@@ -125,7 +125,7 @@ namespace KGySoft.WinForms.Reflection
                     "s_paintEvent";
 #endif
 
-                return GetFieldValue<object>(typeof(Control), fieldName)!;
+                return GetFieldValue<object?>(typeof(Control), fieldName, false);
             }
         }
 

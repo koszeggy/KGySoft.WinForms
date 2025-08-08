@@ -1602,7 +1602,10 @@ namespace KGySoft.WinForms.Controls
             PaintState?.Invoke(this, e);
 
             // Control.OnPaint:
-            (Events[Accessors.PaintEvent] as PaintEventHandler)?.Invoke(this, e);
+            if (Accessors.PaintEvent is not object paintEventKey)
+                return;
+            PaintEventHandler? handler = (PaintEventHandler?)Events[paintEventKey];
+            handler?.Invoke(this, e);
         }
 
         /// <inheritdoc />
