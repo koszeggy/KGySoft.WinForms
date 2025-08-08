@@ -24,18 +24,15 @@ using KGySoft.Libraries.Language;
 
 namespace KGySoft.WinForms.Forms
 {
-    public partial class InputBox : Form
+    internal sealed partial class InputBox : DialogBaseForm
     {
         #region Constructors
 
         public InputBox()
         {
             InitializeComponent();
-            if (!DesignMode)
-            {
-                btnOK.Text = Language.Translate("OK");
-                btnCancel.Text = Language.Translate("Cancel");
-            }
+            if (SystemFonts.MessageBoxFont is Font font)
+                Font = font;
         }
 
         #endregion
@@ -44,30 +41,23 @@ namespace KGySoft.WinForms.Forms
 
         #region Static Methods
 
-        public static bool Show(string caption, string prompt, ref string value, int x, int y)
+        internal static bool Show(string caption, string prompt, ref string value, Point? location = null)
         {
-            using (InputBox inputBox = new InputBox())
+            using InputBox inputBox = new InputBox();
+            inputBox.Text = caption;
+            inputBox.lblPrompt.Text = prompt;
+            inputBox.edtValue.Text = value;
+            if (location.HasValue)
             {
-                inputBox.Text = caption;
-                inputBox.lblPrompt.Text = prompt;
-                inputBox.edtValue.Text = value;
-                if (x >= 0 && y >= 0)
-                {
-                    inputBox.StartPosition = FormStartPosition.Manual;
-                    inputBox.Location = new Point(x, y);
-                }
-                if (inputBox.ShowDialog() == DialogResult.OK)
-                {
-                    value = inputBox.edtValue.Text;
-                    return true;
-                }
-                return false;
+                inputBox.StartPosition = FormStartPosition.Manual;
+                inputBox.Location = location.Value;
             }
-        }
-
-        public static bool Show(string caption, string prompt, ref string value)
-        {
-            return Show(caption, prompt, ref value, -1, -1);
+            if (inputBox.ShowDialog() == DialogResult.OK)
+            {
+                value = inputBox.edtValue.Text;
+                return true;
+            }
+            return false;
         }
 
         #endregion
