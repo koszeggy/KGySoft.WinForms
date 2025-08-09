@@ -1180,6 +1180,10 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 try
                 {
                     base.Font = null!;
+
+                    // setting base.Font caused reentrancy: not letting the outer call to set the font again
+                    if (!suppressFontChanged)
+                        return;
                 }
                 finally
                 {

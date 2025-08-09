@@ -1411,6 +1411,10 @@ namespace KGySoft.WinForms.Forms
                     try
                     {
                         base.Font = null!;
+
+                        // setting base.Font caused reentrancy: not letting the outer call to set the font again
+                        if (!suppressFontChanged)
+                            return;
                     }
                     finally
                     {
