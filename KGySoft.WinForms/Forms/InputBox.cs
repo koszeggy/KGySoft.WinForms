@@ -15,10 +15,9 @@
 
 #region Usings
 
+using System;
 using System.Drawing;
 using System.Windows.Forms;
-
-using KGySoft.Libraries.Language;
 
 #endregion
 
@@ -26,11 +25,18 @@ namespace KGySoft.WinForms.Forms
 {
     internal sealed partial class InputBox : DialogBaseForm
     {
+        #region Fields
+
+        private bool isResettingHeight;
+
+        #endregion
+
         #region Constructors
 
         public InputBox()
         {
             InitializeComponent();
+            RightToLeft = LanguageSettings.DisplayLanguage.TextInfo.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
             if (SystemFonts.MessageBoxFont is Font font)
                 Font = font;
         }
@@ -43,7 +49,7 @@ namespace KGySoft.WinForms.Forms
 
         internal static bool Show(string caption, string prompt, ref string value, Point? location = null)
         {
-            using InputBox inputBox = new InputBox();
+            using var inputBox = new InputBox();
             inputBox.Text = caption;
             inputBox.lblPrompt.Text = prompt;
             inputBox.edtValue.Text = value;
@@ -52,11 +58,13 @@ namespace KGySoft.WinForms.Forms
                 inputBox.StartPosition = FormStartPosition.Manual;
                 inputBox.Location = location.Value;
             }
+
             if (inputBox.ShowDialog() == DialogResult.OK)
             {
                 value = inputBox.edtValue.Text;
                 return true;
             }
+
             return false;
         }
 
@@ -64,7 +72,54 @@ namespace KGySoft.WinForms.Forms
 
         #region Instance Methods
 
-        private void edtValue_KeyPress(object sender, KeyPressEventArgs e)
+        #region Protected Methods
+
+        protected override void OnLoad(EventArgs e)
+        {
+            if (!IsLoaded)
+                CheckHeight();
+            base.OnLoad(e);
+        }
+
+        protected override void OnDeviceScaleAutoResized(EventArgs e)
+        {
+            base.OnDeviceScaleAutoResized(e);
+            CheckHeight();
+        }
+
+        protected override void Dispose(bool disposing)
+        {
+            edtValue.KeyPress -= edtValue_KeyPress;
+
+            if (disposing)
+                components?.Dispose();
+            base.Dispose(disposing);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void CheckHeight()
+        {
+            if (isResettingHeight || !IsHandleCreated)
+                return;
+            int desiredHeight = lblPrompt.GetPreferredSize(new Size(lblPrompt.Width, 0)).Height;
+            if (lblPrompt.Height != desiredHeight)
+            {
+                isResettingHeight = true;
+                var bounds = Bounds;
+                int newHeight = bounds.Height + (desiredHeight - lblPrompt.Height);
+                Bounds = new Rectangle(bounds.X, bounds.Y, bounds.Width, newHeight).EnsureScreen(Screen.FromRectangle(bounds), false);
+                isResettingHeight = false;
+            }
+        }
+
+        #endregion
+
+        #region Event Handlers
+
+        private void edtValue_KeyPress(object? sender, KeyPressEventArgs e)
         {
             switch (e.KeyChar)
             {
@@ -78,6 +133,8 @@ namespace KGySoft.WinForms.Forms
                     break;
             }
         }
+
+        #endregion
 
         #endregion
 
