@@ -61,7 +61,7 @@ namespace KGySoft.WinForms.Controls
         /// Gets whether the fading painter is enabled.
         /// </summary>
         protected virtual bool Enabled
-#if NETFRAMEWORK
+#if NETFRAMEWORK || NET10_0_OR_GREATER
             => operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported;
 #else
             => operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported && CanUseSystemPaint();
@@ -345,7 +345,7 @@ namespace KGySoft.WinForms.Controls
             Control.SizeChanged -= Control_SizeChanged;
         }
 
-#if NETCOREAPP
+#if NETCOREAPP && !NET10_0_OR_GREATER
         private bool CanUseSystemPaint()
         {
             if (Control.BackColor.A == Byte.MaxValue)
@@ -354,6 +354,8 @@ namespace KGySoft.WinForms.Controls
             // alpha background color: paint can be corrupted with no double buffering if a parent has a background image - see https://github.com/dotnet/winforms/issues/13784
             for (Control? parent = Control.Parent; parent != null; parent = parent.Parent)
             {
+                if (parent is ISafePaintBackground)
+                    return true;
                 if (parent.BackgroundImage != null)
                     return false;
                 if (parent.BackColor.A == Byte.MaxValue)

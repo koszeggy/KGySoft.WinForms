@@ -40,7 +40,7 @@ namespace KGySoft.WinForms.Controls
     /// <summary>
     /// Represents a <see cref="GroupBox"/> control with a <see cref="CheckBox"/> that can be checked or unchecked to enable or disable the content of the group box.
     /// </summary>
-    public partial class CheckGroupBox : GroupBox, ICustomLocalizable, IToolTipTargetProvider, IObservableParent
+    public partial class CheckGroupBox : GroupBox, ICustomLocalizable, IToolTipTargetProvider, IObservableParent, ISafePaintBackground // TODO: ISafePaintBackground into an AdvancedGroupBox
     {
         #region Nested Classes
 
@@ -176,7 +176,7 @@ namespace KGySoft.WinForms.Controls
 
         #region ContentPanel class
 
-        private sealed class ContentPanel : Panel
+        private sealed class ContentPanel : Panel, ISafePaintBackground
         {
             #region Fields
 
@@ -222,6 +222,7 @@ namespace KGySoft.WinForms.Controls
                 checkGroupBox.isRendering = true;
                 try
                 {
+                    // NOTE: no need for the Graphics.GetHdc() workaround here, because the background image is never set directly for the content panel, but rather for the CheckGroupBox itself.
                     base.OnPaintBackground(e);
                 }
                 finally
@@ -465,6 +466,17 @@ namespace KGySoft.WinForms.Controls
                     break;
             }
         }
+
+#if NETCOREAPP && !NET10_0_OR_GREATER
+        /// <inheritdoc />
+        protected override void OnPaintBackground(PaintEventArgs pevent)
+        {
+            // workaround for https://github.com/dotnet/winforms/issues/13784
+            base.OnPaintBackground(pevent);
+            pevent.Graphics.GetHdc();
+            pevent.Graphics.ReleaseHdc(); 
+        }
+#endif
 
         /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)

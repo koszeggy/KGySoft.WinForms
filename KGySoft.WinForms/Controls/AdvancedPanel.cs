@@ -30,7 +30,7 @@ namespace KGySoft.WinForms.Controls
     /// Represents an advanced panel with much more flexible <see cref="BorderStyle"/> than original <see cref="Panel"/>
     /// </summary>
     [Designer(typeof(AdvancedPanelDesigner))]
-    public class AdvancedPanel : Panel
+    public class AdvancedPanel : Panel, ISafePaintBackground
     {
         #region Fields
 
@@ -85,6 +85,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Methods
 
+        /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
             switch (m.Msg)
@@ -103,11 +104,23 @@ namespace KGySoft.WinForms.Controls
             base.WndProc(ref m);
         }
 
+        /// <inheritdoc />
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
             NCHelper.InvalidateNC(Handle);
         }
+
+#if NETCOREAPP && !NET10_0_OR_GREATER
+        /// <inheritdoc />
+        protected override void OnPaintBackground(PaintEventArgs e)
+        {
+            // workaround for https://github.com/dotnet/winforms/issues/13784
+            base.OnPaintBackground(e);
+            e.Graphics.GetHdc();
+            e.Graphics.ReleaseHdc();
+        }
+#endif
 
         #endregion
     }
