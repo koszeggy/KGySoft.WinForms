@@ -991,24 +991,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void ResetCaption()
-        {
-            if (String.IsNullOrEmpty(host.Caption))
-            {
-                string?[] args = Environment.GetCommandLineArgs();
-                if (!String.IsNullOrEmpty(args[0]))
-                    Text = Path.GetFileName(args[0]);
-                else
-                {
-                    ProcessModule? mainModule = Process.GetCurrentProcess().MainModule;
-                    Text = mainModule != null ? mainModule.ModuleName : String.Empty;
-                }
-            }
-            else
-            {
-                Text = host.Caption;
-            }
-        }
+        private void ResetCaption() => Text = String.IsNullOrEmpty(host.Caption) ? ApplicationHelper.ApplicationName : host.Caption;
 
         private void ResetRadioButtons(Configuration cfg)
         {

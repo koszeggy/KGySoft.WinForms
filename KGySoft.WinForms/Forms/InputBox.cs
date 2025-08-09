@@ -47,7 +47,7 @@ namespace KGySoft.WinForms.Forms
 
         #region Static Methods
 
-        internal static bool Show(string caption, string prompt, ref string value, Point? location = null)
+        internal static bool Show(IWin32Window? owner, string caption, string prompt, ref string value, Point? location = null)
         {
             using var inputBox = new InputBox();
             inputBox.Text = caption;
@@ -59,7 +59,7 @@ namespace KGySoft.WinForms.Forms
                 inputBox.Location = location.Value;
             }
 
-            if (inputBox.ShowDialog() == DialogResult.OK)
+            if (inputBox.ShowDialog(owner) == DialogResult.OK)
             {
                 value = inputBox.edtValue.Text;
                 return true;

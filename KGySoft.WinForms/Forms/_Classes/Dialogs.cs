@@ -15,6 +15,9 @@
 
 #region Usings
 
+using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
+
 #region Used Namespaces
 
 using System;
@@ -347,56 +350,108 @@ namespace KGySoft.WinForms.Forms
         #endregion
 
         /// <summary>
-        /// Displays an input dialog.
+        /// Displays an input dialog with an editable value, and OK and Cancel buttons.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="InputDialog(IWin32Window,string,string,ref string)"/> overload for more details.
         /// </summary>
-        /// <param name="caption">Window caption</param>
-        /// <param name="prompt">Text of input label</param>
-        /// <param name="value">The value that initially may contain a default value</param>
-        /// <param name="x">Horizontal position</param>
-        /// <param name="y">Vertical position</param>
-        /// <returns>Returns true if the OK button was pressed, otherwise, false.</returns>
-        public static bool InputDialog(string caption, string prompt, ref string value, int x, int y)
-        {
-            return InputBox.Show(Language.Translate(caption), Language.Translate(prompt), ref value, x, y);
-        }
+        /// <param name="caption">The caption of the dialog. If <see langword="null"/>, the name of the application is used.</param>
+        /// <param name="prompt">A prompt text, explaining the purpose of the input dialog. If <see langword="null"/>, a localized string of <c>Value:</c> is used.</param>
+        /// <param name="value">A reference to a string that contains the initial value of the input field. When this method returns <see langword="true"/>, this parameter will contain the value entered by the user.</param>
+        /// <param name="x">The initial horizontal position of the dialog.</param>
+        /// <param name="y">The initial vertical position of the dialog.</param>
+        /// <returns><see langword="true"/> if the user clicked OK or pressed Enter, <see langword="false"/> if the user clicked Cancel, pressed Esc or closed the dialog.</returns>
+        public static bool InputDialog(string? caption, string? prompt, ref string value, int x, int y) => InputDialog(null, caption, prompt, ref value, x, y);
 
         /// <summary>
-        /// Displays an input dialog.
+        /// Displays an input dialog with an editable value, and OK and Cancel buttons.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="InputDialog(IWin32Window,string,string,ref string)"/> overload for more details.
         /// </summary>
-        /// <param name="caption">Window caption</param>
-        /// <param name="prompt">Text of input label</param>
-        /// <param name="value">The value that initially may contain a default value</param>
-        /// <returns>Returns true if the OK button was pressed, otherwise, false.</returns>
-        public static bool InputDialog(string caption, string prompt, ref string value)
-        {
-            return InputBox.Show(Language.Translate(caption), Language.Translate(prompt), ref value);
-        }
+        /// <param name="owner">An optional window that will own the modal input dialog. If <see langword="null"/>, the <see cref="DialogsOwner"/> property will be taken.
+        /// If <see cref="DialogsOwner"/> is also <see langword="null"/>, the currently active window will be used.</param>
+        /// <param name="caption">The caption of the dialog. If <see langword="null"/>, the name of the application is used.</param>
+        /// <param name="prompt">A prompt text, explaining the purpose of the input dialog. If <see langword="null"/>, a localized string of <c>Value:</c> is used.</param>
+        /// <param name="value">A reference to a string that contains the initial value of the input field. When this method returns <see langword="true"/>, this parameter will contain the value entered by the user.</param>
+        /// <param name="x">The initial horizontal position of the dialog.</param>
+        /// <param name="y">The initial vertical position of the dialog.</param>
+        /// <returns><see langword="true"/> if the user clicked OK or pressed Enter, <see langword="false"/> if the user clicked Cancel, pressed Esc or closed the dialog.</returns>
+        public static bool InputDialog(IWin32Window? owner, string? caption, string? prompt, ref string value, int x, int y)
+            => InputBox.Show(owner ?? DialogsOwner, caption ?? ApplicationHelper.ApplicationName, prompt ?? Res.DialogsDefaultPrompt, ref value, new Point(x, y));
 
         /// <summary>
-        /// Displays an input dialog.
+        /// Displays an input dialog with an editable value, and OK and Cancel buttons.
         /// </summary>
-        /// <param name="prompt">Text of input label</param>
-        /// <param name="value">The value that initially may contain a default value</param>
-        /// <returns>Returns true if the OK button was pressed, otherwise, false.</returns>
-        public static bool InputDialog(string prompt, ref string value)
-        {
-            return InputBox.Show(Application.ProductName, Language.Translate(prompt), ref value);
-        }
+        /// <param name="owner">An optional window that will own the modal input dialog. If <see langword="null"/>, the <see cref="DialogsOwner"/> property will be taken.
+        /// If <see cref="DialogsOwner"/> is also <see langword="null"/>, the currently active window will be used.</param>
+        /// <param name="caption">The caption of the dialog. If <see langword="null"/>, the name of the application is used.</param>
+        /// <param name="prompt">A prompt text, explaining the purpose of the input dialog. If <see langword="null"/>, a localized string of <c>Value:</c> is used.</param>
+        /// <param name="value">A reference to a string that contains the initial value of the input field. When this method returns <see langword="true"/>, this parameter will contain the value entered by the user.</param>
+        /// <returns><see langword="true"/> if the user clicked OK or pressed Enter, <see langword="false"/> if the user clicked Cancel, pressed Esc or closed the dialog.</returns>
+        /// <remarks>
+        /// <note>In versions prior to 5.0.0, the <paramref name="caption"/> and the <paramref name="prompt"/> were translated by the obsolete <see cref="Language"/> class.
+        /// Since version 5.0.0, the parameters are expected to be already localized. To use the same dynamic localization
+        /// as <see cref="BaseForm"/> or <see cref="BaseUserControl"/> when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
+        /// property is set to <see cref="DynamicStringLocalization.AssemblyScope"/> or <see cref="DynamicStringLocalization.LocalScope"/>, you can use the
+        /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method.
+        /// To localize default prompt text and buttons, set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
+        /// property to <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
+        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
+        /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
+        /// </remarks>
+        public static bool InputDialog(IWin32Window? owner, string? caption, string? prompt, ref string value)
+            => InputBox.Show(owner ?? DialogsOwner, caption ?? ApplicationHelper.ApplicationName, prompt ?? Res.DialogsDefaultPrompt, ref value);
 
         /// <summary>
-        /// Displays an input dialog.
+        /// Displays an input dialog with an editable value, and OK and Cancel buttons.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="InputDialog(IWin32Window,string,string,ref string)"/> overload for more details.
         /// </summary>
-        /// <param name="value">The value that initially may contain a default value</param>
-        /// <returns>Returns true if the OK button was pressed, otherwise, false.</returns>
-        public static bool InputDialog(ref string value)
-        {
-            return InputBox.Show(Application.ProductName, Language.Translate("Value:"), ref value);
-        }
+        /// <param name="caption">The caption of the dialog. If <see langword="null"/>, the name of the application is used.</param>
+        /// <param name="prompt">A prompt text, explaining the purpose of the input dialog. If <see langword="null"/>, a localized string of <c>Value:</c> is used.</param>
+        /// <param name="value">A reference to a string that contains the initial value of the input field. When this method returns <see langword="true"/>, this parameter will contain the value entered by the user.</param>
+        /// <returns><see langword="true"/> if the user clicked OK or pressed Enter, <see langword="false"/> if the user clicked Cancel, pressed Esc or closed the dialog.</returns>
+        public static bool InputDialog(string? caption, string? prompt, ref string value) => InputDialog(null, caption, prompt, ref value);
+
+        /// <summary>
+        /// Displays an input dialog with an editable value, and OK and Cancel buttons.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="InputDialog(IWin32Window,string,string,ref string)"/> overload for more details.
+        /// </summary>
+        /// <param name="prompt">A prompt text, explaining the purpose of the input dialog. If <see langword="null"/>, a localized string of <c>Value:</c> is used.</param>
+        /// <param name="value">A reference to a string that contains the initial value of the input field. When this method returns <see langword="true"/>, this parameter will contain the value entered by the user.</param>
+        /// <returns><see langword="true"/> if the user clicked OK or pressed Enter, <see langword="false"/> if the user clicked Cancel, pressed Esc or closed the dialog.</returns>
+        public static bool InputDialog(string? prompt, ref string value) => InputDialog(null, null, prompt, ref value);
+
+        /// <summary>
+        /// Displays an input dialog with an editable value, and OK and Cancel buttons.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="InputDialog(IWin32Window,string,string,ref string)"/> overload for more details.
+        /// </summary>
+        /// <param name="owner">An optional window that will own the modal input dialog. If <see langword="null"/>, the <see cref="DialogsOwner"/> property will be taken.
+        /// If <see cref="DialogsOwner"/> is also <see langword="null"/>, the currently active window will be used.</param>
+        /// <param name="prompt">A prompt text, explaining the purpose of the input dialog. If <see langword="null"/>, a localized string of <c>Value:</c> is used.</param>
+        /// <param name="value">A reference to a string that contains the initial value of the input field. When this method returns <see langword="true"/>, this parameter will contain the value entered by the user.</param>
+        /// <returns><see langword="true"/> if the user clicked OK or pressed Enter, <see langword="false"/> if the user clicked Cancel, pressed Esc or closed the dialog.</returns>
+        public static bool InputDialog(IWin32Window? owner, string? prompt, ref string value) => InputDialog(null, null, prompt, ref value);
+
+        /// <summary>
+        /// Displays an input dialog with an editable value, and OK and Cancel buttons.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="InputDialog(IWin32Window,string,string,ref string)"/> overload for more details.
+        /// </summary>
+        /// <param name="value">A reference to a string that contains the initial value of the input field. When this method returns <see langword="true"/>, this parameter will contain the value entered by the user.</param>
+        /// <returns><see langword="true"/> if the user clicked OK or pressed Enter, <see langword="false"/> if the user clicked Cancel, pressed Esc or closed the dialog.</returns>
+        public static bool InputDialog(ref string value) => InputDialog(null, null, null, ref value);
+
+        /// <summary>
+        /// Displays an input dialog with an editable value, and OK and Cancel buttons.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="InputDialog(IWin32Window,string,string,ref string)"/> overload for more details.
+        /// </summary>
+        /// <param name="owner">An optional window that will own the modal input dialog. If <see langword="null"/>, the <see cref="DialogsOwner"/> property will be taken.
+        /// If <see cref="DialogsOwner"/> is also <see langword="null"/>, the currently active window will be used.</param>
+        /// <param name="value">A reference to a string that contains the initial value of the input field. When this method returns <see langword="true"/>, this parameter will contain the value entered by the user.</param>
+        /// <returns><see langword="true"/> if the user clicked OK or pressed Enter, <see langword="false"/> if the user clicked Cancel, pressed Esc or closed the dialog.</returns>
+        public static bool InputDialog(IWin32Window? owner, ref string value) => InputDialog(null, null, null, ref value);
 
         #endregion
 
         #region Private Methods
 
+        [SuppressMessage("ReSharper", "UsingStatementResourceInitialization", Justification = "False alarm, these properties do not throw exceptions")]
         private static bool? ShowMessage(IWin32Window? owner, string message, string caption, MessageBoxButtons buttons, MessageBoxIcon icon, MessageBoxDefaultButton defaultButton = default)
         {
             owner ??= DialogsOwner;

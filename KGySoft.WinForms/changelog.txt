@@ -240,7 +240,11 @@
   ! InfoMessage(string,object[])/WarningMessage(string,object[])/ErrorMessage(string,object[])/
     ConfirmMessage(string,object[])/ConfirmMessage(bool,string,object[]) overloads: They are now obsolete.
     They no longer perform any translation, just remove the possible distinction postfixes if present.
+  ! InputDialog overloads: They no longer perform any translation, but expect the caller to use already localized
+    strings. The default prompt value is taken from the assembly resources.
   + New InfoMessage/WarningMessage/ErrorMessage/ConfirmMessage overloads to provide an owner window.
+  + New InputDialog overloads to provide an owner window.
+  + The InputDialog overloads now support high DPI and per-monitor DPI awareness.
   + New CancellableConfirmMessage methods instead of the obsoleted DialogResult-returning ConfirmMessage overloads.
   + New UseTaskDialogs property: it allows to use the TaskDialog class instead of the standard MessageBox dialogs.
 + New DeviceScaleGetNewSizeEventArgs class

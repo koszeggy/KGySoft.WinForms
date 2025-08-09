@@ -103,6 +103,9 @@ namespace KGySoft.WinForms
         /// <summary>&amp;Ignore</summary>
         internal static string DialogsIgnoreButtonText => Get("Dialogs_IgnoreButtonText");
 
+        /// <summary>Value:</summary>
+        internal static string DialogsDefaultPrompt => Get("Dialogs_DefaultPrompt");
+
         #endregion
 
         #region TaskDialog

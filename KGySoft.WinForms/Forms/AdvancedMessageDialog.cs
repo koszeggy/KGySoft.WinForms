@@ -42,7 +42,7 @@ namespace KGySoft.WinForms.Forms
         #region Fields
 
         private string screenshot = String.Empty; // path of the screenshot
-        private Exception exception = null; // the exception to be reported (only for the appropriate Execute method)
+        private Exception? exception = null; // the exception to be reported (only for the appropriate Execute method)
         private bool detailsVisible;
 
         #endregion
@@ -70,7 +70,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Gets or sets log directory for saving logs and screenshots.
         /// </summary>
-        public static string ErrorLogDirectory { get; set; }
+        public static string? ErrorLogDirectory { get; set; }
 
         /// <summary>
         /// An optional custom error handler that can be used to handle exceptions in a custom way (e.g. log into a database or file).
@@ -273,8 +273,8 @@ namespace KGySoft.WinForms.Forms
         /// <param name="saveLog">True for saving log (see also <see cref="ErrorLogDirectory"/>)</param>
         /// <param name="saveScreenshot">True for saving screenshot (see also <see cref="ErrorLogDirectory"/>)</param>
         /// <param name="logNamePrefix">File name prefix if log saving requested.</param>
-        public DialogResult Execute(string message, string details, string caption, AdvancedDialogTypes dialogType,
-            ButtonTypes buttons, bool saveLog, bool saveScreenshot, string logNamePrefix)
+        public DialogResult Execute(string? message, string? details, string? caption, AdvancedDialogTypes dialogType,
+            ButtonTypes buttons, bool saveLog, bool saveScreenshot, string? logNamePrefix)
         {
             try
             {
@@ -350,7 +350,7 @@ namespace KGySoft.WinForms.Forms
         /// <param name="caption">Caption of the window</param>
         /// <param name="dialogType">Type of the dialog icon</param>
         /// <param name="buttons">Shown buttons</param>
-        public DialogResult Execute(string message, string details, string caption, AdvancedDialogTypes dialogType, ButtonTypes buttons)
+        public DialogResult Execute(string message, string? details, string? caption, AdvancedDialogTypes dialogType, ButtonTypes buttons)
         {
             return Execute(message, details, caption, dialogType, buttons, false, false, null);
         }

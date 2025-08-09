@@ -149,6 +149,9 @@
   <data name="Dialogs_IgnoreButtonText" xml:space="preserve">
     <value>&amp;Ignore</value>
   </data>
+  <data name="Dialogs_DefaultPrompt" xml:space="preserve">
+    <value>Value:</value>
+  </data>
   <data name="TaskDialog_ShowDetails" xml:space="preserve">
     <value>See &amp;details</value>
   </data>
