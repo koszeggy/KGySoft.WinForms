@@ -242,7 +242,7 @@ namespace KGySoft.WinForms.Controls
                         continue;
 
                     button.MinimumSize = minSize;
-                    button.Size = button.GetPreferredSize(new Size(Int32.MaxValue, minSize.Height));
+                    button.Size = button.GetPreferredSize(new Size(0, minSize.Height));
                     button.Margin = margin;
                 }
 
