@@ -233,7 +233,7 @@
   <data name="TaskDialogStandardButtonFlags.Close" xml:space="preserve">
     <value>&amp;Close</value>
   </data>
-  <data name="VisualStyles_NoVisualStyles" xml:space="preserve">
+  <data name="General_NoVisualStyles" xml:space="preserve">
     <value>Visual styles are not available.</value>
   </data>
   <data name="Accessors_InstancePropertyDoesNotExistFormat" xml:space="preserve">

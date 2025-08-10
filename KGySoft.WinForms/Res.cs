@@ -49,6 +49,13 @@ namespace KGySoft.WinForms
 
         #region Properties
 
+        #region General
+
+        /// <summary>Visual styles are not available.</summary>
+        internal static string NoVisualStyles => Get("General_NoVisualStyles");
+
+        #endregion
+
         #region BaseForm
 
         /// <summary>The form must be an MDI container. Set IsMdiContainer before accessing this member.</summary>
@@ -136,13 +143,6 @@ namespace KGySoft.WinForms
 
         #endregion
 
-        #region Visual Styles
-
-        /// <summary>Visual styles are not available.</summary>
-        internal static string NoVisualStyles => Get("VisualStyles_NoVisualStyles");
-
-        #endregion
-
         #region InvokeMarshaller
 
         /// <summary>Invoke is required but no SynchronizationContext was captured and the handle of the owner is not created yet.</summary>
@@ -187,7 +187,7 @@ namespace KGySoft.WinForms
         internal static string AccessorsStaticFieldDoesNotExist(string? fieldName, Type type) => Get("Accessors_StaticFieldDoesNotExistFormat", fieldName, type);
 
         /// <summary>Method "{0}" was not found on type "{1}".</summary>
-        internal static string AccessorsMethodDoesNotExist(string? methodName, Type type) => Get("Accessors_InstanceDoesNotExistFormat", methodName, type);
+        internal static string AccessorsMethodDoesNotExist(string? methodName, Type type) => Get("Accessors_MethodDoesNotExistFormat", methodName, type);
 
         #endregion
 
