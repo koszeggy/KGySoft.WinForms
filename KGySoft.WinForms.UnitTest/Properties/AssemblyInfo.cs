@@ -1,13 +1,11 @@
 ﻿using System.Reflection;
-using System.Resources;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("KGySoft.WinForms")]
+[assembly: AssemblyTitle("KGySoft.WinForms.UnitTest")]
 [assembly: AssemblyDescription("KGy SOFT Windows Forms Libraries")]
 #if DEBUG
 [assembly: AssemblyConfiguration("Debug")]
@@ -21,12 +19,12 @@ using System.Security;
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
-// to COM components.  If you need to access a type in this assembly from 
+// to COM componenets.  If you need to access a type in this assembly from 
 // COM, set the ComVisible attribute to true on that type.
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("73c041be-7efc-4fe1-b23f-edc5bc1bd7d0")]
+[assembly: Guid("1a338160-7798-48d4-aadc-f475705ec5a7")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -37,14 +35,6 @@ using System.Security;
 //
 // You can specify all the values or you can default the Revision and Build Numbers 
 // by using the '*' as shown below:
-[assembly: AssemblyVersion("5.0.0.0")]
-[assembly: AssemblyFileVersion("5.0.0.0")]
-[assembly: AssemblyInformationalVersion("5.0.0-alpha.4")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]
 
-[assembly: AllowPartiallyTrustedCallers]
-#if !NET35
-[assembly: SecurityRules(SecurityRuleSet.Level1, SkipVerificationInFullTrust = true)]
-#endif
-
-[assembly: NeutralResourcesLanguage("en")]
-[assembly: InternalsVisibleTo("KGySoft.WinForms.UnitTest, PublicKey=00240000048000009400000006020000002400005253413100040000010001003928BADFAA8C02789566AB7AC64A59DCDE30B798589A68EF92CBB04C9DED3FCBFE41F644D424DCF82F8A13F9148D45EE15785450318388E01AA8C4CF645E81C772E39DCA0D14B33CF48167B70F5C34A0E7B763141ED3AFDDAD0373D9FCD2E153E78D201C5C4EB61DBBD586EC6291EABFBE11879865C3776088605FA8820387C2")]
