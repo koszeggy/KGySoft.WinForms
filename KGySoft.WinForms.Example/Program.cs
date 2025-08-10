@@ -65,7 +65,7 @@ namespace KGySoft.WinForms.Example
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            
+
             using (TaskDialog dlg = new TaskDialog())
             {
                 dlg.Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.UseCommandLinks;
@@ -711,7 +711,7 @@ namespace KGySoft.WinForms.Example
 
         private static void btnDialogsTest_Click(object? sender, HandledEventArgs e)
         {
-            const string sampleMessage = "Sample message";
+            string sampleMessage = "Sample message";
             Dialogs.AutoRightToLeftLayout = true; // effective only if the current thread's UI culture is an RTL language (you can change it by the localization example)
 
             TaskDialog senderDialog = ((TaskDialogButton)sender!).Parent!;
@@ -737,7 +737,8 @@ namespace KGySoft.WinForms.Example
                     new TaskDialogButton("btnWarning", "Warning Dialog"),
                     new TaskDialogButton("btnError", "Error Dialog"),
                     new TaskDialogButton("btnConfirmation", "Confirmation Dialog"),
-                    new TaskDialogButton("btnCancellableConfirmation", "Cancellable Confirmation Dialog")
+                    new TaskDialogButton("btnCancellableConfirmation", "Cancellable Confirmation Dialog"),
+                    new TaskDialogButton("btnInputDialog", "Input Dialog")
                 }
             };
 
@@ -757,6 +758,12 @@ namespace KGySoft.WinForms.Example
                 false => "You selected No",
                 null => "You selected Cancel or closed the dialog"
             });
+            dlg.Buttons["btnInputDialog"].Click += (_, _) =>
+            {
+                string value = sampleMessage;
+                if (Dialogs.InputDialog("Sample message", "Specify a new value for the sample message", ref value))
+                    sampleMessage = value;
+            };
 
             dlg.Show(senderDialog);
         }
