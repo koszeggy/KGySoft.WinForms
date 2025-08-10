@@ -37,8 +37,7 @@ namespace KGySoft.WinForms.Forms
         {
             InitializeComponent();
             RightToLeft = LanguageSettings.DisplayLanguage.TextInfo.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
-            if (SystemFonts.MessageBoxFont is Font font)
-                Font = font;
+            Font = ScaleHelper.MessageBoxFont;
         }
 
         #endregion

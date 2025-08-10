@@ -300,18 +300,36 @@ namespace KGySoft.WinForms
 
         private static Font? defaultFont;
         private static Font? dialogFont;
+        private static Font? messageBoxFont;
 
         #endregion
 
         #region Properties
-        
+
         #region Public Properties
 
+        /// <summary>
+        /// Gets the scale factor for 100% (1.0) scaling.
+        /// </summary>
         public static PointF DefaultScale => defaultScale;
+
+        /// <summary>
+        /// If the application is DPI aware, gets the scale factor of the primary display at application startup. Otherwise, it returns the default scale factor of 100% (1.0).
+        /// </summary>
+        /// <remarks>
+        /// <note>Even if the application has per-monitor DPI awareness enabled, this property always returns the same value, which is the scale factor of the primary display at application startup.
+        /// To get the current scale factor of a control, use the <see cref="GetScale(Control)"/> method.</note>
+        /// </remarks>
         public static PointF SystemScale => systemScale;
 
+        /// <summary>
+        /// Gets whether the process is per-monitor DPI aware. Per-monitor DPI awareness is available on Windows 8.1 or later.
+        /// </summary>
         public static bool IsProcessPerMonitorAware => isProcessPerMonitorAware;
 
+        /// <summary>
+        /// Gets whether the current thread is per-monitor DPI aware. Thread-based per-monitor DPI awareness is available on Windows 10 Anniversary Update (1607) or later.
+        /// </summary>
         public static bool IsThreadPerMonitorAware
         {
             get
@@ -329,6 +347,11 @@ namespace KGySoft.WinForms
             }
         }
 
+        /// <summary>
+        /// Gets the version of per-monitor DPI awareness of the current thread.
+        /// Per-monitor DPI awareness V1 is available on Windows 8.1 or later, whereas
+        /// per-monitor DPI awareness V2 and is available on Windows 10 Anniversary Update (1607) or later.
+        /// </summary>
         public static int PerMonitorDpiAwarenessVersion
         {
             get
@@ -347,14 +370,24 @@ namespace KGySoft.WinForms
             }
         }
 
+        /// <summary>
+        /// Practically gets the same value as <see cref="Control.DefaultFont">Control.DefaultFont</see>, but the result of this property is always in points that can be scaled correctly.
+        /// </summary>
+        /// <remarks>
+        /// <note>This property may return different fonts on .NET Framework and .NET [Core], just like the <see cref="Control.DefaultFont">Control.DefaultFont</see> property. Use this property only
+        /// to ensure to get a correctly scalable version of <see cref="Control.DefaultFont">Control.DefaultFont</see>. If you target both .NET Framework and .NET [Core] and you want to use the same font on both platforms,
+        /// set the <see cref="Form.Font">Form.Font</see> property of your forms explicitly. You can use the <see cref="SystemFonts.MessageBoxFont">SystemFonts.MessageBoxFont</see> property, which returns the same font on both platforms,
+        /// and returns a correctly scalable <see cref="Font"/> in points.</note>
+        /// </remarks>
         public static Font DefaultFont
         {
             get
             {
+                // NOTE: the result is cached, just like Control.DefaultFont, even though it can be risky if anyone can dispose it.
 #if NETFRAMEWORK
                 if (defaultFont == null)
                 {
-                    if (IsDefaultSystemScale)
+                    if (!IsProcessPerMonitorAware && IsDefaultSystemScale)
                         defaultFont = Control.DefaultFont;
                     else
                     {
@@ -385,13 +418,18 @@ namespace KGySoft.WinForms
             }
         }
 
+        /// <summary>
+        /// Gets whether the <see cref="SystemScale"/> property returns the default 100% (1.0) scale factor.
+        /// </summary>
         public static bool IsDefaultSystemScale => systemScale == defaultScale;
 
         #endregion
-        
+
         #region Internal Properties
-        
+
+        // Not making these properties public because the names are somewhat misleading, and they are cached, which could be an issue if they are misused.
         internal static Font DialogFont => dialogFont ??= SystemFonts.DialogFont;
+        internal static Font MessageBoxFont => messageBoxFont ??= SystemFonts.MessageBoxFont;
 
         #endregion
 
@@ -405,9 +443,22 @@ namespace KGySoft.WinForms
         /// Gets whether the display that the specified control is using has the same DPI as the initial DPI of the primary display.
         /// </summary>
         public static bool HasDefaultScaling(this Control control)
-            // Avoiding calling IsThreadPerMonitorAware twice, it's called in the GetDpiForHwnd method anyway
-            => !isProcessPerMonitorAware || GetDpi(control) == systemInitialDpi;
+        {
+            if (control == null!)
+                ThrowNull(nameof(control));
 
+            // Avoiding calling IsThreadPerMonitorAware twice, it's called in the GetDpiForHwnd method anyway
+            return !isProcessPerMonitorAware || GetDpi(control) == systemInitialDpi;
+        }
+
+        /// <summary>
+        /// Gets the current scale factor of the specified control. If per-monitor DPI awareness is not enabled, it always returns the same value as <see cref="SystemScale"/>.
+        /// </summary>
+        /// <param name="control">The control for which the scale factor is requested.</param>
+        /// <returns>A <see cref="PointF"/> representing the scale factor of the control, where X and Y are the horizontal and vertical scale factors, respectively.</returns>.
+        /// <remarks>
+        /// <para>If the handle of the <paramref name="control"/> is not created yet, or if the control is not hosted in a window, this method returns the value of the <see cref="SystemScale"/> property.</para>
+        /// </remarks>
         public static PointF GetScale(this Control control)
         {
             if (control == null!)
@@ -420,6 +471,11 @@ namespace KGySoft.WinForms
             return new PointF(dpi.X / DefaultDpi, dpi.Y / DefaultDpi);
         }
 
+        /// <summary>
+        /// Gets the current scale factor of the specified window handle. If the handle is invalid or per-monitor DPI awareness is not enabled, it always returns the same value as <see cref="SystemScale"/>.
+        /// </summary>
+        /// <param name="hWnd">The handle of the window for which the scale factor is requested.</param>
+        /// <returns>A <see cref="PointF"/> representing the scale factor of the window, where X and Y are the horizontal and vertical scale factors, respectively.</returns>.
         public static PointF GetScale(IntPtr hWnd)
         {
             if (!isProcessPerMonitorAware || hWnd == IntPtr.Zero)
@@ -429,9 +485,17 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// NOTE: May not work as expected if the <paramref name="graphics"/> is not created for a window (e.g. belongs to a bitmap or a buffered graphics).
-        /// Try to use <see cref="GetScale(Control)"/> instead.
+        /// Gets the current scale factor of the specified <see cref="Graphics"/> object.
         /// </summary>
+        /// <param name="graphics">The <see cref="Graphics"/> object for which the scale factor is requested.</param>
+        /// <returns>A <see cref="PointF"/> representing the scale factor of the graphics object, where X and Y are the horizontal and vertical scale factors, respectively.</returns>.
+        /// <remarks>
+        /// <para>If the process is not per-monitor DPI aware, the result is based on the <see cref="Graphics.DpiX"/> and <see cref="Graphics.DpiY"/> properties of the <paramref name="graphics"/> object.
+        /// Otherwise, it attempts to retrieve the scaling of the window that the <paramref name="graphics"/> object is associated with.
+        /// If no such window is found, it falls back to the <see cref="Graphics.DpiX"/> and <see cref="Graphics.DpiY"/> properties.</para>
+        /// <note>Always try to use the <see cref="GetScale(Control)"/> overload in the first place. If the <paramref name="graphics"/> object is not associated with a control (e.g. when it is created from a bitmap),
+        /// it may return unexpected results.</note>
+        /// </remarks>
         public static PointF GetScale(this Graphics graphics)
         {
             if (graphics == null!)
@@ -458,6 +522,11 @@ namespace KGySoft.WinForms
             return new PointF(graphics.DpiX / DefaultDpi, graphics.DpiY / DefaultDpi);
         }
 
+        /// <summary>
+        /// Gets the current scale factor of the specified <see cref="Screen"/>.
+        /// </summary>
+        /// <param name="screen">The <see cref="Screen"/> for which the scale factor is requested.</param>
+        /// <returns>A <see cref="PointF"/> representing the scale factor of the screen, where X and Y are the horizontal and vertical scale factors, respectively.</returns>.
         public static PointF GetScale(this Screen screen)
         {
             if (screen == null!)
@@ -467,6 +536,7 @@ namespace KGySoft.WinForms
                 return systemScale;
 
             // Unfortunately screen.Handle (HMONITOR) is not exposed publicly so we retrieve it by WinAPI.
+            Debug.Assert(OSHelper.IsWindows, "Non-Windows platform per-monitor awareness");
             var rect = new RECT(screen.Bounds);
             IntPtr hMonitor = User32.MonitorFromRect(ref rect, Constants.MONITOR_DEFAULTTONEAREST);
             if (ShCore.TryGetDpiForMonitor(hMonitor, MONITOR_DPI_TYPE.MDT_EFFECTIVE_DPI, out uint dpiX, out uint dpiY))
@@ -475,21 +545,90 @@ namespace KGySoft.WinForms
             return systemScale;
         }
 
+        /// <summary>
+        /// Scales the specified <paramref name="size"/> by the scale factor of the <paramref name="control"/>.
+        /// </summary>
+        /// <param name="control">The control whose scale factor is used for scaling.</param>
+        /// <param name="size">The <see cref="Size"/> to be scaled.</param>
+        /// <returns>A <see cref="Size"/> representing the scaled size.</returns>
         public static Size ScaleSize(this Control control, Size size) => size.Scale(control.GetScale());
+
+        /// <summary>
+        /// Scales the specified <paramref name="width"/> by the horizontal scale factor of the <paramref name="control"/>.
+        /// </summary>
+        /// <param name="control">The control whose horizontal scale factor is used for scaling.</param>
+        /// <param name="width">The width to be scaled.</param>
+        /// <returns>An integer value representing the scaled width.</returns>
         public static int ScaleWidth(this Control control, int width) => width.Scale(control.GetScale().X);
+
+        /// <summary>
+        /// Scales the specified <paramref name="height"/> by the vertical scale factor of the <paramref name="control"/>.
+        /// </summary>
+        /// <param name="control">The control whose vertical scale factor is used for scaling.</param>
+        /// <param name="height">The height to be scaled.</param>
+        /// <returns>An integer value representing the scaled height.</returns>
         public static int ScaleHeight(this Control control, int height) => height.Scale(control.GetScale().Y);
+
+        /// <summary>
+        /// Scales the specified <paramref name="size"/> by the provided <paramref name="scale"/> factor.
+        /// </summary>
+        /// <param name="size">The <see cref="Size"/> to be scaled.</param>
+        /// <param name="scale">The scale factor to be applied, represented as a <see cref="PointF"/> where X is the horizontal scale and Y is the vertical scale.</param>
+        /// <returns>A <see cref="SizeF"/> representing the scaled size.</returns>
         public static SizeF ScaleF(this Size size, PointF scale) => new SizeF(scale.X * size.Width, scale.Y * size.Height);
+
+        /// <summary>
+        /// Scales the specified <paramref name="size"/> by the provided <paramref name="scale"/> factor.
+        /// </summary>
+        /// <param name="size">The <see cref="Size"/> to be scaled.</param>
+        /// <param name="scale">The scale factor to be applied, represented as a <see cref="PointF"/> where X is the horizontal scale and Y is the vertical scale.</param>
+        /// <returns>A rounded <see cref="Size"/> representing the scaled size.</returns>
         public static Size Scale(this Size size, PointF scale) => Size.Round(ScaleF(size, scale));
+
+        /// <summary>
+        /// Scales the specified <paramref name="size"/> by the provided <paramref name="scale"/> factor.
+        /// </summary>
+        /// <param name="size">The integer value to be scaled.</param>
+        /// <param name="scale">The scale factor to be applied.</param>
+        /// <returns>A rounded integer value representing the scaled size.</returns>
         public static int Scale(this int size, float scale) => (int)Math.Round(size * scale);
+
+        /// <summary>
+        /// Scales the specified <paramref name="size"/> by the provided <paramref name="scale"/> factor.
+        /// </summary>
+        /// <param name="size">The <see cref="Size"/> to be scaled.</param>
+        /// <param name="scale">The scale factor to be applied.</param>
+        /// <returns>A <see cref="Size"/> representing the scaled size.</returns>
         public static Size Scale(this Size size, float scale) => size.Scale(new PointF(scale, scale));
+
+        /// <summary>
+        /// Scales the specified <paramref name="size"/> by the provided <paramref name="scale"/> factor.
+        /// </summary>
+        /// <param name="size">The <see cref="Size"/> to be scaled.</param>
+        /// <param name="scale">The scale factor to be applied.</param>
+        /// <returns>A <see cref="SizeF"/> representing the scaled size.</returns>
         public static SizeF ScaleF(this Size size, float scale) => size.ScaleF(new PointF(scale, scale));
 
+        /// <summary>
+        /// Scales the specified <paramref name="padding"/> by the provided <paramref name="scale"/> factor.
+        /// </summary>
+        /// <param name="padding">The <see cref="Padding"/> to be scaled.</param>
+        /// <param name="scale">The scale factor to be applied, represented as a <see cref="PointF"/> where X is the horizontal scale and Y is the vertical scale.</param>
+        /// <returns>A <see cref="Padding"/> representing the scaled padding.</returns>
         public static Padding Scale(this Padding padding, PointF scale) => new Padding(
             padding.Left.Scale(scale.X),
             padding.Top.Scale(scale.Y),
             padding.Right.Scale(scale.X),
             padding.Bottom.Scale(scale.Y));
 
+        /// <summary>
+        /// Gets the specified <paramref name="font"/> if it is not null and is not equal to <see cref="Control.DefaultFont">Control.DefaultFont</see>; otherwise, returns the <see cref="DefaultFont"/>.
+        /// </summary>
+        /// <param name="font">The <see cref="Font"/> to check.</param>
+        /// <returns>The specified <paramref name="font"/> if it is not null and not equal to <see cref="Control.DefaultFont">Control.DefaultFont</see>; otherwise, the value of the <see cref="DefaultFont"/> property.</returns>
+        /// <remarks>
+        /// <para>This method can be especially useful on .NET Framework, where the <see cref="Control.DefaultFont">Control.DefaultFont</see> property may return a non-scaled font, which is not suitable for high DPI scenarios.</para>
+        /// </remarks>
         public static Font GetFontOrDefault(Font? font)
         {
             if (font == null)
@@ -504,6 +643,11 @@ namespace KGySoft.WinForms
             return font;
         }
 
+        /// <summary>
+        /// Gets the recommended width and height of scrollbars matching the current scaling of the specified <paramref name="control"/>.
+        /// </summary>
+        /// <param name="control">The control for which the scrollbar size is requested.</param>
+        /// <returns>A <see cref="Size"/> representing the recommended width and height of scrollbars.</returns>
         public static Size GetScrollbarSize(this Control control)
         {
             if (control == null!)
@@ -519,6 +663,11 @@ namespace KGySoft.WinForms
             return GetScrollbarSizeForDpi(GetDpi(control), perMonitorDpiAwarenessVersion);
         }
 
+        /// <summary>
+        /// Gets the recommended width and height of scrollbars matching the current scaling of the specified window handle.
+        /// </summary>
+        /// <param name="hWnd">The handle of the window for which the scrollbar size is requested.</param>
+        /// <returns>A <see cref="Size"/> representing the recommended width and height of scrollbars.</returns>
         public static Size GetScrollbarSize(IntPtr hWnd)
         {
             if (OSHelper.IsMono)
@@ -618,10 +767,7 @@ namespace KGySoft.WinForms
 
         private static Point GetDpi(Control control)
         {
-            if (!isProcessPerMonitorAware)
-                return systemInitialDpi;
-
-            if (!control.IsHandleCreated)
+            if (!isProcessPerMonitorAware || !control.IsHandleCreated)
                 return systemInitialDpi;
 
             // NOTE: we could use control.DeviceDpi here on .NET Framework 4.7 or later, but it fails in some cases:

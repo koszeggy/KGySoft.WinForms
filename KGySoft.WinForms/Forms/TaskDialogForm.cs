@@ -316,8 +316,7 @@ namespace KGySoft.WinForms.Forms
             lblDetailsFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             lblFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
-            if (SystemFonts.MessageBoxFont is Font font)
-                Font = font;
+            Font = ScaleHelper.MessageBoxFont;
         }
 
         #endregion
