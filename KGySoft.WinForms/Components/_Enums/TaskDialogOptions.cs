@@ -103,7 +103,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Indicates that texts of <see cref="TaskDialog.StandardButtons"/> are localized from the library resources
-        /// rather than using Windows resources.
+        /// rather than using Windows resources. On non-Windows platforms this flag is ignored, as if it was always set.
         /// <note>This flag causes to use <see cref="TaskDialog"/> in compatibility mode.</note>
         /// </summary>
         TranslateStandardButtons = 1 << 16,

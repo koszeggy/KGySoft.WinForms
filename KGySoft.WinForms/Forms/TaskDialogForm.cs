@@ -185,7 +185,7 @@ namespace KGySoft.WinForms.Forms
             internal int DluToPixelsX(int dialogUnitX)
             {
                 if (baseUnitX == 0)
-                    baseUnitX = (int)User32.GetDialogBaseUnits() & 0xFFFF;
+                    baseUnitX = OSHelper.IsWindows ? (int)User32.GetDialogBaseUnits() & 0xFFFF : 8;
 
                 return dialogUnitX * baseUnitX / 4;
             }
@@ -1541,7 +1541,7 @@ namespace KGySoft.WinForms.Forms
                 AutoSize = false,
                 TextRenderingQuality = RenderingQuality
             };
-            if ((host.Options & TaskDialogOptions.TranslateStandardButtons) != TaskDialogOptions.None)
+            if ((host.Options & TaskDialogOptions.TranslateStandardButtons) != TaskDialogOptions.None || !OSHelper.IsWindows)
                 btn.Text = Res.Get(standardButton);
             else
             {

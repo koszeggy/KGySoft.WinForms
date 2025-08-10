@@ -77,13 +77,15 @@ namespace KGySoft.WinForms.Forms
     {
         #region Nested Classes
 
+        #region ControlCollection class
+
         /// <summary>
         /// Represents a collection of controls contained within a <see cref="BaseForm"/>.
         /// </summary>
         protected new class ControlCollection : Form.ControlCollection
         {
             #region Fields
-            
+
             private readonly BaseForm owner;
 
             #endregion
@@ -120,6 +122,56 @@ namespace KGySoft.WinForms.Forms
 
             #endregion
         }
+
+        #endregion
+
+        #region ControlCollection class
+
+        /// <summary>
+        /// Needed for Mono compatibility, because Form.ControlCollection.Add casts every Control to Form on Mono.
+        /// </summary>
+        private sealed class ControlCollectionMono : Control.ControlCollection
+        {
+            #region Fields
+
+            private readonly BaseForm owner;
+
+            #endregion
+
+            #region Constructors
+
+            /// <summary>
+            /// Initializes a new instance of the <see cref="ControlCollection"/> class with the specified owner.
+            /// </summary>
+            /// <param name="owner">The <see cref="BaseForm"/> that owns this collection.</param>
+            public ControlCollectionMono(BaseForm owner)
+                : base(owner ?? throw new ArgumentNullException(nameof(owner), PublicResources.ArgumentNull))
+            {
+                this.owner = owner;
+            }
+
+            #endregion
+
+            #region Methods
+
+            /// <inheritdoc />
+            public override void Add(Control value)
+            {
+                owner.isAddingControl = true;
+                try
+                {
+                    base.Add(value);
+                }
+                finally
+                {
+                    owner.isAddingControl = false;
+                }
+            }
+
+            #endregion
+        }
+
+        #endregion
 
         #endregion
 
@@ -786,7 +838,8 @@ namespace KGySoft.WinForms.Forms
         #region Protected Methods
 
         /// <inheritdoc />
-        protected override Control.ControlCollection CreateControlsInstance() => new ControlCollection(this);
+        protected override Control.ControlCollection CreateControlsInstance()
+            => OSHelper.IsMono ? new ControlCollectionMono(this) : new ControlCollection(this);
 
         /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)

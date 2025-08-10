@@ -293,7 +293,7 @@ namespace KGySoft.WinForms
         #region Fields
 
         private static readonly bool isProcessPerMonitorAware = OSHelper.IsWindows81OrLater && ShCore.GetProcessDpiAwareness() >= PROCESS_DPI_AWARENESS.PROCESS_PER_MONITOR_DPI_AWARE;
-        private static readonly Point systemInitialDpi = GetDpiForHdc(User32.GetDC(IntPtr.Zero));
+        private static readonly Point systemInitialDpi = OSHelper.IsWindows ? GetDpiForHdc(User32.GetDC(IntPtr.Zero)) : GetDpiForHwnd(IntPtr.Zero);
         private static readonly PointF systemScale = new PointF(systemInitialDpi.X / DefaultDpi, systemInitialDpi.Y / DefaultDpi);
         private static readonly PointF defaultScale = new PointF(1f, 1f);
         private static readonly Size scrollbarFallbackReferenceSize = new Size(16, 16);
@@ -778,8 +778,6 @@ namespace KGySoft.WinForms
 
         private static Point GetDpiForHwnd(IntPtr hwnd)
         {
-            Debug.Assert(isProcessPerMonitorAware);
-
             if (IsThreadPerMonitorAware)
             {
                 // Windows 10 1607 or later
@@ -793,10 +791,18 @@ namespace KGySoft.WinForms
                 // Windows 8.1 or later
                 else
                 {
+                    Debug.Assert(OSHelper.IsWindows81OrLater, "Supporting per-monitor awareness is expected on Windows only");
                     IntPtr hMonitor = User32.MonitorFromWindow(hwnd, Constants.MONITOR_DEFAULTTONEAREST);
                     if (ShCore.TryGetDpiForMonitor(hMonitor, MONITOR_DPI_TYPE.MDT_EFFECTIVE_DPI, out uint dpiX, out uint dpiY))
                         return new Point((int)dpiX, (int)dpiY);
                 }
+            }
+            // Initializing system DPI on non-Windows platforms
+            else if (!OSHelper.IsWindows && systemInitialDpi == default)
+            {
+                Debug.Assert(hwnd == IntPtr.Zero);
+                using Graphics screen = Graphics.FromHwnd(hwnd);
+                return new Point((int)screen.DpiX, (int)screen.DpiY);
             }
 
             // Not per-monitor aware, or fallback when the WinAPI calls above fail.

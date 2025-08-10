@@ -183,7 +183,7 @@ namespace KGySoft.WinForms.Reflection
 
         #region ButtonBase
 
-        internal static void SetShowToolTip(this ButtonBase instance, bool value) => GetProperty(typeof(ButtonBase), "ShowToolTip")!.Set(instance, value);
+        internal static void SetShowToolTip(this ButtonBase instance, bool value) => GetProperty(typeof(ButtonBase), "ShowToolTip")?.Set(instance, value);
 
         internal static void Animate(this ButtonBase instance) => TryInvokeMethod(instance, "Animate", []);
 
