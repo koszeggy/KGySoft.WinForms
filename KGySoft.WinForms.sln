@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		KGySoft.snk = KGySoft.snk
 		KGySoft.WinForms.ruleset = KGySoft.WinForms.ruleset
 		LICENSE = LICENSE
+		README.md = README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KGySoft.WinForms.Example", "KGySoft.WinForms.Example\KGySoft.WinForms.Example.csproj", "{DCFA4BB8-8ADF-0B30-2148-A51D7EB36D9E}"
