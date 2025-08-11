@@ -31,11 +31,11 @@ The binaries can be downloaded as a NuGet package directly from [nuget.org](http
 However, the preferred way is to install the package in VisualStudio either by looking for the `KGySoft.WinForms` package in the Nuget Package Manager GUI, or by sending the following command at the Package Manager Console prompt:
 
     PM> Install-Package KGySoft.WinForms
-
+    
 ### Example Application:
 
 <p align="center">
-  <img alt="A TaskDialog in the KGySoft.WinForms.Example application" src="TODO"/>
+  <img alt="A TaskDialog in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/ad99b5f6-84ae-4306-b610-68549eb348ce"/>
   <br/><em>Try the Examples application from the <a href="KGySoft.WinForms.Example">KGySoft.WinForms.Example</a> folder or download it from the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases">Releases</a>.</em>
 </p>
 
