@@ -140,10 +140,10 @@
     <comment>This resource is not a property. It is applied manually in the overridden ApplyStringResources of the form by calling LocalizationHelper.GetString</comment>
   </data>
   <data name="gbResourceSetName.Text" xml:space="preserve">
-    <value>Resource Entries</value>
+    <value>Resource Set Name</value>
   </data>
   <data name="gbResourceEntries.Text" xml:space="preserve">
-    <value>Resource Set Name</value>
+    <value>Resource Entries</value>
   </data>
   <data name="colResourceKey.HeaderText" xml:space="preserve">
     <value>Key</value>

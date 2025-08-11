@@ -62,9 +62,7 @@ namespace KGySoft.WinForms.Forms
     /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
     /// Note that it affects font scaling only (which may indirectly affect also size and content scaling if <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.Font"/>),
     /// but basically auto-sizing behavior still depends on the current platform.</item>
-    /// <item>The default font is set to <see cref="ScaleHelper.DefaultFont">ScaleHelper.DefaultFont</see>. It makes a difference only when targeting .NET Framework
-    /// and the application is high-DPI aware (even without per-monitor awareness), in which case the form is opened with proper scaling
-    /// when  <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.Font"/>.</item>
+    /// <item>The <see cref="DynamicStringLocalization"/> property allows creating dynamically generated localizations for any language.</item>
     /// <item><see cref="CommandBindings"/> property. See the <a href="https://kgysoft.net/corelibraries#command-binding" target="_blank">online documentation</a> for details.</item>
     /// <item>Advanced MDI application support, see the <see cref="ShowMdiChild"/> method and <see cref="OwnedMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
     /// <item>Fixes a <a href="https://github.com/dotnet/winforms/issues/1504" target="_blank">resizing bug</a> that exists in .NET Framework and .NET Core 3.x that can occur with multiple displays.</item>
@@ -450,7 +448,7 @@ namespace KGySoft.WinForms.Forms
         /// <para>When this property is set to <see cref="DynamicStringLocalization.Disabled"/>, no automatic localization occurs. To localize string resources
         /// programmatically, you can override the <see cref="ApplyStringResources"/> method.</para>
         /// <para>The <see cref="ApplyResources"/> method is called automatically when the form is loaded for the first time, but you can explicitly call it whenever
-        /// you need to re-apply the resources (or <see cref="ApplyResources"/> to re-apply the string resources only), for example when the display language changes.</para>
+        /// you need to re-apply the resources (or <see cref="ApplyStringResources"/> to re-apply the string resources only), for example when the display language changes.</para>
         /// <para>When the value of this property is not <see cref="DynamicStringLocalization.Disabled"/>, then the base <see cref="ApplyStringResources"/> implementation
         /// calls the <see cref="LocalizationHelper.ApplyStringResources">LocalizationHelper.ApplyStringResources</see> method, which traverses the controls of the form recursively,
         /// and invokes the <see cref="LocalizationHelper.LocalizationRequested"/> event for each localizable string property of the controls. If this property is

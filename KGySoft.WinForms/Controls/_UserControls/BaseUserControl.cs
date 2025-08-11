@@ -35,6 +35,7 @@ namespace KGySoft.WinForms.Controls
     /// <list type="bullet">
     /// <item>Removes all event subscriptions when the user control is disposed. To do that for the events of derived controls as well,
     /// use the <see cref="Component.Events"/> property in your derived event <see langword="add"/>/<see langword="remove"/> accessors.</item>
+    /// <item>The <see cref="DynamicStringLocalization"/> property allows creating dynamically generated localizations for any language.</item>
     /// <item><see cref="CommandBindings"/> property. See the <a href="https://kgysoft.net/corelibraries#command-binding" target="_blank">online documentation</a> for details.</item>
     /// <item>An <see cref="IsDesignMode"/> property that works even during initialization, when <see cref="Component.DesignMode"/> would return <see langword="false"/>.</item>
     /// <item><see cref="InvokeOnUIThread">InvokeOnUIThread</see> method.</item>
