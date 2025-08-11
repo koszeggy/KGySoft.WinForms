@@ -86,7 +86,20 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 
 <details>
 <summary><strong><code>AdvancedButton</code></strong><a id="advancedbutton"/></summary><p/>
-TODO
+
+`AdvancedButton` supports the following additional features compared to the standard `Button` control:
+* Custom disabled colors
+* Buffered fading animations for any `FlatStyle` (only for Windows Vista and later when visual styles are enabled)
+* Elevated mode (system shield icon)
+* Consistent font scaling on all platforms when per-monitor DPI awareness is enabled
+* Small visual enhancements, especially in high contrast mode
+* Different text rendering quality options
+
+<p align="center">
+  <img alt="AdvancedButton in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/de1dd6e4-6a85-4002-ac9f-633191ba4656"/>
+  <br/><em>AdvancedButton in the KGySoft.WinForms.Example application in the KGySoft.WinForms.Example application</em>
+</p>
+
 </details>
 
 <details>
