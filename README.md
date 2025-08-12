@@ -78,7 +78,7 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 * `BaseForm` provides several events and overridable methods to support per-monitor DPI awareness for all target platforms, including .NET Framework 3.5 and 4.x. These can be useful even if you target newer platforms where the standard `Form` class already supports per-monitor DPI awareness, because the standard implementation has some issues, especially when the application has older awareness settings.
 
 <p align="center">
-  <img alt="Editing self resources in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/45e10d0d-1ae3-49fb-a3aa-93058c17bfa2"/>
+  <img alt="Editing self resources in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/c606717c-a6bc-4c06-abb6-e78299daedbf"/>
   <br/><em>Editing newly generated resources for a new language in the KGySoft.WinForms.Example application</em>
 </p>
 
