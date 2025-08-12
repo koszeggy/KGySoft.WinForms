@@ -214,14 +214,25 @@ The `CheckGroupBox` control is a specialized `GroupBox` that has a check box in 
 
 <p align="center">
   <img alt="CheckGroupBox in the KGySoft.Drawing.ImagingTools application" src="https://github.com/user-attachments/assets/2e456ff2-5e9d-4115-a6b2-9b3d77fd7050"/>
-  <br/><em>The <code>CheckGroupBox</code> can be used to toggle the enabled status of every control in the group box.</em>
+  <br/><em>The <code>CheckGroupBox</code> can be used to toggle the enabled status of every control in the group box</em>
 </p>
 
 </details>
 
 <details>
 <summary><strong><code>CommandLinkButton</code></strong><a id="commandlinkbutton"/></summary><p/>
-TODO
+
+A command link is a special button that can be used used to present a choice of action to the user. It is practically a `Button`, but it has a larger size, and it can display an icon and a description text below the main text. The `CommandLinkButton` control is a specialized button that supports this functionality.
+
+When `FlatStyle` is set to `System`, the control is rendered by the system on Windows Vista and later, when visual styles are enabled. Otherwise, a compatible rendering is used. The actual appearance can be quite different on different Windows versions, with or without visual styles and with high contrast mode enabled.
+
+In most cases, the `CommandLinkButton` control is used in a [task dialog](#task-dialog), which is a specialized dialog that can display command links. But if you need to use a custom dialog with commands links that cannot be achieved by task dialogs, you can use the `CommandLinkButton` control directly.
+
+<p align="center">
+  <img alt="CommandLinkButtons in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/6a3a6abc-14c1-4bc4-8ce0-04009fba3f74"/>
+  <br/><em><code>CommandLinkButton</code> controls in the KGySoft.WinForms.Example application on Windows 11, with visual styles enabled</em>
+</p>
+
 </details>
 
 ### Advanced Dialogs
