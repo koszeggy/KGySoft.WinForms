@@ -209,7 +209,14 @@ The `ImageViewer` control is like a `PictureBox`, but it supports free zooming a
 
 <details>
 <summary><strong><code>CheckGroupBox</code></strong><a id="checkgroupbox"/></summary><p/>
-TODO
+
+The `CheckGroupBox` control is a specialized `GroupBox` that has a check box in the header. It can be used to toggle the enabled state of the controls in the group box.
+
+<p align="center">
+  <img alt="CheckGroupBox in the KGySoft.Drawing.ImagingTools application" src="https://github.com/user-attachments/assets/2e456ff2-5e9d-4115-a6b2-9b3d77fd7050"/>
+  <br/><em>The <code>CheckGroupBox</code> can be used to toggle the enabled status of every control in the group box.</em>
+</p>
+
 </details>
 
 <details>
