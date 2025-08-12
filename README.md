@@ -150,7 +150,20 @@ Regular `DateTimePicker` control does not allow custom colors, it does not even 
 
 <details>
 <summary><strong><code>AdvancedLabel</code></strong><a id="advancedlabel"/></summary><p/>
-TODO
+
+`AdvancedLabel` supports the following additional features compared to the standard `Label`/`LinkLabel` controls:
+* Adjustable disabled colors
+* Fixed `AutoSize` behavior when the control is docked
+* Buffered fading animations (only for Windows Vista and later when visual styles are enabled). By default, affects toggling the `Enabled` state only, but can be applied to any visual change.
+* Consistent font scaling on all platforms when per-monitor DPI awareness is enabled
+* Different text and visual rendering quality options
+* Auto hyperlink recognition in text (when allowed)
+* Visual enhancements, such as richer `BorderStyle` options or fixed hand cursor for hyperlinks
+<p align="center">
+  <img alt="AdvancedLabel in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/01bfa7f5-5011-4e7d-8224-37dbba73dfd2"/>
+  <br/><em>Some <code>Label</code> vs. <code>AdvancedLabel</code> differences</em>
+</p>
+
 </details>
 
 <details>
