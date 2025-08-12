@@ -195,7 +195,6 @@ namespace KGySoft.WinForms.Controls
         private FlatStyle lastFlatStyle = FlatStyle.Standard; // would not be needed if there was an overridable OnFlatStyleChanged method
         private bool systemDrawDropDownListMode = true;
         private bool readOnly;
-        private bool suppressTextChanged;
         private string? textOnFocus;
         private InnerEditWindow? nativeEditorChild;
         private InnerListBoxWindow? nativeListBoxChild;
@@ -614,17 +613,9 @@ namespace KGySoft.WinForms.Controls
             // enabling
             if (Enabled)
             {
-                suppressTextChanged = true;
-                try
-                {
-                    // without this Text may remain selected even if not focused
-                    if (!Focused && style != ComboBoxStyle.DropDownList)
-                        SelectionLength = 0;
-                }
-                finally
-                {
-                    suppressTextChanged = false;
-                }
+                // without this Text may remain selected even if not focused
+                if (!Focused && style != ComboBoxStyle.DropDownList)
+                    SelectionLength = 0;
 
                 // if readonly was changed in disabled style original auto complete should be restored here
                 if (!readOnly && origCompleteSource != AutoCompleteSource.None && DropDownStyle != ComboBoxStyle.DropDownList
@@ -701,15 +692,6 @@ namespace KGySoft.WinForms.Controls
         /// Raises the <see cref="TextChangedOnLeave"/> event.
         /// </summary>
         protected virtual void OnTextChangedOnLeave(EventArgs e) => TextChangedOnLeave?.Invoke(this, e);
-
-        /// <inheritdoc />
-        protected override void OnTextChanged(EventArgs e)
-        {
-            // suppressing event if changing is a workaround
-            if (suppressTextChanged)
-                return;
-            base.OnTextChanged(e);
-        }
 
         /// <inheritdoc />
         protected override void OnKeyDown(KeyEventArgs e)
@@ -913,6 +895,10 @@ namespace KGySoft.WinForms.Controls
         protected override void OnParentFontChanged(EventArgs e)
         {
             base.OnParentFontChanged(e);
+
+            // without this Text may get selected even if not focused
+            if (!Focused && DropDownStyle != ComboBoxStyle.DropDownList)
+                SelectionLength = 0;
 
             // if the parent control is rescaling its font due to DPI change, then ignoring the event (we do our scaling in CheckDpiChange)
             if (dpiChangingCount > 0 || !AutoScaleFont)
@@ -1150,6 +1136,10 @@ namespace KGySoft.WinForms.Controls
             }
 
             base.Font = newFont;
+
+            // without this Text may get selected even if not focused
+            if (!Focused && DropDownStyle != ComboBoxStyle.DropDownList)
+                SelectionLength = 0;
         }
 
         #endregion
