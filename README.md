@@ -141,6 +141,11 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 
 Regular `DateTimePicker` control does not allow custom colors, it does not even have publicly browsable `BackColor` and `ForeColor` properties. `AdvancedDateTimePicker` addresses this issue, allowing even custom disabled colors. When visual styles are enabled and the control is in focus, it switches back to the default rendering. Additionally, it fixes a sort of rendering issues, especially in high DPI scenarios.
 
+<p align="center">
+  <img alt="AdvancedDateTimePicker in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/559d88ee-ab03-4fec-81a0-3434ec366f06"/>
+  <br/><em><code>DateTimePicker</code> vs. <code>AdvancedDateTimePicker></code> on Windows 11 with high DPI (125%), targeting .NET 9.0</em>
+</p>
+
 </details>
 
 <details>
