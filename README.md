@@ -88,7 +88,7 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 <summary><strong><code>AdvancedButton</code></strong><a id="advancedbutton"/></summary><p/>
 
 `AdvancedButton` supports the following additional features compared to the standard `Button` control:
-* Custom disabled colors
+* Adjustable disabled colors
 * Buffered fading animations for any `FlatStyle` (only for Windows Vista and later when visual styles are enabled)
 * Elevated mode (system shield icon)
 * Consistent font scaling on all platforms when per-monitor DPI awareness is enabled
@@ -97,14 +97,22 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 
 <p align="center">
   <img alt="AdvancedButton in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/de1dd6e4-6a85-4002-ac9f-633191ba4656"/>
-  <br/><em>AdvancedButton in the KGySoft.WinForms.Example application in the KGySoft.WinForms.Example application</em>
+  <br/><em>AdvancedButton in the KGySoft.WinForms.Example application</em>
 </p>
 
 </details>
 
 <details>
-<summary><strong><code>AdvancedCheckBox</code></strong><a id="advancedcheckbox"/></summary><p/>
-TODO
+<summary><strong><code>AdvancedCheckBox</code>/<code>AdvancedRadioButton</code></strong><a id="advancedcheckbox-advancedradiobutton"/></summary><p/>
+
+`AdvancedCheckBox` and `AdvancedRadioButton` support the following additional features compared to the standard `CheckBox`/`RadioButton` controls:
+* Adjustable disabled colors
+* Fixed `AutoSize` behavior when the control is docked (see also [`AdvancedLabel`](#advancedlabel))
+* Buffered fading animations for any `FlatStyle` (only for Windows Vista and later when visual styles are enabled)
+* Consistent font scaling on all platforms when per-monitor DPI awareness is enabled
+* Visual enhancements, especially in high contrast mode and with high DPI
+* Different text and visual rendering quality options
+
 </details>
 
 <details>
@@ -129,11 +137,6 @@ TODO
 
 <details>
 <summary><strong><code>AdvancedProgressBar</code></strong><a id="advancedprogressbar"/></summary><p/>
-TODO
-</details>
-
-<details>
-<summary><strong><code>AdvancedRadioButton</code></strong><a id="advancedradiobutton"/></summary><p/>
 TODO
 </details>
 
