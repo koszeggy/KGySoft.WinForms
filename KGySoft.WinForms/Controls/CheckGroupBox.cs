@@ -202,10 +202,7 @@ namespace KGySoft.WinForms.Controls
 
             #region Constructors
 
-            internal ContentPanel()
-            {
-                DoubleBuffered = true; // to avoid rendering issues when the background is transparent - see https://github.com/dotnet/winforms/issues/13784
-            }
+            internal ContentPanel() => DoubleBuffered = true;
 
             #endregion
 
@@ -223,7 +220,7 @@ namespace KGySoft.WinForms.Controls
                 try
                 {
                     // NOTE: no need for the Graphics.GetHdc() workaround here, because the background image is never set directly for the content panel, but rather for the CheckGroupBox itself.
-                    base.OnPaintBackground(e);
+                    checkGroupBox.OnPaintBackground(e);
                 }
                 finally
                 {
@@ -242,7 +239,7 @@ namespace KGySoft.WinForms.Controls
                 checkGroupBox.isRendering = true;
                 try
                 {
-                    base.OnPaint(e);
+                    checkGroupBox.OnPaint(e);
                 }
                 finally
                 {
@@ -439,6 +436,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnSizeChanged(EventArgs e)
         {
             contentPanel.Size = ClientRectangle.Size;
+            contentPanel.Invalidate();
             base.OnSizeChanged(e);
             if (RightToLeft == RightToLeft.Yes)
                 ResetCheckBoxLocation();
