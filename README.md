@@ -138,7 +138,9 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 
 <details>
 <summary><strong><code>AdvancedDateTimePicker</code></strong><a id="advanceddatetimepicker"/></summary><p/>
-TODO
+
+Regular `DateTimePicker` control does not allow custom colors, it does not even have publicly browsable `BackColor` and `ForeColor` properties. `AdvancedDateTimePicker` addresses this issue, allowing even custom disabled colors. When visual styles are enabled and the control is in focus, it switches back to the default rendering. Additionally, it fixes a sort of rendering issues, especially in high DPI scenarios.
+
 </details>
 
 <details>
