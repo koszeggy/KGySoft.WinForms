@@ -122,7 +122,18 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 
 <details>
 <summary><strong><code>AdvancedComboBox</code></strong><a id="advancedcombobox"/></summary><p/>
-TODO
+
+`AdvancedComboBox` supports the following most notable additional features compared to the standard `ComboBox` control:
+* Adjustable disabled colors
+* Read-only mode (similarly to a `TextBox`)
+* Consistent font scaling on all platforms when per-monitor DPI awareness is enabled
+* Other minor enhancements and fixes
+
+<p align="center">
+  <img alt="AdvancedComboBox in the KGySoft.WinForms.Example application" src=""/>
+  <br/><em>AdvancedComboBox in the KGySoft.WinForms.Example application</em>
+</p>
+
 </details>
 
 <details>
