@@ -757,14 +757,9 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            bool prevPressed = isPressed;
             isPressed = false;
             isMouseDown = false;
             base.OnMouseUp(e);
-
-            // workaround for base ResetFlagsandPaint call, which calls Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
-            if (isPressed != prevPressed)
-                Invalidate();
         }
 
         /// <inheritdoc />
@@ -809,13 +804,10 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnKeyUp(KeyEventArgs e)
         {
-            bool prevPressed = isPressed;
             if (e.KeyData == Keys.Space && isPressed)
                 isPressed = false;
 
             base.OnKeyUp(e);
-            if (isPressed != prevPressed)
-                Invalidate(); // workaround for base ResetFlagsandPaint call, which calls Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
         }
 
         /// <inheritdoc />
