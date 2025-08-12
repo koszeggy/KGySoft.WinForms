@@ -24,7 +24,7 @@ KGy SOFT WinForms Libraries offer advanced Windows Forms controls and other usef
 
 ## Download:
 
-### Download Binaries:
+### Download Binaries
 
 The binaries can be downloaded as a NuGet package directly from [nuget.org](https://www.nuget.org/packages/KGySoft.WinForms)
 
@@ -32,7 +32,7 @@ However, the preferred way is to install the package in VisualStudio either by l
 
     PM> Install-Package KGySoft.WinForms
     
-### Example Application:
+### Example Application
 
 <p align="center">
   <img alt="A TaskDialog in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/ad99b5f6-84ae-4306-b610-68549eb348ce"/>
@@ -168,12 +168,21 @@ Regular `DateTimePicker` control does not allow custom colors, it does not even 
 
 <details>
 <summary><strong><code>AdvancedPanel</code></strong><a id="advancedpanel"/></summary><p/>
-TODO
+
+Just a `Panel`, whose `BorderStyle` has a wider range of options than the standard `Panel` control. See the [`AdvancedLabel`](#advancedlabel) for a visual comparison that has the same variety of border styles.
+
 </details>
 
 <details>
 <summary><strong><code>AdvancedProgressBar</code></strong><a id="advancedprogressbar"/></summary><p/>
-TODO
+
+`AdvancedProgressBar` supports four different styles, including the system default style. Additionally, it supports paused and error states, as well as custom coloring for non-system styles. When visual styles are not available, every style is rendered with the classic appearance.
+
+<p align="center">
+  <img alt="AdvancedProgressBar in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/9bc2c6ce-ab55-4446-b186-c764652cac14"/>
+  <br/><em>The various styles of <code>AdvancedProgressBar</code></em>
+</p>
+
 </details>
 
 <details>
