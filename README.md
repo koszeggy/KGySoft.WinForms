@@ -186,15 +186,25 @@ Just a `Panel`, whose `BorderStyle` has a wider range of options than the standa
 </details>
 
 <details>
-<summary><strong><code>AdvancedTextBox</code></strong><a id="advancedtextbox"/></summary><p/>
-TODO
+<summary><strong><code>AdvancedTextBox</code>/<code>DecimalTextBox</code></strong><a id="advancedtextbox-decimaltextbox"/></summary><p/>
+
+Just like other advanced controls, `AdvancedTextBox` supports adjustable disabled colors and consistent font scaling on all platforms when per-monitor DPI awareness is enabled. Additionally, it fixes some minor issues regarding corrupted fonts, `AcceptsTab` and `AcceptsReturn` handling in read-only mode, or fixing Ctrl+A (select all) behavior when auto appending is enabled.
+
+`DecimalTextBox` is a specialized version of `AdvancedTextBox` that can be used as a numeric input control. A fixed number of fractional digits can be specified, which can be even negative, allowing rounding to whole values. When entering a value, you can use multiplier keys `t`, `m`, `y` for thousand, million, and billion (yard) multipliers, respectively. For example, entering `1.5m` will result in `1.500.000`.
+
 </details>
 
 ### New Control Types
 
 <details open>
 <summary><strong><code>ImageViewer</code></strong><a id="imageviewer"/></summary><p/>
-TODO
+
+The `ImageViewer` control is like a `PictureBox`, but it supports free zooming and panning. It can toggle smoothing, which can be used even for metafiles to apply antialiasing.
+
+<p align="center">
+  <img alt="ImageViewer in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/8f6b75bd-9200-4fff-bf1e-0336350f302e"/>
+  <br/><em>The <code>ImageViewer</code> control in the KGySoft.WinForms.Example application</em>
+</p>
 </details>
 
 <details>
