@@ -113,6 +113,11 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 * Visual enhancements, especially in high contrast mode and with high DPI
 * Different text and visual rendering quality options
 
+<p align="center">
+  <img alt="AdvancedRadioButton in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/59d07bd2-ac94-4229-82e4-7bcb076b73b8"/>
+  <br/><em><code>RadioButton</code> vs. <code>AdvancedRadioButton></code> on Windows 11 with high DPI (150%), targeting .NET 9.0</em>
+</p>
+
 </details>
 
 <details>
