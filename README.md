@@ -130,7 +130,7 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 * Other minor enhancements and fixes
 
 <p align="center">
-  <img alt="AdvancedComboBox in the KGySoft.WinForms.Example application" src=""/>
+  <img alt="AdvancedComboBox in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/3642456f-5900-42a7-b0f3-8a5f94d9cfb3"/>
   <br/><em>AdvancedComboBox in the KGySoft.WinForms.Example application</em>
 </p>
 
