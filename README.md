@@ -78,7 +78,7 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 * All have an `InvokeOnUIThread` method. It is similar as combining `InvokeRequired` and `Invoke`, but works correctly even when the control is not created yet, in which case `InvokeRequired` cannot be trusted.
 * They all have an `IsDesignMode` property, which is similar to `DesignMode`, but works correctly in all cases, even in the constructor an in virtual methods called from the constructor.
 * `BaseControl` provides an event for horizontal scrolling, which is not available in the standard `Control` class.
-* `BaseForm` and `BaseUserControl` have a `DynamicStringLocalization` property that allows enabling simple localization of the controls localizable string properties directly from .resx files. Localizations for non-existing translations can be automatically generated, and changes can be applied at runtime without restarting the application.
+* `BaseForm` and `BaseUserControl` have a `DynamicStringLocalization` property that allows enabling simple localization of the controls' localizable string properties directly from .resx files. Localizations for non-existing translations can be automatically generated, and changes can be applied at runtime without restarting the application.
 * `BaseForm` provides several events and overridable methods to support per-monitor DPI awareness for all target platforms, including .NET Framework 3.5 and 4.x. These can be useful even if you target newer platforms where the standard `Form` class already supports per-monitor DPI awareness, because the standard implementation has some issues, especially when the application has older awareness settings.
 
 <p align="center">
@@ -194,7 +194,7 @@ Just a `Panel`, whose `BorderStyle` has a wider range of options than the standa
 
 Just like other advanced controls, `AdvancedTextBox` supports adjustable disabled colors and consistent font scaling on all platforms when per-monitor DPI awareness is enabled. Additionally, it fixes some minor issues regarding corrupted fonts, `AcceptsTab` and `AcceptsReturn` handling in read-only mode, or fixing Ctrl+A (select all) behavior when auto appending is enabled.
 
-`DecimalTextBox` is a specialized version of `AdvancedTextBox` that can be used as a numeric input control. A fixed number of fractional digits can be specified, which can be even negative, allowing rounding to whole values. When entering a value, you can use multiplier keys `t`, `m`, `y` for thousand, million, and billion (yard) multipliers, respectively. For example, entering `1.5m` will result in `1.500.000`.
+`DecimalTextBox` is a specialized version of `AdvancedTextBox` that can be used as a numeric input control. A fixed number of fractional digits can be specified, which can be even negative, allowing rounding to whole values. When entering a value, you can use multiplier keys `t`, `m`, `y` for thousand, million, and billion (yard) multipliers, respectively. For example, entering `1.5m` will result in `1,500,000`.
 
 </details>
 
