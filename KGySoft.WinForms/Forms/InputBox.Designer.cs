@@ -32,7 +32,7 @@
             this.lblPrompt.Dock = System.Windows.Forms.DockStyle.Fill;
             this.lblPrompt.Location = new System.Drawing.Point(10, 0);
             this.lblPrompt.Name = "lblPrompt";
-            this.lblPrompt.Padding = new System.Windows.Forms.Padding(0, 13, 0, 1);
+            this.lblPrompt.Padding = new System.Windows.Forms.Padding(0, 20, 0, 3);
             this.lblPrompt.Size = new System.Drawing.Size(353, 35);
             this.lblPrompt.TabIndex = 0;
             this.lblPrompt.Text = "lblPrompt";
