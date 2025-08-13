@@ -11,8 +11,6 @@ KGy SOFT WinForms Libraries offer advanced Windows Forms controls and other usef
 
 ## Table of Contents:
 1. [Download](#download)
-   - [Download Binaries](#download-binaries)
-   - [Example Application](#example-application)
 4. [Release Notes](#release-notes)
 5. [Examples](#examples)
    - [Advanced Common Controls](#advanced-common-controls)
@@ -22,9 +20,7 @@ KGy SOFT WinForms Libraries offer advanced Windows Forms controls and other usef
 <!--2. [Project Site](#project-site)
 3. [Documentation](#documentation)-->
 
-## Download:
-
-### Download Binaries
+## Download
 
 The binaries can be downloaded as a NuGet package directly from [nuget.org](https://www.nuget.org/packages/KGySoft.WinForms)
 
@@ -32,12 +28,12 @@ However, the preferred way is to install the package in VisualStudio either by l
 
     PM> Install-Package KGySoft.WinForms
     
-### Example Application
+<!-- ### Example Application
 
 <p align="center">
   <img alt="A TaskDialog in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/ad99b5f6-84ae-4306-b610-68549eb348ce"/>
   <br/><em>Try the Examples application from the <a href="KGySoft.WinForms.Example">KGySoft.WinForms.Example</a> folder or download it from the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases">Releases</a>.</em>
-</p>
+</p> -->
 
 <!--## Project Site
 
@@ -63,6 +59,14 @@ See the [change log](https://github.com/koszeggy/KGySoft.WinForms/blob/master/KG
 The KGy SOFT WinForms libraries contain several advanced controls that are all derived from the standard Windows Forms controls, but offer with additional features and fixes for common issues. These controls include: `AdvancedButton`, `AdvancedCheckBox`, `AdvancedComboBox`, `AdvancedDateTimePicker`, `AdvancedLabel`, `AdvancedProgressBar`, `AdvancedRadioButton` and `AdvancedTextBox`.
 
 Exception with `AdvancedProgressBar`, they all support custom disabled colors (which is normally not adjustable) and fixed auto scaling when the application has per-monitor DPI awareness enabled. Additionally, `AdvancedButton`, `AdvancedCheckBox`, `AdvancedRadioButton` and `AdvancedLabel` support buffered fading animations with every flat style. See more details in the following sections.
+
+> 💡 **Tip**<p/>
+> Try the example application from the [KGySoft.WinForms.Example](KGySoft.WinForms.Example) folder or download its binaries from the [Releases](https://github.com/koszeggy/KGySoft.WinForms/releases).
+
+<p align="center">
+  <img alt="A TaskDialog in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/ad99b5f6-84ae-4306-b610-68549eb348ce"/>
+  <br/><em>Advanced controls selector dialog for testing in the <a href="KGySoft.WinForms.Example">KGySoft.WinForms.Example</a> application</em>
+</p>
 
 </details>
 
@@ -196,7 +200,7 @@ Just like other advanced controls, `AdvancedTextBox` supports adjustable disable
 
 ### New Control Types
 
-<details open>
+<details>
 <summary><strong><code>ImageViewer</code></strong><a id="imageviewer"/></summary><p/>
 
 The `ImageViewer` control is like a `PictureBox`, but it supports free zooming and panning. It can toggle smoothing, which can be used even for metafiles to apply antialiasing.
@@ -237,9 +241,31 @@ In most cases, the `CommandLinkButton` control is used in a [task dialog](#task-
 
 ### Advanced Dialogs
 
-<details>
+<details open>
 <summary><strong>Task Dialog</strong><a id="task-dialog"/></summary><p/>
-TODO
+
+A task dialog is a specialized dialog that can be used to present elaborate information to the user, and can offer possible actions in different ways. It can display a title, a main instruction, a concealable detailed description, footer text, and can have command links, radio buttons, a check box and buttons. It can also display icons (a main icon and a footer icon), a progress bar, and supports using a timer. The task dialog is a native Windows control on Windows Vista and later, but the KGy SOFT `TaskDialog` supports rendering in compatible mode on earlier Windows versions or when visual styles are not enabled.
+
+<p align="center">
+  <img alt="A native TaskDialog in the KGySoft.WinForms.Example application" src=""/>
+  <br/><em>A <code>TaskDialog</code> in the <a href="KGySoft.WinForms.Example">KGySoft.WinForms.Example</a> application on Windows 11 with visual styles using native rendering.</em>
+</p>
+
+> ⚠️ **Warning**<p/>
+> .NET 5 also introduced task dialogs, so when targeting .NET 5 or later, referencing the KGy SOFT version requires using aliases or fully qualified type names. You might want to use the KGy SOFT's `TaskDialog` even when targeting .NET 5 or later for the additional features available in compatible mode only, such as the custom icons for the command links and buttons, tool tips for buttons and radio buttons, fixed rendering in high-contrast mode, richer result when copying the dialog content to the clipboard, and more.
+
+<p align="center">
+  <img alt="A TaskDialog in the KGySoft.WinForms.Example application using compatible rendering on Windows XP" src=""/>
+  <br/><em>The same dialog as above, using compatible rendering on Windows XP.</em>
+</p>
+
+By default, the task dialog uses the native Windows component when available, and switches to compatible rendering when the native component is not available, or when the configuration of your `TaskDialog` uses some compatible-mode-only features (e.g. button icons or localization of standard buttons). Some other exclusive features don't force using the compatibility mode (e.g. tool tips, rendering improvements, etc.), but you can also force compatible rendering by setting the `TaskDialog.ForceCompatibilityMode` property to `true`. 
+
+<p align="center">
+  <img alt="A TaskDialog with custom icons in the KGySoft.WinForms.Example application using compatible rendering on Windows 11" src=""/>
+  <br/><em>Compatibility mode allows some non-native features such as custom command link icons.</em>
+</p>
+
 </details>
 
 <details>
