@@ -242,9 +242,9 @@ In most cases, the `CommandLinkButton` control is used in a [task dialog](#task-
 ### Advanced Dialogs
 
 <details>
-<summary><strong>Task Dialog</strong><a id="task-dialog"/></summary><p/>
+<summary><strong>Task Dialogs</strong><a id="task-dialog"/></summary><p/>
 
-A task dialog is a specialized dialog that can be used to present elaborate information to the user, and can offer possible actions in different ways. It can display a title, a main instruction, a message, a concealable detailed description, footer text, and can have command links, radio buttons, a check box and buttons. It can also display icons (a main icon and a footer icon), a progress bar, and supports using a timer. The task dialog is a native Windows component on Windows Vista and later, but the KGy SOFT `TaskDialog` supports compatibility mode on earlier Windows versions or when visual styles are not enabled.
+A task dialogs are specialized dialogs that can be used to present elaborate information to the user, and can offer possible actions in different ways. A task dialog can display a title, a main instruction, a message, a concealable detailed description, footer text, and can have command links, radio buttons, a check box and buttons. It can also display icons (a main icon and a footer icon), a progress bar, and supports using a timer. The task dialog is a native Windows component on Windows Vista and later, but the KGy SOFT `TaskDialog` supports compatibility mode on earlier Windows versions or when visual styles are not enabled.
 
 <p align="center">
   <img alt="A native TaskDialog in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/f8e87751-d483-48f3-87a3-feabeb7ff86f"/>
@@ -270,12 +270,26 @@ By default, the task dialog uses the native Windows component when available, an
 
 <details>
 <summary><strong>Message Dialogs</strong><a id="message-dialogs"/></summary><p/>
-TODO
+
+The static `Dialogs` class provides several static methods to display message dialogs of information, warning, error and confirmation messages. By default, these methods use the standard `MessageBox.Show` method internally, but you can opt-in to use the KGy SOFT `TaskDialog` instead by setting the `Dialogs.UseTaskDialogs` property to `true`. Using task dialogs instead of message boxes can be beneficial when the application has per-monitor DPI awareness enabled, because the standard message box is adjusted to the DPI of the primary display in the moment of starting the application, and it may not scale correctly on other displays or when the DPI changes later.
+
+<p align="center">
+  <img alt="Dialogs.InfoMessage message when it just uses MessageBox" src="https://github.com/user-attachments/assets/"/>
+  <br/><em><code>Dialogs.InfoMessage</code> example with the default behavior when it just uses <code>MessageBox.Show</code>.</em>
+</p>
+
 </details>
 
 <details>
 <summary><strong>Input Dialog</strong><a id="input-dialog"/></summary><p/>
-TODO
+
+The static `Dialogs` class has various `InputDialog` overloads that can be used to display a dialog for entering a single line of text. A caption and an optional prompt text can be specified along with a default value, which is pre-selected in the input field.
+
+<p align="center">
+  <img alt="Dialogs.InputDialog example" src="https://github.com/user-attachments/assets/"/>
+  <br/><em><code>Dialogs.InputDialog</code> example on Windows 11.</em>
+</p>
+
 </details>
 
 ## License
