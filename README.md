@@ -82,7 +82,7 @@ To implement your own advanced controls, you can derive from the `BaseControl`, 
 * `BaseForm` provides several events and overridable methods to support per-monitor DPI awareness for all target platforms, including .NET Framework 3.5 and 4.x. These can be useful even if you target newer platforms where the standard `Form` class already supports per-monitor DPI awareness, because the standard implementation has some issues, especially when the application has older awareness settings.
 
 <p align="center">
-  <img alt="Editing self resources in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/c606717c-a6bc-4c06-abb6-e78299daedbf"/>
+  <img alt="Editing self resources in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/9100c489-2f99-4956-aa60-49037fe7903f"/>
   <br/><em>Editing newly generated resources for a new language in the KGySoft.WinForms.Example application</em>
 </p>
 
@@ -247,7 +247,7 @@ In most cases, the `CommandLinkButton` control is used in a [task dialog](#task-
 A task dialogs are specialized dialogs that can be used to present elaborate information to the user, and can offer possible actions in different ways. A task dialog can display a title, a main instruction, a message, a concealable detailed description, footer text, and can have command links, radio buttons, a check box and buttons. It can also display icons (a main icon and a footer icon), a progress bar, and supports using a timer. The task dialog is a native Windows component on Windows Vista and later, but the KGy SOFT `TaskDialog` supports compatibility mode on earlier Windows versions or when visual styles are not enabled.
 
 <p align="center">
-  <img alt="A native TaskDialog in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/f8e87751-d483-48f3-87a3-feabeb7ff86f"/>
+  <img alt="A native TaskDialog in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/e32433f5-9d96-4d43-abb4-4a1254ab069a"/>
   <br/><em>A <code>TaskDialog</code> in the <a href="KGySoft.WinForms.Example">KGySoft.WinForms.Example</a> application on Windows 11 with visual styles using native rendering.</em>
 </p>
 
@@ -262,7 +262,7 @@ A task dialogs are specialized dialogs that can be used to present elaborate inf
 By default, the task dialog uses the native Windows component when available, and switches to compatible rendering otherwise, or when the configuration of your `TaskDialog` uses some compatible-mode-only features (e.g. button icons or localization of standard buttons). You can also force compatible mode by setting the `TaskDialog.ForceCompatibilityMode` property to `true`, which unlocks some additional improvements (e.g. tool tips, rendering fixes, better RTL mode support, richer clipboard content, etc.).
 
 <p align="center">
-  <img alt="A TaskDialog with custom icons in the KGySoft.WinForms.Example application using compatible rendering on Windows 11" src="https://github.com/user-attachments/assets/cdfd6764-2fda-4b97-bfde-a89f53b971ef"/>
+  <img alt="A TaskDialog with custom icons in the KGySoft.WinForms.Example application using compatible rendering on Windows 11" src="https://github.com/user-attachments/assets/50d4d0ed-7cf7-426c-832a-26dd584a10b6"/>
   <br/><em>Compatibility mode allows some non-native features like custom command link icons.</em>
 </p>
 
@@ -274,7 +274,7 @@ By default, the task dialog uses the native Windows component when available, an
 The static `Dialogs` class provides several static methods to display message dialogs of information, warning, error and confirmation messages. By default, these methods use the standard `MessageBox.Show` method internally, but you can opt-in to use the KGy SOFT `TaskDialog` instead by setting the `Dialogs.UseTaskDialogs` property to `true`. Using task dialogs instead of message boxes can be beneficial when the application has per-monitor DPI awareness enabled, because the standard message box is adjusted to the DPI of the primary display in the moment of starting the application, and it may not scale correctly on other displays or when the DPI changes later.
 
 <p align="center">
-  <img alt="Dialogs.InfoMessage message when it just uses MessageBox" src="https://github.com/user-attachments/assets/"/>
+  <img alt="Dialogs.InfoMessage message when it just uses MessageBox" src="https://github.com/user-attachments/assets/98000ddd-c3a1-4702-b8d8-8a2050c7e7b8"/>
   <br/><em><code>Dialogs.InfoMessage</code> example with the default behavior when it just uses <code>MessageBox.Show</code>.</em>
 </p>
 
@@ -286,7 +286,7 @@ The static `Dialogs` class provides several static methods to display message di
 The static `Dialogs` class has various `InputDialog` overloads that can be used to display a dialog for entering a single line of text. A caption and an optional prompt text can be specified along with a default value, which is pre-selected in the input field.
 
 <p align="center">
-  <img alt="Dialogs.InputDialog example" src="https://github.com/user-attachments/assets/"/>
+  <img alt="Dialogs.InputDialog example" src="https://github.com/user-attachments/assets/700f9176-ca15-484f-8554-6fd7713d622b"/>
   <br/><em><code>Dialogs.InputDialog</code> example on Windows 11.</em>
 </p>
 
