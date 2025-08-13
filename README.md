@@ -200,7 +200,7 @@ Just like other advanced controls, `AdvancedTextBox` supports adjustable disable
 
 ### New Control Types
 
-<details>
+<details open>
 <summary><strong><code>ImageViewer</code></strong><a id="imageviewer"/></summary><p/>
 
 The `ImageViewer` control is like a `PictureBox`, but it supports free zooming and panning. It can toggle smoothing, which can be used even for metafiles to apply antialiasing.
@@ -241,13 +241,13 @@ In most cases, the `CommandLinkButton` control is used in a [task dialog](#task-
 
 ### Advanced Dialogs
 
-<details open>
+<details>
 <summary><strong>Task Dialog</strong><a id="task-dialog"/></summary><p/>
 
 A task dialog is a specialized dialog that can be used to present elaborate information to the user, and can offer possible actions in different ways. It can display a title, a main instruction, a concealable detailed description, footer text, and can have command links, radio buttons, a check box and buttons. It can also display icons (a main icon and a footer icon), a progress bar, and supports using a timer. The task dialog is a native Windows control on Windows Vista and later, but the KGy SOFT `TaskDialog` supports rendering in compatible mode on earlier Windows versions or when visual styles are not enabled.
 
 <p align="center">
-  <img alt="A native TaskDialog in the KGySoft.WinForms.Example application" src=""/>
+  <img alt="A native TaskDialog in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/f8e87751-d483-48f3-87a3-feabeb7ff86f"/>
   <br/><em>A <code>TaskDialog</code> in the <a href="KGySoft.WinForms.Example">KGySoft.WinForms.Example</a> application on Windows 11 with visual styles using native rendering.</em>
 </p>
 
@@ -255,15 +255,15 @@ A task dialog is a specialized dialog that can be used to present elaborate info
 > .NET 5 also introduced task dialogs, so when targeting .NET 5 or later, referencing the KGy SOFT version requires using aliases or fully qualified type names. You might want to use the KGy SOFT's `TaskDialog` even when targeting .NET 5 or later for the additional features available in compatible mode only, such as the custom icons for the command links and buttons, tool tips for buttons and radio buttons, fixed rendering in high-contrast mode, richer result when copying the dialog content to the clipboard, and more.
 
 <p align="center">
-  <img alt="A TaskDialog in the KGySoft.WinForms.Example application using compatible rendering on Windows XP" src=""/>
+  <img alt="A TaskDialog in the KGySoft.WinForms.Example application using compatible rendering on Windows XP" src="https://github.com/user-attachments/assets/8ee02c8a-f7c9-44bd-a61d-ac51c2d25661"/>
   <br/><em>The same dialog as above, using compatible rendering on Windows XP.</em>
 </p>
 
 By default, the task dialog uses the native Windows component when available, and switches to compatible rendering when the native component is not available, or when the configuration of your `TaskDialog` uses some compatible-mode-only features (e.g. button icons or localization of standard buttons). Some other exclusive features don't force using the compatibility mode (e.g. tool tips, rendering improvements, etc.), but you can also force compatible rendering by setting the `TaskDialog.ForceCompatibilityMode` property to `true`. 
 
 <p align="center">
-  <img alt="A TaskDialog with custom icons in the KGySoft.WinForms.Example application using compatible rendering on Windows 11" src=""/>
-  <br/><em>Compatibility mode allows some non-native features such as custom command link icons.</em>
+  <img alt="A TaskDialog with custom icons in the KGySoft.WinForms.Example application using compatible rendering on Windows 11" src="https://github.com/user-attachments/assets/cdfd6764-2fda-4b97-bfde-a89f53b971ef"/>
+  <br/><em>Compatibility mode allows some non-native features like custom command link icons.</em>
 </p>
 
 </details>
