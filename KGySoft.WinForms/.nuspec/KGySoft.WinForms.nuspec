@@ -2,26 +2,25 @@
 <package >
   <metadata>
     <id>KGySoft.WinForms</id>
-    <version>5.0.0-alpha.4</version>
+    <version>5.0.0-preview.1</version>
     <title>KGy SOFT Windows Forms Libraries</title>
     <authors>György Kőszeg</authors>
     <owners>György Kőszeg</owners>
     <license type="file">LICENSE</license>
-    <!--<licenseUrl>https://creativecommons.org/licenses/by-nd/4.0/legalcode</licenseUrl>-->
     <!--<projectUrl>https://kgysoft.net/winforms</projectUrl>-->
     <!--<iconUrl>https://kgysoft.net/images/Icon64.png</iconUrl>-->
     <icon>Icon64.png</icon>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <summary>Advanced Windows Forms controls, components, forms and features with high backward OS and .NET Framework compatibility from Windows XP to Windows 10.</summary>
+    <summary>Advanced Windows Forms controls, components, forms and features with high backward OS and .NET Framework compatibility from Windows XP to Windows 11.</summary>
     <description xml:space="preserve">KGy SOFT Windows Forms Libraries offer advanced controls and components built around System.Windows.Forms types.
 
 Among others:
 - A BaseForm with command bindings, MDI application and dynamic localization support, fixing some high-DPI and multi-monitor issues also for older frameworks
+- Task dialogs also with compatibility mode supporting even Windows XP
+- Advanced components and controls that either extend existing functionality or add new ones
 - Screenshot support
-- Task dialogs, supporting even Windows XP
-- Advanced components and controls that extend existing functionality or add new ones
 
-Find Documentation: https://docs.kgysoft.net/winforms</description>
+Find some more examples with images at the project site at https://github.com/koszeggy/KGySoft.WinForms</description>
     <releaseNotes>See the detailed release notes here: https://github.com/koszeggy/KGySoft.WinForms/blob/master/KGySoft.WinForms/changelog.txt</releaseNotes>
     <copyright>Copyright © KGy SOFT</copyright>
     <tags>KGySoft WinForms controls components TaskDialog forms</tags>
@@ -29,41 +28,46 @@ Find Documentation: https://docs.kgysoft.net/winforms</description>
     <repository type="git" url="https://github.com/koszeggy/KGySoft.WinForms" />
     <dependencies>
       <group targetFramework=".NETFramework3.5">
-        <dependency id="KGySoft.CoreLibraries" version="8.1.0" />
-        <dependency id="KGySoft.Drawing" version="8.0.0" />
+        <dependency id="KGySoft.Drawing" version="9.2.0" />
       </group>
       <group targetFramework=".NETFramework4.0">
-        <dependency id="KGySoft.CoreLibraries" version="8.1.0" />
-        <dependency id="KGySoft.Drawing" version="8.0.0" />
+        <dependency id="KGySoft.Drawing" version="9.2.0" />
       </group>
-      <!--<group targetFramework=".NETFramework4.5">
-        <dependency id="KGySoft.CoreLibraries" version="8.1.0" />
-        <dependency id="KGySoft.Drawing" version="8.0.0" />
-      </group>-->
+      <group targetFramework=".NETFramework4.7">
+        <dependency id="KGySoft.Drawing" version="9.2.0" />
+      </group>
       <group targetFramework="netcoreapp3.0" >
-        <dependency id="KGySoft.CoreLibraries" version="8.1.0" />
-        <dependency id="KGySoft.Drawing" version="8.0.0" />
+        <dependency id="KGySoft.Drawing" version="9.2.0" />
       </group>
-      <!--<group targetFramework="net5.0-windows7.0" >
-        <dependency id="KGySoft.CoreLibraries" version="8.1.0" />
-        <dependency id="KGySoft.Drawing" version="8.0.0" />
-      </group>-->
+      <group targetFramework="netcoreapp3.1" >
+        <dependency id="KGySoft.Drawing" version="9.2.0" />
+      </group>
+      <group targetFramework="net5.0-windows7.0" >
+        <dependency id="KGySoft.Drawing" version="9.2.0" />
+      </group>
+      <group targetFramework="net6.0-windows7.0" >
+        <dependency id="KGySoft.Drawing" version="9.2.0" />
+      </group>
     </dependencies>
   </metadata>
   <files>
     <file src="..\..\LICENSE" />
     <!--<file src="..\Help\KGySoft.WinForms.chm" target="Help" />-->
-    <file src="readme.txt"/>
+    <!--<file src="readme.txt"/>-->
     <file src="Icon64.png" target="" />
     <file src="..\bin\Release\net35\KGySoft.WinForms.dll" target="lib\net35" />
     <file src="..\bin\Release\net35\KGySoft.WinForms.xml" target="lib\net35" />
     <file src="..\bin\Release\net40\KGySoft.WinForms.dll" target="lib\net40" />
     <file src="..\bin\Release\net40\KGySoft.WinForms.xml" target="lib\net40" />
-    <!--<file src="..\bin\Release\net45\KGySoft.WinForms.dll" target="lib\net45" />
-    <file src="..\bin\Release\net45\KGySoft.WinForms.xml" target="lib\net45" />-->
+    <file src="..\bin\Release\net47\KGySoft.WinForms.dll" target="lib\net47" />
+    <file src="..\bin\Release\net47\KGySoft.WinForms.xml" target="lib\net47" />
     <file src="..\bin\Release\netcoreapp3.0\KGySoft.WinForms.dll" target="lib\netcoreapp3.0" />
     <file src="..\bin\Release\netcoreapp3.0\KGySoft.WinForms.xml" target="lib\netcoreapp3.0" />
-    <!--<file src="..\bin\Release\net5.0-windows\KGySoft.WinForms.dll" target="lib\net5.0-windows7.0" />
-    <file src="..\bin\Release\net5.0-windows\KGySoft.WinForms.xml" target="lib\net5.0-windows7.0" />-->
+    <file src="..\bin\Release\netcoreapp3.1\KGySoft.WinForms.dll" target="lib\netcoreapp3.1" />
+    <file src="..\bin\Release\netcoreapp3.1\KGySoft.WinForms.xml" target="lib\netcoreapp3.1" />
+    <file src="..\bin\Release\net5.0-windows\KGySoft.WinForms.dll" target="lib\net5.0-windows7.0" />
+    <file src="..\bin\Release\net5.0-windows\KGySoft.WinForms.xml" target="lib\net5.0-windows7.0" />
+    <file src="..\bin\Release\net6.0-windows\KGySoft.WinForms.dll" target="lib\net6.0-windows7.0" />
+    <file src="..\bin\Release\net6.0-windows\KGySoft.WinForms.xml" target="lib\net6.0-windows7.0" />
   </files>
 </package>

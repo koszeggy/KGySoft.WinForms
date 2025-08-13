@@ -21,7 +21,7 @@
     <!--Suppressions:
       - NETSDK1138: The target framework 'tfm' is out of support - this is not an application but a library so targeting the lowest possible versions is intended
       -->
-    <NoWarn>$(NoWarn);NETSDK1138;NU1202</NoWarn>
+    <NoWarn>$(NoWarn);NETSDK1138</NoWarn>
   </PropertyGroup>
 
   <!-- .NET Framework 3.5/4.0 references -->

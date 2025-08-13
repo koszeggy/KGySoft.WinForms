@@ -1,9 +1,8 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!--NOTE: scaling of system button adapters is fixed in .NET 5.0+ -->
-    <!--<TargetFrameworks>net35;net40;net47;netcoreapp3.0;net8.0-windows</TargetFrameworks>-->
-    <TargetFrameworks>net35;net40;net47;netcoreapp3.0;netcoreapp3.1;net5.0-windows;net6.0-windows;net7.0-windows</TargetFrameworks>
+    <!--<TargetFrameworks>net35;net40;net47;netcoreapp3.0;netcoreapp3.1;net5.0-windows;net6.0-windows</TargetFrameworks>-->
+    <TargetFrameworks>net35;net40;net47;net9.0-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>KGySoft.WinForms.Example</RootNamespace>
     <LangVersion>latest</LangVersion>
@@ -16,10 +15,6 @@
     <NoWarn>$(NoWarn);WFO1000;CA1304</NoWarn>
   </PropertyGroup>
 
-  <!-- .NET Framework only references -->
-  <!--<ItemGroup Condition="'$(TargetFramework)'=='net35' OR '$(TargetFramework)'=='net40' OR '$(TargetFramework)'=='net45' OR '$(TargetFramework)'=='net48'">
-    <Reference Include="System.Windows.Forms" />
-  </ItemGroup>-->
   <ItemGroup>
     <ProjectReference Include="..\KGySoft.WinForms\KGySoft.WinForms.csproj" />
   </ItemGroup>
@@ -32,7 +27,6 @@
       <LogicalName>KGySoft.WinForms.Example.Controls.LocalizableControlDemo.StringResources.resources</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Update="Forms\frmEditResources.StringResources.resx">
-      <SubType>Designer</SubType>
       <LogicalName>KGySoft.WinForms.Example.Forms.frmEditResources.StringResources.resources</LogicalName>
     </EmbeddedResource>
     <EmbeddedResource Update="Forms\frmLocalizationExample.StringResources.resx">

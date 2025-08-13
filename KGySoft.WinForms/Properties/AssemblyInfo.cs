@@ -39,7 +39,7 @@ using System.Security;
 // by using the '*' as shown below:
 [assembly: AssemblyVersion("5.0.0.0")]
 [assembly: AssemblyFileVersion("5.0.0.0")]
-[assembly: AssemblyInformationalVersion("5.0.0-alpha.4")]
+[assembly: AssemblyInformationalVersion("5.0.0-preview.1")]
 
 [assembly: AllowPartiallyTrustedCallers]
 #if !NET35
