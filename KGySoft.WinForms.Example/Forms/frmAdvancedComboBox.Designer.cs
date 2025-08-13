@@ -68,9 +68,10 @@
             this.comboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.comboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.Simple;
             this.comboBox1.FormattingEnabled = true;
+            this.comboBox1.IntegralHeight = false;
             this.comboBox1.Location = new System.Drawing.Point(84, 38);
             this.comboBox1.Name = "comboBox1";
-            this.comboBox1.Size = new System.Drawing.Size(121, 150);
+            this.comboBox1.Size = new System.Drawing.Size(121, 145);
             this.comboBox1.TabIndex = 0;
             // 
             // gbComboBox
@@ -158,10 +159,11 @@
             this.advancedComboBox6.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.advancedComboBox6.DropDownStyle = System.Windows.Forms.ComboBoxStyle.Simple;
             this.advancedComboBox6.FormattingEnabled = true;
+            this.advancedComboBox6.IntegralHeight = false;
             this.advancedComboBox6.Location = new System.Drawing.Point(355, 38);
             this.advancedComboBox6.Name = "advancedComboBox6";
             this.advancedComboBox6.ReadOnly = true;
-            this.advancedComboBox6.Size = new System.Drawing.Size(121, 150);
+            this.advancedComboBox6.Size = new System.Drawing.Size(121, 145);
             this.advancedComboBox6.TabIndex = 7;
             // 
             // label3
@@ -235,9 +237,10 @@
             this.advancedComboBox1.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.advancedComboBox1.DropDownStyle = System.Windows.Forms.ComboBoxStyle.Simple;
             this.advancedComboBox1.FormattingEnabled = true;
+            this.advancedComboBox1.IntegralHeight = false;
             this.advancedComboBox1.Location = new System.Drawing.Point(220, 38);
             this.advancedComboBox1.Name = "advancedComboBox1";
-            this.advancedComboBox1.Size = new System.Drawing.Size(121, 150);
+            this.advancedComboBox1.Size = new System.Drawing.Size(121, 145);
             this.advancedComboBox1.TabIndex = 3;
             // 
             // label7

@@ -101,7 +101,7 @@
             this.progressBar2.Location = new System.Drawing.Point(3, 23);
             this.progressBar2.Name = "progressBar2";
             this.progressBar2.RightToLeftLayout = true;
-            this.progressBar2.Size = new System.Drawing.Size(324, 23);
+            this.progressBar2.Size = new System.Drawing.Size(324, 16);
             this.progressBar2.TabIndex = 3;
             this.progressBar2.Value = 50;
             // 
@@ -112,7 +112,7 @@
             this.progressBar3.Location = new System.Drawing.Point(333, 23);
             this.progressBar3.Name = "progressBar3";
             this.progressBar3.RightToLeftLayout = true;
-            this.progressBar3.Size = new System.Drawing.Size(324, 23);
+            this.progressBar3.Size = new System.Drawing.Size(324, 16);
             this.progressBar3.Style = System.Windows.Forms.ProgressBarStyle.Marquee;
             this.progressBar3.TabIndex = 4;
             this.progressBar3.Value = 50;
@@ -124,7 +124,7 @@
             this.advancedProgressBar1.Location = new System.Drawing.Point(53, 73);
             this.advancedProgressBar1.Name = "advancedProgressBar1";
             this.advancedProgressBar1.RightToLeftLayout = true;
-            this.advancedProgressBar1.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar1.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar1.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedShiny;
             this.advancedProgressBar1.TabIndex = 5;
             this.advancedProgressBar1.Value = 50;
@@ -136,7 +136,7 @@
             this.progressBar1.Location = new System.Drawing.Point(53, 43);
             this.progressBar1.Name = "progressBar1";
             this.progressBar1.RightToLeftLayout = true;
-            this.progressBar1.Size = new System.Drawing.Size(95, 23);
+            this.progressBar1.Size = new System.Drawing.Size(95, 16);
             this.progressBar1.TabIndex = 1;
             this.progressBar1.Value = 50;
             // 
@@ -147,7 +147,7 @@
             this.advancedProgressBar3.Location = new System.Drawing.Point(53, 103);
             this.advancedProgressBar3.Name = "advancedProgressBar3";
             this.advancedProgressBar3.RightToLeftLayout = true;
-            this.advancedProgressBar3.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar3.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar3.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedFlat;
             this.advancedProgressBar3.TabIndex = 7;
             this.advancedProgressBar3.Value = 50;
@@ -160,7 +160,7 @@
             this.advancedProgressBar4.Location = new System.Drawing.Point(356, 103);
             this.advancedProgressBar4.Name = "advancedProgressBar4";
             this.advancedProgressBar4.RightToLeftLayout = true;
-            this.advancedProgressBar4.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar4.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar4.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedFlat;
             this.advancedProgressBar4.TabIndex = 11;
             this.advancedProgressBar4.Value = 50;
@@ -173,7 +173,7 @@
             this.advancedProgressBar5.Location = new System.Drawing.Point(356, 133);
             this.advancedProgressBar5.Name = "advancedProgressBar5";
             this.advancedProgressBar5.RightToLeftLayout = true;
-            this.advancedProgressBar5.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar5.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar5.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.Classic;
             this.advancedProgressBar5.TabIndex = 10;
             this.advancedProgressBar5.Value = 50;
@@ -186,7 +186,7 @@
             this.advancedProgressBar6.Location = new System.Drawing.Point(356, 73);
             this.advancedProgressBar6.Name = "advancedProgressBar6";
             this.advancedProgressBar6.RightToLeftLayout = true;
-            this.advancedProgressBar6.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar6.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar6.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedShiny;
             this.advancedProgressBar6.TabIndex = 9;
             this.advancedProgressBar6.Value = 50;
@@ -199,7 +199,7 @@
             this.advancedProgressBar7.Location = new System.Drawing.Point(356, 43);
             this.advancedProgressBar7.Name = "advancedProgressBar7";
             this.advancedProgressBar7.RightToLeftLayout = true;
-            this.advancedProgressBar7.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar7.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar7.TabIndex = 8;
             this.advancedProgressBar7.Value = 50;
             // 
@@ -336,7 +336,7 @@
             this.advancedProgressBar23.Location = new System.Drawing.Point(558, 133);
             this.advancedProgressBar23.Name = "advancedProgressBar23";
             this.advancedProgressBar23.RightToLeftLayout = true;
-            this.advancedProgressBar23.Size = new System.Drawing.Size(99, 23);
+            this.advancedProgressBar23.Size = new System.Drawing.Size(99, 16);
             this.advancedProgressBar23.State = KGySoft.WinForms.ProgressBarState.Error;
             this.advancedProgressBar23.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.Classic;
             this.advancedProgressBar23.TabIndex = 14;
@@ -350,7 +350,7 @@
             this.advancedProgressBar22.Location = new System.Drawing.Point(558, 103);
             this.advancedProgressBar22.Name = "advancedProgressBar22";
             this.advancedProgressBar22.RightToLeftLayout = true;
-            this.advancedProgressBar22.Size = new System.Drawing.Size(99, 23);
+            this.advancedProgressBar22.Size = new System.Drawing.Size(99, 16);
             this.advancedProgressBar22.State = KGySoft.WinForms.ProgressBarState.Error;
             this.advancedProgressBar22.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedFlat;
             this.advancedProgressBar22.TabIndex = 14;
@@ -364,7 +364,7 @@
             this.advancedProgressBar21.Location = new System.Drawing.Point(558, 73);
             this.advancedProgressBar21.Name = "advancedProgressBar21";
             this.advancedProgressBar21.RightToLeftLayout = true;
-            this.advancedProgressBar21.Size = new System.Drawing.Size(99, 23);
+            this.advancedProgressBar21.Size = new System.Drawing.Size(99, 16);
             this.advancedProgressBar21.State = KGySoft.WinForms.ProgressBarState.Error;
             this.advancedProgressBar21.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedShiny;
             this.advancedProgressBar21.TabIndex = 14;
@@ -378,7 +378,7 @@
             this.advancedProgressBar20.Location = new System.Drawing.Point(558, 43);
             this.advancedProgressBar20.Name = "advancedProgressBar20";
             this.advancedProgressBar20.RightToLeftLayout = true;
-            this.advancedProgressBar20.Size = new System.Drawing.Size(99, 23);
+            this.advancedProgressBar20.Size = new System.Drawing.Size(99, 16);
             this.advancedProgressBar20.State = KGySoft.WinForms.ProgressBarState.Error;
             this.advancedProgressBar20.TabIndex = 17;
             this.advancedProgressBar20.Value = 50;
@@ -391,7 +391,7 @@
             this.advancedProgressBar19.Location = new System.Drawing.Point(457, 133);
             this.advancedProgressBar19.Name = "advancedProgressBar19";
             this.advancedProgressBar19.RightToLeftLayout = true;
-            this.advancedProgressBar19.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar19.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar19.State = KGySoft.WinForms.ProgressBarState.Paused;
             this.advancedProgressBar19.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.Classic;
             this.advancedProgressBar19.TabIndex = 13;
@@ -405,7 +405,7 @@
             this.advancedProgressBar18.Location = new System.Drawing.Point(457, 103);
             this.advancedProgressBar18.Name = "advancedProgressBar18";
             this.advancedProgressBar18.RightToLeftLayout = true;
-            this.advancedProgressBar18.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar18.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar18.State = KGySoft.WinForms.ProgressBarState.Paused;
             this.advancedProgressBar18.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedFlat;
             this.advancedProgressBar18.TabIndex = 13;
@@ -419,7 +419,7 @@
             this.advancedProgressBar17.Location = new System.Drawing.Point(457, 73);
             this.advancedProgressBar17.Name = "advancedProgressBar17";
             this.advancedProgressBar17.RightToLeftLayout = true;
-            this.advancedProgressBar17.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar17.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar17.State = KGySoft.WinForms.ProgressBarState.Paused;
             this.advancedProgressBar17.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedShiny;
             this.advancedProgressBar17.TabIndex = 13;
@@ -432,7 +432,7 @@
             this.advancedProgressBar15.Location = new System.Drawing.Point(255, 133);
             this.advancedProgressBar15.Name = "advancedProgressBar15";
             this.advancedProgressBar15.RightToLeftLayout = true;
-            this.advancedProgressBar15.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar15.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar15.State = KGySoft.WinForms.ProgressBarState.Error;
             this.advancedProgressBar15.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.Classic;
             this.advancedProgressBar15.TabIndex = 14;
@@ -445,7 +445,7 @@
             this.advancedProgressBar8.Location = new System.Drawing.Point(53, 133);
             this.advancedProgressBar8.Name = "advancedProgressBar8";
             this.advancedProgressBar8.RightToLeftLayout = true;
-            this.advancedProgressBar8.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar8.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar8.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.Classic;
             this.advancedProgressBar8.TabIndex = 12;
             this.advancedProgressBar8.Value = 50;
@@ -457,7 +457,7 @@
             this.advancedProgressBar14.Location = new System.Drawing.Point(255, 103);
             this.advancedProgressBar14.Name = "advancedProgressBar14";
             this.advancedProgressBar14.RightToLeftLayout = true;
-            this.advancedProgressBar14.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar14.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar14.State = KGySoft.WinForms.ProgressBarState.Error;
             this.advancedProgressBar14.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedFlat;
             this.advancedProgressBar14.TabIndex = 14;
@@ -470,7 +470,7 @@
             this.advancedProgressBar13.Location = new System.Drawing.Point(255, 73);
             this.advancedProgressBar13.Name = "advancedProgressBar13";
             this.advancedProgressBar13.RightToLeftLayout = true;
-            this.advancedProgressBar13.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar13.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar13.State = KGySoft.WinForms.ProgressBarState.Error;
             this.advancedProgressBar13.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedShiny;
             this.advancedProgressBar13.TabIndex = 15;
@@ -483,7 +483,7 @@
             this.advancedProgressBar12.Location = new System.Drawing.Point(255, 43);
             this.advancedProgressBar12.Name = "advancedProgressBar12";
             this.advancedProgressBar12.RightToLeftLayout = true;
-            this.advancedProgressBar12.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar12.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar12.State = KGySoft.WinForms.ProgressBarState.Error;
             this.advancedProgressBar12.TabIndex = 14;
             this.advancedProgressBar12.Value = 50;
@@ -495,7 +495,7 @@
             this.advancedProgressBar11.Location = new System.Drawing.Point(154, 133);
             this.advancedProgressBar11.Name = "advancedProgressBar11";
             this.advancedProgressBar11.RightToLeftLayout = true;
-            this.advancedProgressBar11.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar11.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar11.State = KGySoft.WinForms.ProgressBarState.Paused;
             this.advancedProgressBar11.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.Classic;
             this.advancedProgressBar11.TabIndex = 13;
@@ -508,7 +508,7 @@
             this.advancedProgressBar10.Location = new System.Drawing.Point(154, 103);
             this.advancedProgressBar10.Name = "advancedProgressBar10";
             this.advancedProgressBar10.RightToLeftLayout = true;
-            this.advancedProgressBar10.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar10.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar10.State = KGySoft.WinForms.ProgressBarState.Paused;
             this.advancedProgressBar10.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedFlat;
             this.advancedProgressBar10.TabIndex = 13;
@@ -521,7 +521,7 @@
             this.advancedProgressBar9.Location = new System.Drawing.Point(154, 73);
             this.advancedProgressBar9.Name = "advancedProgressBar9";
             this.advancedProgressBar9.RightToLeftLayout = true;
-            this.advancedProgressBar9.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar9.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar9.State = KGySoft.WinForms.ProgressBarState.Paused;
             this.advancedProgressBar9.Style = KGySoft.WinForms.Controls.AdvancedProgressBarStyle.ThemedShiny;
             this.advancedProgressBar9.TabIndex = 14;
@@ -678,7 +678,7 @@
             this.advancedProgressBar2.Location = new System.Drawing.Point(154, 43);
             this.advancedProgressBar2.Name = "advancedProgressBar2";
             this.advancedProgressBar2.RightToLeftLayout = true;
-            this.advancedProgressBar2.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar2.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar2.State = KGySoft.WinForms.ProgressBarState.Paused;
             this.advancedProgressBar2.TabIndex = 13;
             this.advancedProgressBar2.Value = 50;
@@ -691,7 +691,7 @@
             this.advancedProgressBar16.Location = new System.Drawing.Point(457, 43);
             this.advancedProgressBar16.Name = "advancedProgressBar16";
             this.advancedProgressBar16.RightToLeftLayout = true;
-            this.advancedProgressBar16.Size = new System.Drawing.Size(95, 23);
+            this.advancedProgressBar16.Size = new System.Drawing.Size(95, 16);
             this.advancedProgressBar16.State = KGySoft.WinForms.ProgressBarState.Paused;
             this.advancedProgressBar16.TabIndex = 16;
             this.advancedProgressBar16.Value = 50;
