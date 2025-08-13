@@ -77,14 +77,6 @@ namespace KGySoft.WinForms.Example
                 dlg.Buttons["btnTaskDialogTest"].Click += (sender, _) => ShowTaskDialogTestMenu(((TaskDialogButton)sender!).Parent!);
                 dlg.Buttons["btnMiscTests"].Click += (sender, _) => ShowMiscTestsMenu(((TaskDialogButton)sender!).Parent!); 
 
-                //var btn = new TaskDialogButton("Test");
-                //btn.Click += (sender, _) =>
-                //{
-                //    using var frm = new Form1();
-                //    frm.ShowDialog(((TaskDialogButton)sender!).Parent!);
-                //};
-                //dlg.Buttons.Add(btn);
-
                 dlg.Show();
             }
         }

@@ -18,9 +18,11 @@
 ! Every type in this namespace has been marked as obsolete. This is a legacy namespace from the old
   KGySoft.Language.dll dependency. The old translation mechanism doesn't translate anything anymore, just removes
   the possible distinction postfixes if present. To localize your application in a similar way with auto-generated
-  resources, use the new LocalizationHelper class in the KGySoft.WinForms namespace, or the
-  DynamicResourceManager class from the KGySoft.CoreLibraries package. For more details see:
-  DynamicResourceManager class: https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm
+  resources, use the new LocalizationHelper class and/or the BaseForm.DynamicStringLocalization property in the
+  KGySoft.WinForms namespace. As a low-level solution, you can also use the DynamicResourceManager class directly
+  from the KGySoft.CoreLibraries package. For more details, see:
+  - The example application contains a localization example: https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example
+  - DynamicResourceManager class: https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm
 
 ! Language class: It has been made obsolete. See the note above.
   ! The RedirectTranslate event has been removed. Use the LocalizationHelper.LocalizationRequested event instead.
@@ -70,6 +72,11 @@
 
 ! KGySoft.WinForms.Controls namespace:
 ======================================
+! Every user control with 'uc' name prefix (e.g. ucBase, ucText, etc.) has been made obsolete. While these controls
+  are still available, they are no longer recommended to be used. They are not maintained anymore, and they may have
+  some issues with high DPI and per-monitor DPI awareness. For some controls there are new alternatives. For example,
+  if you used ucCaptionedContainer for the check box to be able to disable the inner controls, use the new
+  CheckGroupBox class instead.
 ! AdvancedButton class:
   ! Changing Standard classic (when there are no visual styles) and Popup FlatStyle rendering with images: just like
     the text, the image is also shifted when the button is pressed. This is how the native rendering also works.
@@ -195,6 +202,8 @@
 
 ! KGySoft.WinForms.Forms namespace:
 ===================================
+! The AdvancedMessageDialog class has been made obsolete. The dialog heavily relied on the obsoleted translation
+  mechanism, and the built-in common dialog types can be replaced by the long existing TaskDialog class anyway.
 ! BaseForm class:
   ! The BaseToolTip field has been concealed by the EditorBrowsableState.Never attribute. Actually not a breaking
     change as the code referencing the field is still working, but the field is no longer visible in the IDE. Use
@@ -203,10 +212,10 @@
   ! The CalledMdiChildClosed event is now obsolete. Use OwnedMdiChildClosed instead.
   ! The OnCalledMdiChildClosed method is now obsolete. Use OnOwnedMdiChildClosed instead.
   ! The PaintMdiClientArea event is now obsolete. Use the new MdiClient property instead.
-  ! The default value of StartPosition been changed back to WindowsDefaultLocation to match with regular Form. The
-    previous default value was CenterScreen.
+  ! The default value of StartPosition has been changed back to WindowsDefaultLocation to match with regular Form.
+    The previous default value was CenterScreen.
   ! The InputBox class has been removed (actually it was made internal as it was never meant to be public). Use the
-    static Dialogs.InputDialog methods, which are the intended way to use input dialogs.
+    static Dialogs.InputDialog method overloads, which are the intended way to use input dialogs.
   + New MdiClient, OwnedMdiChildren, SuspendingMdiChild properties
   + New ToolTip property
   + Event subscriptions to self events are automatically removed when the form is disposed.
