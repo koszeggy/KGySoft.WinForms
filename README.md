@@ -244,7 +244,7 @@ In most cases, the `CommandLinkButton` control is used in a [task dialog](#task-
 <details>
 <summary><strong>Task Dialog</strong><a id="task-dialog"/></summary><p/>
 
-A task dialog is a specialized dialog that can be used to present elaborate information to the user, and can offer possible actions in different ways. It can display a title, a main instruction, a concealable detailed description, footer text, and can have command links, radio buttons, a check box and buttons. It can also display icons (a main icon and a footer icon), a progress bar, and supports using a timer. The task dialog is a native Windows control on Windows Vista and later, but the KGy SOFT `TaskDialog` supports rendering in compatible mode on earlier Windows versions or when visual styles are not enabled.
+A task dialog is a specialized dialog that can be used to present elaborate information to the user, and can offer possible actions in different ways. It can display a title, a main instruction, a message, a concealable detailed description, footer text, and can have command links, radio buttons, a check box and buttons. It can also display icons (a main icon and a footer icon), a progress bar, and supports using a timer. The task dialog is a native Windows component on Windows Vista and later, but the KGy SOFT `TaskDialog` supports compatibility mode on earlier Windows versions or when visual styles are not enabled.
 
 <p align="center">
   <img alt="A native TaskDialog in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/f8e87751-d483-48f3-87a3-feabeb7ff86f"/>
@@ -259,7 +259,7 @@ A task dialog is a specialized dialog that can be used to present elaborate info
   <br/><em>The same dialog as above, using compatible rendering on Windows XP.</em>
 </p>
 
-By default, the task dialog uses the native Windows component when available, and switches to compatible rendering when the native component is not available, or when the configuration of your `TaskDialog` uses some compatible-mode-only features (e.g. button icons or localization of standard buttons). Some other exclusive features don't force using the compatibility mode (e.g. tool tips, rendering improvements, etc.), but you can also force compatible rendering by setting the `TaskDialog.ForceCompatibilityMode` property to `true`. 
+By default, the task dialog uses the native Windows component when available, and switches to compatible rendering otherwise, or when the configuration of your `TaskDialog` uses some compatible-mode-only features (e.g. button icons or localization of standard buttons). You can also force compatible mode by setting the `TaskDialog.ForceCompatibilityMode` property to `true`, which unlocks some additional improvements (e.g. tool tips, rendering fixes, better RTL mode support, richer clipboard content, etc.).
 
 <p align="center">
   <img alt="A TaskDialog with custom icons in the KGySoft.WinForms.Example application using compatible rendering on Windows 11" src="https://github.com/user-attachments/assets/cdfd6764-2fda-4b97-bfde-a89f53b971ef"/>
