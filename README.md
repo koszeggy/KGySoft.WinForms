@@ -58,7 +58,7 @@ See the [change log](https://github.com/koszeggy/KGySoft.WinForms/blob/master/KG
 
 The KGy SOFT WinForms libraries contain several advanced controls that are all derived from the standard Windows Forms controls, but offer with additional features and fixes for common issues. These controls include: `AdvancedButton`, `AdvancedCheckBox`, `AdvancedComboBox`, `AdvancedDateTimePicker`, `AdvancedLabel`, `AdvancedProgressBar`, `AdvancedRadioButton` and `AdvancedTextBox`.
 
-Exception with `AdvancedProgressBar`, they all support custom disabled colors (which is normally not adjustable) and fixed auto scaling when the application has per-monitor DPI awareness enabled. Additionally, `AdvancedButton`, `AdvancedCheckBox`, `AdvancedRadioButton` and `AdvancedLabel` support buffered fading animations with every flat style. See more details in the following sections.
+Exception with `AdvancedProgressBar`, they all support custom disabled colors (which is normally not adjustable) and fixed auto font scaling when the application has per-monitor DPI awareness enabled. Additionally, `AdvancedButton`, `AdvancedCheckBox`, `AdvancedRadioButton` and `AdvancedLabel` support buffered fading animations with every flat style. See more details in the following sections.
 
 > 💡 **Tip**<p/>
 > Try the example application from the [KGySoft.WinForms.Example](KGySoft.WinForms.Example) folder or download its binaries from the [Releases](https://github.com/koszeggy/KGySoft.WinForms/releases).
