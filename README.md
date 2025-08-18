@@ -76,7 +76,7 @@ Exception with `AdvancedProgressBar`, they all support custom disabled colors (w
 To implement your own advanced controls, you can derive from the `BaseControl`, `BaseUserControl` and `BaseForm` classes. Most notable features:
 * They remove all event subscriptions when disposed.
 * All have an `InvokeOnUIThread` method. It is similar as combining `InvokeRequired` and `Invoke`, but works correctly even when the control is not created yet, in which case `InvokeRequired` cannot be trusted.
-* They all have an `IsDesignMode` property, which is similar to `DesignMode`, but works correctly in all cases, even in the constructor an in virtual methods called from the constructor.
+* They all have an `IsDesignMode` property, which is similar to `DesignMode`, but works correctly in all cases, even in the constructor and in virtual methods called from the constructor.
 * `BaseControl` provides an event for horizontal scrolling, which is not available in the standard `Control` class.
 * `BaseForm` and `BaseUserControl` have a `DynamicStringLocalization` property that allows enabling simple localization of the controls' localizable string properties directly from .resx files. Localizations for non-existing translations can be automatically generated, and changes can be applied at runtime without restarting the application.
 * `BaseForm` provides several events and overridable methods to support per-monitor DPI awareness for all target platforms, including .NET Framework 3.5 and 4.x. These can be useful even if you target newer platforms where the standard `Form` class already supports per-monitor DPI awareness, because the standard implementation has some issues, especially when the application has older awareness settings.
