@@ -214,8 +214,6 @@
   ! The PaintMdiClientArea event is now obsolete. Use the new MdiClient property instead.
   ! The default value of StartPosition has been changed back to WindowsDefaultLocation to match with regular Form.
     The previous default value was CenterScreen.
-  ! The InputBox class has been removed (actually it was made internal as it was never meant to be public). Use the
-    static Dialogs.InputDialog method overloads, which are the intended way to use input dialogs.
   + New MdiClient, OwnedMdiChildren, SuspendingMdiChild properties
   + New ToolTip property
   + Event subscriptions to self events are automatically removed when the form is disposed.
@@ -256,6 +254,8 @@
   + The InputDialog overloads now support high DPI and per-monitor DPI awareness.
   + New CancellableConfirmMessage methods instead of the obsoleted DialogResult-returning ConfirmMessage overloads.
   + New UseTaskDialogs property: it allows to use the TaskDialog class instead of the standard MessageBox dialogs.
+! The InputBox class has been removed (actually it was made internal as it was never meant to be public). Use the
+  static Dialogs.InputDialog method overloads, which are the intended way to use input dialogs.
 + New DeviceScaleGetNewSizeEventArgs class
 + New DeviceScaleChangeEventArgs class
 + New OwnedMdiChildClosedEventArgs class
