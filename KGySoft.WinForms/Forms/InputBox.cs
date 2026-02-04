@@ -117,6 +117,7 @@ namespace KGySoft.WinForms.Forms
         #endregion
 
         #region Event Handlers
+#pragma warning disable IDE1006 // Naming Styles
 
         private void edtValue_KeyPress(object? sender, KeyPressEventArgs e)
         {
@@ -133,6 +134,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
+#pragma warning restore IDE1006 // Naming Styles
         #endregion
 
         #endregion

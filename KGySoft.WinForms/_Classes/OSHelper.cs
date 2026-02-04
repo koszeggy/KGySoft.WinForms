@@ -25,6 +25,9 @@ using Microsoft.Win32;
 
 namespace KGySoft.WinForms
 {
+    /// <summary>
+    /// Provides operating system related helper properties and methods.
+    /// </summary>
     public static class OSHelper
     {
         #region Fields
@@ -45,33 +48,61 @@ namespace KGySoft.WinForms
 
         #region Properties
 
+        /// <summary>
+        /// Gets whether the current operating system is a Windows platform.
+        /// </summary>
         public static bool IsWindows => isWindows ??= Environment.OSVersion.Platform is PlatformID.Win32NT or PlatformID.Win32Windows;
+
+        /// <summary>
+        /// Gets whether the application is running on the Mono runtime.
+        /// </summary>
         public static bool IsMono => isMono ??= Type.GetType("Mono.Runtime") != null;
 
+        /// <summary>
+        /// Gets whether the current operating system is Windows XP or a later version.
+        /// </summary>
         public static bool IsWindowsXpOrLater
             => isXpOrLater ??= GetWindowsVersion() is Version version && version >= new Version(5, 1, 2600);
 
+        /// <summary>
+        /// Gets whether the current operating system is Windows Vista or a later version.
+        /// </summary>
         public static bool IsWindowsVistaOrLater
             => isVistaOrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 0, 5243);
 
+        /// <summary>
+        /// Gets whether the current operating system is Windows 7 or a later version.
+        /// </summary>
         public static bool IsWindows7OrLater
             => isWin7OrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 1, 7600);
 
+        /// <summary>
+        /// Gets whether the current operating system is Windows 8.0 or a later version.
+        /// </summary>
         public static bool IsWindows8OrLater
             => isWin8OrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 2, 9200);
 
+        /// <summary>
+        /// Gets whether the current operating system is Windows 8.1 or a later version.
+        /// </summary>
         public static bool IsWindows81OrLater
             => isWin81OrLater ??= GetWindowsVersion() is Version version && version >= new Version(6, 3, 9600);
 
+        /// <summary>
+        /// Gets whether the current operating system is Windows 10 or a later version.
+        /// </summary>
         public static bool IsWindows10OrLater
             => isWin10OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 10240);
 
         /// <summary>
-        ///  Windows 10 Anniversary Update or later. (Redstone 1, build 14393, version 1607)
+        ///  Gets whether the current operating system is Windows 10 Anniversary Update (Redstone 1, build 14393, version 1607) or later version.
         /// </summary>
         internal static bool IsWindows10Build1607OrLater
             => isWin10Build1607OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 14393);
 
+        /// <summary>
+        /// Gets whether the current operating system is Windows 11 or a later version.
+        /// </summary>
         public static bool IsWindows11OrLater
             => isWin11OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 22000);
 
@@ -79,6 +110,13 @@ namespace KGySoft.WinForms
 
         #region Methods
 
+        /// <summary>
+        /// Gets the Windows version, or <see langword="null"/> if the current OS is not Windows.
+        /// </summary>
+        /// <returns>The Windows version, or <see langword="null"/> if the current OS is not Windows.</returns>
+        /// <remarks>
+        /// <para>This method works correctly on every platform target, regardless of the presence of an application manifest.</para>
+        /// </remarks>
         public static Version? GetWindowsVersion()
         {
             if (windowsVersion is not null)

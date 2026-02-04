@@ -210,6 +210,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the flat style appearance of the button control.
         /// </summary>
+        [DefaultValue(FlatStyle.Standard)]
         public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
         {
             get => reportedFlatStyle;
@@ -271,6 +272,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
         /// </summary>
+        [DefaultValue(false)]
         public new bool UseCompatibleTextRendering
         {
             get => base.UseCompatibleTextRendering;
@@ -1408,6 +1410,7 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Event Handlers
+#pragma warning disable IDE1006 // Naming Styles
         // ReSharper disable InconsistentNaming
 
         private void defaultAnimationTimer_Tick(object? sender, EventArgs e)
@@ -1419,6 +1422,7 @@ namespace KGySoft.WinForms.Controls
         private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e) => CheckStyles();
 
         // ReSharper restore InconsistentNaming
+#pragma warning restore IDE1006 // Naming Styles
         #endregion
 
         #endregion

@@ -21,6 +21,14 @@ using System.Windows.Forms;
 
 #endregion
 
+#region Suppressions
+
+#if NETFRAMEWORK && !NET47_OR_GREATER
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved - The documentation references members that are not available on all platforms
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Forms
 {
     /// <summary>

@@ -56,12 +56,12 @@ namespace KGySoft.WinForms.Forms
             private string? textCollapsed;
 
             // these must not be disposed, they are just references to statically cached images
-            private Image? cachedDefaultImageNormalDown;
-            private Image? cachedDefaultImageHoveredDown;
-            private Image? cachedDefaultImagePressedDown;
-            private Image? cachedDefaultImageNormalUp;
-            private Image? cachedDefaultImageHoveredUp;
-            private Image? cachedDefaultImagePressedUp;
+            private Bitmap? cachedDefaultImageNormalDown;
+            private Bitmap? cachedDefaultImageHoveredDown;
+            private Bitmap? cachedDefaultImagePressedDown;
+            private Bitmap? cachedDefaultImageNormalUp;
+            private Bitmap? cachedDefaultImageHoveredUp;
+            private Bitmap? cachedDefaultImagePressedUp;
 
             #endregion
 
@@ -94,6 +94,9 @@ namespace KGySoft.WinForms.Forms
 
             #region Internal Properties
 
+#if NET9_0_OR_GREATER
+            [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.", Justification = "False alarm, internal property")]
+#endif
             internal bool IsExpanded
             {
                 get => isExpanded;
@@ -104,12 +107,14 @@ namespace KGySoft.WinForms.Forms
 
                     isExpanded = value;
                     base.Text = isExpanded ? textExpanded : textCollapsed;
-                    if (ExpandedChanged != null)
-                        ExpandedChanged.Invoke(this, EventArgs.Empty);
+                    ExpandedChanged?.Invoke(this, EventArgs.Empty);
                     Invalidate();
                 }
             }
 
+#if NET9_0_OR_GREATER
+            [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.", Justification = "False alarm, internal property")]
+#endif
             internal string? TextExpanded
             {
                 get => textExpanded;
@@ -127,6 +132,9 @@ namespace KGySoft.WinForms.Forms
                 }
             }
 
+#if NET9_0_OR_GREATER
+            [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.", Justification = "False alarm, internal property")]
+#endif
             internal string? TextCollapsed
             {
                 get => textCollapsed;
@@ -148,12 +156,12 @@ namespace KGySoft.WinForms.Forms
 
             #region Private Properties
 
-            private Image DefaultImageNormalDown => cachedDefaultImageNormalDown ??= ExtractBitmap(Resources.ExpandoNormalDown, nameof(Resources.ExpandoNormalDown));
-            private Image DefaultImageHoveredDown => cachedDefaultImageHoveredDown ??= ExtractBitmap(Resources.ExpandoHoveredDown, nameof(Resources.ExpandoHoveredDown));
-            private Image DefaultImagePressedDown => cachedDefaultImagePressedDown ??= ExtractBitmap(Resources.ExpandoPressedDown, nameof(Resources.ExpandoPressedDown));
-            private Image DefaultImageNormalUp => cachedDefaultImageNormalUp ??= ExtractBitmap(Resources.ExpandoNormalUp, nameof(Resources.ExpandoNormalUp));
-            private Image DefaultImageHoveredUp => cachedDefaultImageHoveredUp ??= ExtractBitmap(Resources.ExpandoHoveredUp, nameof(Resources.ExpandoHoveredUp));
-            private Image DefaultImagePressedUp => cachedDefaultImagePressedUp ??= ExtractBitmap(Resources.ExpandoPressedUp, nameof(Resources.ExpandoPressedUp));
+            private Bitmap DefaultImageNormalDown => cachedDefaultImageNormalDown ??= ExtractBitmap(Resources.ExpandoNormalDown, nameof(Resources.ExpandoNormalDown));
+            private Bitmap DefaultImageHoveredDown => cachedDefaultImageHoveredDown ??= ExtractBitmap(Resources.ExpandoHoveredDown, nameof(Resources.ExpandoHoveredDown));
+            private Bitmap DefaultImagePressedDown => cachedDefaultImagePressedDown ??= ExtractBitmap(Resources.ExpandoPressedDown, nameof(Resources.ExpandoPressedDown));
+            private Bitmap DefaultImageNormalUp => cachedDefaultImageNormalUp ??= ExtractBitmap(Resources.ExpandoNormalUp, nameof(Resources.ExpandoNormalUp));
+            private Bitmap DefaultImageHoveredUp => cachedDefaultImageHoveredUp ??= ExtractBitmap(Resources.ExpandoHoveredUp, nameof(Resources.ExpandoHoveredUp));
+            private Bitmap DefaultImagePressedUp => cachedDefaultImagePressedUp ??= ExtractBitmap(Resources.ExpandoPressedUp, nameof(Resources.ExpandoPressedUp));
 
             #endregion
 
@@ -277,7 +285,7 @@ namespace KGySoft.WinForms.Forms
                 return result;
             }
 
-            private Image ExtractBitmap(Icon icon, string name)
+            private Bitmap ExtractBitmap(Icon icon, string name)
             {
                 try
                 {
@@ -334,7 +342,7 @@ namespace KGySoft.WinForms.Forms
 
             private void PaintThemedButton(Graphics g, out Size imageSize)
             {
-                Image image;
+                Bitmap image;
                 if (!isExpanded)
                 {
                     image = isPressed ? DefaultImagePressedDown

@@ -32,7 +32,7 @@ namespace KGySoft.WinForms.WinApi
         /// <returns>If the user specifies a file name and clicks the OK button and the function is successful, the return value is nonzero. The buffer pointed to by the lpstrFile member of the OPENFILENAME structure contains the full path and file name specified by the user.
         /// If the user cancels or closes the Save dialog box or an error such as the file name buffer being too small occurs, the return value is zero. To get extended error information, call the <see cref="CommDlgExtendedError"/> function.
         /// </returns>
-        [DllImport("Comdlg32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("Comdlg32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         internal static extern bool GetSaveFileName(ref OPENFILENAME lpofn);
 
         /// <summary>

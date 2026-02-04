@@ -26,10 +26,11 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Unified user control version of <see cref="NumericUpDown"/>.
+    /// The unified user control version of <see cref="System.Windows.Forms.NumericUpDown"/>.
     /// </summary>
     [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucDecimalUpDown : ucCaptionedBase
     {
@@ -40,26 +41,19 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets the inner control.
         /// </summary>
-        [
-            Category("ucDecimalUpDown"),
-            DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden),
-            Description("Belso textbox")
-        ]
-        public NumericUpDown NumericUpDown
-        {
-            get { return nudValue; }
-        }
+        [Category("ucDecimalUpDown")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Description("Belso textbox")]
+        public NumericUpDown NumericUpDown => nudValue;
 
         /// <summary>
         /// Gets or sets the value assigned to the up-down control.
         /// </summary>
         [Bindable(BindableSupport.Default, BindingDirection.TwoWay)]
+        [DefaultValue(typeof(decimal), "0")]
         public decimal Value
         {
-            get
-            {
-                return nudValue.Value;
-            }
+            get => nudValue.Value;
             set
             {
                 nudValue.Value = value;
@@ -70,31 +64,21 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the minimum allowed value for the up-down control.
         /// </summary>
+        [DefaultValue(typeof(decimal), "0")]
         public decimal Minimum
         {
-            get
-            {
-                return nudValue.Minimum;
-            }
-            set
-            {
-                nudValue.Minimum = value;
-            }
+            get => nudValue.Minimum;
+            set => nudValue.Minimum = value;
         }
 
         /// <summary>
         /// Gets or sets the maximum allowed value for the up-down control.
         /// </summary>
+        [DefaultValue(typeof(decimal), "100")]
         public decimal Maximum
         {
-            get
-            {
-                return nudValue.Maximum;
-            }
-            set
-            {
-                nudValue.Maximum = value;
-            }
+            get => nudValue.Maximum;
+            set => nudValue.Maximum = value;
         }
 
         /// <summary>
@@ -102,10 +86,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public override bool ReadOnly
         {
-            get
-            {
-                return nudValue.ReadOnly;
-            }
+            get => nudValue.ReadOnly;
             set
             {
                 nudValue.ReadOnly = value;
@@ -116,16 +97,10 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the associated value of the control.
         /// </summary>
-        public override object ControlValue
+        public override object? ControlValue
         {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = Convert.ToDecimal(value, CultureInfo.CurrentCulture);
-            }
+            get => Value;
+            set => Value = Convert.ToDecimal(value, CultureInfo.CurrentCulture);
         }
 
         #endregion
@@ -133,15 +108,9 @@ namespace KGySoft.WinForms.Controls
         #region Protected Properties
 
         /// <summary>
-        /// Returns the main inner control of the user control.
+        /// Gets the wrapped <see cref="NumericUpDown"/> control.
         /// </summary>
-        protected override Control MainControl
-        {
-            get
-            {
-                return nudValue;
-            }
-        }
+        protected override Control MainControl => nudValue;
 
         #endregion
 

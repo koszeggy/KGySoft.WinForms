@@ -28,6 +28,14 @@ using KGySoft.WinForms.Forms;
 
 #endregion
 
+#region Suppressions
+
+#if !NET5_0_OR_GREATER
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved - The documentation references types that are not available on all platforms
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Components
 {
     #region Usings
@@ -969,6 +977,7 @@ namespace KGySoft.WinForms.Components
 
         #region Destructor
 
+        /// <inheritdoc />
         ~TaskDialog() => Dispose(false);
 
         #endregion
@@ -1156,7 +1165,7 @@ namespace KGySoft.WinForms.Components
         private void CheckDisposed()
         {
             if (disposed)
-                throw new ObjectDisposedException("TaskDialog");
+                throw new ObjectDisposedException("TaskDialog", PublicResources.ObjectDisposed);
         }
 
         private TaskDialogResult ShowInternal(IntPtr owner, out int customButtonIndex, out int radioButtonIndex, out bool verificationTextChecked)
@@ -1215,20 +1224,12 @@ namespace KGySoft.WinForms.Components
             helpRequested = null;
             detailsVisibleChanged = null;
 
-            // disposing some objects regardless of disposing parameter because they can hold
-            // either unmanaged resources or event subscriptions
-            if (dialogInstance != null)
-            {
-                dialogInstance.Dispose();
-                dialogInstance = null;
-            }
-
-            ((IDisposable)buttons).Dispose();
-            ((IDisposable)radioButtons).Dispose();
-
-            // on explicit disposing nullifying references
             if (disposing)
             {
+                dialogInstance?.Dispose();
+                ((IDisposable)buttons).Dispose();
+                ((IDisposable)radioButtons).Dispose();
+                dialogInstance = null;
                 message = null;
                 mainInstruction = null;
                 caption = null;

@@ -95,6 +95,7 @@ namespace KGySoft.WinForms.Forms
         [Browsable(false)]
         protected Button ApplyButton => pnlButtons.ApplyButton;
 
+#pragma warning disable IDE1006 // Naming Styles
         // ReSharper disable InconsistentNaming - Justification: These were protected field names, they are kept for backward compatibility.
 
         /// <summary>Gets the OK button.</summary>
@@ -108,6 +109,7 @@ namespace KGySoft.WinForms.Forms
         protected Button btnCancel => CancelButton;
 
         // ReSharper restore InconsistentNaming
+#pragma warning restore IDE1006 // Naming Styles
 
         #endregion
 
@@ -121,7 +123,7 @@ namespace KGySoft.WinForms.Forms
         public DialogBaseForm()
         {
             InitializeComponent();
-            AcceptButton = pnlButtons.OKButton;
+            AcceptButton = pnlButtons!.OKButton;
             base.CancelButton = pnlButtons.CancelButton;
             pnlButtons.OKButton.Click += btnOK_Click;
             pnlButtons.CancelButton.Click += btnCancel_Click;
@@ -177,11 +179,13 @@ namespace KGySoft.WinForms.Forms
         #endregion
 
         #region Event handlers
+#pragma warning disable IDE1006 // Naming Styles
 
         private void btnOK_Click(object? sender, EventArgs e) => OKPressed();
 
         private void btnCancel_Click(object? sender, EventArgs e) => CancelPressed();
 
+#pragma warning restore IDE1006 // Naming Styles
         #endregion
 
         #endregion

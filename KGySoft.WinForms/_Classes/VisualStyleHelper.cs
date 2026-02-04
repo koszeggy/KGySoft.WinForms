@@ -87,13 +87,13 @@ namespace KGySoft.WinForms
         {
             // Capturing the context when adding the first handler from a thread.
             // No need to combine the delegates in a thread-safe way, because the values themselves are always accessed from the same thread.
-            add => visualStylesChangedHandlers.AddOrUpdate(Thread.CurrentThread.ManagedThreadId,
+            add => visualStylesChangedHandlers.AddOrUpdate(ThreadHelper.ManagedThreadId,
                 _ => (SynchronizationContext.Current, value),
                 (_, v) => (v.Context, v.Handler + value));
 
             // Removing the handler from the thread where it was added.
             // When the thread is not the same, a new entry may be created with a corresponding context and a null handler.
-            remove => visualStylesChangedHandlers.AddOrUpdate(Thread.CurrentThread.ManagedThreadId,
+            remove => visualStylesChangedHandlers.AddOrUpdate(ThreadHelper.ManagedThreadId,
                 _ => (SynchronizationContext.Current, null),
                 (_, v) => (v.Context, v.Handler - value));
         }
@@ -158,7 +158,7 @@ namespace KGySoft.WinForms
                 }
 
                 // visual styles are actually used
-                if (VisualStyleHelper.RenderWithVisualStyles)
+                if (RenderWithVisualStyles)
                 {
                     isComCtlV6Available = true;
                     return true;
@@ -414,7 +414,7 @@ namespace KGySoft.WinForms
         {
             // VisualStylesChanged is a special event that raises the subscribers in the same thread as the subscription was made.
             // This is important because it is based on the UserPreferenceChanged event that can be raised from any thread, at least in .NET Core.
-            int threadId = Thread.CurrentThread.ManagedThreadId;
+            int threadId = ThreadHelper.ManagedThreadId;
             foreach (var handlersPerThread in visualStylesChangedHandlers)
             {
                 // If the thread is the same or the context is null, invoking the event handler directly; otherwise, using the context to invoke it.
@@ -429,7 +429,7 @@ namespace KGySoft.WinForms
 
         #region Event handlers
 
-        private static void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        private static void SystemEvents_UserPreferenceChanged(object? sender, UserPreferenceChangedEventArgs e)
         {
             // Color: For compatibility reasons, Color is always raised besides VisualStyle when visual styles change, and Color change is emitted before VisualStyle.
             //        Control.SystemColorsChanged is also triggered for the Color category.

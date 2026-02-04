@@ -36,10 +36,11 @@ namespace KGySoft.WinForms.Controls
     {
         #region Fields
 
+        private readonly List<int> values = new List<int>();
+
         private bool translate = true;
         private ucAllInvertNone? allInvertNone;
         private Type? enumType;
-        private List<int> values = new List<int>();
         private bool itemChecking;
 
         #endregion
@@ -61,7 +62,6 @@ namespace KGySoft.WinForms.Controls
         /// Gets or sets whether the items should be translated.
         /// </summary>
         [DefaultValue(false)]
-        [Obsolete]
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public bool Translate
@@ -77,6 +77,7 @@ namespace KGySoft.WinForms.Controls
         [Category("EnumCheckedListBox")]
         [Description("Gets or sets the associated Flags enumerator.")]
         [TypeConverter(typeof(EnumConverter))]
+        [DefaultValue(null)]
         public Type? EnumType
         {
             get => enumType;
@@ -102,7 +103,7 @@ namespace KGySoft.WinForms.Controls
             {
                 int ret = 0;
 
-                foreach (int i in this.CheckedIndices)
+                foreach (int i in CheckedIndices)
                     ret |= values[i];
 
                 return ret;
@@ -110,11 +111,11 @@ namespace KGySoft.WinForms.Controls
             set
             {
                 for (int i = 0; i < Items.Count; i++)
-                    this.SetItemChecked(i, false);
+                    SetItemChecked(i, false);
 
                 for (int i = 0; i < values.Count; i++)
                     if ((values[i] & value) > 0)
-                        this.SetItemChecked(i, true);
+                        SetItemChecked(i, true);
             }
         }
 
@@ -124,6 +125,7 @@ namespace KGySoft.WinForms.Controls
         [Browsable(true)]
         [Category("EnumCheckedListBox")]
         [Description("Gets or sets the associated ucAllInvertNone control.")]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         public ucAllInvertNone? AllInvertNoneControl
         {
             get => allInvertNone;
@@ -144,6 +146,9 @@ namespace KGySoft.WinForms.Controls
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="EnumCheckedListBox"/> class.
+        /// </summary>
         public EnumCheckedListBox()
         {
             InitializeComponent();
@@ -161,7 +166,7 @@ namespace KGySoft.WinForms.Controls
         public void SelectAll()
         {
             for (int i = 0; i < Items.Count; i++)
-                this.SetItemChecked(i, true);
+                SetItemChecked(i, true);
         }
 
         /// <summary>
@@ -170,7 +175,7 @@ namespace KGySoft.WinForms.Controls
         public void SelectNone()
         {
             for (int i = 0; i < Items.Count; i++)
-                this.SetItemChecked(i, false);
+                SetItemChecked(i, false);
         }
 
         /// <summary>
@@ -179,13 +184,14 @@ namespace KGySoft.WinForms.Controls
         public void SelectInvert()
         {
             for (int i = 0; i < Items.Count; i++)
-                this.SetItemChecked(i, !GetItemChecked(i));
+                SetItemChecked(i, !GetItemChecked(i));
         }
 
         #endregion
 
         #region Protected Methods
 
+        /// <inheritdoc />
         protected override void OnHandleDestroyed(EventArgs e)
         {
             base.OnHandleDestroyed(e);
@@ -193,6 +199,7 @@ namespace KGySoft.WinForms.Controls
                 allInvertNone.ButtonPressed -= allInvertNone_ButtonPressed;
         }
 
+        /// <inheritdoc />
         protected override void OnItemCheck(ItemCheckEventArgs ice)
         {
 
@@ -202,9 +209,8 @@ namespace KGySoft.WinForms.Controls
             itemChecking = true;
             try
             {
-                this.SetItemChecked(ice.Index, ice.NewValue == CheckState.Checked);
-                if (CheckedChanged != null)
-                    CheckedChanged(this, EventArgs.Empty);
+                SetItemChecked(ice.Index, ice.NewValue == CheckState.Checked);
+                CheckedChanged?.Invoke(this, EventArgs.Empty);
             }
             finally
             {
@@ -221,14 +227,14 @@ namespace KGySoft.WinForms.Controls
             if (enumType == null)
                 return;
 
-            this.Items.Clear();
+            Items.Clear();
             values.Clear();
             foreach (object i in Enum.GetValues(enumType))
             {
                 if (Convert.ToInt32(i, CultureInfo.InvariantCulture) == 0)
                     continue;
                 string item = Enum.ToObject(enumType, Convert.ToInt32(i, CultureInfo.InvariantCulture)).ToString()!;
-                this.Items.Add(translate ? Language.Translate(item) : item);
+                Items.Add(translate ? Language.Translate(item) : item);
                 values.Add(Convert.ToInt32(i, CultureInfo.InvariantCulture));
             }
         }
@@ -236,6 +242,7 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Event handlers
+#pragma warning disable IDE1006 // Naming Styles
 
         void allInvertNone_ButtonPressed(object? sender, AllInvertNoneEventArgs e)
         {
@@ -253,6 +260,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+#pragma warning restore IDE1006 // Naming Styles
         #endregion
 
         #endregion

@@ -57,6 +57,7 @@
 
 * KGySoft.WinForms.Components namespace:
 ========================================
++ AdvancedSaveFileDialog: it has been made disposable
 * TaskDialog class:
   + Supporting high DPI and per-monitor DPI awareness.
   + Ctrl+C copies the textual content of the task dialog to the clipboard even in compatibility mode.

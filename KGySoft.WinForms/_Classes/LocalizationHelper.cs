@@ -85,13 +85,13 @@ namespace KGySoft.WinForms
 
         // NOTE: not a ThreadSafeDictionary because we want the capacity management that Cache provides,
         // but not a IThreadSafeCacheAccessor either because we need to access Values as well
-        private static IDictionary<string, DynamicResourceManager> ResourceManagersCache
+        private static LockingDictionary<string, DynamicResourceManager> ResourceManagersCache
         {
             get
             {
                 if (resourceManagersCache == null)
                 {
-                    var cache = new Cache<string, DynamicResourceManager>(CreateResourceManager, 16)
+                    LockingDictionary<string, DynamicResourceManager> cache = new Cache<string, DynamicResourceManager>(CreateResourceManager, 16)
                     {
                         DisposeDroppedValues = true
                     }.AsThreadSafe();

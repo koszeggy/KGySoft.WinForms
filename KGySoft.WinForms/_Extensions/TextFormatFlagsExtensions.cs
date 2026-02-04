@@ -58,7 +58,7 @@ namespace KGySoft.WinForms
         #region Internal Methods
 
         /// <summary>
-        /// Use from the UI thread only, and do not mutate or dispose the result.
+        /// Do not mutate or dispose the result.
         /// </summary>
         internal static StringFormat ToStringFormat(this TextFormatFlags tff) => formatsCache[tff];
 

@@ -41,10 +41,9 @@ namespace KGySoft.WinForms
         public static void TranslateControls(Control control)
         {
             if (control == null)
-                throw new ArgumentNullException("control");
+                throw new ArgumentNullException(nameof(control), PublicResources.ArgumentNull);
 
-            bool finished;
-            TranslateControl(control, out finished);
+            TranslateControl(control, out bool finished);
             if (finished)
                 return;
 
@@ -75,53 +74,50 @@ namespace KGySoft.WinForms
 
             translationFinished = false;
 
-            if (control is ICustomTranslated)
-            {
-                (control as ICustomTranslated).TranslateControl(out translationFinished);
-            }
+            if (control is ICustomTranslated customTranslated)
+                customTranslated.TranslateControl(out translationFinished);
             else if (control is Form
-                || control is Button
-                || control is GroupBox
-                || control is Label
-                || control is CheckBox
-                || control is RadioButton
-                || control is TabPage
-                )
+                     || control is Button
+                     || control is GroupBox
+                     || control is Label
+                     || control is CheckBox
+                     || control is RadioButton
+                     || control is TabPage
+                    )
             {
-                if (Language.IsPropertyLocalizable(control, "Text"))
+                if (Language.IsPropertyLocalizable(control, nameof(control.Text)))
                     control.Text = Language.Translate(control.Text);
             }
-            else if (control is ListView)
+            else if (control is ListView listView)
             {
-                foreach (ColumnHeader header in ((ListView)control).Columns)
+                foreach (ColumnHeader header in listView.Columns)
                 {
                     if (Language.IsObjectLocalizable(header))
                         header.Text = Language.Translate(header.Text);
                 }
-                foreach (ListViewGroup group in ((ListView)control).Groups)
+                foreach (ListViewGroup group in listView.Groups)
                 {
                     if (Language.IsObjectLocalizable(group))
                         group.Header = Language.Translate(group.Header);
                 }
             }
-            else if (control is MenuStrip)
+            else if (control is MenuStrip menuStrip)
             {
-                foreach (ToolStripItem item in ((MenuStrip)control).Items)
+                foreach (ToolStripItem item in menuStrip.Items)
                 {
-                    if (item is ToolStripMenuItem)
-                        TranslateMenuItems((ToolStripMenuItem)item);
+                    if (item is ToolStripMenuItem menuItem)
+                        TranslateMenuItems(menuItem);
                     else
                         item.ToolTipText = Language.Translate(item.ToolTipText);
                 }
             }
-            else if (control is StatusStrip)
+            else if (control is StatusStrip statusStrip)
             {
-                foreach (ToolStripItem item in (control as StatusStrip).Items)
+                foreach (ToolStripItem item in statusStrip.Items)
                 {
                     if (!Language.IsObjectLocalizable(item))
                         continue;
-                    ToolStripStatusLabel statusLabel = item as ToolStripStatusLabel;
-                    if (statusLabel != null)
+                    if (item is ToolStripStatusLabel statusLabel)
                     {
                         if (Language.IsPropertyLocalizable(statusLabel, "Text"))
                             statusLabel.Text = Language.Translate(statusLabel.Text);
@@ -129,33 +125,33 @@ namespace KGySoft.WinForms
                     }
                 }
             }
-            else if (control is ToolStrip)
+            else if (control is ToolStrip toolStrip)
             {
-                foreach (ToolStripItem item in (control as ToolStrip).Items)
+                foreach (ToolStripItem item in toolStrip.Items)
                 {
                     if (!Language.IsObjectLocalizable(item))
                         continue;
 
-                    if (Language.IsPropertyLocalizable(item, "Text"))
+                    if (Language.IsPropertyLocalizable(item, nameof(item.Text)))
                         item.Text = Language.Translate(item.Text);
                     if (item.Text != item.ToolTipText)
                         item.ToolTipText = Language.Translate(item.ToolTipText);
 
-                    if (item is ToolStripDropDownItem)
+                    if (item is ToolStripDropDownItem toolStripDropDownItem)
                     {
-                        foreach (ToolStripItem i in (item as ToolStripDropDownItem).DropDownItems)
+                        foreach (ToolStripItem i in toolStripDropDownItem.DropDownItems)
                         {
-                            if (i is ToolStripMenuItem)
-                                TranslateMenuItems((ToolStripMenuItem)i);
+                            if (i is ToolStripMenuItem toolStripMenuItem)
+                                TranslateMenuItems(toolStripMenuItem);
                             else
                                 i.ToolTipText = Language.Translate(i.ToolTipText);
                         }
                     }
                 }
             }
-            else if (control is DataGridView)
+            else if (control is DataGridView dataGridView)
             {
-                foreach (DataGridViewColumn column in ((DataGridView)control).Columns)
+                foreach (DataGridViewColumn column in dataGridView.Columns)
                 {
                     if (!Language.IsObjectLocalizable(column))
                         continue;
@@ -183,8 +179,8 @@ namespace KGySoft.WinForms
             {
                 foreach (ToolStripItem item in menuItems.DropDownItems)
                 {
-                    if (item is ToolStripMenuItem)
-                        TranslateMenuItems((ToolStripMenuItem)item);
+                    if (item is ToolStripMenuItem menuItem)
+                        TranslateMenuItems(menuItem);
                     else
                         item.ToolTipText = Language.Translate(menuItems.ToolTipText);
                 }

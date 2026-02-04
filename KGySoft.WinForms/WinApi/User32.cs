@@ -153,8 +153,8 @@ namespace KGySoft.WinForms.WinApi
         /// <returns>If the function succeeds, the return value is nonzero.
         /// If the function fails, the return value is zero. To get extended error information, call GetLastError.
         /// </returns>
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        internal static extern bool SetWindowText(IntPtr hWnd, string lpString);
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
+        internal static extern bool SetWindowText(IntPtr hWnd, string? lpString);
 
         /// <summary>
         /// The SendMessage function sends the specified message to a window or windows.
@@ -191,7 +191,7 @@ namespace KGySoft.WinForms.WinApi
         /// <param name="wParam">Specifies additional message-specific information.</param>
         /// <param name="lParam">Specifies additional message-specific information.</param>
         /// <returns>The return value specifies the result of the message processing; it depends on the message sent.</returns>
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         internal static extern IntPtr SendMessage(IntPtr hWnd, int Msg, IntPtr wParam, string? lParam);
 
         /// <summary>
@@ -218,7 +218,7 @@ namespace KGySoft.WinForms.WinApi
         /// <returns>If the function succeeds, the return value is the window handle of the specified control.
         /// If the function fails, the return value is NULL, indicating an invalid dialog box handle or a nonexistent control. To get extended error information, call GetLastError.
         /// </returns>
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         internal static extern IntPtr GetDlgItem(IntPtr hDlg, int nIDDlgItem);
 
         /// <summary>
@@ -283,7 +283,7 @@ namespace KGySoft.WinForms.WinApi
         /// If an application calls CreateWindow to create a MDI client window, lpParam should point to a CLIENTCREATESTRUCT structure. If an MDI client window calls CreateWindow to create an MDI child window, lpParam should point to a MDICREATESTRUCT structure. lpParam may be NULL if no additional data is needed.</param>
         /// <returns>If the function succeeds, the return value is a handle to the new window.
         /// If the function fails, the return value is NULL. To get extended error information, call GetLastError.</returns>
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         internal static extern IntPtr CreateWindowEx(int dwExStyle, string lpClassName, string lpWindowName, uint dwStyle, int x, int y, int nWidth, int nHeight, IntPtr hWndParent, IntPtr hMenu, IntPtr hInstance, IntPtr lpParam);
 
         /// <summary>
@@ -314,7 +314,7 @@ namespace KGySoft.WinForms.WinApi
         /// <param name="lpszClass">Pointer to a null-terminated string that specifies the class name or a class atom created by a previous call to the RegisterClass or RegisterClassEx.</param>
         /// <param name="lpszWindow">Pointer to a null-terminated string that specifies the window name (the window's title). If this parameter is NULL, all window names match.</param>
         /// <returns>If the function succeeds, the return value is a pointer to the window object having the specified class and window names. If the function fails, the return value is NULL.</returns>
-        [DllImport("user32.dll", SetLastError = true)]
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         internal static extern IntPtr FindWindowEx(IntPtr hwndParent, IntPtr hwndChildAfter, string lpszClass, string? lpszWindow);
 
         /// <summary>
@@ -334,7 +334,7 @@ namespace KGySoft.WinForms.WinApi
         /// <param name="lpBuffer">The buffer is to receive the string.</param>
         /// <param name="nBufferMax">The size of the buffer, in characters. The string is truncated and null-terminated if it is longer than the number of characters specified. If this parameter is 0, then lpBuffer receives a read-only pointer to the resource itself.</param>
         /// <returns>If the function succeeds, the return value is the number of characters copied into the buffer, not including the terminating null character, or zero if the string resource does not exist.</returns>
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        [DllImport("user32.dll", CharSet = CharSet.Unicode)]
         internal static extern int LoadString(IntPtr hInstance, int uID, out IntPtr lpBuffer, int nBufferMax);
 
         /// <summary>
@@ -363,7 +363,7 @@ namespace KGySoft.WinForms.WinApi
         /// <param name="type">Specifies the type of frame control to draw.</param>
         /// <param name="state">Specifies the initial state of the frame control.</param>
         /// <returns>Nonzero indicates success. Zero indicates failure.</returns>
-        [DllImport("user32.dll", CharSet = CharSet.Auto, ExactSpelling = true)]
+        [DllImport("user32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
         internal static extern bool DrawFrameControl(HandleRef hDC, ref RECT rect, int type, int state);
 
         /// <summary>
@@ -496,10 +496,10 @@ namespace KGySoft.WinForms.WinApi
         {
             #region Local Methods
             
-            [DllImport("user32.dll", EntryPoint = "SetWindowLong", CharSet = CharSet.Auto)]
+            [DllImport("user32.dll", EntryPoint = "SetWindowLong", CharSet = CharSet.Unicode)]
             static extern IntPtr SetWindowLongPtr32(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
-            [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", CharSet = CharSet.Auto)]
+            [DllImport("user32.dll", EntryPoint = "SetWindowLongPtr", CharSet = CharSet.Unicode)]
             static extern IntPtr SetWindowLongPtr64(IntPtr hWnd, int nIndex, IntPtr dwNewLong);
 
             #endregion
@@ -518,10 +518,10 @@ namespace KGySoft.WinForms.WinApi
         {
             #region Local Methods
 
-            [DllImport("user32.dll", EntryPoint = "GetWindowLong", CharSet = CharSet.Auto)]
+            [DllImport("user32.dll", EntryPoint = "GetWindowLong", CharSet = CharSet.Unicode)]
             static extern IntPtr GetWindowLongPtr32(IntPtr hWnd, int nIndex);
 
-            [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", CharSet = CharSet.Auto)]
+            [DllImport("user32.dll", EntryPoint = "GetWindowLongPtr", CharSet = CharSet.Unicode)]
             static extern IntPtr GetWindowLongPtr64(IntPtr hWnd, int nIndex);
 
             #endregion

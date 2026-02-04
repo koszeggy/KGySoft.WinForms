@@ -44,6 +44,7 @@ namespace KGySoft.WinForms.Controls
     /// </remarks>
     [ToolboxItem(false)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class and its descendants are not recommended to use anymore. They may not be maintained or can be even removed in the future.")]
     public partial class ucBase: UserControl, ICustomTranslated, IReadOnlyCapable
     {
@@ -72,35 +73,29 @@ namespace KGySoft.WinForms.Controls
         public CommandBindingsCollection CommandBindings => commandBindings;
 
         /// <summary>
-        /// Gets or sets the ReadOnly state of the inner content.
-        /// <remarks>Must override! Setter must call base setter.</remarks>
+        /// Gets or sets the read-only state of the inner content.
+        /// Should be overridden in a derived class. The base implementation always returns <see langword="true"/>.
         /// </summary>
-        [
-            Category("ucBase"),
-            Description("Gets or sets the ReadOnly state of the inner content."),
-            DefaultValue(true)
-        ]
+        [Category("ucBase")]
+        [Description("Gets or sets the ReadOnly state of the inner content.")]
+        [DefaultValue(true)]
+        [SuppressMessage("ReSharper", "ValueParameterNotUsed", Justification = "Intended, base implementation")]
         public virtual bool ReadOnly
         {
-            get { return true; }
-            set { ResetColor(); }
+            get => true;
+            set => ResetColor();
         }
 
         /// <summary>
-        /// Tooltip text of the control.
+        /// Gets or sets the tooltip text of the control.
         /// </summary>
-        [
-            Category("ucBase"),
-            Description("Tooltip text of the control."),
-            DefaultValue(""),
-            Editor("System.ComponentModel.Design.MultilineStringEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))
-        ]
+        [Category("ucBase")]
+        [Description("Tooltip text of the control.")]
+        [DefaultValue("")]
+        [Editor("System.ComponentModel.Design.MultilineStringEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public string ToolTip
         {
-            get
-            {
-                return toolTipText;
-            }
+            get => toolTipText;
             set
             {
                 toolTipText = value;
@@ -110,17 +105,15 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the associated value of the control.
-        /// This can be a text or number or anything else in derived controls.
-        /// <remarks>Must override!</remarks>
+        /// This can be a text or number or anything else in derived controls. The base implementation returns <see langword="null"/>.
+        /// Should be overridden in a derived class.
         /// </summary>
-        [
-            Category("ucBase"),
-            Browsable(false),
-            DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)
-        ]
-        public virtual object ControlValue
+        [Category("ucBase")]
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public virtual object? ControlValue
         {
-            get { return null; }
+            get => null;
             set { }
         }
 
@@ -129,10 +122,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public object SavedValue
-        {
-            get { return savedValue; }
-        }
+        public object? SavedValue => savedValue;
 
         /// <summary>
         /// Tells whether the content of the control is modified since the last <see cref="SaveValue"/> call.
@@ -153,14 +143,12 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Returns the main inner control of the user control.
-        /// <remarks>Must override!</remarks>
+        /// Should be overridden in a derived class.
+        /// The base implementation returns <see langword="null"/>.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        protected virtual Control MainControl
-        {
-            get { return null; }
-        }
+        protected virtual Control? MainControl => null;
 
         /// <summary>
         /// Gets or sets whether the control should automatically call <see cref="SaveValue"/> to
@@ -176,8 +164,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool AutoSaveValue
         {
-            get { return autoSaveValue; }
-            set { autoSaveValue = value; }
+            get => autoSaveValue;
+            set => autoSaveValue = value;
         }
 
         /// <summary>
@@ -188,7 +176,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "Window")]
         public virtual Color ColorEnabled
         {
-            get { return colorEnabled; }
+            get => colorEnabled;
             set
             {
                 colorEnabled = value;
@@ -204,7 +192,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "Control")]
         public virtual Color ColorDisabled
         {
-            get { return colorDisabled; }
+            get => colorDisabled;
             set
             {
                 colorDisabled = value;
@@ -221,7 +209,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "Gold")]
         public virtual Color ColorModified
         {
-            get { return colorModified; }
+            get => colorModified;
             set
             {
                 colorModified = value;
@@ -239,7 +227,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(Color), "ControlText")]
         public virtual Color ColorControlTextEnabled
         {
-            get { return colorControlTextEnabled; }
+            get => colorControlTextEnabled;
             set
             {
                 colorControlTextEnabled = value;
@@ -249,18 +237,18 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// ForeColor of the inner <see cref="MainControl"/> when control is not Enabled.
+        /// </summary>
         /// <remarks>
         /// This is not supported in WindowsForms by default: The ForeColor of a disabled control is
         /// always gray. The controls that support coloring in disabled state must implement the
         /// <see cref="ISupportsDisabledColor"/> interface and then setting this property will have effect.
         /// </remarks>
-        /// </summary>
         [Category("ucBase")]
         [Description("Fore color of the inner main control when control is not Enabled. May not work with every controls.")]
         [DefaultValue(typeof(Color), "ControlDarkDark")]
         public virtual Color ColorControlTextDisabled
         {
-            get { return colorControlTextDisabled; }
+            get => colorControlTextDisabled;
             set
             {
                 colorControlTextDisabled = value;
@@ -276,7 +264,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool TranslationEnabled
         {
-            get { return translationEnabled; }
+            get => translationEnabled;
             set
             {
                 if (value == translationEnabled)
@@ -299,9 +287,9 @@ namespace KGySoft.WinForms.Controls
         public ucBase()
         {
             InitializeComponent();
-            this.EnabledChanged += new System.EventHandler(this.ucBase_EnabledChanged);
-            this.Load += new System.EventHandler(this.ucBase_Load);
-            this.BindingContextChanged += new EventHandler(ucBase_BindingContextChanged);
+            EnabledChanged += ucBase_EnabledChanged;
+            Load += ucBase_Load;
+            BindingContextChanged += ucBase_BindingContextChanged;
             Language.MarkLocalizable(true, this);
         }
 
@@ -327,13 +315,10 @@ namespace KGySoft.WinForms.Controls
         #region Public methods
 
         /// <summary>
-        /// Clearing the content of <see cref="MainControl"/>.
-        /// <remarks>Must override! When overridden, call base.Clear()!</remarks>
+        /// Clears the content of <see cref="MainControl"/>.
+        /// The base implementation only calls <see cref="ResetColor">ResetColor</see>.
         /// </summary>
-        public virtual void Clear()
-        {
-            ResetColor();
-        }
+        public virtual void Clear() => ResetColor();
 
         /// <summary>
         /// Stores the value of the control. This makes possible to sign when the value has been modified.
@@ -365,10 +350,8 @@ namespace KGySoft.WinForms.Controls
             ResetColor();
         }
 
-        public override string ToString()
-        {
-            return String.IsNullOrEmpty(Name) ? base.ToString() : Name;
-        }
+        /// <inheritdoc />
+        public override string ToString() => String.IsNullOrEmpty(Name) ? base.ToString() : Name;
 
         #endregion
 
@@ -425,9 +408,10 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Sets the ToolTip text for an inner control.
         /// </summary>
-        protected void SetToolTip(Control control, string toolTipText)
+        [SuppressMessage("ReSharper", "ParameterHidesMember", Justification = "Renaming it would be a breaking change")]
+        protected void SetToolTip(Control? control, string? toolTipText)
         {
-            if (DesignMode || MainControl == null)
+            if (DesignMode || control == null)
                 return;
             baseToolTip.SetToolTip(control, toolTipText);
         }
@@ -445,17 +429,17 @@ namespace KGySoft.WinForms.Controls
 
         #region Handled events
 
-        private void ucBase_EnabledChanged(object sender, EventArgs e)
+        private void ucBase_EnabledChanged(object? sender, EventArgs e)
         {
             ResetColor();
         }
 
-        private void ucBase_Load(object sender, EventArgs e)
+        private void ucBase_Load(object? sender, EventArgs e)
         {
             ResetColor();
         }
 
-        void ucBase_BindingContextChanged(object sender, EventArgs e)
+        void ucBase_BindingContextChanged(object? sender, EventArgs e)
         {
             if (autoSaveValue && !DesignMode && DataBindings.Count > 0)
                 SaveValue();

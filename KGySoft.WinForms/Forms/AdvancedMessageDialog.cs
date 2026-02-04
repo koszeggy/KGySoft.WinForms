@@ -18,6 +18,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -27,7 +28,6 @@ using System.Windows.Forms;
 
 using KGySoft.Drawing;
 using KGySoft.Libraries.Language;
-using KGySoft.WinForms.Components;
 
 #endregion
 
@@ -42,7 +42,7 @@ namespace KGySoft.WinForms.Forms
         #region Fields
 
         private string screenshot = String.Empty; // path of the screenshot
-        private Exception? exception = null; // the exception to be reported (only for the appropriate Execute method)
+        //private Exception? exception = null; // the exception to be reported (only for the appropriate Execute method)
         private bool detailsVisible;
 
         #endregion
@@ -52,12 +52,12 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Report sender event. When assigned, report sender button will be visible when requested.
         /// </summary>
-        public static event EventHandler<ReportSenderEventArgs> ReportSender;
+        public static event EventHandler<ReportSenderEventArgs>? ReportSender;
 
         /// <summary>
         /// Occurs before the application terminated if user chooses closing application.
         /// </summary>
-        public static event EventHandler BeforeKillApplication;
+        public static event EventHandler? BeforeKillApplication;
 
         #endregion
 
@@ -75,7 +75,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// An optional custom error handler that can be used to handle exceptions in a custom way (e.g. log into a database or file).
         /// </summary>
-        public static Action<Exception>? CustomErrorHandler = null;
+        public static Action<Exception>? CustomErrorHandler { get; set; }
 
         #endregion
 
@@ -95,20 +95,23 @@ namespace KGySoft.WinForms.Forms
 
         #region Instance Properties
 
+        /// <inheritdoc />
         [Localizable(false)]
+        [AllowNull]
         public override string Text
         {
-            get { return base.Text; }
-            set { base.Text = value; }
+            get => base.Text;
+            set => base.Text = value;
         }
 
         /// <summary>
         /// Gets or sets the dialog Image
         /// </summary>
-        public Image Image
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public Image? Image
         {
-            get { return pbImage.Image; }
-            set { pbImage.Image = value; }
+            get => pbImage.Image;
+            set => pbImage.Image = value;
         }
 
         #endregion
@@ -134,7 +137,7 @@ namespace KGySoft.WinForms.Forms
 
         #region Static Methods
 
-        private static string ErrorToFile(string filename, string logMessage)
+        private static void ErrorToFile(string filename, string? logMessage)
         {
             try
             {
@@ -143,22 +146,20 @@ namespace KGySoft.WinForms.Forms
                     filename = Path.Combine(ErrorLogDirectory, filename);
                 }
                 filename += ".log";
-                string dir = Path.GetDirectoryName(Path.GetFullPath(filename));
-                if (!Directory.Exists(dir))
-                {
+                string? dir = Path.GetDirectoryName(Path.GetFullPath(filename));
+                if (dir != null && !Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
-                }
 
                 using (StreamWriter sw = new StreamWriter(filename, true))
                 {
                     sw.WriteLine(logMessage);
-                    return Path.GetFullPath(filename);
+                    //return Path.GetFullPath(filename);
                 }
             }
             catch (Exception e) when (!e.IsCritical())
             {
                 // suppressing any error
-                return String.Empty;
+                //return String.Empty;
             }
         }
 
@@ -176,16 +177,14 @@ namespace KGySoft.WinForms.Forms
                     filename = Path.Combine(ErrorLogDirectory, filename);
                 }
                 filename += ".png";
-                string dir = Path.GetDirectoryName(Path.GetFullPath(filename));
-                if (!Directory.Exists(dir))
-                {
+                string? dir = Path.GetDirectoryName(Path.GetFullPath(filename));
+                if (dir != null && !Directory.Exists(dir))
                     Directory.CreateDirectory(dir);
-                }
 
                 Application.DoEvents();
                 Thread.Sleep(100);
                 Application.DoEvents();
-                using (Image screenshot = KGySoft.WinForms.Screenshot.CaptureScreenshot())
+                using (Image screenshot = WinForms.Screenshot.CaptureScreenshot())
                 {
                     screenshot.Save(filename, ImageFormat.Png);
 
@@ -210,12 +209,12 @@ namespace KGySoft.WinForms.Forms
         /// <param name="e">Exception</param>
         /// <param name="caption">Caption</param>
         /// <param name="logNamePrefix">Prefix of log file name to save. Path can be set in <see cref="ErrorLogDirectory"/>. Can be null for not saving log.</param>
-        public void Execute(Exception e, string caption, string logNamePrefix)
+        public void Execute(Exception? e, string caption, string logNamePrefix)
         {
             ResetDetails(true);
             Text = caption;
             txtDetails.Text = e?.ToString();
-            exception = e;
+            //exception = e;
             txtMessage.Text = e != null ? e.Message : Language.Translate("Unknown error__Dialogs");
 
             using (Icon icon = Icons.Shield)
@@ -254,7 +253,7 @@ namespace KGySoft.WinForms.Forms
 
         /// <summary>
         /// Message dialog for caught exceptions with a default caption.
-        /// Saves log and screenshot if directory is set in <see cref="ErrorHandling.ErrorLogDirectory"/>.
+        /// Saves log and screenshot if directory is set in <see cref="ErrorLogDirectory"/>.
         /// </summary>
         /// <param name="e">Exception</param>
         public void Execute(Exception e)
@@ -332,7 +331,7 @@ namespace KGySoft.WinForms.Forms
                         Cursor.Current = Cursors.Default;
                     }
                 }
-                exception = null;
+                //exception = null;
                 return ShowDialog();
             }
             catch (Exception ex) when (!ex.IsCritical())
@@ -457,7 +456,7 @@ namespace KGySoft.WinForms.Forms
             else
                 pnlStandardButtons.Visible = false;
 
-            Button b;
+            Button? b;
             switch (buttons)
             {
                 case ButtonTypes.OK:
@@ -465,8 +464,8 @@ namespace KGySoft.WinForms.Forms
                     b.Text = TextOk;
                     b.DialogResult = DialogResult.OK;
                     //b.Image = Images.Accept;
-                    this.AcceptButton = b;
-                    this.CancelButton = b;
+                    AcceptButton = b;
+                    CancelButton = b;
                     pnlStandardButtons.Controls.Add(b, 0, 0);
                     break;
                 case ButtonTypes.YesNo:
@@ -498,7 +497,7 @@ namespace KGySoft.WinForms.Forms
                     b.Text = TextCancel;
                     b.DialogResult = DialogResult.Cancel;
                     //b.Image = Images.Delete;
-                    this.CancelButton = b;
+                    CancelButton = b;
                     pnlStandardButtons.Controls.Add(b, 2, 0);
                     break;
                 case ButtonTypes.OKCancel:
@@ -507,13 +506,13 @@ namespace KGySoft.WinForms.Forms
                     b.Text = TextOk;
                     b.DialogResult = DialogResult.OK;
                     //b.Image = Images.Accept;
-                    this.AcceptButton = b;
+                    AcceptButton = b;
                     pnlStandardButtons.Controls.Add(b, 0, 0);
                     b = new Button();
                     b.Text = TextCancel;
                     b.DialogResult = DialogResult.Cancel;
                     //b.Image = Images.Delete;
-                    this.CancelButton = b;
+                    CancelButton = b;
                     pnlStandardButtons.Controls.Add(b, 1, 0);
                     break;
                 case ButtonTypes.RetryCancel:
@@ -527,7 +526,7 @@ namespace KGySoft.WinForms.Forms
                     b.Text = TextCancel;
                     b.DialogResult = DialogResult.Cancel;
                     //b.Image = Images.Delete;
-                    this.CancelButton = b;
+                    CancelButton = b;
                     pnlStandardButtons.Controls.Add(b, 1, 0);
                     break;
                 case ButtonTypes.AbortRetryIgnore:
@@ -546,7 +545,7 @@ namespace KGySoft.WinForms.Forms
                     b.Text = TextIgnore;
                     b.DialogResult = DialogResult.Ignore;
                     //b.Image = Images.None;
-                    this.CancelButton = b;
+                    CancelButton = b;
                     pnlStandardButtons.Controls.Add(b, 2, 0);
                     break;
                 case ButtonTypes.Closewin:
@@ -578,43 +577,39 @@ namespace KGySoft.WinForms.Forms
                 for (int i = 0; i < pnlStandardButtons.ColumnStyles.Count; i++)
                 {
                     pnlStandardButtons.ColumnStyles[i].SizeType = SizeType.Percent;
-                    pnlStandardButtons.ColumnStyles[i].Width = 100 / pnlStandardButtons.ColumnStyles.Count;
+                    pnlStandardButtons.ColumnStyles[i].Width = 100f / pnlStandardButtons.ColumnStyles.Count;
                 }
             }
         }
 
-        private void OnSendReport(ReportSenderEventArgs e)
-        {
-            if (ReportSender != null)
-                ReportSender(this, e);
-        }
+        private void OnSendReport(ReportSenderEventArgs e) => ReportSender?.Invoke(this, e);
 
         #endregion
 
         #region Event handlers
+#pragma warning disable IDE1006 // Naming Styles
 
-        private void btnDetails_Click(object sender, EventArgs e)
+        private void btnDetails_Click(object? sender, EventArgs e)
         {
             ShowDetails(!detailsVisible);
         }
 
-        private void btnIgnore_Click(object sender, EventArgs e)
+        private void btnIgnore_Click(object? sender, EventArgs e)
         {
             Close();
         }
 
-        private void btnCloseApp_Click(object sender, EventArgs e)
+        private void btnCloseApp_Click(object? sender, EventArgs e)
         {
             if (Dialogs.ConfirmMessage("Are you sure to terminate application? All unsaved work will be lost!"))
             {
-                if (BeforeKillApplication != null)
-                    BeforeKillApplication(null, EventArgs.Empty);
+                BeforeKillApplication?.Invoke(null, EventArgs.Empty);
                 Process.GetCurrentProcess().Kill();
                 Application.Exit();
             }
         }
 
-        private void btnSendReport_Click(object sender, EventArgs e)
+        private void btnSendReport_Click(object? sender, EventArgs e)
         {
             if (ReportSender != null)
             {
@@ -622,7 +617,7 @@ namespace KGySoft.WinForms.Forms
                 Hide();
                 try
                 {
-                    ReportSender(this, args);
+                    OnSendReport(args);
                     if (args.CloseMessageDialog)
                         Close();
 
@@ -634,6 +629,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
+#pragma warning restore IDE1006 // Naming Styles
         #endregion
 
         #endregion

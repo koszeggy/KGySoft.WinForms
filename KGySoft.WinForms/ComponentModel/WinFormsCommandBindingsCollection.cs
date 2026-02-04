@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Windows.Forms;
 
 using KGySoft.Reflection;
@@ -35,6 +36,9 @@ namespace KGySoft.ComponentModel
     {
         #region CrossThreadEnabledStateUpdater class
 
+#if NET6_0_OR_GREATER
+        [SuppressMessage("Style", "IDE0004:Remove unnecessary cast", Justification = "Needed in pre-.NET 6")]
+#endif
         private sealed class CrossThreadEnabledStateUpdater : ICommandStateUpdater
         {
             #region Fields
@@ -72,15 +76,18 @@ namespace KGySoft.ComponentModel
                     }
                 }
 
-                Func<bool> setState = () => Reflector.TrySetProperty(commandSource, stateName, value);
                 return commandSource switch
                 {
-                    // ReSharper disable RedundantCast
-                    Control control => control.InvokeRequired ? (bool)control.Invoke(setState) : setState.Invoke(),
-                    ToolStripItem item => item.Owner?.InvokeRequired == true ? (bool)item.Owner.Invoke(setState) : setState.Invoke(),
-                    // ReSharper restore RedundantCast
+                    Control control => control.InvokeRequired ? (bool)control.Invoke(SetState) : SetState(),
+                    ToolStripItem item => item.Owner?.InvokeRequired == true ? (bool)item.Owner.Invoke(SetState) : SetState(),
                     _ => false
                 };
+
+                #region Local Methods
+
+                bool SetState() => Reflector.TrySetProperty(commandSource, stateName, value);
+
+                #endregion
             }
 
             public void Dispose()
@@ -109,6 +116,7 @@ namespace KGySoft.ComponentModel
 
         #region Methods
 
+        /// <inheritdoc />
         public override ICommandBinding Add(ICommand command, IDictionary<string, object?>? initialState = null, bool disposeCommand = false)
         {
             ICommandBinding result = base.Add(command, initialState, disposeCommand);

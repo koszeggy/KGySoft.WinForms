@@ -24,7 +24,8 @@ using System.ComponentModel;
 namespace KGySoft.ComponentModel
 {
     /// <summary>
-    /// Similar to <see cref="ExpandableObjectConverter"/> but recursively.
+    /// Provides a type converter to convert objects allowing expanding their properties.
+    /// This class is similar to <see cref="ExpandableObjectConverter"/>, but this one allows expanding the properties recursively.
     /// </summary>
     public class ExpandablePropertiesConverter : TypeConverter
     {
@@ -83,7 +84,12 @@ namespace KGySoft.ComponentModel
 
         #region Constructors
 
-        public ExpandablePropertiesConverter(Type type) => this.type = type ?? throw new ArgumentNullException(nameof(type));
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ExpandablePropertiesConverter"/> class for the specified <paramref name="type"/>.
+        /// </summary>
+        /// <param name="type">The <see cref="Type"/> to associate with the converter.</param>
+        /// <exception cref="ArgumentNullException">Thrown if <paramref name="type"/> is <see langword="null"/>.</exception>
+        public ExpandablePropertiesConverter(Type type) => this.type = type ?? throw new ArgumentNullException(nameof(type), PublicResources.ArgumentNull);
 
         #endregion
 
@@ -91,7 +97,7 @@ namespace KGySoft.ComponentModel
 
         #region Static Methods
 
-        internal static PropertyDescriptorCollection FilterProperties(PropertyDescriptorCollection properties, Type type)
+        internal static PropertyDescriptorCollection FilterProperties(PropertyDescriptorCollection properties)
         {
             var result = new PropertyDescriptorCollection(null);
 
@@ -113,9 +119,11 @@ namespace KGySoft.ComponentModel
 
         #region Instance Methods
 
+        /// <inheritdoc />
         public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext? context, object value, Attribute[]? attributes)
-            => FilterProperties(TypeDescriptor.GetProperties(value, attributes, true), type);
+            => FilterProperties(TypeDescriptor.GetProperties(value, attributes, true));
 
+        /// <inheritdoc />
         public override bool GetPropertiesSupported(ITypeDescriptorContext? context)
             => context?.PropertyDescriptor?.PropertyType.GetProperties().Length > 0;
 

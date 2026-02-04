@@ -28,22 +28,26 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Unified user control version of <see cref="AdvancedComboBox"/>.
+    /// The unified user control version of <see cref="AdvancedComboBox"/>.
     /// </summary>
     [DefaultBindingProperty("SelectedValue")]
     [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucCombo: ucCaptionedBase
     {
         #region Constructor, Dispose
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ucCombo"/> class.
+        /// </summary>
         public ucCombo()
         {
             InitializeComponent();
-            this.cmbCombo.EnabledChanged += new System.EventHandler(this.cmbCombo_EnabledChanged);
-            this.cmbCombo.SelectedValueChanged += new EventHandler(this.cmbCombo_SelectedValueChanged);
-            this.cmbCombo.TextChanged += new EventHandler(cmbCombo_TextChanged);
+            cmbCombo.EnabledChanged += cmbCombo_EnabledChanged;
+            cmbCombo.SelectedValueChanged += cmbCombo_SelectedValueChanged;
+            cmbCombo.TextChanged += cmbCombo_TextChanged;
         }
 
         /// <summary> 
@@ -52,13 +56,11 @@ namespace KGySoft.WinForms.Controls
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            this.cmbCombo.EnabledChanged -= cmbCombo_EnabledChanged;
-            this.cmbCombo.SelectedValueChanged -= cmbCombo_SelectedValueChanged;
-            this.cmbCombo.TextChanged -= cmbCombo_TextChanged;
+            cmbCombo.EnabledChanged -= cmbCombo_EnabledChanged;
+            cmbCombo.SelectedValueChanged -= cmbCombo_SelectedValueChanged;
+            cmbCombo.TextChanged -= cmbCombo_TextChanged;
             if (disposing && (components != null))
-            {
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
@@ -66,6 +68,9 @@ namespace KGySoft.WinForms.Controls
 
         #region Mandatory overrides
 
+        /// <summary>
+        /// Clears the selection of the inner combo box.
+        /// </summary>
         public override void Clear()
         {
             cmbCombo.SelectedIndex = -1;
@@ -79,7 +84,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets read-only state of the combo box.")]
         public override bool ReadOnly
         {
-            get { return cmbCombo.ReadOnly; }
+            get => cmbCombo.ReadOnly;
             set
             {
                 cmbCombo.ReadOnly = value;
@@ -91,28 +96,24 @@ namespace KGySoft.WinForms.Controls
         /// Gets or sets the associated value of the control.
         /// </summary>
         /// <value>If the combo box is data-bound, then this is the <see cref="SelectedValue"/>, otherwise, the <see cref="Text"/> property.</value>
-        public override object ControlValue
+        public override object? ControlValue
         {
-            get { return cmbCombo.DataSource == null ? cmbCombo.Text : cmbCombo.SelectedValue; }
+            get => cmbCombo.DataSource == null ? cmbCombo.Text : cmbCombo.SelectedValue;
             set
             {
                 if (cmbCombo.DataSource == null)
-                {
-                    string text = String.Empty;
-                    if (value != null)
-                        text = value.ToString();
-
-                    SetText(text);
-                }
-                else
+                    SetText(value?.ToString() ?? String.Empty);
+                else if (value != null)
                     cmbCombo.SelectedValue = value;
+                else
+                    cmbCombo.SelectedItem = null;
             }
         }
 
-        protected override Control MainControl
-        {
-            get { return cmbCombo; }
-        }
+        /// <summary>
+        /// Gets the wrapped <see cref="AdvancedComboBox"/> control.
+        /// </summary>
+        protected override Control MainControl => cmbCombo;
 
         #endregion
 
@@ -125,10 +126,11 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the text associated with this control.")]
         [Browsable(true)]
         [Bindable(BindableSupport.Yes)]
+        [AllowNull]
         public override string Text
         {
-            get { return cmbCombo.Text; }
-            set { cmbCombo.Text = value; }
+            get => cmbCombo.Text;
+            set => cmbCombo.Text = value;
         }
 
         /// <summary>
@@ -137,10 +139,7 @@ namespace KGySoft.WinForms.Controls
         [Category("ucCombo")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public AdvancedComboBox Combo
-        {
-            get { return cmbCombo; }
-        }
+        public AdvancedComboBox Combo => cmbCombo;
 
         /// <summary>
         /// Gets or sets a value specifying the style of the combo box.
@@ -150,8 +149,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(ComboBoxStyle), "DropDown")]
         public ComboBoxStyle DropDownStyle
         {
-            get { return cmbCombo.DropDownStyle; }
-            set { cmbCombo.DropDownStyle = value; }
+            get => cmbCombo.DropDownStyle;
+            set => cmbCombo.DropDownStyle = value;
         }
 
         /// <summary>
@@ -166,8 +165,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool SystemDrawDropDownListMode
         {
-            get { return cmbCombo.SystemDrawDropDownListMode; }
-            set { cmbCombo.SystemDrawDropDownListMode = value; }
+            get => cmbCombo.SystemDrawDropDownListMode;
+            set => cmbCombo.SystemDrawDropDownListMode = value;
         }
 
         /// <summary>
@@ -176,12 +175,9 @@ namespace KGySoft.WinForms.Controls
         [Category("ucCombo")]
         [Description("Gets an object representing the collection of the items contained in the inner AdvancedComboBox.")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(System.Drawing.Design.UITypeEditor))]
+        [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         [MergableProperty(false)]
-        public ComboBox.ObjectCollection Items
-        {
-            get { return cmbCombo.Items; }
-        }
+        public ComboBox.ObjectCollection Items => cmbCombo.Items;
 
         #endregion
 
@@ -201,20 +197,9 @@ namespace KGySoft.WinForms.Controls
 
         #region Handled events
 
-        private void cmbCombo_EnabledChanged(object sender, EventArgs e)
-        {
-            ResetColor();
-        }
-
-        private void cmbCombo_SelectedValueChanged(object sender, EventArgs e)
-        {
-            ResetColor();
-        }
-
-        void cmbCombo_TextChanged(object sender, EventArgs e)
-        {
-            ResetColor();
-        }
+        private void cmbCombo_EnabledChanged(object? sender, EventArgs e) => ResetColor();
+        private void cmbCombo_SelectedValueChanged(object? sender, EventArgs e) => ResetColor();
+        void cmbCombo_TextChanged(object? sender, EventArgs e) => ResetColor();
 
         #endregion
 
@@ -228,20 +213,18 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         [Bindable(BindableSupport.Default)]
-        public object SelectedValue
+        [DisallowNull]
+        public object? SelectedValue
         {
-            get { return cmbCombo.SelectedValue; }
-            set { cmbCombo.SelectedValue = value; }
+            get => cmbCombo.SelectedValue;
+            set => cmbCombo.SelectedValue = value;
         }
 
         /// <summary>
         /// Gets whether the there is no selected item in the combo box (<see cref="SelectedValue"/> or is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
         /// </summary>
         [Browsable(false)]
-        public bool IsEmpty
-        {
-            get { return cmbCombo.IsEmpty(); }
-        }
+        public bool IsEmpty => cmbCombo.IsEmpty();
 
         /// <summary>
         /// Occurs when the <see cref="SelectedIndex"/> property has changed.
@@ -249,8 +232,8 @@ namespace KGySoft.WinForms.Controls
         [Category("ucCombo")]
         public event EventHandler SelectedIndexChanged
         {
-            add { cmbCombo.SelectedIndexChanged += value; }
-            remove { cmbCombo.SelectedIndexChanged -= value; }
+            add => cmbCombo.SelectedIndexChanged += value;
+            remove => cmbCombo.SelectedIndexChanged -= value;
         }
 
         /// <summary>
@@ -259,8 +242,8 @@ namespace KGySoft.WinForms.Controls
         [Category("ucCombo")]
         public event EventHandler SelectedValueChanged
         {
-            add { cmbCombo.SelectedValueChanged += value; }
-            remove { cmbCombo.SelectedValueChanged -= value; }
+            add => cmbCombo.SelectedValueChanged += value;
+            remove => cmbCombo.SelectedValueChanged -= value;
         }
 
         /// <summary>
@@ -269,10 +252,10 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         [Bindable(BindableSupport.Yes)]
-        public object SelectedItem
+        public object? SelectedItem
         {
-            get { return cmbCombo.SelectedItem; }
-            set { cmbCombo.SelectedItem = value; }
+            get => cmbCombo.SelectedItem;
+            set => cmbCombo.SelectedItem = value;
         }
 
         /// <summary>
@@ -282,8 +265,8 @@ namespace KGySoft.WinForms.Controls
         [Browsable(false)]
         public string SelectedText
         {
-            get { return cmbCombo.SelectedText; }
-            set { cmbCombo.SelectedText = value; }
+            get => cmbCombo.SelectedText;
+            set => cmbCombo.SelectedText = value;
         }
 
         /// <summary>
@@ -293,8 +276,8 @@ namespace KGySoft.WinForms.Controls
         [Browsable(false)]
         public int SelectedIndex
         {
-            get { return cmbCombo.SelectedIndex; }
-            set { cmbCombo.SelectedIndex = value; }
+            get => cmbCombo.SelectedIndex;
+            set => cmbCombo.SelectedIndex = value;
         }
 
         /// <summary>
@@ -305,10 +288,10 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(null)]
         [RefreshProperties(RefreshProperties.Repaint)]
         [AttributeProvider(typeof(IListSource))]
-        public object DataSource
+        public object? DataSource
         {
-            get { return cmbCombo.DataSource; }
-            set { cmbCombo.DataSource = value; }
+            get => cmbCombo.DataSource;
+            set => cmbCombo.DataSource = value;
         }
 
         /// <summary>
@@ -321,8 +304,8 @@ namespace KGySoft.WinForms.Controls
         [Editor("System.Windows.Forms.Design.DataMemberFieldEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public string DisplayMember
         {
-            get { return cmbCombo.DisplayMember; }
-            set { cmbCombo.DisplayMember = value; }
+            get => cmbCombo.DisplayMember;
+            set => cmbCombo.DisplayMember = value;
         }
 
         /// <summary>
@@ -334,8 +317,8 @@ namespace KGySoft.WinForms.Controls
         [Editor("System.Windows.Forms.Design.DataMemberFieldEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public string ValueMember
         {
-            get { return cmbCombo.ValueMember; }
-            set { cmbCombo.ValueMember = value; }
+            get => cmbCombo.ValueMember;
+            set => cmbCombo.ValueMember = value;
         }
 
         /// <summary>
@@ -346,8 +329,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoCompleteMode.None)]
         public AutoCompleteMode AutoCompleteMode
         {
-            get { return cmbCombo.AutoCompleteMode; }
-            set { cmbCombo.AutoCompleteMode = value; }
+            get => cmbCombo.AutoCompleteMode;
+            set => cmbCombo.AutoCompleteMode = value;
         }
 
         ///<summary>
@@ -358,8 +341,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoCompleteSource.None)]
         public AutoCompleteSource AutoCompleteSource
         {
-            get { return cmbCombo.AutoCompleteSource; }
-            set { cmbCombo.AutoCompleteSource = value; }
+            get => cmbCombo.AutoCompleteSource;
+            set => cmbCombo.AutoCompleteSource = value;
         }
 
         ///<summary>
@@ -371,8 +354,8 @@ namespace KGySoft.WinForms.Controls
         [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public AutoCompleteStringCollection AutoCompleteCustomSource
         {
-            get { return cmbCombo.AutoCompleteCustomSource; }
-            set { cmbCombo.AutoCompleteCustomSource = value; }
+            get => cmbCombo.AutoCompleteCustomSource;
+            set => cmbCombo.AutoCompleteCustomSource = value;
         }
 
         /// <summary>

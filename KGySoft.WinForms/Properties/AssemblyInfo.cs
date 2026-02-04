@@ -2,6 +2,9 @@
 using System.Resources;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
+#if NET8_0_OR_GREATER
+using System.Runtime.Versioning;
+#endif
 using System.Security;
 
 // General Information about an assembly is controlled through the following 
@@ -40,6 +43,9 @@ using System.Security;
 [assembly: AssemblyVersion("5.0.0.0")]
 [assembly: AssemblyFileVersion("5.0.0.0")]
 [assembly: AssemblyInformationalVersion("5.0.0-preview.1")]
+#if NET8_0_OR_GREATER
+[assembly: SupportedOSPlatform("windows")] 
+#endif
 
 [assembly: AllowPartiallyTrustedCallers]
 #if !NET35

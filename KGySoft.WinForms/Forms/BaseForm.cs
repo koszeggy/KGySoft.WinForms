@@ -42,7 +42,7 @@ using KGySoft.WinForms.WinApi;
 #region Suppressions
 
 #if NETFRAMEWORK && !NET47_OR_GREATER
-#pragma warning disable CS1574 // the documentation contains types that are not available in every target
+#pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved - The documentation references types that are not available on all platforms
 #endif
 
 #endregion
@@ -105,7 +105,7 @@ namespace KGySoft.WinForms.Forms
             #region Methods
 
             /// <inheritdoc />
-            public override void Add(Control value)
+            public override void Add(Control? value)
             {
                 owner.isAddingControl = true;
                 try
@@ -153,7 +153,7 @@ namespace KGySoft.WinForms.Forms
             #region Methods
 
             /// <inheritdoc />
-            public override void Add(Control value)
+            public override void Add(Control? value)
             {
                 owner.isAddingControl = true;
                 try
@@ -527,6 +527,10 @@ namespace KGySoft.WinForms.Forms
         public PointF DeviceScale => deviceScale;
 
         /// <inheritdoc cref="Form.Icon" />
+#if NET9_0_OR_GREATER
+        [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.",
+            Justification = "False alarm, inherited from the base. Cannot redefine easily because Form uses a ShouldSerialize method reurning a private state flag.")] 
+#endif
         public new Icon? Icon
         {
             get => base.Icon;
@@ -702,6 +706,7 @@ namespace KGySoft.WinForms.Forms
         /// whereas this property still may contain items. If this form is currently suspended, the <see cref="SuspendingMdiChild"/> property
         /// returns the blocker form, which is an element of this property.</note>
         /// </remarks>
+        [SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Intended, just like Form.MdiChildren is an array, too.")]
         protected Form[] OwnedMdiChildren => ownedMdiChildren?.ToArray() ?? [];
 
         #endregion
@@ -1013,17 +1018,16 @@ namespace KGySoft.WinForms.Forms
         {
             if (translateControls)
             {
-                bool finished;
-                if (LanguageWinForms.TranslateControl(control, out finished))
+                if (LanguageWinForms.TranslateControl(control, out bool finished))
                     TranslateToolTip(control);
                 if (finished)
                     return;
 
                 if (control.HasChildren)
-#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type.
+                {
                     foreach (Control c in control.Controls)
                         PerformTranslate(c!);
-#pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
+                }
             }
         }
 
@@ -1035,7 +1039,7 @@ namespace KGySoft.WinForms.Forms
         /// <param name="sender">The closed form, which is the sender of the provided arguments.</param>
         /// <param name="e">Arguments of the closed form.</param>
         [Obsolete("The CalledMdiChildClosed event is now obsolete. Use the OwnedMdiChildClosed event and the OnCalledMdiChildClosed method instead.")]
-        protected virtual void OnCalledMdiChildClosed(object sender, FormClosedEventArgs e)
+        protected virtual void OnCalledMdiChildClosed(object? sender, FormClosedEventArgs e)
             => Events.GetHandler<FormClosedEventHandler>(nameof(CalledMdiChildClosed))?.Invoke(sender, e);
 
         /// <summary>

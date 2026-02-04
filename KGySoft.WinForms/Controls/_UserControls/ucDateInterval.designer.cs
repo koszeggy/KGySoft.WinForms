@@ -29,11 +29,11 @@ namespace KGySoft.WinForms.Controls
         private void InitializeComponent()
         {
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.dtpDateFrom = new System.Windows.Forms.DateTimePicker();
+            this.dtpDateFrom = new AdvancedDateTimePicker();
             this.upHourFrom = new System.Windows.Forms.NumericUpDown();
             this.lblHour1 = new System.Windows.Forms.Label();
-            this.lblMinus = new System.Windows.Forms.Label();
-            this.dtpDateTo = new System.Windows.Forms.DateTimePicker();
+            this.lblHyphen = new System.Windows.Forms.Label();
+            this.dtpDateTo = new AdvancedDateTimePicker();
             this.upHourTo = new System.Windows.Forms.NumericUpDown();
             this.lblHour2 = new System.Windows.Forms.Label();
             this.groupBox.SuspendLayout();
@@ -57,7 +57,7 @@ namespace KGySoft.WinForms.Controls
             this.flowLayoutPanel1.Controls.Add(this.dtpDateFrom);
             this.flowLayoutPanel1.Controls.Add(this.upHourFrom);
             this.flowLayoutPanel1.Controls.Add(this.lblHour1);
-            this.flowLayoutPanel1.Controls.Add(this.lblMinus);
+            this.flowLayoutPanel1.Controls.Add(this.lblHyphen);
             this.flowLayoutPanel1.Controls.Add(this.dtpDateTo);
             this.flowLayoutPanel1.Controls.Add(this.upHourTo);
             this.flowLayoutPanel1.Controls.Add(this.lblHour2);
@@ -103,14 +103,14 @@ namespace KGySoft.WinForms.Controls
             // 
             // lblMinus
             // 
-            this.lblMinus.AutoSize = true;
-            this.lblMinus.Font = new System.Drawing.Font("Arial Black", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
-            this.lblMinus.Location = new System.Drawing.Point(157, 0);
-            this.lblMinus.Margin = new System.Windows.Forms.Padding(0);
-            this.lblMinus.Name = "lblMinus";
-            this.lblMinus.Size = new System.Drawing.Size(13, 18);
-            this.lblMinus.TabIndex = 12;
-            this.lblMinus.Text = "-";
+            this.lblHyphen.AutoSize = true;
+            this.lblHyphen.Font = new System.Drawing.Font("Arial Black", 9.75F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(238)));
+            this.lblHyphen.Location = new System.Drawing.Point(157, 0);
+            this.lblHyphen.Margin = new System.Windows.Forms.Padding(0);
+            this.lblHyphen.Name = "lblHyphen";
+            this.lblHyphen.Size = new System.Drawing.Size(13, 18);
+            this.lblHyphen.TabIndex = 12;
+            this.lblHyphen.Text = "-";
             // 
             // dtpDateTo
             // 
@@ -171,11 +171,11 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel1;
-        private System.Windows.Forms.DateTimePicker dtpDateFrom;
+        private AdvancedDateTimePicker dtpDateFrom;
         private System.Windows.Forms.NumericUpDown upHourFrom;
         private System.Windows.Forms.Label lblHour1;
-        private System.Windows.Forms.Label lblMinus;
-        private System.Windows.Forms.DateTimePicker dtpDateTo;
+        private System.Windows.Forms.Label lblHyphen;
+        private AdvancedDateTimePicker dtpDateTo;
         private System.Windows.Forms.NumericUpDown upHourTo;
         private System.Windows.Forms.Label lblHour2;
 

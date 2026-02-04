@@ -376,7 +376,7 @@ namespace KGySoft.WinForms
         /// <remarks>
         /// <note>This property may return different fonts on .NET Framework and .NET [Core], just like the <see cref="Control.DefaultFont">Control.DefaultFont</see> property. Use this property only
         /// to ensure to get a correctly scalable version of <see cref="Control.DefaultFont">Control.DefaultFont</see>. If you target both .NET Framework and .NET [Core] and you want to use the same font on both platforms,
-        /// set the <see cref="Form.Font">Form.Font</see> property of your forms explicitly. You can use the <see cref="SystemFonts.MessageBoxFont">SystemFonts.MessageBoxFont</see> property, which returns the same font on both platforms,
+        /// set the <see cref="Control.Font"/> property of your forms explicitly. You can use the <see cref="SystemFonts.MessageBoxFont">SystemFonts.MessageBoxFont</see> property, which returns the same font on both platforms,
         /// and returns a correctly scalable <see cref="Font"/> in points.</note>
         /// </remarks>
         public static Font DefaultFont
@@ -429,7 +429,7 @@ namespace KGySoft.WinForms
 
         // Not making these properties public because the names are somewhat misleading, and they are cached, which could be an issue if they are misused.
         internal static Font DialogFont => dialogFont ??= SystemFonts.DialogFont;
-        internal static Font MessageBoxFont => messageBoxFont ??= SystemFonts.MessageBoxFont;
+        internal static Font MessageBoxFont => messageBoxFont ??= SystemFonts.MessageBoxFont ?? SystemFonts.DialogFont;
 
         #endregion
 
@@ -648,7 +648,7 @@ namespace KGySoft.WinForms
         /// </summary>
         /// <param name="control">The control for which the scrollbar size is requested.</param>
         /// <returns>A <see cref="Size"/> representing the recommended width and height of scrollbars.</returns>
-        public static Size GetScrollbarSize(this Control control)
+        public static Size GetScrollBarSize(this Control control)
         {
             if (control == null!)
                 ThrowNull(nameof(control));
@@ -668,7 +668,7 @@ namespace KGySoft.WinForms
         /// </summary>
         /// <param name="hWnd">The handle of the window for which the scrollbar size is requested.</param>
         /// <returns>A <see cref="Size"/> representing the recommended width and height of scrollbars.</returns>
-        public static Size GetScrollbarSize(IntPtr hWnd)
+        public static Size GetScrollBarSize(IntPtr hWnd)
         {
             if (OSHelper.IsMono)
                 return scrollbarFallbackReferenceSize.Scale(GetScale(hWnd));

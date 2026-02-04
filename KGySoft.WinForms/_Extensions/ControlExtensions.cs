@@ -38,13 +38,44 @@ namespace KGySoft.WinForms
     {
         #region Constants
 
+        /// <summary>
+        /// Represents a special value indicating that no item is selected in a selection control.
+        /// </summary>
         [Obsolete("SelectionPlusItems-related functionality")]public const int NotSelectedValue = 0;
+
+        /// <summary>
+        /// Represents a special value indicating that all items are selected in a selection control.
+        /// </summary>
         [Obsolete("SelectionPlusItems-related functionality")]public const int AllSelectedValue = NotSelectedValue - 1;
+
+        /// <summary>
+        /// Represents a special value indicating that no items are selected in a selection control.
+        /// </summary>
         [Obsolete("SelectionPlusItems-related functionality")]public const int NoneSelectedValue = NotSelectedValue - 2;
+
+        /// <summary>
+        /// Represents a special value indicating that an undefined custom value is selected in a selection control.
+        /// </summary>
         [Obsolete("SelectionPlusItems-related functionality")]public const int UndefinedValue = Int32.MaxValue;
+
+        /// <summary>
+        /// Gets the text representing the <see cref="NotSelectedValue"/>.
+        /// </summary>
         [Obsolete("SelectionPlusItems-related functionality")]public const string NotSelectedText = " (Not selected)";
+
+        /// <summary>
+        /// Gets the text representing the <see cref="AllSelectedValue"/>.
+        /// </summary>
         [Obsolete("SelectionPlusItems-related functionality")]public const string AllSelectedText = " (All)";
+
+        /// <summary>
+        /// Gets the text representing the <see cref="NoneSelectedValue"/>.
+        /// </summary>
         [Obsolete("SelectionPlusItems-related functionality")]public const string NoneSelectedText = " (None)";
+
+        /// <summary>
+        /// Gets the text representing the <see cref="UndefinedValue"/>.
+        /// </summary>
         [Obsolete("SelectionPlusItems-related functionality")]public const string UndefinedText = " (Undefined)";
 
         #endregion
@@ -90,9 +121,8 @@ namespace KGySoft.WinForms
         [Obsolete("ucBase-related functionality.")]
         public static void StoreValues(this Control control)
         {
-            if (control is ucBase)
-                (control as ucBase).SaveValue();
-
+            if (control is ucBase @base)
+                @base.SaveValue();
             if (control.HasChildren)
                 foreach (Control c in control.Controls)
                     StoreValues(c);
@@ -104,9 +134,8 @@ namespace KGySoft.WinForms
         [Obsolete("ucBase-related functionality.")]
         public static void ClearStoredValues(this Control control)
         {
-            if (control is ucBase)
-                (control as ucBase).ClearSavedValue();
-
+            if (control is ucBase @base)
+                @base.ClearSavedValue();
             if (control.HasChildren)
                 foreach (Control c in control.Controls)
                     ClearStoredValues(c);
@@ -142,15 +171,15 @@ namespace KGySoft.WinForms
         /// <param name="readOnly">The read-only state to set.</param>
         public static void SetControlReadonly(this Control control, bool readOnly)
         {
-            if (control is IReadOnlyCapable)
+            if (control is IReadOnlyCapable readOnlyCapable)
             {
-                ((IReadOnlyCapable)control).ReadOnly = readOnly;
+                readOnlyCapable.ReadOnly = readOnly;
                 return;
             }
 
-            if (control is TextBoxBase)
+            if (control is TextBoxBase textBoxBase)
             {
-                ((TextBoxBase)control).ReadOnly = readOnly;
+                textBoxBase.ReadOnly = readOnly;
                 return;
             }
 
@@ -279,7 +308,7 @@ namespace KGySoft.WinForms
         public static void SetDoubleBuffered(this Control control, bool useDoubleBuffering)
         {
             if (control == null)
-                throw new ArgumentNullException(nameof(control));
+                throw new ArgumentNullException(nameof(control), PublicResources.ArgumentNull);
             Accessors.SetDoubleBuffered(control, useDoubleBuffering);
         }
 
@@ -292,7 +321,7 @@ namespace KGySoft.WinForms
         public static void SetStyle(this Control control, ControlStyles flags, bool value)
         {
             if (control == null)
-                throw new ArgumentNullException(nameof(control));
+                throw new ArgumentNullException(nameof(control), PublicResources.ArgumentNull);
             Accessors.SetStyle(control, flags, value);
         }
 
@@ -302,7 +331,7 @@ namespace KGySoft.WinForms
 
         internal static void PaintTransparentBackground(this Control c, PaintEventArgs e)
         {
-            Control parent = c.Parent;
+            Control? parent = c.Parent;
             if (parent == null)
                 return;
 
@@ -311,7 +340,7 @@ namespace KGySoft.WinForms
                 ButtonRenderer.DrawParentBackground(e.Graphics, rectangle, c);
             else
             {
-                GraphicsContainer cstate = e.Graphics.BeginContainer();
+                GraphicsContainer state = e.Graphics.BeginContainer();
                 try
                 {
                     e.Graphics.TranslateTransform(-c.Left, -c.Top);
@@ -322,7 +351,7 @@ namespace KGySoft.WinForms
                 }
                 finally
                 {
-                    e.Graphics.EndContainer(cstate);
+                    e.Graphics.EndContainer(state);
                 }
             }
         }

@@ -58,8 +58,8 @@ namespace KGySoft.WinForms.Controls
 
         internal AutoFindEventArgs(string searchPattern, object notSelectedValue)
         {
-            this.Value = notSelectedValue;
-            this.SearchPattern = searchPattern;
+            Value = notSelectedValue;
+            SearchPattern = searchPattern;
         }
 
         #endregion

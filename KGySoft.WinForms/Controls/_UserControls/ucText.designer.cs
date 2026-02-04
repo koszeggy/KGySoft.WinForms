@@ -59,7 +59,7 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        protected AdvancedTextBox textControl;
+        private AdvancedTextBox textControl;
 
 
 

@@ -123,7 +123,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Occurs when a link is clicked.
-        /// To handle clicked links automatically, set <see cref="AutoHandleUrls"/>&#160;<see langword="true"/>, and if this event is subscribed, set <see cref="HyperlinkClickedEventArgs.Handled"/> <see langword="false"/> in the event handler.
+        /// To handle clicked links automatically, set <see cref="AutoHandleUrls"/>&#160;<see langword="true"/>, and if this event is subscribed, set <see cref="HandledEventArgs.Handled"/> <see langword="false"/> in the event handler.
         /// </summary>
         [Description("Occurs when a link is clicked. To handle clicked links automatically, set AutoHandleUrls true, and if this event is subsribed, set HyperlinkClickedEventArgs.Handled false in the event handler.")]
         [Category("AdvancedLabel")]
@@ -143,7 +143,7 @@ namespace KGySoft.WinForms.Controls
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets whether clicked links should be handled automatically or when <see cref="HyperlinkClickedEventArgs.Handled"/> is set to <see langword="false"/>.
+        /// Gets or sets whether clicked links should be handled automatically or when <see cref="HandledEventArgs.Handled"/> is set to <see langword="false"/>.
         /// <note type="caution">Caution: Setting this property to <see langword="true"/> may cause security issues. Use only in secure circumstances!</note>
         /// </summary>
         [Category("AdvancedLabel")]
@@ -488,8 +488,12 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         }
 
         /// <summary>
-        /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
+        /// Gets or sets whether to use compatible text rendering engine (GDI+) or not (GDI).
         /// </summary>
+#if NET9_0_OR_GREATER
+        [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.",
+            Justification = "False alarm, inherited from the base. Cannot redefine easily because LinkLabel uses a ShouldSerialize method calling internal members.")] 
+#endif
         public new bool UseCompatibleTextRendering
         {
             get => base.UseCompatibleTextRendering;

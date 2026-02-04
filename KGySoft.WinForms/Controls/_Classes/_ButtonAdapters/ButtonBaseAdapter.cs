@@ -449,9 +449,9 @@ namespace KGySoft.WinForms.Controls
             internal void LayoutTextAndImage(Graphics g, LayoutData layout)
             {
                 // Translate for Rtl applications.  This intentially shadows the member variables.
-                ContentAlignment imageAlign = RtlTranslateContent(this.ImageAlign);
-                ContentAlignment textAlign = RtlTranslateContent(this.TextAlign);
-                TextImageRelation textImageRelation = RtlTranslateRelation(this.TextImageRelation);
+                ContentAlignment imageAlign = RtlTranslateContent(ImageAlign);
+                ContentAlignment textAlign = RtlTranslateContent(TextAlign);
+                TextImageRelation textImageRelation = RtlTranslateRelation(TextImageRelation);
 
                 // Figure out the maximum bounds for text & image
                 Rectangle maxBounds = Rectangle.Inflate(layout.Field, -textImageInset, -textImageInset);

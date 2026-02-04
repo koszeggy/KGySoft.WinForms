@@ -456,6 +456,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets an option that controls how automatic completion works for the inner combo box.
         /// </summary>
+        [DefaultValue(AutoCompleteMode.None)]
         public new AutoCompleteMode AutoCompleteMode
         {
             get => readOnly ? origCompleteMode : base.AutoCompleteMode;
@@ -477,6 +478,7 @@ namespace KGySoft.WinForms.Controls
         ///<summary>
         /// Gets or sets a value specifying the source of complete strings used for automatic completion.
         ///</summary>
+        [DefaultValue(AutoCompleteSource.None)]
         public new AutoCompleteSource AutoCompleteSource
         {
             get => readOnly ? origCompleteSource : base.AutoCompleteSource;
@@ -1172,7 +1174,7 @@ namespace KGySoft.WinForms.Controls
         #region Former IListControl Obsolete Members
 
         /// <summary>
-        /// Gets whether the there is no selected item in the combo box (<see cref="ComboBox.SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
+        /// Gets whether the there is no selected item in the combo box (<see cref="ListControl.SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
         /// </summary>
         [Obsolete("This property reflects the special value represented by the obsoleted SelectionPlusItems and should not be used")]
         [Browsable(false)]

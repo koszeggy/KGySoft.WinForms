@@ -110,7 +110,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether the buttons and their panel should be automatically scaled depending on the current DPI settings,
-        /// regardless of the auto-scaling of the current framework or the <see cref="Form.AutoScaleMode"/> of the form.
+        /// regardless of the auto-scaling of the current framework or the <see cref="ContainerControl.AutoScaleMode"/> of the form.
         /// Default value: <see langword="true"/>.
         /// </summary>
         /// <remarks>

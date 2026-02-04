@@ -21,30 +21,34 @@ using System;
 
 namespace KGySoft.WinForms.Controls
 {
+    /// <summary>
+    /// Provides data for the <see cref="ucAllInvertNone.ButtonPressed">ucAllInvertNone.ButtonPressed</see> event.
+    /// </summary>
     [Obsolete("This class belongs to the obsoleted ucAllInvertNone class")]
     public class AllInvertNoneEventArgs : EventArgs
     {
         #region Fields
 
-        InvertButtonTypes buttonType;
+        private readonly InvertButtonTypes buttonType;
 
         #endregion
 
         #region Properties
 
-        public InvertButtonTypes ButtonType
-        {
-            get { return buttonType; }
-        }
+        /// <summary>
+        /// Gets the button type that was pressed.
+        /// </summary>
+        public InvertButtonTypes ButtonType => buttonType;
 
         #endregion
 
         #region Constructors
 
-        public AllInvertNoneEventArgs(InvertButtonTypes buttonType)
-        {
-            this.buttonType = buttonType;
-        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="AllInvertNoneEventArgs"/> class.
+        /// </summary>
+        /// <param name="buttonType">The button that triggered the event.</param>
+        public AllInvertNoneEventArgs(InvertButtonTypes buttonType) => this.buttonType = buttonType;
 
         #endregion
     }

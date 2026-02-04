@@ -21,9 +21,25 @@ using System;
 
 namespace KGySoft.WinForms.Controls
 {
+    /// <summary>
+    /// Represents the button types for an <see cref="ucAllInvertNone"/> control.
+    /// </summary>
     [Obsolete("This type belongs to the obsoleted ucAllInvertNone class")]
     public enum InvertButtonTypes
     {
-        All, Invert, None
+        /// <summary>
+        /// Represents the 'All' button
+        /// </summary>
+        All,
+        
+        /// <summary>
+        /// Represents the 'Invert' button
+        /// </summary>
+        Invert,
+
+        /// <summary>
+        /// Represents the 'None' button
+        /// </summary>
+        None
     }
 }

@@ -21,7 +21,7 @@ using System.Runtime.InteropServices;
 
 namespace KGySoft.WinForms.WinApi
 {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct LOGFONT
     {
         #region Constants

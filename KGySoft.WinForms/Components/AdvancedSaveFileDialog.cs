@@ -16,11 +16,25 @@
 #region Usings
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 using KGySoft.WinForms.WinApi;
+
+#endregion
+
+#region Suppressions
+
+#if NET451_OR_GREATER || NETCOREAPP
+#pragma warning disable CA2263 // Prefer generic overload when type is known - The generic Marshal members are not available on all targets
+#endif
+
+#if !NETCOREAPP3_0_OR_GREATER
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type. - analyzer false alarm for .NET Framework
+#pragma warning disable CS8602 // Dereference of a possibly null reference. - analyzer false alarm for .NET Framework
+#endif
 
 #endregion
 
@@ -30,14 +44,14 @@ namespace KGySoft.WinForms.Components
     /// <summary>
     /// Windows save file dialog that can host a custom control and can raise events.
     /// </summary>
-    public sealed class AdvancedSaveFileDialog
+    public sealed class AdvancedSaveFileDialog : IDisposable
     {
         #region Fields
 
         private IntPtr labelHandle;
-        private Screen activeScreen;
+        //private Screen activeScreen;
         private IntPtr ptrTemplate;
-        private string[] fileTypes;
+        private string[]? fileTypes;
         private bool isInitialized;
 
         #endregion
@@ -56,7 +70,7 @@ namespace KGySoft.WinForms.Components
         /// The dialog appends this extension to the file name if the user fails to type an extension.
         /// The string should not contain a period (.). If this member is NULL and the user fails to type an extension, no extension is appended.
         /// </summary>
-        public string DefaultExt { get; set; }
+        public string? DefaultExt { get; set; }
 
         /// <summary>
         /// Gets or sets file types filter.
@@ -64,23 +78,23 @@ namespace KGySoft.WinForms.Components
         /// Example: "C# files|*.cs|All files|*.*"
         /// </example>
         /// </summary>
-        public string Filter { get; set; }
+        public string? Filter { get; set; }
 
         /// <summary>
         /// Gets or sets the selected file name
         /// </summary>
-        public string FileName { get; set; }
+        public string? FileName { get; set; }
 
         /// <summary>
         /// Gets or sets the title of the dialog
         /// </summary>
-        public string Title { get; set; }
+        public string? Title { get; set; }
 
         /// <summary>
         /// A custom control that will be placed under the file type combo. It must be allocated and disposed by
         /// the user, <see cref="AdvancedSaveFileDialog"/> adjusts only its size if <see cref="CustomControlAutoSize"/> is true.
         /// </summary>
-        public Control CustomControl { get; set; }
+        public Control? CustomControl { get; set; }
 
         /// <summary>
         /// Gets or sets whether <see cref="CustomControl"/> should be resized when the file dialog is resized.
@@ -90,12 +104,12 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets or sets label of the custom control.
         /// </summary>
-        public string CustomControlLabel { get; set; }
+        public string? CustomControlLabel { get; set; }
 
         /// <summary>
         /// Gets or sets initial directory
         /// </summary>
-        public string InitialDirectory { get; set; }
+        public string? InitialDirectory { get; set; }
 
         /// <summary>
         /// Gets or sets whether path of given file must exist. Default value is true.
@@ -121,16 +135,16 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Occurs when user selects another value in file type combo box.
         /// </summary>
-        public event EventHandler<FileTypeChangedEventArgs> FileTypeChanged;
+        public event EventHandler<FileTypeChangedEventArgs>? FileTypeChanged;
 
         /// <summary>
         /// Occurs when user selects a file in the browser.
         /// </summary>
-        public event EventHandler<SelectedFileChangedEventArgs> SelectedFileChanged;
+        public event EventHandler<SelectedFileChangedEventArgs>? SelectedFileChanged;
 
         #endregion
 
-        #region Contructor and Destructor
+        #region Contruction and Destruction
 
         /// <summary>
         /// Creates a new instance of <see cref="AdvancedSaveFileDialog"/>.
@@ -142,11 +156,8 @@ namespace KGySoft.WinForms.Components
             PromptOverride = true;
         }
 
-        ~AdvancedSaveFileDialog()
-        {
-            if (isInitialized)
-                DestroyHandles();
-        }
+        /// <inheritdoc />
+        ~AdvancedSaveFileDialog() => Dispose(false);
 
         #endregion
 
@@ -170,11 +181,11 @@ namespace KGySoft.WinForms.Components
                 ofn.lStructSize = 0x4c;
             }
 
-            string filter = Filter;
+            string? filter = Filter;
             if (String.IsNullOrEmpty(filter))
                 filter = " |*.*";
             ofn.lpstrFilter = filter.Replace('|', '\0') + '\0';
-            fileTypes = filter.Split(new char[] { '|' });
+            fileTypes = filter.Split('|');
             ofn.nFilterIndex = FilterIndex;
 
             //filename in editor
@@ -207,10 +218,10 @@ namespace KGySoft.WinForms.Components
             ptrTemplate = BuildDialogTemplate();
             ofn.hInstance = ptrTemplate;
 
-            activeScreen = null;
-            if (Form.ActiveForm != null)
-                activeScreen = Screen.FromControl(Form.ActiveForm);
-            activeScreen = Screen.PrimaryScreen;
+            //activeScreen = null;
+            //if (Form.ActiveForm != null)
+            //    activeScreen = Screen.FromControl(Form.ActiveForm);
+            //activeScreen = Screen.PrimaryScreen;
 
             //set up some sensible flags
             int flags = Constants.OFN_EXPLORER | Constants.OFN_NOTESTFILECREATE | Constants.OFN_ENABLETAMPLATEHANDLE | Constants.OFN_ENABLEHOOK | Constants.OFN_HIDEREADONLY | Constants.OFN_ENABLESIZING;
@@ -223,7 +234,7 @@ namespace KGySoft.WinForms.Components
             ofn.Flags = flags;
 
             //this is where the hook is set. Note that we can use a C# delegate in place of a C function pointer
-            ofn.lpfnHook = new OFNHookProcDelegate(HookProc);
+            ofn.lpfnHook = HookProc;
 
             //if we're running on Windows 98/ME then the struct is smaller
             if (Environment.OSVersion.Platform != PlatformID.Win32NT)
@@ -249,6 +260,15 @@ namespace KGySoft.WinForms.Components
             FileName = ofn.lpstrFile;
 
             return DialogResult.OK;
+        }
+
+        /// <summary>
+        /// Releases all resources used by the current instance of the class.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         #endregion
@@ -374,7 +394,7 @@ namespace KGySoft.WinForms.Components
                     //we need to intercept the CDN_FILEOK message
                     //which is sent when the user selects a filename
 
-                    NMHDR nmhdr = (NMHDR)Marshal.PtrToStructure(new IntPtr(lParam), typeof(NMHDR));
+                    NMHDR nmhdr = (NMHDR)Marshal.PtrToStructure(new IntPtr(lParam), typeof(NMHDR))!;
 
                     // OK pressed
                     if (nmhdr.Code == Constants.CDN_FILEOK)
@@ -393,8 +413,8 @@ namespace KGySoft.WinForms.Components
                         IntPtr parent = User32.GetParent(hdlg);
                         IntPtr fileComboWindow = User32.GetDlgItem(parent, 0x470);
                         int selectedIndex = User32.SendMessage(fileComboWindow, Constants.CB_GETCURSEL, IntPtr.Zero, IntPtr.Zero).ToInt32();
-                        string extension = null;
-                        if (fileTypes.Length >= selectedIndex * 2)
+                        string? extension = null;
+                        if (fileTypes?.Length >= selectedIndex * 2)
                             extension = fileTypes[selectedIndex * 2 + 1];
                         FilterIndex = selectedIndex + 1;
                         OnFileTypeChanged(new FileTypeChangedEventArgs(selectedIndex, extension));
@@ -407,7 +427,7 @@ namespace KGySoft.WinForms.Components
                         {
                             IntPtr parent = User32.GetParent(hdlg);
                             User32.SendMessage(parent, Constants.CDM_GETFILEPATH, new IntPtr(0x2000), ptrFileName);
-                            string fileName = Marshal.PtrToStringAuto(ptrFileName);
+                            string fileName = Marshal.PtrToStringAuto(ptrFileName)!;
                             OnSelectedFileChanged(new SelectedFileChangedEventArgs(fileName));
                         }
                         finally
@@ -462,17 +482,17 @@ namespace KGySoft.WinForms.Components
             isInitialized = false;
         }
 
-        private void OnFileTypeChanged(FileTypeChangedEventArgs e)
+        [SuppressMessage("ReSharper", "UnusedParameter.Local", Justification = "Dispose pattern")]
+        [SuppressMessage("Style", "IDE0060:Remove unused parameter", Justification = "Dispose pattern")]
+        private void Dispose(bool disposing)
         {
-            if (FileTypeChanged != null)
-                FileTypeChanged(this, e);
+            if (isInitialized)
+                DestroyHandles();
         }
 
-        private void OnSelectedFileChanged(SelectedFileChangedEventArgs e)
-        {
-            if (SelectedFileChanged != null)
-                SelectedFileChanged(this, e);
-        }
+        private void OnFileTypeChanged(FileTypeChangedEventArgs e) => FileTypeChanged?.Invoke(this, e);
+
+        private void OnSelectedFileChanged(SelectedFileChangedEventArgs e) => SelectedFileChanged?.Invoke(this, e);
 
         //private void FindScreenToClient(IntPtr parent, ref RECT rect)
         //{

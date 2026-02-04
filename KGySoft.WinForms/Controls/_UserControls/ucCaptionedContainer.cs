@@ -36,15 +36,17 @@ namespace KGySoft.WinForms.Controls
     //[DesignerSerializer(typeof(ucCaptionedContainerSerializer), typeof(CodeDomSerializer))]
     [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore. "
         + "If you would use it for the check box, it is recommended to use the CheckGroupBox control instead.")]
     public partial class ucCaptionedContainer: ucCaptionedBase
     {
         #region Fields
 
-        private object value;
-        private bool readOnly = false;
         private readonly ContentPanel contentPanel;
+
+        private object? value;
+        private bool readOnly;
 
         #endregion
 
@@ -53,10 +55,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Returns the <see cref="PanelContent"/> as main control.
         /// </summary>
-        protected override Control MainControl
-        {
-            get { return PanelContent; }
-        }
+        protected override Control MainControl => PanelContent;
 
         /// <summary>
         /// Gets or sets the object value associated with the control.
@@ -64,10 +63,10 @@ namespace KGySoft.WinForms.Controls
         /// property is not set automatically but can be used for data binding if you need.
         /// </summary>
         [Bindable(BindableSupport.Default, BindingDirection.TwoWay)]
-        public override object ControlValue
+        public override object? ControlValue
         {
-            get { return this.value; }
-            set { this.value = value; }
+            get => value;
+            set => this.value = value;
         }
 
         /// <summary>
@@ -78,7 +77,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public override bool ReadOnly
         {
-            get { return this.readOnly; }
+            get => readOnly;
             set
             {
                 if (readOnly != value)
@@ -98,7 +97,7 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public override Color ColorEnabled
         {
-            get { return BackColor; }
+            get => BackColor;
             set { }
         }
 
@@ -110,7 +109,7 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public override Color ColorDisabled
         {
-            get { return BackColor; }
+            get => BackColor;
             set { }
         }
 
@@ -122,7 +121,7 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public override Color ColorModified
         {
-            get { return base.ColorModified; }
+            get => base.ColorModified;
             set { }
         }
 
@@ -135,7 +134,7 @@ namespace KGySoft.WinForms.Controls
         public override Color ColorControlTextDisabled
         {
             // TODO: AdvancedLabel: IDisabledColorCapable. Then a few of these properties will have meaning.
-            get { return SystemColors.GrayText; }
+            get => SystemColors.GrayText;
             set { }
         }
 
@@ -147,7 +146,7 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public override Color ColorControlTextEnabled
         {
-            get { return ForeColor; }
+            get => ForeColor;
             set { }
         }
 
@@ -156,15 +155,9 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        public ContentPanel PanelContent
-        {
-            get { return contentPanel; }
-        }
+        public ContentPanel PanelContent => contentPanel;
 
-        internal override Panel ContentPanel
-        {
-            get { return contentPanel; }
-        }
+        internal override Panel ContentPanel => contentPanel;
 
         #endregion
 
@@ -180,13 +173,16 @@ namespace KGySoft.WinForms.Controls
 
             // Replacing pnlContent to a ContentPanel to prevent saving panel properties when using ucCaptionedContainer
             pnlContent = new ContentPanel(pnlContent);
-            contentPanel = pnlContent as ContentPanel;
+            contentPanel = (ContentPanel)pnlContent;
         }
 
         #endregion
 
         #region Methods
 
+        /// <summary>
+        /// This method does nothing in this class.
+        /// </summary>
         protected override void ResetColor()
         {
             // suppressing color resetting for the main panel

@@ -25,10 +25,11 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Unified user control version of <see cref="DecimalTextBox"/>.
+    /// The unified user control version of <see cref="DecimalTextBox"/>.
     /// </summary>
     [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucDecimal : ucTextBase
     {
@@ -41,8 +42,8 @@ namespace KGySoft.WinForms.Controls
         [Description("Occurs when Value has been changed.")]
         public event EventHandler ValueChanged
         {
-            add { decimalControl.ValueChanged += value; }
-            remove { decimalControl.ValueChanged -= value; }
+            add => decimalControl.ValueChanged += value;
+            remove => decimalControl.ValueChanged -= value;
         }
 
         /// <summary>
@@ -52,8 +53,8 @@ namespace KGySoft.WinForms.Controls
         [Description("Occurs when Blank has been changed.")]
         public event EventHandler BlankChanged
         {
-            add { decimalControl.BlankChanged += value; }
-            remove { decimalControl.BlankChanged -= value; }
+            add => decimalControl.BlankChanged += value;
+            remove => decimalControl.BlankChanged -= value;
         }
 
         #endregion
@@ -67,24 +68,21 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public new DecimalTextBox TextBox
-        {
-            get { return decimalControl; }
-        }
+        public new DecimalTextBox TextBox => decimalControl;
 
         /// <summary>
         /// Gets or sets the associated value of the control.
         /// This can be a text or number or anything else in derived controls.
         /// </summary>
-        public override object ControlValue
+        public override object? ControlValue
         {
-            get { return Value; }
+            get => Value;
             set
             {
-                if (value is decimal)
-                    Value = (decimal)value;
+                if (value is decimal d)
+                    Value = d;
                 else
-                    Text = (value == null ? null : value.ToString());
+                    Text = value?.ToString();
             }
         }
 
@@ -97,8 +95,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool Blank
         {
-            get { return decimalControl.Blank; }
-            set { decimalControl.Blank = value; }
+            get => decimalControl.Blank;
+            set => decimalControl.Blank = value;
         }
 
         /// <summary>
@@ -109,8 +107,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue("")]
         public string BlankText
         {
-            get { return decimalControl.BlankText; }
-            set { decimalControl.BlankText = value; }
+            get => decimalControl.BlankText;
+            set => decimalControl.BlankText = value;
         }
 
         /// <summary>
@@ -123,8 +121,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool BlankEnabled
         {
-            get { return decimalControl.BlankEnabled; }
-            set { decimalControl.BlankEnabled = value; }
+            get => decimalControl.BlankEnabled;
+            set => decimalControl.BlankEnabled = value;
         }
 
         /// <summary>
@@ -136,8 +134,8 @@ namespace KGySoft.WinForms.Controls
         [RefreshProperties(RefreshProperties.All)]
         public DecimalValueOnBlank ValueOnBlank
         {
-            get { return decimalControl.ValueOnBlank; }
-            set { decimalControl.ValueOnBlank = value; }
+            get => decimalControl.ValueOnBlank;
+            set => decimalControl.ValueOnBlank = value;
         }
 
         /// <summary>
@@ -148,8 +146,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(DecimalFormat), "Number")]
         public DecimalFormat Format
         {
-            get { return decimalControl.Format; }
-            set { decimalControl.Format = value; }
+            get => decimalControl.Format;
+            set => decimalControl.Format = value;
         }
 
         /// <summary>
@@ -161,8 +159,8 @@ namespace KGySoft.WinForms.Controls
         [RefreshProperties(RefreshProperties.All)]
         public sbyte DecimalDigits
         {
-            get { return decimalControl.DecimalDigits; }
-            set { decimalControl.DecimalDigits = value; }
+            get => decimalControl.DecimalDigits;
+            set => decimalControl.DecimalDigits = value;
         }
 
         /// <summary>
@@ -175,8 +173,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(DecimalRange), "Any")]
         public DecimalRange Range
         {
-            get { return decimalControl.Range; }
-            set { decimalControl.Range = value; }
+            get => decimalControl.Range;
+            set => decimalControl.Range = value;
         }
 
         /// <summary>
@@ -190,8 +188,8 @@ namespace KGySoft.WinForms.Controls
         [RefreshProperties(RefreshProperties.All)]
         public decimal RangeMinValue
         {
-            get { return decimalControl.RangeMinValue; }
-            set { decimalControl.RangeMinValue = value; }
+            get => decimalControl.RangeMinValue;
+            set => decimalControl.RangeMinValue = value;
         }
 
         /// <summary>
@@ -205,8 +203,8 @@ namespace KGySoft.WinForms.Controls
         [RefreshProperties(RefreshProperties.All)]
         public decimal RangeMaxValue
         {
-            get { return decimalControl.RangeMaxValue; }
-            set { decimalControl.RangeMaxValue = value; }
+            get => decimalControl.RangeMaxValue;
+            set => decimalControl.RangeMaxValue = value;
         }
 
         /// <summary>
@@ -219,8 +217,8 @@ namespace KGySoft.WinForms.Controls
         [Bindable(BindableSupport.Default, BindingDirection.TwoWay)]
         public decimal Value
         {
-            get { return decimalControl.Value; }
-            set { decimalControl.Value = value; }
+            get => decimalControl.Value;
+            set => decimalControl.Value = value;
         }
 
         /// <summary>
@@ -228,10 +226,11 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [AllowNull]
         public override string Text
         {
-            get { return decimalControl.Text; }
-            set { decimalControl.Text = value; }
+            get => decimalControl.Text;
+            set => decimalControl.Text = value;
         }
 
         /// <summary>
@@ -242,8 +241,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(HorizontalAlignment), "Right")]
         public HorizontalAlignment TextAlign
         {
-            get { return decimalControl.TextAlign; }
-            set { decimalControl.TextAlign = value; }
+            get => decimalControl.TextAlign;
+            set => decimalControl.TextAlign = value;
         }
 
         /// <summary>
@@ -255,18 +254,18 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool ChangeValueOnTextChange
         {
-            get { return decimalControl.ChangeValueOnTextChange; }
-            set { decimalControl.ChangeValueOnTextChange = value; }
+            get => decimalControl.ChangeValueOnTextChange;
+            set => decimalControl.ChangeValueOnTextChange = value;
         }
 
         #endregion
 
         #region Protected Properties
 
-        protected override Control MainControl
-        {
-            get { return decimalControl; }
-        }
+        /// <summary>
+        /// Gets the wrapped <see cref="DecimalTextBox"/> control.
+        /// </summary>
+        protected override Control MainControl => decimalControl;
 
         #endregion
 

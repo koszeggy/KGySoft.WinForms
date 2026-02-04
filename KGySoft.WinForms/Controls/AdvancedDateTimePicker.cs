@@ -273,7 +273,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/> and not <see cref="TextBox.ReadOnly"/>.
+        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/> and not <see cref="TextBoxBase.ReadOnly"/>.
         /// </summary>
         [Category("AdvancedDateTimePicker")]
         [Description("Determines the background color when the control is Enabled and not ReadOnly.")]
@@ -307,7 +307,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/> or is <see cref="TextBox.ReadOnly"/>.
+        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/> or is <see cref="TextBoxBase.ReadOnly"/>.
         /// </summary>
         [Category("AdvancedDateTimePicker")]
         [Description("Determines the background when the control is not Enabled or is ReadOnly.")]
@@ -558,7 +558,8 @@ namespace KGySoft.WinForms.Controls
                 // If we use the wider calendar drop down button when the system rendering would use the smaller one, we need to adjust the mouse position to make sure
                 // to open/close the calendar. If the control is just getting focused, the appearance may change to the narrower button, but it's alright.
                 case Constants.WM_LBUTTONDOWN when isDropDownHovered:
-                    m.LParam = new IntPtr((m.LParam & (nint)0xFFFF0000) | ((nint)(uint)Width - 5));
+                    // ReSharper disable once RedundantOverflowCheckingContext - false alarm, needed to avoid CS8778
+                    m.LParam = new IntPtr((m.LParam & unchecked((nint)0xFFFF0000)) | ((nint)(uint)Width - 5));
                     isPressed = true;
                     base.WndProc(ref m);
                     return;

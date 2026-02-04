@@ -37,19 +37,17 @@ namespace KGySoft.WinForms.Controls
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucPropertyGrid: ucBase
     {
+        #region Fields
+
         private bool showDescription = true;
-        private bool readOnly = false;
+        private bool readOnly;
         private bool allowPropertyRecursion = true;
 
-        /// <summary>
-        /// Creates a new instance of <see cref="ucPropertyGrid"/>
-        /// </summary>
-        public ucPropertyGrid()
-        {
-            InitializeComponent();
-            txtDescription.Label.Font = new Font(txtDescription.Label.Font, FontStyle.Bold);
-            Language.MarkLocalizable(false, propertyGrid);
-        }
+        #endregion
+
+        #region Properties
+
+        #region Public Properties
 
         ///<summary>
         /// Gets or sets whether description is shown.
@@ -59,7 +57,7 @@ namespace KGySoft.WinForms.Controls
         [Category("ucPropertyGrid")]
         public bool ShowDescription
         {
-            get { return showDescription; }
+            get => showDescription;
             set
             {
                 showDescription = value;
@@ -76,11 +74,11 @@ namespace KGySoft.WinForms.Controls
         [Category("ucPropertyGrid")]
         public bool AllowPropertyRecursion
         {
-            get { return allowPropertyRecursion; }
+            get => allowPropertyRecursion;
             set
             {
                 allowPropertyRecursion = value;
-                SelectedObjects = SelectedObjects;
+                SetSelectedObjects(GetSelectedObjects());
             }
         }
 
@@ -89,10 +87,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public PropertyGrid PropertyGrid
-        {
-            get { return propertyGrid; }
-        }
+        public PropertyGrid PropertyGrid => propertyGrid;
 
         /// <summary>
         /// Gets or sets the object for which the grid displays properties.
@@ -101,15 +96,15 @@ namespace KGySoft.WinForms.Controls
         [Category("ucPropertyGrid")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public object SelectedObject
+        public object? SelectedObject
         {
-            get { return Unwrap(propertyGrid.SelectedObject); }
+            get => Unwrap(propertyGrid.SelectedObject);
             set
             {
                 if (value == null)
                     propertyGrid.SelectedObject = null;
                 else
-                    SetSelectedObjects(new object[] { value });
+                    SetSelectedObjects([value]);
             }
         }
 
@@ -120,21 +115,20 @@ namespace KGySoft.WinForms.Controls
         [Category("ucPropertyGrid")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
+        [SuppressMessage("Performance", "CA1819:Properties should not return arrays", Justification = "Array, just like PropertyGrid.SelectedObjects")]
         public object[] SelectedObjects
         {
-            get { return GetSelectedObjects(); }
-            set { SetSelectedObjects(value); }
+            get => GetSelectedObjects();
+            set => SetSelectedObjects(value);
         }
 
-        protected override Control MainControl
+        /// <summary>
+        /// Gets or sets the selected object if the property grid.
+        /// </summary>
+        public override object? ControlValue
         {
-            get { return propertyGrid; }
-        }
-
-        public override object ControlValue
-        {
-            get { return SelectedObject; }
-            set { SelectedObject = value; }
+            get => SelectedObject;
+            set => SelectedObject = value;
         }
 
         /// <summary>
@@ -145,7 +139,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the ReadOnly state of the property editor.")]
         public override bool ReadOnly
         {
-            get { return readOnly; }
+            get => readOnly;
             set
             {
                 readOnly = value;
@@ -154,19 +148,74 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        #endregion
+
+        #region Protected Properties
+
+        /// <summary>
+        /// Gets the wrapped <see cref="PropertyGrid"/> control.
+        /// </summary>
+        protected override Control MainControl => propertyGrid;
+
+        #endregion
+
+        #endregion
+
+        #region Constructors
+
+        /// <summary>
+        /// Creates a new instance of <see cref="ucPropertyGrid"/>
+        /// </summary>
+        public ucPropertyGrid()
+        {
+            InitializeComponent();
+            txtDescription.Label.Font = new Font(txtDescription.Label.Font, FontStyle.Bold);
+            Language.MarkLocalizable(false, propertyGrid);
+        }
+
+        #endregion
+
+        #region Methods
+
+        #region Static Methods
+
+        [return:NotNullIfNotNull(nameof(obj))]
+        private static object? Unwrap(object? obj) =>
+            obj is LocalizedObjectDescriptor localizedObjectDescriptor ? Unwrap(localizedObjectDescriptor.Object)
+            : obj is RecursivelyEditableTypeDescriptor recursivelyEditableTypeDescriptor ? Unwrap(recursivelyEditableTypeDescriptor.Object)
+            : obj;
+
+        #endregion
+
+        #region Instance Methods
+
+        #region Public Methods
+
+        /// <summary>
+        /// Clears the selected object.
+        /// </summary>
         public override void Clear()
         {
             SelectedObject = null;
             base.Clear();
         }
 
+        #endregion
+
+        #region Protected Methods
+
+        /// <inheritdoc />
         protected override void TranslateContent(ref bool translationFinished)
         {
             // preventing translation of inner content
             translationFinished = true;
         }
 
-        private void SetSelectedObjects(object[] values)
+        #endregion
+
+        #region Private Methods
+
+        private void SetSelectedObjects(object[]? values)
         {
             if (values == null || !TranslationEnabled && !AllowPropertyRecursion)
             {
@@ -180,8 +229,6 @@ namespace KGySoft.WinForms.Controls
         private object[] GetSelectedObjects()
         {
             object[] result = propertyGrid.SelectedObjects;
-            if (result == null)
-                return result;
             for (int i = 0; i < result.Length; i++)
                 result[i] = Unwrap(result[i]);
             return result;
@@ -189,23 +236,22 @@ namespace KGySoft.WinForms.Controls
 
         private object Wrap(object o)
         {
-            if (AllowPropertyRecursion && !(o is RecursivelyEditableTypeDescriptor))
+            if (AllowPropertyRecursion && o is not RecursivelyEditableTypeDescriptor)
                 o = new RecursivelyEditableTypeDescriptor(o);
             if (TranslationEnabled)
                 o = new LocalizedObjectDescriptor(o);
             return o;
         }
 
-        private static object Unwrap(object obj) =>
-            obj is LocalizedObjectDescriptor localizedObjectDescriptor ? Unwrap(localizedObjectDescriptor.Object)
-            : obj is RecursivelyEditableTypeDescriptor recursivelyEditableTypeDescriptor ? Unwrap(recursivelyEditableTypeDescriptor.Object)
-            : obj;
+        #endregion
 
-        private void propertyGrid_SelectedGridItemChanged(object sender, SelectedGridItemChangedEventArgs e)
+        #region Event handlers
+
+        private void propertyGrid_SelectedGridItemChanged(object? sender, SelectedGridItemChangedEventArgs e)
         {
-            if (propertyGrid.SelectedGridItem.PropertyDescriptor == null)
+            if (propertyGrid.SelectedGridItem?.PropertyDescriptor == null)
             {
-                txtDescription.Caption = propertyGrid.SelectedGridItem.Label;
+                txtDescription.Caption = propertyGrid.SelectedGridItem?.Label;
                 txtDescription.Text = null;
             }
             else
@@ -214,5 +260,11 @@ namespace KGySoft.WinForms.Controls
                 txtDescription.Text = propertyGrid.SelectedGridItem.PropertyDescriptor.Description;
             }
         }
+
+        #endregion
+
+        #endregion
+
+        #endregion
     }
 }

@@ -231,8 +231,8 @@ namespace KGySoft.WinForms.Components
                 {
                     // bug: if there is description without text, Out of memory exception occurs so appending a space
                     if (text.Length == 0)
-                        text.Append(" ");
-                    text.Append("\n"); // Environment.NewLine would cause double new lines
+                        text.Append(' ');
+                    text.Append('\n'); // Environment.NewLine would cause double new lines
                     text.Append(button.Description);
                 }
 
@@ -241,7 +241,7 @@ namespace KGySoft.WinForms.Components
             }
 
             // allocating unmanaged memory and marshaling elements
-            int buttonSize = Marshal.SizeOf(typeof(TASKDIALOG_BUTTON));
+            int buttonSize = SizeOf<TASKDIALOG_BUTTON>();
             IntPtr result = Marshal.AllocHGlobal(nativeButtons.Length * buttonSize);
             for (int i = 0; i < nativeButtons.Length; i++)
                 Marshal.StructureToPtr(nativeButtons[i], new IntPtr((long)result + i * buttonSize), false);
@@ -257,15 +257,35 @@ namespace KGySoft.WinForms.Components
             if (buttonsArray == IntPtr.Zero)
                 return;
 
-            int buttonSize = Marshal.SizeOf(typeof(TASKDIALOG_BUTTON));
+            int buttonSize = SizeOf<TASKDIALOG_BUTTON>();
             for (int i = 0; i < count; i++)
-                Marshal.DestroyStructure(new IntPtr((long)buttonsArray + i * buttonSize), typeof(TASKDIALOG_BUTTON));
+                DestroyStructure<TASKDIALOG_BUTTON>(new IntPtr((long)buttonsArray + i * buttonSize));
 
             Marshal.FreeHGlobal(buttonsArray);
         }
 
         private static bool IsBackgroundDifferent(TaskDialogStandardIcons icon1, TaskDialogStandardIcons icon2)
             => icon1 != icon2 && !(icon1.In(whiteBackgroundIcons) && icon2.In(whiteBackgroundIcons));
+
+        private static void DestroyStructure<T>(IntPtr ptr)
+        {
+#if NET451_OR_GREATER || NETCOREAPP
+            // To avoid CA2263
+            Marshal.DestroyStructure<T>(ptr);
+#else
+            Marshal.DestroyStructure(ptr, typeof(T));
+#endif
+        }
+
+        private static int SizeOf<T>()
+        {
+#if NET451_OR_GREATER || NETCOREAPP
+            // To avoid CA2263
+            return Marshal.SizeOf<T>();
+#else
+            return Marshal.SizeOf(typeof(T));
+#endif
+        }
 
         #endregion
 
@@ -290,7 +310,7 @@ namespace KGySoft.WinForms.Components
         {
             // setting standard configuration
             config = new TASKDIALOGCONFIG();
-            config.cbSize = (uint)Marshal.SizeOf(typeof(TASKDIALOGCONFIG));
+            config.cbSize = (uint)SizeOf<TASKDIALOGCONFIG>();
             config.hwndParent = ownerHandle;
             config.hInstance = IntPtr.Zero;
             config.dwFlags = (TASKDIALOG_FLAGS)((int)host.Options & TaskDialog.NativeOptionsMask);
@@ -424,6 +444,9 @@ namespace KGySoft.WinForms.Components
         /// <param name="lParam">wParam which is interpreted differently depending on the message.</param>
         /// <param name="refData">The refrence data that was set to TaskDialog.CallbackData.</param>
         /// <returns>A HRESULT value. The return value is specific to the message being processed. </returns>
+#if NET7_0_OR_GREATER
+        [SuppressMessage("Reliability", "CA2020:Prevent behavioral change", Justification = "The (int)IntPtr casts never overflow in this method.")] 
+#endif
         private int ProcessDialogMessages(IntPtr hwnd, TASKDIALOG_NOTIFICATIONS uNotification, IntPtr wParam, IntPtr lParam, IntPtr refData)
         {
             eventHandlerCount++;
@@ -880,7 +903,7 @@ namespace KGySoft.WinForms.Components
             }
             finally
             {
-                Marshal.DestroyStructure(ptrConfig, typeof(TASKDIALOGCONFIG));
+                DestroyStructure<TASKDIALOGCONFIG>(ptrConfig);
                 Marshal.FreeHGlobal(ptrConfig);
             }
         }

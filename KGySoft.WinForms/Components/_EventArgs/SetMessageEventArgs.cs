@@ -34,7 +34,7 @@ namespace KGySoft.WinForms.Components
         /// Gets the current item of the underlying data source.
         /// Can be <see langword="null"/> if the message is required for a binding error.
         /// </summary>
-        public object Current { get; }
+        public object? Current { get; }
 
         /// <summary>
         /// Gets the name of the property for which the message is requested.
@@ -45,13 +45,13 @@ namespace KGySoft.WinForms.Components
         /// Gets or sets the message to be displayed. If the message is retrieved due to a binding error or the <see cref="Current"/> item
         /// implements the <see cref="IDataErrorInfo"/> interface, then this property may already contain a value.
         /// </summary>
-        public string Message { get; set; }
+        public string? Message { get; set; }
 
         #endregion
 
         #region Constructors
 
-        internal SetMessageEventArgs(object current, string propertyName, string message)
+        internal SetMessageEventArgs(object? current, string propertyName, string? message)
         {
             Current = current;
             PropertyName = propertyName;

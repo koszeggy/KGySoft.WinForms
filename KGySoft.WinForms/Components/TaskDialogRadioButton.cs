@@ -160,18 +160,14 @@ namespace KGySoft.WinForms.Components
         /// <returns>A <see cref="System.String"/>.</returns>
         public override string ToString()
         {
-            return base.ToString() + ", Checked: " + this.Checked.ToString(CultureInfo.InvariantCulture);
+            return base.ToString() + ", Checked: " + Checked.ToString(CultureInfo.InvariantCulture);
         }
 
         #endregion
 
         #region Private Methods
         
-        private void OnSelected()
-        {
-            if (selected != null)
-                selected.Invoke(this, EventArgs.Empty);
-        }
+        private void OnSelected() => selected?.Invoke(this, EventArgs.Empty);
 
         #endregion
         

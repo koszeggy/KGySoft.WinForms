@@ -163,6 +163,7 @@ namespace KGySoft.WinForms.Controls
         /// Gets or sets the interval in milliseconds between two frames of the marquee animation.
         /// </summary>
         [Description("Gets or sets the interval in milliseconds between two frames of the marquee animation.")]
+        [DefaultValue(100)]
         public new int MarqueeAnimationSpeed
         {
             get => base.MarqueeAnimationSpeed;
@@ -172,7 +173,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 if (value < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.ArgumentMustBeGreaterThanOrEqualTo(0));
 
                 base.MarqueeAnimationSpeed = value;
                 ResetAnimation(false);
@@ -183,6 +184,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the current position of the progress bar.
         /// </summary>
+        [DefaultValue(0)]
         public new int Value
         {
             get => base.Value;
@@ -268,6 +270,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Properties
 
+        /// <inheritdoc />
         protected override CreateParams CreateParams
         {
             get
@@ -351,6 +354,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             base.Dispose(disposing);
@@ -360,6 +364,7 @@ namespace KGySoft.WinForms.Controls
                 animationTimer.Dispose();
         }
 
+        /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
@@ -368,6 +373,7 @@ namespace KGySoft.WinForms.Controls
             ResetAnimation(true);
         }
 
+        /// <inheritdoc />
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
             if (!IsClassicAppearance && style == AdvancedProgressBarStyle.ThemedShiny)
@@ -376,6 +382,7 @@ namespace KGySoft.WinForms.Controls
                 base.OnPaintBackground(pevent);
         }
 
+        /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
             if (IsClassicAppearance)
@@ -385,9 +392,10 @@ namespace KGySoft.WinForms.Controls
             else
                 PaintFlatAppearance(e);
 
-            // TODO: PaintText() - ha lesz, figyelni LTR mód esetén a tükrözésre!
+            // TODO: PaintText() - with mirroring if LTR
         }
 
+        /// <inheritdoc />
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
@@ -397,6 +405,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
             switch (m.Msg)
@@ -595,7 +604,7 @@ namespace KGySoft.WinForms.Controls
         private void DrawShinyFrame(Graphics graphics)
         {
             // inner stroke
-            Rectangle rect = this.ClientRectangle;
+            Rectangle rect = ClientRectangle;
             rect.Inflate(-1, -1);
             rect.Width--;
             rect.Height--;
@@ -610,7 +619,7 @@ namespace KGySoft.WinForms.Controls
 
         private void DrawShinyBackground(Graphics g)
         {
-            Rectangle rect = this.ClientRectangle;
+            Rectangle rect = ClientRectangle;
             rect.Inflate(-1, -1);
             if (rect.Width >= 1 && rect.Height >= 1)
                 g.FillRoundedRectangle(BackColor.Dark(0.1f).GetBrush(), rect, 2);
@@ -749,6 +758,7 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Event handlers
+#pragma warning disable IDE1006 // Naming Styles
 
         void animationTimer_Tick(object? sender, EventArgs e)
         {
@@ -756,6 +766,7 @@ namespace KGySoft.WinForms.Controls
             Invalidate();
         }
 
+#pragma warning restore IDE1006 // Naming Styles
         #endregion
 
         #endregion

@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 
@@ -55,6 +56,9 @@ namespace KGySoft.WinForms.Example.Controls
         public bool FadingAnimationsEnabled { get; set; }
         public int FadingAnimationDefaultSpeed { get; set; }
 
+#if NETCOREAPP3_0_OR_GREATER
+        [AllowNull]
+#endif
         public override string Text
         {
             get => base.Text;
@@ -101,7 +105,7 @@ namespace KGySoft.WinForms.Example.Controls
             SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
 
             Text = @"This control uses fading animations when its hovered status, ForeColor, BackColor or Text changes.";
-            NonFadingText = "This text does not participate in fading animations";
+            nonFadingText = "This text does not participate in fading animations";
         }
 
         #endregion
@@ -170,7 +174,7 @@ namespace KGySoft.WinForms.Example.Controls
 
         #region Private Methods
 
-        private FadingPaintState GetAppearance() => new FadingPaintState
+        private FadingPaintState GetAppearance() => new()
         {
             BackColor = isHovered ? SystemColors.Highlight : BackColor,
             ForeColor = EffectiveForeColor,

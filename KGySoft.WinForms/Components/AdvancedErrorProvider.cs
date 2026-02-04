@@ -38,8 +38,7 @@ namespace KGySoft.WinForms.Components
     {
         #region Fields
 
-        private BindingManagerBase lastManager;
-        private EventHandler<SetMessageEventArgs> setMessageHandler;
+        private BindingManagerBase? lastManager;
 
         #endregion
 
@@ -50,10 +49,10 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         [Category(nameof(AdvancedErrorProvider))]
         [Description("Occurs when the DataSource property is set and the message of a bound property is about to be retrieved.")]
-        public event EventHandler<SetMessageEventArgs> SetMessage
+        public event EventHandler<SetMessageEventArgs>? SetMessage
         {
-            add => setMessageHandler += value;
-            remove => setMessageHandler -= value;
+            add => Events.AddHandler(nameof(SetMessage), value);
+            remove => Events.RemoveHandler(nameof(SetMessage), value);
         }
 
         #endregion
@@ -100,7 +99,7 @@ namespace KGySoft.WinForms.Components
         /// <param name="container">The container.</param>
         public AdvancedErrorProvider(IContainer container) : base(container) => Initilize();
 
-        private void RewireEvents(BindingManagerBase bindingManager)
+        private void RewireEvents(BindingManagerBase? bindingManager)
         {
             if (lastManager != null)
                 UnwireRedirectedEvents(lastManager);
@@ -151,7 +150,6 @@ namespace KGySoft.WinForms.Components
         /// <param name="disposing"><see langword="true"/> to release both managed and unmanaged resources; <see langword="false"/> to release only unmanaged resources.</param>
         protected override void Dispose(bool disposing)
         {
-            setMessageHandler = null;
             if (lastManager != null && disposing)
             {
                 UnwireRedirectedEvents(lastManager);
@@ -159,13 +157,14 @@ namespace KGySoft.WinForms.Components
             }
 
             base.Dispose(disposing);
+            Events.Dispose();
         }
 
         /// <summary>
         /// Raises the <see cref="SetMessage" /> event.
         /// </summary>
         /// <param name="e">The <see cref="SetMessageEventArgs" /> instance containing the event data.</param>
-        protected virtual void OnSetMessage(SetMessageEventArgs e) => setMessageHandler?.Invoke(this, e);
+        protected virtual void OnSetMessage(SetMessageEventArgs e) => Events.GetHandler<EventHandler<SetMessageEventArgs>>(nameof(SetMessage))?.Invoke(this, e);
 
         #endregion
 
@@ -174,7 +173,7 @@ namespace KGySoft.WinForms.Components
         private void Initilize()
         {
             // Replacing the method of the base.currentChanged delegate, which will help us to rewire the other events whenever the data source is changed.
-            // This can be auto detected only if the data source notifies about changes, like a BindingSource. Otherwise, we can only hope that consumers
+            // This can be auto-detected only if the data source notifies about changes, like a BindingSource. Otherwise, we can only hope that consumers
             // call the DataSource and DataMember of this class.
             // ReSharper disable once ConvertToLocalFunction - it will be converted to delegate anyway
             EventHandler injectedCurrentChanged = InjectedCurrentChanged;
@@ -194,15 +193,15 @@ namespace KGySoft.WinForms.Components
 
         private void ApplyMessagesFromBinding()
         {
-            BindingManagerBase bindingManager = BindingManager;
+            BindingManagerBase? bindingManager = BindingManager;
             if (bindingManager == null || bindingManager.Count == 0)
                 return;
 
             BindingsCollection bindings = bindingManager.Bindings;
-            object currentItem = bindingManager.Current;
+            object? currentItem = bindingManager.Current;
 
             // Collecting the messages for the controls
-            Dictionary<Control, StringBuilder> controlMessages = new Dictionary<Control, StringBuilder>(bindings.Count);
+            var controlMessages = new Dictionary<Control, StringBuilder>(bindings.Count);
             foreach (Binding binding in bindings)
             {
                 // Ignore everything but bindings to Controls
@@ -214,7 +213,7 @@ namespace KGySoft.WinForms.Components
                 var args = new SetMessageEventArgs(currentItem, propertyName, currentItem is IDataErrorInfo info ? info[propertyName] : null);
                 OnSetMessage(args);
 
-                if (!controlMessages.TryGetValue(control, out StringBuilder message))
+                if (!controlMessages.TryGetValue(control, out StringBuilder? message))
                     controlMessages[control] = new StringBuilder(args.Message ?? String.Empty);
                 else if (!String.IsNullOrEmpty(args.Message))
                 {
@@ -234,27 +233,24 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// This is the new target of the base.currentChanged delegate field. If this is invoked, we can sure that the base manager is not fixed yet.
         /// </summary>
-        private void InjectedCurrentChanged(object sender, EventArgs eventArgs)
-        {
-            RewireEvents((BindingManagerBase)sender);
-        }
+        private void InjectedCurrentChanged(object? sender, EventArgs eventArgs) => RewireEvents(sender as BindingManagerBase);
 
         /// <summary>
         /// This is the fixed version of the base.ErrorManager_CurrentChanged method
         /// </summary>
-        private void BindingManager_CurrentChanged(object sender, EventArgs e) => ApplyMessagesFromBinding();
+        private void BindingManager_CurrentChanged(object? sender, EventArgs e) => ApplyMessagesFromBinding();
 
         /// <summary>
         /// This is the fixed version of the base.ErrorManager_BindingsChanged method
         /// </summary>
-        private void CurrencyManager_BindingsCollectionChanged(object sender, CollectionChangeEventArgs e) => ApplyMessagesFromBinding();
+        private void CurrencyManager_BindingsCollectionChanged(object? sender, CollectionChangeEventArgs e) => ApplyMessagesFromBinding();
 
         /// <summary>
         /// This is the fixed version of the base.ErrorManager_BindingComplete method
         /// </summary>
-        private void BindingManager_BindingComplete(object sender, BindingCompleteEventArgs e)
+        private void BindingManager_BindingComplete(object? sender, BindingCompleteEventArgs e)
         {
-            Binding binding = e.Binding;
+            Binding? binding = e.Binding;
             if (!ShowBindingErrors || binding?.Control == null)
                 return;
             var args = new SetMessageEventArgs(null, binding.PropertyName, e.ErrorText);
@@ -262,10 +258,12 @@ namespace KGySoft.WinForms.Components
             SetError(binding.Control, args.Message);
         }
 
-        private void CurrencyManager_ItemChanged(object sender, ItemChangedEventArgs e)
+        private void CurrencyManager_ItemChanged(object? sender, ItemChangedEventArgs e)
         {
             // This is the fixed version of the base.ErrorManager_ItemChanged method.
-            BindingManagerBase manager = BindingManager;
+            BindingManagerBase? manager = BindingManager;
+            if (manager == null)
+                return;
 
             // The original handler is overridden only due to this part.
             if (e.Index != -1 || manager.Count != 0)

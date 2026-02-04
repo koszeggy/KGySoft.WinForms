@@ -350,6 +350,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
         /// </summary>
+        [DefaultValue(false)]
         public new bool UseCompatibleTextRendering
         {
             get => base.UseCompatibleTextRendering;
@@ -440,6 +441,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the flat style appearance of the checkbox.
         /// </summary>
+        [DefaultValue(FlatStyle.Standard)]
         public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
         {
             get => base.FlatStyle;

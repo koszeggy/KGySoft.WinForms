@@ -44,7 +44,7 @@ namespace KGySoft.WinForms.WinApi
             [In] ref TASKDIALOGCONFIG pTaskConfig,
             [Out] out int pnButton,
             [Out] out int pnRadioButton,
-            [MarshalAs(UnmanagedType.Bool), Out] out bool pfVerificationFlagChecked);
+            [MarshalAs(UnmanagedType.Bool)] [Out] out bool pfVerificationFlagChecked);
 
         #endregion
     }

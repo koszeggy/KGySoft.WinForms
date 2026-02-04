@@ -26,11 +26,12 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Unified user control version of <see cref="AdvancedDateTimePicker"/>.
+    /// The unified user control version of <see cref="AdvancedDateTimePicker"/>.
     /// </summary>
     [DefaultBindingProperty("Value")]
     [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucDate : ucCaptionedBase
     {
@@ -46,70 +47,56 @@ namespace KGySoft.WinForms.Controls
         [Browsable(false)]
         public DateTime Value
         {
-            get
-            {
-                return dtpDate.Value;
-            }
-            set
-            {
-                dtpDate.Value = value;
-            }
+            get => dtpDate.Value;
+            set => dtpDate.Value = value;
         }
 
         /// <summary>
         /// Gets or sets the inner checkbox of the control.
         /// </summary>
-        [
-            Category("ucDate"),
-            Description("Gets or sets the inner checkbox of the control."),
-            DefaultValue(true)
-        ]
+        [Category("ucDate")]
+        [Description("Gets or sets the inner checkbox of the control.")]
+        [DefaultValue(true)]
         public override bool Checked
         {
-            get { return dtpDate.Checked; }
-            set { dtpDate.Checked = value; }
+            get => dtpDate.Checked;
+            set => dtpDate.Checked = value;
         }
 
         /// <summary>
         /// Gets or sets whether the inner checkbox of the control should be shown.
         /// </summary>
-        [
-            Category("ucDate"),
-            Description("Gets or sets whether the inner checkbox of the control should be shown."),
-            DefaultValue(false)
-        ]
+        [Category("ucDate")]
+        [Description("Gets or sets whether the inner checkbox of the control should be shown.")]
+        [DefaultValue(false)]
         public override bool ShowCheckBox
         {
-            get { return dtpDate.ShowCheckBox; }
-            set { dtpDate.ShowCheckBox = value; }
+            get => dtpDate.ShowCheckBox;
+            set => dtpDate.ShowCheckBox = value;
         }
 
         /// <summary>
         /// Gets or sets of the format of the time and date displayed in the control.
         /// </summary>
-        [
-            Category("ucDate"),
-            Description("Gets or sets of the format of the time and date displayed in the control."),
-            DefaultValue(typeof(DateTimePickerFormat), "Short")
-        ]
+        [Category("ucDate")]
+        [Description("Gets or sets of the format of the time and date displayed in the control.")]
+        [DefaultValue(typeof(DateTimePickerFormat), "Short")]
         public DateTimePickerFormat Format
         {
-            get { return dtpDate.Format; }
-            set { dtpDate.Format = value; }
+            get => dtpDate.Format;
+            set => dtpDate.Format = value;
         }
 
         /// <summary>
         /// Gets or sets the custom date/time format string.
         /// </summary>
-        [
-            Category("ucDate"),
-            Description("Gets or sets the custom date/time format string."),
-            DefaultValue("")
-        ]
-        public string CustomFormat
+        [Category("ucDate")]
+        [Description("Gets or sets the custom date/time format string.")]
+        [DefaultValue("")]
+        public string? CustomFormat
         {
-            get { return dtpDate.CustomFormat; }
-            set { dtpDate.CustomFormat = value; }
+            get => dtpDate.CustomFormat;
+            set => dtpDate.CustomFormat = value;
         }
 
         /// <summary>
@@ -117,20 +104,14 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public AdvancedDateTimePicker DateTimePicker
-        {
-            get { return dtpDate; }
-        }
+        public AdvancedDateTimePicker DateTimePicker => dtpDate;
 
         /// <summary>
         /// Gets or sets whether the control is read-only.
         /// </summary>
         public override bool ReadOnly
         {
-            get
-            {
-                return !dtpDate.Enabled;
-            }
+            get => !dtpDate.Enabled;
             set
             {
                 dtpDate.Enabled = !value;
@@ -141,16 +122,10 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the associated value of the control.
         /// </summary>
-        public override object ControlValue
+        public override object? ControlValue
         {
-            get
-            {
-                return Value;
-            }
-            set
-            {
-                Value = Convert.ToDateTime(value, CultureInfo.CurrentCulture);
-            }
+            get => Value;
+            set => Value = Convert.ToDateTime(value, CultureInfo.CurrentCulture);
         }
 
         #endregion
@@ -158,12 +133,9 @@ namespace KGySoft.WinForms.Controls
         #region Protected Properties
 
         /// <summary>
-        /// Returns the main inner control of the user control.
+        /// Gets the wrapped <see cref="AdvancedDateTimePicker"/> control.
         /// </summary>
-        protected override Control MainControl
-        {
-            get { return dtpDate; }
-        }
+        protected override Control MainControl => dtpDate;
 
         #endregion
 
@@ -177,9 +149,9 @@ namespace KGySoft.WinForms.Controls
         public ucDate()
         {
             InitializeComponent();
-            this.dtpDate.Format = System.Windows.Forms.DateTimePickerFormat.Short;
-            this.dtpDate.EnabledChanged += new System.EventHandler(this.dtpDate_EnabledChanged);
-            this.dtpDate.ValueChanged += new System.EventHandler(this.dtpDate_ValueChanged);
+            dtpDate.Format = DateTimePickerFormat.Short;
+            dtpDate.EnabledChanged += dtpDate_EnabledChanged;
+            dtpDate.ValueChanged += dtpDate_ValueChanged;
             dtpDate.Value = DateTime.Now;
         }
 
@@ -189,12 +161,15 @@ namespace KGySoft.WinForms.Controls
 
         #region Public Methods
 
+        /// <summary>
+        /// Resets the date picker to its default state, and unchecks it if <see cref="ShowCheckBox"/> is <see langword="true"/>.
+        /// </summary>
         public override void Clear()
         {
             if (dtpDate.ShowCheckBox)
                 dtpDate.Checked = false;
 
-            dtpDate.Value = System.DateTime.Now;
+            dtpDate.Value = DateTime.Now;
             ResetColor();
         }
 
@@ -202,12 +177,12 @@ namespace KGySoft.WinForms.Controls
 
         #region Event handlers
 
-        private void dtpDate_EnabledChanged(object sender, EventArgs e)
+        private void dtpDate_EnabledChanged(object? sender, EventArgs e)
         {
             ResetColor();
         }
 
-        private void dtpDate_ValueChanged(object sender, EventArgs e)
+        private void dtpDate_ValueChanged(object? sender, EventArgs e)
         {
             ResetColor();
         }

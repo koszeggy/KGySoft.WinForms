@@ -73,7 +73,7 @@ namespace KGySoft.WinForms.Controls
                             borderWidth = 2;
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException("value");
+                            throw new ArgumentOutOfRangeException(nameof(value));
                     }
 
                     NCHelper.InvalidateNC(Handle);

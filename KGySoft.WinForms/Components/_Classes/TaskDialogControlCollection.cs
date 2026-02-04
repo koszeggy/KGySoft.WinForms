@@ -42,50 +42,30 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         /// <param name="name">Name of the control</param>
         /// <returns>A <see cref="TaskDialogControl"/> instance with the searched name or <see langword="null"/> if no control found with such name.</returns>
-        public T this[string name]
-        {
-            get
-            {
-                return Items.FirstOrDefault(x => x.Name == name);
-            }
-        }
+        public T? this[string name] => Items.FirstOrDefault(x => x.Name == name);
 
         #endregion
-
-        #region Construction and Destruction
 
         #region Constructors
 
-        internal TaskDialogControlCollection(TaskDialog parent)
-        {
-            this.parent = parent;
-        }
-
-        #endregion
-
-        #region Explicit Disposing
-
-        void IDisposable.Dispose()
-        {
-            foreach (T control in this)
-            {
-                control.Dispose();
-            }
-
-            base.ClearItems();
-        }
-
-        #endregion
+        internal TaskDialogControlCollection(TaskDialog parent) => this.parent = parent;
 
         #endregion
 
         #region Methods
 
+        #region Protected Methods
+
+        /// <summary>
+        /// Inserts a <see cref="TaskDialogControl"/> into the <see cref="TaskDialogControlCollection{T}" /> at the specified index.
+        /// </summary>
+        /// <param name="index">The zero-based index at which <paramref name="item" /> should be inserted.</param>
+        /// <param name="item">The object to insert. The value can be <see langword="null" /> for reference types.</param>
         protected override void InsertItem(int index, T item)
         {
             if (item == null)
             {
-                throw new ArgumentNullException("item");
+                throw new ArgumentNullException(nameof(item), PublicResources.ArgumentNull);
             }
 
             parent.CheckCanChangeProperty();
@@ -99,6 +79,10 @@ namespace KGySoft.WinForms.Components
             }
         }
 
+        /// <summary>
+        /// Removes the element at the specified index of the <see cref="TaskDialogControlCollection{T}" />.
+        /// </summary>
+        /// <param name="index">The zero-based index of the element to remove.</param>
         protected override void RemoveItem(int index)
         {
             parent.CheckCanChangeProperty();
@@ -106,17 +90,18 @@ namespace KGySoft.WinForms.Components
             base.RemoveItem(index);
 
             if (parent.IsDialogShowing)
-            {
                 parent.ControlCollectionChanged(this, TaskDialogControlCollectionChangeTypes.Remove, index);
-            }
         }
 
+        /// <summary>
+        /// Replaces the element at the specified index.
+        /// </summary>
+        /// <param name="index">The zero-based index of the element to replace.</param>
+        /// <param name="item">The new value for the element at the specified index. The value can be <see langword="null" /> for reference types.</param>
         protected override void SetItem(int index, T item)
         {
             if (item == null)
-            {
-                throw new ArgumentNullException("item");
-            }
+                throw new ArgumentNullException(nameof(item), PublicResources.ArgumentNull);
 
             parent.CheckCanChangeProperty();
             this[index].AssignParent(null);
@@ -125,31 +110,39 @@ namespace KGySoft.WinForms.Components
             base.SetItem(index, item);
 
             if (parent.IsDialogShowing)
-            {
                 parent.ControlCollectionChanged(this, TaskDialogControlCollectionChangeTypes.Replace, index);
-            }
         }
 
+        /// <summary>
+        /// Removes all elements from the <see cref="TaskDialogControlCollection{T}" />.
+        /// </summary>
         protected override void ClearItems()
         {
             if (Count == 0)
-            {
                 return;
-            }
 
             parent.CheckCanChangeProperty();
             foreach (T control in this)
-            {
                 control.AssignParent(null);
-            }
 
             base.ClearItems();
-
             if (parent.IsDialogShowing)
-            {
                 parent.ControlCollectionChanged(this, TaskDialogControlCollectionChangeTypes.Clear, 0);
-            }
         }
+
+        #endregion
+
+        #region Explicitly Implemented Interface Methods
+
+        void IDisposable.Dispose()
+        {
+            foreach (T control in this)
+                control.Dispose();
+
+            base.ClearItems();
+        }
+
+        #endregion
 
         #endregion
     }

@@ -108,7 +108,7 @@ namespace KGySoft.WinForms.WinApi
             /// <param name="hwnd">Handle of the window for which theme data is required.</param>
             /// <param name="pszClassList">Pointer to a string that contains a semicolon-separated list of classes.</param>
             /// <returns>OpenThemeData tries to match each class, one at a time, to a class data section in the active theme. If a match is found, an associated HTHEME handle is returned. If no match is found NULL is returned.</returns>
-            [DllImport("uxtheme.dll", CharSet = CharSet.Auto)]
+            [DllImport("uxtheme.dll", CharSet = CharSet.Unicode)]
             internal static extern IntPtr OpenThemeData(IntPtr hwnd, string pszClassList);
 
             /// <summary>
@@ -310,7 +310,7 @@ namespace KGySoft.WinForms.WinApi
 
         internal static bool BufferedPaintInit() => NativeMethods.BufferedPaintInit() == Constants.S_OK;
 
-        internal static void BufferedPaintUnInit() => NativeMethods.BufferedPaintUnInit();
+        internal static bool BufferedPaintUnInit() => NativeMethods.BufferedPaintUnInit() == Constants.S_OK;
 
         internal static IntPtr BeginBufferedAnimation(IntPtr hwnd, IntPtr hdc, Rectangle bounds, int speed, out IntPtr phdcFrom, out IntPtr phdcTo)
         {
@@ -322,11 +322,11 @@ namespace KGySoft.WinForms.WinApi
             return NativeMethods.BeginBufferedAnimation(hwnd, hdc, ref rect, BP_BUFFERFORMAT.BPBF_COMPATIBLEBITMAP, IntPtr.Zero, ref animParams, out phdcFrom, out phdcTo);
         }
 
-        internal static void EndBufferedAnimation(IntPtr hbpAnimation) => NativeMethods.EndBufferedAnimation(hbpAnimation, true);
+        internal static bool EndBufferedAnimation(IntPtr hbpAnimation) => NativeMethods.EndBufferedAnimation(hbpAnimation, true) == Constants.S_OK;
 
         internal static bool BufferedPaintRenderAnimation(IntPtr hwnd, IntPtr hdcTarget) => NativeMethods.BufferedPaintRenderAnimation(hwnd, hdcTarget);
 
-        internal static void BufferedPaintStopAllAnimations(IntPtr hwnd) => NativeMethods.BufferedPaintStopAllAnimations(hwnd);
+        internal static bool BufferedPaintStopAllAnimations(IntPtr hwnd) => NativeMethods.BufferedPaintStopAllAnimations(hwnd) == Constants.S_OK;
 
         #endregion
 

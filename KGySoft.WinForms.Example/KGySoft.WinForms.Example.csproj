@@ -12,7 +12,11 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Nullable>Enable</Nullable>
 
-    <NoWarn>$(NoWarn);WFO1000;CA1304</NoWarn>
+    <!--Suppressions
+      - WFO0003: Remove high DPI settings from app.manifest - indended, required to test all possible configurations.
+      - WFO1000: This is an example project and its controls are not meant to be used by other projects, so it doesn't really matter what is serialized by the designer.
+    -->
+    <NoWarn>$(NoWarn);WFO1000;WFO0003</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
@@ -26,11 +30,11 @@
     <EmbeddedResource Update="Controls\LocalizableControlDemo.StringResources.resx">
       <LogicalName>KGySoft.WinForms.Example.Controls.LocalizableControlDemo.StringResources.resources</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Update="Forms\frmEditResources.StringResources.resx">
-      <LogicalName>KGySoft.WinForms.Example.Forms.frmEditResources.StringResources.resources</LogicalName>
+    <EmbeddedResource Update="Forms\EditResourcesExample.StringResources.resx">
+      <LogicalName>KGySoft.WinForms.Example.Forms.EditResourcesExample.StringResources.resources</LogicalName>
     </EmbeddedResource>
-    <EmbeddedResource Update="Forms\frmLocalizationExample.StringResources.resx">
-      <LogicalName>KGySoft.WinForms.Example.Forms.frmLocalizationExample.StringResources.resources</LogicalName>
+    <EmbeddedResource Update="Forms\LocalizationExample.StringResources.resx">
+      <LogicalName>KGySoft.WinForms.Example.Forms.LocalizationExample.StringResources.resources</LogicalName>
     </EmbeddedResource>
   </ItemGroup>
 

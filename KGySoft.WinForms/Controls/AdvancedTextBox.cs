@@ -25,6 +25,14 @@ using KGySoft.WinForms.WinApi;
 
 #endregion
 
+#region Suppressions
+
+#if NETCOREAPP
+#pragma warning disable CA1846 // Prefer 'AsSpan' over 'Substring' when span-based overloads are available - spans are not available in every targeted platform
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
@@ -101,7 +109,7 @@ namespace KGySoft.WinForms.Controls
         #region Properties
 
         /// <summary>
-        /// Gets or sets the background color of the control in the current <see cref="Control.Enabled"/> and <see cref="TextBox.ReadOnly"/> state.
+        /// Gets or sets the background color of the control in the current <see cref="Control.Enabled"/> and <see cref="TextBoxBase.ReadOnly"/> state.
         /// </summary>
         [Description("The background color in the current Enabled/ReadOnly state. This property always sets EnabledBackColor or DisabledBackColor.\r\n\r\n"
             + "Please note that in the WinForms designer a control never actually turns disabled.")]
@@ -135,7 +143,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/> and not <see cref="TextBox.ReadOnly"/>.
+        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/> and not <see cref="TextBoxBase.ReadOnly"/>.
         /// </summary>
         [Category("AdvancedTextBox")]
         [Description("Determines the background color when the control is Enabled and not ReadOnly.")]
@@ -171,7 +179,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/> or is <see cref="TextBox.ReadOnly"/>.
+        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/> or is <see cref="TextBoxBase.ReadOnly"/>.
         /// </summary>
         [Category("AdvancedTextBox")]
         [Description("Determines the background when the control is not Enabled or is ReadOnly.")]
@@ -365,7 +373,7 @@ namespace KGySoft.WinForms.Controls
             if (!UseSystemPasswordChar)
                 TextRenderer.DrawText(e.Graphics, Text.Substring(GetFirstCharIndexFromLine(GetFirstVisibleLine())), Font, textRect, ForeColor, flags);
             else
-                TextRenderer.DrawText(e.Graphics, new string(PasswordChar, Text.Length), Font, textRect, ForeColor, flags);
+                TextRenderer.DrawText(e.Graphics, new String(PasswordChar, Text.Length), Font, textRect, ForeColor, flags);
         }
 
         /// <inheritdoc />

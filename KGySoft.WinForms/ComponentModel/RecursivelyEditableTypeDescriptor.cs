@@ -30,32 +30,63 @@ namespace KGySoft.ComponentModel
     {
         #region Properties
 
+        /// <summary>
+        /// Gets the underlying object associated with this instance.
+        /// </summary>
         public object Object { get; }
 
         #endregion
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="RecursivelyEditableTypeDescriptor"/> class for the specified object.
+        /// </summary>
+        /// <param name="obj">The object, whose properties should be recursively expandable and editable.</param>
+        /// <exception cref="ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
         public RecursivelyEditableTypeDescriptor(object obj)
         {
-            Object = obj ?? throw new ArgumentNullException(nameof(obj));
+            Object = obj ?? throw new ArgumentNullException(nameof(obj), PublicResources.ArgumentNull);
         }
 
         #endregion
 
         #region Methods
 
+        /// <inheritdoc />
         public AttributeCollection GetAttributes() => TypeDescriptor.GetAttributes(Object, true);
+
+        /// <inheritdoc />
         public string? GetClassName() => TypeDescriptor.GetClassName(Object, true);
+
+        /// <inheritdoc />
         public string? GetComponentName() => TypeDescriptor.GetComponentName(Object, true);
+
+        /// <inheritdoc />
         public TypeConverter GetConverter() => TypeDescriptor.GetConverter(Object, true);
+
+        /// <inheritdoc />
         public EventDescriptor? GetDefaultEvent() => TypeDescriptor.GetDefaultEvent(Object, true);
+
+        /// <inheritdoc />
         public PropertyDescriptor? GetDefaultProperty() => TypeDescriptor.GetDefaultProperty(Object, true);
+
+        /// <inheritdoc />
         public object? GetEditor(Type editorBaseType) => TypeDescriptor.GetEditor(Object, editorBaseType, true);
+
+        /// <inheritdoc />
         public EventDescriptorCollection GetEvents() => TypeDescriptor.GetEvents(Object, true);
+
+        /// <inheritdoc />
         public EventDescriptorCollection GetEvents(Attribute[]? attributes) => TypeDescriptor.GetEvents(Object, attributes, true);
-        public PropertyDescriptorCollection GetProperties() => ExpandablePropertiesConverter.FilterProperties(TypeDescriptor.GetProperties(Object, true), Object.GetType());
-        public PropertyDescriptorCollection GetProperties(Attribute[]? attributes) => ExpandablePropertiesConverter.FilterProperties(TypeDescriptor.GetProperties(Object, attributes, true), Object.GetType());
+
+        /// <inheritdoc />
+        public PropertyDescriptorCollection GetProperties() => ExpandablePropertiesConverter.FilterProperties(TypeDescriptor.GetProperties(Object, true));
+
+        /// <inheritdoc />
+        public PropertyDescriptorCollection GetProperties(Attribute[]? attributes) => ExpandablePropertiesConverter.FilterProperties(TypeDescriptor.GetProperties(Object, attributes, true));
+
+        /// <inheritdoc />
         public object GetPropertyOwner(PropertyDescriptor? pd) => Object;
 
         #endregion

@@ -17,6 +17,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
@@ -31,279 +32,225 @@ namespace KGySoft.WinForms.Controls
 	[ToolboxItem(false)]
     [Designer(typeof(ScrollableControlDesigner))]
 	[Obsolete("Used by the obsoleted ucCaptionedContainer")]
+    [SuppressMessage("ReSharper", "ValueParameterNotUsed", Justification = "ContentPanel does not allow resetting most of its properties")]
     public sealed class ContentPanel: Panel
 	{
 		#region Overridden events
 
-		[EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-		public new event EventHandler AutoSizeChanged
+		/// <inheritdoc cref="Panel.AutoSizeChanged"/>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Browsable(false)]
+        public new event EventHandler AutoSizeChanged
 		{
-			add
-			{
-				base.AutoSizeChanged += value;
-			}
-			remove
-			{
-				base.AutoSizeChanged -= value;
-			}
-		}
+			add => base.AutoSizeChanged += value;
+            remove => base.AutoSizeChanged -= value;
+        }
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
-		public new event EventHandler DockChanged
+        /// <inheritdoc cref="Control.DockChanged"/>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new event EventHandler DockChanged
 		{
-			add
-			{
-				base.DockChanged += value;
-			}
-			remove
-			{
-				base.DockChanged -= value;
-			}
-		}
+			add => base.DockChanged += value;
+            remove => base.DockChanged -= value;
+        }
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-		public new event EventHandler LocationChanged
+        /// <inheritdoc cref="Control.LocationChanged"/>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Browsable(false)]
+        public new event EventHandler LocationChanged
 		{
-			add
-			{
-				base.LocationChanged += value;
-			}
-			remove
-			{
-				base.LocationChanged -= value;
-			}
-		}
+			add => base.LocationChanged += value;
+            remove => base.LocationChanged -= value;
+        }
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
-		public new event EventHandler TabIndexChanged
+        /// <inheritdoc cref="Control.TabIndexChanged"/>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new event EventHandler TabIndexChanged
 		{
-			add
-			{
-				base.TabIndexChanged += value;
-			}
-			remove
-			{
-				base.TabIndexChanged -= value;
-			}
-		}
+			add => base.TabIndexChanged += value;
+            remove => base.TabIndexChanged -= value;
+        }
 
-		[Browsable(false), EditorBrowsable(EditorBrowsableState.Never), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public new event EventHandler TabStopChanged
+        /// <inheritdoc cref="Control.TabStopChanged"/>
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new event EventHandler TabStopChanged
 		{
-			add
-			{
-				base.TabStopChanged += value;
-			}
-			remove
-			{
-				base.TabStopChanged -= value;
-			}
-		}
+			add => base.TabStopChanged += value;
+            remove => base.TabStopChanged -= value;
+        }
 
-		[Browsable(false), EditorBrowsable(EditorBrowsableState.Never), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public new event EventHandler VisibleChanged
+        /// <inheritdoc cref="Control.VisibleChanged"/>
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new event EventHandler VisibleChanged
 		{
-			add
-			{
-				base.VisibleChanged += value;
-			}
-			remove
-			{
-				base.VisibleChanged -= value;
-			}
-		}
+			add => base.VisibleChanged += value;
+            remove => base.VisibleChanged -= value;
+        }
 
 		#endregion
 
 		#region Properties
 
-		[Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), EditorBrowsable(EditorBrowsableState.Never)]
-		public new AnchorStyles Anchor
+        /// <inheritdoc cref="Control.Anchor"/>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new AnchorStyles Anchor
 		{
-			get
-			{
-				return base.Anchor;
-			}
-			set
-			{
-			}
+			get => base.Anchor;
+            set { }
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never), Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-		public new bool AutoSize
+		/// <summary>
+		/// Always returns <see langword="true"/>.
+		/// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        public new bool AutoSize
 		{
-			get
-			{
-				return true;
-			}
-			set
-			{
-			}
+			get => true;
+            set { }
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false), Localizable(false), EditorBrowsable(EditorBrowsableState.Never)]
-		public override AutoSizeMode AutoSizeMode
+        /// <inheritdoc cref="Panel.AutoSizeMode"/>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        [Localizable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public override AutoSizeMode AutoSizeMode
 		{
-			get
-			{
-				return base.AutoSizeMode;
-			}
-			set
-			{
-			}
+			get => base.AutoSizeMode;
+            set { }
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
-		public new BorderStyle BorderStyle
+        /// <inheritdoc cref="Panel.BorderStyle"/>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new BorderStyle BorderStyle
 		{
-			get
-			{
-				return base.BorderStyle;
-			}
-			set
-			{
-			}
+			get => base.BorderStyle;
+            set { }
 		}
 
-		protected override Padding DefaultMargin
+        /// <inheritdoc/>
+		protected override Padding DefaultMargin => new(0, 0, 0, 0);
+
+        /// <inheritdoc cref="Control.Dock"/>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new DockStyle Dock
 		{
-			get
-			{
-				return new Padding(0, 0, 0, 0);
-			}
+			get => base.Dock;
+            set { }
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
-		public new DockStyle Dock
+        /// <inheritdoc cref="ScrollableControl.DockPadding"/>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new DockPaddingEdges DockPadding => base.DockPadding;
+
+        /// <inheritdoc cref="Control.Location"/>
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [Browsable(false)]
+        public new Point Location
 		{
-			get
-			{
-				return base.Dock;
-			}
-			set
-			{
-			}
+			get => base.Location;
+            set { }
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false), EditorBrowsable(EditorBrowsableState.Never)]
-		public new ScrollableControl.DockPaddingEdges DockPadding
+        /// <inheritdoc cref="Control.MaximumSize"/>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        public new Size MaximumSize
 		{
-			get
-			{
-				return base.DockPadding;
-			}
+			get => base.MaximumSize;
+            set { }
 		}
 
-		[DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), EditorBrowsable(EditorBrowsableState.Never), Browsable(false)]
-		public new Point Location
+        /// <inheritdoc cref="Control.MinimumSize"/>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        public new Size MinimumSize
 		{
-			get
-			{
-				return base.Location;
-			}
-			set
-			{
-			}
+			get => base.MinimumSize;
+            set { }
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-		public new Size MaximumSize
+        /// <inheritdoc cref="Control.Name"/>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        public new string Name
 		{
-			get
-			{
-				return base.MaximumSize;
-			}
-			set
-			{
-			}
+			get => base.Name;
+            set { }
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-		public new Size MinimumSize
+        /// <inheritdoc cref="Control.Parent"/>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        public new Control? Parent
 		{
-			get
-			{
-				return base.MinimumSize;
-			}
-			set
-			{
-			}
+			get => base.Parent;
+            set { }
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-		public new string Name
+        /// <inheritdoc cref="Control.Size"/>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        public new Size Size
 		{
-			get
-			{
-				return base.Name;
-			}
-			set
-			{
-			}
+			get => base.Size;
+            set { }
 		}
 
-		[EditorBrowsable(EditorBrowsableState.Never), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-		public new Control Parent
+        /// <inheritdoc cref="Control.TabIndex"/>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        public new int TabIndex
 		{
-			get
-			{
-				return base.Parent;
-			}
-			set
-			{
-			}
-		}
+			get => base.TabIndex;
+            set => base.TabIndex = value;
+        }
 
-		[EditorBrowsable(EditorBrowsableState.Never), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-		public new Size Size
+        /// <inheritdoc cref="Control.TabStop"/>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [Browsable(false)]
+        public new bool TabStop
 		{
-			get
-			{
-				return base.Size;
-			}
-			set
-			{
-			}
-		}
+			get => base.TabStop;
+            set => base.TabStop = value;
+        }
 
-		[EditorBrowsable(EditorBrowsableState.Never), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-		public new int TabIndex
+        /// <inheritdoc cref="Control.Visible"/>
+        [Browsable(false)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        public new bool Visible
 		{
-			get
-			{
-				return base.TabIndex;
-			}
-			set
-			{
-				base.TabIndex = value;
-			}
-		}
-
-		[EditorBrowsable(EditorBrowsableState.Never), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), Browsable(false)]
-		public new bool TabStop
-		{
-			get
-			{
-				return base.TabStop;
-			}
-			set
-			{
-				base.TabStop = value;
-			}
-		}
-
-		[Browsable(false), DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden), EditorBrowsable(EditorBrowsableState.Never)]
-		public new bool Visible
-		{
-			get
-			{
-				return base.Visible;
-			}
-			set
-			{
-				base.Visible = value;
-			}
-		}
+			get => base.Visible;
+            set => base.Visible = value;
+        }
 		#endregion
 
 		#region Constructor

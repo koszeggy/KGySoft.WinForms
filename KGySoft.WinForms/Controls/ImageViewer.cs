@@ -361,6 +361,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc cref="Control.CausesValidation" />
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new bool CausesValidation
         {
             get => base.CausesValidation;
@@ -370,6 +371,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc cref="Control.ImeMode" />
         [Browsable(false)]
         [EditorBrowsable(EditorBrowsableState.Never)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public new ImeMode ImeMode
         {
             get => base.ImeMode;
@@ -419,7 +421,7 @@ namespace KGySoft.WinForms.Controls
             InitializeComponent();
 
             SetStyle(ControlStyles.Selectable | ControlStyles.OptimizedDoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
-            scrollbarSize = this.GetScrollbarSize();
+            scrollbarSize = this.GetScrollBarSize();
             sbVertical.Width = scrollbarSize.Width;
             sbHorizontal.Height = scrollbarSize.Height;
 
@@ -977,7 +979,7 @@ namespace KGySoft.WinForms.Controls
                 return;
 
             lastScale = scale;
-            scrollbarSize = this.GetScrollbarSize();
+            scrollbarSize = this.GetScrollBarSize();
             sbVertical.Width = scrollbarSize.Width;
             sbHorizontal.Height = scrollbarSize.Height;
             targetRectangle = Rectangle.Empty; // forces calling AdjustSizes on the next paint
@@ -986,6 +988,7 @@ namespace KGySoft.WinForms.Controls
         [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
         private bool ShouldSerializeCursor() => false;
         private bool ShouldSerializeZoom() => !autoZoom && !zoom.Equals(1f);
+        private bool ShouldSerializePadding() => !Padding.Equals(DefaultPadding);
 
         #endregion
 

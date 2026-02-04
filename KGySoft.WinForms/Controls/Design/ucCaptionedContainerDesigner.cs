@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.Design;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing.Design;
 using System.Windows.Forms;
 using System.Windows.Forms.Design;
@@ -31,12 +32,14 @@ namespace KGySoft.WinForms.Controls.Design
     /// Designer of <see cref="ucCaptionedContainer"/> that makes possible to use <see cref="ucCaptionedContainer"/>
     /// as a container control in design time.
     /// </summary>
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("Needed for the obsoleted ucCaptionedContainer")]
     internal sealed class ucCaptionedContainerDesigner : ParentControlDesigner
     {
         #region Fields
 
-        IDesignerHost designerHost;
+        private IDesignerHost? designerHost;
 
         #endregion
 
@@ -64,31 +67,25 @@ namespace KGySoft.WinForms.Controls.Design
 
         public override void Initialize(IComponent component)
         {
-            if (!(component is ucCaptionedContainer))
+            if (component is not ucCaptionedContainer container)
                 throw new InvalidOperationException("The ucCaptionedContainerDesigner can be used only for user controls that are derived from ucCaptionedBase class.");
-            base.Initialize(component);
-            base.AutoResizeHandles = true;
-            base.EnableDesignMode((component as ucCaptionedContainer).PanelContent, "ContentPanel");
-            designerHost = (IDesignerHost)component.Site.GetService(typeof(IDesignerHost));
+            base.Initialize(container);
+            AutoResizeHandles = true;
+            EnableDesignMode(container.PanelContent, "ContentPanel");
+            designerHost = (IDesignerHost?)component.Site?.GetService(typeof(IDesignerHost));
         }
 
-        public override bool CanParent(Control control)
-        {
-            return false;
-        }
+        public override bool CanParent(Control control) => false;
 
-        public override int NumberOfInternalControlDesigners()
-        {
-            return 1;
-        }
+        public override int NumberOfInternalControlDesigners() => 1;
 
-        public override ControlDesigner InternalControlDesigner(int internalControlIndex)
+        public override ControlDesigner? InternalControlDesigner(int internalControlIndex)
         {
             Control panel = ((ucCaptionedContainer)Control).PanelContent;
             switch (internalControlIndex)
             {
                 case 0:
-                    return this.designerHost.GetDesigner(panel) as ControlDesigner;
+                    return designerHost?.GetDesigner(panel) as ControlDesigner;
                 default:
                     return null;
             }
@@ -103,10 +100,10 @@ namespace KGySoft.WinForms.Controls.Design
             return ((ucCaptionedContainer)Control).PanelContent;
         }
 
-        protected override IComponent[] CreateToolCore(ToolboxItem tool, int x, int y, int width, int height, bool hasLocation, bool hasSize)
+        protected override IComponent[]? CreateToolCore(ToolboxItem tool, int x, int y, int width, int height, bool hasLocation, bool hasSize)
         {
-            ParentControlDesigner panelDesigner = this.designerHost.GetDesigner(((ucCaptionedContainer)Control).PanelContent) as ParentControlDesigner;
-            InvokeCreateTool(panelDesigner, tool);
+            if (designerHost?.GetDesigner(((ucCaptionedContainer)Control).PanelContent) is ParentControlDesigner panelDesigner)
+                InvokeCreateTool(panelDesigner, tool);
             return null;
         }
 

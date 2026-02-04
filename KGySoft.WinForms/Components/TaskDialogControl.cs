@@ -20,6 +20,14 @@ using System.ComponentModel;
 
 #endregion
 
+#region Suppressions
+
+#if !NETCOREAPP3_0_OR_GREATER
+#pragma warning disable CS8603 // Possible null reference return - false alarm for older frameworks
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
@@ -198,9 +206,7 @@ namespace KGySoft.WinForms.Components
         protected void CheckDisposed()
         {
             if (disposed)
-            {
-                throw new ObjectDisposedException(ToString());
-            }
+                throw new ObjectDisposedException(ToString(), PublicResources.ObjectDisposed);
         }
 
         ///<summary>
@@ -210,11 +216,7 @@ namespace KGySoft.WinForms.Components
         protected void CheckChangePropertyValue()
         {
             CheckDisposed();
-
-            if (parent != null)
-            {
-                parent.CheckCanChangeProperty();
-            }
+            parent?.CheckCanChangeProperty();
         }
 
         ///<summary>
@@ -224,16 +226,8 @@ namespace KGySoft.WinForms.Components
         protected void OnPropertyChanged(string propName)
         {
             Debug.Assert(!string.IsNullOrEmpty(propName), "Changed property name is empty");
-
-            if (parent != null)
-            {
-                parent.ControlPropertyChanged(this, propName);
-            }
-
-            if (propertyChanged != null)
-            {
-                propertyChanged.Invoke(this, new PropertyChangedEventArgs(propName));
-            }
+            parent?.ControlPropertyChanged(this, propName);
+            propertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
         }
 
         #endregion

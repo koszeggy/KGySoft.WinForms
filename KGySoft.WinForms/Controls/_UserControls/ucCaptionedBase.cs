@@ -31,21 +31,52 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Base class of user controls that may have captions (on a groupbox or label)
-    /// and content can be disabled by a checkbox (if <see cref="Orientation"/> is groupboxed).
+    /// and content can be disabled by a checkbox (if <see cref="Orientation"/> is <see cref="Orientation.GroupBoxed"/>).
     /// </summary>
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucCaptionedBase : ucBase
     {
         #region Enumerations
 
+        /// <summary>
+        /// Specifies the layout orientation and caption placement options for an <see cref="ucCaptionedBase"/> control.
+        /// </summary>
+        /// <remarks>Use this enumeration to control how captions are displayed relative to a group box or
+        /// similar container. The values determine whether the caption appears on a specific side, is omitted, or if
+        /// the group is rendered with a standard boxed appearance. The exact visual effect may depend on the control or
+        /// framework using this enumeration.</remarks>
         public enum Orientation
         {
+            /// <summary>
+            /// Represents a group boxed orientation (default).
+            /// </summary>
             GroupBoxed,
+
+            /// <summary>
+            /// Specifies that the caption is aligned to the left.
+            /// </summary>
             CaptionLeft,
+
+            /// <summary>
+            /// Specifies that the caption is aligned to the right.
+            /// </summary>
             CaptionRight,
+
+            /// <summary>
+            /// Specifies that the caption is aligned to the top.
+            /// </summary>
             CaptionTop,
+
+            /// <summary>
+            /// Specifies that the caption is aligned to the bottom.
+            /// </summary>
             CaptionBottom,
+
+            /// <summary>
+            /// Indicates that no caption is displayed.
+            /// </summary>
             NoCaption
         }
 
@@ -54,10 +85,10 @@ namespace KGySoft.WinForms.Controls
         #region Fields
 
         private bool chk = true;
-        private bool showCheckBox = false;
+        private bool showCheckBox;
         private Orientation orientation = Orientation.GroupBoxed;
         private Size gbSize;
-        private bool gbSizeChanging = false;
+        private bool gbSizeChanging;
 
         #endregion
 
@@ -66,14 +97,12 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Occurs when the value of the ckeckbox (that can be enabled by <see cref="ShowCheckBox"/> when <see cref="Orientation"/> is GroupBoxed) has been changed.
         /// </summary>
-        [
-            Category("ucCaptionedBase"),
-            Description("Occurs when the value of the ckeckbox (that can be enabled by ShowCheckBox when Orientation is GroupBoxed) has been changed.")
-        ]
+        [Category("ucCaptionedBase")]
+        [Description("Occurs when the value of the ckeckbox (that can be enabled by ShowCheckBox when Orientation is GroupBoxed) has been changed.")]
         public event EventHandler CheckedChanged
         {
-            add { chkCheckBox.CheckedChanged += value; }
-            remove { chkCheckBox.CheckedChanged -= value; }
+            add => chkCheckBox.CheckedChanged += value;
+            remove => chkCheckBox.CheckedChanged -= value;
         }
 
         #endregion
@@ -89,10 +118,7 @@ namespace KGySoft.WinForms.Controls
         [Description("The inner GroupBox.")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public GroupBox GroupBox
-        {
-            get { return groupBox; }
-        }
+        public GroupBox GroupBox => groupBox;
 
         /// <summary>
         /// The inner Label.
@@ -101,10 +127,7 @@ namespace KGySoft.WinForms.Controls
         [Description("The inner Label.")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public Label Label
-        {
-            get { return lblCaption; }
-        }
+        public Label Label => lblCaption;
 
         /// <summary>
         /// Gets or sets the caption of the control.
@@ -112,10 +135,11 @@ namespace KGySoft.WinForms.Controls
         [Category("ucCaptionedBase")]
         [Description("Gets or sets the caption of the control.")]
         [DefaultValue("Caption")]
+        [AllowNull]
         public virtual string Caption
         {
-            get { return lblCaption.Text; }
-            set { RefreshCaption(value); }
+            get => lblCaption.Text;
+            set => RefreshCaption(value);
         }
 
         /// <summary>
@@ -127,7 +151,7 @@ namespace KGySoft.WinForms.Controls
         [RefreshProperties(RefreshProperties.All)]
         public virtual bool ShowCheckBox
         {
-            get { return showCheckBox; }
+            get => showCheckBox;
             set
             {
                 if (orientation != Orientation.GroupBoxed)
@@ -158,7 +182,7 @@ namespace KGySoft.WinForms.Controls
         [Bindable(BindableSupport.Yes, BindingDirection.TwoWay)]
         public virtual bool Checked
         {
-            get { return (chk); }
+            get => chk;
             set
             {
                 chk = value;
@@ -167,16 +191,15 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the ReadOnly state of the inner content.
-        /// <remarks>Must override!</remarks>
+        /// Gets or sets the read-only state of the inner content. Should be overridden in a derived control.
         /// </summary>
         [Category("ucCaptionedBase")]
         [Description("Gets or sets the ReadOnly state of the inner content.")]
         [DefaultValue(false)]
         public override bool ReadOnly
         {
-            get { return false; }
-            set { base.ReadOnly = value; }
+            get => false;
+            set => base.ReadOnly = value;
         }
 
         /// <summary>
@@ -188,7 +211,7 @@ namespace KGySoft.WinForms.Controls
         public override Color ForeColor
         {
             [DebuggerStepThrough]
-            get { return base.ForeColor; }
+            get => base.ForeColor;
             [DebuggerStepThrough]
             set
             {
@@ -209,12 +232,12 @@ namespace KGySoft.WinForms.Controls
         public override Color BackColor
         {
             [DebuggerStepThrough]
-            get { return base.BackColor; }
+            get => base.BackColor;
             [DebuggerStepThrough]
             set
             {
                 base.BackColor = value;
-                if (groupBox == null || lblCaption == null || ContentPanel == null)
+                if (groupBox == null || lblCaption == null)
                     return;
                 groupBox.BackColor = value;
                 lblCaption.BackColor = value;
@@ -227,12 +250,12 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("ucCaptionedBase")]
         [Description("Gets or sets the orientation of the caption.")]
-        [DefaultValue(typeof(ucCaptionedBase.Orientation), "GroupBoxed")]
+        [DefaultValue(typeof(Orientation), "GroupBoxed")]
         [RefreshProperties(RefreshProperties.All)]
         public Orientation CaptionOrientation
         {
-            get { return orientation; }
-            set { SetOrientation(value); }
+            get => orientation;
+            set => SetOrientation(value);
         }
 
         /// <summary>
@@ -243,7 +266,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(ContentAlignment), "MiddleLeft")]
         public ContentAlignment CaptionAlignment
         {
-            get { return lblCaption.TextAlign; }
+            get => lblCaption.TextAlign;
             set
             {
                 lblCaption.TextAlign = value;
@@ -294,10 +317,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Internal Properties
 
-        internal virtual Panel ContentPanel
-        {
-            get { return pnlContent; }
-        }
+        internal virtual Panel ContentPanel => pnlContent;
 
         #endregion
 
@@ -305,6 +325,9 @@ namespace KGySoft.WinForms.Controls
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ucCaptionedBase"/> class.
+        /// </summary>
         public ucCaptionedBase()
         {
             InitializeComponent();
@@ -312,8 +335,8 @@ namespace KGySoft.WinForms.Controls
             chkCheckBox.Checked = chk; // becase default of this.Checked differs from default of CheckBox.Checked
             lblCaption.Visible = false;
             gbSize = groupBox.Size;
-            groupBox.SizeChanged += new EventHandler(groupBox_SizeChanged);
-            chkCheckBox.CheckedChanged += new EventHandler(chkCheckBox_CheckedChanged);
+            groupBox.SizeChanged += groupBox_SizeChanged;
+            chkCheckBox.CheckedChanged += chkCheckBox_CheckedChanged;
             // marking groupbox not localizable for prevent storing values with leading spaces in dictionary if checkbox is visible
             Language.MarkLocalizable(false, lblCaption, groupBox, pnlContent);
         }
@@ -331,9 +354,7 @@ namespace KGySoft.WinForms.Controls
         protected override void Dispose(bool disposing)
         {
             if (disposing && (components != null))
-            {
                 components.Dispose();
-            }
             groupBox.SizeChanged -= groupBox_SizeChanged;
             chkCheckBox.CheckedChanged -= chkCheckBox_CheckedChanged;
             base.Dispose(disposing);
@@ -350,9 +371,7 @@ namespace KGySoft.WinForms.Controls
             if (pnlContent.HasChildren)
             {
                 foreach (Control control in pnlContent.Controls)
-                {
                     LanguageWinForms.TranslateControls(control);
-                }
             }
 
             translationFinished = true;
@@ -362,7 +381,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Methods
 
-        private void RefreshCaption(string value)
+        private void RefreshCaption(string? value)
         {
             groupBox.Text = (showCheckBox && groupBox.RightToLeft == RightToLeft.No ? "    " : "") + value;
             lblCaption.Text = value;
@@ -373,7 +392,7 @@ namespace KGySoft.WinForms.Controls
             if (orientation == value)
                 return;
 
-            System.Drawing.Size contentSize = ContentPanel.Size;
+            Size contentSize = ContentPanel.Size;
 
             switch (value)
             {
@@ -435,13 +454,13 @@ namespace KGySoft.WinForms.Controls
 
         #region Event handlers
 
-        private void chkCheckBox_CheckedChanged(object sender, EventArgs e)
+        private void chkCheckBox_CheckedChanged(object? sender, EventArgs e)
         {
             chk = chkCheckBox.Checked;
             groupBox.Enabled = !showCheckBox || chkCheckBox.Checked;
         }
 
-        void groupBox_SizeChanged(object sender, EventArgs e)
+        void groupBox_SizeChanged(object? sender, EventArgs e)
         {
             if (gbSizeChanging || orientation != Orientation.GroupBoxed)
                 return;

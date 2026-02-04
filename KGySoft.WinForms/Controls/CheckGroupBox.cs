@@ -360,6 +360,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
         /// </summary>
+        [DefaultValue(false)]
         public new bool UseCompatibleTextRendering
         {
             get => base.UseCompatibleTextRendering;

@@ -105,11 +105,8 @@ namespace KGySoft.WinForms.Controls
             // performing base paint if regular changes are required
             if ((Host.FadingAnimationOptions & FadingOptions.AnyChange) == FadingOptions.None)
             {
-                if (prevStateImage != null)
-                {
-                    prevStateImage.Dispose();
-                    prevStateImage = null;
-                }
+                prevStateImage?.Dispose();
+                prevStateImage = null;
 
                 // Bug workaround: When disabling a button, command link or enabling/disabling a label, a further paint is immediately triggered and UxTheme.BufferedPaintRenderAnimation
                 // fails to report that animating is in progress. Therefore, here masking double triggered enabling/disabling to avoid a flickering effect
@@ -256,11 +253,8 @@ namespace KGySoft.WinForms.Controls
         {
             if (disposing)
             {
-                if (prevStateImage != null)
-                {
-                    prevStateImage.Dispose();
-                    prevStateImage = null;
-                }
+                prevStateImage?.Dispose();
+                prevStateImage = null;
             }
 
             base.Dispose(disposing);
@@ -272,11 +266,8 @@ namespace KGySoft.WinForms.Controls
         protected override void StopAnimations()
         {
             base.StopAnimations();
-            if (prevStateImage != null)
-            {
-                prevStateImage.Dispose();
-                prevStateImage = null;
-            }
+            prevStateImage?.Dispose();
+            prevStateImage = null;
         }
 
         /// <summary>

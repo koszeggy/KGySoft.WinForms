@@ -81,7 +81,7 @@ namespace KGySoft.WinForms.Controls
         public FadingPainter(ISupportsFading<TState> host, TState? initialState)
         {
             if (host == null)
-                throw new ArgumentNullException(nameof(host));
+                throw new ArgumentNullException(nameof(host), PublicResources.ArgumentNull);
 
             Debug.Assert(host is Control);
             operating = FadingPainterInternal.IsSupported && UxTheme.BufferedPaintInit();
@@ -103,7 +103,7 @@ namespace KGySoft.WinForms.Controls
         public void Paint(PaintEventArgs e)
         {
             if (disposed)
-                throw new ObjectDisposedException(ToString());
+                throw new ObjectDisposedException(GetType().Name, PublicResources.ObjectDisposed);
 
             if (!Enabled)
             {
@@ -173,8 +173,7 @@ namespace KGySoft.WinForms.Controls
             IntPtr hdc = e.Graphics.GetHdc();
             try
             {
-                IntPtr hdcFrom, hdcTo;
-                hbpAnimation = UxTheme.BeginBufferedAnimation(Control.Handle, hdc, Control.ClientRectangle, speed, out hdcFrom, out hdcTo);
+                hbpAnimation = UxTheme.BeginBufferedAnimation(Control.Handle, hdc, Control.ClientRectangle, speed, out IntPtr hdcFrom, out IntPtr hdcTo);
                 if (hbpAnimation != IntPtr.Zero)
                 {
                     //// DEBUG: render to images

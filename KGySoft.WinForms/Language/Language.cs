@@ -181,8 +181,7 @@ namespace KGySoft.Libraries.Language
             // cannot use indexer because default of LocalizableAttribute is false, while here localization is considered true by default
             for (int i = 0; i < attrs.Count; i++)
             {
-                LocalizableAttribute localizable = attrs[i] as LocalizableAttribute;
-                if (localizable != null)
+                if (attrs[i] is LocalizableAttribute localizable)
                     return localizable.IsLocalizable;
             }
 
@@ -190,17 +189,14 @@ namespace KGySoft.Libraries.Language
         }
 
         /// <summary>
-        /// Gets whether a property is localizable. By default a property is not localizable unless it is marked
+        /// Gets whether a property is localizable. By default, a property is not localizable unless it is marked
         /// by <see cref="LocalizableAttribute"/>.
         /// </summary>
         /// <remarks>
-        /// A property is not considered localizable by default, because here only properties with LocalizableAttribute shuold be checked.
+        /// A property is not considered localizable by default, because here only properties with LocalizableAttribute should be checked.
         /// <note>Checking whether a property is localizable in a .NET framework class could be needed only in case of virtual properties.</note>
         /// </remarks>
-        public static bool IsPropertyLocalizable(object obj, string propertyName)
-        {
-            return TypeDescriptor.GetProperties(obj)[propertyName].IsLocalizable;
-        }
+        public static bool IsPropertyLocalizable(object obj, string propertyName) => TypeDescriptor.GetProperties(obj)[propertyName]?.IsLocalizable == true;
 
         /// <summary>
         /// Formats captions:

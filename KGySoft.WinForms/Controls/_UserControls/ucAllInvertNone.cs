@@ -24,7 +24,11 @@ using System.Windows.Forms;
 
 namespace KGySoft.WinForms.Controls
 {
+    /// <summary>
+    /// Represents a selector control that contains three buttons: All, Invert, and None.
+    /// </summary>
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("It is not recommended to use this class anymore.")]
     public partial class ucAllInvertNone : UserControl
     {
@@ -35,45 +39,45 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("ucAllInvertNone")]
         [Description("Occurs when a button is pressed.")]
-        public event EventHandler<AllInvertNoneEventArgs> ButtonPressed;
+        public event EventHandler<AllInvertNoneEventArgs>? ButtonPressed;
 
         #endregion
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ucAllInvertNone"/> class.
+        /// </summary>
         public ucAllInvertNone()
         {
             InitializeComponent();
 
-            this.buttonNone.Image = Properties.Resources.None;
-            this.buttonInvert.Image = Properties.Resources.Options;
-            this.buttonAll.Image = Properties.Resources.All;
+            buttonNone.Image = Properties.Resources.None;
+            buttonInvert.Image = Properties.Resources.Options;
+            buttonAll.Image = Properties.Resources.All;
 
-            buttonAll.Click += new EventHandler(buttonAll_Click);
-            buttonInvert.Click += new EventHandler(buttonInvert_Click);
-            buttonNone.Click += new EventHandler(buttonNone_Click);
+            buttonAll.Click += buttonAll_Click;
+            buttonInvert.Click += buttonInvert_Click;
+            buttonNone.Click += buttonNone_Click;
         }
 
         #endregion
 
         #region Methods
 
-        void buttonNone_Click(object sender, EventArgs e)
+        void buttonNone_Click(object? sender, EventArgs e)
         {
-            if (ButtonPressed != null)
-                ButtonPressed(this, new AllInvertNoneEventArgs(InvertButtonTypes.None));
+            ButtonPressed?.Invoke(this, new AllInvertNoneEventArgs(InvertButtonTypes.None));
         }
 
-        void buttonInvert_Click(object sender, EventArgs e)
+        void buttonInvert_Click(object? sender, EventArgs e)
         {
-            if (ButtonPressed != null)
-                ButtonPressed(this, new AllInvertNoneEventArgs(InvertButtonTypes.Invert));
+            ButtonPressed?.Invoke(this, new AllInvertNoneEventArgs(InvertButtonTypes.Invert));
         }
 
-        void buttonAll_Click(object sender, EventArgs e)
+        void buttonAll_Click(object? sender, EventArgs e)
         {
-            if (ButtonPressed != null)
-                ButtonPressed(this, new AllInvertNoneEventArgs(InvertButtonTypes.All));
+            ButtonPressed?.Invoke(this, new AllInvertNoneEventArgs(InvertButtonTypes.All));
         }
 
         #endregion

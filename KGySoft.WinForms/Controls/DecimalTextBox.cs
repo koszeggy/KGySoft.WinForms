@@ -17,6 +17,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.Threading;
 using System.Windows.Forms;
@@ -26,19 +27,44 @@ using KGySoft.WinForms.WinApi;
 
 #endregion
 
+#region Suppressions
+
+#if NETCOREAPP3_0_OR_GREATER
+#pragma warning disable CA2249 // Consider using 'string.Contains' instead of 'string.IndexOf' - there is no String.Contains(string, StringComparison) method in some targeted platforms
+#endif
+
+#if !NETCOREAPP3_0_OR_GREATER
+#pragma warning disable CS8602 // Dereference of a possibly null reference. - analyzer false alarm for .NET Framework
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Controls
 {
-    // TODO: features into remarks:
-    // - Coloring in disabled mode (by the base AdvancedTextBox)
-    // - Value (decimal) property
-    // - multiplier characters (t = thousand; m = million; y = billion (yard)) support
-    // - Settable value limits
-    // - Blank state (can be set only if BlankEnabled is true)
-    // - DecimalFormat
-    // - DecimalDigits: number of decimal digits, negative value means rounding
     /// <summary>
-    /// A text box to edit decimal values.
+    /// Represents a text box to edit decimal values.
     /// </summary>
+    /// The <see cref="DecimalTextBox"/> control offers the following features:
+    /// <remarks>
+    /// <list type="bullet">
+    /// <item>Coloring in disabled mode (provided by the base <see cref="AdvancedTextBox"/> control).</item>
+    /// <item>A <see cref="decimal">decimal</see>&#160;<see cref="Value"/> property for getting/setting the decimal value.</item>
+    /// <item>Multiplier hotkeys: <c>t</c> = thousand; <c>m</c> = million; <c>y</c> = billion (yard).</item>
+    /// <item>Configurable limits for <see cref="Value"/>.</item>
+    /// <item>Optional blank state if <see cref="BlankEnabled"/> is <see langword="true"/>.</item>
+    /// <item>Formatting options (see <see cref="Format"/>).</item>
+    /// <item>Configurable number of decimal digits or rounding (see <see cref="DecimalDigits"/>).</item>
+    /// </list>
+    /// </remarks>
+    [Description(@"A text box for decimal values. Some highlighted features:
+- A decimal Value property
+- Multiplier hotkeys: t = thousand; m = million; y = billion (yard)
+- Configurable limits
+- Optional blank state (if BlankEnabled is true)
+- Formatting options
+- Configurable number of decimal digits or rounding
+- Coloring in disabled mode (by the base AdvancedTextBox)
+- Auto scaling Font on all platform targets (by the base AdvancedTextBox)")]
     public class DecimalTextBox : AdvancedTextBox
     {
         #region Nested structs
@@ -58,13 +84,13 @@ namespace KGySoft.WinForms.Controls
 
             internal decimal MinValue
             {
-                get => minValue;
+                readonly get => minValue;
                 set => minValue = value;
             }
 
             internal decimal MaxValue
             {
-                get => maxValue;
+                readonly get => maxValue;
                 set => maxValue = value;
             }
 
@@ -82,7 +108,7 @@ namespace KGySoft.WinForms.Controls
 
             #region Methods
 
-            public override string ToString() => $"{minValue}; {maxValue}";
+            public override readonly string ToString() => $"{minValue}; {maxValue}";
 
             #endregion
         }
@@ -239,10 +265,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the format of the displayed <see cref="Text"/>.
+        /// Gets or sets the numeric formatting of the displayed <see cref="Value"/>.
         /// </summary>
         [Category("DecimalTextBox")]
-        [Description("Gets or sets the format of the displayed Text.")]
+        [Description("Gets or sets the format of the displayed Value.")]
         [DefaultValue(typeof(DecimalFormat), "Number")]
         public DecimalFormat Format
         {
@@ -363,6 +389,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [AllowNull]
         public override string Text
         {
             get => base.Text;
@@ -505,6 +532,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
+        /// <inheritdoc />
         protected override void OnEnter(EventArgs e)
         {
             base.OnEnter(e);
@@ -514,6 +542,7 @@ namespace KGySoft.WinForms.Controls
             RefreshValue();
         }
 
+        /// <inheritdoc />
         protected override void OnLeave(EventArgs e)
         {
             base.OnLeave(e);
@@ -526,6 +555,7 @@ namespace KGySoft.WinForms.Controls
                 Blank = true;  // and if it's invalid while not blank, Validating does not allow to leave the control
         }
 
+        /// <inheritdoc />
         protected override void OnKeyPress(KeyPressEventArgs e)
         {
             base.OnKeyPress(e);
@@ -562,6 +592,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        /// <inheritdoc />
         protected override void OnValidating(CancelEventArgs e)
         {
             base.OnValidating(e);
@@ -573,6 +604,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        /// <inheritdoc />
         protected override void OnTextChanged(EventArgs e)
         {
             base.OnTextChanged(e);
@@ -602,20 +634,21 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Invokes <see cref="ValueChanged"/> event.
+        /// Raises the <see cref="ValueChanged"/> event.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected void OnValueChanged(EventArgs e) => ValueChanged?.Invoke(this, e);
 
         /// <summary>
-        /// Invokes <see cref="BlankChanged"/> event.
+        /// Raises the <see cref="BlankChanged"/> event.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected void OnBlankChanged(EventArgs e) => BlankChanged?.Invoke(this, e);
 
-        /// <summary>
-        /// Suppressing keys in Blank mode. Further checks are in KeyPress where key can be checked as char.
-        /// </summary>
+        /// <inheritdoc />
         protected override void OnKeyDown(KeyEventArgs e)
         {
+            // Suppressing keys in Blank mode. Further checks are in KeyPress where key can be checked as char.
             base.OnKeyDown(e);
 
             if (blank && e.KeyCode.In(Keys.Delete, Keys.Back))
@@ -625,6 +658,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
             // pasting attempt from clipboard
@@ -633,9 +667,9 @@ namespace KGySoft.WinForms.Controls
                 if (!Clipboard.ContainsText())
                     return;
 
-                string text = blank ? Clipboard.GetText()
-                        : (Text.Substring(0, SelectionStart) + Clipboard.GetText() + Text.Substring(SelectionStart + SelectionLength));
-
+                string text = blank
+                    ? Clipboard.GetText()
+                    : $"{Text.Substring(0, SelectionStart)}{Clipboard.GetText()}{Text.Substring(SelectionStart + SelectionLength)}";
                 if (IsValid(text, false))
                 {
                     int selstart = blank ? 0 : SelectionStart;
@@ -713,11 +747,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Is typed string valid.
+        /// Gets if typed string is valid.
         /// If called from anywhere with strong = false, then call ApplyText or process multipliers in text.
+        /// When strong is false, then a single minus sign can be accepted or can contain multipliers at the end.
         /// </summary>
-        /// <param name="strong">When false, then a single minus sign can be accepted or can contain multipliers at the end.</param>
-        /// <returns>Valid state</returns>
         private bool IsValid(string s, bool strong)
         {
             decimal d = 0;
@@ -794,28 +827,29 @@ namespace KGySoft.WinForms.Controls
             AdjustAlignment();
         }
 
-        private void SetText(string value)
+        private void SetText(string? txt)
         {
             decimal d;
-            if (String.IsNullOrEmpty(value))
+            if (String.IsNullOrEmpty(txt))
             {
                 if (blankEnabled)
                 {
                     Blank = true;
                     return;
                 }
-                else d = 0;
+
+                d = 0;
             }
             else
             {
-                string text = value.Trim().ToLowerInvariant();
+                string text = txt.Trim().ToLowerInvariant();
                 char mult = text[text.Length - 1];
 
                 if (mult.ToString().IndexOfAny(multipliers) >= 0)
                     text = text.Substring(0, text.Length - 1);
 
                 if (!decimal.TryParse(text, out d))
-                    throw new InvalidOperationException("Cannot assign value as decimal number: " + value);
+                    throw new InvalidOperationException("Cannot assign value as decimal number: " + txt);
 
                 try
                 {
@@ -829,9 +863,10 @@ namespace KGySoft.WinForms.Controls
                 }
                 catch (Exception e)
                 {
-                    throw new OverflowException("Value does not fit in a decimal number's range: " + value, e);
+                    throw new OverflowException("Value does not fit in a decimal number's range: " + txt, e);
                 }
             }
+
             SetValue(d, true);
         }
 
@@ -846,31 +881,32 @@ namespace KGySoft.WinForms.Controls
                 insert = false;
 
             if (insert)
-            {
-                text = Text.Substring(0, SelectionStart) +
-                    text + Text.Substring(SelectionStart +
-                            SelectionLength);
-            }
+                text = $"{Text.Substring(0, SelectionStart)}{text}{Text.Substring(SelectionStart + SelectionLength)}";
 
             BlankOff();
 
-            if (text == "")
+            if (text == String.Empty)
                 return;
 
             text = text.ToLowerInvariant();
             if (text[text.Length - 1].ToString().IndexOfAny(multipliers) >= 0)
             {
-                decimal num;
-                decimal.TryParse(text.Substring(0, text.Length - 1), out num);
+                decimal num = 0;
                 try
                 {
-                    if (num != 0)
+#if NETCOREAPP
+                    if (Decimal.TryParse(text.AsSpan()[..^1], out num) && num != 0) 
+#else
+                    if (Decimal.TryParse(text.Substring(0, text.Length - 1), out num) && num != 0) 
+#endif
+                    {
                         switch (text[text.Length - 1])
                         {
                             case 't': num *= 1000; break;
                             case 'm': num *= 1000000; break;
                             case 'y': num *= 1000000000; break;
                         }
+                    }
                 }
                 catch (Exception e) when (!e.IsCritical())
                 {

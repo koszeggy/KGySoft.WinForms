@@ -30,6 +30,7 @@ using KGySoft.Libraries.Language;
 namespace KGySoft.WinForms.Controls
 {
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     partial class ucPropertyGrid
     {
         #region LocalizedObjectDescriptor class
@@ -55,7 +56,7 @@ namespace KGySoft.WinForms.Controls
 
                 readonly PropertyDescriptor wrappedDescriptor;
 
-                private TypeConverter converter;
+                private TypeConverter? converter;
 
                 #endregion
 
@@ -108,17 +109,7 @@ namespace KGySoft.WinForms.Controls
                     }
                 }
 
-                public override TypeConverter Converter
-                {
-                    get
-                    {
-                        if (converter == null)
-                        {
-                            converter = new LocalizedTypeConverter(wrappedDescriptor);
-                        }
-                        return converter;
-                    }
-                }
+                public override TypeConverter Converter => converter ??= new LocalizedTypeConverter(wrappedDescriptor);
 
                 #endregion
 
@@ -135,42 +126,28 @@ namespace KGySoft.WinForms.Controls
 
                 #region Constructors
 
-                public LocalizedPropertyDescriptor(PropertyDescriptor descr)
-                    : base(descr)
+                public LocalizedPropertyDescriptor(PropertyDescriptor descriptor)
+                    : base(descriptor)
                 {
-                    wrappedDescriptor = descr;
+                    wrappedDescriptor = descriptor;
                 }
 
                 #endregion
 
                 #region Methods
 
-                public override bool CanResetValue(object component)
-                {
-                    return wrappedDescriptor.CanResetValue(component);
-                }
+                public override bool CanResetValue(object component) => wrappedDescriptor.CanResetValue(component);
+                public override object? GetValue(object? component) => wrappedDescriptor.GetValue(component);
+                public override void ResetValue(object component) => wrappedDescriptor.ResetValue(component);
 
-                public override object GetValue(object component)
+                public override void SetValue(object? component, object? value)
                 {
-                    return wrappedDescriptor.GetValue(component);
-                }
-
-                public override void ResetValue(object component)
-                {
-                    wrappedDescriptor.ResetValue(component);
-                }
-
-                public override void SetValue(object component, object value)
-                {
-                    if (value != null && !PropertyType.IsAssignableFrom(value.GetType()))
+                    if (value != null && !PropertyType.IsInstanceOfType(value))
                         value = Converter.ConvertFrom(value);
                     wrappedDescriptor.SetValue(component, value);
                 }
 
-                public override bool ShouldSerializeValue(object component)
-                {
-                    return wrappedDescriptor.ShouldSerializeValue(component);
-                }
+                public override bool ShouldSerializeValue(object component) => wrappedDescriptor.ShouldSerializeValue(component);
 
                 #endregion
             }
@@ -201,48 +178,23 @@ namespace KGySoft.WinForms.Controls
 
                     #region Constructors
 
-                    public LocalizedTypeDescriptorContextUnwrapper(ITypeDescriptorContext wrappedContext)
-                    {
-                        this.wrappedContext = wrappedContext;
-                    }
+                    public LocalizedTypeDescriptorContextUnwrapper(ITypeDescriptorContext wrappedContext) => this.wrappedContext = wrappedContext;
 
                     #endregion
 
-                    #region ITypeDescriptorContext Members
+                    #region Properties
 
-                    public IContainer Container
-                    {
-                        get { return wrappedContext.Container; }
-                    }
-
-                    public object Instance
-                    {
-                        get { return ((LocalizedObjectDescriptor)wrappedContext.Instance).Object; }
-                    }
-
-                    public void OnComponentChanged()
-                    {
-                        wrappedContext.OnComponentChanged();
-                    }
-
-                    public bool OnComponentChanging()
-                    {
-                        return wrappedContext.OnComponentChanging();
-                    }
-
-                    public PropertyDescriptor PropertyDescriptor
-                    {
-                        get { return ((LocalizedPropertyDescriptor)wrappedContext.PropertyDescriptor).WrappedDescriptor; }
-                    }
+                    public IContainer? Container => wrappedContext.Container;
+                    public object Instance => ((LocalizedObjectDescriptor)wrappedContext.Instance!).Object;
+                    public PropertyDescriptor PropertyDescriptor => ((LocalizedPropertyDescriptor)wrappedContext.PropertyDescriptor!).WrappedDescriptor;
 
                     #endregion
 
-                    #region IServiceProvider Members
+                    #region Methods
 
-                    public object GetService(Type serviceType)
-                    {
-                        return wrappedContext.GetService(serviceType);
-                    }
+                    public void OnComponentChanged() => wrappedContext.OnComponentChanged();
+                    public bool OnComponentChanging() => wrappedContext.OnComponentChanging();
+                    public object? GetService(Type serviceType) => wrappedContext.GetService(serviceType);
 
                     #endregion
                 }
@@ -251,16 +203,12 @@ namespace KGySoft.WinForms.Controls
 
                 #region Fields
 
-                private ITypeDescriptorContext unwrappedContext;
-
                 private readonly PropertyDescriptor originalDescriptor;
 
-                private Dictionary<object, string> dictionary;
-
-                private Dictionary<string, object> reverseDictionary;
-
-                private List<string> translatedValues;
-
+                private ITypeDescriptorContext? unwrappedContext;
+                private Dictionary<object, string>? dictionary;
+                private Dictionary<string, object>? reverseDictionary;
+                private List<string>? translatedValues;
                 private bool? canTranslateValues;
 
                 #endregion
@@ -276,12 +224,13 @@ namespace KGySoft.WinForms.Controls
                         canTranslateValues = originalDescriptor.Converter.GetStandardValuesSupported() && originalDescriptor.Converter.CanConvertTo(typeof(string));
                         if (canTranslateValues.Value)
                         {
-                            ICollection values = originalDescriptor.Converter.GetStandardValues();
+                            ICollection? values = originalDescriptor.Converter.GetStandardValues();
                             if (values == null)
                             {
                                 canTranslateValues = false;
                                 return false;
                             }
+
                             dictionary = new Dictionary<object, string>();
                             reverseDictionary = new Dictionary<string, object>();
                             translatedValues = new List<string>();
@@ -329,30 +278,24 @@ namespace KGySoft.WinForms.Controls
 
                 #region Public Methods
 
-                public override bool CanConvertFrom(ITypeDescriptorContext context, Type sourceType)
-                {
-                    return originalDescriptor.Converter.CanConvertFrom(UnwrapContext(context), sourceType);
-                }
+                public override bool CanConvertFrom(ITypeDescriptorContext? context, Type sourceType)
+                    => context != null && originalDescriptor.Converter.CanConvertFrom(UnwrapContext(context), sourceType);
 
-                public override bool CanConvertTo(ITypeDescriptorContext context, Type destinationType)
-                {
-                    return originalDescriptor.Converter.CanConvertTo(UnwrapContext(context), destinationType);
-                }
+                public override bool CanConvertTo(ITypeDescriptorContext? context, Type? destinationType)
+                    => context != null && originalDescriptor.Converter.CanConvertTo(UnwrapContext(context), destinationType);
 
-                public override object ConvertFrom(ITypeDescriptorContext context, CultureInfo culture, object value)
+                public override object? ConvertFrom(ITypeDescriptorContext? context, CultureInfo? culture, object value)
                 {
-                    object result;
-                    if (CanTranslateValues && value != null && value.GetType() == typeof(string) && reverseDictionary.TryGetValue((string)value, out result))
+                    if (CanTranslateValues && value is string str && reverseDictionary!.TryGetValue(str, out object? result))
                         return result;
                     return originalDescriptor.Converter.ConvertFrom(UnwrapContext(context), culture, value);
                 }
 
-                public override object ConvertTo(ITypeDescriptorContext context, CultureInfo culture, object value, Type destinationType)
+                public override object? ConvertTo(ITypeDescriptorContext? context, CultureInfo? culture, object? value, Type destinationType)
                 {
                     if (CanTranslateValues && destinationType == typeof(string) && value != null)
                     {
-                        string result;
-                        if (dictionary.TryGetValue(value, out result))
+                        if (dictionary!.TryGetValue(value, out string? result))
                             return result;
                         if (value is string)
                             return value;
@@ -360,52 +303,39 @@ namespace KGySoft.WinForms.Controls
                     return originalDescriptor.Converter.ConvertTo(UnwrapContext(context), culture, value, destinationType);
                 }
 
-                public override object CreateInstance(ITypeDescriptorContext context, IDictionary propertyValues)
-                {
-                    return originalDescriptor.Converter.CreateInstance(UnwrapContext(context), propertyValues);
-                }
+                public override object? CreateInstance(ITypeDescriptorContext? context, IDictionary propertyValues)
+                    => originalDescriptor.Converter.CreateInstance(UnwrapContext(context), propertyValues);
 
-                public override bool GetCreateInstanceSupported(ITypeDescriptorContext context)
-                {
-                    return originalDescriptor.Converter.GetCreateInstanceSupported(UnwrapContext(context));
-                }
+                public override bool GetCreateInstanceSupported(ITypeDescriptorContext? context)
+                    => originalDescriptor.Converter.GetCreateInstanceSupported(UnwrapContext(context));
 
-                public override bool GetPropertiesSupported(ITypeDescriptorContext context)
-                {
-                    return originalDescriptor.Converter.GetPropertiesSupported(UnwrapContext(context));
-                }
+                public override bool GetPropertiesSupported(ITypeDescriptorContext? context)
+                    => originalDescriptor.Converter.GetPropertiesSupported(UnwrapContext(context));
 
-                public override bool GetStandardValuesSupported(ITypeDescriptorContext context)
-                {
-                    return originalDescriptor.Converter.GetStandardValuesSupported(UnwrapContext(context));
-                }
+                public override bool GetStandardValuesSupported(ITypeDescriptorContext? context)
+                    => originalDescriptor.Converter.GetStandardValuesSupported(UnwrapContext(context));
 
-                public override bool GetStandardValuesExclusive(ITypeDescriptorContext context)
-                {
-                    return originalDescriptor.Converter.GetStandardValuesExclusive(UnwrapContext(context));
-                }
+                public override bool GetStandardValuesExclusive(ITypeDescriptorContext? context)
+                    => originalDescriptor.Converter.GetStandardValuesExclusive(UnwrapContext(context));
 
-                public override StandardValuesCollection GetStandardValues(ITypeDescriptorContext context)
+                public override StandardValuesCollection? GetStandardValues(ITypeDescriptorContext? context)
                 {
-                    StandardValuesCollection result = originalDescriptor.Converter.GetStandardValues(UnwrapContext(context));
+                    StandardValuesCollection? result = originalDescriptor.Converter.GetStandardValues(UnwrapContext(context));
                     if (CanTranslateValues)
-                    {
                         result = new StandardValuesCollection(translatedValues);
-                    }
                     return result;
                 }
 
-                public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext context, object value, Attribute[] attributes)
+                public override PropertyDescriptorCollection GetProperties(ITypeDescriptorContext? context, object value, Attribute[]? attributes)
                 {
-                    List<PropertyDescriptor> result = new List<PropertyDescriptor>();
-                    PropertyDescriptorCollection properties = originalDescriptor.Converter.GetProperties(UnwrapContext(context), value, attributes);
+                   var result = new List<PropertyDescriptor>();
+                    PropertyDescriptorCollection? properties = originalDescriptor.Converter.GetProperties(UnwrapContext(context), value, attributes);
                     if (properties != null)
                     {
                         foreach (PropertyDescriptor property in properties)
-                        {
                             result.Add(new LocalizedPropertyDescriptor(property));
-                        }
                     }
+
                     return new PropertyDescriptorCollection(result.ToArray());
                 }
 
@@ -413,12 +343,11 @@ namespace KGySoft.WinForms.Controls
 
                 #region Private Methods
 
-                private ITypeDescriptorContext UnwrapContext(ITypeDescriptorContext context)
+                private ITypeDescriptorContext? UnwrapContext(ITypeDescriptorContext? context)
                 {
-                    if (unwrappedContext == null)
-                    {
-                        unwrappedContext = new LocalizedTypeDescriptorContextUnwrapper(context);
-                    }
+                    if (context == null)
+                        return null;
+                    unwrappedContext ??= new LocalizedTypeDescriptorContextUnwrapper(context);
                     return unwrappedContext;
                 }
 
@@ -448,52 +377,17 @@ namespace KGySoft.WinForms.Controls
 
             #region ICustomTypeDescriptor Members
 
-            public AttributeCollection GetAttributes()
-            {
-                return TypeDescriptor.GetAttributes(Unwrap(Object), true);
-            }
+            public AttributeCollection GetAttributes() => TypeDescriptor.GetAttributes(Unwrap(Object), true);
+            public string? GetClassName() => TypeDescriptor.GetClassName(Unwrap(Object), true);
+            public string? GetComponentName() => TypeDescriptor.GetComponentName(Unwrap(Object), true);
+            public TypeConverter GetConverter() => TypeDescriptor.GetConverter(Unwrap(Object), true);
+            public EventDescriptor? GetDefaultEvent() => TypeDescriptor.GetDefaultEvent(Unwrap(Object), true);
+            public PropertyDescriptor? GetDefaultProperty() => TypeDescriptor.GetDefaultProperty(Unwrap(Object));
+            public object? GetEditor(Type editorBaseType) => TypeDescriptor.GetEditor(Unwrap(Object), editorBaseType, true);
+            public EventDescriptorCollection GetEvents(Attribute[]? attributes) => TypeDescriptor.GetEvents(Unwrap(Object), attributes, true);
+            public EventDescriptorCollection GetEvents() => TypeDescriptor.GetEvents(Unwrap(Object), true);
 
-            public string GetClassName()
-            {
-                return TypeDescriptor.GetClassName(Unwrap(Object), true);
-            }
-
-            public string GetComponentName()
-            {
-                return TypeDescriptor.GetComponentName(Unwrap(Object), true);
-            }
-
-            public TypeConverter GetConverter()
-            {
-                return TypeDescriptor.GetConverter(Unwrap(Object), true);
-            }
-
-            public EventDescriptor GetDefaultEvent()
-            {
-                return TypeDescriptor.GetDefaultEvent(Unwrap(Object), true);
-            }
-
-            public PropertyDescriptor GetDefaultProperty()
-            {
-                return TypeDescriptor.GetDefaultProperty(Unwrap(Object));
-            }
-
-            public object GetEditor(Type editorBaseType)
-            {
-                return TypeDescriptor.GetEditor(Unwrap(Object), editorBaseType, true);
-            }
-
-            public EventDescriptorCollection GetEvents(Attribute[] attributes)
-            {
-                return TypeDescriptor.GetEvents(Unwrap(Object), attributes, true);
-            }
-
-            public EventDescriptorCollection GetEvents()
-            {
-                return TypeDescriptor.GetEvents(Unwrap(Object), true);
-            }
-
-            public PropertyDescriptorCollection GetProperties(Attribute[] attributes)
+            public PropertyDescriptorCollection GetProperties(Attribute[]? attributes)
             {
                 var properties = (Object as ICustomTypeDescriptor)?.GetProperties(attributes) ?? TypeDescriptor.GetProperties(Object, attributes, true);
                 return new PropertyDescriptorCollection(properties.Cast<PropertyDescriptor>().Select(p => (PropertyDescriptor)new LocalizedPropertyDescriptor(p)).ToArray());
@@ -505,10 +399,7 @@ namespace KGySoft.WinForms.Controls
                 return new PropertyDescriptorCollection(properties.Cast<PropertyDescriptor>().Select(p => (PropertyDescriptor)new LocalizedPropertyDescriptor(p)).ToArray());
             }
 
-            public object GetPropertyOwner(PropertyDescriptor pd)
-            {
-                return Unwrap(Object);
-            }
+            public object GetPropertyOwner(PropertyDescriptor? pd) => Unwrap(Object);
 
             #endregion
         }

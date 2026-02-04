@@ -15,7 +15,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private void InitializeComponent()
         {
-            this.cbCheck = new System.Windows.Forms.CheckBox();
+            this.cbCheck = new AdvancedCheckBox();
             this.groupBox.SuspendLayout();
             this.pnlContent.SuspendLayout();
             this.SuspendLayout();
@@ -57,9 +57,6 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        private System.Windows.Forms.CheckBox cbCheck;
-
-
-
+        private AdvancedCheckBox cbCheck;
     }
 }

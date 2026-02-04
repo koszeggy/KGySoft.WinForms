@@ -29,13 +29,14 @@ namespace KGySoft.WinForms.Controls
     /// </summary>
     [DefaultBindingProperty("Text")]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucTextBase : ucCaptionedBase
     {
         #region Fields
 
+        private readonly TextBox tbForDesignerOnly = new TextBox(); // dummy TextBox only for the designer
         private string origValue = "";
-        private TextBox tbForDesignerOnly = new TextBox(); // dummy TextBox only for the designer
 
         #endregion
 
@@ -44,31 +45,21 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Occurs when the text of the inner textbox changes.
         /// </summary>
-        [
-            Browsable(true),
-            Category("ucTextBase"),
-            Description("Occurs when the text of the inner textbox changes.")
-        ]
+        [Browsable(true)]
+        [Category("ucTextBase")]
+        [Description("Occurs when the text of the inner textbox changes.")]
         public new event EventHandler TextChanged
         {
-            add
-            {
-                MainControl.TextChanged += value;
-            }
-            remove
-            {
-                MainControl.TextChanged -= value;
-            }
+            add => MainControl.TextChanged += value;
+            remove => MainControl.TextChanged -= value;
         }
 
         /// <summary>
         /// Occurs on leave when content differs from the content at getting focused.
         /// </summary>
-        [
-            Category("ucTextBase"),
-            Description("Occurs on leave when content differs from the content at getting focused.")
-        ]
-        public event EventHandler TextChangedOnLeave;
+        [Category("ucTextBase")]
+        [Description("Occurs on leave when content differs from the content at getting focused.")]
+        public event EventHandler? TextChangedOnLeave;
 
         #endregion
 
@@ -79,25 +70,26 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the Read-Only state.
         /// </summary>
-        [
-            Category("ucTextBase"),
-            Description("Gets or sets the Read-Only state."),
-            DefaultValue(false)
-        ]
+        [Category("ucTextBase")]
+        [Description("Gets or sets the Read-Only state.")]
+        [DefaultValue(false)]
         public override bool ReadOnly
         {
-            get { return (MainControl as TextBoxBase).ReadOnly; }
+            get => (MainControl as TextBoxBase)?.ReadOnly ?? true;
             set
             {
-                (MainControl as TextBoxBase).ReadOnly = value;
+                (MainControl as TextBoxBase)?.ReadOnly = value;
                 ResetColor();
             }
         }
 
-        public override object ControlValue
+        /// <summary>
+        /// Gets or sets the text of the inner textbox.
+        /// </summary>
+        public override object? ControlValue
         {
-            get { return Text; }
-            set { Text = value.ToString(); }
+            get => Text;
+            set => Text = value?.ToString();
         }
 
         /// <summary>
@@ -109,71 +101,56 @@ namespace KGySoft.WinForms.Controls
         [Browsable(false)]
         [Category("ucTextBase")]
         [Description("Gets the inner TextBox")]
-        public TextBoxBase TextBox
-        {
-            get
-            {
-                if (MainControl is TextBoxBase)
-                    return (TextBoxBase)MainControl;
-                else
-                    return null;
-            }
-        }
+        public TextBoxBase? TextBox => MainControl as TextBoxBase;
 
         /// <summary>
         /// Gets or sets the Text of the inner textbox.
-        /// <remarks>If needed, can be ReadOnly in descendants.</remarks>
         /// </summary>
-        [
-            Category("ucTextBase"),
-            Description("Gets or sets the Text of the inner textbox."),
-            DefaultValue(""),
-            Browsable(true),
-            DesignerSerializationVisibility(DesignerSerializationVisibility.Visible),
-            Bindable(BindableSupport.Default, BindingDirection.TwoWay),
-        ]
+        [Category("ucTextBase")]
+        [Description("Gets or sets the Text of the inner textbox.")]
+        [DefaultValue("")]
+        [Browsable(true)]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        [Bindable(BindableSupport.Default, BindingDirection.TwoWay)]
+        [AllowNull]
         public override string Text
         {
-            get { return MainControl.Text; }
-            set { MainControl.Text = value; }
+            get => MainControl.Text;
+            set => MainControl.Text = value;
         }
 
         /// <summary>
         /// Maximal text length when editing text on the user interface.
         /// </summary>
-        [
-            Category("ucTextBase"),
-            Description("Maximal text length when editing text on the user interface."),
-            DefaultValue(32767)
-        ]
+        [Category("ucTextBase")]
+        [Description("Maximal text length when editing text on the user interface.")]
+        [DefaultValue(32767)]
         public virtual int MaxLength
         {
-            get { return (MainControl as TextBoxBase).MaxLength; }
-            set { (MainControl as TextBoxBase).MaxLength = value; }
+            get => (MainControl as TextBoxBase)?.MaxLength ?? 0;
+            set => (MainControl as TextBoxBase)?.MaxLength = value;
         }
 
         /// <summary>
-        /// Maximal text length when editing text on the user interface.
+        /// Gets or sets the border style of the inner textbox.
         /// </summary>
-        [
-            Category("ucTextBase"),
-            Description("Gets or sets the border type of the text box control."),
-            DefaultValue(typeof(BorderStyle), "Fixed3D")
-        ]
+        [Category("ucTextBase")]
+        [Description("Gets or sets the border type of the text box control.")]
+        [DefaultValue(BorderStyle.Fixed3D)]
         public BorderStyle TextBoxBorderStyle
         {
-            get { return (MainControl as TextBoxBase).BorderStyle; }
-            set { (MainControl as TextBoxBase).BorderStyle = value; }
+            get => (MainControl as TextBoxBase)?.BorderStyle ?? BorderStyle.Fixed3D;
+            set => (MainControl as TextBoxBase)?.BorderStyle = value;
         }
 
         #endregion
 
         #region Protected Properties
 
-        protected override Control MainControl
-        {
-            get { return tbForDesignerOnly; } // Must override in further descendants!
-        }
+        /// <summary>
+        /// This property should be overridden in derived classes.
+        /// </summary>
+        protected override Control MainControl => tbForDesignerOnly;
 
         #endregion
 
@@ -181,10 +158,13 @@ namespace KGySoft.WinForms.Controls
 
         #region Constructors
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ucTextBase"/> class.
+        /// </summary>
         public ucTextBase()
         {
             InitializeComponent();
-            Load += new EventHandler(ucTextBase_Load);
+            Load += ucTextBase_Load;
         }
 
         #endregion
@@ -193,9 +173,12 @@ namespace KGySoft.WinForms.Controls
 
         #region Public Methods
 
+        /// <summary>
+        /// Clears the text of the inner textbox.
+        /// </summary>
         public override void Clear()
         {
-            MainControl.Text = "";
+            MainControl.Text = String.Empty;
             base.Clear();
         }
 
@@ -207,54 +190,42 @@ namespace KGySoft.WinForms.Controls
         /// Fires the <see cref="TextChangedOnLeave"/> event.
         /// </summary>
         /// <param name="e"></param>
-        protected virtual void OnTextChangedOnLeave(EventArgs e)
-        {
-            if (TextChangedOnLeave != null)
-                TextChangedOnLeave(this, e);
-        }
+        protected virtual void OnTextChangedOnLeave(EventArgs e) => TextChangedOnLeave?.Invoke(this, e);
 
         #endregion
 
         #region Event handlers
 
-        void ucTextBase_Load(object sender, EventArgs e)
+        void ucTextBase_Load(object? sender, EventArgs e)
         {
             if (DesignMode)
                 return;
 
-            if (!(MainControl is TextBoxBase) || (MainControl == tbForDesignerOnly))
+            if (MainControl is not TextBoxBase || (MainControl == tbForDesignerOnly))
                 throw new InvalidOperationException("Derived class from ucTextBase must contain an overridden MainControl, which returns with a TextBoxBase control! You must also define a new TextBox property, which returns with the actual type of your custom TextBox.");
 
-            MainControl.Enter += new System.EventHandler(this.txtValue_Enter);
-            MainControl.Leave += new System.EventHandler(this.txtValue_Leave);
-            MainControl.TextChanged += new EventHandler(MainControl_TextChanged);
-            MainControl.EnabledChanged += new System.EventHandler(this.txtValue_EnabledChanged);
+            MainControl.Enter += txtValue_Enter;
+            MainControl.Leave += txtValue_Leave;
+            MainControl.TextChanged += MainControl_TextChanged;
+            MainControl.EnabledChanged += txtValue_EnabledChanged;
         }
 
-        void MainControl_TextChanged(object sender, EventArgs e)
+        void MainControl_TextChanged(object? sender, EventArgs e)
         {
-            if (MainControl.Focused)
-                return;
-            else
+            if (!MainControl.Focused)
                 ResetColor();
         }
 
-        private void txtValue_Enter(object sender, EventArgs e)
-        {
-            origValue = MainControl.Text;
-        }
+        private void txtValue_Enter(object? sender, EventArgs e) => origValue = MainControl.Text;
 
-        private void txtValue_Leave(object sender, EventArgs e)
+        private void txtValue_Leave(object? sender, EventArgs e)
         {
             ResetColor();
             if (origValue != MainControl.Text)
                 OnTextChangedOnLeave(e);
         }
 
-        private void txtValue_EnabledChanged(object sender, EventArgs e)
-        {
-            ResetColor();
-        }
+        private void txtValue_EnabledChanged(object? sender, EventArgs e) => ResetColor();
 
         #endregion
 

@@ -434,6 +434,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets description text for the command link button.")]
         [Editor(typeof(MultilineStringEditor), typeof(UITypeEditor))]
         [Localizable(true)]
+        [DefaultValue(null)]
         public string? Description
         {
             get => description;
@@ -842,6 +843,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
         /// </summary>
+        [DefaultValue(false)]
         public new bool UseCompatibleTextRendering
         {
             get => base.UseCompatibleTextRendering;
@@ -855,6 +857,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the flat style state of the command link button.
         /// </summary>
+        [DefaultValue(FlatStyle.Standard)]
         public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
         {
             get => reportedFlatStyle;
@@ -873,6 +876,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the image that is displayed on the button control.
         /// </summary>
+        [DefaultValue(null)]
         public new Image? Image // it is also detected when base.Image changes but reacting onto that in OnPaint has a performance cost
         {
             get => base.Image;
@@ -1009,8 +1013,8 @@ namespace KGySoft.WinForms.Controls
                 {
                     Blend = new Blend
                     {
-                        Factors = new float[] { 0f, 1f, 1f, 0.5f },
-                        Positions = new float[] { 0f, p1, p2, 1f }
+                        Factors = [0f, 1f, 1f, 0.5f],
+                        Positions = [0f, p1, p2, 1f]
                     }
                 };
 
@@ -1039,8 +1043,8 @@ namespace KGySoft.WinForms.Controls
                 {
                     Blend = new Blend
                     {
-                        Factors = new float[] { 0f, 0.8f, 0.8f, 1f },
-                        Positions = new float[] { 0f, p1, p2, 1f }
+                        Factors = [0f, 0.8f, 0.8f, 1f],
+                        Positions = [0f, p1, p2, 1f]
                     }
                 };
                 return hoveredBrush;
@@ -2311,38 +2315,20 @@ namespace KGySoft.WinForms.Controls
 
         private void FreeBrushes()
         {
-            if (pressedBrush != null)
-            {
-                pressedBrush.Dispose();
-                pressedBrush = null;
-            }
-
-            if (hoveredBrush != null)
-            {
-                hoveredBrush.Dispose();
-                hoveredBrush = null;
-            }
+            pressedBrush?.Dispose();
+            pressedBrush = null;
+            hoveredBrush?.Dispose();
+            hoveredBrush = null;
         }
 
         private void FreeRegions()
         {
-            if (outerBorder != null)
-            {
-                outerBorder.Dispose();
-                outerBorder = null;
-            }
-
-            if (innerBorder != null)
-            {
-                innerBorder.Dispose();
-                innerBorder = null;
-            }
-
-            if (selectionBorder != null)
-            {
-                selectionBorder.Dispose();
-                selectionBorder = null;
-            }
+            outerBorder?.Dispose();
+            outerBorder = null;
+            innerBorder?.Dispose();
+            innerBorder = null;
+            selectionBorder?.Dispose();
+            selectionBorder = null;
         }
 
         private Bitmap GetScaledDefaultGlyph(Icon icon, string name)
@@ -2437,6 +2423,7 @@ namespace KGySoft.WinForms.Controls
         #endregion
 
         #region Event Handlers
+#pragma warning disable IDE1006 // Naming Styles
         // ReSharper disable InconsistentNaming
 
         void defaultAnimationTimer_Tick(object? sender, EventArgs e)
@@ -2448,6 +2435,7 @@ namespace KGySoft.WinForms.Controls
         private void VisualStyleHelper_VisualStylesChanged(object? sender, EventArgs e) => ResetTheme();
 
         // ReSharper restore InconsistentNaming
+#pragma warning restore IDE1006 // Naming Styles
         #endregion
 
         #endregion

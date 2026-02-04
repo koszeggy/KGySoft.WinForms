@@ -25,6 +25,15 @@ using KGySoft.WinForms.Forms;
 
 #endregion
 
+#region Suppressions
+
+#if !NETCOREAPP3_0_OR_GREATER
+#pragma warning disable CS8601 // Possible null reference assignment - false alarm, older frameworks handle String.IsNullOrEmpty incorrectly
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor - false alarm, older frameworks handle String.IsNullOrEmpty incorrectly
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms
 {
     /// <summary>

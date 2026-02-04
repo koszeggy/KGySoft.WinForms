@@ -108,7 +108,7 @@ namespace KGySoft.WinForms.Reflection
 
         #region Application
 
-        internal static bool ComCtlSupportsVisualStyles => (bool)GetPropertyValue(typeof(Application), "ComCtlSupportsVisualStyles")!;
+        internal static bool ComCtlSupportsVisualStyles => (bool)GetPropertyValue(typeof(Application), nameof(ComCtlSupportsVisualStyles))!;
 
         #endregion
 

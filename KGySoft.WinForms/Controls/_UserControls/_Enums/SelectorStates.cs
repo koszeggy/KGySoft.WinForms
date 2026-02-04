@@ -22,14 +22,29 @@ using System;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// <see cref="ucCustomSelector.State"/>
+    /// Represents the possible values for the <see cref="ucCustomSelector.State"/> property.
     /// </summary>
     [Obsolete("This type is used by the obsoleted ucCustomSelector and is not recommended to use it anymore.")]
     public enum SelectorStates
     {
+        /// <summary>
+        /// Represents the 'Not Selected' state.
+        /// </summary>
         NotSelected = ControlExtensions.NotSelectedValue,
+
+        /// <summary>
+        /// Represents the 'All Selected' state.
+        /// </summary>
         All = ControlExtensions.AllSelectedValue,
+        
+        /// <summary>
+        /// Represents the 'None Selected' state.
+        /// </summary>
         None = ControlExtensions.NoneSelectedValue,
+
+        /// <summary>
+        /// Represents the 'Value Set' state.
+        /// </summary>
         ValueSet = ControlExtensions.UndefinedValue
     }
 }

@@ -19,26 +19,32 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Globalization;
 using System.Windows.Forms;
 
 #endregion
 
 namespace KGySoft.WinForms.Controls
-{    
+{
+    /// <summary>
+    /// The unified user control version of <see cref="AdvancedCheckBox"/>.
+    /// </summary>
     [DefaultBindingProperty("CheckedContent")]
     [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucCheckBox: ucCaptionedBase
 	{
 		#region Contructor, Dispose
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ucCheckBox"/> class.
+        /// </summary>
 		public ucCheckBox()
         {
             InitializeComponent();
-            this.cbCheck.EnabledChanged += new System.EventHandler(this.cbCheck_EnabledChanged);
-            this.cbCheck.CheckedChanged += new System.EventHandler(this.cbCheck_CheckedChanged);
+            cbCheck.EnabledChanged += cbCheck_EnabledChanged;
+            cbCheck.CheckedChanged += cbCheck_CheckedChanged;
 		}
 
         /// <summary> 
@@ -50,31 +56,30 @@ namespace KGySoft.WinForms.Controls
             cbCheck.EnabledChanged -= cbCheck_EnabledChanged;
             cbCheck.CheckedChanged -= cbCheck_CheckedChanged;
             if (disposing && (components != null))
-            {
                 components.Dispose();
-            }
             base.Dispose(disposing);
         }
 
-		#endregion
+        #endregion
 
-		#region Properties
+        #region Properties
 
-		protected override Control MainControl
-        {
-            get { return cbCheck; }
-        }
+        /// <summary>
+        /// Gets the wrapped <see cref="AdvancedCheckBox"/> control.
+        /// </summary>
+		protected override Control MainControl => cbCheck;
 
         /// <summary>
         /// Gets or sets the caption of the checkbox.
         /// </summary>
 		[Description("Gets or sets the caption of the checkbox.")]
 		[Category("ucCheckBox")]
-		public string CaptionCheckbox
+        [AllowNull]
+        [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
+        public string CaptionCheckbox
         {
-            get { return cbCheck.Text; }
-            set { cbCheck.Text = value; }
-
+            get => cbCheck.Text;
+            set => cbCheck.Text = value;
         }
 
         /// <summary>
@@ -82,10 +87,11 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
 		[Description("Gets or sets the alignment of the checkbox.")]
 		[Category("ucCheckBox")]
+        [DefaultValue(ContentAlignment.MiddleLeft)]
 		public ContentAlignment CheckAlign
         {
-            get { return cbCheck.CheckAlign; }
-            set { cbCheck.CheckAlign = value; }
+            get => cbCheck.CheckAlign;
+            set => cbCheck.CheckAlign = value;
         }
 
 
@@ -99,7 +105,7 @@ namespace KGySoft.WinForms.Controls
 		[Description("Gets or sets the Checked state of the inner checkbox.")]
 		public bool CheckedContent
         {
-            get { return cbCheck.Checked; }
+            get => cbCheck.Checked;
             set
             {
                 cbCheck.Checked = value;
@@ -114,7 +120,7 @@ namespace KGySoft.WinForms.Controls
 		[Description("Gets or sets the ReadOnly state of the inner content.")]
         public override bool ReadOnly
         {
-            get { return !cbCheck.Enabled; }
+            get => !cbCheck.Enabled;
             set
             {
                 cbCheck.Enabled = !value;
@@ -122,17 +128,15 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-		public override object ControlValue
+        /// <summary>
+        /// Gets or sets the checked state of the inner check box.
+        /// </summary>
+		[AllowNull]
+        public override object ControlValue
 		{
-			get
-			{
-				return CheckedContent;
-			}
-			set
-			{
-				CheckedContent = Convert.ToBoolean(value, CultureInfo.CurrentCulture);
-			}
-		}
+			get => CheckedContent;
+            set => CheckedContent = value is true;
+        }
 
 		#endregion
 
@@ -145,29 +149,29 @@ namespace KGySoft.WinForms.Controls
 		[Description("Occurs when the state of the inner check box changes.")]
 		public event EventHandler CheckedContentChanged
 		{
-			add { cbCheck.CheckedChanged += value; }
-			remove { cbCheck.CheckedChanged -= value; }
-		}
+			add => cbCheck.CheckedChanged += value;
+            remove => cbCheck.CheckedChanged -= value;
+        }
 
 		#endregion
 
 		#region Overridden methods
 
-		public override void Clear()
-		{
-			cbCheck.Checked = false;
-		}
+        /// <summary>
+        /// Clears the checked state of the inner check box.
+        /// </summary>
+		public override void Clear() => cbCheck.Checked = false;
 
-		#endregion
+        #endregion
 
 		#region Private implementation
 
-		private void cbCheck_EnabledChanged(object sender, EventArgs e)
+		private void cbCheck_EnabledChanged(object? sender, EventArgs e)
         {
             ResetColor();
         }
 
-        private void cbCheck_CheckedChanged(object sender, EventArgs e)
+        private void cbCheck_CheckedChanged(object? sender, EventArgs e)
         {
             ResetColor();
 		}

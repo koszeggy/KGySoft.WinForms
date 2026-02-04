@@ -91,7 +91,7 @@ namespace KGySoft.WinForms
 
         #region Internal Properties
 
-        internal static TextWriter ConsoleWriter { get; private set; }
+        internal static TextWriter ConsoleWriter { get; private set; } = null!;
 
         #endregion
 

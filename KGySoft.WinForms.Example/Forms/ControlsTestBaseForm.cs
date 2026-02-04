@@ -131,8 +131,9 @@ namespace KGySoft.WinForms.Example.Forms
         #endregion
 
         #region Event handlers
+#pragma warning disable IDE1006 // Naming Styles
 
-        private void miResetValue_Click(object sender, EventArgs e)
+        private void miResetValue_Click(object? sender, EventArgs e)
         {
             #region Local Methods
 
@@ -155,7 +156,7 @@ namespace KGySoft.WinForms.Example.Forms
 
                 // Fallback solution by using public API if possible (may fail when multiple objects are selected, see below)
                 var parents = new Stack<GridItem>();
-                for (GridItem parent = selectedItem.Parent; parent.GridItemType == GridItemType.Property; parent = parent.Parent)
+                for (GridItem? parent = selectedItem.Parent; parent?.GridItemType == GridItemType.Property; parent = parent.Parent)
                     parents.Push(parent);
 
                 foreach (GridItem gridItem in parents)
@@ -209,12 +210,13 @@ namespace KGySoft.WinForms.Example.Forms
             grdProperties.Refresh();
         }
 
-        private void grdProperties_SelectedObjectsChanged(object sender, EventArgs e)
+        private void grdProperties_SelectedObjectsChanged(object? sender, EventArgs e)
         {
             var selectedObjects = grdProperties.SelectedObjects;
             lblSelection.Text = @$"{(selectedObjects.Length == 1 ? (selectedObjects[0] as Control)?.Name ?? grdProperties.SelectedObject : $"{selectedObjects.Length} controls selected")}";
         }
 
+#pragma warning restore IDE1006 // Naming Styles
         #endregion
 
         #endregion

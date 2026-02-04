@@ -101,7 +101,7 @@ namespace KGySoft.WinForms.Example.Forms
 
         #region Event handlers
 
-        private void SystemEvents_UserPreferenceChanged(object sender, UserPreferenceChangedEventArgs e)
+        private void SystemEvents_UserPreferenceChanged(object? sender, UserPreferenceChangedEventArgs e)
         {
             AddLine($"{e.Category}");
             AddLine($"Current Scale: {this.GetScale()}");

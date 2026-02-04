@@ -27,19 +27,20 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Unified user control version of <see cref="AdvancedTextBox"/>.
+    /// The unified user control version of <see cref="AdvancedTextBox"/>.
     /// </summary>
     [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucText: ucTextBase
     {
         #region Overridden properties
 
-        protected override Control MainControl
-        {
-            get { return textControl; }
-        }
+        /// <summary>
+        /// Gets the wrapped <see cref="AdvancedTextBox"/> control.
+        /// </summary>
+        protected override Control MainControl => textControl;
 
         /// <summary>
         /// Gets the inner <see cref="TextBox"/>.
@@ -48,10 +49,7 @@ namespace KGySoft.WinForms.Controls
         [Description("The inner TextBox")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)] // Do not change this! If something is needed, make a new property instead.
         [Browsable(false)]
-        public new AdvancedTextBox TextBox
-        {
-            get { return textControl; }
-        }
+        public new AdvancedTextBox TextBox => textControl;
 
         #endregion
 
@@ -62,23 +60,22 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("ucText")]
         [Editor("System.ComponentModel.Design.MultilineStringEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
+        [AllowNull]
         public override string Text
         {
-            get { return base.Text; }
-            set { base.Text = value; }
+            get => base.Text;
+            set => base.Text = value;
         }
 
         /// <summary>
 		/// Gets or sets a value indicating whether this is a multiline textbox.
         /// </summary>
-        [
-            Category("ucText"),
-			Description("Gets or sets a value indicating whether this is a multiline textbox."),
-            DefaultValue(false)
-        ]
+        [Category("ucText")]
+        [Description("Gets or sets a value indicating whether this is a multiline textbox.")]
+        [DefaultValue(false)]
         public bool Multiline
         {
-            get { return textControl.Multiline; }
+            get => textControl.Multiline;
             set
             {
                 textControl.Multiline = value;
@@ -89,14 +86,13 @@ namespace KGySoft.WinForms.Controls
 		/// <summary>
 		/// Gets or sets which scroll bars should appear in a multiline TextBox.
 		/// </summary>
-        [
-            Category("ucText"),
-			Description("Gets or sets which scroll bars should appear in a multiline TextBox.")
-        ]
+        [Category("ucText")]
+        [Description("Gets or sets which scroll bars should appear in a multiline TextBox.")]
+        [DefaultValue(ScrollBars.None)]
         public ScrollBars ScrollBars
         {
-            get { return textControl.ScrollBars; }
-            set { textControl.ScrollBars = value; }
+            get => textControl.ScrollBars;
+            set => textControl.ScrollBars = value;
         }
 
 		/// <summary>
@@ -108,8 +104,8 @@ namespace KGySoft.WinForms.Controls
 		[Description("Gets or sets the character used to mask characters of a password in a single-line TextBox control.")]
         public char PasswordChar
         {
-            get { return textControl.PasswordChar; }
-            set { textControl.PasswordChar = value; }
+            get => textControl.PasswordChar;
+            set => textControl.PasswordChar = value;
         }
 
 		/// <summary>
@@ -122,8 +118,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool UseSystemPasswordChar
         {
-            get { return textControl.UseSystemPasswordChar; }
-            set { textControl.UseSystemPasswordChar = value; }
+            get => textControl.UseSystemPasswordChar;
+            set => textControl.UseSystemPasswordChar = value;
         }
 
 		/// <summary>
@@ -134,8 +130,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(HorizontalAlignment), "Left")]
         public HorizontalAlignment TextAlign
         {
-            get { return textControl.TextAlign; }
-            set { textControl.TextAlign = value; }
+            get => textControl.TextAlign;
+            set => textControl.TextAlign = value;
         }
 
         /// <summary>
@@ -147,8 +143,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool WordWrap
         {
-            get { return textControl.WordWrap; }
-            set { textControl.WordWrap = value; }
+            get => textControl.WordWrap;
+            set => textControl.WordWrap = value;
         }
 
         /// <summary>
@@ -159,8 +155,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoCompleteMode.None)]
         public AutoCompleteMode AutoCompleteMode
         {
-            get { return textControl.AutoCompleteMode; }
-            set { textControl.AutoCompleteMode = value; }
+            get => textControl.AutoCompleteMode;
+            set => textControl.AutoCompleteMode = value;
         }
 
         ///<summary>
@@ -171,8 +167,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoCompleteSource.None)]
         public AutoCompleteSource AutoCompleteSource
         {
-            get { return textControl.AutoCompleteSource; }
-            set { textControl.AutoCompleteSource = value; }
+            get => textControl.AutoCompleteSource;
+            set => textControl.AutoCompleteSource = value;
         }
 
         ///<summary>
@@ -184,18 +180,18 @@ namespace KGySoft.WinForms.Controls
         [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public AutoCompleteStringCollection AutoCompleteCustomSource
         {
-            get { return textControl.AutoCompleteCustomSource; }
-            set { textControl.AutoCompleteCustomSource = value; }
+            get => textControl.AutoCompleteCustomSource;
+            set => textControl.AutoCompleteCustomSource = value;
         }
 
         #endregion
 
         #region Constructor
 
-        public ucText()
-        {
-            InitializeComponent();
-        }
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ucText"/> class.
+        /// </summary>
+        public ucText() => InitializeComponent();
 
         #endregion
     }

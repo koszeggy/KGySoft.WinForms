@@ -18,13 +18,24 @@ using System;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// <see cref="ucCustomSelector.RelevantControlValue"/>
+    /// Represents the possible values of the <see cref="ucCustomSelector.RelevantControlValue">ucCustomSelector.RelevantControlValue</see> property.
     /// </summary>
     [Obsolete("This type is used by the obsoleted ucCustomSelector and is not recommended to use it anymore.")]
     public enum RelevantControlValues
     {
+        /// <summary>
+        /// Indicates that the <see cref="ucCustomSelector.Value">ucCustomSelector.Value</see> property reflects the value of the inner control.
+        /// </summary>
         Value,
+        
+        /// <summary>
+        /// Indicates that the <see cref="ucCustomSelector.Text">ucCustomSelector.Text</see> property reflects the text of the inner control.
+        /// </summary>
         Text,
+
+        /// <summary>
+        /// Indicates that the <see cref="ucCustomSelector.State">ucCustomSelector.State</see> property reflects the state of the inner control.
+        /// </summary>
         State
     }
 }

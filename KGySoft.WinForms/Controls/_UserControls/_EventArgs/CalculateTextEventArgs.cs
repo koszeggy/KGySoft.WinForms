@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Diagnostics.CodeAnalysis;
 
 #endregion
 
@@ -29,8 +30,9 @@ namespace KGySoft.WinForms.Controls
     {
         #region Fields
 
+        private readonly object? value;
+        
         private string text;
-        private object value;
 
         #endregion
 
@@ -39,25 +41,23 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Get or sets the text that is associated by <see cref="Value"/>.
         /// </summary>
+        [AllowNull]
         public string Text
         {
-            get { return text; }
-            set { text = value; }
+            get => text;
+            set => text = value ?? String.Empty;
         }
 
         /// <summary>
         /// Gets the value that is associated with the found or selected item.
         /// </summary>
-        public object Value
-        {
-            get { return value; }
-        }
+        public object? Value => value;
 
         #endregion
 
         #region Constructors
 
-        internal CalculateTextEventArgs(object value, string text)
+        internal CalculateTextEventArgs(object? value, string? text)
         {
             this.value = value;
             this.text = text ?? String.Empty;

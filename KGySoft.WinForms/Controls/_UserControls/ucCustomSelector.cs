@@ -34,35 +34,44 @@ using KGySoft.WinForms.Forms;
 
 #endregion
 
+#region Suppressions
+
+#if !NETCOREAPP3_0_OR_GREATER
+#pragma warning disable CS8602 // Dereference of a possibly null reference. - analyzer false alarm for .NET Framework
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Controls
 {
 
     /// <summary>
-    /// Selector control that can be used for general purposes.
+    /// A selector control that can be used for general purposes.
     /// </summary>
     [DefaultBindingProperty("Value")]
     [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
+    [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucCustomSelector: ucCaptionedBase
     {
         #region Fields
 
         private SelectorButtons buttons = SelectorButtons.Browse;
-        private Button btnClearSelection;
-        private Button btnSelectAll;
-        private Button btnSelectNone;
-        private Button btnBrowse;
-        private Button btnEditor;
-        private Button btnNew;
+        private Button btnClearSelection = null!;
+        private Button btnSelectAll = null!;
+        private Button btnSelectNone = null!;
+        private Button btnBrowse = null!;
+        private Button btnEditor = null!;
+        private Button btnNew = null!;
         private FlatStyle buttonStyle = FlatStyle.Standard;
-        private object value = ControlExtensions.NotSelectedValue;
+        private object? value = ControlExtensions.NotSelectedValue;
         private SelectorStates state = SelectorStates.NotSelected;
-        private bool readOnly = false;
+        private bool readOnly;
         private bool textEditable = true;
         private bool autoFind = true;
-        private bool autoImage = false;
-        private bool deleteContent = false;
+        private bool autoImage;
+        private bool deleteContent;
         private RelevantControlValues relevantControlValue = RelevantControlValues.Value;
         private bool checkChangedOnLeave;
 
@@ -85,16 +94,16 @@ namespace KGySoft.WinForms.Controls
 
         #region Mandatory overridden properties
 
-        protected override Control MainControl
-        {
-            get { return cmbCombo; }
-        }
+        /// <summary>
+        /// Gets the wrapped <see cref="AdvancedComboBox"/> control.
+        /// </summary>
+        protected override Control MainControl => cmbCombo;
 
         /// <summary>
         /// Gets or sets the relevant property of the control (<see cref="Value"/> or <see cref="Text"/>,
         /// depends on <see cref="RelevantControlValue"/>.
         /// </summary>
-        public override object ControlValue
+        public override object? ControlValue
         {
             get
             {
@@ -110,9 +119,12 @@ namespace KGySoft.WinForms.Controls
                         return null;
                 }
             }
-            set { SetControlValue(value); }
+            set => SetControlValue(value);
         }
 
+        /// <summary>
+        /// Sets the <see cref="SelectorStates.NotSelected"/> state.
+        /// </summary>
         public override void Clear()
         {
             Value = valueNotSelected;
@@ -132,8 +144,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(RelevantControlValues), "Value")]
         public RelevantControlValues RelevantControlValue
         {
-            get { return relevantControlValue; }
-            set { relevantControlValue = value; }
+            get => relevantControlValue;
+            set => relevantControlValue = value;
         }
 
         /// <summary>
@@ -143,10 +155,10 @@ namespace KGySoft.WinForms.Controls
         [Bindable(BindableSupport.Default, BindingDirection.TwoWay)]
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
-        public object Value
+        public object? Value
         {
-            get { return value; }
-            set { SetValue(value); }
+            get => value;
+            set => SetValue(value);
         }
 
         /// <summary>
@@ -156,10 +168,10 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object ValueNotSelected
         {
-            get { return valueNotSelected; }
+            get => valueNotSelected;
             set
             {
-                if (!Object.Equals(value, valueNotSelected) && !Object.Equals(value, valueAllSelected) && !Object.Equals(value, valueNoneSelected))
+                if (!Equals(value, valueNotSelected) && !Equals(value, valueAllSelected) && !Equals(value, valueNoneSelected))
                 {
                     valueNotSelected = value;
                     if (state == SelectorStates.NotSelected)
@@ -169,16 +181,16 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the value of the All <see cref="State"/>.
+        /// Gets or sets the value of the 'All' <see cref="State"/>.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object ValueAllSelected
         {
-            get { return valueAllSelected; }
+            get => valueAllSelected;
             set
             {
-                if (!Object.Equals(value, valueNotSelected) && !Object.Equals(value, valueAllSelected) && !Object.Equals(value, valueNoneSelected))
+                if (!Equals(value, valueNotSelected) && !Equals(value, valueAllSelected) && !Equals(value, valueNoneSelected))
                 {
                     valueAllSelected = value;
                     if (state == SelectorStates.All)
@@ -188,16 +200,16 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the value of the None <see cref="State"/>.
+        /// Gets or sets the value of the 'None' <see cref="State"/>.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public object ValueNoneSelected
         {
-            get { return valueNoneSelected; }
+            get => valueNoneSelected;
             set
             {
-                if (!Object.Equals(value, valueNotSelected) && !Object.Equals(value, valueAllSelected) && !Object.Equals(value, valueNoneSelected))
+                if (!Equals(value, valueNotSelected) && !Equals(value, valueAllSelected) && !Equals(value, valueNoneSelected))
                 {
                     valueNoneSelected = value;
                     if (state == SelectorStates.None)
@@ -214,8 +226,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(ComboBoxStyle), "Simple")]
         public ComboBoxStyle DropDownStyle
         {
-            get { return cmbCombo.DropDownStyle; }
-            set { cmbCombo.DropDownStyle = value; }
+            get => cmbCombo.DropDownStyle;
+            set => cmbCombo.DropDownStyle = value;
         }
 
         /// <summary>
@@ -230,8 +242,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool SystemDrawDropDownListMode
         {
-            get { return cmbCombo.SystemDrawDropDownListMode; }
-            set { cmbCombo.SystemDrawDropDownListMode = value; }
+            get => cmbCombo.SystemDrawDropDownListMode;
+            set => cmbCombo.SystemDrawDropDownListMode = value;
         }
 
         /// <summary>
@@ -245,8 +257,8 @@ namespace KGySoft.WinForms.Controls
         [RefreshProperties(RefreshProperties.All)]
         public SelectorStates State
         {
-            get { return state; }
-            set { SetState(value); }
+            get => state;
+            set => SetState(value);
         }
 
         /// <summary>
@@ -258,7 +270,7 @@ namespace KGySoft.WinForms.Controls
         [TypeConverter(typeof(FlagsEnumConverter))]
         public SelectorButtons Buttons
         {
-            get { return buttons; }
+            get => buttons;
             set
             {
                 buttons = value;
@@ -274,7 +286,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(FlatStyle), "Standard")]
         public FlatStyle ButtonStyle
         {
-            get { return buttonStyle; }
+            get => buttonStyle;
             set
             {
                 buttonStyle = value;
@@ -288,15 +300,9 @@ namespace KGySoft.WinForms.Controls
         [Category("ucCustomSelector")]
         [Description("The image of the selector control.")]
         [DefaultValue(null)]
-        public Image Image
+        public Image? Image
         {
-            get
-            {
-                if (autoImage)
-                    return null;
-                else
-                    return pbImage.Image;
-            }
+            get => autoImage ? null : pbImage.Image;
             set
             {
                 pbImage.Image = value;
@@ -313,7 +319,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(PictureBoxSizeMode), "CenterImage")]
         public PictureBoxSizeMode ImageSizeMode
         {
-            get { return pbImage.SizeMode; }
+            get => pbImage.SizeMode;
             set
             {
                 if (value != PictureBoxSizeMode.AutoSize)
@@ -329,8 +335,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(typeof(BorderStyle), "None")]
         public BorderStyle ImageBorderStyle
         {
-            get { return pbImage.BorderStyle; }
-            set { pbImage.BorderStyle = value; }
+            get => pbImage.BorderStyle;
+            set => pbImage.BorderStyle = value;
         }
 
         /// <summary>
@@ -342,7 +348,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool AutoImage
         {
-            get { return autoImage; }
+            get => autoImage;
             set
             {
                 autoImage = value;
@@ -363,7 +369,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public virtual bool TextEditable
         {
-            get { return textEditable; }
+            get => textEditable;
             set
             {
                 textEditable = value;
@@ -386,8 +392,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public virtual bool AutoFindText
         {
-            get { return autoFind; }
-            set { autoFind = value; }
+            get => autoFind;
+            set => autoFind = value;
         }
 
         /// <summary>
@@ -414,15 +420,16 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         [Bindable(BindableSupport.Yes, BindingDirection.TwoWay)]
         [RefreshProperties(RefreshProperties.All)]
+        [AllowNull]
         public override string Text
         {
-            get { return cmbCombo.Text; }
+            get => cmbCombo.Text;
             set
             {
                 // this is for prevent Text to be set "ucCustomSelector1" or similar
                 // in design time.
-                if ((DesignMode && value == ToString().Split(new char[] { ' ' })[0])
-                    || this.state != SelectorStates.ValueSet)
+                if ((DesignMode && value == ToString().Split(' ')[0])
+                    || state != SelectorStates.ValueSet)
                 {
                     return;
                 }
@@ -439,7 +446,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the read-only state for the control. This disables most of the buttons, too. To disable manual text editing only, use TextEditable property.")]
         public override bool ReadOnly
         {
-            get { return readOnly; }
+            get => readOnly;
             set
             {
                 readOnly = value;
@@ -451,15 +458,14 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the tooltip text of the Clear Selection button.
-        /// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the tooltip text of the Clear Selection button. (Translatable text).")]
+        [Description("Gets or sets the tooltip text of the Clear Selection button.")]
         [Browsable(true)]
         [DefaultValue("")]
         public string ToolTipClearSelection
         {
-            get { return toolTipClearSelection; }
+            get => toolTipClearSelection;
             set
             {
                 toolTipClearSelection = value;
@@ -469,15 +475,14 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the tooltip text of the Select All button.
-        /// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the tooltip text of the Select All button. (Translatable text).")]
+        [Description("Gets or sets the tooltip text of the Select All button.")]
         [Browsable(true)]
         [DefaultValue("")]
         public string ToolTipSelectAll
         {
-            get { return toolTipSelectAll; }
+            get => toolTipSelectAll;
             set
             {
                 toolTipSelectAll = value;
@@ -487,15 +492,14 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the tooltip text of the Select None button.
-        /// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the tooltip text of the Select None button. (Translatable text).")]
+        [Description("Gets or sets the tooltip text of the Select None button.")]
         [Browsable(true)]
         [DefaultValue("")]
         public string ToolTipSelectNone
         {
-            get { return toolTipSelectNone; }
+            get => toolTipSelectNone;
             set
             {
                 toolTipSelectNone = value;
@@ -505,15 +509,14 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the tooltip text of the Browse button.
-        /// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the tooltip text of the Browse button. (Translatable text).")]
+        [Description("Gets or sets the tooltip text of the Browse button.")]
         [Browsable(true)]
         [DefaultValue("")]
         public string ToolTipBrowse
         {
-            get { return toolTipBrowse; }
+            get => toolTipBrowse;
             set
             {
                 toolTipBrowse = value;
@@ -523,15 +526,14 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the tooltip text of the Editor button.
-        /// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the tooltip text of the Editor button. (Translatable text).")]
+        [Description("Gets or sets the tooltip text of the Editor button.")]
         [Browsable(true)]
         [DefaultValue("")]
         public string ToolTipEditor
         {
-            get { return toolTipEditor; }
+            get => toolTipEditor;
             set
             {
                 toolTipEditor = value;
@@ -541,15 +543,14 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the tooltip text of the New button.
-        /// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the tooltip text of the New button. (Translatable text).")]
+        [Description("Gets or sets the tooltip text of the New button.")]
         [Browsable(true)]
         [DefaultValue("")]
         public string ToolTipNew
         {
-            get { return toolTipNew; }
+            get => toolTipNew;
             set
             {
                 toolTipNew = value;
@@ -559,16 +560,15 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the <see cref="Text"/> of NotSelected <see cref="State"/>.
-        /// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the Text NotSelected State. (Translatable text).")]
+        [Description("Gets or sets the Text NotSelected State.")]
         [Browsable(true)]
         [RefreshProperties(RefreshProperties.All)]
         [DefaultValue(ControlExtensions.NotSelectedText)]
         public string TextNotSelected
         {
-            get { return textNotSelected; }
+            get => textNotSelected;
             set
             {
                 textNotSelected = value;
@@ -579,16 +579,15 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the <see cref="Text"/> of All <see cref="State"/>.
-        /// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the Text of All State. (Translatable text).")]
+        [Description("Gets or sets the Text of All State.")]
         [Browsable(true)]
         [RefreshProperties(RefreshProperties.All)]
         [DefaultValue(ControlExtensions.AllSelectedText)]
         public string TextAllSelected
         {
-            get { return textAllSelected; }
+            get => textAllSelected;
             set
             {
                 textAllSelected = value;
@@ -599,16 +598,15 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the <see cref="Text"/> of None <see cref="State"/>.
-        /// <remarks>This text will be translated to the target <see cref="Language.ActiveLanguage"/>.</remarks>
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the Text of None State. (Translatable text).")]
+        [Description("Gets or sets the Text of None State.")]
         [Browsable(true)]
         [RefreshProperties(RefreshProperties.All)]
         [DefaultValue(ControlExtensions.NoneSelectedText)]
         public string TextNoneSelected
         {
-            get { return textNoneSelected; }
+            get => textNoneSelected;
             set
             {
                 textNoneSelected = value;
@@ -624,10 +622,7 @@ namespace KGySoft.WinForms.Controls
         [Description("The inner AdvancedComboBox")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)] // Do not change this! If something is needed, make a new property instead.
         [Browsable(false)]
-        public AdvancedComboBox ComboBox
-        {
-            get { return cmbCombo; }
-        }
+        public AdvancedComboBox ComboBox => cmbCombo;
 
         /// <summary>
         /// Gets an object representing the collection of the items contained in the inner <see cref="AdvancedComboBox"/>.
@@ -635,12 +630,9 @@ namespace KGySoft.WinForms.Controls
         [Category("ucCustomSelector")]
         [Description("Gets an object representing the collection of the items contained in the inner AdvancedComboBox.")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
-        [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(System.Drawing.Design.UITypeEditor))]
+        [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         [MergableProperty(false)]
-        public ComboBox.ObjectCollection Items
-        {
-            get { return cmbCombo.Items; }
-        }
+        public ComboBox.ObjectCollection Items => cmbCombo.Items;
 
         #endregion
 
@@ -651,164 +643,138 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Occurs when <see cref="Value"/> is changed.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when Value is changed.")
-        ]
-        public event EventHandler ValueChanged;
+        [Category("ucCustomSelector")]
+        [Description("Occurs when Value is changed.")]
+        public event EventHandler? ValueChanged;
 
         /// <summary>
         /// Occurs when <see cref="State"/> is changed.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when State is changed.")
-        ]
-        public event EventHandler StateChanged;
+        [Category("ucCustomSelector")]
+        [Description("Occurs when State is changed.")]
+        public event EventHandler? StateChanged;
 
         /// <summary>
         /// Occurs when Clear button is clicked.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when Clear button is clicked.")
-        ]
-        public event EventHandler ButtonClearClick;
+        [Category("ucCustomSelector")]
+        [Description("Occurs when Clear button is clicked.")]
+        public event EventHandler? ButtonClearClick;
 
         /// <summary>
         /// Occurs when All button is clicked.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when All button is clicked.")
-        ]
-        public event EventHandler ButtonAllClick;
+        [Category("ucCustomSelector")]
+        [Description("Occurs when All button is clicked.")]
+        public event EventHandler? ButtonAllClick;
 
         /// <summary>
         /// Occurs when None button is clicked.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when None button is clicked.")
-        ]
-        public event EventHandler ButtonNoneClick;
+        [Category("ucCustomSelector")]
+        [Description("Occurs when None button is clicked.")]
+        public event EventHandler? ButtonNoneClick;
 
         /// <summary>
         /// Occurs when Browse button is clicked.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when Browse button is clicked.")
-        ]
-        public event EventHandler ButtonBrowseClick;
+        [Category("ucCustomSelector")]
+        [Description("Occurs when Browse button is clicked.")]
+        public event EventHandler? ButtonBrowseClick;
 
         /// <summary>
         /// Occurs when Editor button is clicked.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when Editor button is clicked.")
-        ]
-        public event EventHandler ButtonEditorClick;
+        [Category("ucCustomSelector")]
+        [Description("Occurs when Editor button is clicked.")]
+        public event EventHandler? ButtonEditorClick;
 
         /// <summary>
         /// Occurs when New button is clicked.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when New button is clicked.")
-        ]
-        public event EventHandler ButtonNewClick;
+        [Category("ucCustomSelector")]
+        [Description("Occurs when New button is clicked.")]
+        public event EventHandler? ButtonNewClick;
 
         /// <summary>
         /// Occurs on leaving the control after editing the text manually and when <see cref="AutoFindText"/> property is <see langword="true"/>.
         /// Can be used for calculating <see cref="Value"/> based on the typed text. If this event is not subscribed, then <see cref="DefaultAutoFind"/> will be called,
         /// which tries to find the element in <see cref="Items"/> or simply makes <see cref="Value"/> equal to <see cref="Text"/>.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs on leaving the control after editing the text manually and when AutoFindText property is true. " +
-                "Can be used for calculating Value based on the typed text. If this event is not subscribed, then DefaultAutoFind will be called, " +
-                "which tries to find the element in Items or simply makes Value equal to Text.")
-        ]
-        public event EventHandler<AutoFindEventArgs> AutoFind;
+        [Category("ucCustomSelector")]
+        [Description("Occurs on leaving the control after editing the text manually and when AutoFindText property is true. " +
+            "Can be used for calculating Value based on the typed text. If this event is not subscribed, then DefaultAutoFind will be called, " +
+            "which tries to find the element in Items or simply makes Value equal to Text.")]
+        public event EventHandler<AutoFindEventArgs>? AutoFind;
 
         /// <summary>
         /// Occurs when a displayed text of a value needs to be calculated. Does not occur when <see cref="Value"/> equals <see cref="ValueNotSelected"/>,
         /// <see cref="ValueAllSelected"/> or <see cref="ValueNoneSelected"/>.
         /// If not handled, then calculated text will gain its value either by the defined <see cref="DataSource"/> or by the string representation of Value.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when a displayed text of a value needs to be calculated. Does not occur when Value equals ValueNotSelected, " +
-                "ValueAllSelected or ValueNoneSelected. If not handled, then calculated text will gain its value either by the defined DataSource " +
-                "or by the string representation of Value.")
-        ]
-        public event EventHandler<CalculateTextEventArgs> CalculateText;
-
+        [Category("ucCustomSelector")]
+        [Description("Occurs when a displayed text of a value needs to be calculated. Does not occur when Value equals ValueNotSelected, " +
+            "ValueAllSelected or ValueNoneSelected. If not handled, then calculated text will gain its value either by the defined DataSource " +
+            "or by the string representation of Value.")]
+        public event EventHandler<CalculateTextEventArgs>? CalculateText;
 
         /// <summary>
         /// Occurs when the <see cref="Image"/> of the control been clicked.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when the Image of the control been clicked.")
-        ]
-        public event EventHandler ImageClick;
+        [Category("ucCustomSelector")]
+        [Description("Occurs when the Image of the control been clicked.")]
+        public event EventHandler? ImageClick;
 
         /// <summary>
         /// Occurs when the <see cref="Image"/> of the control been double clicked.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs when the Image of the control been double clicked.")
-        ]
-        public event EventHandler ImageDoubleClick;
+        [Category("ucCustomSelector")]
+        [Description("Occurs when the Image of the control been double clicked.")]
+        public event EventHandler? ImageDoubleClick;
 
         /// <summary>
         /// Occurs when the text of the inner textbox changes.
         /// </summary>
-        [
-            Browsable(true),
-            Category("ucCustomSelector"),
-            Description("Occurs when the text of the inner textbox changes.")
-        ]
-        public new event EventHandler TextChanged
+        [Browsable(true)]
+        [Category("ucCustomSelector")]
+        [Description("Occurs when the text of the inner textbox changes.")]
+        public new event EventHandler? TextChanged
         {
-            add { cmbCombo.TextChanged += value; }
-            remove { cmbCombo.TextChanged -= value; }
+            add => cmbCombo.TextChanged += value;
+            remove => cmbCombo.TextChanged -= value;
         }
 
         /// <summary>
         /// Occurs on leave when content differs from the content at getting focused.
         /// </summary>
-        [
-            Category("ucCustomSelector"),
-            Description("Occurs on leave when content differs from the content at getting focused.")
-        ]
-        public event EventHandler TextChangedOnLeave
+        [Category("ucCustomSelector")]
+        [Description("Occurs on leave when content differs from the content at getting focused.")]
+        public event EventHandler? TextChangedOnLeave
         {
-            add { cmbCombo.TextChangedOnLeave += value; }
-            remove { cmbCombo.TextChangedOnLeave -= value; }
+            add => cmbCombo.TextChangedOnLeave += value;
+            remove => cmbCombo.TextChangedOnLeave -= value;
         }
 
         #endregion
 
         #region Constructor, Dispose
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="ucCustomSelector"/> class.
+        /// </summary>
         public ucCustomSelector()
         {
             InitializeComponent();
             cmbCombo.DropDownStyle = ComboBoxStyle.Simple;
 
-            cmbCombo.TextChangedOnLeave += new System.EventHandler(cmbCombo_TextChangedOnLeave);
-            cmbCombo.Enter += new System.EventHandler(cmbCombo_Enter);
-            cmbCombo.KeyPress += new System.Windows.Forms.KeyPressEventHandler(cmbCombo_KeyPress);
-            cmbCombo.TextChanged += new EventHandler(cmbCombo_TextChanged);
-            pbImage.Click += new EventHandler(pbImage_Click);
-            pbImage.DoubleClick += new EventHandler(pbImage_DoubleClick);
-            cmbCombo.SelectedValueChanged += new EventHandler(cmbCombo_SelectedValueChanged);
-            cmbCombo.SelectedIndexChanged += new EventHandler(cmbCombo_SelectedIndexChanged);
+            cmbCombo.TextChangedOnLeave += cmbCombo_TextChangedOnLeave;
+            cmbCombo.Enter += cmbCombo_Enter;
+            cmbCombo.KeyPress += cmbCombo_KeyPress;
+            cmbCombo.TextChanged += cmbCombo_TextChanged;
+            pbImage.Click += pbImage_Click;
+            pbImage.DoubleClick += pbImage_DoubleClick;
+            cmbCombo.SelectedValueChanged += cmbCombo_SelectedValueChanged;
+            cmbCombo.SelectedIndexChanged += cmbCombo_SelectedIndexChanged;
 
             CreateActionPanel();
             RefreshActionPanel();
@@ -842,10 +808,11 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Sets the value-text pair without raising events.
         /// <remarks>
-        /// This can be useful tipically for LoadFromDataBase-like methods.
+        /// This can be useful typically for LoadFromDataBase-like methods.
         /// </remarks>
         /// </summary>
-        public void Assign(object value, string text)
+        [SuppressMessage("ReSharper", "ParameterHidesMember", Justification = "Public method, changing the name would be breaking")]
+        public void Assign(object? value, string text)
         {
             if (value == null || value.In(valueNotSelected, valueAllSelected, valueNoneSelected))
             {
@@ -938,10 +905,10 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Creates an action button.
         /// </summary>
-        /// <param name="bmp">Image of the cutton.</param>
-        /// <param name="caption">Felirat</param>
+        /// <param name="bmp">Image of the button.</param>
+        /// <param name="toolTip">The tooltip of the button</param>
         /// <returns></returns>
-        protected Button CreateActionButton(Bitmap bmp, string toolTip)
+        protected Button CreateActionButton(Bitmap? bmp, string toolTip)
         {
             Button result = new Button();
             result.Size = new Size(23, 22);
@@ -952,11 +919,14 @@ namespace KGySoft.WinForms.Controls
             result.TabStop = false;
             result.FlatStyle = buttonStyle;
             result.Visible = false;
-            result.Click += new EventHandler(SelectorButtonClick);
+            result.Click += SelectorButtonClick;
             pnlActionPanel.Controls.Add(result);
             return result;
         }
 
+        /// <summary>
+        /// If <see cref="AutoImage"/> is <see langword="true"/>, refreshes the <see cref="Image"/> property based on the current <see cref="State"/>.
+        /// </summary>
         protected void RefreshImage()
         {
             if (!autoImage)
@@ -984,6 +954,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Overridden methods
 
+        /// <inheritdoc />
         protected override void ResetColor()
         {
             // BackColor when control is Enabled and not ReadOnly and TextEditable is true
@@ -1036,11 +1007,10 @@ namespace KGySoft.WinForms.Controls
             btnEditor.Visible = (buttons & SelectorButtons.Editor) != 0;
             btnNew.Visible = (buttons & SelectorButtons.New) != 0;
             foreach (Control c in pnlActionPanel.Controls)
-                if (c is Button)
-                {
-                    (c as Button).FlatStyle = ButtonStyle;
-                    //(c as Button).Size...
-                }
+            {
+                if (c is Button button)
+                    button.FlatStyle = ButtonStyle;
+            }
         }
 
         /// <summary>
@@ -1061,13 +1031,13 @@ namespace KGySoft.WinForms.Controls
         /// Default AutoFind behaviour if <see cref="AutoFind"/> event is not handled.
         /// Can be overridden to set <see cref="Value"/> and <see cref="Text"/> based on
         /// the written text or text chunk and can be triggered also from a handled <see cref="AutoFind"/> by setting <see cref="AutoFindEventArgs.DefaultAutoFind"/> property.
-        /// The default implementataion sets <paramref name="text"/> to <see cref="Value"/>
+        /// The default implementation sets <paramref name="text"/> to <see cref="Value"/>
         /// or tries to find the given text in <see cref="Items"/>.
         /// </summary>
         /// <param name="text">Text or text chunk for that can be used for search.</param>
         protected virtual void DefaultAutoFind(string text)
         {
-            if (Items != null && Items.Count > 0)
+            if (Items.Count > 0)
             {
                 bool toResolve = DataSource != null && !String.IsNullOrEmpty(ValueMember) && !String.IsNullOrEmpty(DisplayMember);
                 foreach (object item in Items)
@@ -1091,34 +1061,35 @@ namespace KGySoft.WinForms.Controls
         /// Otherwise, returns with the ToString of <see cref="Value"/>.
         /// Override this method to calculate texts for other values.
         /// </summary>
-        protected virtual string GetTextByValue(object value)
+        [SuppressMessage("ReSharper", "ParameterHidesMember", Justification = "Renaming would be a breaking change")]
+        protected virtual string GetTextByValue(object? value)
         {
-            if (Object.Equals(value, valueNotSelected) || (DataSource != null && value.In(null, DBNull.Value)))
+            if (Equals(value, valueNotSelected) || (DataSource != null && value.In(null, DBNull.Value)))
                 return Language.Translate(textNotSelected);
-            else if (Object.Equals(value, valueAllSelected))
+            else if (Equals(value, valueAllSelected))
                 return Language.Translate(textAllSelected);
-            else if (Object.Equals(value, valueNoneSelected))
+            else if (Equals(value, valueNoneSelected))
                 return Language.Translate(textNoneSelected);
             else
             {
-                string text = (value ?? String.Empty).ToString();
-
+                string text = value?.ToString() ?? String.Empty;
                 if ((DataSource is IList || DataSource is IListSource) && !String.IsNullOrEmpty(ValueMember) && !String.IsNullOrEmpty(DisplayMember))
                 {
-                    IEnumerable<object> ds = (DataSource is IListSource ? ((IListSource)DataSource).GetList() : (IList)DataSource).Cast<object>();
-                    object item = ds.FirstOrDefault(i => Equals(value, GetItemValue(i)));
+                    IEnumerable<object> ds = (DataSource is IListSource listSource ? listSource.GetList() : (IList)DataSource).Cast<object>();
+                    object? item = ds.FirstOrDefault(i => Equals(value, GetItemValue(i)));
                     if (item != null)
-                        text = cmbCombo.GetItemText(item);
+                        text = cmbCombo.GetItemText(item) ?? String.Empty;
                 }
 
-                CalculateTextEventArgs e = new CalculateTextEventArgs(value, text);
+                var e = new CalculateTextEventArgs(value, text);
                 if (CalculateText != null)
                 {
                     OnCalculateText(e);
                     return e.Text;
                 }
-                else if (Object.Equals(value, ControlExtensions.UndefinedValue))
-                    return cmbCombo.Text;
+                else if (Equals(value, ControlExtensions.UndefinedValue))
+                    // ReSharper disable once NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - false alarm, can happen
+                    return cmbCombo.Text ?? String.Empty;
                 else
                     return e.Text;
             }
@@ -1128,17 +1099,18 @@ namespace KGySoft.WinForms.Controls
         /// Sets value while adjusts <see cref="Text"/> and <see cref="State"/>.
         /// </summary>
         /// <param name="value">The value to set.</param>
-        protected virtual void SetValue(object value)
+        [SuppressMessage("ReSharper", "ParameterHidesMember", Justification = "Intended, sets the value; renaming would be a breaking change")]
+        protected virtual void SetValue(object? value)
         {
             if (!Equals(this.value, value))
             {
                 this.value = value;
                 SelectorStates newState;
-                if (Object.Equals(value, valueNotSelected))
+                if (Equals(value, valueNotSelected))
                     newState = SelectorStates.NotSelected;
-                else if (Object.Equals(value, valueAllSelected))
+                else if (Equals(value, valueAllSelected))
                     newState = SelectorStates.All;
-                else if (Object.Equals(value, valueNoneSelected))
+                else if (Equals(value, valueNoneSelected))
                     newState = SelectorStates.None;
                 else
                     newState = SelectorStates.ValueSet;
@@ -1161,20 +1133,12 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Invokes the <see cref="ValueChanged"/> event.
         /// </summary>
-        protected virtual void OnValueChanged(EventArgs e)
-        {
-            if (ValueChanged != null)
-                ValueChanged(this, e);
-        }
+        protected virtual void OnValueChanged(EventArgs e) => ValueChanged?.Invoke(this, e);
 
         /// <summary>
         /// Invokes the <see cref="StateChanged"/> event.
         /// </summary>
-        protected virtual void OnStateChanged(EventArgs e)
-        {
-            if (StateChanged != null)
-                StateChanged(this, e);
-        }
+        protected virtual void OnStateChanged(EventArgs e) => StateChanged?.Invoke(this, e);
 
         /// <summary>
         /// Invokes the <see cref="ButtonClearClick"/> event or when it is not handled
@@ -1182,8 +1146,8 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected virtual void OnButtonClearClick(EventArgs e)
         {
-            if (ButtonClearClick != null)
-                ButtonClearClick(this, e);
+            if (ButtonClearClick is EventHandler handler)
+                handler.Invoke(this, e);
             else
                 DefaultClearClick();
         }
@@ -1194,8 +1158,8 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected virtual void OnButtonAllClick(EventArgs e)
         {
-            if (ButtonAllClick != null)
-                ButtonAllClick(this, e);
+            if (ButtonAllClick is EventHandler handler)
+                handler.Invoke(this, e);
             else
                 DefaultAllClick();
         }
@@ -1206,8 +1170,8 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected virtual void OnButtonNoneClick(EventArgs e)
         {
-            if (ButtonNoneClick != null)
-                ButtonNoneClick(this, e);
+            if (ButtonNoneClick is EventHandler handler)
+                handler.Invoke(this, e);
             else
                 DefaultNoneClick();
         }
@@ -1218,8 +1182,8 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected virtual void OnButtonBrowseClick(EventArgs e)
         {
-            if (ButtonBrowseClick != null)
-                ButtonBrowseClick(this, e);
+            if (ButtonBrowseClick is EventHandler handler)
+                handler.Invoke(this, e);
             else
                 DefaultBrowseClick();
         }
@@ -1230,8 +1194,8 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected virtual void OnButtonEditorClick(EventArgs e)
         {
-            if (ButtonEditorClick != null)
-                ButtonEditorClick(this, e);
+            if (ButtonEditorClick is EventHandler handler)
+                handler.Invoke(this, e);
             else
                 DefaultEditorClick();
         }
@@ -1242,8 +1206,8 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected virtual void OnButtonNewClick(EventArgs e)
         {
-            if (ButtonNewClick != null)
-                ButtonNewClick(this, e);
+            if (ButtonNewClick is EventHandler handler)
+                handler.Invoke(this, e);
             else
                 DefaultNewClick();
         }
@@ -1254,12 +1218,12 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         protected virtual void OnAutoFind(AutoFindEventArgs e)
         {
-            if (AutoFind != null)
+            if (AutoFind is EventHandler<AutoFindEventArgs> handler)
             {
-                AutoFind(this, e);
+                handler.Invoke(this, e);
                 if (!e.DefaultAutoFind)
                 {
-                    this.Value = e.Value;
+                    Value = e.Value;
                     return;
                 }
             }
@@ -1270,29 +1234,17 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Invokes the <see cref="CalculateText"/> event.
         /// </summary>
-        protected virtual void OnCalculateText(CalculateTextEventArgs e)
-        {
-            if (CalculateText != null)
-                CalculateText(this, e);
-        }
+        protected virtual void OnCalculateText(CalculateTextEventArgs e) => CalculateText?.Invoke(this, e);
 
         /// <summary>
         /// Invokes the <see cref="ImageClick"/> event.
         /// </summary>
-        protected virtual void OnImageClick(EventArgs e)
-        {
-            if (ImageClick != null)
-                ImageClick(this, e);
-        }
+        protected virtual void OnImageClick(EventArgs e) => ImageClick?.Invoke(this, e);
 
         /// <summary>
         /// Invokes the <see cref="ImageDoubleClick"/> event.
         /// </summary>
-        protected virtual void OnImageDoubleClick(EventArgs e)
-        {
-            if (ImageDoubleClick != null)
-                ImageDoubleClick(this, e);
-        }
+        protected virtual void OnImageDoubleClick(EventArgs e) => ImageDoubleClick?.Invoke(this, e);
 
         #endregion
 
@@ -1302,12 +1254,12 @@ namespace KGySoft.WinForms.Controls
 
         #region Private implementation
 
-        private void SetText(string value)
+        private void SetText(string? newValue)
         {
-            if (String.IsNullOrEmpty(value))
+            if (String.IsNullOrEmpty(newValue))
                 cmbCombo.Clear();
             else
-                cmbCombo.Text = value;
+                cmbCombo.Text = newValue;
         }
 
         /// <summary>
@@ -1315,7 +1267,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private void SetTextByValue()
         {
-            string text = GetTextByValue(value) ?? String.Empty;
+            string text = GetTextByValue(value);
 
             // assigning even if equal to set SelectedIndex and SelectedValue if text is among elements (might needed after AutoFind)
             SetText(text);
@@ -1325,7 +1277,7 @@ namespace KGySoft.WinForms.Controls
                 cmbCombo.SelectedIndex = -1;
         }
 
-        private object GetItemValue(object item)
+        private object? GetItemValue(object item)
         {
             Debug.Assert(DataSource != null && !String.IsNullOrEmpty(ValueMember) && !String.IsNullOrEmpty(DisplayMember));
 
@@ -1359,30 +1311,28 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private void SetControlValue(object value)
+        private void SetControlValue(object? newValue)
         {
             switch (relevantControlValue)
             {
                 case RelevantControlValues.Value:
-                    Value = value;
+                    Value = newValue;
                     break;
                 case RelevantControlValues.Text:
-                    if (String.IsNullOrEmpty((string)value) || value.Equals(Language.Translate(textNotSelected)))
+                    if (String.IsNullOrEmpty(newValue as string) || newValue.Equals(Language.Translate(textNotSelected)))
                         Value = valueNotSelected;
-                    else if (Equals(value, Language.Translate(textAllSelected)))
+                    else if (Equals(newValue, Language.Translate(textAllSelected)))
                         Value = valueAllSelected;
-                    else if (Equals(value, Language.Translate(textNoneSelected)))
+                    else if (Equals(newValue, Language.Translate(textNoneSelected)))
                         Value = valueNoneSelected;
                     else
                     {
-                        Value = value;
+                        Value = newValue;
                     }
                     break;
                 case RelevantControlValues.State:
-                    if (value is RelevantControlValues)
-                    {
-                        SetState((SelectorStates)value);
-                    }
+                    if (newValue is RelevantControlValues)
+                        SetState((SelectorStates)newValue);
                     else
                         Value = valueNotSelected;
                     break;
@@ -1393,7 +1343,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Handled events
 
-        private void SelectorButtonClick(object sender, EventArgs e)
+        private void SelectorButtonClick(object? sender, EventArgs e)
         {
             if (sender == btnClearSelection)
                 OnButtonClearClick(e);
@@ -1409,17 +1359,10 @@ namespace KGySoft.WinForms.Controls
                 OnButtonNewClick(e);
         }
 
-        private void pbImage_Click(object sender, EventArgs e)
-        {
-            OnImageClick(e);
-        }
+        private void pbImage_Click(object? sender, EventArgs e) => OnImageClick(e);
+        private void pbImage_DoubleClick(object? sender, EventArgs e) => OnImageDoubleClick(e);
 
-        private void pbImage_DoubleClick(object sender, EventArgs e)
-        {
-            OnImageDoubleClick(e);
-        }
-
-        private void cmbCombo_KeyPress(object sender, KeyPressEventArgs e)
+        private void cmbCombo_KeyPress(object? sender, KeyPressEventArgs e)
         {
             if (readOnly || !textEditable || DropDownStyle == ComboBoxStyle.DropDownList)
                 return;
@@ -1430,13 +1373,13 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private void cmbCombo_Enter(object sender, EventArgs e)
+        private void cmbCombo_Enter(object? sender, EventArgs e)
         {
             checkChangedOnLeave = false;
             deleteContent = state != SelectorStates.ValueSet;
         }
 
-        private void cmbCombo_TextChangedOnLeave(object sender, EventArgs e)
+        private void cmbCombo_TextChangedOnLeave(object? sender, EventArgs e)
         {
             ResetColor();
             if (!checkChangedOnLeave)
@@ -1451,7 +1394,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        void cmbCombo_SelectedValueChanged(object sender, EventArgs e)
+        void cmbCombo_SelectedValueChanged(object? sender, EventArgs e)
         {
             // if DropDownList, cmbCombo.SelectedValue will be null if Value is not among DataSource elements
             if (DataSource != null && !(cmbCombo.DropDownStyle == ComboBoxStyle.DropDownList && cmbCombo.SelectedValue == null) && !Equals(value, cmbCombo.SelectedValue))
@@ -1461,7 +1404,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        void cmbCombo_SelectedIndexChanged(object sender, EventArgs e)
+        void cmbCombo_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (DataSource == null && SelectedIndex != -1 && !Equals(value, cmbCombo.SelectedItem))
             {
@@ -1470,12 +1413,12 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        private void ucCustomSelector_Load(object sender, EventArgs e)
+        private void ucCustomSelector_Load(object? sender, EventArgs e)
         {
             SetTextByValue();
         }
 
-        void cmbCombo_TextChanged(object sender, EventArgs e)
+        void cmbCombo_TextChanged(object? sender, EventArgs e)
         {
             if (cmbCombo.Focused)
                 checkChangedOnLeave = true;
@@ -1511,20 +1454,18 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         [Bindable(BindableSupport.Default)]
-        public object SelectedValue
+        [DisallowNull]
+        public object? SelectedValue
         {
-            get { return cmbCombo.SelectedValue; }
-            set { cmbCombo.SelectedValue = value; }
+            get => cmbCombo.SelectedValue;
+            set => cmbCombo.SelectedValue = value;
         }
 
         /// <summary>
         /// Gets whether the there is no selected item in the combo box (<see cref="SelectedValue"/> or is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
         /// </summary>
         [Browsable(false)]
-        public bool IsEmpty
-        {
-            get { return cmbCombo.IsEmpty(); }
-        }
+        public bool IsEmpty => cmbCombo.IsEmpty();
 
         /// <summary>
         /// Occurs when the <see cref="SelectedIndex"/> property has changed.
@@ -1532,8 +1473,8 @@ namespace KGySoft.WinForms.Controls
         [Category("ucCustomSelector")]
         public event EventHandler SelectedIndexChanged
         {
-            add { cmbCombo.SelectedIndexChanged += value; }
-            remove { cmbCombo.SelectedIndexChanged -= value; }
+            add => cmbCombo.SelectedIndexChanged += value;
+            remove => cmbCombo.SelectedIndexChanged -= value;
         }
 
         /// <summary>
@@ -1542,8 +1483,8 @@ namespace KGySoft.WinForms.Controls
         [Category("ucCustomSelector")]
         public event EventHandler SelectedValueChanged
         {
-            add { cmbCombo.SelectedValueChanged += value; }
-            remove { cmbCombo.SelectedValueChanged -= value; }
+            add => cmbCombo.SelectedValueChanged += value;
+            remove => cmbCombo.SelectedValueChanged -= value;
         }
 
         /// <summary>
@@ -1552,10 +1493,10 @@ namespace KGySoft.WinForms.Controls
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         [Bindable(BindableSupport.Yes)]
-        public object SelectedItem
+        public object? SelectedItem
         {
-            get { return cmbCombo.SelectedItem; }
-            set { cmbCombo.SelectedItem = value; }
+            get => cmbCombo.SelectedItem;
+            set => cmbCombo.SelectedItem = value;
         }
 
         /// <summary>
@@ -1565,8 +1506,8 @@ namespace KGySoft.WinForms.Controls
         [Browsable(false)]
         public string SelectedText
         {
-            get { return cmbCombo.SelectedText; }
-            set { cmbCombo.SelectedText = value; }
+            get => cmbCombo.SelectedText;
+            set => cmbCombo.SelectedText = value;
         }
 
         /// <summary>
@@ -1576,8 +1517,8 @@ namespace KGySoft.WinForms.Controls
         [Browsable(false)]
         public int SelectedIndex
         {
-            get { return cmbCombo.SelectedIndex; }
-            set { cmbCombo.SelectedIndex = value; }
+            get => cmbCombo.SelectedIndex;
+            set => cmbCombo.SelectedIndex = value;
         }
 
         /// <summary>
@@ -1588,10 +1529,10 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(null)]
         [RefreshProperties(RefreshProperties.Repaint)]
         [AttributeProvider(typeof(IListSource))]
-        public object DataSource
+        public object? DataSource
         {
-            get { return cmbCombo.DataSource; }
-            set { cmbCombo.DataSource = value; }
+            get => cmbCombo.DataSource;
+            set => cmbCombo.DataSource = value;
         }
 
         /// <summary>
@@ -1604,8 +1545,8 @@ namespace KGySoft.WinForms.Controls
         [Editor("System.Windows.Forms.Design.DataMemberFieldEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public string DisplayMember
         {
-            get { return cmbCombo.DisplayMember; }
-            set { cmbCombo.DisplayMember = value; }
+            get => cmbCombo.DisplayMember;
+            set => cmbCombo.DisplayMember = value;
         }
 
         /// <summary>
@@ -1617,8 +1558,8 @@ namespace KGySoft.WinForms.Controls
         [Editor("System.Windows.Forms.Design.DataMemberFieldEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public string ValueMember
         {
-            get { return cmbCombo.ValueMember; }
-            set { cmbCombo.ValueMember = value; }
+            get => cmbCombo.ValueMember;
+            set => cmbCombo.ValueMember = value;
         }
 
         /// <summary>
@@ -1629,8 +1570,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoCompleteMode.None)]
         public AutoCompleteMode AutoCompleteMode
         {
-            get { return cmbCombo.AutoCompleteMode; }
-            set { cmbCombo.AutoCompleteMode = value; }
+            get => cmbCombo.AutoCompleteMode;
+            set => cmbCombo.AutoCompleteMode = value;
         }
 
         ///<summary>
@@ -1641,8 +1582,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoCompleteSource.None)]
         public AutoCompleteSource AutoCompleteSource
         {
-            get { return cmbCombo.AutoCompleteSource; }
-            set { cmbCombo.AutoCompleteSource = value; }
+            get => cmbCombo.AutoCompleteSource;
+            set => cmbCombo.AutoCompleteSource = value;
         }
 
         ///<summary>
@@ -1654,8 +1595,8 @@ namespace KGySoft.WinForms.Controls
         [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public AutoCompleteStringCollection AutoCompleteCustomSource
         {
-            get { return cmbCombo.AutoCompleteCustomSource; }
-            set { cmbCombo.AutoCompleteCustomSource = value; }
+            get => cmbCombo.AutoCompleteCustomSource;
+            set => cmbCombo.AutoCompleteCustomSource = value;
         }
 
         /// <summary>

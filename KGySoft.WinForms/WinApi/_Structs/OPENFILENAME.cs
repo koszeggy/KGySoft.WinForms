@@ -22,7 +22,7 @@ using System.Runtime.InteropServices;
 
 namespace KGySoft.WinForms.WinApi
 {
-    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct OPENFILENAME
     {
         #region Fields
@@ -46,18 +46,18 @@ namespace KGySoft.WinForms.WinApi
         /// The file name and extension (without path information) of the selected file. This member can be NULL.
         /// </summary>
         [MarshalAs(UnmanagedType.LPTStr)]
-        internal string lpstrFileTitle;
+        internal string? lpstrFileTitle;
 
         internal int nMaxFileTitle;
-        [MarshalAs(UnmanagedType.LPTStr)]internal string lpstrInitialDir;
-        [MarshalAs(UnmanagedType.LPTStr)]internal string lpstrTitle;
+        [MarshalAs(UnmanagedType.LPTStr)]internal string? lpstrInitialDir;
+        [MarshalAs(UnmanagedType.LPTStr)]internal string? lpstrTitle;
         internal int Flags;
         internal short nFileOffset;
         internal short nFileExtension;
-        [MarshalAs(UnmanagedType.LPTStr)]internal string lpstrDefExt;
+        [MarshalAs(UnmanagedType.LPTStr)]internal string? lpstrDefExt;
         internal int lCustData;
         internal OFNHookProcDelegate lpfnHook;
-        [MarshalAs(UnmanagedType.LPTStr)]internal string lpTemplateName;
+        [MarshalAs(UnmanagedType.LPTStr)]internal string? lpTemplateName;
 
         // NT 5.0 or higher
         internal int pvReserved;

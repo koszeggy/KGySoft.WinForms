@@ -38,7 +38,7 @@ namespace KGySoft.WinForms
         internal InvokeMarshaller(Control owner)
         {
             this.owner = owner;
-            threadId = Thread.CurrentThread.ManagedThreadId;
+            threadId = ThreadHelper.ManagedThreadId;
             synchronizationContext = SynchronizationContext.Current;
         }
 
@@ -54,7 +54,7 @@ namespace KGySoft.WinForms
             try
             {
                 // no invoke is required (not using owner.InvokeRequired because that may return false if handle is not created yet)
-                if (threadId == Thread.CurrentThread.ManagedThreadId)
+                if (threadId == ThreadHelper.ManagedThreadId)
                 {
                     action.Invoke();
                     return;

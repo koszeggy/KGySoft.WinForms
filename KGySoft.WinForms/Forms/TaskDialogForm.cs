@@ -20,7 +20,9 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
+#if NET9_0_OR_GREATER
+using System.Diagnostics.CodeAnalysis;
+#endif
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -113,6 +115,9 @@ namespace KGySoft.WinForms.Forms
         {
             #region Properties
 
+#if NET9_0_OR_GREATER
+            [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.", Justification = "False alarm, internal property")]
+#endif
             internal TaskDialogForm Owner { get; set; } = null!;
 
             #endregion
@@ -412,8 +417,7 @@ namespace KGySoft.WinForms.Forms
                 if (handle == IntPtr.Zero)
                     return Enum<SystemTextIds>.ToString(id);
 
-                IntPtr result;
-                int length = User32.LoadString(handle, (int)id, out result, 0);
+                int length = User32.LoadString(handle, (int)id, out IntPtr result, 0);
 
                 // cannot access string
                 if (length == 0)
@@ -1927,7 +1931,7 @@ namespace KGySoft.WinForms.Forms
             SuspendLayout();
             try
             {
-                IOrderedEnumerable<Control> controls = this.Controls.Cast<Control>().OrderBy(c => c.TabIndex);
+                IOrderedEnumerable<Control> controls = Controls.Cast<Control>().OrderBy(c => c.TabIndex);
                 foreach (Control control in controls)
                     control.BringToFront();
             }
@@ -2055,7 +2059,7 @@ namespace KGySoft.WinForms.Forms
                 foreach (var button in pnlButtons.Controls.OfType<AdvancedButton>())
                 {
                     if (!first)
-                        result.Append(" ");
+                        result.Append(' ');
                     first = false;
 
                     if (button.IsElevated)
@@ -2447,6 +2451,7 @@ namespace KGySoft.WinForms.Forms
         #endregion
 
         #region Event Handlers
+#pragma warning disable IDE1006 // Naming Styles
         // ReSharper disable InconsistentNaming
 
         private void RadioButton_CheckedChanged(object? sender, EventArgs e)
@@ -2544,6 +2549,7 @@ namespace KGySoft.WinForms.Forms
         }
 
         // ReSharper restore InconsistentNaming
+#pragma warning restore IDE1006 // Naming Styles
         #endregion
 
         #endregion

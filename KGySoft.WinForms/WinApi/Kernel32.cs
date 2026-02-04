@@ -115,7 +115,7 @@ namespace KGySoft.WinForms.WinApi
         /// address space of the calling process.</param>
         /// <returns>If the function succeeds, the return value is a handle to the specified module.
         /// If the function fails, the return value is NULL.</returns>
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         internal static extern IntPtr GetModuleHandle(string lpModuleName);
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace KGySoft.WinForms.WinApi
         /// If the string specifies a relative path or a module name without a path, the function uses a standard search strategy to find the module.</param>
         /// <returns>If the function succeeds, the return value is a handle to the module.
         /// If the function fails, the return value is NULL.</returns>
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
         internal static extern IntPtr LoadLibrary(string lpFileName);
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace KGySoft.WinForms.WinApi
         /// <param name="lpBuffer">A pointer to a MEMORYSTATUSEX structure that receives information about current memory availability.</param>
         /// <returns>If the function succeeds, the return value is nonzero. If the function fails, the return value is zero.</returns>
         [return: MarshalAs(UnmanagedType.Bool)]
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [DllImport("kernel32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
         internal static extern bool GlobalMemoryStatusEx(ref MEMORYSTATUSEX lpBuffer);
 
         #endregion
