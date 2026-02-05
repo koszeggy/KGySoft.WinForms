@@ -642,7 +642,7 @@ namespace KGySoft.WinForms.Controls
                                 {
                                     IsCancelRequestedCallback = () => task.IsCanceled,
                                     ThrowIfCanceled = false,
-                                    MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 2) // TODO: ParallelHelper.CoreCount
+                                    MaxDegreeOfParallelism = Math.Max(1, ParallelHelper.CoreCount - 2)
                                 });
                         }
                     }
@@ -708,7 +708,7 @@ namespace KGySoft.WinForms.Controls
                                 {
                                     IsCancelRequestedCallback = () => task.IsCanceled,
                                     ThrowIfCanceled = false,
-                                    MaxDegreeOfParallelism = Math.Max(1, Environment.ProcessorCount - 2) // TODO: ParallelHelper.CoreCount
+                                    MaxDegreeOfParallelism = Math.Max(1, ParallelHelper.CoreCount - 2)
                                 });
                         }
                         finally
