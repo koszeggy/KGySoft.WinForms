@@ -315,8 +315,8 @@ namespace KGySoft.WinForms.WinApi
         internal static IntPtr BeginBufferedAnimation(IntPtr hwnd, IntPtr hdc, Rectangle bounds, int speed, out IntPtr phdcFrom, out IntPtr phdcTo)
         {
             var rect = new RECT(bounds);
-            BP_ANIMATIONPARAMS animParams = new BP_ANIMATIONPARAMS();
-            animParams.cbSize = Marshal.SizeOf(animParams);
+            var animParams = new BP_ANIMATIONPARAMS();
+            animParams.cbSize = MarshalHelper.SizeOf<BP_ANIMATIONPARAMS>();
             animParams.style = BP_ANIMATIONSTYLE.BPAS_LINEAR;
             animParams.dwDuration = speed;
             return NativeMethods.BeginBufferedAnimation(hwnd, hdc, ref rect, BP_BUFFERFORMAT.BPBF_COMPATIBLEBITMAP, IntPtr.Zero, ref animParams, out phdcFrom, out phdcTo);

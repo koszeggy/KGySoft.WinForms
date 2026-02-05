@@ -173,9 +173,8 @@ namespace KGySoft.WinForms.Components
         {
             //set up the struct and populate it
 
-            OPENFILENAME ofn = new OPENFILENAME();
-
-            ofn.lStructSize = Marshal.SizeOf(ofn);
+            var ofn = new OPENFILENAME();
+            ofn.lStructSize = MarshalHelper.SizeOf<OPENFILENAME>();
             if ((Environment.OSVersion.Platform != PlatformID.Win32NT) || (Environment.OSVersion.Version.Major < 5))
             {
                 ofn.lStructSize = 0x4c;
@@ -296,7 +295,7 @@ namespace KGySoft.WinForms.Components
             template.itemClass = 0x0082;
 
             // Allocate some unmanaged memory for the template structure, and copy it in
-            IntPtr ptrTemplate = Marshal.AllocCoTaskMem(Marshal.SizeOf(template));
+            IntPtr ptrTemplate = Marshal.AllocCoTaskMem(MarshalHelper.SizeOf<DLGTEMPLATE>());
             Marshal.StructureToPtr(template, ptrTemplate, true);
             return ptrTemplate;
         }

@@ -52,13 +52,9 @@ namespace KGySoft.WinForms
             [SecuritySafeCritical]
             get
             {
-                if (maxMemoryForGC == null)
-                {
-                    maxMemoryForGC = Math.Min(
-                        IntPtr.Size == 4 ? 1_600_000_000 : Int64.MaxValue,
-                        OSHelper.IsWindows ? GetTotalMemory() : Int64.MaxValue);
-                }
-
+                maxMemoryForGC ??= Math.Min(
+                    IntPtr.Size == 4 ? 1_600_000_000 : Int64.MaxValue,
+                    OSHelper.IsWindows ? GetTotalMemory() : Int64.MaxValue);
                 return maxMemoryForGC.Value;
             }
         }
@@ -114,7 +110,7 @@ namespace KGySoft.WinForms
 #if NETFRAMEWORK
         private static long GetTotalMemory()
         {
-            var status = new MEMORYSTATUSEX { dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX)) };
+            var status = new MEMORYSTATUSEX { dwLength = (uint)MarshalHelper.SizeOf<MEMORYSTATUSEX>() };
             if (!Kernel32.GlobalMemoryStatusEx(ref status))
                 return Int64.MaxValue;
             return (long)status.ullTotalPhys;
@@ -123,7 +119,7 @@ namespace KGySoft.WinForms
 
         private static long GetAvailableMemory()
         {
-            var status = new MEMORYSTATUSEX { dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX)) };
+            var status = new MEMORYSTATUSEX { dwLength = (uint)MarshalHelper.SizeOf<MEMORYSTATUSEX>() };
             if (!Kernel32.GlobalMemoryStatusEx(ref status))
                 return Int64.MaxValue;
             return (long)status.ullAvailPhys;

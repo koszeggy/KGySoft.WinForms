@@ -101,7 +101,7 @@ namespace KGySoft.WinForms.WinApi
             lock (typeof(ThemingActivationContext))
             {
                 enableThemingActivationContext = new ACTCTX();
-                enableThemingActivationContext.cbSize = Marshal.SizeOf(typeof(ACTCTX));
+                enableThemingActivationContext.cbSize = MarshalHelper.SizeOf<ACTCTX>();
                 enableThemingActivationContext.lpSource = typeof(Application).Assembly.Location;
                 enableThemingActivationContext.lpResourceName = themingManifestId;
                 enableThemingActivationContext.dwFlags = Constants.ACTCTX_FLAG_ASSEMBLY_RESOURCE_NAME_VALID;

@@ -404,7 +404,7 @@ namespace KGySoft.WinForms
         /// This includes resources of <see cref="BaseForm"/> and <see cref="BaseUserControl"/> instances when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
         /// property is <see cref="DynamicStringLocalization.LocalScope"/> or <see cref="DynamicStringLocalization.AssemblyScope"/>.
         /// If you use <see cref="DynamicResourceManager"/> managers directly whose <see cref="DynamicResourceManager.UseLanguageSettings"/>
-        /// property is <see langword="true"/>, use the <see cref="LanguageSettings.SavePendingResources">LanguageSettings.SavePendingResources</see> method instead.</note>
+        /// property is <see langword="true"/>, use the <see cref="LanguageSettings.SavePendingResources()">LanguageSettings.SavePendingResources</see> method instead.</note>
         /// </remarks>
         public static void SavePendingScopedResources()
         {

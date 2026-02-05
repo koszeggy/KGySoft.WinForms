@@ -241,7 +241,7 @@ namespace KGySoft.WinForms.Components
             }
 
             // allocating unmanaged memory and marshaling elements
-            int buttonSize = SizeOf<TASKDIALOG_BUTTON>();
+            int buttonSize = MarshalHelper.SizeOf<TASKDIALOG_BUTTON>();
             IntPtr result = Marshal.AllocHGlobal(nativeButtons.Length * buttonSize);
             for (int i = 0; i < nativeButtons.Length; i++)
                 Marshal.StructureToPtr(nativeButtons[i], new IntPtr((long)result + i * buttonSize), false);
@@ -257,35 +257,15 @@ namespace KGySoft.WinForms.Components
             if (buttonsArray == IntPtr.Zero)
                 return;
 
-            int buttonSize = SizeOf<TASKDIALOG_BUTTON>();
+            int buttonSize = MarshalHelper.SizeOf<TASKDIALOG_BUTTON>();
             for (int i = 0; i < count; i++)
-                DestroyStructure<TASKDIALOG_BUTTON>(new IntPtr((long)buttonsArray + i * buttonSize));
+                MarshalHelper.DestroyStructure<TASKDIALOG_BUTTON>(new IntPtr((long)buttonsArray + i * buttonSize));
 
             Marshal.FreeHGlobal(buttonsArray);
         }
 
         private static bool IsBackgroundDifferent(TaskDialogStandardIcons icon1, TaskDialogStandardIcons icon2)
             => icon1 != icon2 && !(icon1.In(whiteBackgroundIcons) && icon2.In(whiteBackgroundIcons));
-
-        private static void DestroyStructure<T>(IntPtr ptr)
-        {
-#if NET451_OR_GREATER || NETCOREAPP
-            // To avoid CA2263
-            Marshal.DestroyStructure<T>(ptr);
-#else
-            Marshal.DestroyStructure(ptr, typeof(T));
-#endif
-        }
-
-        private static int SizeOf<T>()
-        {
-#if NET451_OR_GREATER || NETCOREAPP
-            // To avoid CA2263
-            return Marshal.SizeOf<T>();
-#else
-            return Marshal.SizeOf(typeof(T));
-#endif
-        }
 
         #endregion
 
@@ -310,7 +290,7 @@ namespace KGySoft.WinForms.Components
         {
             // setting standard configuration
             config = new TASKDIALOGCONFIG();
-            config.cbSize = (uint)SizeOf<TASKDIALOGCONFIG>();
+            config.cbSize = (uint)MarshalHelper.SizeOf<TASKDIALOGCONFIG>();
             config.hwndParent = ownerHandle;
             config.hInstance = IntPtr.Zero;
             config.dwFlags = (TASKDIALOG_FLAGS)((int)host.Options & TaskDialog.NativeOptionsMask);
@@ -894,7 +874,7 @@ namespace KGySoft.WinForms.Components
 
             ResetSettings();
 
-            int size = Marshal.SizeOf(config);
+            int size = MarshalHelper.SizeOf<TASKDIALOGCONFIG>();
             IntPtr ptrConfig = Marshal.AllocHGlobal(size);
             try
             {
@@ -903,7 +883,7 @@ namespace KGySoft.WinForms.Components
             }
             finally
             {
-                DestroyStructure<TASKDIALOGCONFIG>(ptrConfig);
+                MarshalHelper.DestroyStructure<TASKDIALOGCONFIG>(ptrConfig);
                 Marshal.FreeHGlobal(ptrConfig);
             }
         }
