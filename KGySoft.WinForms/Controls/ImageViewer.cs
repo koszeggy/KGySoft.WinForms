@@ -450,10 +450,18 @@ namespace KGySoft.WinForms.Controls
 
             var flags = InvalidateFlags.Image | InvalidateFlags.DisplayImage;
             Size newImageSize;
-            lock (image)
+            bool lockOnImage = AllowUnsafeCooperativeLocking;
+            if (lockOnImage)
+                Monitor.Enter(image);
+            try
             {
                 newImageSize = image.Size;
                 pixelFormat = image.PixelFormat;
+            }
+            finally
+            {
+                if (lockOnImage)
+                    Monitor.Exit(image);
             }
 
             if (newImageSize != imageSize)
@@ -879,7 +887,7 @@ namespace KGySoft.WinForms.Controls
                 // so the "bitmap region is already locked" can be avoided. Important: this cannot be ensured without locking here internally because
                 // OnPaint can occur any time after invalidating.
                 // NOTE: Of course, to avoid the exception every participant must cooperate and lock on the image when accessing its bitmap data.
-                //       This not happens if the image used by 3rd party code (e.g. PictureBox, PropertyGrid) without locking on it.
+                //       This does not happen if the image is used by 3rd party code (e.g. PictureBox, PropertyGrid) without locking on it.
                 bool useLock = image == toDraw && AllowUnsafeCooperativeLocking;
                 if (useLock)
                     Monitor.Enter(toDraw);

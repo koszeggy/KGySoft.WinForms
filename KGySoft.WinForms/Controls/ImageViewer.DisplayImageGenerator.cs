@@ -164,8 +164,7 @@ namespace KGySoft.WinForms.Controls
 
             #region Internal Properties
             
-            // This is alright, this class is private and is not exposed publicly.
-            internal object SyncRoot => this;
+            internal Lock SyncRoot { get; } = new Lock();
 
             #endregion
 
@@ -242,7 +241,7 @@ namespace KGySoft.WinForms.Controls
             {
                 Debug.Assert(owner.image != null);
 
-                // When turning on AllowUnsafeCooperativeLocking, we don't free possibly existing the clone immediately, so we do it here if there is no running resize task.
+                // When turning on AllowUnsafeCooperativeLocking, we don't free the possibly existing clone immediately, so we do it here if there is no running resize task.
                 if (owner.AllowUnsafeCooperativeLocking && generateResizedImageTask == null)
                 {
                     origImageClone?.Dispose();

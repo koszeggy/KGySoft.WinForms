@@ -64,7 +64,9 @@ namespace KGySoft.WinForms.Controls
         /// When this option is disabled, <see cref="ImageViewer"/> may clone <see cref="ImageViewer.Image"/> internally to generate a resized image in the background, which means more memory consumption.
         /// <para><note type="caution">This option is for advanced users only. If you assign the same <see cref="Image"/> instance to other controls than <see cref="ImageViewer"/> instances,
         /// this option must be disabled, because it may lead to exceptions ("bitmap region is already locked").
-        /// You still can access the <see cref="Image"/> from other threads if you cooperatively lock on the <see cref="Image"/> instance.</note></para>
+        /// You still can access the <see cref="Image"/> from other threads if you cooperatively lock on the <see cref="Image"/> instance.
+        /// Please note that using a shared synchronization root object needs to be handled carefully to avoid deadlocks.
+        /// Do not wait for events from the UI thread while holding the lock.</note></para>
         /// </summary>
         [Description("CAUTION: For advanced users only!\r\n"
             + "Specifies that ImageViewer is allowed to access Image on a background thread. Do not use it when the same Image instance is assigned to other type of controls, because "
