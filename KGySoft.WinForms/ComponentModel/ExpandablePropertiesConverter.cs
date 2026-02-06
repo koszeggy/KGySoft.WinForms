@@ -20,6 +20,15 @@ using System.ComponentModel;
 
 #endregion
 
+#region Suppressions
+
+#if !NET6_0_OR_GREATER
+// ReSharper disable AssignNullToNotNullAttribute - inconsistent annotations on different platforms
+// ReSharper disable PossibleNullReferenceException - inconsistent annotations on different platforms
+#endif
+
+#endregion
+
 // ReSharper disable once CheckNamespace
 namespace KGySoft.ComponentModel
 {
@@ -48,7 +57,7 @@ namespace KGySoft.ComponentModel
             public override Type ComponentType => wrappedDescriptor.ComponentType;
             public override bool IsReadOnly => wrappedDescriptor.IsReadOnly;
             public override Type PropertyType => wrappedDescriptor.PropertyType;
-            public override TypeConverter Converter => converter ??= new ExpandablePropertiesConverter(wrappedDescriptor.PropertyType);
+            public override TypeConverter Converter => converter ??= new ExpandablePropertiesConverter();
 
             #endregion
 
@@ -76,23 +85,6 @@ namespace KGySoft.ComponentModel
 
         #endregion
 
-        #region Fields
-
-        private readonly Type type;
-
-        #endregion
-
-        #region Constructors
-
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ExpandablePropertiesConverter"/> class for the specified <paramref name="type"/>.
-        /// </summary>
-        /// <param name="type">The <see cref="Type"/> to associate with the converter.</param>
-        /// <exception cref="ArgumentNullException">Thrown if <paramref name="type"/> is <see langword="null"/>.</exception>
-        public ExpandablePropertiesConverter(Type type) => this.type = type ?? throw new ArgumentNullException(nameof(type), PublicResources.ArgumentNull);
-
-        #endregion
-
         #region Methods
 
         #region Static Methods
@@ -101,8 +93,10 @@ namespace KGySoft.ComponentModel
         {
             var result = new PropertyDescriptorCollection(null);
 
-            foreach (PropertyDescriptor property in properties)
+            foreach (PropertyDescriptor? property in properties)
             {
+                if (property == null)
+                    continue;
                 if (!(property.Converter is ReferenceConverter || property.Converter.GetType() == typeof(TypeConverter)))
                 {
                     result.Add(property);

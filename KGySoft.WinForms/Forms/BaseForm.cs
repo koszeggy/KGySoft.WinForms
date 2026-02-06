@@ -41,8 +41,23 @@ using KGySoft.WinForms.WinApi;
 
 #region Suppressions
 
+#if !NET7_0_OR_GREATER
+// ReSharper disable AssignNullToNotNullAttribute 
+#endif
+
+#if !NET8_0_OR_GREATER
+// ReSharper disable ConditionalAccessQualifierIsNonNullableAccordingToAPIContract 
+#endif
+
 #if NETFRAMEWORK && !NET47_OR_GREATER
 #pragma warning disable CS1574 // XML comment has cref attribute that could not be resolved - The documentation references types that are not available on all platforms
+#endif
+
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type - inconsistent nullability annotations on different platforms
+//#pragma warning disable CS8602 // Dereference of a possibly null reference - inconsistent nullability annotations on different platforms
+//#pragma warning disable CS8604 // Possible null reference argument - inconsistent nullability annotations on different platforms
+//#pragma warning disable CS8605 // Unboxing a possibly null value - inconsistent nullability annotations on different platforms
 #endif
 
 #endregion

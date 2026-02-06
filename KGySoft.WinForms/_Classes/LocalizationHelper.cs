@@ -16,7 +16,6 @@
 #region Usings
 
 using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Globalization;
 using System.Linq;
@@ -30,6 +29,16 @@ using KGySoft.Reflection;
 using KGySoft.Resources;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Forms;
+
+#endregion
+
+#region Suppressions
+
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type - inconsistent nullability annotations on different platforms 
+#pragma warning disable CS8602 // Dereference of a possibly null reference - inconsistent nullability annotations on different platforms 
+#pragma warning disable CS8604 // Possible null reference argument - inconsistent nullability annotations on different platforms 
+#endif
 
 #endregion
 
@@ -156,8 +165,11 @@ namespace KGySoft.WinForms
 #if !NETCOREAPP3_1_OR_GREATER
             static void ApplyMenuResources(Menu.MenuItemCollection items, LocalizationContext context)
             {
-                foreach (MenuItem item in items)
+                foreach (MenuItem? item in items)
                 {
+                    if (item == null)
+                        continue;
+
                     // to self
                     LocalizeStringProperties(item, item.Name ?? String.Empty, context);
 

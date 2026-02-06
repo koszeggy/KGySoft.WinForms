@@ -27,6 +27,26 @@ using KGySoft.Libraries.Language;
 
 #endregion
 
+#region Suppressions
+
+#if !NET6_0_OR_GREATER
+// ReSharper disable AssignNullToNotNullAttribute 
+// ReSharper disable PossibleNullReferenceException
+// ReSharper disable NullnessAnnotationConflictWithJetBrainsAnnotations
+#endif
+
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type - inconsistent nullability annotations on different platforms
+#pragma warning disable CS8604 // Possible null reference argument - inconsistent nullability annotations on different platforms
+#endif
+
+#if NET6_0 || NET7_0
+// ReSharper disable RedundantSuppressNullableWarningExpression 
+#pragma warning disable CS8766 // Nullability of reference types in return type doesn't match implicitly implemented member (possibly because of nullability attributes). 
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Controls
 {
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]

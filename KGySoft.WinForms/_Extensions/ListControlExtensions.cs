@@ -31,6 +31,16 @@ using KGySoft.Reflection;
 
 #endregion
 
+#region Suppressions
+
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type - inconsistent nullability annotations on different platforms
+#pragma warning disable CS8602 // Dereference of a possibly null reference - inconsistent nullability annotations on different platforms
+#pragma warning disable CS8604 // Possible null reference argument - inconsistent nullability annotations on different platforms
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms
 {
     /// <summary>

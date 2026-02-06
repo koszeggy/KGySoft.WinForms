@@ -24,6 +24,14 @@ using KGySoft.WinForms.WinApi;
 
 #endregion
 
+#region Suppressions
+
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+#pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type - inconsistent nullability annotations on different platforms 
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
