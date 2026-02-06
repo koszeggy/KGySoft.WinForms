@@ -276,6 +276,17 @@ namespace KGySoft.WinForms.Reflection
 
         #endregion
 
+        #region Font
+
+        internal static IntPtr? GetNativeFont(this Font font)
+        {
+            string propertyName = OSHelper.IsMono ? "NativeObject" : "NativeFont";
+            PropertyAccessor? property = GetProperty(typeof(Font), propertyName);
+            return property?.GetInstanceValue<Font, IntPtr>(font);
+        }
+
+        #endregion
+
         #endregion
 
         #region Private Methods
@@ -463,7 +474,6 @@ namespace KGySoft.WinForms.Reflection
             }
 
             field.SetInstanceValue(instance, value);
-
         }
 
         #endregion

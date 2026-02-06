@@ -18,6 +18,9 @@
 using System;
 using System.Drawing;
 
+using KGySoft.Reflection;
+using KGySoft.WinForms.Reflection;
+
 #endregion
 
 namespace KGySoft.WinForms
@@ -28,7 +31,11 @@ namespace KGySoft.WinForms
 
         internal static bool IsDisposed(this Font font)
         {
-            // TODO: We could access the internal NativeFont (Mono: NativeObject) property by reflection, and use fallback only if the property is not found
+            // Trying to access the inner native font, which is null if the font is already disposed.
+            // NOTE: NativeFont is IntPtr on older frameworks and an unmanaged pointer on newer frameworks, but the returned value is IntPtr in both cases.
+            if (font.GetNativeFont() is IntPtr ptr)
+                return ptr == IntPtr.Zero;
+
             try
             {
                 // The Height property reads the internal NativeFont property, which throws ArgumentException if the font is disposed.
