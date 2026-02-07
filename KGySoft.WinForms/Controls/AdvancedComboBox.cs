@@ -220,14 +220,22 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Description("Occurs when ReadOnly property has been changed.")]
         [Category("AdvancedComboBox")]
-        public event EventHandler? ReadOnlyChanged;
+        public event EventHandler? ReadOnlyChanged
+        {
+            add => Events.AddHandler(nameof(ReadOnlyChanged), value);
+            remove => Events.RemoveHandler(nameof(ReadOnlyChanged), value);
+        }
 
         /// <summary>
         /// Occurs on leaving the control when content is different from the original one when the control was focused.
         /// </summary>
         [Category("AdvancedComboBox")]
         [Description("Occurs on leaving the control when content is different from the original one when the control was focused.")]
-        public event EventHandler? TextChangedOnLeave;
+        public event EventHandler? TextChangedOnLeave
+        {
+            add => Events.AddHandler(nameof(TextChangedOnLeave), value);
+            remove => Events.RemoveHandler(nameof(TextChangedOnLeave), value);
+        }
 
         #endregion
 
@@ -688,12 +696,13 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Raises the <see cref="ReadOnlyChanged"/> event.
         /// </summary>
-        protected virtual void OnReadOnlyChanged(EventArgs e) => ReadOnlyChanged?.Invoke(this, e);
+        protected virtual void OnReadOnlyChanged(EventArgs e) => Events.GetHandler<EventHandler>(nameof(ReadOnlyChanged))?.Invoke(this, e);
+
 
         /// <summary>
         /// Raises the <see cref="TextChangedOnLeave"/> event.
         /// </summary>
-        protected virtual void OnTextChangedOnLeave(EventArgs e) => TextChangedOnLeave?.Invoke(this, e);
+        protected virtual void OnTextChangedOnLeave(EventArgs e) => Events.GetHandler<EventHandler>(nameof(TextChangedOnLeave))?.Invoke(this, e);
 
         /// <inheritdoc />
         protected override void OnKeyDown(KeyEventArgs e)
@@ -734,6 +743,8 @@ namespace KGySoft.WinForms.Controls
             }
 
             base.Dispose(disposing);
+            if (disposing)
+                Events.Dispose();
         }
 
         /// <summary>

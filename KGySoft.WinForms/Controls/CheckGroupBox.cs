@@ -495,6 +495,7 @@ namespace KGySoft.WinForms.Controls
         protected override void Dispose(bool disposing)
         {
             VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
+            base.Dispose(disposing);
             if (disposing)
             {
                 components?.Dispose();
@@ -502,8 +503,6 @@ namespace KGySoft.WinForms.Controls
                     contentPanel.Dispose();
                 Events.Dispose();
             }
-
-            base.Dispose(disposing);
         }
 
         #endregion

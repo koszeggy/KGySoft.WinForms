@@ -728,6 +728,8 @@ namespace KGySoft.WinForms.Controls
             }
 
             base.Dispose(disposing);
+            if (disposing)
+                Events.Dispose();
         }
 
         #endregion

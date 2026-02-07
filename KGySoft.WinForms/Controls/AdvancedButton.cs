@@ -122,7 +122,11 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Description("Occurs when the control is painted in a specific state.")]
         [Category("AdvancedButton")]
-        public event EventHandler<PaintStateEventArgs>? PaintState;
+        public event EventHandler<PaintStateEventArgs>? PaintState
+        {
+            add => Events.AddHandler(nameof(PaintState), value);
+            remove => Events.RemoveHandler(nameof(PaintState), value);
+        }
 
         #endregion
 
@@ -1039,7 +1043,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             // Raising PaintState
-            PaintState?.Invoke(this, e);
+            Events.GetHandler<EventHandler<PaintStateEventArgs>>(nameof(PaintState))?.Invoke(this, e);
 
             // Control.OnPaint:
             if (Accessors.PaintEvent is not object paintEventKey)
@@ -1065,6 +1069,8 @@ namespace KGySoft.WinForms.Controls
             }
 
             base.Dispose(disposing);
+            if (disposing)
+                Events.Dispose();
         }
 
         #endregion

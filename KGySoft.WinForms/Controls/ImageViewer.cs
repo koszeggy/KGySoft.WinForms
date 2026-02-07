@@ -682,9 +682,8 @@ namespace KGySoft.WinForms.Controls
             if (disposing)
                 displayImageGenerator.Dispose();
 
+            // base disposes Events as well
             base.Dispose(disposing);
-            if (disposing)
-                Events.Dispose();
         }
 
         #endregion

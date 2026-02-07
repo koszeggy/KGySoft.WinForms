@@ -102,7 +102,11 @@ namespace KGySoft.WinForms.Controls
         [Category("AdvancedTextBox")]
         [Description("Occurs on leaving the control when content is different from the original one when the control was focused. "
             + "It fires after the Leave and before the Validating event.")]
-        public event EventHandler? TextChangedOnLeave;
+        public event EventHandler? TextChangedOnLeave
+        {
+            add => Events.AddHandler(nameof(TextChangedOnLeave), value);
+            remove => Events.RemoveHandler(nameof(TextChangedOnLeave), value);
+        }
 
         #endregion
 
@@ -344,9 +348,9 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Triggers TextChangedOnLeave event
+        /// Raises the <see cref="TextChangedOnLeave"/> event.
         /// </summary>
-        protected virtual void OnTextChangedOnLeave(EventArgs e) => TextChangedOnLeave?.Invoke(this, e);
+        protected virtual void OnTextChangedOnLeave(EventArgs e) => Events.GetHandler<EventHandler>(nameof(TextChangedOnLeave))?.Invoke(this, e);
 
         /// <inheritdoc/>
         protected override void OnPaint(PaintEventArgs e)
@@ -518,6 +522,8 @@ namespace KGySoft.WinForms.Controls
             }
 
             base.Dispose(disposing);
+            if (disposing)
+                Events.Dispose();
         }
 
         #endregion

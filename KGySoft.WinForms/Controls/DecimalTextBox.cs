@@ -147,14 +147,22 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("DecimalTextBox")]
         [Description("Occurs when Value has been changed.")]
-        public event EventHandler? ValueChanged;
+        public event EventHandler? ValueChanged
+        {
+            add => Events.AddHandler(nameof(ValueChanged), value);
+            remove => Events.RemoveHandler(nameof(ValueChanged), value);
+        }
 
         /// <summary>
         /// Occurs when <see cref="Blank"/> has been changed.
         /// </summary>
         [Category("DecimalTextBox")]
         [Description("Occurs when Blank has been changed.")]
-        public event EventHandler? BlankChanged;
+        public event EventHandler? BlankChanged
+        {
+            add => Events.AddHandler(nameof(BlankChanged), value);
+            remove => Events.RemoveHandler(nameof(BlankChanged), value);
+        }
 
         #endregion
 
@@ -637,13 +645,13 @@ namespace KGySoft.WinForms.Controls
         /// Raises the <see cref="ValueChanged"/> event.
         /// </summary>
         /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
-        protected void OnValueChanged(EventArgs e) => ValueChanged?.Invoke(this, e);
+        protected void OnValueChanged(EventArgs e) => Events.GetHandler<EventHandler>(nameof(ValueChanged))?.Invoke(this, e);
 
         /// <summary>
         /// Raises the <see cref="BlankChanged"/> event.
         /// </summary>
         /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
-        protected void OnBlankChanged(EventArgs e) => BlankChanged?.Invoke(this, e);
+        protected void OnBlankChanged(EventArgs e) => Events.GetHandler<EventHandler>(nameof(BlankChanged))?.Invoke(this, e);
 
         /// <inheritdoc />
         protected override void OnKeyDown(KeyEventArgs e)
@@ -680,7 +688,8 @@ namespace KGySoft.WinForms.Controls
             // suppressing editing in Blank mode
             else if (blank && m.Msg.In(Constants.WM_CUT, Constants.WM_CLEAR))
                 return;
-            else base.WndProc(ref m);
+            else
+                base.WndProc(ref m);
         }
 
         #endregion

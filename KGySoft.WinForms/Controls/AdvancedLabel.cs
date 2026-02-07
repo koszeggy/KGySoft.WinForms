@@ -127,19 +127,27 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Description("Occurs when a link is clicked. To handle clicked links automatically, set AutoHandleUrls true, and if this event is subsribed, set HyperlinkClickedEventArgs.Handled false in the event handler.")]
         [Category("AdvancedLabel")]
-        public event EventHandler<HyperlinkClickedEventArgs>? HyperlinkClicked;
+        public event EventHandler<HyperlinkClickedEventArgs>? HyperlinkClicked
+        {
+            add => Events.AddHandler(nameof(HyperlinkClicked), value);
+            remove => Events.RemoveHandler(nameof(HyperlinkClicked), value);
+        }
 
         /// <summary>
         /// Occurs when the control is painted in a specific state.
         /// </summary>
         [Description("Occurs when the control is painted in a specific state.")]
         [Category("AdvancedLabel")]
-        public event EventHandler<PaintStateEventArgs>? PaintState;
+        public event EventHandler<PaintStateEventArgs>? PaintState
+        {
+            add => Events.AddHandler(nameof(PaintState), value);
+            remove => Events.RemoveHandler(nameof(PaintState), value);
+        }
 
         #endregion
 
         #region Properties
-        
+
         #region Public Properties
 
         /// <summary>
@@ -724,7 +732,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         /// <param name="args">A <see cref="HyperlinkClickedEventArgs"/> that contains the event data.</param>
         protected virtual void OnHyperlinkClicked(HyperlinkClickedEventArgs args)
         {
-            if (HyperlinkClicked is { } handler)
+            if (Events.GetHandler<EventHandler<HyperlinkClickedEventArgs>>(nameof(HyperlinkClicked)) is { } handler)
                 handler.Invoke(this, args);
             else
                 args.Handled = false;
@@ -963,7 +971,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             }
             finally
             {
-                PaintState?.Invoke(this, e);
+                Events.GetHandler<EventHandler<PaintStateEventArgs>>(nameof(PaintState))?.Invoke(this, e);
             }
         }
 
@@ -982,6 +990,8 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             }
 
             base.Dispose(disposing);
+            if (disposing)
+                Events.Dispose();
         }
 
         #endregion

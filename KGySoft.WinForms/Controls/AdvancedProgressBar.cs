@@ -361,7 +361,10 @@ namespace KGySoft.WinForms.Controls
             animationTimer.Tick -= animationTimer_Tick;
 
             if (disposing)
+            {
                 animationTimer.Dispose();
+                Events.Dispose();
+            }
         }
 
         /// <inheritdoc />
