@@ -55,6 +55,11 @@
 + The ExpandablePropertiesConverter class has been extracted from the RecursivelyEditableTypeDescriptor class
   and has been made public.
 
++ KGySoft.Drawing.Imaging namespace:
+====================================
++ New WinFormsBitmapDataExtensions class
+
+
 * KGySoft.WinForms.Components namespace:
 ========================================
 + AdvancedSaveFileDialog: it has been made disposable
