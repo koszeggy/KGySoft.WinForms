@@ -34,7 +34,6 @@ namespace KGySoft.WinForms.Controls
     [Designer(typeof(ucCaptionedContainerDesigner))]
     [DefaultBindingProperty("ControlValue")]
     //[DesignerSerializer(typeof(ucCaptionedContainerSerializer), typeof(CodeDomSerializer))]
-    [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore. "

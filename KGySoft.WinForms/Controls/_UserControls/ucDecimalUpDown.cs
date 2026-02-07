@@ -28,7 +28,6 @@ namespace KGySoft.WinForms.Controls
     /// <summary>
     /// The unified user control version of <see cref="System.Windows.Forms.NumericUpDown"/>.
     /// </summary>
-    [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]

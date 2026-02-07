@@ -54,7 +54,6 @@ namespace KGySoft.WinForms.Controls
     /// A selector control that can be used for general purposes.
     /// </summary>
     [DefaultBindingProperty("Value")]
-    [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]

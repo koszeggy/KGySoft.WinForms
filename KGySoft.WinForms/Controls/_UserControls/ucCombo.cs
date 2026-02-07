@@ -31,7 +31,6 @@ namespace KGySoft.WinForms.Controls
     /// The unified user control version of <see cref="AdvancedComboBox"/>.
     /// </summary>
     [DefaultBindingProperty("SelectedValue")]
-    [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]

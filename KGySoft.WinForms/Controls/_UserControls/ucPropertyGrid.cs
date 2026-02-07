@@ -32,7 +32,6 @@ namespace KGySoft.WinForms.Controls
     /// <summary>
     /// A property grid control that translates description automatically.
     /// </summary>
-    [ToolboxItem(true)]
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
     [Obsolete("This class is derived from the obsolete ucBase, and it is not recommended to use it anymore.")]
     public partial class ucPropertyGrid: ucBase
