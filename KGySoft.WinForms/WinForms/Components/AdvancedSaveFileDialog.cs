@@ -28,7 +28,7 @@ using KGySoft.WinForms.WinApi;
 #region Suppressions
 
 #if NET451_OR_GREATER || NETCOREAPP
-#pragma warning disable CA2263 // Prefer generic overload when type is known - The generic Marshal members are not available on all targets
+//#pragma warning disable CA2263 // Prefer generic overload when type is known - The generic Marshal members are not available on all targets
 #endif
 
 #if !NETCOREAPP3_0_OR_GREATER
@@ -393,7 +393,7 @@ namespace KGySoft.WinForms.Components
                     //we need to intercept the CDN_FILEOK message
                     //which is sent when the user selects a filename
 
-                    NMHDR nmhdr = (NMHDR)Marshal.PtrToStructure(new IntPtr(lParam), typeof(NMHDR))!;
+                    NMHDR nmhdr = MarshalHelper.PtrToStructure<NMHDR>(new IntPtr(lParam));
 
                     // OK pressed
                     if (nmhdr.Code == Constants.CDN_FILEOK)

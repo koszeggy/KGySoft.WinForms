@@ -23,7 +23,7 @@ using KGySoft.Resources;
 
 #endregion
 
-namespace KGySoft.WinForms
+namespace KGySoft
 {
     /// <summary>
     /// Contains the string resources of the project.

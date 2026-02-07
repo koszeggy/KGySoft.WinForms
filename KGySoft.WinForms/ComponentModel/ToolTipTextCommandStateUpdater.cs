@@ -22,7 +22,6 @@ using KGySoft.WinForms;
 
 #endregion
 
-// ReSharper disable once CheckNamespace
 namespace KGySoft.ComponentModel
 {
     /// <summary>

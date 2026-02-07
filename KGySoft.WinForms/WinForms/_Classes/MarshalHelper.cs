@@ -22,13 +22,22 @@ using System.Runtime.InteropServices;
 
 namespace KGySoft.WinForms
 {
+    // To avoid CA2263
     internal static class MarshalHelper
     {
         #region Methods
 
+        internal static T? PtrToStructure<T>(IntPtr ptr)
+        {
+#if NET451_OR_GREATER || NETCOREAPP
+            return Marshal.PtrToStructure<T>(ptr);
+#else
+            return (T)Marshal.PtrToStructure(ptr, typeof(T));
+#endif
+        }
+
         internal static void DestroyStructure<T>(IntPtr ptr)
         {
-            // To avoid CA2263
 #if NET451_OR_GREATER || NETCOREAPP
             Marshal.DestroyStructure<T>(ptr);
 #else
@@ -38,7 +47,6 @@ namespace KGySoft.WinForms
 
         internal static int SizeOf<T>()
         {
-            // To avoid CA2263
 #if NET451_OR_GREATER || NETCOREAPP
             return Marshal.SizeOf<T>();
 #else

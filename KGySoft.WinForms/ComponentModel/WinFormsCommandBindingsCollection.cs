@@ -24,7 +24,6 @@ using KGySoft.Reflection;
 
 #endregion
 
-// ReSharper disable once CheckNamespace
 namespace KGySoft.ComponentModel
 {
     /// <summary>

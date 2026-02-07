@@ -22,7 +22,7 @@ using SystemDebug = System.Diagnostics.Debug;
 
 #endregion
 
-namespace KGySoft.WinForms
+namespace KGySoft
 {
     internal static class Debug
     {

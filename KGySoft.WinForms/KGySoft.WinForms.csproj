@@ -4,7 +4,7 @@
     <!--<TargetFrameworks>net35;net40;net47;netcoreapp3.0;netcoreapp3.1;net5.0-windows;net6.0-windows</TargetFrameworks>-->
     <TargetFrameworks>net35;net40;net47;net9.0-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <RootNamespace>KGySoft.WinForms</RootNamespace>
+    <RootNamespace>KGySoft</RootNamespace>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
     <SignAssembly>true</SignAssembly>
     <AssemblyOriginatorKeyFile>..\KGySoft.snk</AssemblyOriginatorKeyFile>
@@ -44,8 +44,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <EmbeddedResource Include="Controls\Resources\Toolbox.AdvancedLabel.png" />
-    <EmbeddedResource Include="Controls\Resources\Toolbox.CommandLinkButton.png" />
+    <EmbeddedResource Include="WinForms\Controls\Resources\Toolbox.AdvancedLabel.png" />
+    <EmbeddedResource Include="WinForms\Controls\Resources\Toolbox.CommandLinkButton.png" />
   </ItemGroup>
 
   <ItemGroup>
