@@ -356,58 +356,47 @@ namespace KGySoft.WinForms
 
         private static Bitmap ReconstructWithAlpha(Bitmap blackBg, Bitmap whiteBg)
         {
+            #region Local Methods
+
+            static Color32 RestoreWithAlpha(Color32 colorOnBlack, Color32 colorOnWhite)
+            {
+                const uint black = 0xFF000000;
+                const uint white = 0xFFFFFFFF;
+
+                // colors are the same: no transparency
+                if (colorOnBlack == colorOnWhite)
+                    return colorOnBlack;
+
+                // colors equal to background: full transparency
+                if (colorOnBlack.ToArgbUInt32() == black && colorOnWhite.ToArgbUInt32() == white)
+                    return default;
+
+                // colors are different: calculate original color with alpha
+                float alphaR = 1f - (colorOnWhite.R - colorOnBlack.R) / 255f;
+                float alphaG = 1f - (colorOnWhite.G - colorOnBlack.G) / 255f;
+                float alphaB = 1f - (colorOnWhite.B - colorOnBlack.B) / 255f;
+                float alpha = (alphaR + alphaG + alphaB) / 3f;
+                if (alpha == 0f)
+                    return default; // fully transparent
+
+                int r = (int)(colorOnBlack.R / alpha);
+                int g = (int)(colorOnBlack.G / alpha);
+                int b = (int)(colorOnBlack.B / alpha);
+                int a = (int)(alpha * 255);
+                return new Color32((byte)a, (byte)r, (byte)g, (byte)b);
+            }
+
+            #endregion
+            
             using IReadableBitmapData bmpDataWhite = whiteBg.GetReadableBitmapData();
             using IReadableBitmapData bmpDataBlack = blackBg.GetReadableBitmapData();
             int width = bmpDataWhite.Width;
             int height = bmpDataWhite.Height;
-            Bitmap result = new Bitmap(width, height, PixelFormat.Format32bppArgb);
+            var result = new Bitmap(width, height, PixelFormat.Format32bppArgb);
             using IWritableBitmapData bmpDataResult = result.GetWritableBitmapData();
-
-            const uint black = 0xFF000000;
-            const uint white = 0xFFFFFFFF;
-            var rowBlack = bmpDataBlack.FirstRow;
-            var rowWhite = bmpDataWhite.FirstRow;
-            var rowResult = bmpDataResult.FirstRow;
-            do
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    Color32 colorOnWhite = rowWhite[x];
-                    Color32 colorOnBlack = rowBlack[x];
-
-                    // colors are the same: no transparency
-                    if (colorOnBlack == colorOnWhite)
-                    {
-                        rowResult[x] = colorOnWhite;
-                        continue;
-                    }
-
-                    // colors equal to background: full transparency (no need to set the color, it's already transparent)
-                    if (colorOnBlack.ToArgbUInt32() == black && colorOnWhite.ToArgbUInt32() == white)
-                        continue;
-
-                    // colors are different: calculate original color with alpha
-                    rowResult[x] = RestoreAlphaColor(colorOnBlack, colorOnWhite);
-                }
-            } while (rowBlack.MoveNextRow() && rowWhite.MoveNextRow() && rowResult.MoveNextRow());
+            bmpDataBlack.Combine(bmpDataWhite, bmpDataResult, RestoreWithAlpha);
 
             return result;
-        }
-
-        private static Color32 RestoreAlphaColor(Color32 cb, Color32 cw)
-        {
-            float alphaR = 1f - (cw.R - cb.R) / 255f;
-            float alphaG = 1f - (cw.G - cb.G) / 255f;
-            float alphaB = 1f - (cw.B - cb.B) / 255f;
-            float alpha = (alphaR + alphaG + alphaB) / 3f;
-            if (alpha == 0f)
-                return default; // fully transparent
-
-            int r = (int)(cb.R / alpha);
-            int g = (int)(cb.G / alpha);
-            int b = (int)(cb.B / alpha);
-            int a = (int)(alpha * 255);
-            return new Color32((byte)a, (byte)r, (byte)g, (byte)b);
         }
 
         private static void OnVisualStylesChanged(EventArgs e)

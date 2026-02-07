@@ -184,21 +184,22 @@ namespace KGySoft.WinForms.WinApi
             [DllImport("uxtheme.dll")]
             internal static extern int DrawThemeBackground(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, [In]ref RECT pRect, IntPtr pClipRect);
 
-            /// <summary>
-            /// Retrieves the bitmap associated with a particular theme, part, state, and property.
-            /// </summary>
-            /// <param name="hTheme">A handle to theme data.</param>
-            /// <param name="iPartId">The part that contains the bitmap. See Parts and States.</param>
-            /// <param name="iStateId">The state of the part.</param>
-            /// <param name="iPropId">The property to retrieve. Pass zero to automatically select the first available bitmap for this part and state, or use one of the following values:
-            /// TMT_DIBDATA/TMT_GLYPHDIBDATA/TMT_HBITMAP</param>
-            /// <param name="dwFlags">The flags that specify how the bitmap is to be retrieved. Can be one of the following values:
-            /// GBF_DIRECT/GBF_COPY/GBF_VALIDBITS</param>
-            /// <param name="phBitmap">A pointer that receives a handle to the requested bitmap.</param>
-            /// <returns>If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.</returns>
-            /// <remarks>If dwFlags is set to GBF_COPY, release the bitmap stored in phBitmap when no longer needed by calling DeleteObject.</remarks>
-            [DllImport("uxtheme.dll")]
-            internal static extern int GetThemeBitmap(IntPtr hTheme, int iPartId, int iStateId, int iPropId, uint dwFlags, out IntPtr phBitmap);
+            // NOTE: Does not work as needed, see the outer GetThemeBitmap method
+            ///// <summary>
+            ///// Retrieves the bitmap associated with a particular theme, part, state, and property.
+            ///// </summary>
+            ///// <param name="hTheme">A handle to theme data.</param>
+            ///// <param name="iPartId">The part that contains the bitmap. See Parts and States.</param>
+            ///// <param name="iStateId">The state of the part.</param>
+            ///// <param name="iPropId">The property to retrieve. Pass zero to automatically select the first available bitmap for this part and state, or use one of the following values:
+            ///// TMT_DIBDATA/TMT_GLYPHDIBDATA/TMT_HBITMAP</param>
+            ///// <param name="dwFlags">The flags that specify how the bitmap is to be retrieved. Can be one of the following values:
+            ///// GBF_DIRECT/GBF_COPY/GBF_VALIDBITS</param>
+            ///// <param name="phBitmap">A pointer that receives a handle to the requested bitmap.</param>
+            ///// <returns>If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.</returns>
+            ///// <remarks>If dwFlags is set to GBF_COPY, release the bitmap stored in phBitmap when no longer needed by calling DeleteObject.</remarks>
+            //[DllImport("uxtheme.dll")]
+            //internal static extern int GetThemeBitmap(IntPtr hTheme, int iPartId, int iStateId, int iPropId, uint dwFlags, out IntPtr phBitmap);
 
             #endregion
         }
