@@ -231,7 +231,7 @@ namespace KGySoft.WinForms.Controls
                 Color backColor = isHighContrastHighlighted ? SystemColors.Highlight : state.BackColor;
                 if (backColor.A > 0)
                 {
-                    if (backColor.A == Byte.MaxValue)
+                    if (backColor.A == Byte.MaxValue && !OSHelper.IsMono)
                         backColor = e.Graphics.GetNearestColor(backColor);
                     e.Graphics.FillRectangle(backColor.GetBrush(), bounds);
                 }

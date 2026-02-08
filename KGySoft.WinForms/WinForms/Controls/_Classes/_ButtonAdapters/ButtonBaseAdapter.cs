@@ -131,15 +131,19 @@ namespace KGySoft.WinForms.Controls
                 if (colors.IsHighContrastHighlighted)
                     colors.ButtonFace = SystemColors.Highlight;
 
-                colors.ButtonFace = graphics.GetNearestColor(colors.ButtonFace);
-                colors.ButtonShadow = graphics.GetNearestColor(colors.ButtonShadow);
-                colors.ButtonShadowDark = graphics.GetNearestColor(colors.ButtonShadowDark);
-                colors.ContrastButtonShadow = graphics.GetNearestColor(colors.ContrastButtonShadow);
-                colors.WindowText = graphics.GetNearestColor(colors.WindowText);
-                colors.Highlight = graphics.GetNearestColor(colors.Highlight);
-                colors.LowHighlight = graphics.GetNearestColor(colors.LowHighlight);
-                colors.LowButtonFace = graphics.GetNearestColor(colors.LowButtonFace);
-                colors.WindowFrame = graphics.GetNearestColor(colors.WindowFrame);
+                // On Mono, graphics.GetNearestColor returns the empty color
+                if (!OSHelper.IsMono)
+                {
+                    colors.ButtonFace = graphics.GetNearestColor(colors.ButtonFace);
+                    colors.ButtonShadow = graphics.GetNearestColor(colors.ButtonShadow);
+                    colors.ButtonShadowDark = graphics.GetNearestColor(colors.ButtonShadowDark);
+                    colors.ContrastButtonShadow = graphics.GetNearestColor(colors.ContrastButtonShadow);
+                    colors.WindowText = graphics.GetNearestColor(colors.WindowText);
+                    colors.Highlight = graphics.GetNearestColor(colors.Highlight);
+                    colors.LowHighlight = graphics.GetNearestColor(colors.LowHighlight);
+                    colors.LowButtonFace = graphics.GetNearestColor(colors.LowButtonFace);
+                    colors.WindowFrame = graphics.GetNearestColor(colors.WindowFrame);
+                }
 
                 return colors;
             }
