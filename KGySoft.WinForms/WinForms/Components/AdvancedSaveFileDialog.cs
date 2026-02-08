@@ -27,10 +27,6 @@ using KGySoft.WinForms.WinApi;
 
 #region Suppressions
 
-#if NET451_OR_GREATER || NETCOREAPP
-//#pragma warning disable CA2263 // Prefer generic overload when type is known - The generic Marshal members are not available on all targets
-#endif
-
 #if !NETCOREAPP3_0_OR_GREATER
 #pragma warning disable CS8600 // Converting null literal or possible null value to non-nullable type. - analyzer false alarm for .NET Framework
 #pragma warning disable CS8602 // Dereference of a possibly null reference. - analyzer false alarm for .NET Framework
