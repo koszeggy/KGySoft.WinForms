@@ -28,25 +28,31 @@ Find some more examples with images at the project site at https://github.com/ko
     <repository type="git" url="https://github.com/koszeggy/KGySoft.WinForms" />
     <dependencies>
       <group targetFramework=".NETFramework3.5">
-        <dependency id="KGySoft.Drawing" version="9.2.0" />
+        <dependency id="KGySoft.Drawing" version="10.0.1" />
       </group>
       <group targetFramework=".NETFramework4.0">
-        <dependency id="KGySoft.Drawing" version="9.2.0" />
+        <dependency id="KGySoft.Drawing" version="10.0.1" />
+      </group>
+      <group targetFramework=".NETFramework4.5">
+        <dependency id="KGySoft.Drawing" version="10.0.1" />
       </group>
       <group targetFramework=".NETFramework4.7">
-        <dependency id="KGySoft.Drawing" version="9.2.0" />
+        <dependency id="KGySoft.Drawing" version="10.0.1" />
       </group>
       <group targetFramework="netcoreapp3.0" >
-        <dependency id="KGySoft.Drawing" version="9.2.0" />
+        <dependency id="KGySoft.Drawing" version="10.0.1" />
       </group>
       <group targetFramework="netcoreapp3.1" >
-        <dependency id="KGySoft.Drawing" version="9.2.0" />
+        <dependency id="KGySoft.Drawing" version="10.0.1" />
       </group>
       <group targetFramework="net5.0-windows7.0" >
-        <dependency id="KGySoft.Drawing" version="9.2.0" />
+        <dependency id="KGySoft.Drawing" version="10.0.1" />
       </group>
       <group targetFramework="net6.0-windows7.0" >
-        <dependency id="KGySoft.Drawing" version="9.2.0" />
+        <dependency id="KGySoft.Drawing" version="10.0.1" />
+      </group>
+      <group targetFramework="net10.0-windows7.0" >
+        <dependency id="KGySoft.Drawing" version="10.0.1" />
       </group>
     </dependencies>
   </metadata>
@@ -59,6 +65,8 @@ Find some more examples with images at the project site at https://github.com/ko
     <file src="..\bin\Release\net35\KGySoft.WinForms.xml" target="lib\net35" />
     <file src="..\bin\Release\net40\KGySoft.WinForms.dll" target="lib\net40" />
     <file src="..\bin\Release\net40\KGySoft.WinForms.xml" target="lib\net40" />
+    <file src="..\bin\Release\net45\KGySoft.WinForms.dll" target="lib\net45" />
+    <file src="..\bin\Release\net45\KGySoft.WinForms.xml" target="lib\net45" />
     <file src="..\bin\Release\net47\KGySoft.WinForms.dll" target="lib\net47" />
     <file src="..\bin\Release\net47\KGySoft.WinForms.xml" target="lib\net47" />
     <file src="..\bin\Release\netcoreapp3.0\KGySoft.WinForms.dll" target="lib\netcoreapp3.0" />
@@ -69,5 +77,7 @@ Find some more examples with images at the project site at https://github.com/ko
     <file src="..\bin\Release\net5.0-windows\KGySoft.WinForms.xml" target="lib\net5.0-windows7.0" />
     <file src="..\bin\Release\net6.0-windows\KGySoft.WinForms.dll" target="lib\net6.0-windows7.0" />
     <file src="..\bin\Release\net6.0-windows\KGySoft.WinForms.xml" target="lib\net6.0-windows7.0" />
+    <file src="..\bin\Release\net10.0-windows\KGySoft.WinForms.dll" target="lib\net10.0-windows7.0" />
+    <file src="..\bin\Release\net10.0-windows\KGySoft.WinForms.xml" target="lib\net10.0-windows7.0" />
   </files>
 </package>
