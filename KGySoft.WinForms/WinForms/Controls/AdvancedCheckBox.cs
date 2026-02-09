@@ -475,6 +475,7 @@ namespace KGySoft.WinForms.Controls
                         FlatStyle.Flat => new CheckBoxFlatAdapter(this),
                         FlatStyle.Popup => new CheckBoxPopupAdapter(this),
                         FlatStyle.Standard => new CheckBoxStandardAdapter(this),
+                        FlatStyle.System when OSHelper.IsMono => new ButtonStandardAdapter(this),
                         _ => throw new InvalidOperationException()
                     };
                     lastAdapterType = base.FlatStyle;

@@ -221,8 +221,7 @@ namespace KGySoft.WinForms.Controls
         {
             ControlAppearanceState state = e.State;
             if (ButtonRenderer.IsBackgroundPartiallyTransparent((PushButtonState)state.SystemStateId))
-                ButtonRenderer.DrawParentBackground(e.Graphics, bounds, ButtonInstance);
-
+                ButtonInstance.PaintTransparentBackground(e, bounds);
             VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, ButtonInstance.ClientRectangle);
             bounds.Inflate(-ButtonBorderSize, -ButtonBorderSize);
             if (!ButtonInstance.UseVisualStyleBackColor)

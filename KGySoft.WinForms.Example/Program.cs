@@ -44,7 +44,7 @@ using TaskDialogRadioButton = KGySoft.WinForms.Components.TaskDialogRadioButton;
 namespace KGySoft.WinForms.Example
 {
     [SuppressMessage("ReSharper", "UsingStatementResourceInitialization", Justification = "No exceptions are excepted during TaskDialog construction")]
-    static class Program
+    internal static class Program
     {
         #region Properties
 
@@ -611,7 +611,7 @@ namespace KGySoft.WinForms.Example
                     {
                         Description = @"As a button, icon image is shrunk to 16x16 on 100% DPI." + Environment.NewLine
                             + "As a command link, rendered as a 64x64 icon on 100% DPI. When using 400% DPI or higher the unscaled 256x256 icon is displayed.",
-                        CustomIcon = Icons.SystemWarning.Resize(new Size(256, 256))
+                        CustomIcon = Icons.SystemWarning.Resize(OSHelper.IsMono ? new Size(128, 128) : new Size(256, 256))
                     },
                 },
                 RadioButtons =

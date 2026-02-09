@@ -43,6 +43,34 @@ namespace KGySoft.WinForms.WinApi
         public static extern IntPtr GetStockObject(int i);
 
         /// <summary>
+        /// The CreateCompatibleDC function creates a memory device context (DC) compatible with the specified device.
+        /// </summary>
+        /// <param name="hdc">A handle to an existing DC. If this handle is NULL, the function creates a memory DC compatible with the application's current screen.</param>
+        /// <returns>If the function succeeds, the return value is the handle to a memory DC. If the function fails, the return value is NULL.</returns>
+        [DllImport("gdi32.dll", SetLastError = true)]
+        internal static extern IntPtr CreateCompatibleDC(IntPtr hdc);
+
+        /// <summary>
+        /// The CreateCompatibleBitmap function creates a bitmap compatible with the device that is associated with the specified device context.
+        /// </summary>
+        /// <param name="hdc">A handle to a device context.</param>
+        /// <param name="nWidth">The bitmap width, in pixels.</param>
+        /// <param name="nHeight">The bitmap height, in pixels.</param>
+        /// <returns>If the function succeeds, the return value is a handle to the compatible bitmap (DDB). If the function fails, the return value is NULL.</returns>
+        [DllImport("gdi32.dll")]
+        internal static extern IntPtr CreateCompatibleBitmap(IntPtr hdc, int nWidth, int nHeight);
+
+        /// <summary>
+        /// The SelectObject function selects an object into the specified device context (DC). The new object replaces the previous object of the same type.
+        /// </summary>
+        /// <param name="hdc">A handle to the DC.</param>
+        /// <param name="hGdiObj">A handle to the object to be selected. The specified object must have been created.</param>
+        /// <returns>If the selected object is not a region and the function succeeds, the return value is a handle to the object being replaced.
+        /// If an error occurs and the selected object is not a region, the return value is NULL. Otherwise, it is HGDI_ERROR.</returns>
+        [DllImport("gdi32.dll", ExactSpelling = true, SetLastError = true)]
+        internal static extern IntPtr SelectObject(IntPtr hdc, IntPtr hGdiObj);
+
+        /// <summary>
         /// The DeleteObject function deletes a logical pen, brush, font, bitmap, region, or palette, freeing all system resources associated with the object.
         /// After the object is deleted, the specified handle is no longer valid.
         /// </summary>

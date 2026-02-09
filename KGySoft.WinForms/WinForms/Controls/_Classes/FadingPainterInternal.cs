@@ -98,6 +98,7 @@ namespace KGySoft.WinForms.Controls
 
         internal override void PaintCore(PaintEventArgs e, ControlAppearanceState newState)
         {
+            Debug.Assert(OSHelper.IsWindows);
             bool isStandardChangeOnly = (Host.FadingAnimationOptions & FadingOptions.StandardEffects) != FadingOptions.None
                     && !newState.EqualsWithOptions(State, FadingOptions.StandardEffects)
                     && newState.EqualsWithOptions(State, ControlAppearanceState.NonStandardChanges);
@@ -128,69 +129,84 @@ namespace KGySoft.WinForms.Controls
             // AnyChange is handled here: creating and comparing snapshots
             Size size = Control.ClientSize;
             Bitmap newStateImage;
-            //ControlAppearanceState newState = Host.State;
+            IntPtr hdc;
 
-            //    /////////////////////// Rendering into a bitmap - Native solution:
-            //    IntPtr hdc = e.Graphics.GetHdc();
-            //    IntPtr comapitbleDc = Gdi32.CreateCompatibleDC(hdc);
-            //    IntPtr hBitmap = Gdi32.CreateCompatibleBitmap(hdc, size.Width, size.Height);
-            //    Gdi32.SelectObject(comapitbleDc, hBitmap);
-            //    e.Graphics.ReleaseHdc(hdc);
-
-            //    using (Graphics g = Graphics.FromHdc(comapitbleDc))
-            //    {
-            //        Host.PaintState(Host.State, new PaintEventArgs(g, e.ClipRectangle));
-            //        newStateImage = Image.FromHbitmap(hBitmap);
-            //    }
-
-            //    Gdi32.DeleteObject(hBitmap);
-            //    Gdi32.DeleteObject(comapitbleDc);
-
-
-            /////////////////////// Managed solution (this is better because BufferedGraphics.Render uses Gdi.Bitblt, which is faster than Graphics.DrawImage):
-
-            // Using a BufferedGraphics instead of using the Graphics of a newly created Bitmap
-            // because that would cause ugly text rendering when using TextRenderer.DrawText
-            using (BufferedGraphicsContext context = new BufferedGraphicsContext())
+            // On Windows Mono throws an exception from BufferedGraphicsContext.Allocate, so going on with the native solution if possible.
+            // NOTE: Unlike on the normal path, we don't use fine tunings for cases when a paint should be ignored
+            if (OSHelper.IsMono)
             {
-                using (BufferedGraphics bg = context.Allocate(e.Graphics, new Rectangle(Point.Empty, size)))
+                hdc = e.Graphics.GetHdc();
+                IntPtr compatibleDc = Gdi32.CreateCompatibleDC(hdc);
+                IntPtr hBitmap = Gdi32.CreateCompatibleBitmap(hdc, size.Width, size.Height);
+                try
                 {
-                    Host.PaintState(newState, new PaintEventArgs(bg.Graphics, Control.ClientRectangle));
-
-                    newStateImage = new Bitmap(size.Width, size.Height, e.Graphics);
-                    using (Graphics graphicsImage = Graphics.FromImage(newStateImage))
+                    if (hBitmap == IntPtr.Zero)
                     {
-                        bg.Render(graphicsImage);
+                        // the ultimate fallback: Alpha will be corrupted around text
+                        e.Graphics.ReleaseHdc(hdc);
+                        newStateImage = new Bitmap(size.Width, size.Height, e.Graphics);
+                        using Graphics g = Graphics.FromImage(newStateImage);
+                        Host.PaintState(newState, new PaintEventArgs(g, Control.ClientRectangle));
+                    }
+                    else
+                    {
+                        Gdi32.SelectObject(compatibleDc, hBitmap);
+                        e.Graphics.ReleaseHdc(hdc);
+                        using Graphics g = Graphics.FromHdc(compatibleDc);
+                        Host.PaintState(newState, new PaintEventArgs(g, e.ClipRectangle));
+                        newStateImage = Image.FromHbitmap(hBitmap);
                     }
 
-                    // if no actual change or no speed is set rendering result quickly (maybe just Invalidate was called)
-                    bool equal = false;
-                    if (State == null || (State.Visible == newState.Visible && (prevStateImage == null || (equal = prevStateImage.EqualsByContent(newStateImage)))
-                            || prevStateImage?.Size != newStateImage.Size || (Host.FadingAnimationDefaultSpeed <= 0 && !isStandardChangeOnly)))
+                    State ??= newState;
+                }
+                finally
+                {
+                    if (hBitmap != IntPtr.Zero)
+                        Gdi32.DeleteObject(hBitmap);
+                    if (compatibleDc != IntPtr.Zero)
+                        Gdi32.DeleteObject(compatibleDc);
+                }
+            }
+            // Non-Mono Windows platform: Managed solution. This is better because BufferedGraphics.Render uses Gdi.Bitblt, which is faster than Graphics.DrawImage
+            else
+            {
+                // Using a BufferedGraphics instead of using the Graphics of a newly created Bitmap
+                // because that would cause ugly text rendering when using TextRenderer.DrawText
+                using var context = new BufferedGraphicsContext();
+                using BufferedGraphics bg = context.Allocate(e.Graphics, new Rectangle(Point.Empty, size));
+                Host.PaintState(newState, new PaintEventArgs(bg.Graphics, Control.ClientRectangle));
+
+                newStateImage = new Bitmap(size.Width, size.Height, e.Graphics);
+                using (Graphics graphicsImage = Graphics.FromImage(newStateImage))
+                    bg.Render(graphicsImage);
+
+                // if no actual change or no speed is set rendering result quickly (maybe just Invalidate was called)
+                bool equal = false;
+                if (State == null || (State.Visible == newState.Visible && (prevStateImage == null || (equal = prevStateImage.EqualsByContent(newStateImage)))
+                        || prevStateImage?.Size != newStateImage.Size || (Host.FadingAnimationDefaultSpeed <= 0 && !isStandardChangeOnly)))
+                {
+                    // Bug workaround: When disabling a button or enabling/disabling a label, a further paint is immediately triggered and UxTheme.BufferedPaintRenderAnimation
+                    // fails to report that animating is in progress. Therefore, here masking double triggered enabling/disabling to avoid a flickering effect
+                    if (equal && lastEnableToggled != default(DateTime) && DateTime.UtcNow - lastEnableToggled < disablingMaskingTime)
                     {
-                        // Bug workaround: When disabling a button or enabling/disabling a label, a further paint is immediately triggered and UxTheme.BufferedPaintRenderAnimation
-                        // fails to report that animating is in progress. Therefore, here masking double triggered enabling/disabling to avoid a flickering effect
-                        if (equal && lastEnableToggled != default(DateTime) && DateTime.UtcNow - lastEnableToggled < disablingMaskingTime)
-                        {
-                            lastEnableToggled = default(DateTime);
-                            return;
-                        }
-
-                        // this copies newState into e.Graphics
-                        bg.Render();
-
-                        if (equal)
-                            newStateImage.Dispose();
-                        else
-                        {
-                            prevStateImage?.Dispose();
-                            prevStateImage = newStateImage;
-                        }
-
-                        State = newState;
                         lastEnableToggled = default(DateTime);
                         return;
                     }
+
+                    // this copies newState into e.Graphics
+                    bg.Render();
+
+                    if (equal)
+                        newStateImage.Dispose();
+                    else
+                    {
+                        prevStateImage?.Dispose();
+                        prevStateImage = newStateImage;
+                    }
+
+                    State = newState;
+                    lastEnableToggled = default(DateTime);
+                    return;
                 }
             }
 
@@ -200,7 +216,7 @@ namespace KGySoft.WinForms.Controls
                 lastEnableToggled = default(DateTime);
 
             IntPtr hbpAnimation;
-            IntPtr hdc = e.Graphics.GetHdc();
+            hdc = e.Graphics.GetHdc();
             try
             {
                 int speed = isStandardChangeOnly ? GetSpeed(State, newState) : base.GetSpeed(State, newState);
@@ -214,7 +230,7 @@ namespace KGySoft.WinForms.Controls
                         // if previous state was invisible, letting the control paint
                         if (State?.Visible == false)
                             Host.PaintState(State, new PaintEventArgs(g, Control.ClientRectangle));
-                        else
+                        else if (prevStateImage != null)
                             g.DrawImage(prevStateImage, Control.ClientRectangle);
                     }
                     if (hdcTo != IntPtr.Zero)

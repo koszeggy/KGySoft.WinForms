@@ -315,31 +315,70 @@ namespace KGySoft.WinForms
             // Cannot use UxTheme.GetThemeBitmap (see the issues there) so as a workaround, drawing into a black and a white bitmap, and restoring alpha.
             var (hTheme, part, state) = key;
             Size realSize = UxTheme.GetThemePartSize(hTheme, IntPtr.Zero, part, state, (int)ThemeSizeType.True);
-            using Bitmap bmpBlack = PaintIntoBitmap(hTheme, part, state, Color.Black, realSize);
-            using Bitmap bmpWhite = PaintIntoBitmap(hTheme, part, state, Color.White, realSize);
+            using Bitmap? bmpBlack = PaintIntoBitmap(hTheme, part, state, Color.Black, realSize);
+            using Bitmap? bmpWhite = PaintIntoBitmap(hTheme, part, state, Color.White, realSize);
+
+            // fallback, although it has issues (always 100%, regardless of DPI)
+            if (bmpBlack == null || bmpWhite == null)
+                return UxTheme.GetThemeBitmap(hTheme, part, state, realSize);
+
             return ReconstructWithAlpha(bmpBlack, bmpWhite);
         }
 
-        private static Bitmap PaintIntoBitmap(IntPtr hTheme, int part, int state, Color backColor, Size size)
+        private static Bitmap? PaintIntoBitmap(IntPtr hTheme, int part, int state, Color backColor, Size size)
         {
-            // Using just the hdc of g would cause black alpha-blended pixels, but using BufferedGraphics solves the problem
-            var bitmap = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppRgb);
-            using var g = Graphics.FromImage(bitmap);
-            using BufferedGraphicsContext context = new BufferedGraphicsContext();
-            using BufferedGraphics bg = context.Allocate(g, new Rectangle(Point.Empty, size));
-            bg.Graphics.Clear(backColor);
-            var hdc = bg.Graphics.GetHdc();
+            Debug.Assert(OSHelper.IsWindows);
+            if (!OSHelper.IsMono)
+            {
+                // Using just the hdc of g would cause black alpha-blended pixels, but using BufferedGraphics solves the problem
+                var bitmap = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppRgb);
+                using Graphics g = Graphics.FromImage(bitmap);
+
+                using var context = new BufferedGraphicsContext();
+                using BufferedGraphics bg = context.Allocate(g, new Rectangle(Point.Empty, size));
+                bg.Graphics.Clear(backColor);
+                IntPtr hdc = bg.Graphics.GetHdc();
+                try
+                {
+                    UxTheme.DrawThemeBackground(hTheme, hdc, part, state, new Rectangle(Point.Empty, size));
+                }
+                finally
+                {
+                    bg.Graphics.ReleaseHdc(hdc);
+                }
+
+                bg.Render(g);
+                return bitmap;
+            }
+
+            // On Windows, Mono throws an exception for BufferedGraphicsContext.Allocate, so going on with the native solution
+            // This bitmap is needed just for reference, so 1x1 size is alright
+            using var refBitmap = new Bitmap(1, 1, PixelFormat.Format32bppRgb);
+            using Graphics refGraphics = Graphics.FromImage(refBitmap);
+
+            IntPtr refHdc = refGraphics.GetHdc();
+            IntPtr compatibleDc = Gdi32.CreateCompatibleDC(refHdc);
+            if (compatibleDc == IntPtr.Zero)
+                return null;
+            IntPtr hBitmap = Gdi32.CreateCompatibleBitmap(refHdc, size.Width, size.Height);
+            if (hBitmap == IntPtr.Zero)
+                return null;
             try
             {
+                Gdi32.SelectObject(compatibleDc, hBitmap);
+                refGraphics.ReleaseHdc(refHdc);
+                using Graphics g = Graphics.FromHdc(compatibleDc);
+                g.Clear(backColor);
+                IntPtr hdc = g.GetHdc();
                 UxTheme.DrawThemeBackground(hTheme, hdc, part, state, new Rectangle(Point.Empty, size));
+                g.ReleaseHdc(hdc);
+                return Image.FromHbitmap(hBitmap);
             }
             finally
             {
-                bg.Graphics.ReleaseHdc(hdc);
+                Gdi32.DeleteObject(hBitmap);
+                Gdi32.DeleteObject(compatibleDc);
             }
-
-            bg.Render(g);
-            return bitmap;
         }
 
         private static bool GetHasDefaultAnimation((int PartId, int StateId1, int StateId2) key)
@@ -349,8 +388,8 @@ namespace KGySoft.WinForms
             using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))
                 size = GetPartSize(ButtonTheme, null, g, key.PartId, key.StateId1, true);
 
-            using Bitmap bmp1 = PaintIntoBitmap(ButtonTheme, key.PartId, key.StateId1, Color.White, size);
-            using Bitmap bmp2 = PaintIntoBitmap(ButtonTheme, key.PartId, key.StateId2, Color.White, size);
+            using Bitmap? bmp1 = PaintIntoBitmap(ButtonTheme, key.PartId, key.StateId1, Color.White, size);
+            using Bitmap? bmp2 = PaintIntoBitmap(ButtonTheme, key.PartId, key.StateId2, Color.White, size);
             return !bmp1.EqualsByContent(bmp2);
         }
 

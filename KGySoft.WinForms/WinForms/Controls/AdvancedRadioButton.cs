@@ -477,6 +477,7 @@ namespace KGySoft.WinForms.Controls
                         FlatStyle.Flat => new RadioButtonFlatAdapter(this),
                         FlatStyle.Popup => new RadioButtonPopupAdapter(this),
                         FlatStyle.Standard => new RadioButtonStandardAdapter(this),
+                        FlatStyle.System when OSHelper.IsMono => new ButtonStandardAdapter(this),
                         _ => throw new InvalidOperationException()
                     };
                     lastAdapterType = base.FlatStyle;

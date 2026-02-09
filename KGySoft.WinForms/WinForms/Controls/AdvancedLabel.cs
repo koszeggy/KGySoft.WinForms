@@ -704,10 +704,18 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         /// <inheritdoc />
         protected override void OnMouseMove(MouseEventArgs e)
         {
-            base.OnMouseMove(e);
+            try
+            {
+                base.OnMouseMove(e);
+            }
+            catch (NullReferenceException) when (OSHelper.IsMono) // workaround for Mono bug
+            {
+                // at System.Windows.Forms.LinkLabel.PointInLink (System.Int32 x, System.Int32 y)
+                return;
+            }
 
             // If the base class decided to show the ugly hand cursor
-            if (OverrideCursor == Cursors.Hand)
+            if (OSHelper.IsWindows && OverrideCursor == Cursors.Hand)
             {
                 // Show the system hand cursor instead
                 OverrideCursor = new Cursor(User32.LoadCursor(IntPtr.Zero, Constants.IDC_HAND));

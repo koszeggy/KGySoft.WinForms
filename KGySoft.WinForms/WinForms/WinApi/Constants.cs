@@ -170,6 +170,8 @@ namespace KGySoft.WinForms.WinApi
 
         internal const int FontSmoothingType_ClearType = 2;
 
+        internal const uint GBF_DIRECT = 0x00000001;
+
         #endregion
     }
 }

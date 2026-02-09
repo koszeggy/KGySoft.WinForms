@@ -612,6 +612,7 @@ namespace KGySoft.WinForms.Controls
                         FlatStyle.Flat => new ButtonFlatAdapter(this),
                         FlatStyle.Popup => new ButtonPopupAdapter(this),
                         FlatStyle.Standard => new ButtonStandardAdapter(this),
+                        FlatStyle.System when OSHelper.IsMono => new ButtonStandardAdapter(this),
                         _ => throw new InvalidOperationException()
                     };
 

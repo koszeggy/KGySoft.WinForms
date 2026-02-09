@@ -18,6 +18,7 @@
 using System;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
@@ -185,21 +186,21 @@ namespace KGySoft.WinForms.WinApi
             internal static extern int DrawThemeBackground(IntPtr hTheme, IntPtr hdc, int iPartId, int iStateId, [In]ref RECT pRect, IntPtr pClipRect);
 
             // NOTE: Does not work as needed, see the outer GetThemeBitmap method
-            ///// <summary>
-            ///// Retrieves the bitmap associated with a particular theme, part, state, and property.
-            ///// </summary>
-            ///// <param name="hTheme">A handle to theme data.</param>
-            ///// <param name="iPartId">The part that contains the bitmap. See Parts and States.</param>
-            ///// <param name="iStateId">The state of the part.</param>
-            ///// <param name="iPropId">The property to retrieve. Pass zero to automatically select the first available bitmap for this part and state, or use one of the following values:
-            ///// TMT_DIBDATA/TMT_GLYPHDIBDATA/TMT_HBITMAP</param>
-            ///// <param name="dwFlags">The flags that specify how the bitmap is to be retrieved. Can be one of the following values:
-            ///// GBF_DIRECT/GBF_COPY/GBF_VALIDBITS</param>
-            ///// <param name="phBitmap">A pointer that receives a handle to the requested bitmap.</param>
-            ///// <returns>If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.</returns>
-            ///// <remarks>If dwFlags is set to GBF_COPY, release the bitmap stored in phBitmap when no longer needed by calling DeleteObject.</remarks>
-            //[DllImport("uxtheme.dll")]
-            //internal static extern int GetThemeBitmap(IntPtr hTheme, int iPartId, int iStateId, int iPropId, uint dwFlags, out IntPtr phBitmap);
+            /// <summary>
+            /// Retrieves the bitmap associated with a particular theme, part, state, and property.
+            /// </summary>
+            /// <param name="hTheme">A handle to theme data.</param>
+            /// <param name="iPartId">The part that contains the bitmap. See Parts and States.</param>
+            /// <param name="iStateId">The state of the part.</param>
+            /// <param name="iPropId">The property to retrieve. Pass zero to automatically select the first available bitmap for this part and state, or use one of the following values:
+            /// TMT_DIBDATA/TMT_GLYPHDIBDATA/TMT_HBITMAP</param>
+            /// <param name="dwFlags">The flags that specify how the bitmap is to be retrieved. Can be one of the following values:
+            /// GBF_DIRECT/GBF_COPY/GBF_VALIDBITS</param>
+            /// <param name="phBitmap">A pointer that receives a handle to the requested bitmap.</param>
+            /// <returns>If this function succeeds, it returns S_OK. Otherwise, it returns an HRESULT error code.</returns>
+            /// <remarks>If dwFlags is set to GBF_COPY, release the bitmap stored in phBitmap when no longer needed by calling DeleteObject.</remarks>
+            [DllImport("uxtheme.dll")]
+            internal static extern int GetThemeBitmap(IntPtr hTheme, int iPartId, int iStateId, int iPropId, uint dwFlags, out IntPtr phBitmap);
 
             #endregion
         }
@@ -263,7 +264,12 @@ namespace KGySoft.WinForms.WinApi
         internal static Font? GetThemeFont(IntPtr hTheme, int part, int state, int prop)
         {
             int hResult = NativeMethods.GetThemeFont(hTheme, IntPtr.Zero, part, state, prop, out LOGFONT logFont);
-            return hResult != Constants.S_OK ? null : Font.FromLogFont(logFont);
+            return hResult != Constants.S_OK ? null
+                : !OSHelper.IsMono ? Font.FromLogFont(logFont)
+                // On Mono Font.FromLogFont casts the parameter to an internal LOGFONT by a direct cast, causing an InvalidCastException, so using an internal conversion
+                : new Font(logFont.lfFaceName, Math.Abs(logFont.lfHeight),
+                    (logFont.lfWeight > 400 ? FontStyle.Bold : FontStyle.Regular) | (logFont.lfItalic == 0 ? FontStyle.Regular : FontStyle.Italic) | (logFont.lfStrikeOut == 0 ? FontStyle.Regular : FontStyle.Strikeout) | (logFont.lfUnderline == 0 ? FontStyle.Regular : FontStyle.Underline),
+                    logFont.lfHeight > 0 ? GraphicsUnit.Point : GraphicsUnit.Pixel);
         }
 
         internal static bool TryGetThemeTransitionDuration(IntPtr hTheme, int part, int stateFrom, int stateTo, int prop, out int duration)
@@ -281,33 +287,33 @@ namespace KGySoft.WinForms.WinApi
         }
 
         // DOES NOT WORK, RETURNS ALWAYS THE BITMAPS OF 100% DPI, EVEN WHEN THE TRUE GLYPH SIZE REPORTS LARGER BITMAPS
-        ///// <summary>
-        ///// UxTheme.GetThemeBitmap has many issues, so this method uses massive workarounds:
-        ///// - None of the documented TMT_* constants work, all of them returns E_INVALIDARG. A StackOverflow answer suggests using 3 instead of TMT_DIBDATA.
-        ///// - Using 3 as iPropId returns every state in a single bitmap concatenated vertically.
-        ///// - The returned bitmap always has Format32bppRgb pixel format and black background, though reinterpreting it as Format32bppPArgb restores the correct alpha pixels.
-        ///// </summary>
-        //public static Bitmap GetThemeBitmap(IntPtr hTheme, int part, int state, Size glyphSize)
-        //{
-        //    // Using 3 instead of TMT_DIBDATA. This returns a single bitmap with all states concatenated vertically.
-        //    int hResult = NativeMethods.GetThemeBitmap(hTheme, part, state, /*Constants.TMT_DIBDATA*/3, Constants.GBF_DIRECT, out IntPtr hBitmap);
-        //    if (hResult != Constants.S_OK)
-        //        ThrowError(hResult);
+        /// <summary>
+        /// UxTheme.GetThemeBitmap has many issues, so this method uses massive workarounds:
+        /// - None of the documented TMT_* constants work, all of them returns E_INVALIDARG. A StackOverflow answer suggests using 3 instead of TMT_DIBDATA.
+        /// - Using 3 as iPropId returns every state in a single bitmap concatenated vertically.
+        /// - The returned bitmap always has Format32bppRgb pixel format and black background, though reinterpreting it as Format32bppPArgb restores the correct alpha pixels.
+        /// </summary>
+        public static Bitmap GetThemeBitmap(IntPtr hTheme, int part, int state, Size glyphSize)
+        {
+            // Using 3 instead of TMT_DIBDATA. This returns a single bitmap with all states concatenated vertically.
+            int hResult = NativeMethods.GetThemeBitmap(hTheme, part, state, /*Constants.TMT_DIBDATA*/3, Constants.GBF_DIRECT, out IntPtr hBitmap);
+            if (hResult != Constants.S_OK)
+                ThrowError(hResult);
 
-        //    using Bitmap bmp = Image.FromHbitmap(hBitmap);
-        //    Debug.Assert(bmp.Width == glyphSize.Width, $"{glyphSize} vs {bmp.Size}");
+            using Bitmap bmp = Image.FromHbitmap(hBitmap);
+            Debug.Assert(bmp.Width == glyphSize.Width, $"{glyphSize} vs {bmp.Size}");
 
-        //    // Getting the bitmap data with the original pixel format (Format32bppRgb), so it does not create a copy but provides access to the original bitmap memory area.
-        //    var bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
+            // Getting the bitmap data with the original pixel format (Format32bppRgb), so it does not create a copy but provides access to the original bitmap memory area.
+            var bitmapData = bmp.LockBits(new Rectangle(0, 0, bmp.Width, bmp.Height), ImageLockMode.ReadOnly, bmp.PixelFormat);
 
-        //    // Reinterpreting both the size and the pixel format and returning a bitmap from the narrowed memory area.
-        //    var result = new Bitmap(glyphSize.Width, glyphSize.Height, bitmapData.Stride, PixelFormat.Format32bppPArgb, (nint)bitmapData.Scan0 + bitmapData.Stride * glyphSize.Height * state);
+            // Reinterpreting both the size and the pixel format and returning a bitmap from the narrowed memory area.
+            var result = new Bitmap(glyphSize.Width, glyphSize.Height, bitmapData.Stride, PixelFormat.Format32bppPArgb, (nint)bitmapData.Scan0 + bitmapData.Stride * glyphSize.Height * state);
 
-        //    // Note that we release the bitmap data and dispose the original bitmap here, still, we return the new bitmap of the original bitmap memory area.
-        //    // This is safe because we requested the bitmap with GBF_DIRECT flag, so it is not a copy.
-        //    bmp.UnlockBits(bitmapData);
-        //    return result;
-        //}
+            // Note that we release the bitmap data and dispose the original bitmap here, still, we return the new bitmap of the original bitmap memory area.
+            // This is safe because we requested the bitmap with GBF_DIRECT flag, so it is not a copy.
+            bmp.UnlockBits(bitmapData);
+            return result;
+        }
 
         internal static bool BufferedPaintInit() => NativeMethods.BufferedPaintInit() == Constants.S_OK;
 

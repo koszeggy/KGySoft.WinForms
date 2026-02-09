@@ -301,6 +301,8 @@ namespace KGySoft.WinForms.Forms
         #endregion
 
         #region Properties
+        
+        #region Static Properties
 
 #if NETFRAMEWORK
         private static IEqualityComparer<SystemTextIds> Comparer => EnumComparer<SystemTextIds>.Comparer;
@@ -313,29 +315,7 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region Constructors
-
-        public TaskDialogForm()
-        {
-            InitializeComponent();
-            pnlMainInstruction.Owner = this;
-            btnShowHideDetails.ExpandedChanged += btnShowHideDetails_ExpandedChanged;
-            pnlMain.SizeChanged += Control_SizeChanged;
-            pnlMainControls.SizeChanged += Control_SizeChanged;
-            pnlFooter.SizeChanged += Control_SizeChanged;
-            chbCheckBox.CheckedChanged += cbCheckBox_CheckedChanged;
-            timer.Tick += timer_Tick;
-            lblMessage.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
-            lblDetailsMain.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
-            lblDetailsFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
-            lblFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
-            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
-            Font = ScaleHelper.MessageBoxFont;
-        }
-
-        #endregion
-
-        #region Properties
+        #region Instance Properties
 
         #region Private Properties
 
@@ -406,6 +386,30 @@ namespace KGySoft.WinForms.Forms
         TaskDialogStatus ITaskDialog.ShowState => dialogState;
 
         #endregion
+
+        #endregion
+
+        #endregion
+
+        #region Constructors
+
+        public TaskDialogForm()
+        {
+            InitializeComponent();
+            pnlMainInstruction.Owner = this;
+            btnShowHideDetails.ExpandedChanged += btnShowHideDetails_ExpandedChanged;
+            pnlMain.SizeChanged += Control_SizeChanged;
+            pnlMainControls.SizeChanged += Control_SizeChanged;
+            pnlFooter.SizeChanged += Control_SizeChanged;
+            chbCheckBox.CheckedChanged += cbCheckBox_CheckedChanged;
+            timer.Tick += timer_Tick;
+            lblMessage.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
+            lblDetailsMain.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
+            lblDetailsFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
+            lblFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
+            VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
+            Font = ScaleHelper.MessageBoxFont;
+        }
 
         #endregion
 

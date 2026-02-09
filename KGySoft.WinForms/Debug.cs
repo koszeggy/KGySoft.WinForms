@@ -15,8 +15,11 @@
 
 #region Usings
 
+using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+
+using KGySoft.WinForms;
 
 using SystemDebug = System.Diagnostics.Debug;
 
@@ -36,7 +39,15 @@ namespace KGySoft
         internal static void Assert(bool condition, [CallerArgumentExpression(nameof(condition))]string? message = null)
         {
 #if NETFRAMEWORK
-            SystemDebug.Assert(condition, message);
+            if (OSHelper.IsMono)
+            {
+                if (condition)
+                    return;
+                Fail(message);
+                return;
+            }
+
+            SystemDebug.Assert(condition, message!);
 #else
             if (!condition)
                 Fail(message);
@@ -47,9 +58,16 @@ namespace KGySoft
         internal static void Fail(string? message)
         {
 #if NETFRAMEWORK
-            SystemDebug.Fail(message);
+            if (OSHelper.IsMono)
+            {
+                message = $"Debug failure occurred - {message ?? "No message"}";
+                WriteLine(message);
+                throw new InvalidOperationException(message);
+            }
+
+            SystemDebug.Fail(message ?? "No message");
 #else
-            SystemDebug.WriteLine("Debug failure occurred - " + (message ?? "No message"));
+            WriteLine("Debug failure occurred - " + (message ?? "No message"));
 
             // preventing the attach dialog come up if already attached it once
             if (!everAttached)
@@ -62,6 +80,15 @@ namespace KGySoft
             else
                 Debugger.Break();
 #endif
+        }
+
+        [Conditional("DEBUG")]
+        internal static void WriteLine(string? message = null)
+        {
+            if (OSHelper.IsMono || !Debugger.IsAttached)
+                Console.WriteLine(message);
+            else
+                SystemDebug.WriteLine(message);
         }
 
         #endregion

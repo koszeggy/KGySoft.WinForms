@@ -338,15 +338,20 @@ namespace KGySoft.WinForms
 
         #region Internal Methods
 
-        internal static void PaintTransparentBackground(this Control c, PaintEventArgs e)
+        internal static void PaintTransparentBackground(this Control c, PaintEventArgs e, Rectangle? bounds = null)
         {
             Control? parent = c.Parent;
             if (parent == null)
                 return;
 
-            Rectangle rectangle = c.ClientRectangle;
+            Rectangle rectangle = bounds ?? c.ClientRectangle;
             if (VisualStyleHelper.RenderWithVisualStyles)
+            {
+                // On Windows/Mono we explicitly have to paint the background first; otherwise, the alpha parts of the themed background will be black
+                if (OSHelper.IsMono)
+                    c.PaintBackground(e, rectangle, parent.BackColor);
                 ButtonRenderer.DrawParentBackground(e.Graphics, rectangle, c);
+            }
             else
             {
                 GraphicsContainer state = e.Graphics.BeginContainer();

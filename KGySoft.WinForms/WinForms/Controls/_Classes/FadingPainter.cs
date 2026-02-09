@@ -107,21 +107,22 @@ namespace KGySoft.WinForms.Controls
 
             if (!Enabled)
             {
-                // using a buffer because original control must use a disabled buffer
                 State = host.State;
-                using (BufferedGraphicsContext context = new BufferedGraphicsContext())
-                {
-                    using (BufferedGraphics bg = context.Allocate(e.Graphics, new Rectangle(Point.Empty, Control.ClientSize)))
-                    {
-                        context.Invalidate();
-                        using (PaintEventArgs be = new PaintEventArgs(bg.Graphics, e.ClipRectangle))
-                        {
-                            host.PaintState(State, be);
-                        }
 
-                        bg.Render(e.Graphics);
-                    }
+                // On Windows, Mono throws an exception from BufferedGraphicsContext.Allocate, so leaving the paint without double buffering
+                if (OSHelper.IsMono && OSHelper.IsWindows)
+                {
+                    host.PaintState(State, e);
+                    return;
                 }
+
+                // the original control must use a disabled double buffer, so using a buffer here
+                using var context = new BufferedGraphicsContext();
+                using BufferedGraphics bg = context.Allocate(e.Graphics, new Rectangle(Point.Empty, Control.ClientSize));
+                context.Invalidate();
+                using (var be = new PaintEventArgs(bg.Graphics, e.ClipRectangle))
+                    host.PaintState(State, be);
+                bg.Render(e.Graphics);
 
                 return;
             }
@@ -226,25 +227,26 @@ namespace KGySoft.WinForms.Controls
                 e.Graphics.ReleaseHdc(hdc);
             }
 
-            // fallbacking
             Size clientSize = Control.ClientSize;
-            if (hbpAnimation == IntPtr.Zero && clientSize.Width > 0 && clientSize.Height > 0)
-            {
-                State = newState;
-                using (BufferedGraphicsContext context = new BufferedGraphicsContext())
-                {
-                    using (BufferedGraphics bg = context.Allocate(e.Graphics, new Rectangle(Point.Empty, clientSize)))
-                    {
-                        context.Invalidate();
-                        using (PaintEventArgs be = new PaintEventArgs(bg.Graphics, e.ClipRectangle))
-                        {
-                            host.PaintState(newState, be);
-                        }
+            if (hbpAnimation != IntPtr.Zero || clientSize.Width <= 0 || clientSize.Height <= 0)
+                return;
 
-                        bg.Render(e.Graphics);
-                    }
-                }
+            // fallback
+            State = newState;
+            
+            // On Windows, Mono throws an exception from BufferedGraphicsContext.Allocate, so leaving the paint without double buffering
+            if (OSHelper.IsMono && OSHelper.IsWindows)
+            {
+                host.PaintState(newState, e);
+                return;
             }
+
+            using var context = new BufferedGraphicsContext();
+            using BufferedGraphics bg = context.Allocate(e.Graphics, new Rectangle(Point.Empty, clientSize));
+            context.Invalidate();
+            using (PaintEventArgs be = new PaintEventArgs(bg.Graphics, e.ClipRectangle))
+                host.PaintState(newState, be);
+            bg.Render(e.Graphics);
         }
 
         #endregion
