@@ -34,8 +34,8 @@ namespace KGySoft.WinForms.Example.Forms
     {
         #region Constants
 
-        private const int WM_MOUSEACTIVATE = 0x0021;
         private const int WM_LBUTTONDOWN = 0x201;
+        private const int WM_PARENTNOTIFY = 0x210;
 
         #endregion
 
@@ -84,7 +84,7 @@ namespace KGySoft.WinForms.Example.Forms
             switch (m.Msg)
             {
                 case WM_LBUTTONDOWN: // when clicking over the disabled pnlTestArea (so the form gets the mouse down event)
-                case WM_MOUSEACTIVATE when (m.LParam.ToInt32() >> 16) == WM_LBUTTONDOWN: // when clicking over a child control, even disabled ones
+                case WM_PARENTNOTIFY when m.WParam.ToInt32() == WM_LBUTTONDOWN: // when clicking over a child control, even disabled ones
                     Control? child = FindControl(this, Cursor.Position);
                     if (child == null || child == grdProperties || grdProperties.Contains(child))
                         break;
