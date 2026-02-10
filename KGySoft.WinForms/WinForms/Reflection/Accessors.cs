@@ -166,6 +166,13 @@ namespace KGySoft.WinForms.Reflection
                 return;
 
             // fallback solution (e.g. on Mono): painting a solid background
+            // Transparent back color: obtaining the color from the parent
+            while (backColor.A == 0 && c.Parent is Control parent)
+            {
+                backColor = parent.BackColor;
+                c = parent;
+            }
+
             e.Graphics.FillRectangle((backColor.A == Byte.MaxValue ? backColor : backColor.ToColor32().ToOpaque().ToColor()).GetBrush(), rectangle);
         }
 

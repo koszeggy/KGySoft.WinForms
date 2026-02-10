@@ -107,7 +107,7 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
-        #region CheckBox class
+        #region GroupBoxCheckBox class
 
         private sealed class GroupBoxCheckBox : AdvancedCheckBox
         {
@@ -544,12 +544,14 @@ namespace KGySoft.WinForms.Controls
             Font font = checkBox.Font;
             int desiredWidth = checkBox.Width + referencePlaceholderPadding.Scale(this.GetScale().X);
             using Graphics g = CreateGraphics();
+            bool useTextRenderer = !UseCompatibleTextRendering && OSHelper.IsWindows; // on Mono/Linux TextRenderer.MeasureText ignores spaces
+            StringFormat? format = useTextRenderer ? null : TextFormatFlags.Default.ToStringFormat(); // from the internal cache, it includes MeasureTrailingSpaces
 
             // Initial measurement: set the same number of spaces as the CheckBox's text length. Most likely it will be smaller than the desired width,
             // but we can use it to guess a good length.
             int len = checkBox.Text.Length;
             string spaces = new String(' ', Math.Max(1, len));
-            int actualWidth = UseCompatibleTextRendering ? (int)g.MeasureString(spaces, font).Width : TextRenderer.MeasureText(g, spaces, font).Width;
+            int actualWidth = useTextRenderer ? TextRenderer.MeasureText(g, spaces, font).Width : (int)g.MeasureString(spaces, font, PointF.Empty, format).Width;
 
             if (actualWidth != desiredWidth)
             {
@@ -557,20 +559,20 @@ namespace KGySoft.WinForms.Controls
 
                 // len should be quite close to the desired space count now, but refining it
                 spaces = new String(' ', len);
-                actualWidth = UseCompatibleTextRendering ? (int)g.MeasureString(spaces, font).Width : TextRenderer.MeasureText(g, spaces, font).Width;
+                actualWidth = useTextRenderer ? TextRenderer.MeasureText(g, spaces, font).Width : (int)g.MeasureString(spaces, font, PointF.Empty, format).Width;
 
                 while (actualWidth > desiredWidth && len > 1)
                 {
                     len -= 1;
                     spaces = new String(' ', len);
-                    actualWidth = UseCompatibleTextRendering ? (int)g.MeasureString(spaces, font).Width : TextRenderer.MeasureText(g, spaces, font).Width;
+                    actualWidth = useTextRenderer ? TextRenderer.MeasureText(g, spaces, font).Width : (int)g.MeasureString(spaces, font, PointF.Empty, format).Width;
                 }
 
                 while (actualWidth < desiredWidth)
                 {
                     len += 1;
                     spaces = new String(' ', len);
-                    actualWidth = UseCompatibleTextRendering ? (int)g.MeasureString(spaces, font).Width : TextRenderer.MeasureText(g, spaces, font).Width;
+                    actualWidth = useTextRenderer ? TextRenderer.MeasureText(g, spaces, font).Width : (int)g.MeasureString(spaces, font, PointF.Empty, format).Width;
                 }
             }
 
