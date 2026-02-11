@@ -167,7 +167,7 @@ namespace KGySoft.WinForms
                 // Here EnableVisualStyles was either called but classic theme is used (true result) or visual styles were not enabled at all (false result)
                 // We could use the Comctl32ActivationContext and get the dll version of comctl32, but then V6 would be loaded accidentally, causing that controls
                 // begin to use visual styles in non-System mode.
-                isComCtlV6Available = Accessors.ComCtlSupportsVisualStyles;
+                isComCtlV6Available = !OSHelper.IsMono && Accessors.ComCtlSupportsVisualStyles;
                 return isComCtlV6Available.Value;
             }
         }

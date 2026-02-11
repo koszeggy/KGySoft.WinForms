@@ -239,9 +239,6 @@
   <data name="Accessors_InstancePropertyDoesNotExistFormat" xml:space="preserve">
     <value>Instance property "{0}" not found on type "{1}".</value>
   </data>
-  <data name="Accessors_StaticPropertyDoesNotExistFormat" xml:space="preserve">
-    <value>Static property "{0}" not found on type "{1}".</value>
-  </data>
   <data name="Accessors_InstanceFieldDoesNotExistFormat" xml:space="preserve">
     <value>Instance field "{0}" not found on type "{1}".</value>
   </data>

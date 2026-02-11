@@ -108,7 +108,7 @@ namespace KGySoft.WinForms.Reflection
 
         #region Application
 
-        internal static bool ComCtlSupportsVisualStyles => (bool)GetPropertyValue(typeof(Application), nameof(ComCtlSupportsVisualStyles))!;
+        internal static bool ComCtlSupportsVisualStyles => TryGetPropertyValue<bool>(typeof(Application), nameof(ComCtlSupportsVisualStyles));
 
         #endregion
 
@@ -320,12 +320,12 @@ namespace KGySoft.WinForms.Reflection
             return property.Get(instance);
         }
 
-        private static object? GetPropertyValue(Type type, string propertyName)
+        private static T TryGetPropertyValue<T>(Type type, string propertyName, T defaultValue = default!)
         {
             PropertyAccessor? property = GetProperty(type, propertyName);
             if (property == null)
-                throw new InvalidOperationException(Res.AccessorsStaticPropertyDoesNotExist(propertyName, type));
-            return property.Get(null);
+                return defaultValue;
+            return property.GetStaticValue<T>();
         }
 
         private static MethodAccessor? GetMethodByName(Type type, string methodName)

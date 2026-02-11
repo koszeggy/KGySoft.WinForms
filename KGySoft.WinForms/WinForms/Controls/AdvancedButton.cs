@@ -1019,6 +1019,22 @@ namespace KGySoft.WinForms.Controls
             base.OnPaddingChanged(e);
         }
 
+        /// <inheritdoc />
+        protected override void OnForeColorChanged(EventArgs e)
+        {
+            base.OnForeColorChanged(e);
+            if (OSHelper.IsMono)
+                Invalidate();
+        }
+
+        /// <inheritdoc />
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+            if (OSHelper.IsMono)
+                Invalidate();
+        }
+
         /// <summary>
         /// Paints the specified state of this control, and raises the <see cref="PaintState"/> event.
         /// </summary>
@@ -1204,7 +1220,7 @@ namespace KGySoft.WinForms.Controls
                 currentImage = base.Image;
                 if (base.FlatStyle == FlatStyle.System)
                 {
-                    if (!OSHelper.IsWindowsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
+                    if (!OSHelper.IsWindowsVistaOrLater || OSHelper.IsMono || !VisualStyleHelper.InitializedWithVisualStyles)
                     {
                         base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
                         return true;
@@ -1223,11 +1239,11 @@ namespace KGySoft.WinForms.Controls
             {
                 currentImage = SecurityShieldImage;
 
-                if (base.FlatStyle != FlatStyle.System || !OSHelper.IsWindowsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
+                if (base.FlatStyle != FlatStyle.System || !OSHelper.IsWindowsVistaOrLater || OSHelper.IsMono || !VisualStyleHelper.InitializedWithVisualStyles)
                 {
                     base.Image = currentImage;
 
-                    if (!OSHelper.IsWindowsVistaOrLater || !VisualStyleHelper.InitializedWithVisualStyles)
+                    if (!OSHelper.IsWindowsVistaOrLater || OSHelper.IsMono || !VisualStyleHelper.InitializedWithVisualStyles)
                         base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
 
                     return true;
@@ -1236,7 +1252,7 @@ namespace KGySoft.WinForms.Controls
                 if (IsHandleCreated)
                     User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, new IntPtr(1));
             }
-            else if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater && IsHandleCreated)
+            else if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater && !OSHelper.IsMono && IsHandleCreated)
             {
                 User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, IntPtr.Zero);
             }

@@ -177,9 +177,6 @@ namespace KGySoft
         /// <summary>Instance property "{0}" not found on type "{1}".</summary>
         internal static string AccessorsInstancePropertyDoesNotExist(string? propertyName, Type type) => Get("Accessors_InstancePropertyDoesNotExistFormat", propertyName, type);
 
-        /// <summary>Static property "{0}" not found on type "{1}".</summary>
-        internal static string AccessorsStaticPropertyDoesNotExist(string? propertyName, Type type) => Get("Accessors_StaticPropertyDoesNotExistFormat", propertyName, type);
-
         /// <summary>Instance field "{0}" not found on type "{1}".</summary>
         internal static string AccessorsInstanceFieldDoesNotExist(string? fieldName, Type type) => Get("Accessors_InstanceFieldDoesNotExistFormat", fieldName, type);
 
