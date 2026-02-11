@@ -30,6 +30,7 @@ namespace KGySoft.WinForms.Controls
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Compatibility, legacy code")]
     [SuppressMessage("Style", "IDE1006:Naming Styles", Justification = "Compatibility, legacy code")]
     [Obsolete("It is not recommended to use this class anymore.")]
+    [ToolboxItem(false)]
     public partial class ucAllInvertNone : UserControl
     {
         #region Events

@@ -41,6 +41,7 @@ namespace KGySoft.WinForms.Controls
     /// The state of the checkboxes can be got or set via <see cref="EnumCheckedListBox.Value"/> property.
     /// </summary>
     [Obsolete("This class uses obsolete techniques and is not recommended to use it anymore.")]
+    [ToolboxItem(false)]
     public partial class EnumCheckedListBox : CheckedListBox
     {
         #region Fields
