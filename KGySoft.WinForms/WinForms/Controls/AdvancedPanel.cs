@@ -27,7 +27,7 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents an advanced panel with much more flexible <see cref="BorderStyle"/> than original <see cref="Panel"/>
+    /// Represents an advanced panel with much more flexible <see cref="BorderStyle"/> than the original <see cref="Panel"/>.
     /// </summary>
     [Designer(typeof(AdvancedPanelDesigner))]
     public class AdvancedPanel : Panel, ISafePaintBackground
@@ -41,6 +41,8 @@ namespace KGySoft.WinForms.Controls
 
         #region Properties
 
+        #region Public Properties
+
         /// <summary>
         /// Gets or sets the border style of the <see cref="AdvancedPanel"/> panel.
         /// </summary>
@@ -52,66 +54,84 @@ namespace KGySoft.WinForms.Controls
             get => borderStyle;
             set
             {
-                if (borderStyle != value)
-                {
-                    borderStyle = value;
-                    switch (value)
-                    {
-                        case AdvancedBorderStyle.None:
-                            borderWidth = 0;
-                            break;
-                        case AdvancedBorderStyle.FixedSingle:
-                        case AdvancedBorderStyle.Raised:
-                        case AdvancedBorderStyle.Sunken:
-                            borderWidth = 1;
-                            break;
-                        case AdvancedBorderStyle.Flat:
-                        case AdvancedBorderStyle.RaisedHigh:
-                        case AdvancedBorderStyle.SunkenLow:
-                        case AdvancedBorderStyle.RaisedFrame:
-                        case AdvancedBorderStyle.SunkenFrame:
-                            borderWidth = 2;
-                            break;
-                        default:
-                            throw new ArgumentOutOfRangeException(nameof(value));
-                    }
+                if (borderStyle == value)
+                    return;
 
-                    NCHelper.InvalidateNC(Handle);
+                borderStyle = value;
+                int previousWidth = borderWidth;
+                borderWidth = value switch
+                {
+                    AdvancedBorderStyle.None => 0,
+                    AdvancedBorderStyle.FixedSingle or AdvancedBorderStyle.Raised or AdvancedBorderStyle.Sunken => 1,
+                    AdvancedBorderStyle.Flat or AdvancedBorderStyle.RaisedHigh or AdvancedBorderStyle.SunkenLow
+                        or AdvancedBorderStyle.RaisedFrame or AdvancedBorderStyle.SunkenFrame => 2,
+                    _ => throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value))
+                };
+
+                if (OSHelper.IsWindows)
+                {
+                    InvalidateNC();
+                    return;
                 }
+
+                // To rearrange docked controls when the border is part of the client area. Unfortunately, it's not working great on Linux.
+                if (previousWidth != borderWidth)
+                    PerformLayout();
+                Invalidate();
             }
         }
 
         #endregion
 
+        #region Protected Properties
+
+        /// <inheritdoc />
+        protected override Padding DefaultPadding => OSHelper.IsWindows ? Padding.Empty : new Padding(borderWidth);
+
+        #endregion
+
+        #endregion
+
         #region Methods
+
+        #region Protected Methods
 
         /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
             switch (m.Msg)
             {
-                case Constants.WM_NCCALCSIZE:
+                case Constants.WM_NCCALCSIZE when OSHelper.IsWindows:
+                    base.WndProc(ref m);
                     if (m.WParam == IntPtr.Zero || m.WParam == new IntPtr(1))
-                    {
                         NCHelper.CalcSizeNC(m.LParam, borderWidth);
-                    }
-                    break;
+                    return;
 
-                case Constants.WM_NCPAINT:
+                case Constants.WM_NCPAINT when OSHelper.IsWindows:
+                    base.WndProc(ref m);
                     NCHelper.DrawBorderNC(m.HWnd, Size, borderStyle);
-                    break;
+                    return;
+
+                case Constants.WM_MOUSEWHEEL or Constants.WM_HSCROLL or Constants.WM_VSCROLL when !OSHelper.IsWindows:
+                    base.WndProc(ref m);
+                    Invalidate();
+                    return;
+
+                default:
+                    base.WndProc(ref m);
+                    return;
             }
-            base.WndProc(ref m);
         }
 
         /// <inheritdoc />
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
-            NCHelper.InvalidateNC(Handle);
+            if (OSHelper.IsWindows)
+                InvalidateNC();
         }
 
-#if NETCOREAPP && !NET10_0_OR_GREATER
+#if NET && !NET10_0_OR_GREATER
         /// <inheritdoc />
         protected override void OnPaintBackground(PaintEventArgs e)
         {
@@ -121,6 +141,27 @@ namespace KGySoft.WinForms.Controls
             e.Graphics.ReleaseHdc();
         }
 #endif
+
+        /// <inheritdoc />
+        protected override void OnPaint(PaintEventArgs e)
+        {
+            base.OnPaint(e);
+            if (OSHelper.IsWindows || borderStyle == AdvancedBorderStyle.None)
+                return;
+            e.Graphics.DrawBorder(borderStyle, ClientRectangle);
+        }
+
+        #endregion
+
+        #region Private Methods
+
+        private void InvalidateNC()
+        {
+            if (IsHandleCreated)
+                NCHelper.InvalidateNC(Handle);
+        }
+
+        #endregion
 
         #endregion
     }

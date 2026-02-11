@@ -68,7 +68,10 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_LBUTTONDOWN = 0x0201;
         internal const int WM_LBUTTONUP = 0x0202;
         internal const int WM_LBUTTONDBLCLK = 0x0203;
+        internal const int WM_MOUSEWHEEL = 0x020A;
         internal const int WM_MOUSEHWHEEL = 0x020E;
+        internal const int WM_HSCROLL = 0x0114;
+        internal const int WM_VSCROLL = 0x0115;
         internal const int WM_EXITSIZEMOVE = 0x0232;
         internal const int WM_DPICHANGED = 0x02E0;
         internal const int WM_DPICHANGED_BEFOREPARENT = 0x02E2;

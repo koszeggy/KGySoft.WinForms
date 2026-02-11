@@ -60,6 +60,8 @@ namespace KGySoft.WinForms.Controls
     /// <item>Automatic resolve of hyperlinks.</item>
     /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
+    /// <item>Fixing some Mono-specific <see cref="Label"/>/<see cref="LinkLabel"/> issues, such as non-visible text with border, wrong rendering with padding, random
+    /// exceptions from mouse events when links are used.</item>
     /// </list>
     /// </remarks>
     [ToolboxBitmap(typeof(AdvancedLabel), "Resources.Toolbox.AdvancedLabel.png")]
@@ -222,32 +224,19 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
 
                 // setting base border style in cases just for rendering the text into the right position
                 borderStyle = value;
-                switch (value)
+                int previousWidth = borderWidth;
+                borderWidth = value switch
                 {
-                    case AdvancedBorderStyle.None:
-                        borderWidth = 0;
-                        //base.BorderStyle = System.Windows.Forms.BorderStyle.None;
-                        break;
-                    case AdvancedBorderStyle.FixedSingle:
-                    case AdvancedBorderStyle.Raised:
-                    case AdvancedBorderStyle.Sunken:
-                        borderWidth = 1;
-                        //base.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle;
-                        break;
-                    case AdvancedBorderStyle.Flat:
-                    case AdvancedBorderStyle.RaisedHigh:
-                    case AdvancedBorderStyle.SunkenLow:
-                    case AdvancedBorderStyle.RaisedFrame:
-                    case AdvancedBorderStyle.SunkenFrame:
-                        borderWidth = 2;
-                        //base.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-                        break;
-                    default:
-                        throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
-                }
+                    AdvancedBorderStyle.None => 0,
+                    AdvancedBorderStyle.FixedSingle or AdvancedBorderStyle.Raised or AdvancedBorderStyle.Sunken => 1,
+                    AdvancedBorderStyle.Flat or AdvancedBorderStyle.RaisedHigh or AdvancedBorderStyle.SunkenLow
+                        or AdvancedBorderStyle.RaisedFrame or AdvancedBorderStyle.SunkenFrame => 2,
+                    _ => throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value))
+                };
 
                 ResetSizeCache();
-                InvalidateNC();
+                if (OSHelper.IsWindows)
+                    InvalidateNC();
                 Invalidate();
 
                 if (AutoSize)
@@ -314,7 +303,8 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 if (AutoSize)
                 {
                     ResetSizeCache();
-                    InvalidateNC();
+                    if (OSHelper.IsWindows)
+                        InvalidateNC();
                     ResetSize();
                 }
             }
@@ -633,9 +623,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                     lastProposedSize = Size.Empty;
             }
             else
-            {
                 lastProposedSize = proposedSize;
-            }
 
             if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out var preferredSize))
                 return preferredSize;
@@ -719,6 +707,30 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             {
                 // Show the system hand cursor instead
                 OverrideCursor = new Cursor(User32.LoadCursor(IntPtr.Zero, Constants.IDC_HAND));
+            }
+        }
+
+        /// <inheritdoc />
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            try
+            {
+                base.OnMouseDown(e);
+            }
+            catch (NullReferenceException) when (OSHelper.IsMono) // workaround for Mono bug
+            {
+            }
+        }
+
+        /// <inheritdoc />
+        protected override void OnMouseUp(MouseEventArgs e)
+        {
+            try
+            {
+                base.OnMouseUp(e);
+            }
+            catch (NullReferenceException) when (OSHelper.IsMono) // workaround for Mono bug
+            {
             }
         }
 
@@ -851,13 +863,13 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         {
             switch (m.Msg)
             {
-                case Constants.WM_NCCALCSIZE:
+                case Constants.WM_NCCALCSIZE when OSHelper.IsWindows:
                     base.WndProc(ref m);
                     if (m.WParam == IntPtr.Zero || m.WParam == new IntPtr(1))
                         NCHelper.CalcSizeNC(m.LParam, borderWidth);
                     return;
 
-                case Constants.WM_NCPAINT:
+                case Constants.WM_NCPAINT when OSHelper.IsWindows:
                     base.WndProc(ref m);
                     NCHelper.DrawBorderNC(m.HWnd, Size, borderStyle);
                     return;
@@ -906,7 +918,8 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
-            InvalidateNC();
+            if (OSHelper.IsWindows)
+                InvalidateNC();
         }
 
         /// <inheritdoc />
@@ -963,8 +976,8 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                     }
                 }
 
-                // drawing text regularly (this does not draw image again, that is in base.OnPaintBackground)
-                if (state.Enabled)
+                // When there are links, drawing the text regularly (this does not draw image again, that is in base.OnPaintBackground)
+                if (state.Enabled && base.LinkArea.Length != 0)
                 {
                     base.OnPaint(e);
                     return;
@@ -980,6 +993,8 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             finally
             {
                 Events.GetHandler<EventHandler<PaintStateEventArgs>>(nameof(PaintState))?.Invoke(this, e);
+                if (!OSHelper.IsWindows && borderStyle != AdvancedBorderStyle.None)
+                    e.Graphics.DrawBorder(borderStyle, ClientRectangle);
             }
         }
 
@@ -1147,12 +1162,8 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 return size;
             }
 
-            size += SizeFromClientSize(Size.Empty);
-
             if (BorderStyle != AdvancedBorderStyle.None)
-            {
                 size += new Size(borderWidth << 1, borderWidth << 1);
-            }
 
             return size;
         }

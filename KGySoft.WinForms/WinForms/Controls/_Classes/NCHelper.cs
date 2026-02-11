@@ -48,55 +48,15 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         internal static void DrawBorderNC(IntPtr hWnd, Size size, AdvancedBorderStyle borderStyle)
         {
+            Debug.Assert(OSHelper.IsWindows);
             if (borderStyle == AdvancedBorderStyle.None)
                 return;
 
             IntPtr hDC = User32.GetWindowDC(hWnd);
             try
             {
-                using (Graphics g = Graphics.FromHdc(hDC))
-                {
-                    Rectangle rect = new Rectangle(Point.Empty, size);
-                    switch (borderStyle)
-                    {
-                        case AdvancedBorderStyle.FixedSingle:
-                            g.DrawRectangle(SystemPens.WindowFrame, 0, 0, size.Width - 1, size.Height - 1);
-                            break;
-                        case AdvancedBorderStyle.Raised:
-                        case AdvancedBorderStyle.Flat:
-                        case AdvancedBorderStyle.RaisedHigh:
-                        case AdvancedBorderStyle.Sunken:
-                        case AdvancedBorderStyle.SunkenLow:
-                            ControlPaint.DrawBorder3D(g, rect, (Border3DStyle)borderStyle);
-                            break;
-                        case AdvancedBorderStyle.SunkenFrame:
-                            ControlPaint.DrawBorder(g, rect, SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid);
-                            ControlPaint.DrawBorder(g, new Rectangle(1, 1, size.Width - 2, size.Height - 2),
-                                SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlDark, 1, ButtonBorderStyle.Solid);
-                            //ControlPaint.DrawBorder3D(g, rect, Border3DStyle.SunkenOuter);
-                            //ControlPaint.DrawBorder3D(g, new Rectangle(1, 1, Width - 2, Height - 2), Border3DStyle.RaisedInner);
-                            break;
-                        case AdvancedBorderStyle.RaisedFrame:
-                            ControlPaint.DrawBorder(g, rect, SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlDark, 1, ButtonBorderStyle.Solid);
-                            ControlPaint.DrawBorder(g, new Rectangle(1, 1, size.Width - 2, size.Height - 2),
-                                SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                                SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid);
-                            //ControlPaint.DrawBorder3D(g, rect, Border3DStyle.RaisedInner);
-                            //ControlPaint.DrawBorder3D(g, new Rectangle(1, 1, Width - 2, Height - 2), Border3DStyle.SunkenOuter);
-                            break;
-                    }
-                }
+                using Graphics g = Graphics.FromHdc(hDC);
+                g.DrawBorder(borderStyle, new Rectangle(Point.Empty, size));
             }
             finally
             {
@@ -109,6 +69,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         internal static void InvalidateNC(IntPtr handle)
         {
+            Debug.Assert(OSHelper.IsWindows);
             User32.SetWindowPos(handle, IntPtr.Zero, 0, 0, 0, 0,
                 Constants.SWP_NOMOVE | Constants.SWP_NOSIZE | Constants.SWP_NOZORDER |
                     Constants.SWP_NOACTIVATE | Constants.SWP_DRAWFRAME);
