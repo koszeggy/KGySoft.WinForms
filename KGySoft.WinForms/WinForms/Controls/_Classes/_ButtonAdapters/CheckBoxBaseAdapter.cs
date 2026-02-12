@@ -17,9 +17,11 @@
 
 using System;
 using System.Drawing;
-using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
+using KGySoft.Drawing;
+using KGySoft.Drawing.Imaging;
+using KGySoft.Drawing.Shapes;
 using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
@@ -102,33 +104,48 @@ namespace KGySoft.WinForms.Controls
 
         private static Bitmap GetCheckBoxImage(Color checkColor, Rectangle fullSize, ref Color cacheCheckColor, ref Bitmap? cacheCheckImage)
         {
-            if (cacheCheckImage == null || !cacheCheckColor.Equals(checkColor) || cacheCheckImage.Width != fullSize.Width || cacheCheckImage.Height != fullSize.Height)
+            if (cacheCheckImage != null && cacheCheckColor.ToArgb() == checkColor.ToArgb() && cacheCheckImage.Size == fullSize.Size)
+                return cacheCheckImage;
+
+            cacheCheckImage?.Dispose();
+
+            var result = new Bitmap(fullSize.Width, fullSize.Height);
+            if (OSHelper.IsWindows)
             {
-                if (cacheCheckImage != null)
-                {
-                    cacheCheckImage.Dispose();
-                    cacheCheckImage = null;
-                }
-
                 RECT rect = RECT.FromXYWH(0, 0, fullSize.Width, fullSize.Height);
-                Bitmap image = new Bitmap(fullSize.Width, fullSize.Height);
-                Graphics wrapper = Graphics.FromImage(image);
-                wrapper.Clear(Color.Transparent);
-                IntPtr hdc = wrapper.GetHdc();
-                try
+                using (Graphics g = Graphics.FromImage(result))
                 {
-                    User32.DrawFrameControl(new HandleRef(wrapper, hdc), ref rect, 2, 1);
-                }
-                finally
-                {
-                    wrapper.ReleaseHdcInternal(hdc);
-                    wrapper.Dispose();
+                    IntPtr hdc = g.GetHdc();
+                    try
+                    {
+                        User32.DrawFrameControl(hdc, ref rect, 2, 1);
+                    }
+                    finally
+                    {
+                        g.ReleaseHdcInternal(hdc);
+                    }
                 }
 
-                image.MakeTransparent();
-                cacheCheckImage = image;
-                cacheCheckColor = checkColor;
+                result.MakeTransparent();
             }
+            else
+            {
+                using IReadWriteBitmapData bitmapData = result.GetReadWriteBitmapData();
+                int checkHeight = fullSize.Height / 5;
+                Color32 c = Color.Black;
+                int start = (int)(fullSize.Width * 0.25f);
+                int mid = (int)(fullSize.Width * 0.4f);
+                int end = (int)(fullSize.Width * 0.7f);
+                int y = (int)(fullSize.Height * 0.4f);
+                for (int x = start; x < end; x++)
+                {
+                    bitmapData.DrawLine(c, x, y, x, y + checkHeight);
+                    y += x < mid ? +1 : -1;
+                }
+            }
+
+            cacheCheckImage = result;
+            cacheCheckColor = checkColor;
             return cacheCheckImage;
         }
 

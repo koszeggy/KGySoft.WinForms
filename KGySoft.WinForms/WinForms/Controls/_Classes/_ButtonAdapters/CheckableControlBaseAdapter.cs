@@ -38,7 +38,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Properties
 
-        protected bool IsButton
+        protected override bool IsButton
         {
             get
             {
@@ -46,7 +46,7 @@ namespace KGySoft.WinForms.Controls
                     return checkBox.Appearance == Appearance.Button;
                 if (ButtonInstance is RadioButton radioButton)
                     return radioButton.Appearance == Appearance.Button;
-                return false;
+                return base.IsButton;
             }
         }
 

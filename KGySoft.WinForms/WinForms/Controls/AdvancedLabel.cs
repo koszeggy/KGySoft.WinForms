@@ -735,6 +735,22 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         }
 
         /// <inheritdoc />
+        protected override void OnForeColorChanged(EventArgs e)
+        {
+            base.OnForeColorChanged(e);
+            if (OSHelper.IsMono)
+                Invalidate();
+        }
+
+        /// <inheritdoc />
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+            if (OSHelper.IsMono)
+                Invalidate();
+        }
+
+        /// <inheritdoc />
         [EditorBrowsable(EditorBrowsableState.Never)]
         protected override void OnLinkClicked(LinkLabelLinkClickedEventArgs e)
         {

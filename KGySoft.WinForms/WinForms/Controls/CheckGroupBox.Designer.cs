@@ -23,8 +23,6 @@
             this.checkBox.AutoSize = true;
             this.checkBox.Checked = true;
             this.checkBox.CheckState = System.Windows.Forms.CheckState.Checked;
-            this.checkBox.DisabledBackColor = System.Drawing.Color.Transparent;
-            this.checkBox.EnabledBackColor = System.Drawing.Color.Transparent;
             this.checkBox.Location = new System.Drawing.Point(0, 0);
             this.checkBox.Name = "checkBox";
             this.checkBox.Size = new System.Drawing.Size(104, 24);

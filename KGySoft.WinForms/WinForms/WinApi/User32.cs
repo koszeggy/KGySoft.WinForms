@@ -364,7 +364,7 @@ namespace KGySoft.WinForms.WinApi
         /// <param name="state">Specifies the initial state of the frame control.</param>
         /// <returns>Nonzero indicates success. Zero indicates failure.</returns>
         [DllImport("user32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        internal static extern bool DrawFrameControl(HandleRef hDC, ref RECT rect, int type, int state);
+        internal static extern bool DrawFrameControl(IntPtr hDC, ref RECT rect, int type, int state);
 
         /// <summary>
         /// The current DPI_AWARENESS_CONTEXT for the thread.

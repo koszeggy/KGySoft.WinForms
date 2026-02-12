@@ -385,7 +385,6 @@ namespace KGySoft.WinForms.Controls
             get => autoScaleFont;
             set
             {
-                Debug.Assert(AutoScaleFont ^ defaultFont == null);
                 if (autoScaleFont == value)
                     return;
 
@@ -415,7 +414,6 @@ namespace KGySoft.WinForms.Controls
             get => base.Font;
             set
             {
-                Debug.Assert(AutoScaleFont ^ defaultFont == null);
                 if (dpiChangingCount > 0 && AutoScaleFont)
                     return;
 
@@ -477,7 +475,7 @@ namespace KGySoft.WinForms.Controls
                         FlatStyle.Flat => new RadioButtonFlatAdapter(this),
                         FlatStyle.Popup => new RadioButtonPopupAdapter(this),
                         FlatStyle.Standard => new RadioButtonStandardAdapter(this),
-                        FlatStyle.System when OSHelper.IsMono => new ButtonStandardAdapter(this),
+                        FlatStyle.System when OSHelper.IsMono => new RadioButtonStandardAdapter(this),
                         _ => throw new InvalidOperationException()
                     };
                     lastAdapterType = base.FlatStyle;
@@ -506,6 +504,8 @@ namespace KGySoft.WinForms.Controls
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
+            if (OSHelper.IsMono)
+                SetAutoSizeMode(AutoSizeMode.GrowAndShrink);
         }
 
         #endregion
@@ -523,7 +523,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="proposedSize">The custom-sized area for a control.</param>
         public override Size GetPreferredSize(Size proposedSize)
         {
-            if (FlatStyle == FlatStyle.System)
+            if (FlatStyle == FlatStyle.System && !OSHelper.IsMono)
                 return base.GetPreferredSize(proposedSize);
 
             if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out var preferredSize))
@@ -834,6 +834,22 @@ namespace KGySoft.WinForms.Controls
             base.OnPaddingChanged(e);
         }
 
+        /// <inheritdoc />
+        protected override void OnForeColorChanged(EventArgs e)
+        {
+            base.OnForeColorChanged(e);
+            if (OSHelper.IsMono)
+                Invalidate();
+        }
+
+        /// <inheritdoc />
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+            if (OSHelper.IsMono)
+                Invalidate();
+        }
+
         /// <summary>
         /// Paints the specified state of this control, and raises the <see cref="PaintState"/> event.
         /// </summary>
@@ -934,7 +950,8 @@ namespace KGySoft.WinForms.Controls
 
         private ControlAppearanceState GetAppearance()
         {
-            int partId = (int)(Appearance == Appearance.Normal || FlatStyle != FlatStyle.Standard ? BUTTONPARTS.BP_RADIOBUTTON : BUTTONPARTS.BP_PUSHBUTTON);
+            // For non-standard FlatStyles, we use CheckBox part even for Button appearance so we will have nonzero transition speeds for CheckState changes.
+            int partId = (int)(Appearance == Appearance.Normal || FlatStyle is FlatStyle.Popup or FlatStyle.Flat ? BUTTONPARTS.BP_RADIOBUTTON : BUTTONPARTS.BP_PUSHBUTTON);
             int stateId = GetSystemState();
             bool isEnabled = Enabled;
             Color foreColor = ForeColor;
@@ -962,7 +979,7 @@ namespace KGySoft.WinForms.Controls
         private int GetSystemState()
         {
             // For non-standard FlatStyles, we use RadioButton states even for Button appearance so we will have nonzero transition speeds for Checked changes.
-            if (Appearance == Appearance.Normal || FlatStyle != FlatStyle.Standard)
+            if (Appearance == Appearance.Normal || FlatStyle is FlatStyle.Popup or FlatStyle.Flat)
             {
                 RadioButtonState result = RadioButtonState.UncheckedNormal;
                 if (!Enabled)
@@ -1108,7 +1125,6 @@ namespace KGySoft.WinForms.Controls
 
         void IPerMonitorDpiAware.ParentFormDpiChanged()
         {
-            Debug.Assert(dpiChangingCount > 0);
             dpiChangingCount -= 1;
             if (isPerMonitorDpiAwarenessV1 && AutoSize)
                 PerformLayout();

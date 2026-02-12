@@ -475,7 +475,7 @@ namespace KGySoft.WinForms.Controls
                         FlatStyle.Flat => new CheckBoxFlatAdapter(this),
                         FlatStyle.Popup => new CheckBoxPopupAdapter(this),
                         FlatStyle.Standard => new CheckBoxStandardAdapter(this),
-                        FlatStyle.System when OSHelper.IsMono => new ButtonStandardAdapter(this),
+                        FlatStyle.System when OSHelper.IsMono => new CheckBoxStandardAdapter(this),
                         _ => throw new InvalidOperationException()
                     };
                     lastAdapterType = base.FlatStyle;
@@ -522,7 +522,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="proposedSize">The custom-sized area for a control.</param>
         public override Size GetPreferredSize(Size proposedSize)
         {
-            if (FlatStyle == FlatStyle.System)
+            if (FlatStyle == FlatStyle.System && !OSHelper.IsMono)
                 return base.GetPreferredSize(proposedSize);
 
             if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out var preferredSize))
@@ -748,7 +748,7 @@ namespace KGySoft.WinForms.Controls
         {
             // ignoring next paint if check state will change; otherwise, because of double paints,
             // no animation is performed due to wrong transitions (unchecked hot -> unchecked pressed -> unchecked hot (ignored) -> checked hot)
-            if (isPressed && isHovered)
+            if (isPressed && isHovered && !OSHelper.IsMono)
                 ignoreNextPaint = true;
 
             isPressed = false;
@@ -825,6 +825,22 @@ namespace KGySoft.WinForms.Controls
         {
             ResetSizeCache();
             base.OnPaddingChanged(e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnForeColorChanged(EventArgs e)
+        {
+            base.OnForeColorChanged(e);
+            if (OSHelper.IsMono)
+                Invalidate();
+        }
+
+        /// <inheritdoc />
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+            if (OSHelper.IsMono)
+                Invalidate();
         }
 
         /// <summary>
@@ -909,7 +925,8 @@ namespace KGySoft.WinForms.Controls
 
         private ControlAppearanceState GetAppearance()
         {
-            int partId = (int)(Appearance == Appearance.Normal || FlatStyle != FlatStyle.Standard ? BUTTONPARTS.BP_CHECKBOX : BUTTONPARTS.BP_PUSHBUTTON);
+            // For non-standard FlatStyles, we use CheckBox part even for Button appearance so we will have nonzero transition speeds for CheckState changes.
+            int partId = (int)(Appearance == Appearance.Normal || FlatStyle is FlatStyle.Popup or FlatStyle.Flat ? BUTTONPARTS.BP_CHECKBOX : BUTTONPARTS.BP_PUSHBUTTON);
             int stateId = GetSystemState();
             bool isEnabled = Enabled;
             Color foreColor = ForeColor;
@@ -937,7 +954,7 @@ namespace KGySoft.WinForms.Controls
         private int GetSystemState()
         {
             // For non-standard FlatStyles, we use CheckBox states even for Button appearance so we will have nonzero transition speeds for CheckState changes.
-            if (Appearance == Appearance.Normal || FlatStyle != FlatStyle.Standard)
+            if (Appearance == Appearance.Normal || FlatStyle is FlatStyle.Popup or FlatStyle.Flat)
             {
                 CheckBoxState result = CheckBoxState.UncheckedNormal;
                 if (!Enabled)

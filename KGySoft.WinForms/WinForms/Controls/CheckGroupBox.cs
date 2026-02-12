@@ -169,6 +169,13 @@ namespace KGySoft.WinForms.Controls
                 Owner?.OnTextChanged(e);
             }
 
+            protected override void OnParentBackgroundImageChanged(EventArgs e)
+            {
+                // if there is a direct background image, making the checkbox background explicitly transparent; otherwise, inheriting the groupbox back color
+                base.OnParentBackgroundImageChanged(e);
+                EnabledBackColor = DisabledBackColor = Parent?.BackgroundImage == null ? Color.Empty : Color.Transparent;
+            }
+
             #endregion
         }
 

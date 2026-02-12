@@ -818,6 +818,7 @@ namespace KGySoft.WinForms.Controls
         protected virtual int ButtonBorderSize => 4;
         protected ButtonBase ButtonInstance => control;
         protected bool ShowFocusCues => ((ISupportButtonAdapter)control).ShowFocusCues;
+        protected virtual bool IsButton => true;
 
         #endregion
 
@@ -917,7 +918,7 @@ namespace KGySoft.WinForms.Controls
 
         internal virtual LayoutOptions CommonLayout(ControlAppearanceState state)
         {
-            LayoutOptions layout = new LayoutOptions();
+            var layout = new LayoutOptions();
             layout.Client = LayoutUtils.DeflateRect(control.ClientRectangle, control.Padding);
             layout.Padding = control.Padding;
             layout.Scale = control.GetScale();
@@ -1054,7 +1055,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Draws the button's text.
         /// </summary>
-        void DrawText(Graphics g, LayoutData layout, ColorData colors, ControlAppearanceState state)
+        private void DrawText(Graphics g, LayoutData layout, ColorData colors, ControlAppearanceState state)
         {
             Rectangle r = layout.TextBounds;
             bool disabledText3D = layout.Options.ShadowedText;
@@ -1079,30 +1080,34 @@ namespace KGySoft.WinForms.Controls
                 }
                 else
                     g.DrawString(state.Text, control.Font, colors.WindowText.GetBrush(), r, stringFormat);
+                return;
             }
-            else
-            {
-                // Draw text using GDI (.NET Framework 2.0+ feature).
-                if (disabledText3D && !state.Enabled)
-                {
-                    Color disabledColor = state.ForeColor; // now this is DisabledForeColor
-                    if (VisualStyleHelper.RenderWithVisualStyles)
-                    {
-                        //don't draw chiseled text if themed as win32 app does.
-                        TextRenderer.DrawText(g, state.Text, control.Font, r, disabledColor, formatFlags);
-                    }
-                    else
-                    {
-                        r.Offset(1, 1);
-                        TextRenderer.DrawText(g, state.Text, control.Font, r, colors.Highlight, formatFlags);
 
-                        r.Offset(-1, -1);
-                        TextRenderer.DrawText(g, state.Text, control.Font, r, disabledColor, formatFlags);
-                    }
+            // Mono/Windows bug: the VerticalCenter flag kills word wrapping, so clearing it for check box and radio button.
+            // Centering is actually not really needed when AutoSize is true, at least when the preferred size can be applied properly.
+            if (OSHelper.IsMono && OSHelper.IsWindows && control.AutoSize && !IsButton)
+                formatFlags &= ~TextFormatFlags.VerticalCenter;
+
+            // Draw text using GDI (.NET Framework 2.0+ feature).
+            if (disabledText3D && !state.Enabled)
+            {
+                Color disabledColor = state.ForeColor; // now this is DisabledForeColor
+                if (VisualStyleHelper.RenderWithVisualStyles)
+                {
+                    //don't draw chiseled text if themed as win32 app does.
+                    TextRenderer.DrawText(g, state.Text, control.Font, r, disabledColor, formatFlags);
                 }
                 else
-                    TextRenderer.DrawText(g, state.Text, control.Font, r, colors.WindowText, formatFlags);
+                {
+                    r.Offset(1, 1);
+                    TextRenderer.DrawText(g, state.Text, control.Font, r, colors.Highlight, formatFlags);
+
+                    r.Offset(-1, -1);
+                    TextRenderer.DrawText(g, state.Text, control.Font, r, disabledColor, formatFlags);
+                }
             }
+            else
+                TextRenderer.DrawText(g, state.Text, control.Font, r, colors.WindowText, formatFlags);
         }
 
         #endregion

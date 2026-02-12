@@ -62,45 +62,46 @@ namespace KGySoft.WinForms.Controls
         internal override void PaintUp(PaintStateEventArgs e)
         {
             if (IsButton)
-                ButtonAdapter.PaintUp(e);
-            else
             {
-                Graphics g = e.Graphics;
-                ControlAppearanceState state = e.State;
-                ColorData colors = ColorData.Calculate(this, g, state);
-                LayoutData layout = Layout(g, state).Layout(g);
-                PaintButtonBackground(e, ButtonInstance.ClientRectangle, null);
-
-                if (!layout.Options.DotNetOneButtonCompat)
-                    layout.TextBounds.Offset(-1, -1);
-
-                layout.ImageBounds.Offset(-1, -1);
-                AdjustFocusRectangle(state, layout);
-
-                if (!String.IsNullOrEmpty(state.Text))
-                {
-                    // Minor adjustment to make sure the appearance is exactly the same as Win32 app.
-                    int focusRectFixup = layout.Focus.X & 0x1; // if it's odd, subtract one pixel for fixup.
-                    if (!VisualStyleHelper.RenderWithVisualStyles)
-                        focusRectFixup = 1 - focusRectFixup;
-
-                    layout.Focus.Offset(-(focusRectFixup + 1), -2);
-                    layout.Focus.Width = layout.TextBounds.Width + layout.ImageBounds.Width - 1;
-                    layout.Focus.Intersect(layout.TextBounds);
-
-                    if (!layout.Options.TextAlign.AnyLeft()
-                        && layout.Options.UseCompatibleTextRendering
-                        && layout.Options.Font.Italic)
-                    {
-                        // Fixup for GDI+ text rendering.
-                        layout.Focus.Width += 2;
-                    }
-                }
-
-                PaintImage(e, layout);
-                DrawCheckBox(e, layout);
-                PaintField(e, layout, colors, true);
+                ButtonAdapter.PaintUp(e);
+                return;
             }
+
+            Graphics g = e.Graphics;
+            ControlAppearanceState state = e.State;
+            ColorData colors = ColorData.Calculate(this, g, state);
+            LayoutData layout = Layout(g, state).Layout(g);
+            PaintButtonBackground(e, ButtonInstance.ClientRectangle, null);
+
+            if (!layout.Options.DotNetOneButtonCompat)
+                layout.TextBounds.Offset(-1, -1);
+
+            layout.ImageBounds.Offset(-1, -1);
+            AdjustFocusRectangle(state, layout);
+
+            if (!String.IsNullOrEmpty(state.Text))
+            {
+                // Minor adjustment to make sure the appearance is exactly the same as Win32 app.
+                int focusRectFixup = layout.Focus.X & 0x1; // if it's odd, subtract one pixel for fixup.
+                if (!VisualStyleHelper.RenderWithVisualStyles)
+                    focusRectFixup = 1 - focusRectFixup;
+
+                layout.Focus.Offset(-(focusRectFixup + 1), -2);
+                layout.Focus.Width = layout.TextBounds.Width + layout.ImageBounds.Width - 1;
+                layout.Focus.Intersect(layout.TextBounds);
+
+                if (!layout.Options.TextAlign.AnyLeft()
+                    && layout.Options.UseCompatibleTextRendering
+                    && layout.Options.Font.Italic)
+                {
+                    // Fixup for GDI+ text rendering.
+                    layout.Focus.Width += 2;
+                }
+            }
+
+            PaintImage(e, layout);
+            DrawCheckBox(e, layout);
+            PaintField(e, layout, colors, true);
         }
 
         #endregion
