@@ -63,12 +63,13 @@ namespace KGySoft.WinForms.Controls
 
         #region Instance Properties
 
-        #region Protected Properties
+        #region Internal Properties
 
         /// <summary>
         /// Gets whether the fading painter is enabled.
         /// </summary>
-        protected override bool Enabled => base.Enabled && Host.FadingAnimationOptions != FadingOptions.None;
+        internal override bool Enabled => base.Enabled && Host.FadingAnimationOptions != FadingOptions.None
+            && !(OSHelper.IsMono && Control.BackColor.A == 0); // turning off fading animations on Mono when back color is transparent to avoid heavy flickering
 
         #endregion
 

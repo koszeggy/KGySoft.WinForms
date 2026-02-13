@@ -264,7 +264,7 @@ namespace KGySoft.WinForms.Controls
                 if (state.CheckState == CheckState.Indeterminate)
                 {
                     using Brush brush = CreateDitherBrush(colors.Highlight, colors.BackColor);
-                    PaintButtonBackground(e, clientRectangle, brush);
+                    PaintButtonBackground(e, clientRectangle, brush, colors.BackColor.A != byte.MaxValue);
                 }
                 else
                     PaintButtonBackground(e, clientRectangle, null);

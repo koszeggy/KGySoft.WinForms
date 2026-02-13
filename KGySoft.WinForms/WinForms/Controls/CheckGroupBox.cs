@@ -114,6 +114,7 @@ namespace KGySoft.WinForms.Controls
             #region Fields
 
             private CheckGroupBox? owner;
+            private bool hasAlpha;
 
             #endregion
 
@@ -174,6 +175,15 @@ namespace KGySoft.WinForms.Controls
                 // if there is a direct background image, making the checkbox background explicitly transparent; otherwise, inheriting the groupbox back color
                 base.OnParentBackgroundImageChanged(e);
                 EnabledBackColor = DisabledBackColor = Parent?.BackgroundImage == null ? Color.Empty : Color.Transparent;
+            }
+
+            protected override void OnBackColorChanged(EventArgs e)
+            {
+                base.OnBackColorChanged(e);
+                bool newHasAlpha = BackColor.A != Byte.MaxValue;
+                if (newHasAlpha != hasAlpha)
+                    Owner?.ResetBaseText();
+                hasAlpha = newHasAlpha;
             }
 
             #endregion
@@ -548,16 +558,29 @@ namespace KGySoft.WinForms.Controls
             if (!IsHandleCreated)
                 return;
 
+            if (checkBox.BackColor.A == Byte.MaxValue)
+            {
+                changingBaseText = true;
+                base.Text = @" ";
+                changingBaseText = false;
+                return;
+            }
+
+            // TextRenderer usage:
+            // - when using visual styles, TextRenderer provides a closer result, even when rendering with GDI+
+            // - Mono/Linux: TextRenderer.MeasureText ignores spaces so we would go into an infinite loop
+            // - Mono/Windows/NoVisualStyles: TextRenderer provides a closer result, even when rendering with GDI+
+            // - Relying on UseCompatibleTextRendering on non-Mono-Windows with no VisualStyles only
+            bool useTextRenderer = VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsWindows && (OSHelper.IsMono || !UseCompatibleTextRendering);
             Font font = checkBox.Font;
             int desiredWidth = checkBox.Width + referencePlaceholderPadding.Scale(this.GetScale().X);
             using Graphics g = CreateGraphics();
-            bool useTextRenderer = !UseCompatibleTextRendering && OSHelper.IsWindows; // on Mono/Linux TextRenderer.MeasureText ignores spaces
             StringFormat? format = useTextRenderer ? null : TextFormatFlags.Default.ToStringFormat(); // from the internal cache, it includes MeasureTrailingSpaces
 
             // Initial measurement: set the same number of spaces as the CheckBox's text length. Most likely it will be smaller than the desired width,
             // but we can use it to guess a good length.
             int len = checkBox.Text.Length;
-            string spaces = new String(' ', Math.Max(1, len));
+            var spaces = new String(' ', Math.Max(1, len));
             int actualWidth = useTextRenderer ? TextRenderer.MeasureText(g, spaces, font).Width : (int)g.MeasureString(spaces, font, PointF.Empty, format).Width;
 
             if (actualWidth != desiredWidth)
@@ -584,7 +607,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             changingBaseText = true;
-            base.Text = spaces;
+            base.Text = spaces + '\u200d'; // adding ZWJ, because in some cases (Mono or no visual styles with compatible rendering) multiple spaces are ignored by GroupBox.Text
             changingBaseText = false;
         }
 

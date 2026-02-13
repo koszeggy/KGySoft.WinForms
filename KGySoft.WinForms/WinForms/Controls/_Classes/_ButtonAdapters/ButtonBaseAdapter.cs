@@ -834,8 +834,6 @@ namespace KGySoft.WinForms.Controls
 
         protected static Brush CreateDitherBrush(Color color1, Color color2)
         {
-            // Note: Don't dispose the bitmap here. The texture brush will take ownership
-            // of the bitmap. So the bitmap will get disposed by the brush's Dispose().
             using Bitmap b = new Bitmap(2, 2);
             b.SetPixel(0, 0, color1);
             b.SetPixel(0, 1, color2);
@@ -957,12 +955,12 @@ namespace KGySoft.WinForms.Controls
 
         protected abstract LayoutOptions Layout(Graphics graphics, ControlAppearanceState state);
 
-        protected void PaintButtonBackground(PaintStateEventArgs e, Rectangle bounds, Brush? backBrush)
+        protected void PaintButtonBackground(PaintStateEventArgs e, Rectangle bounds, Brush? backBrush = null, bool brushHasAlpha = false)
         {
+            if (backBrush == null || brushHasAlpha)
+                ButtonInstance.PaintBackground(e, bounds, e.State.BackColor);
             if (backBrush != null)
                 e.Graphics.FillRectangle(backBrush, bounds);
-            else
-                ButtonInstance.PaintBackground(e, bounds, e.State.BackColor);
         }
 
         protected void PaintField(PaintStateEventArgs e, LayoutData layout, ColorData colors, bool drawFocus)

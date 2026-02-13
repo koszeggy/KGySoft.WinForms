@@ -165,8 +165,12 @@ namespace KGySoft.WinForms.Reflection
             if (TryInvokeMethod(c, "PaintBackground", [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point)], e, rectangle, backColor, scrollOffset))
                 return;
 
-            // fallback solution (e.g. on Mono): painting a solid background
-            // Transparent back color: obtaining the color from the parent
+            // transparent background on Mono (this draws the possible background image)
+            if (backColor.A == 0 && OSHelper.IsMono && TryInvokeMethod(c, "PaintControlBackground", [typeof(PaintEventArgs)], e))
+                return;
+
+            // fallback solution (including Mono): painting the specified back color
+            // Transparent back color: obtaining the color from the parent (occurs only when none of the method invoked above worked)
             while (backColor.A == 0 && c.Parent is Control parent)
             {
                 backColor = parent.BackColor;

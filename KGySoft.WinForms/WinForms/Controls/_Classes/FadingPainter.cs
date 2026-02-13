@@ -50,22 +50,26 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Internal Properties
+
+        /// <summary>
+        /// Gets whether the fading painter is enabled.
+        /// </summary>
+        internal virtual bool Enabled
+#if NETFRAMEWORK || NET10_0_OR_GREATER
+            => operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported;
+#else
+            => operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported && CanUseSystemPaint();
+#endif
+
+        #endregion
+
         #region Protected Properties
 
         /// <summary>
         /// Gets the host control.
         /// </summary>
         protected Control Control => (Control)host;
-
-        /// <summary>
-        /// Gets whether the fading painter is enabled.
-        /// </summary>
-        protected virtual bool Enabled
-#if NETFRAMEWORK || NET10_0_OR_GREATER
-            => operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported;
-#else
-            => operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported && CanUseSystemPaint();
-#endif
 
         #endregion
 

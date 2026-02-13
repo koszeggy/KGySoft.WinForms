@@ -1176,8 +1176,8 @@ namespace KGySoft.WinForms.Controls
             base.TextAlign = ContentAlignment.TopLeft;
             base.ImageAlign = lastImageAlign = ContentAlignment.TopLeft;
             textRenderingQuality = RenderingQuality.High;
-            CheckStyles();
             fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton);
+            CheckStyles();
             defaultTextFont = new ScalingFont(DefaultTextFont, ScaleHelper.SystemScale);
             defaultDescriptionFont = new ScalingFont(DefaultDescriptionFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
@@ -1576,6 +1576,24 @@ namespace KGySoft.WinForms.Controls
             base.OnPaddingChanged(e);
         }
 
+        /// <inheritdoc />
+        protected override void OnForeColorChanged(EventArgs e)
+        {
+            base.OnForeColorChanged(e);
+            if (OSHelper.IsMono)
+                Invalidate();
+        }
+
+        /// <inheritdoc />
+        protected override void OnBackColorChanged(EventArgs e)
+        {
+            base.OnBackColorChanged(e);
+            if (!OSHelper.IsMono)
+                return;
+            Invalidate();
+            CheckStyles();
+        }
+
         /// <summary>
         /// Paints the specified state of this control, and raises the <see cref="PaintState"/> event.
         /// </summary>
@@ -1708,7 +1726,7 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckStyles()
         {
-            if (fadingAnimationsEnabled && FadingPainterInternal.IsSupported)
+            if (fadingAnimationsEnabled && fadingPainter.Enabled)
             {
                 // to enable animations, double buffering must be disabled
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);

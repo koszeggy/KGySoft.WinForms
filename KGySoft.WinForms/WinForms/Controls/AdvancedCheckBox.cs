@@ -500,8 +500,8 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public AdvancedCheckBox()
         {
-            CheckStyles();
             fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton);
+            CheckStyles();
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
@@ -839,8 +839,10 @@ namespace KGySoft.WinForms.Controls
         protected override void OnBackColorChanged(EventArgs e)
         {
             base.OnBackColorChanged(e);
-            if (OSHelper.IsMono)
-                Invalidate();
+            if (!OSHelper.IsMono)
+                return;
+            Invalidate();
+            CheckStyles();
         }
 
         /// <summary>
@@ -912,14 +914,14 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckStyles()
         {
-            if (fadingAnimationsEnabled && FadingPainterInternal.IsSupported)
+            if (fadingAnimationsEnabled && fadingPainter.Enabled)
             {
                 // to enable animations, double buffering must be disabled
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
                 return;
             }
 
-            if (base.FlatStyle != FlatStyle.System)
+            if (base.FlatStyle != FlatStyle.System || OSHelper.IsMono)
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
         }
 

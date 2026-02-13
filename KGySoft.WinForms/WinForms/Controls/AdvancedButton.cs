@@ -638,8 +638,8 @@ namespace KGySoft.WinForms.Controls
         public AdvancedButton()
         {
             base.TextImageRelation = TextImageRelation.ImageBeforeText;
-            CheckStyles();
             fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton);
+            CheckStyles();
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
@@ -658,7 +658,7 @@ namespace KGySoft.WinForms.Controls
                 return preferredSize;
 
             // System mode
-            if (base.FlatStyle == FlatStyle.System)
+            if (base.FlatStyle == FlatStyle.System && !OSHelper.IsMono)
             {
                 if (base.Image == null && !isElevated)
                     preferredSize = base.GetPreferredSize(proposedSize);
@@ -1031,8 +1031,10 @@ namespace KGySoft.WinForms.Controls
         protected override void OnBackColorChanged(EventArgs e)
         {
             base.OnBackColorChanged(e);
-            if (OSHelper.IsMono)
+            if (!OSHelper.IsMono)
+                return;
                 Invalidate();
+            CheckStyles();
         }
 
         /// <summary>
@@ -1142,14 +1144,14 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckStyles()
         {
-            if (fadingAnimationsEnabled && FadingPainterInternal.IsSupported)
+            if (fadingAnimationsEnabled && fadingPainter.Enabled)
             {
                 // to enable animations, double buffering must be disabled
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
                 return;
             }
 
-            if (base.FlatStyle != FlatStyle.System)
+            if (base.FlatStyle != FlatStyle.System || OSHelper.IsMono)
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
         }
 
