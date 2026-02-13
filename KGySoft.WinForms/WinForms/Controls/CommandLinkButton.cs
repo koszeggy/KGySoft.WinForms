@@ -1603,35 +1603,32 @@ namespace KGySoft.WinForms.Controls
             e.Graphics.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
 
             if (!e.State.Visible)
-            {
                 this.PaintTransparentBackground(e);
-                return;
-            }
-
-            // ButtonBase.OnPaint:
-            if (AutoEllipsis)
-            {
-                int preferredHeight = GetPreferredSize(new Size(Width, 0)).Height;
-                this.SetShowToolTip(Height < preferredHeight);
-            }
             else
-                this.SetShowToolTip(false);
-
-            if (GetStyle(ControlStyles.UserPaint))
             {
-                this.Animate();
-                ImageAnimator.UpdateFrames();
-                DoPaint(e);
+                // ButtonBase.OnPaint:
+                if (AutoEllipsis)
+                {
+                    int preferredHeight = GetPreferredSize(new Size(Width, 0)).Height;
+                    this.SetShowToolTip(Height < preferredHeight);
+                }
+                else
+                    this.SetShowToolTip(false);
+
+                if (GetStyle(ControlStyles.UserPaint))
+                {
+                    this.Animate();
+                    ImageAnimator.UpdateFrames();
+                    DoPaint(e);
+                }
             }
+
+            // Raising Paint
+            if (Accessors.PaintEvent is object paintEventKey)
+                Events.GetHandler<PaintEventHandler>(paintEventKey)?.Invoke(this, e);
 
             // Raising PaintState
             Events.GetHandler<EventHandler<PaintStateEventArgs>>(nameof(PaintState))?.Invoke(this, e);
-
-            // Control.OnPaint:
-            if (Accessors.PaintEvent is not object paintEventKey)
-                return;
-            PaintEventHandler? handler = (PaintEventHandler?)Events[paintEventKey];
-            handler?.Invoke(this, e);
         }
 
         /// <inheritdoc />

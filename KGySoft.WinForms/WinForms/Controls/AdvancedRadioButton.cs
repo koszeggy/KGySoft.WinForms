@@ -878,14 +878,12 @@ namespace KGySoft.WinForms.Controls
                 ((ISupportButtonAdapter)this).Adapter.Paint(e);
             }
 
+            // Raising Paint
+            if (Accessors.PaintEvent is object paintEventKey)
+                Events.GetHandler<PaintEventHandler>(paintEventKey)?.Invoke(this, e);
+
             // Raising PaintState
             Events.GetHandler<EventHandler<PaintStateEventArgs>>(nameof(PaintState))?.Invoke(this, e);
-
-            // Control.OnPaint:
-            if (Accessors.PaintEvent is not object paintEventKey)
-                return;
-            PaintEventHandler? handler = (PaintEventHandler?)Events[paintEventKey];
-            handler?.Invoke(this, e);
         }
 
         /// <inheritdoc />

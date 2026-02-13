@@ -965,15 +965,12 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         {
             ControlAppearanceState state = e.State;
             e.Graphics.SetTextRenderingQuality(textRenderingQuality, UseCompatibleTextRendering);
+            bool paintRaised = false;
 
-            try
+            if (!state.Visible)
+                this.PaintTransparentBackground(e);
+            else
             {
-                if (!state.Visible)
-                {
-                    this.PaintTransparentBackground(e);
-                        return;
-                }
-
                 Rectangle backRect = ClientRectangle;
                 this.PaintBackground(e, backRect, state.BackColor);
 
@@ -998,22 +995,29 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 if (state.Enabled && base.LinkArea.Length != 0)
                 {
                     base.OnPaint(e);
-                    return;
+                    paintRaised = true;
                 }
-
-                Rectangle rect = new Rectangle(ClientRectangle.X + Padding.Left, ClientRectangle.Y + Padding.Top, ClientRectangle.Width - Padding.Horizontal, ClientRectangle.Height - Padding.Vertical);
-                TextFormatFlags formatFlags = this.GetFormatFlags();
-                if (UseCompatibleTextRendering)
-                    e.Graphics.DrawString(state.Text, Font, state.ForeColor.GetBrush(), rect, formatFlags.ToStringFormat());
                 else
-                    TextRenderer.DrawText(e.Graphics, state.Text, Font, rect, state.ForeColor, image == null ? state.BackColor : Color.Transparent, formatFlags);
+                {
+                    Rectangle rect = new Rectangle(ClientRectangle.X + Padding.Left, ClientRectangle.Y + Padding.Top, ClientRectangle.Width - Padding.Horizontal, ClientRectangle.Height - Padding.Vertical);
+                    TextFormatFlags formatFlags = this.GetFormatFlags();
+                    if (UseCompatibleTextRendering)
+                        e.Graphics.DrawString(state.Text, Font, state.ForeColor.GetBrush(), rect, formatFlags.ToStringFormat());
+                    else
+                        TextRenderer.DrawText(e.Graphics, state.Text, Font, rect, state.ForeColor, image == null ? state.BackColor : Color.Transparent, formatFlags);
+                }
             }
-            finally
-            {
-                Events.GetHandler<EventHandler<PaintStateEventArgs>>(nameof(PaintState))?.Invoke(this, e);
-                if (!OSHelper.IsWindows && borderStyle != AdvancedBorderStyle.None)
-                    e.Graphics.DrawBorder(borderStyle, ClientRectangle);
-            }
+
+            // Raising Paint
+            if (!paintRaised && Accessors.PaintEvent is object paintEventKey)
+                Events.GetHandler<PaintEventHandler>(paintEventKey)?.Invoke(this, e);
+
+            // Raising PaintState
+            Events.GetHandler<EventHandler<PaintStateEventArgs>>(nameof(PaintState))?.Invoke(this, e);
+
+            // Drawing border if it's in the client area, intentionally over user paint
+            if (!OSHelper.IsWindows && borderStyle != AdvancedBorderStyle.None && state.Visible)
+                e.Graphics.DrawBorder(borderStyle, ClientRectangle);
         }
 
         /// <inheritdoc />

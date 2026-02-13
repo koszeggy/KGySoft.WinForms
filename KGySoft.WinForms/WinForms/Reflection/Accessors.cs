@@ -118,7 +118,7 @@ namespace KGySoft.WinForms.Reflection
         {
             get
             {
-                const string fieldName =
+                string fieldName = OSHelper.IsMono ? "PaintEvent" :
 #if NETFRAMEWORK
                     "EventPaint";
 #else
