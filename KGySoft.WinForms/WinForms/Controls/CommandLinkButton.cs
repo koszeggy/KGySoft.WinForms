@@ -210,8 +210,9 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets whether the current operating system supports command link buttons natively.
-        /// That is on Windows Vista or later, when Application.EnableVisualStyles() was called.
-        /// NOTE: it does not mean that visual styles are actually used (use <see cref="IsNativeVisualStylesRenderingAvailable"/> to check that).
+        /// That is on Windows Vista or later, when Application.EnableVisualStyles() was called (even on Mono).
+        /// NOTE: It does not mean that visual styles are actually used (use <see cref="IsNativeVisualStylesRenderingAvailable"/> to check that).
+        ///       It also does not mean that native rendering is actually used (use <see cref="IsNativeRendering"/> to check that)
         /// </summary>
         private static bool IsNativelySupported => OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles;
 
@@ -936,9 +937,9 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets whether Vista+ system rendering is used.
         /// </summary>
-        private bool IsNativeRendering => base.FlatStyle == FlatStyle.System && IsNativelySupported;
+        private bool IsNativeRendering => base.FlatStyle == FlatStyle.System && IsNativelySupported && !OSHelper.IsMono;
 
-        private bool IsCustomRendering => base.FlatStyle != FlatStyle.System;
+        private bool IsCustomRendering => base.FlatStyle != FlatStyle.System || OSHelper.IsMono;
 
         private Font DefaultTextFont
         {
@@ -1114,7 +1115,7 @@ namespace KGySoft.WinForms.Controls
         private int VerticalPadding => VerticalBasePadding << 1;
         private int VerticalBasePadding => UsesTheming ? 10 : 6;
 
-        private bool UsesTheming => VisualStyleHelper.RenderWithVisualStyles && base.FlatStyle == FlatStyle.Standard;
+        private bool UsesTheming => VisualStyleHelper.RenderWithVisualStyles && base.FlatStyle is FlatStyle.Standard or FlatStyle.System;
         private int ImagePadding => UsesTheming ? 5 : 3;
         private int ImageTextMargin => UsesTheming ? 1 : 4;
 
@@ -1208,9 +1209,7 @@ namespace KGySoft.WinForms.Controls
         public override Size GetPreferredSize(Size proposedSize)
         {
             if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out var preferredSize))
-            {
                 return preferredSize;
-            }
 
             if (IsNativeRendering)
             {
@@ -1290,7 +1289,7 @@ namespace KGySoft.WinForms.Controls
         {
             switch (m.Msg)
             {
-                case Constants.WM_PAINT when base.FlatStyle == FlatStyle.System:
+                case Constants.WM_PAINT when base.FlatStyle == FlatStyle.System && !OSHelper.IsMono:
                     // Image and FlatStyle are not overridable properties so in case of native rendering reacting their change here.
                     // (On custom rendering, image change is handled in OnPaint)
                     if (base.FlatStyle != lastFlatStyle)
@@ -1730,7 +1729,7 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, base.FlatStyle != FlatStyle.System);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, base.FlatStyle != FlatStyle.System || OSHelper.IsMono);
         }
 
         private void CheckDefaultAnimation()
@@ -1774,7 +1773,7 @@ namespace KGySoft.WinForms.Controls
                 base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
             }
 
-            if (recreateHandle)
+            if (recreateHandle && !OSHelper.IsMono)
                 RecreateHandle();
             CheckDefaultAnimation();
 
