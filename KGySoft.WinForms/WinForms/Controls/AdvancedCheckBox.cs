@@ -857,10 +857,10 @@ namespace KGySoft.WinForms.Controls
             if (AutoEllipsis)
             {
                 int preferredHeight = GetPreferredSize(new Size(Width, 0)).Height;
-                this.SetShowToolTip(Height < preferredHeight);
+                this.ShowToolTip(Height < preferredHeight);
             }
             else
-                this.SetShowToolTip(false);
+                this.ShowToolTip(false);
 
             //OnPaintBackground(e);
             if (GetStyle(ControlStyles.UserPaint))

@@ -174,14 +174,11 @@ namespace KGySoft
 
         #region Accessors
 
-        /// <summary>Instance property "{0}" not found on type "{1}".</summary>
-        internal static string AccessorsInstancePropertyDoesNotExist(string? propertyName, Type type) => Get("Accessors_InstancePropertyDoesNotExistFormat", propertyName, type);
+        /// <summary>Property "{0}" was not found on type "{1}".</summary>
+        internal static string AccessorsPropertyDoesNotExist(string? propertyName, Type type) => Get("Accessors_PropertyDoesNotExistFormat", propertyName, type);
 
-        /// <summary>Instance field "{0}" not found on type "{1}".</summary>
-        internal static string AccessorsInstanceFieldDoesNotExist(string? fieldName, Type type) => Get("Accessors_InstanceFieldDoesNotExistFormat", fieldName, type);
-
-        /// <summary>Static field "{0}" not found on type "{1}".</summary>
-        internal static string AccessorsStaticFieldDoesNotExist(string? fieldName, Type type) => Get("Accessors_StaticFieldDoesNotExistFormat", fieldName, type);
+        ///// <summary>Field "{0}" not found on type "{1}".</summary>
+        //internal static string AccessorsFieldDoesNotExist(string? fieldName, Type type) => Get("Accessors_FieldDoesNotExistFormat", fieldName, type);
 
         /// <summary>Method "{0}" was not found on type "{1}".</summary>
         internal static string AccessorsMethodDoesNotExist(string? methodName, Type type) => Get("Accessors_MethodDoesNotExistFormat", methodName, type);

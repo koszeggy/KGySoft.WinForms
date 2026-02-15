@@ -665,16 +665,16 @@ namespace KGySoft.WinForms.Controls
                 else
                 {
                     // in system mode we must calculate with the image so hacking base.systemSize field
-                    Size systemSize = this.GetSystemSize();
-                    if (systemSize.Width == Int32.MinValue)
+                    Size? systemSize = this.GetSystemSize();
+                    if (systemSize?.Width == Int32.MinValue)
                     {
-                        systemSize = SizeFromClientSize(TextRenderer.MeasureText(base.Text, base.Font));
-                        systemSize.Width += 14;
-                        systemSize.Height += 9;
+                        Size newSystemSize = SizeFromClientSize(TextRenderer.MeasureText(base.Text, base.Font));
+                        newSystemSize.Width += 14;
+                        newSystemSize.Height += 9;
                         Size imageSize = base.Image != null ? base.Image.Size : SecurityShieldImage.Size;
-                        if (imageSize.Height + 7 > systemSize.Height)
-                            systemSize.Height = imageSize.Height + 7;
-                        this.SetSystemSize(systemSize);
+                        if (imageSize.Height + 7 > newSystemSize.Height)
+                            newSystemSize.Height = imageSize.Height + 7;
+                        this.SetSystemSize(newSystemSize);
                     }
 
                     // now base.GetPreferredSize will return correct result
@@ -1049,10 +1049,10 @@ namespace KGySoft.WinForms.Controls
             if (AutoEllipsis)
             {
                 int preferredHeight = GetPreferredSize(new Size(Width, 0)).Height;
-                this.SetShowToolTip(Height < preferredHeight);
+                this.ShowToolTip(Height < preferredHeight);
             }
             else
-                this.SetShowToolTip(false);
+                this.ShowToolTip(false);
 
             if (GetStyle(ControlStyles.UserPaint))
             {

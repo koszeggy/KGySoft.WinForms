@@ -236,14 +236,8 @@
   <data name="General_NoVisualStyles" xml:space="preserve">
     <value>Visual styles are not available.</value>
   </data>
-  <data name="Accessors_InstancePropertyDoesNotExistFormat" xml:space="preserve">
-    <value>Instance property "{0}" not found on type "{1}".</value>
-  </data>
-  <data name="Accessors_InstanceFieldDoesNotExistFormat" xml:space="preserve">
-    <value>Instance field "{0}" not found on type "{1}".</value>
-  </data>
-  <data name="Accessors_StaticFieldDoesNotExistFormat" xml:space="preserve">
-    <value>Static field "{0}" not found on type "{1}".</value>
+  <data name="Accessors_PropertyDoesNotExistFormat" xml:space="preserve">
+    <value>Property was "{0}" not found on type "{1}".</value>
   </data>
   <data name="Accessors_MethodDoesNotExistFormat" xml:space="preserve">
     <value>Method "{0}" was not found on type "{1}".</value>

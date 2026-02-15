@@ -16,20 +16,21 @@
 #region Usings
 
 using System;
+using System.Collections.Generic;
 #if !NET5_0_OR_GREATER
 using System.Collections.Specialized;
 #endif
 using System.Drawing;
-using System.Drawing.Drawing2D;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Forms;
 
 using KGySoft.Collections;
+#if NETFRAMEWORK
 using KGySoft.CoreLibraries;
-using KGySoft.Drawing;
-using KGySoft.Drawing.Imaging;
+#endif
 using KGySoft.Reflection;
 
 #endregion
@@ -39,68 +40,84 @@ namespace KGySoft.WinForms.Reflection
     // ReSharper disable InconsistentNaming
     internal static class Accessors
     {
-        #region Nested Types
-
-        /// <summary>
-        /// A value-compared variable-length tuple of types
-        /// </summary>
-        private readonly struct TypesKey : IEquatable<TypesKey>
-        {
-            #region Properties
-
-            internal Type[] Types { get; }
-
-            #endregion
-
-            #region Constructors
-
-            internal TypesKey(Type[] types) => Types = types;
-
-            #endregion
-
-            #region Methods
-
-            public override bool Equals(object? obj) => obj is TypesKey key && Equals(key);
-
-            public bool Equals(TypesKey other)
-            {
-                if (Types.Length != other.Types.Length)
-                    return false;
-                for (int i = 0; i < Types.Length; i++)
-                {
-                    if (!ReferenceEquals(Types[i], other.Types[i]))
-                        return false;
-                }
-
-                return true;
-            }
-
-            public override int GetHashCode()
-            {
-                var result = 13;
-
-                // ReSharper disable once ForCanBeConvertedToForeach - performance
-                for (int i = 0; i < Types.Length; i++)
-                    result = result * 397 + Types[i].GetHashCode();
-
-                return result;
-            }
-
-            public override string ToString() => $"({Types.Select(t => t.GetName(TypeNameKind.ShortName)).Join(", ")})";
-
-            #endregion
-        }
-
-        #endregion
-
         #region Fields
 
-        private static readonly LockFreeCacheOptions cacheOptions = new LockFreeCacheOptions { ThresholdCapacity = 128, HashingStrategy = HashingStrategy.And, MergeInterval = TimeSpan.FromSeconds(1) };
+        private static readonly LockFreeCacheOptions cacheOptions = new() { ThresholdCapacity = 16, HashingStrategy = HashingStrategy.And, MergeInterval = TimeSpan.FromMilliseconds(100) };
 
-        private static IThreadSafeCacheAccessor<(Type DeclaringType, Type? FieldType, string? FieldNamePattern), FieldAccessor?>? fields;
-        private static IThreadSafeCacheAccessor<(Type DeclaringType, string PropertyName), PropertyAccessor?>? properties;
-        private static IThreadSafeCacheAccessor<(Type DeclaringType, string MethodName), MethodAccessor?>? methodsByName;
-        private static IThreadSafeCacheAccessor<(Type DeclaringType, string MethodName, TypesKey ParameterTypes), MethodAccessor?>? methodsByTypes;
+        // Property keys and lookup callbacks. Public flags are added to support possible future compatibility for originally non-visible properties.
+        private static readonly object propApplication_ComCtlSupportsVisualStyles = new();
+        private static readonly object propControl_ShowKeyboardCues = new();
+        private static readonly object propControl_DoubleBuffered = new();
+        private static readonly object propControl_ShowToolTip = new();
+        private static readonly object propFont_NativeFont = new();
+        private static readonly Dictionary<object, Func<PropertyInfo?>> propertyLookup = new(5)
+        {
+            [propApplication_ComCtlSupportsVisualStyles] = () => typeof(Application).GetProperty(nameof(ComCtlSupportsVisualStyles), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
+            [propControl_ShowKeyboardCues] = () => typeof(Control).GetProperty(nameof(ShowKeyboardCues), BindingFlags.Instance | BindingFlags.NonPublic),
+            [propControl_DoubleBuffered] = () => typeof(Control).GetProperty(nameof(DoubleBuffered), BindingFlags.Instance | BindingFlags.NonPublic),
+            [propControl_ShowToolTip] = () => typeof(ButtonBase).GetProperty(nameof(ShowToolTip), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+            [propFont_NativeFont] = () => typeof(Font).GetProperty(OSHelper.IsMono ? "NativeObject" : "NativeFont", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Public)
+        };
+
+        // Method keys and lookup callbacks. A public binding flag is added by FindMethod to support possible future compatibility for originally non-visible methods.
+        private static readonly object methodControl_RtlTranslateContent = new();
+        private static readonly object methodControl_GetStyle = new();
+        private static readonly object methodControl_OnPaintBackground = new();
+        private static readonly object methodControl_OnPaint = new();
+        private static readonly object methodControl_PaintBackground = new();
+        private static readonly object methodControl_PaintControlBackground = new();
+        private static readonly object methodControl_SetState = new();
+        private static readonly object methodControl_SetStyle = new();
+        private static readonly object methodButtonBase_Animate = new();
+        private static readonly object methodErrorProvider_UnwireEvents = new();
+        private static readonly object methodControlPaint_DrawBackgroundImage = new();
+        private static readonly object methodControlPaint_DrawImageColorized = new();
+        private static readonly object methodControlPaint_DrawHighContrastFocusRectangle = new();
+        private static readonly Dictionary<object, Func<MethodInfo?>> methodLookup = new(13)
+        {
+            [methodControl_RtlTranslateContent] = () => FindMethod(typeof(Control), nameof(RtlTranslateContent), [typeof(ContentAlignment)], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodControl_GetStyle] = () => FindMethod(typeof(Control), nameof(GetStyle), [typeof(ControlStyles)], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodControl_OnPaintBackground] = () => FindMethod(typeof(Control), nameof(OnPaintBackground), [typeof(PaintEventArgs)], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodControl_OnPaint] = () => FindMethod(typeof(Control), nameof(OnPaint), [typeof(PaintEventArgs)], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodControl_PaintBackground] = () => FindMethod(typeof(Control), nameof(ControlExtensions.PaintBackground), [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point)], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodControl_PaintControlBackground] = () => FindMethod(typeof(Control), "PaintControlBackground", [typeof(PaintEventArgs)], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodControl_SetState] = () => FindMethod(typeof(Control), nameof(SetState), [/*int|State*/null, typeof(bool)], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodControl_SetStyle] = () => FindMethod(typeof(Control), nameof(SetStyle), [typeof(ControlStyles), typeof(bool)], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodButtonBase_Animate] = () => FindMethod(typeof(ButtonBase), nameof(Animate), [], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodErrorProvider_UnwireEvents] = () => FindMethod(typeof(ErrorProvider), nameof(UnwireEvents), [typeof(BindingManagerBase)], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodControlPaint_DrawBackgroundImage] = () => FindMethod(typeof(ControlPaint), nameof(GraphicsExtensions.DrawBackgroundImage), [typeof(Graphics), typeof(Image), typeof(Color), typeof(ImageLayout), typeof(Rectangle), typeof(Rectangle), typeof(Point), typeof(RightToLeft)], BindingFlags.Static | BindingFlags.NonPublic),
+            [methodControlPaint_DrawImageColorized] = () => FindMethod(typeof(ControlPaint), nameof(GraphicsExtensions.DrawImageColorized), [typeof(Graphics), typeof(Image), typeof(Rectangle), typeof(Color)], BindingFlags.Static | BindingFlags.NonPublic),
+            [methodControlPaint_DrawHighContrastFocusRectangle] = () => FindMethod(typeof(ControlPaint), nameof(GraphicsExtensions.DrawHighContrastFocusRectangle), [typeof(Graphics), typeof(Rectangle), typeof(Color)], BindingFlags.Static | BindingFlags.NonPublic),
+        };
+
+        // Field keys and lookup callbacks. The DeclaredOnly flag is implicitly added by FindField.
+        private static readonly object fieldControl_PaintEvent = new();
+        private static readonly object fieldButton_systemSize = new();
+        private static readonly object fieldComboBox_mouseEvents = new();
+        private static readonly object fieldComboBox_mousePressed = new();
+        private static readonly object fieldErrorProvider_currentChanged = new();
+        private static readonly object fieldErrorProvider_errorManager = new();
+        private static readonly object fieldForm_formState = new();
+        private static readonly Dictionary<object, Func<FieldInfo?>> fieldLookup = new(7)
+        {
+#if NETFRAMEWORK
+            [fieldControl_PaintEvent] = () => FindField(typeof(Control), OSHelper.IsMono ? "PaintEvent" : "EventPaint", typeof(object), BindingFlags.Static | BindingFlags.NonPublic),
+#else
+            [fieldControl_PaintEvent] = () => FindField(typeof(Control), "s_paintEvent", typeof(object), BindingFlags.Static | BindingFlags.NonPublic),
+#endif
+            [fieldButton_systemSize] = () => FindField(typeof(Button), "systemSize", typeof(Size), BindingFlags.Instance | BindingFlags.NonPublic),
+            [fieldComboBox_mouseEvents] = () => FindField(typeof(ComboBox), "mouseEvents", typeof(bool), BindingFlags.Instance | BindingFlags.NonPublic),
+            [fieldComboBox_mousePressed] = () => FindField(typeof(ComboBox), "mousePressed", typeof(bool), BindingFlags.Instance | BindingFlags.NonPublic),
+            [fieldErrorProvider_currentChanged] = () => FindField(typeof(ErrorProvider), "currentChanged", typeof(EventHandler), BindingFlags.Instance | BindingFlags.NonPublic),
+            [fieldErrorProvider_errorManager] = () => FindField(typeof(ErrorProvider), "errorManager", typeof(BindingManagerBase), BindingFlags.Instance | BindingFlags.NonPublic),
+#if !NET5_0_OR_GREATER
+            [fieldForm_formState] = () => FindField(typeof(Form), "formState", typeof(Form), BindingFlags.Instance | BindingFlags.NonPublic),
+#endif
+        };
+
+        private static IThreadSafeCacheAccessor<object, PropertyAccessor?>? properties;
+        private static IThreadSafeCacheAccessor<object, MethodAccessor?>? methods;
+        private static IThreadSafeCacheAccessor<object, FieldAccessor?>? fields;
 
         #endregion
 
@@ -108,26 +125,13 @@ namespace KGySoft.WinForms.Reflection
 
         #region Application
 
-        internal static bool ComCtlSupportsVisualStyles => TryGetPropertyValue<bool>(typeof(Application), nameof(ComCtlSupportsVisualStyles));
+        internal static bool ComCtlSupportsVisualStyles => TryGetProperty(propApplication_ComCtlSupportsVisualStyles)?.GetStaticValue<bool>() ?? false;
 
         #endregion
 
         #region Control
 
-        internal static object? PaintEvent
-        {
-            get
-            {
-                string fieldName = OSHelper.IsMono ? "PaintEvent" :
-#if NETFRAMEWORK
-                    "EventPaint";
-#else
-                    "s_paintEvent";
-#endif
-
-                return GetFieldValue<object?>(typeof(Control), fieldName, false);
-            }
-        }
+        internal static object? PaintEvent => TryGetField(fieldControl_PaintEvent)?.GetStaticValue<object>();
 
         #endregion
 
@@ -139,71 +143,70 @@ namespace KGySoft.WinForms.Reflection
 
         #region Control
 
-        internal static int GetControlState(this Control control)
-        {
-            // simple field name pattern is not guaranteed to work because there are at least 3 fields in Control that has "state" in its name.
-#if NETFRAMEWORK || NETCOREAPP3_0
-            const string fieldName = "state";
-#else
-            const string fieldName = "_state";
-#endif
-            var field = GetField(typeof(Control), null, fieldName);
-            if (field == null)
-                throw new InvalidOperationException(Res.AccessorsInstanceFieldDoesNotExist(fieldName, typeof(Control)));
-
-            // actually a private State enum but enums can be unboxed as their underlying type
-            return (int)field.Get(control)!;
-        }
-
         internal static ContentAlignment RtlTranslateContent(this Control control, ContentAlignment alignment)
-            => (ContentAlignment)InvokeMethod(control, "RtlTranslateContent", alignment)!;
+            => GetMethod(methodControl_RtlTranslateContent, typeof(Control), nameof(RtlTranslateContent)).InvokeInstanceFunction<Control, ContentAlignment, ContentAlignment>(control, alignment);
 
-        internal static bool ShowKeyboardCues(this Control control) => (bool)GetPropertyValue(control, "ShowKeyboardCues")!;
+        internal static bool ShowKeyboardCues(this Control control)
+            => GetProperty(propControl_ShowKeyboardCues, typeof(Control), nameof(ShowKeyboardCues)).GetInstanceValue<Control, bool>(control);
 
-        internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset = default)
+        internal static bool TryPaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset)
         {
-            if (TryInvokeMethod(c, "PaintBackground", [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point)], e, rectangle, backColor, scrollOffset))
-                return;
-
-            // transparent background on Mono (this draws the possible background image)
-            if (backColor.A == 0 && OSHelper.IsMono && TryInvokeMethod(c, "PaintControlBackground", [typeof(PaintEventArgs)], e))
-                return;
-
-            // fallback solution (including Mono): painting the specified back color
-            // Transparent back color: obtaining the color from the parent (occurs only when none of the method invoked above worked)
-            while (backColor.A == 0 && c.Parent is Control parent)
+#if NETFRAMEWORK
+            if (!OSHelper.IsMono)
+#endif
             {
-                backColor = parent.BackColor;
-                c = parent;
+                // We must use always the 4 parameters overload, because the others have been removed in .NET (they exist in .NET Framework only).
+                if (TryGetMethod(methodControl_PaintBackground) is not MethodAccessor accessor)
+                    return false;
+                accessor.InvokeInstanceAction(c, e, rectangle, backColor, scrollOffset);
+                return true;
             }
 
-            e.Graphics.FillRectangle((backColor.A == Byte.MaxValue ? backColor : backColor.ToColor32().ToOpaque().ToColor()).GetBrush(), rectangle);
+#if NETFRAMEWORK
+            // PaintControlBackground on Mono is similar as PaintBackground, except that it cannot use a custom back color, bounds and background image offset.
+            // We can ignore the latter two, but not the custom back color (see more details at ControlExtensions.PaintBackground).
+            // ISSUE: Mono may draw the transparent background incorrectly (e.g. when the parent is a GroupBox), so not allowing alpha back color here either.
+            if (backColor.A != Byte.MaxValue || backColor.ToArgb() != c.BackColor.ToArgb() || TryGetMethod(methodControl_PaintControlBackground) is not MethodAccessor accessorMono)
+                return false;
+
+            // Here we call the native method only if c.BackColor is the same as the desired opaque backColor. It draws the possible background image on the back color.
+            accessorMono.InvokeInstanceAction(c, e);
+            return true;
+#endif
         }
 
-        internal static void OnPaint(this Control control, PaintEventArgs e) => InvokeMethod(control, "OnPaint", e);
+        internal static bool GetStyle(this Control control, ControlStyles styles)
+            => GetMethod(methodControl_GetStyle, typeof(Control), nameof(GetStyle)).InvokeInstanceFunction<Control, ControlStyles, bool>(control, styles);
 
-        internal static void SetDoubleBuffered(this Control control, bool value) => GetProperty(typeof(Control), "DoubleBuffered")!.Set(control, value);
+        internal static void OnPaintBackground(this Control control, PaintEventArgs e)
+            => GetMethod(methodControl_OnPaintBackground, typeof(Control), nameof(OnPaintBackground)).InvokeInstanceAction(control, e);
+
+        internal static void OnPaint(this Control control, PaintEventArgs e)
+            => GetMethod(methodControl_OnPaint, typeof(Control), nameof(OnPaint)).InvokeInstanceAction(control, e);
+        
+        internal static void DoubleBuffered(this Control control, bool value)
+            => GetProperty(propControl_DoubleBuffered, typeof(Control), nameof(DoubleBuffered)).SetInstanceValue(control, value);
+        
         internal static void SetStyle(this Control control, ControlStyles flags, bool value)
-            => GetMethodByName(typeof(Control), "SetStyle")!.Invoke(control, flags, value);
+            => GetMethod(methodControl_SetStyle, typeof(Control), nameof(SetStyle)).InvokeInstanceAction(control, flags, value);
 
-        // NOTE: on newer .NET versions the state parameter is an enum, but reflection works with the underlying type (int) as well
+        // NOTE: on newer .NET versions the state parameter is an enum, but reflection works with the underlying type (int) as well, so using always the non-generic Invoke with int
         internal static void SetState(this Control control, int state, bool value)
-            => GetMethodByName(typeof(Control), "SetState")?.Invoke(control, state, value);
+            => TryGetMethod(methodControl_SetState)?.Invoke(control, state, value);
 
         #endregion
 
         #region ButtonBase
 
-        internal static void SetShowToolTip(this ButtonBase instance, bool value) => GetProperty(typeof(ButtonBase), "ShowToolTip")?.Set(instance, value);
-
-        internal static void Animate(this ButtonBase instance) => TryInvokeMethod(instance, "Animate", []);
+        internal static void ShowToolTip(this ButtonBase instance, bool value) => TryGetProperty(propControl_ShowToolTip)?.SetInstanceValue(instance, value);
+        internal static void Animate(this ButtonBase instance) => TryGetMethod(methodButtonBase_Animate)?.InvokeInstanceAction(instance);
 
         #endregion
 
         #region Button
 
-        internal static Size GetSystemSize(this Button button) => GetFieldValueOrDefault(button, Size.Empty, "systemSize");
-        internal static void SetSystemSize(this Button button, Size value) => SetFieldValue(button, "systemSize", value, false);
+        internal static Size? GetSystemSize(this Button button) => TryGetField(fieldButton_systemSize)?.GetInstanceValue<Button, Size>(button);
+        internal static void SetSystemSize(this Button button, Size value) => TryGetField(fieldButton_systemSize)?.SetInstanceValue(button, value);
 
         #endregion
 
@@ -211,8 +214,12 @@ namespace KGySoft.WinForms.Reflection
 
         internal static void SetMouseEvents(this ComboBox comboBox)
         {
-            SetFieldValue(comboBox, "mouseEvents", true, false);
-            SetFieldValue(comboBox, "mousePressed", true, false);
+#if NETFRAMEWORK
+            if (OSHelper.IsMono)
+                return;
+#endif
+            TryGetField(fieldComboBox_mouseEvents)?.SetInstanceValue(comboBox, true);
+            TryGetField(fieldComboBox_mousePressed)?.SetInstanceValue(comboBox, true);
         }
 
         #endregion
@@ -220,57 +227,43 @@ namespace KGySoft.WinForms.Reflection
         #region Error Provider
 
         internal static void SetCurrentChanged(this ErrorProvider errorProvider, EventHandler currentChanged)
-            => SetFieldValue(errorProvider, "currentChanged", currentChanged);
+            => TryGetField(fieldErrorProvider_currentChanged)?.SetInstanceValue(errorProvider, currentChanged);
 
         internal static BindingManagerBase? GetErrorManager(this ErrorProvider errorProvider)
-            => GetFieldValue<BindingManagerBase?>(errorProvider, "errorManager");
+            => TryGetField(fieldErrorProvider_errorManager)?.GetInstanceValue<ErrorProvider, BindingManagerBase>(errorProvider);
 
         internal static void UnwireEvents(this ErrorProvider errorProvider, BindingManagerBase listManager)
-            => TryInvokeMethod(errorProvider, "UnwireEvents", listManager);
+            => TryGetMethod(methodErrorProvider_UnwireEvents)?.InvokeInstanceAction(errorProvider, listManager);
 
         #endregion
 
         #region ControlPaint
 
-        internal static void DrawBackgroundImage(this Graphics g, Image backgroundImage, Color backColor, ImageLayout backgroundImageLayout, Rectangle bounds, Rectangle clipRect, Point scrollOffset, RightToLeft rightToLeft)
-            => TryInvokeMethod(typeof(ControlPaint), "DrawBackgroundImage", [typeof(Graphics), typeof(Image), typeof(Color), typeof(ImageLayout), typeof(Rectangle), typeof(Rectangle), typeof(Point), typeof(RightToLeft)],
-                g, backgroundImage, backColor, backgroundImageLayout, bounds, clipRect, scrollOffset, rightToLeft);
-
-        internal static void DrawImageColorized(this Graphics graphics, Image image, Rectangle destination, Color replaceBlack)
+        internal static bool TryDrawBackgroundImage(this Graphics g, Image backgroundImage, Color backColor, ImageLayout backgroundImageLayout, Rectangle bounds, Rectangle clipRect, Point scrollOffset, RightToLeft rightToLeft)
         {
-            if (TryInvokeMethod(typeof(ControlPaint), "DrawImageColorized", [typeof(Graphics), typeof(Image), typeof(Rectangle), typeof(Color)],
-                    graphics, image, destination, replaceBlack))
-            {
-                return;
-            }
+            if (TryGetMethod(methodControlPaint_DrawBackgroundImage) is not MethodAccessor accessor)
+                return false;
 
-            // fallback solution: manually drawing the recolored image
-            Bitmap? recolored = null;
-            try
-            {
-                if (replaceBlack.ToArgb() != Color.Black.ToArgb())
-                {
-                    recolored = new Bitmap(image);
-                    recolored.ReplaceColor(Color.Black, replaceBlack);
-                }
-
-                graphics.DrawImage(recolored ?? image, destination, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel);
-            }
-            finally
-            {
-                recolored?.Dispose();
-            }
+            accessor.Invoke(null, g, backgroundImage, backColor, backgroundImageLayout, bounds, clipRect, scrollOffset, rightToLeft);
+            return true;
         }
 
-        internal static void DrawHighContrastFocusRectangle(this Graphics graphics, Rectangle rectangle, Color color)
+        internal static bool TryDrawImageColorized(this Graphics graphics, Image image, Rectangle destination, Color replaceBlack)
         {
-            if (TryInvokeMethod(typeof(ControlPaint), "DrawHighContrastFocusRectangle", [typeof(Graphics), typeof(Rectangle), typeof(Color)], graphics, rectangle, color))
-                return;
+            if (TryGetMethod(methodControlPaint_DrawImageColorized) is not MethodAccessor accessor)
+                return false;
 
-            // fallback solution: manually drawing a simple focus rectangle, ignoring such fine details like rounding, etc.
-            using Pen pen = new(color);
-            pen.DashStyle = DashStyle.Dot;
-            graphics.DrawRectangle(pen, rectangle.X, rectangle.Y, rectangle.Width - 1, rectangle.Height - 1);
+            accessor.InvokeStaticAction(graphics, image, destination, replaceBlack);
+            return true;
+        }
+
+        internal static bool TryDrawHighContrastFocusRectangle(this Graphics graphics, Rectangle rectangle, Color color)
+        {
+            if (TryGetMethod(methodControlPaint_DrawHighContrastFocusRectangle) is not MethodAccessor accessor)
+                return false;
+
+            accessor.InvokeStaticAction(graphics, rectangle, color);
+            return true;
         }
 
         #endregion
@@ -278,23 +271,14 @@ namespace KGySoft.WinForms.Reflection
         #region Form
 
 #if !NET5_0_OR_GREATER
-        internal static BitVector32 FormState(this Form form)
-        {
-            var formState = GetFieldValue<BitVector32>(form, "formState", false);
-            return formState;
-        }
+        internal static BitVector32 FormState(this Form form) => TryGetField(fieldForm_formState)?.GetInstanceValue<Form, BitVector32>(form) ?? default;
 #endif
 
         #endregion
 
         #region Font
 
-        internal static IntPtr? GetNativeFont(this Font font)
-        {
-            string propertyName = OSHelper.IsMono ? "NativeObject" : "NativeFont";
-            PropertyAccessor? property = GetProperty(typeof(Font), propertyName);
-            return property?.GetInstanceValue<Font, IntPtr>(font);
-        }
+        internal static IntPtr? GetNativeFont(this Font font) => TryGetProperty(propFont_NativeFont)?.GetInstanceValue<Font, IntPtr>(font);
 
         #endregion
 
@@ -302,189 +286,123 @@ namespace KGySoft.WinForms.Reflection
 
         #region Private Methods
 
-        private static PropertyAccessor? GetProperty(Type type, string propertyName)
-        {
-            static PropertyAccessor? GetPropertyAccessor((Type DeclaringType, string PropertyName) key)
-            {
-                // Properties are meant to be used for visible members so always exact names are searched
-                PropertyInfo? property = key.DeclaringType.GetProperty(key.PropertyName, BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic);
-                return property == null ? null : PropertyAccessor.GetAccessor(property);
-            }
-
-            if (properties == null)
-                Interlocked.CompareExchange(ref properties, ThreadSafeCacheFactory.Create<(Type, string), PropertyAccessor?>(GetPropertyAccessor, cacheOptions), null);
-            return properties[(type, propertyName)];
-        }
-
-        private static object? GetPropertyValue(object instance, string propertyName)
-        {
-            PropertyAccessor? property = GetProperty(instance.GetType(), propertyName);
-            if (property == null)
-                throw new InvalidOperationException(Res.AccessorsInstancePropertyDoesNotExist(propertyName, instance.GetType()));
-            return property.Get(instance);
-        }
-
-        private static T TryGetPropertyValue<T>(Type type, string propertyName, T defaultValue = default!)
-        {
-            PropertyAccessor? property = GetProperty(type, propertyName);
-            if (property == null)
-                return defaultValue;
-            return property.GetStaticValue<T>();
-        }
-
-        private static MethodAccessor? GetMethodByName(Type type, string methodName)
-        {
-            static MethodAccessor? GetMethodAccessor((Type DeclaringType, string MethodName) key)
-            {
-                MethodInfo? method = key.DeclaringType.GetMethod(key.MethodName, BindingFlags.Instance | BindingFlags.NonPublic);
-                return method == null ? null : MethodAccessor.GetAccessor(method);
-            }
-
-            if (methodsByName == null)
-                Interlocked.CompareExchange(ref methodsByName, ThreadSafeCacheFactory.Create<(Type, string), MethodAccessor?>(GetMethodAccessor, cacheOptions), null);
-            return methodsByName[(type, methodName)];
-        }
-
-        private static MethodAccessor? GetMethodByTypes(Type type, string methodName, TypesKey parameterTypes)
+        [MethodImpl(MethodImpl.AggressiveInlining)]
+        private static PropertyAccessor? TryGetProperty(object key)
         {
             #region Local Methods
             
-            static MethodAccessor? GetMethodAccessor((Type DeclaringType, string MethodName, TypesKey ParameterTypes) key)
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static PropertyAccessor? GetPropertyAccessor(object key)
             {
-                for (Type? t = key.DeclaringType; t != typeof(object); t = t.BaseType)
-                {
-                    MethodInfo[] methods = t!.GetMember(key.MethodName, MemberTypes.Method, BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
-                        .Cast<MethodInfo>()
-                        .Where(m => !m.IsGenericMethodDefinition && m.GetParameters().Length == key.ParameterTypes.Types.Length)
-                        .ToArray();
-
-                    foreach (MethodInfo mi in methods)
-                    {
-                        if (!mi.GetParameters().Select(p => p.ParameterType).SequenceEqual(key.ParameterTypes.Types))
-                            continue;
-
-                        return MethodAccessor.GetAccessor(mi);
-                    }
-                }
-
-                return null;
+                if (!propertyLookup.TryGetValue(key, out var func))
+                    throw new InvalidOperationException(Res.InternalError("GetPropertyAccessor: Property key found"));
+                PropertyInfo? result = func.Invoke();
+                return result is null ? null : PropertyAccessor.GetAccessor(result);
             }
 
             #endregion
 
-            if (methodsByTypes == null)
-                Interlocked.CompareExchange(ref methodsByTypes, ThreadSafeCacheFactory.Create<(Type, string, TypesKey), MethodAccessor?>(GetMethodAccessor, null, cacheOptions), null);
-            return methodsByTypes[(type, methodName, parameterTypes)];
+            if (properties == null)
+                Interlocked.CompareExchange(ref properties, ThreadSafeCacheFactory.Create<object, PropertyAccessor?>(GetPropertyAccessor, cacheOptions), null);
+            return properties[key];
         }
 
-        private static object? TryInvokeMethod(object instance, string methodName, params object?[] parameters)
-        {
-            var method = GetMethodByName(instance.GetType(), methodName);
-            return method?.Invoke(instance, parameters);
-        }
-
-        private static object? InvokeMethod(object instance, string methodName, params object?[] parameters)
-        {
-            var method = GetMethodByName(instance.GetType(), methodName);
-            if (method == null)
-                throw new InvalidOperationException(Res.AccessorsMethodDoesNotExist(methodName, instance.GetType()));
-            return method.Invoke(instance, parameters);
-        }
-
-        // NOTE: now this method is used for void methods only, so it can return bool to indicate success
-        private static bool TryInvokeMethod(object instance, string methodName, Type[] parameterTypes, params object?[] parameters)
-        {
-            var method = GetMethodByTypes(instance.GetType(), methodName, new TypesKey(parameterTypes));
-            if (method == null)
-                return false;
-            method.Invoke(instance, parameters);
-            return true;
-        }
-
-        // NOTE: now this method is used for void methods only, so it can return bool to indicate success
-        private static bool TryInvokeMethod(Type type, string methodName, Type[] parameterTypes, params object?[] parameters)
-        {
-            var method = GetMethodByTypes(type, methodName, new TypesKey(parameterTypes));
-            if (method == null)
-                return false;
-            method.Invoke(null, parameters);
-            return true;
-        }
-
-        private static FieldAccessor? GetField(Type type, Type? fieldType, string? fieldNamePattern)
+        [MethodImpl(MethodImpl.AggressiveInlining)]
+        private static PropertyAccessor GetProperty(object key, Type type, string propertyName)
         {
             #region Local Methods
 
-            // Fields are meant to be used for non-visible members either by type or name pattern (or both)
-            FieldAccessor? GetFieldAccessor((Type DeclaringType, Type? FieldType, string? FieldNamePattern) key)
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static PropertyAccessor Throw(Type type, string propertyName) => throw new InvalidOperationException(Res.AccessorsPropertyDoesNotExist(propertyName, type));
+
+            #endregion
+
+            return TryGetProperty(key) ?? Throw(type, propertyName);
+        }
+
+        private static MethodInfo? FindMethod(Type declaringType, string methodName, Type?[] parameterTypes, BindingFlags bindingFlags)
+        {
+            // LINQ is not a problem, this method is called only once per key by the cache item loader
+            if (parameterTypes.All(t => t is not null))
+                return declaringType.GetMethod(methodName, bindingFlags | BindingFlags.Public, null, parameterTypes!, null);
+            
+            // not all parameters are specified: matching the parameters manually
+            // ReSharper disable once PossibleInvalidCastExceptionInForeachLoop - false alarm, methods are queried
+            foreach (MethodInfo mi in declaringType.GetMember(methodName, MemberTypes.Method, bindingFlags | BindingFlags.Public))
             {
-                for (Type? t = key.DeclaringType; t != typeof(object); t = t.BaseType)
-                {
-                    FieldInfo[] fieldArray = t!.GetFields(BindingFlags.Instance | BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.DeclaredOnly);
-                    FieldInfo? field = fieldArray.FirstOrDefault(f => (key.FieldType == null || f.FieldType == key.FieldType) && f.Name == key.FieldNamePattern) // exact name first
-                        ?? fieldArray.FirstOrDefault(f => (key.FieldType == null || f.FieldType == key.FieldType)
-                            && (key.FieldNamePattern == null || f.Name.Contains(key.FieldNamePattern, StringComparison.OrdinalIgnoreCase)));
+                if (mi.IsGenericMethodDefinition)
+                    continue;
+                ParameterInfo[] methodParams = mi.GetParameters();
+                if (methodParams.Length != parameterTypes.Length)
+                    continue;
+                if (methodParams.Zip(parameterTypes).All(((ParameterInfo Info, Type? ExpectedType) p) => p.ExpectedType is null || p.Info.ParameterType == p.ExpectedType))
+                    return mi;
+            }
 
-                    if (field != null)
-                        return FieldAccessor.GetAccessor(field);
-                }
+            return null;
+        }
 
-                return null;
+        [MethodImpl(MethodImpl.AggressiveInlining)]
+        private static MethodAccessor? TryGetMethod(object key)
+        {
+            #region Local Methods
+            
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static MethodAccessor? GetMethodAccessor(object key)
+            {
+                if (!methodLookup.TryGetValue(key, out var func))
+                    throw new InvalidOperationException(Res.InternalError("GetMethodAccessor: Method key found"));
+                MethodInfo? result = func.Invoke();
+                return result is null ? null : MethodAccessor.GetAccessor(result);
+            }
+
+            #endregion
+
+            if (methods == null)
+                Interlocked.CompareExchange(ref methods, ThreadSafeCacheFactory.Create<object, MethodAccessor?>(GetMethodAccessor, null, cacheOptions), null);
+            return methods[key];
+        }
+
+        [MethodImpl(MethodImpl.AggressiveInlining)]
+        private static MethodAccessor GetMethod(object key, Type type, string methodName)
+        {
+            #region Local Methods
+
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static MethodAccessor Throw(Type type, string methodName) => throw new InvalidOperationException(Res.AccessorsMethodDoesNotExist(methodName, type));
+
+            #endregion
+
+            return TryGetMethod(key) ?? Throw(type, methodName);
+        }
+
+        private static FieldInfo? FindField(Type declaringType, string? namePattern, Type? fieldType, BindingFlags bindingFlags)
+        {
+            FieldInfo[] candidates = declaringType.GetFields(bindingFlags | BindingFlags.DeclaredOnly);
+            return candidates.FirstOrDefault(f => (fieldType == null || f.FieldType == fieldType) && f.Name == namePattern) // exact name first
+                ?? candidates.FirstOrDefault(f => (fieldType == null || f.FieldType == fieldType)
+                    && (namePattern == null || f.Name.Contains(namePattern, StringComparison.OrdinalIgnoreCase)));
+        }
+
+        [MethodImpl(MethodImpl.AggressiveInlining)]
+        private static FieldAccessor? TryGetField(object key)
+        {
+            #region Local Methods
+            
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            static FieldAccessor? GetFieldAccessor(object key)
+            {
+                if (!fieldLookup.TryGetValue(key, out var func))
+                    throw new InvalidOperationException(Res.InternalError("GetFieldAccessor: Field key found"));
+                FieldInfo? result = func.Invoke();
+                return result is null ? null : FieldAccessor.GetAccessor(result);
             }
 
             #endregion
 
             if (fields == null)
-                Interlocked.CompareExchange(ref fields, ThreadSafeCacheFactory.Create<(Type, Type?, string?), FieldAccessor?>(GetFieldAccessor, cacheOptions), null);
-            return fields[(type, fieldType, fieldNamePattern)];
-        }
-
-        private static T? GetFieldValue<T>(object instance, string? fieldNamePattern = null, bool throwIfMissing = true)
-        {
-            Type type = instance.GetType();
-            FieldAccessor? field = GetField(type, typeof(T), fieldNamePattern);
-            if (field == null)
-            {
-                if (throwIfMissing)
-                    throw new InvalidOperationException(Res.AccessorsInstanceFieldDoesNotExist(fieldNamePattern, type));
-                return default;
-            }
-
-            return (T)field.Get(instance)!;
-        }
-
-        private static T? GetFieldValue<T>(Type type, string? fieldNamePattern = null, bool throwIfMissing = true)
-        {
-            FieldAccessor? field = GetField(type, typeof(T), fieldNamePattern);
-            if (field == null)
-            {
-                if (throwIfMissing)
-                    throw new InvalidOperationException(Res.AccessorsStaticFieldDoesNotExist(fieldNamePattern, type));
-                return default;
-            }
-
-            return (T)field.Get(null)!;
-        }
-
-        private static T? GetFieldValueOrDefault<T>(object instance, T? defaultValue = default, string? fieldNamePattern = null)
-        {
-            FieldAccessor? field = GetField(instance.GetType(), typeof(T), fieldNamePattern);
-            return field == null ? defaultValue : (T)field.Get(instance)!;
-        }
-
-        private static void SetFieldValue<TInstance, TValue>(TInstance instance, string fieldNamePattern, TValue value, bool throwIfMissing = true)
-            where TInstance : class
-        {
-            Type type = instance.GetType();
-            FieldAccessor? field = GetField(type, typeof(TValue), fieldNamePattern);
-            if (field == null)
-            {
-                if (throwIfMissing)
-                    throw new InvalidOperationException(Res.AccessorsInstanceFieldDoesNotExist(fieldNamePattern, type));
-                return;
-            }
-
-            field.SetInstanceValue(instance, value);
+                Interlocked.CompareExchange(ref fields, ThreadSafeCacheFactory.Create<object, FieldAccessor?>(GetFieldAccessor, null, cacheOptions), null);
+            return fields[key];
         }
 
         #endregion

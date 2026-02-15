@@ -94,19 +94,19 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Initializes a new instance of the <see cref="AdvancedErrorProvider" /> class with the default settings.
         /// </summary>
-        public AdvancedErrorProvider() => Initilize();
+        public AdvancedErrorProvider() => Initialize();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdvancedErrorProvider" /> class attached to a container.
         /// </summary>
         /// <param name="parentControl">The parent control.</param>
-        public AdvancedErrorProvider(ContainerControl parentControl) : base(parentControl) => Initilize();
+        public AdvancedErrorProvider(ContainerControl parentControl) : base(parentControl) => Initialize();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AdvancedErrorProvider" /> class attached to an <see cref="IContainer"/> implementation.
         /// </summary>
         /// <param name="container">The container.</param>
-        public AdvancedErrorProvider(IContainer container) : base(container) => Initilize();
+        public AdvancedErrorProvider(IContainer container) : base(container) => Initialize();
 
         private void RewireEvents(BindingManagerBase? bindingManager)
         {
@@ -179,7 +179,7 @@ namespace KGySoft.WinForms.Components
 
         #region Private Methods
 
-        private void Initilize()
+        private void Initialize()
         {
             // Replacing the method of the base.currentChanged delegate, which will help us to rewire the other events whenever the data source is changed.
             // This can be auto-detected only if the data source notifies about changes, like a BindingSource. Otherwise, we can only hope that consumers

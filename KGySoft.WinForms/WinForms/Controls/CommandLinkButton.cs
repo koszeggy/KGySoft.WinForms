@@ -1609,10 +1609,10 @@ namespace KGySoft.WinForms.Controls
                 if (AutoEllipsis)
                 {
                     int preferredHeight = GetPreferredSize(new Size(Width, 0)).Height;
-                    this.SetShowToolTip(Height < preferredHeight);
+                    this.ShowToolTip(Height < preferredHeight);
                 }
                 else
-                    this.SetShowToolTip(false);
+                    this.ShowToolTip(false);
 
                 if (GetStyle(ControlStyles.UserPaint))
                 {
@@ -1906,7 +1906,6 @@ namespace KGySoft.WinForms.Controls
         {
             e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
             ControlAppearanceState state = e.State;
-            Rectangle backRect = new Rectangle(ClientRectangle.X - 1, ClientRectangle.Y - 1, ClientRectangle.Width + 1, ClientRectangle.Height + 1);
             int borderWidth = FlatAppearance.BorderSize;
             Color backColor = state.BackColor;
 
