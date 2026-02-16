@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 #if !NET5_0_OR_GREATER
 using System.Collections.Specialized;
 #endif
@@ -64,6 +65,7 @@ namespace KGySoft.WinForms.Reflection
         private static readonly object methodControl_GetStyle = new();
         private static readonly object methodControl_OnPaintBackground = new();
         private static readonly object methodControl_OnPaint = new();
+        private static readonly object methodControl_PaintTransparentBackground = new();
         private static readonly object methodControl_PaintBackground = new();
         private static readonly object methodControl_PaintControlBackground = new();
         private static readonly object methodControl_SetState = new();
@@ -73,12 +75,13 @@ namespace KGySoft.WinForms.Reflection
         private static readonly object methodControlPaint_DrawBackgroundImage = new();
         private static readonly object methodControlPaint_DrawImageColorized = new();
         private static readonly object methodControlPaint_DrawHighContrastFocusRectangle = new();
-        private static readonly Dictionary<object, Func<MethodInfo?>> methodLookup = new(13)
+        private static readonly Dictionary<object, Func<MethodInfo?>> methodLookup = new(14)
         {
             [methodControl_RtlTranslateContent] = () => FindMethod(typeof(Control), nameof(RtlTranslateContent), [typeof(ContentAlignment)], BindingFlags.Instance | BindingFlags.NonPublic),
             [methodControl_GetStyle] = () => FindMethod(typeof(Control), nameof(GetStyle), [typeof(ControlStyles)], BindingFlags.Instance | BindingFlags.NonPublic),
             [methodControl_OnPaintBackground] = () => FindMethod(typeof(Control), nameof(OnPaintBackground), [typeof(PaintEventArgs)], BindingFlags.Instance | BindingFlags.NonPublic),
             [methodControl_OnPaint] = () => FindMethod(typeof(Control), nameof(OnPaint), [typeof(PaintEventArgs)], BindingFlags.Instance | BindingFlags.NonPublic),
+            [methodControl_PaintTransparentBackground] = () => FindMethod(typeof(Control), nameof(ControlExtensions.PaintTransparentBackground), [typeof(PaintEventArgs), typeof(Rectangle), typeof(Region)], BindingFlags.Instance | BindingFlags.NonPublic),
             [methodControl_PaintBackground] = () => FindMethod(typeof(Control), nameof(ControlExtensions.PaintBackground), [typeof(PaintEventArgs), typeof(Rectangle), typeof(Color), typeof(Point)], BindingFlags.Instance | BindingFlags.NonPublic),
             [methodControl_PaintControlBackground] = () => FindMethod(typeof(Control), "PaintControlBackground", [typeof(PaintEventArgs)], BindingFlags.Instance | BindingFlags.NonPublic),
             [methodControl_SetState] = () => FindMethod(typeof(Control), nameof(SetState), [/*int|State*/null, typeof(bool)], BindingFlags.Instance | BindingFlags.NonPublic),
@@ -148,6 +151,16 @@ namespace KGySoft.WinForms.Reflection
 
         internal static bool ShowKeyboardCues(this Control control)
             => GetProperty(propControl_ShowKeyboardCues, typeof(Control), nameof(ShowKeyboardCues)).GetInstanceValue<Control, bool>(control);
+
+        // NOTE: we must use the Region overload, because that's what is available both in .NET Framework and Core
+        internal static bool TryPaintTransparentBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Region? region = null)
+        {
+            if (TryGetMethod(methodControl_PaintTransparentBackground) is not MethodAccessor accessor)
+                return false;
+
+            accessor.InvokeInstanceAction(c, e, rectangle, region);
+            return true;
+        }
 
         internal static bool TryPaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset)
         {
@@ -320,6 +333,7 @@ namespace KGySoft.WinForms.Reflection
             return TryGetProperty(key) ?? Throw(type, propertyName);
         }
 
+        [SuppressMessage("Style", "IDE0220:Add explicit cast", Justification = "False alarm, methods are queried by GetMember")]
         private static MethodInfo? FindMethod(Type declaringType, string methodName, Type?[] parameterTypes, BindingFlags bindingFlags)
         {
             // LINQ is not a problem, this method is called only once per key by the cache item loader

@@ -1822,8 +1822,9 @@ namespace KGySoft.WinForms.Controls
             Rectangle clientRectangle = ClientRectangle;
 
             // painting the background (underlying part of the parent control)
+            // NOTE: using PaintBackground with transparent backColor instead of PaintTransparentBackground to paint also the self background image if exists
             if (Parent != null)
-                this.PaintTransparentBackground(e);
+                this.PaintBackground(e, clientRectangle, Color.Transparent);
             else
                 e.Graphics.FillRectangle(state.BackColor.GetBrush(), new Rectangle(clientRectangle.X - 1, clientRectangle.Y - 1, clientRectangle.Width + 1, clientRectangle.Height + 1));
 
@@ -1967,12 +1968,9 @@ namespace KGySoft.WinForms.Controls
                     borderWidth++;
             }
 
-            this.PaintBackground(e, backRect, state.BackColor);
-            if (backColor != state.BackColor)
-            {
-                backRect.Inflate(-(borderWidth / 2 + 3), -(borderWidth / 2 + 2));
-                e.Graphics.FillRectangle(backColor.GetBrush(), backRect);
-            }
+            this.PaintTransparentBackground(e);
+            if (backColor.A != 0)
+                e.Graphics.FillPath(backColor.GetBrush(), SelectionBorder);
 
             if (borderWidth > 0)
             {

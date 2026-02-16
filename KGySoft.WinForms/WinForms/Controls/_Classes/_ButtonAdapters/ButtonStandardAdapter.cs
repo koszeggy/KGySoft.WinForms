@@ -221,7 +221,7 @@ namespace KGySoft.WinForms.Controls
         {
             ControlAppearanceState state = e.State;
             if (ButtonRenderer.IsBackgroundPartiallyTransparent((PushButtonState)state.SystemStateId))
-                ButtonInstance.PaintTransparentBackground(e, bounds);
+                ButtonInstance.PaintTransparentBackground(e);
             VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, ButtonInstance.ClientRectangle);
             bounds.Inflate(-ButtonBorderSize, -ButtonBorderSize);
             if (!ButtonInstance.UseVisualStyleBackColor)
@@ -236,8 +236,8 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            if (ButtonInstance.BackgroundImage != null && !VisualStyleHelper.HighContrast)
-                e.Graphics.DrawBackgroundImage(ButtonInstance.BackgroundImage, Color.Transparent, ButtonInstance.BackgroundImageLayout, ButtonInstance.ClientRectangle, bounds, ButtonInstance.DisplayRectangle.Location, ButtonInstance.RightToLeft);
+            if (ButtonInstance.BackgroundImage is Image backgroundImage && !VisualStyleHelper.HighContrast)
+                e.Graphics.DrawBackgroundImage(backgroundImage, Color.Transparent, ButtonInstance.BackgroundImageLayout, ButtonInstance.ClientRectangle, bounds, ButtonInstance.DisplayRectangle.Location, ButtonInstance.RightToLeft);
         }
 
         private void PaintWorker(PaintStateEventArgs e, bool up)

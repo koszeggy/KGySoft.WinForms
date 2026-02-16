@@ -22,6 +22,7 @@ using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Windows.Forms;
+
 using KGySoft.Collections;
 using KGySoft.Reflection;
 using KGySoft.WinForms.Controls;
@@ -318,7 +319,7 @@ namespace KGySoft.WinForms
         {
             if (control == null)
                 throw new ArgumentNullException(nameof(control), PublicResources.ArgumentNull);
-            Accessors.SetDoubleBuffered(control, useDoubleBuffering);
+            control.DoubleBuffered(useDoubleBuffering);
         }
 
         /// <summary>
@@ -338,36 +339,106 @@ namespace KGySoft.WinForms
 
         #region Internal Methods
 
-        internal static void PaintTransparentBackground(this Control c, PaintEventArgs e, Rectangle? bounds = null)
+        /// <summary>
+        /// Paints the content of the parent into this control, mimicking as if it was transparent.
+        /// </summary>
+        internal static void PaintTransparentBackground(this Control c, PaintEventArgs e, Rectangle bounds = default)
         {
-            Control? parent = c.Parent;
-            if (parent == null)
+            if (bounds.IsEmpty())
+                bounds = c.ClientRectangle;
+
+            if (c.TryPaintTransparentBackground(e, bounds))
                 return;
 
-            Rectangle rectangle = bounds ?? c.ClientRectangle;
-            if (VisualStyleHelper.RenderWithVisualStyles)
+            Graphics g = e.Graphics;
+            Control? parent = c.Parent;
+
+            // There is no parent: we must use some solid color as a fallback
+            if (parent == null)
             {
-                // On Windows/Mono we explicitly have to paint the background first; otherwise, the alpha parts of the themed background will be black
-                if (OSHelper.IsMono)
-                    c.PaintBackground(e, rectangle, parent.BackColor);
-                ButtonRenderer.DrawParentBackground(e.Graphics, rectangle, c);
+                g.FillRectangle(SystemBrushes.Control, bounds);
+                return;
             }
-            else
+
+            // NOTE: Rendering by VisualStyles works always well (though on Mono/Windows), but it has a big performance cost, and it is required
+            // for some controls (e.g. TabPage). Still, not checking the possibly existing RenderTransparencyWithVisualStyles property for the parent,
+            // because if that exists, we almost surely exited at TryPaintTransparentBackground above, so it's not really expected to use this branch.
+            if (VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsMono)
             {
-                GraphicsContainer state = e.Graphics.BeginContainer();
-                try
-                {
-                    e.Graphics.TranslateTransform(-c.Left, -c.Top);
-                    rectangle.Offset(c.Left, c.Top);
-                    PaintEventArgs pe = new PaintEventArgs(e.Graphics, rectangle);
-                    parent.PaintBackground(pe, rectangle, parent.BackColor);
-                    parent.OnPaint(pe);
-                }
-                finally
-                {
-                    e.Graphics.EndContainer(state);
-                }
+                ButtonRenderer.DrawParentBackground(g, bounds, c);
+                return;
             }
+
+            // The system code starts a new HDC scope by internal solutions here. The closest thing is to start a new container, and then reset it at the end.
+            GraphicsContainer state = g.BeginContainer();
+            try
+            {
+                g.TranslateTransform(-c.Left, -c.Top);
+                bounds.Offset(c.Left, c.Top);
+                var transformedArgs = new PaintEventArgs(g, bounds);
+
+                // NOTE: It's not an issue that our advanced controls with fading animations do not call base.OnPaintBackground,
+                // because they are not parents in the first place, and they would paint both the background and the foreground in OnPaint below.
+                parent.OnPaintBackground(transformedArgs);
+
+                // Workaround for mono: for drawing the frame of the GroupBox, Mono resets our translation, so it will appear in the child controls
+                // (the text is placed correctly though). So on Mono, we simply do not call GroupBox.OnPaint.
+                // Not an issue if the group box has no custom paint, and the possibly transparent children are placed inside the frame.
+                if (!OSHelper.IsMono || !VisualStyleHelper.RenderWithVisualStyles || parent is not GroupBox)
+                    parent.OnPaint(transformedArgs);
+            }
+            finally
+            {
+                g.EndContainer(state);
+            }
+        }
+
+        /// <summary>
+        /// Paints the background of a control.
+        /// If <paramref name="backColor"/> has alpha, paints the transparent background first, and then blends it with <paramref name="backColor"/>.
+        /// If <paramref name="backColor"/> is opaque, just fills the <paramref name="rectangle"/> with <paramref name="backColor"/>.
+        /// </summary>
+        /// <param name="c">The control, whose background should be painted.</param>
+        /// <param name="e">The event args with the Graphics. Can be a PaintStateEventArgs as well.</param>
+        /// <param name="rectangle">Normally the client rectangle. The flat button adapter may use a deflated rectangle by border width, but in practice,
+        /// it could make a difference in the result only when the undrawn border could be also transparent (which is not supported). Kept only to reflect the original code.</param>
+        /// <param name="backColor">A custom back color. Can be different from the actual back color of the control. Typical values are Color.Transparent, or PaintStateEventArgs.State.BackColor.</param>
+        /// <param name="scrollOffset">Passed to the ControlPaint.DrawBackgroundImage method by Control.PaintBackground. It matters only for self background image,
+        /// as the inherited ones from parent controls are always painted without an offset. Flat/Popup adapters use the client rectangle location, which is always
+        /// either 0;0 or 1;1, so doesn't really make a difference, and can be ignored for Mono.</param>
+        internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset = default)
+        {
+            if (c.TryPaintBackground(e, rectangle, backColor, scrollOffset))
+                return;
+
+            Control? parent = c.Parent;
+            Graphics g = e.Graphics;
+            bool renderTransparent = c.GetStyle(ControlStyles.SupportsTransparentBackColor) && backColor.A != Byte.MaxValue;
+
+            // alpha background: drawing the parent content
+            if (renderTransparent && parent != null)
+                c.PaintTransparentBackground(e, rectangle);
+
+            // If the form or mdiclient is mirrored then we do not render the background image due to GDI+ issues.
+            Image? backgroundImage = VisualStyleHelper.HighContrast || (c is Form or MdiClient && c.IsMirrored) ? null : c.BackgroundImage;
+
+            // No background image: painting the back color only
+            // NOTE: the MS solution paints the backColor here also when the layout is tiled and the image has alpha.
+            // We do that in DrawBackgroundImage, which is alright, because if we are here, TryPaintBackground returned false,
+            // and TryDrawBackgroundImage will most likely also do so (which normally means that we are on Mono).
+            // But apart from the possibly double painting the only actual difference would be for not completely transparent alpha back color.
+            if (backgroundImage is null)
+            {
+                // no parent: making backColor opaque
+                if (parent == null)
+                    backColor = Color.FromArgb(Byte.MaxValue, backColor);
+                if (backColor.A != 0)
+                    g.FillRectangle(backColor.GetBrush(), rectangle);
+
+                return;
+            }
+
+            g.DrawBackgroundImage(backgroundImage, backColor, c.BackgroundImageLayout, c.ClientRectangle, rectangle, scrollOffset, c.RightToLeft);
         }
 
         /// <summary>
