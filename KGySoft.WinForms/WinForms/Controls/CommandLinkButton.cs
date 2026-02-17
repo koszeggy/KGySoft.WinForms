@@ -633,7 +633,12 @@ namespace KGySoft.WinForms.Controls
         [Description("Determines the background color when the control is Enabled.")]
         public Color EnabledBackColor
         {
-            get => !enabledBackColor.IsEmpty ? enabledBackColor : base.BackColor;
+            // Standard/System flat style with visual styles: reporting transparent background. This fixes the ugly stripes issue
+            // when the parent is enlarged while the control is partially invisible, for example.
+            // Not applying on Mono, because it turns fading animations off to prevent flickering.
+            get => !OSHelper.IsMono && !DesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
+                : !enabledBackColor.IsEmpty ? enabledBackColor
+                : base.BackColor;
             set
             {
                 if (enabledBackColor == value)
@@ -671,7 +676,12 @@ namespace KGySoft.WinForms.Controls
         [Description("Determines the disabled background color. Has effect only when FlatStyle is Popup or Flat, or when visual styles are not enabled and FlatStyle is Standard.")]
         public Color DisabledBackColor
         {
-            get => !disabledBackColor.IsEmpty ? disabledBackColor : base.BackColor;
+            // Standard/System flat style with visual styles: reporting transparent background. This fixes the ugly stripes issue
+            // when the parent is enlarged while the control is partially invisible, for example.
+            // Not applying on Mono, because it turns fading animations off to prevent flickering.
+            get => !OSHelper.IsMono && !DesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
+                : !disabledBackColor.IsEmpty ? disabledBackColor
+                : base.BackColor;
             set
             {
                 if (disabledBackColor == value)
