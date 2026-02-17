@@ -126,7 +126,7 @@ namespace KGySoft.WinForms.Example.Controls
             Rectangle bounds = ClientRectangle;
             bounds.Height /= 2;
 
-            // This is the fading text. Text and color is taken from state. You can include Font to animate Font change as well.
+            // This is the fading text. Text and color are taken from state. You can include Font to animate Font change as well.
             TextRenderer.DrawText(e.Graphics, state.FadingText, Font, bounds, state.ForeColor, flags);
             bounds.Y += bounds.Height;
 

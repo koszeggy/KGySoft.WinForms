@@ -41,6 +41,7 @@ namespace KGySoft.WinForms.Example.Forms
         public ImageViewerExample()
         {
             InitializeComponent();
+            rbMetafile.Enabled = !OSHelper.IsMono;
         }
 
         #endregion
@@ -49,8 +50,11 @@ namespace KGySoft.WinForms.Example.Forms
 
         #region Static Methods
 
-        private static Metafile GenerateMetafile()
+        private static Metafile? GenerateMetafile()
         {
+            if (OSHelper.IsMono)
+                return null;
+
             //Set up reference Graphic
             Graphics refGraph = Graphics.FromHwnd(IntPtr.Zero);
             IntPtr hdc = refGraph.GetHdc();
@@ -99,6 +103,21 @@ namespace KGySoft.WinForms.Example.Forms
 
         #endregion
 
+        #region Private Methods
+
+        private Bitmap GenerateLargeBitmap()
+        {
+            if (OSHelper.IsWindows)
+                return (Bitmap)Screenshot.CaptureScreenshot();
+
+            // Mono/Linux: CaptureScreenshot throws InvalidOperationException from System.Drawing.Graphics.CopyFromScreenX11, so returning just the current form instead of the whole screen.
+            var result = new Bitmap(Width, Height);
+            DrawToBitmap(result, new Rectangle(Point.Empty, Size));
+            return result;
+        }
+
+        #endregion
+
         #region Event handlers
 
         private void AdvancedRadioButton_CheckedChanged(object? sender, EventArgs e)
@@ -110,7 +129,7 @@ namespace KGySoft.WinForms.Example.Forms
             Image? image = radioButton.Name switch
             {
                 nameof(rbSmallBitmap) => smallBitmap ??= Icons.SystemError.ExtractNearestBitmap(new Size(16, 16), PixelFormat.Format32bppArgb),
-                nameof(rbLargeBitmap) => largeBitmap ??= (Bitmap)Screenshot.CaptureScreenshot(),
+                nameof(rbLargeBitmap) => largeBitmap ??= GenerateLargeBitmap(),
                 nameof(rbMetafile) => metafile ??= GenerateMetafile(),
                 _ => null
             };

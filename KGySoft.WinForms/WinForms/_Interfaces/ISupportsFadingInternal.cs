@@ -25,9 +25,6 @@ namespace KGySoft.WinForms
     {
         #region Properties
 
-        /// <summary>
-        /// Gets or sets fading options of the control.
-        /// </summary>
         FadingOptions FadingAnimationOptions { get; }
 
         #endregion

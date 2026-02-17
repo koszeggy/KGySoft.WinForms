@@ -26,7 +26,7 @@ namespace KGySoft.WinForms
     /// <summary>
     /// Represents a control that supports fading animations based on a custom state type.
     /// </summary>
-    /// <typeparam name="TState">A type that represents the state of the object. It should be meningfully equatable.</typeparam>
+    /// <typeparam name="TState">A type that represents the state of the object. It should be meaningfully equatable.</typeparam>
     /// <remarks>
     /// A <see cref="FadingPainter{TState}"/> instance should be created along with the control.
     /// Double buffering should be disabled, otherwise animations will not work. To avoid
