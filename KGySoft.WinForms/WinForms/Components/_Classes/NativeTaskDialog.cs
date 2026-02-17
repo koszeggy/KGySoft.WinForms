@@ -156,7 +156,7 @@ namespace KGySoft.WinForms.Components
             {
                 // NOTE: it is possible to activate Comctl32 V6 even with disabled visual styles,
                 // but it fails if Comctl32 V5 is already loaded. In that case reporting false here.
-                return OSHelper.IsWindowsVistaOrLater && !OSHelper.IsMono && VisualStyleHelper.InitializedWithVisualStyles&& ThemingActivationContext.IsThemingAvailable;
+                return OSHelper.IsWindowsVistaOrLater && !OSHelper.IsMono && VisualStyleHelper.InitializedWithVisualStyles && ThemingActivationContext.IsThemingAvailable;
             }
         }
 

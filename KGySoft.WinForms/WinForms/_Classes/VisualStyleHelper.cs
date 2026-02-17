@@ -106,6 +106,7 @@ namespace KGySoft.WinForms
         {
             get
             {
+                Debug.Assert(OSHelper.IsWindowsXpOrLater);
                 var cache = themeBitmapsCache;
                 while (cache is null) // the while is needed because of ClearCaches
                 {
@@ -121,6 +122,7 @@ namespace KGySoft.WinForms
         {
             get
             {
+                Debug.Assert(OSHelper.IsWindowsVistaOrLater);
                 var cache = hasDefaultAnimationCache;
                 while (cache is null) // the while is needed because of ClearCaches
                 {
@@ -243,6 +245,8 @@ namespace KGySoft.WinForms
 
         internal static void RenderScaled(IntPtr hTheme, Control control, Graphics g, int part, int state, Rectangle bounds)
         {
+            Debug.Assert(OSHelper.IsWindowsXpOrLater);
+
             IntPtr hThemeWindow = IntPtr.Zero;
             GraphicsState gState = g.Save();
             try
@@ -294,7 +298,7 @@ namespace KGySoft.WinForms
 
         internal static bool HasDefaultAnimation(int part, int state1, int state2)
         {
-            Debug.Assert(RenderWithVisualStyles);
+            Debug.Assert(OSHelper.IsWindowsVistaOrLater && RenderWithVisualStyles);
             if (!RenderWithVisualStyles)
                 return false;
             return HasDefaultAnimationCache[(part, state1, state2)];
@@ -312,6 +316,8 @@ namespace KGySoft.WinForms
 
         private static Bitmap GetThemeBitmap((IntPtr ThemeHandle, int PartId, int StateId) key)
         {
+            Debug.Assert(OSHelper.IsWindowsXpOrLater);
+
             // Cannot use UxTheme.GetThemeBitmap (see the issues there) so as a workaround, drawing into a black and a white bitmap, and restoring alpha.
             var (hTheme, part, state) = key;
             Size realSize = UxTheme.GetThemePartSize(hTheme, IntPtr.Zero, part, state, (int)ThemeSizeType.True);
@@ -327,7 +333,7 @@ namespace KGySoft.WinForms
 
         private static Bitmap? PaintIntoBitmap(IntPtr hTheme, int part, int state, Color backColor, Size size)
         {
-            Debug.Assert(OSHelper.IsWindows);
+            Debug.Assert(OSHelper.IsWindowsXpOrLater);
             if (!OSHelper.IsMono)
             {
                 // Using just the hdc of g would cause black alpha-blended pixels, but using BufferedGraphics solves the problem
@@ -383,6 +389,8 @@ namespace KGySoft.WinForms
 
         private static bool GetHasDefaultAnimation((int PartId, int StateId1, int StateId2) key)
         {
+            Debug.Assert(OSHelper.IsWindowsVistaOrLater);
+
             // DPI does not matter here, because the animation is the same for all DPIs
             Size size;
             using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))

@@ -387,7 +387,7 @@ namespace KGySoft.WinForms
 #if NETFRAMEWORK
                 if (defaultFont == null)
                 {
-                    if (!IsProcessPerMonitorAware && IsDefaultSystemScale)
+                    if (!OSHelper.IsWindows || !IsProcessPerMonitorAware && IsDefaultSystemScale)
                         defaultFont = Control.DefaultFont;
                     else
                     {

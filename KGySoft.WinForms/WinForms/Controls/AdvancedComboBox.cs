@@ -842,7 +842,9 @@ namespace KGySoft.WinForms.Controls
 
                     if (systemDrawDropDownListMode && (DropDownStyle == ComboBoxStyle.DropDownList || nativeEditorChild == null))
                     {
-                        var bounds = User32.GetClientRect(m.HWnd, out RECT rect) ? rect.ToRectangle() : Rectangle.Empty;
+                        var bounds = OSHelper.IsWindows
+                            ? User32.GetClientRect(m.HWnd, out RECT rect) ? rect.ToRectangle() : Rectangle.Empty
+                            : ClientRectangle;
                         if (!bounds.IsEmpty())
                         {
                             using var g = Graphics.FromHwnd(m.HWnd);
@@ -945,6 +947,9 @@ namespace KGySoft.WinForms.Controls
         private void InitHooks()
         {
             Debug.Assert(IsHandleCreated);
+            if (!OSHelper.IsWindows)
+                return;
+
             if (DropDownStyle == ComboBoxStyle.Simple)
             {
                 // Hooking inner list box the same way as the base class does. In Simple mode the first child is the list box.

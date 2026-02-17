@@ -96,6 +96,8 @@ namespace KGySoft.WinForms.WinApi
 
         private static bool TryCreateThemingActivationContext()
         {
+            Debug.Assert(OSHelper.IsWindowsXpOrLater);
+
             // it is safe to lock on the internal type
             lock (typeof(ThemingActivationContext))
             {

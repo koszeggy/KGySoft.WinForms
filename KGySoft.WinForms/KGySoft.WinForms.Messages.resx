@@ -101,6 +101,9 @@
   <data name="General_InternalErrorFormat" xml:space="preserve">
     <value>Internal Error: {0}</value>
   </data>
+  <data name="General_WindowsOnly" xml:space="preserve">
+    <value>This method is supported on Windows only.</value>
+  </data>
   <data name="BaseForm_NotMdiContainer" xml:space="preserve">
     <value>The form must be an MDI container. Set IsMdiContainer before accessing this member.</value>
   </data>

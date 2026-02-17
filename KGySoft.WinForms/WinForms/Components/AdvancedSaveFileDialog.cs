@@ -164,11 +164,13 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Shows the file dialog
         /// </summary>
-        /// <returns></returns>
+        /// <returns>The result of the dialog.</returns>
         public DialogResult ShowDialog()
         {
-            //set up the struct and populate it
+            if (!OSHelper.IsWindows)
+                throw new PlatformNotSupportedException(Res.WindowsOnly);
 
+            //set up the struct and populate it
             var ofn = new OPENFILENAME();
             ofn.lStructSize = MarshalHelper.SizeOf<OPENFILENAME>();
             if ((Environment.OSVersion.Platform != PlatformID.Win32NT) || (Environment.OSVersion.Version.Major < 5))
@@ -298,6 +300,7 @@ namespace KGySoft.WinForms.Components
 
         private int HookProc(IntPtr hdlg, uint msg, int wParam, int lParam)
         {
+            Debug.Assert(OSHelper.IsWindows);
             switch (msg)
             {
                 case Constants.WM_INITDIALOG:
@@ -454,6 +457,7 @@ namespace KGySoft.WinForms.Components
 
         private void DestroyHandles()
         {
+            Debug.Assert(OSHelper.IsWindows);
             //destroy the handles we have created
             // winapi combo:
             //if (m_ComboHandle != IntPtr.Zero)

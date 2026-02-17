@@ -110,6 +110,7 @@ namespace KGySoft.WinForms
 #if NETFRAMEWORK
         private static long GetTotalMemory()
         {
+            Debug.Assert(OSHelper.IsWindows);
             var status = new MEMORYSTATUSEX { dwLength = (uint)MarshalHelper.SizeOf<MEMORYSTATUSEX>() };
             if (!Kernel32.GlobalMemoryStatusEx(ref status))
                 return Int64.MaxValue;
@@ -119,6 +120,7 @@ namespace KGySoft.WinForms
 
         private static long GetAvailableMemory()
         {
+            Debug.Assert(OSHelper.IsWindows);
             var status = new MEMORYSTATUSEX { dwLength = (uint)MarshalHelper.SizeOf<MEMORYSTATUSEX>() };
             if (!Kernel32.GlobalMemoryStatusEx(ref status))
                 return Int64.MaxValue;

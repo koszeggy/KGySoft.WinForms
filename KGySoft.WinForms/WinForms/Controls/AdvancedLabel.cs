@@ -1254,6 +1254,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
 
         private void InvalidateNC()
         {
+            Debug.Assert(OSHelper.IsWindows);
             if (IsHandleCreated)
                 NCHelper.InvalidateNC(Handle);
         }

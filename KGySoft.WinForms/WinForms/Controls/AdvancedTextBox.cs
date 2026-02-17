@@ -532,7 +532,9 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckStyles() => SetStyle(ControlStyles.UserPaint, !Enabled && DisabledForeColor != defaultDisabledForeColor);
 
-        private int GetFirstVisibleLine() => User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, IntPtr.Zero, IntPtr.Zero).ToInt32();
+        private int GetFirstVisibleLine() => OSHelper.IsWindows
+            ? User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, IntPtr.Zero, IntPtr.Zero).ToInt32()
+            : GetLineFromCharIndex(GetCharIndexFromPosition(Point.Empty));
 
         private void ResetColors()
         {

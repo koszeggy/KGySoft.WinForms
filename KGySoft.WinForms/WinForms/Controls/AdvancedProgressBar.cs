@@ -464,7 +464,8 @@ namespace KGySoft.WinForms.Controls
             if (isMarquee)
             {
                 int speed = base.MarqueeAnimationSpeed;
-                User32.SendMessage(Handle, Constants.PBM_SETMARQUEE, new IntPtr(speed > 0 ? 1 : 0), new IntPtr(speed));
+                if (OSHelper.IsWindows)
+                    User32.SendMessage(Handle, Constants.PBM_SETMARQUEE, new IntPtr(speed > 0 ? 1 : 0), new IntPtr(speed));
                 if (style == AdvancedProgressBarStyle.System)
                     animationTimer.Enabled = false;
                 else

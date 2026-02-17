@@ -131,6 +131,7 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
+            Debug.Assert(OSHelper.IsWindowsVistaOrLater);
             IntPtr hdc = e.Graphics.GetHdc();
             try
             {
@@ -159,6 +160,7 @@ namespace KGySoft.WinForms.Controls
 
         internal virtual void PaintCore(PaintEventArgs e, TState newState)
         {
+            Debug.Assert(OSHelper.IsWindowsVistaOrLater);
             int speed = !StateEquals(State ??= host.State, newState) ? GetSpeed(State, newState) : 0;
             if (speed < 0)
                 speed = 0;

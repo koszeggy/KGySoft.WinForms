@@ -946,10 +946,9 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets whether Vista+ system rendering is used.
+        /// NOTE: it does NOT mean that theming is also used.
         /// </summary>
         private bool IsNativeRendering => base.FlatStyle == FlatStyle.System && IsNativelySupported && !OSHelper.IsMono;
-
-        private bool IsCustomRendering => base.FlatStyle != FlatStyle.System || OSHelper.IsMono;
 
         private Font DefaultTextFont
         {
@@ -2243,7 +2242,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             currentImage = null;
-            if (IsCustomRendering)
+            if (!IsNativeRendering)
                 return true;
 
             if (isElevated)

@@ -100,7 +100,7 @@ namespace KGySoft.WinForms.Controls
 
         internal override void PaintCore(PaintEventArgs e, ControlAppearanceState newState)
         {
-            Debug.Assert(OSHelper.IsWindows);
+            Debug.Assert(OSHelper.IsWindowsVistaOrLater);
             bool isStandardChangeOnly = (Host.FadingAnimationOptions & FadingOptions.StandardEffects) != FadingOptions.None
                     && !newState.EqualsWithOptions(State, FadingOptions.StandardEffects)
                     && newState.EqualsWithOptions(State, ControlAppearanceState.NonStandardChanges);

@@ -53,6 +53,9 @@ namespace KGySoft
 
         /// <summary>Visual styles are not available.</summary>
         internal static string NoVisualStyles => Get("General_NoVisualStyles");
+        
+        /// <summary>This method is supported on Windows only.</summary>
+        internal static string WindowsOnly => Get("General_WindowsOnly");
 
         #endregion
 

@@ -491,7 +491,7 @@ namespace KGySoft.WinForms.Controls
                     // On Vista and above the calendar button can be either a combo box drop down button or the regular calendar button, depending on the text length.
                     // As it's practically impossible to tell the actual button type of the system rendering, we always draw the non-Focused appearance ourselves with our preference.
                     bool fullCustomPaint = isDroppedDown || !Focused || ShowCheckBox && !Checked;
-                    if (fullCustomPaint)
+                    if (fullCustomPaint && OSHelper.IsWindows)
                         User32.ValidateRect(m.HWnd, IntPtr.Zero);
                     else
                         base.WndProc(ref m);

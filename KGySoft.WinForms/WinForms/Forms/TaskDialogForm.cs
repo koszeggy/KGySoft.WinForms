@@ -419,6 +419,7 @@ namespace KGySoft.WinForms.Forms
 
         private static string GetSystemText(SystemTextIds id)
         {
+            Debug.Assert(OSHelper.IsWindows);
             IntPtr handle = Kernel32.GetModuleHandle("user32.dll");
             bool isLoaded = handle != IntPtr.Zero;
             try
@@ -453,6 +454,7 @@ namespace KGySoft.WinForms.Forms
         /// <returns><see langword="true"/> to continue the enumeration.</returns>
         private static bool PopulateThreadWindows(IntPtr hWnd, IntPtr lParam)
         {
+            Debug.Assert(OSHelper.IsWindows);
             if (!User32.IsWindowVisible(hWnd))
                 return true;
             IntPtr owner = User32.GetWindowLong(hWnd, Constants.GWLP_HWNDPARENT);
@@ -549,6 +551,8 @@ namespace KGySoft.WinForms.Forms
             // if the dialog was opened without an owner, simulating the native task dialog behavior that opens in a non-modal way
             if (executeNonModal)
             {
+                Debug.Assert(OSHelper.IsWindows);
+
                 // Removing the owner and making the form non-modal (Owner is always null here, so not setting that).
                 User32.SetWindowLong(Handle, Constants.GWLP_HWNDPARENT, IntPtr.Zero);
                 this.SetState(Constants.ControlStates_Modal, false); // without this, the form cannot be closed before closing possible child windows
@@ -2146,11 +2150,11 @@ namespace KGySoft.WinForms.Forms
                     ShowDialog(ownerWindow);
 
                 // the handle of the owner may change, too
-                if (isReopening && ownerWindow != null)
+                if (isReopening && ownerWindow != null && OSHelper.IsWindows)
                 {
                     IntPtr newOwner = User32.GetActiveWindow();
                     if (newOwner != IntPtr.Zero)
-                        ownerWindow = new Win32Window { Handle = User32.GetActiveWindow() };
+                        ownerWindow = new Win32Window { Handle = newOwner };
                 }
             } while (isReopening);
 
