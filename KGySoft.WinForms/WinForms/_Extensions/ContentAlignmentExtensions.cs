@@ -30,7 +30,7 @@ namespace KGySoft.WinForms
     /// </summary>
     public static class ContentAlignmentExtensions
     {
-        #region Private Constants
+        #region Constants
 
         // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
         private const ContentAlignment anyLeft = ContentAlignment.BottomLeft | ContentAlignment.MiddleLeft | ContentAlignment.TopLeft;
@@ -43,65 +43,63 @@ namespace KGySoft.WinForms
 
         #endregion
 
+        #region Properties
+
+        internal static ContentAlignment[][] RtlMapping => field ??= new ContentAlignment[3][]
+        {
+            [ContentAlignment.TopLeft, ContentAlignment.TopRight],
+            [ContentAlignment.MiddleLeft, ContentAlignment.MiddleRight],
+            [ContentAlignment.BottomLeft, ContentAlignment.BottomRight]
+        };
+
+        #endregion
+
         #region Methods
 
         /// <summary>
         /// Calls the protected <see cref="Control.RtlTranslateContent"/> method as it was a public method.
+        /// It also applies a workaround for a Mono bug when the internal field value is <see cref="RightToLeft.Inherit"/>.
         /// </summary>
         /// <param name="alignment">The alignment to translate if needed.</param>
         /// <param name="instance">The <see cref="Control"/> instance.</param>
-        /// <returns></returns>
+        /// <returns>The translated alignment.</returns>
         public static ContentAlignment RtlTranslateContent(this ContentAlignment alignment, Control instance)
-            => instance.RtlTranslateContent(alignment);
+        {
+            if (OSHelper.IsMono && instance.RightToLeft != RightToLeft.Yes)
+                return alignment;
+            return instance.RtlTranslateContent(alignment);
+        }
 
         // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
         /// <summary>
         /// Gets if any left alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
-        public static bool AnyLeft(this ContentAlignment contentAlignment)
-        {
-            return (contentAlignment & anyLeft) != 0;
-        }
+        public static bool AnyLeft(this ContentAlignment contentAlignment) => (contentAlignment & anyLeft) != 0;
 
         /// <summary>
         /// Gets if any top alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
-        public static bool AnyTop(this ContentAlignment contentAlignment)
-        {
-            return (contentAlignment & anyTop) != 0;
-        }
+        public static bool AnyTop(this ContentAlignment contentAlignment) => (contentAlignment & anyTop) != 0;
 
         /// <summary>
         /// Gets if any bottom alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
-        public static bool AnyBottom(this ContentAlignment contentAlignment)
-        {
-            return (contentAlignment & anyBottom) != 0;
-        }
+        public static bool AnyBottom(this ContentAlignment contentAlignment) => (contentAlignment & anyBottom) != 0;
 
         /// <summary>
         /// Gets if any middle alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
-        public static bool AnyMiddle(this ContentAlignment contentAlignment)
-        {
-            return (contentAlignment & anyMiddle) != 0;
-        }
+        public static bool AnyMiddle(this ContentAlignment contentAlignment) => (contentAlignment & anyMiddle) != 0;
 
         /// <summary>
         /// Gets if any right alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
-        public static bool AnyRight(this ContentAlignment contentAlignment)
-        {
-            return (contentAlignment & anyRight) != 0;
-        }
+        public static bool AnyRight(this ContentAlignment contentAlignment) => (contentAlignment & anyRight) != 0;
 
         /// <summary>
         /// Gets if any center alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
-        public static bool AnyCenter(this ContentAlignment contentAlignment)
-        {
-            return (contentAlignment & anyCenter) != 0;
-        }
+        public static bool AnyCenter(this ContentAlignment contentAlignment) => (contentAlignment & anyCenter) != 0;
         // ReSharper restore BitwiseOperatorOnEnumWithoutFlags
 
         #endregion

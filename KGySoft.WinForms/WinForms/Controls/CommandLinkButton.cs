@@ -2414,6 +2414,14 @@ namespace KGySoft.WinForms.Controls
             base.Font = newFont;
         }
 
+        private new ContentAlignment RtlTranslateContent(ContentAlignment alignment)
+        {
+            // Not calling ContentAlignmentExtensions.RtlTranslateContent to avoid reflection
+            if (OSHelper.IsMono && RightToLeft != RightToLeft.Yes)
+                return alignment;
+            return base.RtlTranslateContent(alignment);
+        }
+
         #endregion
 
         #region Explicitly Implemented Interface Methods

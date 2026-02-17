@@ -224,7 +224,6 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
 
                 // setting base border style in cases just for rendering the text into the right position
                 borderStyle = value;
-                int previousWidth = borderWidth;
                 borderWidth = value switch
                 {
                     AdvancedBorderStyle.None => 0,
@@ -1257,6 +1256,14 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         {
             if (IsHandleCreated)
                 NCHelper.InvalidateNC(Handle);
+        }
+
+        private new ContentAlignment RtlTranslateAlignment(ContentAlignment alignment)
+        {
+            // Not calling ContentAlignmentExtensions.RtlTranslateContent to avoid reflection
+            if (OSHelper.IsMono && RightToLeft != RightToLeft.Yes)
+                return alignment;
+            return base.RtlTranslateAlignment(alignment);
         }
 
         #endregion

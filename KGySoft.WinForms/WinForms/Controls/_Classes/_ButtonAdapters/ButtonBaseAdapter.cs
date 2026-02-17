@@ -432,21 +432,18 @@ namespace KGySoft.WinForms.Controls
 
             internal ContentAlignment RtlTranslateContent(ContentAlignment align)
             {
-                if (LayoutRtl)
-                {
-                    ContentAlignment[][] mapping = new ContentAlignment[3][];
-                    mapping[0] = new[] { ContentAlignment.TopLeft, ContentAlignment.TopRight };
-                    mapping[1] = new[] { ContentAlignment.MiddleLeft, ContentAlignment.MiddleRight };
-                    mapping[2] = new[] { ContentAlignment.BottomLeft, ContentAlignment.BottomRight };
+                if (!LayoutRtl)
+                    return align;
 
-                    for (int i = 0; i < 3; ++i)
-                    {
-                        if (mapping[i][0] == align)
-                            return mapping[i][1];
-                        if (mapping[i][1] == align)
-                            return mapping[i][0];
-                    }
+                ContentAlignment[][] mapping = ContentAlignmentExtensions.RtlMapping;
+                for (int i = 0; i < 3; ++i)
+                {
+                    if (mapping[i][0] == align)
+                        return mapping[i][1];
+                    if (mapping[i][1] == align)
+                        return mapping[i][0];
                 }
+
                 return align;
             }
 
@@ -672,17 +669,15 @@ namespace KGySoft.WinForms.Controls
             TextImageRelation RtlTranslateRelation(TextImageRelation relation)
             {
                 // If RTL, we swap ImageBeforeText and TextBeforeImage
-                if (LayoutRtl)
+                if (!LayoutRtl)
+                    return relation;
+
+                return relation switch
                 {
-                    switch (relation)
-                    {
-                        case TextImageRelation.ImageBeforeText:
-                            return TextImageRelation.TextBeforeImage;
-                        case TextImageRelation.TextBeforeImage:
-                            return TextImageRelation.ImageBeforeText;
-                    }
-                }
-                return relation;
+                    TextImageRelation.ImageBeforeText => TextImageRelation.TextBeforeImage,
+                    TextImageRelation.TextBeforeImage => TextImageRelation.ImageBeforeText,
+                    _ => relation
+                };
             }
 
             private void CalcCheckmarkRectangle(LayoutData layout)
