@@ -112,7 +112,7 @@ namespace KGySoft.WinForms
             // (e.g. when a transparent background is also painted, which calls OnPaintBackground, potentially drawing background images using Mono's own logic).
 
             // filling with backColor, except for an opaque tiled image
-            if (backColor.A != 0 && (backgroundImageLayout != ImageLayout.Tile || backgroundImage is not Bitmap bmp || (bmp.Flags & (int)ImageFlags.HasAlpha) != 0))
+            if (backColor.A != 0 && (backgroundImageLayout != ImageLayout.Tile || (backgroundImage.Flags & (int)ImageFlags.HasAlpha) != 0))
                 g.FillRectangle(backColor.GetBrush(), clipRect);
 
             var imageBounds = new Rectangle();

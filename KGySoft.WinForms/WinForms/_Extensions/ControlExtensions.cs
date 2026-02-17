@@ -344,6 +344,21 @@ namespace KGySoft.WinForms
         /// </summary>
         internal static void PaintTransparentBackground(this Control c, PaintEventArgs e, Rectangle bounds = default)
         {
+            #region Local Methods
+
+            static bool IsInGroupBox(Control control)
+            {
+                for (Control? c = control; c != null; c = c.Parent)
+                {
+                    if (c is GroupBox)
+                        return true;
+                }
+
+                return false;
+            }
+
+            #endregion
+
             if (bounds.IsEmpty())
                 bounds = c.ClientRectangle;
 
@@ -382,9 +397,9 @@ namespace KGySoft.WinForms
                 parent.OnPaintBackground(transformedArgs);
 
                 // Workaround for mono: for drawing the frame of the GroupBox, Mono resets our translation, so it will appear in the child controls
-                // (the text is placed correctly though). So on Mono, we simply do not call GroupBox.OnPaint.
+                // (the text is placed correctly though). So on Mono, we simply do not call OnPaint when the control is in a group box.
                 // Not an issue if the group box has no custom paint, and the possibly transparent children are placed inside the frame.
-                if (!OSHelper.IsMono || !VisualStyleHelper.RenderWithVisualStyles || parent is not GroupBox)
+                if (!OSHelper.IsMono || !VisualStyleHelper.RenderWithVisualStyles || !IsInGroupBox(parent))
                     parent.OnPaint(transformedArgs);
             }
             finally
