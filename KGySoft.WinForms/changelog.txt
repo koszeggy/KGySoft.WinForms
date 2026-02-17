@@ -90,6 +90,7 @@
     or visual styles are not available).
   ! BackColor/ForeColor: when the control is not Enabled, they get/set the disabled colors. The Changed events are
     raised also when the Enabled state changes and the enabled/disabled colors are different.
+  ! The non-functional OnPaintBackground is now sealed an hidden. Use OnPaintState instead.
   + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
     DisabledForeColor properties.
   + Making the overridden ForeColor/BackColor properties visible in the designer.
@@ -108,6 +109,7 @@
     or visual styles are not available).
   ! BackColor/ForeColor: when the control is not Enabled, they get/set the disabled colors. The Changed events are
     raised also when the Enabled state changes and the enabled/disabled colors are different.
+  ! The non-functional OnPaintBackground is now sealed an hidden. Use OnPaintState instead.
   + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
     DisabledForeColor properties.
   + Making the overridden ForeColor/BackColor properties visible in the designer.
@@ -126,6 +128,7 @@
     or visual styles are not available).
   ! BackColor/ForeColor: when the control is not Enabled, they get/set the disabled colors. The Changed events are
     raised also when the Enabled state changes and the enabled/disabled colors are different.
+  ! The non-functional OnPaintBackground is now sealed an hidden. Use OnPaintState instead.
   + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
     DisabledForeColor properties.
   + Making the overridden ForeColor/BackColor properties visible in the designer.
@@ -142,6 +145,7 @@
   ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark
   ! BackColor/ForeColor: when the control is not Enabled, they get/set the disabled colors. The Changed events are
     raised also when the Enabled state changes and the enabled/disabled colors are different.
+  ! The non-functional OnPaintBackground is now sealed an hidden. Use OnPaintState instead.
   + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
     DisabledForeColor properties.
   + Making the overridden ForeColor/BackColor properties visible in the designer.
@@ -157,6 +161,7 @@
   ! Allowing custom default arrow glyph color (Windows 10 and above)
   ! Not using visual style colors in Popup/Flat mode.
   ! The BackColor/ForeColor properties really reflect the actual colors of the control in the current Enabled state.
+  ! The non-functional OnPaintBackground is now sealed an hidden. Use OnPaintState instead.
   + New EnabledBackColor/EnabledForeColor properties: for symmetry with the existing DisabledBackColor and
     DisabledForeColor properties.
   + Making the overridden ForeColor/BackColor properties visible in the designer.

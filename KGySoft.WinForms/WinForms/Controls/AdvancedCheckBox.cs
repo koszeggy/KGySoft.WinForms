@@ -621,8 +621,12 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        /// <inheritdoc />
-        protected override void OnPaintBackground(PaintEventArgs pevent)
+        /// <summary>
+        /// This method does nothing on this class. Use the <see cref="OnPaintState"/> method to customize painting.
+        /// </summary>
+        /// <param name="pevent">Not used</param>
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        protected override sealed void OnPaintBackground(PaintEventArgs pevent)
         {
         }
 
@@ -862,7 +866,6 @@ namespace KGySoft.WinForms.Controls
             else
                 this.ShowToolTip(false);
 
-            //OnPaintBackground(e);
             if (GetStyle(ControlStyles.UserPaint))
             {
                 this.Animate();

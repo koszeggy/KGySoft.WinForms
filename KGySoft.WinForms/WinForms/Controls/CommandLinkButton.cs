@@ -1450,9 +1450,12 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// This method does nothing on this class. Use the <see cref="OnPaintState"/> method to customize painting.
+        /// </summary>
+        /// <param name="pevent">Not used</param>
         [EditorBrowsable(EditorBrowsableState.Never)]
-        protected override void OnPaintBackground(PaintEventArgs pevent)
+        protected override sealed void OnPaintBackground(PaintEventArgs pevent)
         {
         }
 
