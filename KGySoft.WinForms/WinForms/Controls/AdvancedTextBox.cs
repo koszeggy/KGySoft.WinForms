@@ -25,14 +25,6 @@ using KGySoft.WinForms.WinApi;
 
 #endregion
 
-#region Suppressions
-
-#if NETCOREAPP
-#pragma warning disable CA1846 // Prefer 'AsSpan' over 'Substring' when span-based overloads are available - spans are not available in every targeted platform
-#endif
-
-#endregion
-
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
@@ -149,6 +141,9 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the background color when the control is <see cref="Control.Enabled"/> and not <see cref="TextBoxBase.ReadOnly"/>.
         /// </summary>
+        /// <remarks>
+        /// <note>This property has no effect on Windows/Mono with visual styles enabled.</note>
+        /// </remarks>
         [Category("AdvancedTextBox")]
         [Description("Determines the background color when the control is Enabled and not ReadOnly.")]
         public Color EnabledBackColor
@@ -355,29 +350,11 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc/>
         protected override void OnPaint(PaintEventArgs e)
         {
+            // Custom paint for disabled state. On Mono, OnPaint is never called; still, for future compatibility, calling PaintDisabled only when it's not called from WM_PAINT.
             if (Enabled)
-            {
                 base.OnPaint(e);
-                return;
-            }
-
-            // Painting with disabled colors
-            var clientRect = ClientRectangle;
-            e.Graphics.FillRectangle(BackColor.GetBrush(), clientRect);
-
-            Rectangle textRect = clientRect;
-            TextFormatFlags flags = this.GetFormatFlags();
-            textRect.Inflate(-1, -1);
-
-            // The multiline textbox is rendered with some settings that are impossible to reproduce with TextFormatFlags.
-            // The current settings are adjusted for Segoe UI, which is the default font in .NET Core, but the padding apparently changes from font to font.
-            // To minimize chance of the visual difference, we do manual painting only when DisabledForeColor is different from the default color.
-            if (Multiline)
-                textRect.Width += 1;
-            if (!UseSystemPasswordChar)
-                TextRenderer.DrawText(e.Graphics, Text.Substring(GetFirstCharIndexFromLine(GetFirstVisibleLine())), Font, textRect, ForeColor, flags);
-            else
-                TextRenderer.DrawText(e.Graphics, new String(PasswordChar, Text.Length), Font, textRect, ForeColor, flags);
+            else if (!OSHelper.IsMono && VisualStyleHelper.RenderWithVisualStyles)
+                PaintDisabled(e.Graphics);
         }
 
         /// <inheritdoc />
@@ -387,7 +364,19 @@ namespace KGySoft.WinForms.Controls
             {
                 case Constants.WM_PAINT:
                     CheckDpiChange();
-                    base.WndProc(ref m);
+
+                    // Mono with visual styles works differently than the Framework implementation: it's the back color that cannot be customized without custom paint.
+                    // And we must do it from here, because OnPaint is never called on Mono, no matter what we set in SetStyle.
+                    // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable - needed for older frameworks
+                    if (OSHelper.IsMono && OSHelper.IsWindows && VisualStyleHelper.RenderWithVisualStyles && !Enabled && DisabledBackColor.ToArgb() != defaultDisabledOrReadOnlyBackColor.ToArgb())
+                    {
+                        using Graphics g = Graphics.FromHwnd(m.HWnd);
+                        PaintDisabled(g);
+                        User32.ValidateRect(m.HWnd, IntPtr.Zero);
+                    }
+                    else
+                        base.WndProc(ref m);
+
                     return;
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
@@ -530,11 +519,19 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Methods
 
-        private void CheckStyles() => SetStyle(ControlStyles.UserPaint, !Enabled && DisabledForeColor != defaultDisabledForeColor);
+        private void CheckStyles()
+        {
+            bool oldUserPaint = GetStyle(ControlStyles.UserPaint);
+            bool newUserPaint = !Enabled && DisabledForeColor != defaultDisabledForeColor;
+            if (oldUserPaint == newUserPaint)
+                return;
 
-        private int GetFirstVisibleLine() => OSHelper.IsWindows
-            ? User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, IntPtr.Zero, IntPtr.Zero).ToInt32()
-            : GetLineFromCharIndex(GetCharIndexFromPosition(Point.Empty));
+            SetStyle(ControlStyles.UserPaint, newUserPaint);
+
+            // preventing font corruption. It can occur when TextAlign/WordWrap/etc. was changed in disabled state
+            if (!OSHelper.IsMono)
+                SetFont(font ?? defaultFont);
+        }
 
         private void ResetColors()
         {
@@ -552,6 +549,39 @@ namespace KGySoft.WinForms.Controls
                 base.ForeColor = enabledFgColor;
             else if (!enabled && DisabledForeColor is Color disabledFgColor && disabledFgColor != baseForeColor)
                 base.ForeColor = disabledFgColor;
+        }
+
+        private void PaintDisabled(Graphics g)
+        {
+            // Painting with disabled colors
+            var clientRect = ClientRectangle;
+            g.FillRectangle(BackColor.GetBrush(), clientRect);
+
+            Rectangle textRect = clientRect;
+            TextFormatFlags flags = this.GetFormatFlags();
+            textRect.Inflate(-1, -1);
+
+            // The multiline textbox is rendered with some settings that are impossible to reproduce with TextFormatFlags.
+            // The current settings are adjusted for Segoe UI, which is the default font in .NET Core, but the padding apparently changes from font to font.
+            // Also, when WordWrap is false, and the multiline text is scrolled to the right, the disabled rendering will not offset the text horizontally.
+            // To minimize chance of the visual difference, we do manual painting only when DisabledForeColor (Mono with visual styles: back color) is different from the default color.
+            bool multiline = Multiline;
+            if (multiline)
+                textRect.Width += 1;
+            if (UseSystemPasswordChar)
+            {
+                TextRenderer.DrawText(g, new String(PasswordChar, Text.Length), Font, textRect, ForeColor, flags);
+                return;
+            }
+
+            int firstCharIndex = OSHelper.IsMono ? 0 // on Mono GetCharIndexFromPosition always returns 0, whereas GetLineFromCharIndex always returns 1, even for a single line TextBox
+                : multiline ? GetFirstCharIndexFromLine(User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, IntPtr.Zero, IntPtr.Zero).ToInt32())
+                : GetCharIndexFromPosition(Point.Empty);
+            string text = Text.Substring(firstCharIndex);
+            Font f = Font;
+            if (!multiline && !OSHelper.IsMono && TextAlign != HorizontalAlignment.Left && TextRenderer.MeasureText(g, text, f).Width > textRect.Width)
+                flags &= ~(TextFormatFlags.HorizontalCenter | TextFormatFlags.Right);
+            TextRenderer.DrawText(g, text, f, textRect, ForeColor, flags);
         }
 
         private bool ShouldSerializeFont() => font != null;
