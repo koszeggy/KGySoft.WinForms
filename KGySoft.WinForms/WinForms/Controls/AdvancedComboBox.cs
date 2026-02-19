@@ -364,7 +364,7 @@ namespace KGySoft.WinForms.Controls
         public Color DisabledForeColor
         {
             get => !disabledForeColor.IsEmpty ? disabledForeColor
-                : VisualStyleHelper.RenderWithVisualStyles && SystemDrawDropDownListMode
+                : VisualStyleHelper.RenderWithVisualStyles && SystemDrawDropDownListMode && !OSHelper.IsMono
                     && DropDownStyle is ComboBoxStyle.DropDownList && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedDisabledDropDownListColor
                 : defaultDisabledForeColor;
             set
@@ -455,10 +455,12 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
+        [SuppressMessage("ReSharper", "ValueParameterNotUsed", Justification = "Intended")]
         public new DrawMode DrawMode
         {
             get => base.DrawMode;
-            set => throw new NotSupportedException("DrawMode cannot be set in AdvancedComboBox");
+            set { }
         }
 
         /// <summary>
@@ -566,7 +568,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Properties
 
-        private bool DrawByVisualStylesWhenDisabled => systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles
+        private bool DrawByVisualStylesWhenDisabled => systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsMono
             && OSHelper.IsWindowsVistaOrLater && DropDownStyle == ComboBoxStyle.DropDownList && FlatStyle is FlatStyle.System or FlatStyle.Standard;
 
         #endregion
@@ -840,7 +842,7 @@ namespace KGySoft.WinForms.Controls
                     else
                         base.WndProc(ref m);
 
-                    if (systemDrawDropDownListMode && (DropDownStyle == ComboBoxStyle.DropDownList || nativeEditorChild == null))
+                    if (systemDrawDropDownListMode && DropDownStyle == ComboBoxStyle.DropDownList && !OSHelper.IsMono)
                     {
                         var bounds = OSHelper.IsWindows
                             ? User32.GetClientRect(m.HWnd, out RECT rect) ? rect.ToRectangle() : Rectangle.Empty
@@ -994,7 +996,7 @@ namespace KGySoft.WinForms.Controls
 
         private void AdjustDrawMode()
         {
-            bool customDraw = DropDownStyle == ComboBoxStyle.Simple || !systemDrawDropDownListMode;
+            bool customDraw = DropDownStyle == ComboBoxStyle.Simple || !systemDrawDropDownListMode || OSHelper.IsMono;
             DrawMode drawMode = customDraw ? DrawMode.OwnerDrawFixed : DrawMode.Normal;
             if (base.DrawMode != drawMode)
                 base.DrawMode = drawMode;
@@ -1043,7 +1045,6 @@ namespace KGySoft.WinForms.Controls
         private void DrawDisabledTextBox(Graphics g, Rectangle bounds)
         {
             var style = DropDownStyle;
-
             var clientRect = bounds;
             bool rtl = RightToLeft == RightToLeft.Yes;
             bool visualStyles = VisualStyleHelper.RenderWithVisualStyles;
