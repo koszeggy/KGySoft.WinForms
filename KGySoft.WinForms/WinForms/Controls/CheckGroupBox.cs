@@ -465,6 +465,8 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnRightToLeftChanged(e);
             ResetCheckBoxLocation();
+            if (OSHelper.IsMono)
+                ResetBaseText();
         }
 
         /// <inheritdoc />
@@ -558,10 +560,15 @@ namespace KGySoft.WinForms.Controls
             if (!IsHandleCreated)
                 return;
 
-            if (checkBox.BackColor.A == Byte.MaxValue)
+            // Mono GroupBox does not support RTL, so preventing the rendering of a big gap at the lift side in RTL mode when the back color is transparent.
+            // TODO: Remove the Mono condition after implementing an AdvancedGroupBox with RTL support on all platforms
+            if (checkBox.BackColor.A == Byte.MaxValue || OSHelper.IsMono && RightToLeft == RightToLeft.Yes)
             {
                 changingBaseText = true;
-                base.Text = @" ";
+
+                // On Mono with visual styles we must use som non-empty text to avoid stretching the frame, so using a zero-width space character.
+                // Unfortunately, this still causes a visible gap, though matters only when using Right-to-Left layout.
+                base.Text = OSHelper.IsMono && VisualStyleHelper.RenderWithVisualStyles ? "\u200b" : String.Empty;
                 changingBaseText = false;
                 return;
             }
