@@ -560,6 +560,9 @@ namespace KGySoft.WinForms.Controls
                 if (Enabled)
                     ResetColors();
 
+                // Handling read-only changes on Mono. Otherwise, it's handled in the native controls directly.
+                if (OSHelper.IsMono)
+                    AdjustReadOnlyOnMono();
                 OnReadOnlyChanged(EventArgs.Empty);
             }
         }
@@ -657,7 +660,10 @@ namespace KGySoft.WinForms.Controls
             // Hooking inner text box to capture WM_PASTE and others.
             // The base.OnHandleCreated creates the inner native window for Simple and DropDown modes only.
             base.OnHandleCreated(e);
-            InitHooks();
+
+            // Hooking the native inner controls on .NET [Framework] only. On mono, it's in OnDropDownStyleChanged.
+            if (!OSHelper.IsMono)
+                InitHooks();
 
             // BUG workaround: If DropDownStyle is Simple or DropDown, setting the font recreates the handle again, which will end up in a Win32Exception.
             // In this case waiting with the DPI resizing. In worst case we can still detect the DPI change in WM_PAINT.
@@ -709,8 +715,6 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            base.OnKeyDown(e);
-
             // suppressing deleting and navigation (selecting item from list) because these cannot be suppressed in KeyPress
             if (readOnly && (e.KeyCode is Keys.Delete or Keys.Back or Keys.Up or Keys.Down or Keys.PageUp or Keys.PageDown
                 || DropDownStyle == ComboBoxStyle.DropDownList && e.KeyCode is Keys.Space or Keys.Right or Keys.Left or Keys.Home or Keys.End))
@@ -718,17 +722,38 @@ namespace KGySoft.WinForms.Controls
                 e.Handled = true;
                 e.SuppressKeyPress = true;
             }
+
+            if (!OSHelper.IsMono || !e.SuppressKeyPress)
+                base.OnKeyDown(e);
         }
 
         /// <inheritdoc />
         protected override void OnKeyPress(KeyPressEventArgs e)
         {
-            base.OnKeyPress(e);
             if (readOnly)
             {
                 // allowing only Ctrl+C (Copy) - Ctrl+Insert is not captured here
                 e.Handled = e.KeyChar != (char)3; //!e.KeyChar.In((char)3, (char)13, (char)27);
             }
+
+            if (!OSHelper.IsMono || !e.Handled)
+                base.OnKeyPress(e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnMouseDown(MouseEventArgs e)
+        {
+            if (!OSHelper.IsMono || !readOnly || DropDownStyle == ComboBoxStyle.Simple)
+            {
+                base.OnMouseDown(e);
+                return;
+            }
+
+            // The Mono implementation subscribes the MouseDown event to handle the drop-down button, 
+            // so we must not call the base.OnMouseDown in read-only mode on Mono.
+            Rectangle buttonArea = DropDownStyle == ComboBoxStyle.DropDownList ? ClientRectangle : this.GetButtonArea() ?? ClientRectangle;
+            if (!buttonArea.Contains(e.Location))
+                base.OnMouseDown(e);
         }
 
         /// <inheritdoc />
@@ -795,6 +820,10 @@ namespace KGySoft.WinForms.Controls
             base.OnDropDownStyleChanged(e);
             AdjustDrawMode();
             ResetColors(); // because DisabledForeColor depends on this property
+
+            // Handling read-only for new style on Mono. Otherwise, it's handled in OnHandleCreated.
+            if (OSHelper.IsMono)
+                AdjustReadOnlyOnMono();
         }
 
         /// <summary>
@@ -948,10 +977,7 @@ namespace KGySoft.WinForms.Controls
 
         private void InitHooks()
         {
-            Debug.Assert(IsHandleCreated);
-            if (!OSHelper.IsWindows)
-                return;
-
+            Debug.Assert(IsHandleCreated && !OSHelper.IsMono);
             if (DropDownStyle == ComboBoxStyle.Simple)
             {
                 // Hooking inner list box the same way as the base class does. In Simple mode the first child is the list box.
@@ -987,7 +1013,11 @@ namespace KGySoft.WinForms.Controls
         {
             if (!Focused)
                 Focus();
+
             OnMouseDown(new MouseEventArgs(MouseButtons.Left, m.Msg is Constants.WM_LBUTTONDOWN ? 1 : 2, m.LParam.SignedLOWORD(), m.LParam.SignedHIWORD(), 0));
+
+            if (OSHelper.IsMono)
+                return;
 
             // This is required to raise the Click event when the mouse button is released
             this.SetMouseEvents();
@@ -1159,6 +1189,16 @@ namespace KGySoft.WinForms.Controls
             // without this Text may get selected even if not focused
             if (!Focused && DropDownStyle != ComboBoxStyle.DropDownList)
                 SelectionLength = 0;
+        }
+
+        private void AdjustReadOnlyOnMono()
+        {
+            Debug.Assert(OSHelper.IsMono);
+            var style = DropDownStyle;
+            if (style == ComboBoxStyle.Simple)
+                this.InnerListBox()?.Enabled = !readOnly;
+            if (style != ComboBoxStyle.DropDownList)
+                this.InnerTextBox()?.ReadOnly = readOnly;
         }
 
         #endregion
