@@ -297,6 +297,12 @@ namespace KGySoft.WinForms.Controls
         {
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
+
+            // Needed because in Mono the base ctor calls the overridden BackColor/ForeColor setters
+            if (!OSHelper.IsMono)
+                return;
+            EnabledBackColor = default;
+            EnabledForeColor = default;
         }
 
         #endregion
