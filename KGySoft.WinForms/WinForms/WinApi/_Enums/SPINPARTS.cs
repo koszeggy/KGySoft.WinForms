@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: DATEPICKERSTATES.cs
+//  File: SPINPARTS.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2026 - All Rights Reserved
 //
@@ -15,11 +15,11 @@
 
 namespace KGySoft.WinForms.WinApi
 {
-    internal enum DATEPICKERSTATES
+    internal enum SPINPARTS
     {
-        DPS_NORMAL = 1,
-        DPS_HOT = 2,
-        DPS_FOCUSED = 3,
-        DPS_DISABLED = 4,
-    };
+        SPNP_UP = 1,
+        SPNP_DOWN = 2,
+        SPNP_UPHORZ = 3,
+        SPNP_DOWNHORZ = 4,
+    }
 }

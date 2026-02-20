@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
@@ -23,6 +24,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
 using KGySoft.CoreLibraries;
+using KGySoft.WinForms.Reflection;
 using KGySoft.WinForms.WinApi;
 
 #endregion
@@ -62,6 +64,7 @@ namespace KGySoft.WinForms.Controls
             internal readonly Rectangle CheckBoxBounds;
             internal readonly Rectangle TranslatedCheckBoxBounds;
             internal readonly Rectangle DropDownBounds;
+            internal readonly Rectangle UpDownBounds; // Only on Mono with visual styles, represents the drawn bounds.
             internal readonly Rectangle TranslatedDropDownBounds;
             internal readonly Rectangle TextBounds;
             internal readonly bool IsCalendarDropDown;
@@ -76,7 +79,7 @@ namespace KGySoft.WinForms.Controls
                 // 1. background
                 Rectangle bounds = control.ClientRectangle;
                 Rectangle textRect = bounds;
-                bool rtl = IsRightToLeft = control.RightToLeftLayout && control.RightToLeft == RightToLeft.Yes;
+                bool rtl = IsRightToLeft = control.RightToLeftLayout && control.RightToLeft == RightToLeft.Yes && !OSHelper.IsMono;
 
                 // When EnableVisualStyles was called, the border belongs to the client area (even if visual styles are actually not available),
                 // so we could omit this if VisualStyleHelper.InitializedWithVisualStyles is false,
@@ -85,18 +88,28 @@ namespace KGySoft.WinForms.Controls
                 BackgroundBounds = textRect;
 
                 // 2. check box
-                int checkBoxPadding = control.ShowCheckBox ? textRect.Height + 1 : 0;
+                int checkBoxPadding = !control.ShowCheckBox ? 0
+                    : OSHelper.IsMono ? 21
+                    : textRect.Height + 1;
                 if (checkBoxPadding > 0)
                 {
-                    CheckBoxBounds = new Rectangle(textRect.X, textRect.Y, checkBoxPadding - 1, checkBoxPadding - 1);
-
-                    if (!VisualStyleHelper.InitializedWithVisualStyles)
+                    if (OSHelper.IsMono)
                     {
-                        CheckBoxBounds.Width -= 1;
-                        CheckBoxBounds.Height -= 1;
+                        CheckBoxBounds = new Rectangle(textRect.X, (textRect.Y + textRect.Height / 2) - (checkBoxPadding - 5) / 2, checkBoxPadding - 5, checkBoxPadding - 5);
+                        if (!VisualStyleHelper.RenderWithVisualStyles)
+                            CheckBoxBounds.Inflate(-1, -1);
                     }
-                    else if (!VisualStyleHelper.RenderWithVisualStyles)
-                        CheckBoxBounds.Inflate(-1, -1);
+                    else
+                    {
+                        CheckBoxBounds = new Rectangle(textRect.X, textRect.Y, checkBoxPadding - 1, checkBoxPadding - 1);
+                        if (!VisualStyleHelper.InitializedWithVisualStyles)
+                        {
+                            CheckBoxBounds.Width -= 1;
+                            CheckBoxBounds.Height -= 1;
+                        }
+                        else if (!VisualStyleHelper.RenderWithVisualStyles)
+                            CheckBoxBounds.Inflate(-1, -1);
+                    }
 
                     textRect.Width -= checkBoxPadding;
                     TranslatedCheckBoxBounds = CheckBoxBounds;
@@ -111,19 +124,32 @@ namespace KGySoft.WinForms.Controls
 
                 // 3. drop down
                 int dropDownSize = control.ScaleWidth(referenceDropDownWidth);
-
-                // checking if we have enough space for the wider calendar drop down button
                 if (VisualStyleHelper.RenderWithVisualStyles && !control.ShowUpDown && OSHelper.IsWindowsVistaOrLater)
                 {
-                    int textWidth = TextRenderer.MeasureText(g, control.Text, control.Font, Size.Empty, control.GetFormatFlags()).Width;
-                    if (textWidth + dropDownSize * 2 <= textRect.Width)
-                    {
+                    if (OSHelper.IsMono)
                         IsCalendarDropDown = true;
-                        dropDownSize <<= 1;
+                    else
+                    {
+                        // Checking if we have enough space for the wider calendar drop down button
+                        int textWidth = TextRenderer.MeasureText(g, control.Text, control.Font, Size.Empty, control.GetFormatFlags()).Width;
+                        if (textWidth + dropDownSize * 2 <= textRect.Width)
+                            IsCalendarDropDown = true;
                     }
+
+                    if (IsCalendarDropDown)
+                        dropDownSize <<= 1;
                 }
 
-                if (!control.ShowUpDown)
+                if (control.ShowUpDown)
+                {
+                    // Only on Mono. Otherwise, the up/down buttons are actual (native) child controls that cannot be overdrawn.
+                    if (OSHelper.IsMono)
+                    {
+                        BackgroundBounds.Width -= 17;
+                        UpDownBounds = new Rectangle(BackgroundBounds.Right, BackgroundBounds.Top, 17, BackgroundBounds.Height);
+                    }
+                }
+                else
                 {
                     bool fullHeight = !VisualStyleHelper.InitializedWithVisualStyles || VisualStyleHelper.RenderWithVisualStyles && OSHelper.IsWindowsVistaOrLater;
 
@@ -131,6 +157,8 @@ namespace KGySoft.WinForms.Controls
                     // The image mirroring does not happen for the checkbox rendering though. And ControlPaint does not mirror the X coordinate either.
                     DropDownBounds = new Rectangle(fullHeight ? bounds.Right - dropDownSize : BackgroundBounds.Right - dropDownSize,
                         fullHeight ? 0 : textRect.Y, dropDownSize, fullHeight ? bounds.Height : textRect.Height);
+                    if (OSHelper.IsMono && !VisualStyleHelper.RenderWithVisualStyles)
+                        BackgroundBounds.Width -= DropDownBounds.Width;
                     TranslatedDropDownBounds = DropDownBounds;
                     if (rtl)
                         TranslatedDropDownBounds.X = fullHeight ? 0 : BackgroundBounds.X;
@@ -145,9 +173,11 @@ namespace KGySoft.WinForms.Controls
                 // so we have to undo the translation that we made for the calculations above.
                 // This behavior is different from every other custom rendering that we use with TextRenderer and GetFormatFlags.
                 // Note that if we use g.DrawString instead, it needs the original flags and the original rectangle.
-                //TranslatedTextBounds = textRect; // TODO: uncomment if it will be needed, e.g. if Mono does not do the translation
+                //TranslatedTextBounds = textRect; // TODO: uncomment if it will be needed, e.g. if Mono will support RTL, and it does not do the translation
                 if (rtl)
                     textRect.X -= dropDownSize - checkBoxPadding;
+                else if (OSHelper.IsMono)
+                    textRect.Y -= 2;
 
                 TextBounds = textRect;
             }
@@ -172,6 +202,13 @@ namespace KGySoft.WinForms.Controls
         private static readonly Color defaultDisabledBackColor = SystemColors.Control;
         private static readonly Color defaultDisabledForeColor = SystemColors.GrayText;
 
+        private static readonly int isHovered = BitVector32.CreateMask();
+        private static readonly int isDropDownHovered = BitVector32.CreateMask(isHovered);
+        private static readonly int isPressed = BitVector32.CreateMask(isDropDownHovered);
+        private static readonly int isDroppedDown = BitVector32.CreateMask(isPressed);
+        private static readonly int isUpHovered = BitVector32.CreateMask(isDroppedDown);
+        private static readonly int isDownHovered = BitVector32.CreateMask(isUpHovered);
+
         #endregion
 
         #region Instance Fields
@@ -194,10 +231,7 @@ namespace KGySoft.WinForms.Controls
         private int dpiChangingCount;
 
         private RenderingQuality checkBoxRenderingQuality = RenderingQuality.High;
-        private bool isHovered;
-        private bool isDropDownHovered;
-        private bool isPressed;
-        private bool isDroppedDown;
+        private BitVector32 flags;
 
         #endregion
 
@@ -441,7 +475,11 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Properties
 
-        private bool IsCustomCalendarSize => VisualStyleHelper.RenderWithVisualStyles && !ShowUpDown && (!Focused || (ShowCheckBox && !Checked));
+        private bool IsCustomDropDownPaint => !ShowUpDown
+            && (VisualStyleHelper.RenderWithVisualStyles && (!Focused || (ShowCheckBox && !Checked) || OSHelper.IsMono) // custom calendar size both on .NET (horizontally) and Mono (vertically)
+                || !VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsMono); // fixing pressed rendering also in RTL mode with no visual styles
+
+        private bool IsCustomUpDownPaint => OSHelper.IsMono && VisualStyleHelper.RenderWithVisualStyles && ShowUpDown; // fixing region on Mono with visual styles
 
         #endregion
 
@@ -457,6 +495,12 @@ namespace KGySoft.WinForms.Controls
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
+            
+            // Needed because in Mono the base ctor calls the overridden BackColor/ForeColor setters
+            if (!OSHelper.IsMono)
+                return;
+            EnabledBackColor = default;
+            EnabledForeColor = default;
         }
 
         #endregion
@@ -487,17 +531,20 @@ namespace KGySoft.WinForms.Controls
                     // It's important that it's before the base.WndProc call, so there will not be extra paint if color changes cause invalidation.
                     ResetColors();
                     CheckDpiChange();
+                    bool isMono = OSHelper.IsMono;
 
-                    // On Vista and above the calendar button can be either a combo box drop down button or the regular calendar button, depending on the text length.
-                    // As it's practically impossible to tell the actual button type of the system rendering, we always draw the non-Focused appearance ourselves with our preference.
-                    bool fullCustomPaint = isDroppedDown || !Focused || ShowCheckBox && !Checked;
-                    if (fullCustomPaint && OSHelper.IsWindows)
+                    // - On Vista and above the calendar button can be either a combo box drop down button or the regular calendar button, depending on the text length.
+                    //   As it's practically impossible to tell the actual button type of the system rendering, we always draw the non-Focused appearance ourselves with our preference.
+                    // - On Mono with visual styles, the buttons are not scaled to a larger font, and also the up/down buttons are rendered incorrectly
+                    // - On Mono with no visual styles, we never paint the buttons, even with full custom paint
+                    bool fullCustomPaint = flags[isDroppedDown] || !Focused || ShowCheckBox && !Checked;
+                    if (fullCustomPaint && OSHelper.IsWindows && (!isMono || VisualStyleHelper.RenderWithVisualStyles))
                         User32.ValidateRect(m.HWnd, IntPtr.Zero);
                     else
                         base.WndProc(ref m);
 
                     // Accepting system rendering if the control is focused, rendering without visual styles and RTL mode is not enabled.
-                    bool rtl = RightToLeftLayout && RightToLeft == RightToLeft.Yes;
+                    bool rtl = RightToLeftLayout && RightToLeft == RightToLeft.Yes && !isMono;
 
                     using (Graphics g = Graphics.FromHwnd(m.HWnd))
                     {
@@ -508,18 +555,20 @@ namespace KGySoft.WinForms.Controls
                         var layout = new LayoutData(this, g);
 
                         // 1. Background and border
-                        if (fullCustomPaint)
-                            PaintBackground(g, layout);
+                        PaintBackground(g, layout, fullCustomPaint);
 
                         // 2. Check box: When visual styles are enabled, reflecting the hovered state.
                         //    Otherwise, fixing RTL appearance (the borders would be mirrored)
                         if (ShowCheckBox && (fullCustomPaint || rtl || VisualStyleHelper.RenderWithVisualStyles))
                             PaintCheckBox(g, layout, !fullCustomPaint);
 
-                        // 3. Drop down button. With visual styles we may use the wider calendar drop down button more likely than the native rendering.
+                        // 3.a. Drop-down button. With visual styles we may use the wider calendar drop down button more likely than the native rendering.
                         //    With no visual styles we fix the RTL appearance - except when initializing without visual styles, because the button may be redrawn outside a WM_PAINT message...
-                        if (!ShowUpDown && (fullCustomPaint || !VisualStyleHelper.RenderWithVisualStyles))
+                        if (!ShowUpDown && (fullCustomPaint || !isMono && !VisualStyleHelper.RenderWithVisualStyles || isMono && VisualStyleHelper.RenderWithVisualStyles))
                             PaintDropDownButton(g, layout);
+                        // 3.b. up/down button - only with Mono/Windows with visual styles, where it's totally broken
+                        else if (!layout.UpDownBounds.IsEmpty())
+                            PaintUpDownButton(g, layout); // On Mono with visual styles the Up/Down button has a terrible quality by default
 
                         // 4. Text. Clearing the Right flag because TextRenderer recognizes The RTL layout somehow and always expects Left alignment.
                         // If we were using Graphics.DrawString with the ToStringFormat extension, the Right flag should not be cleared.
@@ -557,16 +606,29 @@ namespace KGySoft.WinForms.Controls
 
                 // If we use the wider calendar drop down button when the system rendering would use the smaller one, we need to adjust the mouse position to make sure
                 // to open/close the calendar. If the control is just getting focused, the appearance may change to the narrower button, but it's alright.
-                case Constants.WM_LBUTTONDOWN when isDropDownHovered:
-                    // ReSharper disable once RedundantOverflowCheckingContext - false alarm, needed to avoid CS8778
-                    m.LParam = new IntPtr((m.LParam & unchecked((nint)0xFFFF0000)) | ((nint)(uint)Width - 5));
-                    isPressed = true;
+                case Constants.WM_LBUTTONDOWN:
+                    // lParam: LO: X coordinate; HI: Y coordinate
+
+                    if (flags.Any(isDropDownHovered | isUpHovered | isDownHovered))
+                    {
+                        flags[isPressed] = true;
+
+                        // On .NET, we need to adjust the X coordinate to apply our threshold of wide/normal drop-down.
+                        // On Mono, we need to adjust the Y coordinate to stretch the calendar down to the whole area.
+                        // Setting the mouse to (Width - 5, 5) fixes both issues
+                        if (flags[isDropDownHovered])
+                            m.LParam = new IntPtr(0x00005_0000 | ((nint)(uint)Width - 5));
+                        // For Up/Down buttons adjusting the coordinates only if we can get the internal Mono calculation for the up/down area. It's halved horizontally.
+                        else if (this.DropDownArrowRect() is Rectangle upDownBounds)
+                            m.LParam = new IntPtr(((upDownBounds.Top + (flags[isUpHovered] ? 0 : upDownBounds.Height - 1)) << 16) | ((nint)(uint)Width - 5));
+                    }
+
                     base.WndProc(ref m);
                     return;
 
-                case Constants.WM_LBUTTONUP when isDropDownHovered:
+                case Constants.WM_LBUTTONUP when flags[isPressed]:
                     base.WndProc(ref m);
-                    isPressed = false;
+                    flags[isPressed] = false;
                     if (!VisualStyleHelper.RenderWithVisualStyles)
                         Invalidate();
                     return;
@@ -581,7 +643,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnGotFocus(EventArgs e)
         {
             base.OnGotFocus(e);
-            if (!VisualStyleHelper.RenderWithVisualStyles)
+            if (!VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsMono)
                 Invalidate();
         }
 
@@ -647,16 +709,16 @@ namespace KGySoft.WinForms.Controls
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
-            isHovered = isDropDownHovered = false;
-            if (isPressed && !VisualStyleHelper.RenderWithVisualStyles)
+            flags[isHovered | isDropDownHovered | isUpHovered | isDownHovered] = false;
+            if (flags[isPressed] && !VisualStyleHelper.RenderWithVisualStyles)
                 Invalidate();
         }
 
         /// <inheritdoc />
         protected override void OnMouseEnter(EventArgs e)
         {
-            isHovered = true;
-            isDropDownHovered = false;
+            flags[isHovered] = true;
+            flags[isDropDownHovered | isUpHovered | isDownHovered] = false;
             base.OnMouseEnter(e);
         }
 
@@ -665,29 +727,57 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnMouseMove(e);
 
-            if (!IsCustomCalendarSize && VisualStyleHelper.RenderWithVisualStyles)
+            bool customDropDown = IsCustomDropDownPaint;
+            bool customUpDown = IsCustomUpDownPaint;
+            if (!(customDropDown || customUpDown))
                 return;
 
-            // We may render the wider calendar drop down button under different conditions,
-            // so we need to invalidate the control if its hover state changes according to our custom rendering.
             LayoutData layout;
             using (var g = Graphics.FromHwnd(Handle))
                 layout = new LayoutData(this, g);
 
-            bool dropDownHovered = layout.DropDownBounds.Contains(e.Location);
-            if (isDropDownHovered == dropDownHovered)
+            // custom drop down: both on .NET and Mono with visual styles, and on .NET with no visual styles
+            if (customDropDown)
+            {
+                bool dropDownHovered = layout.DropDownBounds.Contains(e.Location);
+                if (flags[isDropDownHovered] == dropDownHovered && !(OSHelper.IsMono && flags[isPressed]))
+                    return;
+
+                flags[isDropDownHovered] = dropDownHovered;
+                if (VisualStyleHelper.RenderWithVisualStyles)
+                {
+                    // Clearing the flag is relevant on Mono, where the OnCloseUp is not called. Receiving OnMouseMove means the calendar is no longer dropped.
+                    flags[isPressed] = false;
+                    Invalidate(layout.DropDownBounds);
+                    return;
+                }
+
+                // No visual styles on .NET: while the left mouse button is pressed, we update the pressed state of the drop-down button.
+                bool pressed = dropDownHovered && MouseButtons == MouseButtons.Left;
+                if (pressed != flags[isPressed])
+                    Invalidate(layout.DropDownBounds);
+                flags[isPressed] = pressed;
+
+                return;
+            }
+
+            // custom up/down: on Mono with visual styles
+            if (Capture)
                 return;
 
-            isDropDownHovered = dropDownHovered;
-            if (VisualStyleHelper.RenderWithVisualStyles)
-                Invalidate();
-            else
-            {
-                bool pressed = dropDownHovered && MouseButtons == MouseButtons.Left;
-                if (pressed != isPressed)
-                    Invalidate();
-                isPressed = pressed;
-            }
+            flags[isPressed] = false;
+            bool upDownHovered = layout.UpDownBounds.Contains(e.Location) // custom drawn bounds (can be higher than drawn by Mono)
+                || this.DropDownArrowRect()?.Contains(e.Location) == true; // calculated bounds by Mono (can be wider and vertically shorter than actually drawn)
+
+            // our vertically fixed hovered flags
+            bool up = upDownHovered && e.Y < layout.UpDownBounds.Top + layout.UpDownBounds.Height / 2;
+            bool down = upDownHovered && !up;
+            if (flags[isUpHovered] == up && flags[isDownHovered] == down)
+                return;
+
+            flags[isUpHovered] = up;
+            flags[isDownHovered] = down;
+            Invalidate(layout.UpDownBounds);
         }
 
         /// <inheritdoc />
@@ -701,8 +791,8 @@ namespace KGySoft.WinForms.Controls
         protected override void OnDropDown(EventArgs eventargs)
         {
             base.OnDropDown(eventargs);
-            isDroppedDown = true;
-            isDropDownHovered = false;
+            flags[isDroppedDown] = true;
+            flags[isDropDownHovered] = false;
             if (!VisualStyleHelper.InitializedWithVisualStyles)
                 Invalidate();
         }
@@ -711,8 +801,21 @@ namespace KGySoft.WinForms.Controls
         protected override void OnCloseUp(EventArgs eventargs)
         {
             base.OnCloseUp(eventargs);
-            isDroppedDown = isPressed = false;
+            flags[isDroppedDown | isPressed] = false;
             Invalidate();
+        }
+
+        /// <inheritdoc />
+        protected override void OnLeave(EventArgs e)
+        {
+            // On mono the OnCloseUp is never called, so using this method as a workaround
+            if (OSHelper.IsMono)
+            {
+                flags[isPressed | isDroppedDown] = false;
+                Invalidate();
+            }
+
+            base.OnLeave(e);
         }
 
         /// <inheritdoc />
@@ -753,31 +856,51 @@ namespace KGySoft.WinForms.Controls
                 base.ForeColor = disabledFgColor;
         }
 
-        private void PaintBackground(Graphics g, LayoutData layout)
+        private void PaintBackground(Graphics g, LayoutData layout, bool fullPaint)
         {
             if (VisualStyleHelper.RenderWithVisualStyles)
             {
+                // partial paint on .NET: the background can be ignored
+                if (!(fullPaint || OSHelper.IsMono))
+                    return;
+
+                // Non-full paint here means that we paint only the background of the drop-down button area. Needed for Mono to fix the messed-up calendar and up/down bounds.
+                // NOTE: This paints the custom back color for the button area. Doing this on Mono only, because on Windows the width of the drop-down button cannot be predicted.
+                Rectangle bounds = fullPaint ? layout.BackgroundBounds
+                    : IsCustomUpDownPaint ? layout.UpDownBounds
+                    : Rectangle.Intersect(layout.BackgroundBounds, layout.DropDownBounds);
+
                 int state = (int)(!Enabled ? DATEPICKERSTATES.DPS_DISABLED
-                    : isHovered ? DATEPICKERSTATES.DPS_HOT
+                    : flags[isHovered] ? DATEPICKERSTATES.DPS_HOT
                     : DATEPICKERSTATES.DPS_NORMAL);
 
-                if (OSHelper.IsWindowsVistaOrLater)
-                    VisualStyleHelper.Render(VisualStyleHelper.DatePickerTheme, this, g, (int)DATEPICKERPARTS.DP_DATEBORDER, state, ClientRectangle);
-                else // Windows XP: there is no DatePicker theme, using the COMBOBOX instead with Part 0 (EDIT 2 could also work but the disabled state has a strange background)
-                    VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_COMPATIBLEBACKGROUND, state, ClientRectangle);
+                if (fullPaint)
+                {
+                    if (OSHelper.IsWindowsVistaOrLater)
+                        VisualStyleHelper.Render(VisualStyleHelper.DatePickerTheme, this, g, (int)DATEPICKERPARTS.DP_DATEBORDER, state, ClientRectangle);
+                    else // Windows XP: there is no DatePicker theme, using the COMBOBOX instead with Part 0 (EDIT 2 could also work but the disabled state has a strange background)
+                        VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_COMPATIBLEBACKGROUND, state, ClientRectangle);
+                }
 
                 // Clearing the background only in disabled state or when a custom back color is specified; otherwise, preserving the theme back color
-                if (state == (int)DATEPICKERSTATES.DPS_DISABLED || (ShowCheckBox && !Checked) || !enabledBackColor.IsEmpty)
-                    g.FillRectangle(BackColor.GetBrush(), layout.BackgroundBounds);
+                // When there is partial paint, we paint the possibly specified custom back color. On Mono only, because on Windows the drop-down size change threshold is different.
+                if (state == (int)DATEPICKERSTATES.DPS_DISABLED || (ShowCheckBox && !Checked) || !enabledBackColor.IsEmpty || !fullPaint)
+                    g.FillRectangle(BackColor.GetBrush(), bounds);
                 return;
             }
 
-            g.Clear(BackColor);
+            if (fullPaint)
+            {
+                if (OSHelper.IsMono)
+                    g.FillRectangle(BackColor.GetBrush(), layout.BackgroundBounds);
+                else
+                    g.Clear(BackColor);
+            }
 
             // If the application was initialized with visual styles (even if they are not enabled), the borders are in the client area, so we need to draw them.
             // Otherwise, the border belongs to the NC area.
-            if (VisualStyleHelper.InitializedWithVisualStyles)
-                ControlPaint.DrawBorder3D(g, ClientRectangle);
+            if (fullPaint && VisualStyleHelper.InitializedWithVisualStyles || OSHelper.IsMono)
+                ControlPaint.DrawBorder3D(g, ClientRectangle, Border3DStyle.Sunken);
         }
 
         private void PaintCheckBox(Graphics g, LayoutData layout, bool paintBackground)
@@ -788,10 +911,10 @@ namespace KGySoft.WinForms.Controls
             {
                 var checkState = Checked
                     ? !Enabled ? CheckBoxState.CheckedDisabled
-                        : isHovered ? CheckBoxState.CheckedHot
+                        : flags[isHovered] ? CheckBoxState.CheckedHot
                         : CheckBoxState.CheckedNormal
                     : !Enabled ? CheckBoxState.UncheckedDisabled
-                        : isHovered ? CheckBoxState.UncheckedHot
+                        : flags[isHovered] ? CheckBoxState.UncheckedHot
                         : CheckBoxState.UncheckedNormal;
 
                 // When the control is not fully custom painted, we already have the system painted checkbox, potentially with different size and quality.
@@ -840,8 +963,8 @@ namespace KGySoft.WinForms.Controls
             if (VisualStyleHelper.RenderWithVisualStyles)
             {
                 int state = (int)(!Enabled ? DATEPICKERSTATES.DPS_DISABLED
-                    : isDroppedDown || isPressed ? DATEPICKERSTATES.DPS_FOCUSED
-                    : isDropDownHovered ? DATEPICKERSTATES.DPS_HOT
+                    : flags.Any(isDroppedDown | isPressed) ? DATEPICKERSTATES.DPS_FOCUSED
+                    : flags[isDropDownHovered] ? DATEPICKERSTATES.DPS_HOT
                     : DATEPICKERSTATES.DPS_NORMAL);
 
                 IntPtr theme = layout.IsCalendarDropDown ? VisualStyleHelper.DatePickerTheme : VisualStyleHelper.ComboBoxTheme;
@@ -850,9 +973,26 @@ namespace KGySoft.WinForms.Controls
                     : layout.IsRightToLeft ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;
                 VisualStyleHelper.Render(theme, this, g, part, state, layout.DropDownBounds);
             }
-            else
-                ControlPaint.DrawComboButton(g, layout.TranslatedDropDownBounds, !Enabled ? ButtonState.Inactive : isPressed ? ButtonState.Pushed : ButtonState.Normal);
+            else if (!OSHelper.IsMono)
+                ControlPaint.DrawComboButton(g, layout.TranslatedDropDownBounds, !Enabled ? ButtonState.Inactive : flags[isPressed] ? ButtonState.Pushed : ButtonState.Normal);
+        }
 
+        private void PaintUpDownButton(Graphics g, LayoutData layout)
+        {
+            Debug.Assert(ShowUpDown && OSHelper.IsMono && VisualStyleHelper.RenderWithVisualStyles);
+
+            Rectangle boundsUp = layout.UpDownBounds;
+            boundsUp.Height /= 2;
+            Rectangle boundsDown = boundsUp;
+            boundsDown.Y += boundsDown.Height;
+            int stateUp = (int)(!Enabled ? SPINSTATES.SPNS_DISABLED
+                : flags[isUpHovered] ? flags[isPressed] ? SPINSTATES.SPNS_PRESSED : SPINSTATES.SPNS_HOT
+                : SPINSTATES.SPNS_NORMAL);
+            int stateDown = (int)(!Enabled ? SPINSTATES.SPNS_DISABLED
+                : flags[isDownHovered] ? flags[isPressed] ? SPINSTATES.SPNS_PRESSED : SPINSTATES.SPNS_HOT
+                : SPINSTATES.SPNS_NORMAL);
+            VisualStyleHelper.Render(VisualStyleHelper.SpinTheme, this, g, (int)SPINPARTS.SPNP_UP, stateUp, boundsUp);
+            VisualStyleHelper.Render(VisualStyleHelper.SpinTheme, this, g, (int)SPINPARTS.SPNP_DOWN, stateDown, boundsDown);
         }
 
         private bool ShouldSerializeFont() => font != null;

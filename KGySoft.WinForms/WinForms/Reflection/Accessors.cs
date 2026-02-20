@@ -51,13 +51,21 @@ namespace KGySoft.WinForms.Reflection
         private static readonly object propControl_DoubleBuffered = new();
         private static readonly object propControl_ShowToolTip = new();
         private static readonly object propFont_NativeFont = new();
-        private static readonly Dictionary<object, Func<PropertyInfo?>> propertyLookup = new(5)
+        private static readonly object propComboBox_ComboListBox = new();
+        private static readonly object propComboBox_TextBox = new();
+        private static readonly object propComboBox_ButtonArea = new();
+        private static readonly object propDateTimePicker_DropDownArrowRect = new();
+        private static readonly Dictionary<object, Func<PropertyInfo?>> propertyLookup = new(9)
         {
             [propApplication_ComCtlSupportsVisualStyles] = () => typeof(Application).GetProperty(nameof(ComCtlSupportsVisualStyles), BindingFlags.Static | BindingFlags.NonPublic | BindingFlags.Public),
             [propControl_ShowKeyboardCues] = () => typeof(Control).GetProperty(nameof(ShowKeyboardCues), BindingFlags.Instance | BindingFlags.NonPublic),
             [propControl_DoubleBuffered] = () => typeof(Control).GetProperty(nameof(DoubleBuffered), BindingFlags.Instance | BindingFlags.NonPublic),
             [propControl_ShowToolTip] = () => typeof(ButtonBase).GetProperty(nameof(ShowToolTip), BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
-            [propFont_NativeFont] = () => typeof(Font).GetProperty(OSHelper.IsMono ? "NativeObject" : "NativeFont", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Public)
+            [propFont_NativeFont] = () => typeof(Font).GetProperty(OSHelper.IsMono ? "NativeObject" : "NativeFont", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+            [propComboBox_ComboListBox] = () => typeof(ComboBox).GetProperty("UIAComboListBox", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+            [propComboBox_TextBox] = () => typeof(ComboBox).GetProperty("UIATextBox", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+            [propComboBox_ButtonArea] = () => typeof(ComboBox).GetProperty("ButtonArea", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
+            [propDateTimePicker_DropDownArrowRect] = () => typeof(DateTimePicker).GetProperty("drop_down_arrow_rect", BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public),
         };
 
         // Method keys and lookup callbacks. A public binding flag is added by FindMethod to support possible future compatibility for originally non-visible methods.
@@ -227,12 +235,37 @@ namespace KGySoft.WinForms.Reflection
 
         internal static void SetMouseEvents(this ComboBox comboBox)
         {
-#if NETFRAMEWORK
-            if (OSHelper.IsMono)
-                return;
-#endif
+            Debug.Assert(!OSHelper.IsMono);
             TryGetField(fieldComboBox_mouseEvents)?.SetInstanceValue(comboBox, true);
             TryGetField(fieldComboBox_mousePressed)?.SetInstanceValue(comboBox, true);
+        }
+
+        internal static Control? InnerListBox(this ComboBox comboBox)
+        {
+            Debug.Assert(OSHelper.IsMono);
+            return TryGetProperty(propComboBox_ComboListBox)?.GetInstanceValue<ComboBox, Control?>(comboBox);
+        }
+
+        internal static TextBox? InnerTextBox(this ComboBox comboBox)
+        {
+            Debug.Assert(OSHelper.IsMono);
+            return TryGetProperty(propComboBox_TextBox)?.GetInstanceValue<ComboBox, TextBox?>(comboBox);
+        }
+
+        internal static Rectangle? GetButtonArea(this ComboBox comboBox)
+        {
+            Debug.Assert(OSHelper.IsMono);
+            return TryGetProperty(propComboBox_ButtonArea)?.GetInstanceValue<ComboBox, Rectangle>(comboBox);
+        }
+
+        #endregion
+
+        #region DateTimePicker
+
+        internal static Rectangle? DropDownArrowRect(this DateTimePicker dateTimePicker)
+        {
+            Debug.Assert(OSHelper.IsMono);
+            return TryGetProperty(propDateTimePicker_DropDownArrowRect)?.GetInstanceValue<DateTimePicker, Rectangle>(dateTimePicker);
         }
 
         #endregion

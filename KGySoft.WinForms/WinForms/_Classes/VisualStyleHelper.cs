@@ -64,6 +64,7 @@ namespace KGySoft.WinForms
         private static IntPtr taskDialogThemeHandle;
         private static IntPtr comboBoxThemeHandle;
         private static IntPtr datePickerThemeHandle;
+        private static IntPtr spinThemeHandle;
 
         private static bool? visualStylesAvailable;
         private static bool? highContrast;
@@ -192,6 +193,10 @@ namespace KGySoft.WinForms
             ? datePickerThemeHandle
             : datePickerThemeHandle = UxTheme.OpenThemeDataGlobal(Constants.ThemeDatePicker);
 
+        internal static IntPtr SpinTheme => spinThemeHandle != IntPtr.Zero
+            ? spinThemeHandle
+            : spinThemeHandle = UxTheme.OpenThemeDataGlobal(Constants.ThemeSpin);
+
         #endregion
 
         #region Constructors
@@ -288,6 +293,7 @@ namespace KGySoft.WinForms
             taskDialogThemeHandle = IntPtr.Zero;
             comboBoxThemeHandle = IntPtr.Zero;
             datePickerThemeHandle = IntPtr.Zero;
+            spinThemeHandle = IntPtr.Zero;
             visualStylesAvailable = null;
             highContrast = null;
 
@@ -312,6 +318,7 @@ namespace KGySoft.WinForms
             : hTheme == taskDialogThemeHandle ? Constants.ThemeClassTaskDialog
             : hTheme == comboBoxThemeHandle ? Constants.ThemeClassComboBox
             : hTheme == datePickerThemeHandle ? Constants.ThemeDatePicker
+            : hTheme == spinThemeHandle ? Constants.ThemeSpin
             : String.Empty; // Not throwing here for performance reasons so the method can be inlined. The exception will be thrown by UxTheme
 
         private static Bitmap GetThemeBitmap((IntPtr ThemeHandle, int PartId, int StateId) key)

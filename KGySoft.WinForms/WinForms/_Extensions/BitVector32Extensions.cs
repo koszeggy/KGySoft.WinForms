@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: DATEPICKERSTATES.cs
+//  File: BitVector32Extensions.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2026 - All Rights Reserved
 //
@@ -13,13 +13,20 @@
 
 #endregion
 
-namespace KGySoft.WinForms.WinApi
+#region Usings
+
+using System.Collections.Specialized;
+
+#endregion
+
+namespace KGySoft.WinForms
 {
-    internal enum DATEPICKERSTATES
+    internal static class BitVector32Extensions
     {
-        DPS_NORMAL = 1,
-        DPS_HOT = 2,
-        DPS_FOCUSED = 3,
-        DPS_DISABLED = 4,
-    };
+        #region Methods
+
+        internal static bool Any(this BitVector32 data, int bits) => (data.Data & bits) != 0;
+
+        #endregion
+    }
 }
