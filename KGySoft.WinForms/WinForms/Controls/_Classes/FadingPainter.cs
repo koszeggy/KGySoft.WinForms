@@ -165,9 +165,9 @@ namespace KGySoft.WinForms.Controls
             if (speed < 0)
                 speed = 0;
 
-            // Not fallbacking if speed is 0 because in this case only new state is drawn, using buffer.
-            // Previous animations must be stopped. When not stopped and current paint is a change witoug state change,
-            // accidentally fading transitions may occur (eg. Elevated state of a (CommandLink)Button).
+            // Not falling back if speed is 0, because in this case only new state is drawn, using buffer.
+            // Previous animations must be stopped. When not stopped and current paint is a change witout state change,
+            // accidentally fading transitions may occur (e.g. Elevated state of a (CommandLink)Button).
             if (speed == 0)
                 StopAnimations();
 

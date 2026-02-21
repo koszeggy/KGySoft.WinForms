@@ -452,6 +452,7 @@ namespace KGySoft.WinForms.Controls
                 ResetSizeCache();
                 ResetNativeDescription();
 
+                // known Mono issue: the order of events are somehow different, so on Mono, description changes on Click may animate even when FadingOptions.TextChange is not set.
                 Invalidate();
                 if (base.AutoSize)
                     PerformLayout();
