@@ -278,7 +278,7 @@ namespace KGySoft.WinForms.Controls
                 // enabling marquee style even in design mode
                 CreateParams createParams = base.CreateParams;
                 if (isMarquee)
-                    createParams.Style |= 8;
+                    createParams.Style |= Constants.PBS_MARQUEE;
 
                 return createParams;
             }
@@ -388,12 +388,19 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
-            if (IsClassicAppearance)
-                PaintClassicAppearance(e);
-            else if (style == AdvancedProgressBarStyle.ThemedShiny)
-                PaintShinyAppearance(e);
-            else
-                PaintFlatAppearance(e);
+            // With style == System OnPaint should not be reached due to the SetStyle call, but on Mono we still get here
+            if (style != AdvancedProgressBarStyle.System)
+            {
+                if (IsClassicAppearance)
+                    PaintClassicAppearance(e);
+                else if (style == AdvancedProgressBarStyle.ThemedShiny)
+                    PaintShinyAppearance(e);
+                else
+                    PaintFlatAppearance(e);
+            }
+
+            // To raise the Paint event. Painting the System style has already occurred in WM_PAINT.
+            base.OnPaint(e);
 
             // TODO: PaintText() - with mirroring if LTR
         }
@@ -403,9 +410,7 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnSizeChanged(e);
             if (isMarquee && state != ProgressBarState.Normal)
-            {
                 ResetAnimation(true);
-            }
         }
 
         /// <inheritdoc />
@@ -514,9 +519,9 @@ namespace KGySoft.WinForms.Controls
             // background
             PaintSimpleBackground(e);
 
-            // frame: when visual styles are disabled, there is already a frame in NC area
+            // frame: when visual styles are disabled, there is already a frame in NC area, except in Mono, where the frame is in the client area
             Rectangle rect = ClientRectangle;
-            if (VisualStyleHelper.RenderWithVisualStyles)
+            if (VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsMono)
             {
                 ControlPaint.DrawBorder3D(e.Graphics, rect, Border3DStyle.SunkenOuter);
                 rect.Inflate(-2, -2);
@@ -532,9 +537,7 @@ namespace KGySoft.WinForms.Controls
             if (BackColor == Color.Transparent)
                 this.PaintTransparentBackground(e);
             else
-            {
                 e.Graphics.FillRectangle(BackColor.GetBrush(), e.ClipRectangle);
-            }
         }
 
         private Rectangle GetBarRect(Rectangle rect)

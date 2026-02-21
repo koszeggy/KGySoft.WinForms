@@ -146,6 +146,7 @@ namespace KGySoft.WinForms.WinApi
         internal const int TMT_FONT = 210;
         internal const int TMT_COLOR = 3803;
 
+        internal const int PBS_MARQUEE = 0x0008;
         internal const int PBM_SETMARQUEE = WM_USER + 10;
         internal const int PBM_SETSTATE = WM_USER + 16;
 
