@@ -20,6 +20,7 @@ using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
@@ -81,7 +82,7 @@ namespace KGySoft.WinForms.Controls
                 Rectangle textRect = bounds;
                 bool rtl = IsRightToLeft = control.RightToLeftLayout && control.RightToLeft == RightToLeft.Yes && !OSHelper.IsMono;
 
-                // When EnableVisualStyles was called, the border belongs to the client area (even if visual styles are actually not available),
+                // When EnableVisualStyles was called on Vista+, the border belongs to the client area (even if visual styles are actually not available),
                 // so we could omit this if VisualStyleHelper.InitializedWithVisualStyles is false,
                 // but apparently the system rendering applies the same padding to the client rectangle as well.
                 textRect.Inflate(-2, -2);
@@ -97,18 +98,35 @@ namespace KGySoft.WinForms.Controls
                     {
                         CheckBoxBounds = new Rectangle(textRect.X, (textRect.Y + textRect.Height / 2) - (checkBoxPadding - 5) / 2, checkBoxPadding - 5, checkBoxPadding - 5);
                         if (!VisualStyleHelper.RenderWithVisualStyles)
+                        {
                             CheckBoxBounds.Inflate(-1, -1);
+                            CheckBoxBounds.X += 1;
+                            CheckBoxBounds.Y += 1;
+                        }
                     }
                     else
                     {
                         CheckBoxBounds = new Rectangle(textRect.X, textRect.Y, checkBoxPadding - 1, checkBoxPadding - 1);
-                        if (!VisualStyleHelper.InitializedWithVisualStyles)
+                        if (OSHelper.IsWindowsVistaOrLater)
                         {
-                            CheckBoxBounds.Width -= 1;
-                            CheckBoxBounds.Height -= 1;
+                            if (!VisualStyleHelper.InitializedWithVisualStyles)
+                            {
+                                CheckBoxBounds.Width -= 1;
+                                CheckBoxBounds.Height -= 1;
+                            }
+                            else if (!VisualStyleHelper.RenderWithVisualStyles)
+                                CheckBoxBounds.Inflate(-1, -1);
                         }
-                        else if (!VisualStyleHelper.RenderWithVisualStyles)
-                            CheckBoxBounds.Inflate(-1, -1);
+                        else
+                        {
+                            if (VisualStyleHelper.RenderWithVisualStyles)
+                                CheckBoxBounds.X -= 1;
+                            else
+                            {
+                                CheckBoxBounds.Width -= 1;
+                                CheckBoxBounds.Height -= 1;
+                            }
+                        }
                     }
 
                     textRect.Width -= checkBoxPadding;
@@ -151,7 +169,9 @@ namespace KGySoft.WinForms.Controls
                 }
                 else
                 {
-                    bool fullHeight = !VisualStyleHelper.InitializedWithVisualStyles || VisualStyleHelper.RenderWithVisualStyles && OSHelper.IsWindowsVistaOrLater;
+                    bool fullHeight = !VisualStyleHelper.InitializedWithVisualStyles // EnableVisualStyles was not called: full client area, border is in the NC area
+                        || OSHelper.IsWindows && !OSHelper.IsWindowsVistaOrLater && !OSHelper.IsMono // Windows XP: the border belongs to the NC even with visual styles
+                        || VisualStyleHelper.RenderWithVisualStyles && OSHelper.IsWindowsVistaOrLater; // Vista+ with visual styles: the calendar/drop/down occupies the border in the client area
 
                     // Strange visual style renderer behavior: in RTL mode it mirrors the X coordinates AND the glyph image.
                     // The image mirroring does not happen for the checkbox rendering though. And ControlPaint does not mirror the X coordinate either.
@@ -177,7 +197,12 @@ namespace KGySoft.WinForms.Controls
                 if (rtl)
                     textRect.X -= dropDownSize - checkBoxPadding;
                 else if (OSHelper.IsMono)
-                    textRect.Y -= 2;
+                {
+                    if (VisualStyleHelper.RenderWithVisualStyles)
+                        textRect.Y -= 2;
+                    else
+                        textRect.X += 2;
+                }
 
                 TextBounds = textRect;
             }
@@ -307,10 +332,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/> and not <see cref="TextBoxBase.ReadOnly"/>.
+        /// Gets or sets the background color when the control is <see cref="Control.Enabled"/>.
         /// </summary>
         [Category("AdvancedDateTimePicker")]
-        [Description("Determines the background color when the control is Enabled and not ReadOnly.")]
+        [Description("Determines the background color when the control is Enabled.")]
         public Color EnabledBackColor
         {
             get => !enabledBackColor.IsEmpty ? enabledBackColor : defaultEnabledBackColor;
@@ -341,10 +366,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/> or is <see cref="TextBoxBase.ReadOnly"/>.
+        /// Gets or sets the background color when the control is not <see cref="Control.Enabled"/>.
         /// </summary>
         [Category("AdvancedDateTimePicker")]
-        [Description("Determines the background when the control is not Enabled or is ReadOnly.")]
+        [Description("Determines the background when the control is not Enabled.")]
         public Color DisabledBackColor
         {
             get => !disabledBackColor.IsEmpty ? disabledBackColor : defaultDisabledBackColor;
@@ -643,7 +668,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnGotFocus(EventArgs e)
         {
             base.OnGotFocus(e);
-            if (!VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsMono)
+            if (!VisualStyleHelper.RenderWithVisualStyles || !OSHelper.IsWindowsVistaOrLater || OSHelper.IsMono)
                 Invalidate();
         }
 
@@ -878,8 +903,8 @@ namespace KGySoft.WinForms.Controls
                 {
                     if (OSHelper.IsWindowsVistaOrLater)
                         VisualStyleHelper.Render(VisualStyleHelper.DatePickerTheme, this, g, (int)DATEPICKERPARTS.DP_DATEBORDER, state, ClientRectangle);
-                    else // Windows XP: there is no DatePicker theme, using the COMBOBOX instead with Part 0 (EDIT 2 could also work but the disabled state has a strange background)
-                        VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_COMPATIBLEBACKGROUND, state, ClientRectangle);
+                    else // Windows XP: there is no DatePicker theme, but as the border is in the NC area, we can simply fill the background with back color
+                        g.Clear(BackColor);
                 }
 
                 // Clearing the background only in disabled state or when a custom back color is specified; otherwise, preserving the theme back color
@@ -899,7 +924,7 @@ namespace KGySoft.WinForms.Controls
 
             // If the application was initialized with visual styles (even if they are not enabled), the borders are in the client area, so we need to draw them.
             // Otherwise, the border belongs to the NC area.
-            if (fullPaint && VisualStyleHelper.InitializedWithVisualStyles || OSHelper.IsMono)
+            if (fullPaint && VisualStyleHelper.InitializedWithVisualStyles && OSHelper.IsWindowsVistaOrLater || OSHelper.IsMono)
                 ControlPaint.DrawBorder3D(g, ClientRectangle, Border3DStyle.Sunken);
         }
 
@@ -920,7 +945,7 @@ namespace KGySoft.WinForms.Controls
                 // When the control is not fully custom painted, we already have the system painted checkbox, potentially with different size and quality.
                 // Using the Window system color is alright, because we do the clearing only when the control is focused, in which case no custom back color is used.
                 if (paintBackground)
-                    g.FillRectangle(SystemBrushes.Window, layout.TranslatedCheckBoxBounds);
+                    g.FillRectangle(OSHelper.IsWindowsVistaOrLater ? SystemBrushes.Window : BackColor.GetBrush(), layout.TranslatedCheckBoxBounds);
 
                 Size actualSize = VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, true);
                 Size drawnSize = layout.CheckBoxBounds.Height < actualSize.Height
@@ -952,7 +977,19 @@ namespace KGySoft.WinForms.Controls
                     checkState |= ButtonState.Inactive;
                 if (Checked)
                     checkState |= ButtonState.Checked;
-                ControlPaint.DrawCheckBox(g, layout.TranslatedCheckBoxBounds, checkState);
+
+                if (!layout.IsRightToLeft || OSHelper.IsWindowsVistaOrLater || VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsMono)
+                {
+                    ControlPaint.DrawCheckBox(g, layout.TranslatedCheckBoxBounds, checkState);
+                    return;
+                }
+
+                // Windows XP with no visual styles in RTL mode: the checkbox is drawn mirrored by ControlPaint
+                using var bmpCheckBox = new Bitmap(layout.CheckBoxBounds.Width, layout.CheckBoxBounds.Height, PixelFormat.Format32bppPArgb);
+                using (Graphics gBitmap = Graphics.FromImage(bmpCheckBox))
+                    ControlPaint.DrawCheckBox(gBitmap, 0, 0, layout.CheckBoxBounds.Width, layout.CheckBoxBounds.Height, checkState);
+                bmpCheckBox.RotateFlip(RotateFlipType.RotateNoneFlipX);
+                g.DrawImage(bmpCheckBox, layout.CheckBoxBounds);
             }
         }
 
@@ -974,12 +1011,17 @@ namespace KGySoft.WinForms.Controls
                 VisualStyleHelper.Render(theme, this, g, part, state, layout.DropDownBounds);
             }
             else if (!OSHelper.IsMono)
-                ControlPaint.DrawComboButton(g, layout.TranslatedDropDownBounds, !Enabled ? ButtonState.Inactive : flags[isPressed] ? ButtonState.Pushed : ButtonState.Normal);
+            {
+                Rectangle bounds = OSHelper.IsWindowsVistaOrLater ? layout.TranslatedDropDownBounds : layout.DropDownBounds;
+                ControlPaint.DrawComboButton(g, bounds, !Enabled ? ButtonState.Inactive : flags[isPressed] ? ButtonState.Pushed : ButtonState.Normal);
+            }
         }
 
         private void PaintUpDownButton(Graphics g, LayoutData layout)
         {
-            Debug.Assert(ShowUpDown && OSHelper.IsMono && VisualStyleHelper.RenderWithVisualStyles);
+            Debug.Assert(ShowUpDown && OSHelper.IsMono);
+            if (!VisualStyleHelper.RenderWithVisualStyles)
+                return;
 
             Rectangle boundsUp = layout.UpDownBounds;
             boundsUp.Height /= 2;
