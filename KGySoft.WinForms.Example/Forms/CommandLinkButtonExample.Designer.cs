@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(CommandLinkButtonExample));
-            this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.gbIcons = new System.Windows.Forms.GroupBox();
             this.commandLinkButton13 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.commandLinkButton11 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.commandLinkButton12 = new KGySoft.WinForms.Controls.CommandLinkButton();
@@ -37,47 +37,47 @@
             this.commandLinkButton4 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.commandLinkButton2 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.commandLinkButton1 = new KGySoft.WinForms.Controls.CommandLinkButton();
-            this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.gbRendering = new System.Windows.Forms.GroupBox();
             this.commandLinkButton10 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.commandLinkButton9 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.commandLinkButton8 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.commandLinkButton7 = new KGySoft.WinForms.Controls.CommandLinkButton();
             this.pnlTestArea.SuspendLayout();
-            this.groupBox1.SuspendLayout();
-            this.groupBox2.SuspendLayout();
+            this.gbIcons.SuspendLayout();
+            this.gbRendering.SuspendLayout();
             this.SuspendLayout();
             // 
             // pnlTestArea
             // 
-            this.pnlTestArea.Controls.Add(this.groupBox1);
-            this.pnlTestArea.Controls.Add(this.groupBox2);
+            this.pnlTestArea.Controls.Add(this.gbIcons);
+            this.pnlTestArea.Controls.Add(this.gbRendering);
             this.pnlTestArea.Margin = new System.Windows.Forms.Padding(4);
             this.pnlTestArea.Size = new System.Drawing.Size(625, 566);
             this.pnlTestArea.Controls.SetChildIndex(this.lblInstruction, 0);
-            this.pnlTestArea.Controls.SetChildIndex(this.groupBox2, 0);
-            this.pnlTestArea.Controls.SetChildIndex(this.groupBox1, 0);
+            this.pnlTestArea.Controls.SetChildIndex(this.gbRendering, 0);
+            this.pnlTestArea.Controls.SetChildIndex(this.gbIcons, 0);
             // 
             // lblInstuction
             // 
             this.lblInstruction.Size = new System.Drawing.Size(623, 79);
             this.lblInstruction.Text = resources.GetString("lblInstruction.Text");
             // 
-            // groupBox1
+            // gbIcons
             // 
-            this.groupBox1.Controls.Add(this.commandLinkButton13);
-            this.groupBox1.Controls.Add(this.commandLinkButton11);
-            this.groupBox1.Controls.Add(this.commandLinkButton12);
-            this.groupBox1.Controls.Add(this.commandLinkButton3);
-            this.groupBox1.Controls.Add(this.commandLinkButton4);
-            this.groupBox1.Controls.Add(this.commandLinkButton2);
-            this.groupBox1.Controls.Add(this.commandLinkButton1);
-            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox1.Location = new System.Drawing.Point(0, 321);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(625, 170);
-            this.groupBox1.TabIndex = 2;
-            this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Icons";
+            this.gbIcons.Controls.Add(this.commandLinkButton13);
+            this.gbIcons.Controls.Add(this.commandLinkButton11);
+            this.gbIcons.Controls.Add(this.commandLinkButton12);
+            this.gbIcons.Controls.Add(this.commandLinkButton3);
+            this.gbIcons.Controls.Add(this.commandLinkButton4);
+            this.gbIcons.Controls.Add(this.commandLinkButton2);
+            this.gbIcons.Controls.Add(this.commandLinkButton1);
+            this.gbIcons.Dock = System.Windows.Forms.DockStyle.Top;
+            this.gbIcons.Location = new System.Drawing.Point(0, 321);
+            this.gbIcons.Name = "gbIcons";
+            this.gbIcons.Size = new System.Drawing.Size(625, 170);
+            this.gbIcons.TabIndex = 2;
+            this.gbIcons.TabStop = false;
+            this.gbIcons.Text = "Icons";
             // 
             // commandLinkButton13
             // 
@@ -164,21 +164,21 @@
             this.commandLinkButton1.UseDefaultGlyph = false;
             this.commandLinkButton1.UseVisualStyleBackColor = true;
             // 
-            // groupBox2
+            // gbRendering
             // 
-            this.groupBox2.AutoSize = true;
-            this.groupBox2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.groupBox2.Controls.Add(this.commandLinkButton10);
-            this.groupBox2.Controls.Add(this.commandLinkButton9);
-            this.groupBox2.Controls.Add(this.commandLinkButton8);
-            this.groupBox2.Controls.Add(this.commandLinkButton7);
-            this.groupBox2.Dock = System.Windows.Forms.DockStyle.Top;
-            this.groupBox2.Location = new System.Drawing.Point(0, 28);
-            this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(625, 293);
-            this.groupBox2.TabIndex = 0;
-            this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Rendering modes";
+            this.gbRendering.AutoSize = true;
+            this.gbRendering.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.gbRendering.Controls.Add(this.commandLinkButton10);
+            this.gbRendering.Controls.Add(this.commandLinkButton9);
+            this.gbRendering.Controls.Add(this.commandLinkButton8);
+            this.gbRendering.Controls.Add(this.commandLinkButton7);
+            this.gbRendering.Dock = System.Windows.Forms.DockStyle.Top;
+            this.gbRendering.Location = new System.Drawing.Point(0, 28);
+            this.gbRendering.Name = "gbRendering";
+            this.gbRendering.Size = new System.Drawing.Size(625, 293);
+            this.gbRendering.TabIndex = 0;
+            this.gbRendering.TabStop = false;
+            this.gbRendering.Text = "Rendering modes";
             // 
             // commandLinkButton10
             // 
@@ -245,16 +245,16 @@
             this.Text = "CommandLinkTest";
             this.pnlTestArea.ResumeLayout(false);
             this.pnlTestArea.PerformLayout();
-            this.groupBox1.ResumeLayout(false);
-            this.groupBox1.PerformLayout();
-            this.groupBox2.ResumeLayout(false);
-            this.groupBox2.PerformLayout();
+            this.gbIcons.ResumeLayout(false);
+            this.gbIcons.PerformLayout();
+            this.gbRendering.ResumeLayout(false);
+            this.gbRendering.PerformLayout();
             this.ResumeLayout(false);
 
         }
 
         #endregion
-        private System.Windows.Forms.GroupBox groupBox1;
+        private System.Windows.Forms.GroupBox gbIcons;
         private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton11;
         private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton12;
         private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton3;
@@ -262,7 +262,7 @@
         private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton2;
         private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton1;
         private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton13;
-        private System.Windows.Forms.GroupBox groupBox2;
+        private System.Windows.Forms.GroupBox gbRendering;
         private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton10;
         private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton9;
         private KGySoft.WinForms.Controls.CommandLinkButton commandLinkButton8;
