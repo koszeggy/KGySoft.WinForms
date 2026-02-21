@@ -408,7 +408,8 @@ namespace KGySoft.WinForms.Forms
             lblDetailsFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             lblFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
-            Font = ScaleHelper.MessageBoxFont;
+            if (!OSHelper.IsMono)
+                Font = ScaleHelper.MessageBoxFont;
         }
 
         #endregion
@@ -738,8 +739,11 @@ namespace KGySoft.WinForms.Forms
         {
             selectedCustomButtonIndex = -1;
             chbCheckBox.Checked = host.CheckBoxChecked;
-            if (ownerWindow != null && (host.Options & TaskDialogOptions.PositionRelativeToWindow) != TaskDialogOptions.None)
+            if (ownerWindow != null && (host.Options & TaskDialogOptions.PositionRelativeToWindow) != TaskDialogOptions.None
+                || OSHelper.IsMono && OSHelper.IsWindows && ownerWindow != null) // Mono/Windows does not handle multiple monitors well, so this is needed to remain on a non-primary screen
+            {
                 StartPosition = FormStartPosition.CenterParent;
+            }
             else
                 StartPosition = FormStartPosition.CenterScreen;
 

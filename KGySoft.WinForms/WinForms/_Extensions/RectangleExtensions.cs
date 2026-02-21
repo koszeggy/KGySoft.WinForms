@@ -54,6 +54,9 @@ namespace KGySoft.WinForms
         /// <returns>The adjusted <see cref="Rectangle"/>.</returns>
         public static Rectangle EnsureScreen(this Rectangle suggestedBounds, Screen screen, bool forceSingleScreen)
         {
+            if (OSHelper.IsMono && Screen.AllScreens.Length <= 1)
+                return suggestedBounds;
+
             Rectangle screenBounds;
             if (!forceSingleScreen)
             {

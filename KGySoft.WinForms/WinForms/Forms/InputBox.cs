@@ -36,8 +36,11 @@ namespace KGySoft.WinForms.Forms
         public InputBox()
         {
             InitializeComponent();
+            if (OSHelper.IsMono && OSHelper.IsWindows)
+                StartPosition = FormStartPosition.CenterParent;
             RightToLeft = LanguageSettings.DisplayLanguage.TextInfo.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
-            Font = ScaleHelper.MessageBoxFont;
+            if (!OSHelper.IsMono)
+                Font = ScaleHelper.MessageBoxFont;
         }
 
         #endregion
