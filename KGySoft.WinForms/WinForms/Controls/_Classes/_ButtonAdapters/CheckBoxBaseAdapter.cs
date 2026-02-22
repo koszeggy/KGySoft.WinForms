@@ -19,12 +19,6 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-using KGySoft.Drawing;
-using KGySoft.Drawing.Imaging;
-using KGySoft.Drawing.Shapes;
-using KGySoft.WinForms.Reflection;
-using KGySoft.WinForms.WinApi;
-
 #endregion
 
 namespace KGySoft.WinForms.Controls
@@ -33,16 +27,17 @@ namespace KGySoft.WinForms.Controls
     {
         #region Constants
 
-        protected const int FlatCheckSize = 11;
+        #region Internal Constants
+
+        internal const int FlatCheckSize = 11;
 
         #endregion
 
-        #region Fields
+        #region Private Constants
 
-        [ThreadStatic]private static Bitmap? checkImageChecked;
-        [ThreadStatic]private static Color checkImageCheckedBackColor;
-        [ThreadStatic]private static Bitmap? checkImageIndeterminate;
-        [ThreadStatic]private static Color checkImageIndeterminateBackColor;
+        private const int minCheckSize = 13;
+        
+        #endregion
 
         #endregion
 
@@ -64,10 +59,8 @@ namespace KGySoft.WinForms.Controls
         #region Methods
 
         #region Static Methods
-        
-        #region Protected Methods
 
-        protected static void DrawCheckOnly(Graphics g, LayoutData layout, ColorData colors, Color checkColor, bool disabledColors, ControlAppearanceState state)
+        protected static void DrawCheckOnly(Graphics g, Rectangle checkBounds, ColorData colors, Color checkColor, bool disabledColors, ControlAppearanceState state)
         {
             if (state.CheckState == CheckState.Unchecked)
                 return;
@@ -76,80 +69,11 @@ namespace KGySoft.WinForms.Controls
                 checkColor = colors.ButtonShadow;
             else if (state.CheckState == CheckState.Indeterminate && disabledColors)
                 checkColor = VisualStyleHelper.HighContrast ? colors.Highlight : colors.ButtonShadow;
-            
-            Rectangle checkBounds = layout.CheckBounds;
-            if (checkBounds.Width == FlatCheckSize)
-            {
-                checkBounds.Width++;
-                checkBounds.Height++;
-            }
 
-            checkBounds.Width++;
-            checkBounds.Height++;
-            Bitmap image = state.CheckState == CheckState.Checked
-                ? GetCheckBoxImage(checkColor, checkBounds, ref checkImageCheckedBackColor, ref checkImageChecked)
-                : GetCheckBoxImage(checkColor, checkBounds, ref checkImageIndeterminateBackColor, ref checkImageIndeterminate);
-            
-            if (layout.Options.DotNetOneButtonCompat)
-                checkBounds.Y--;
-            else
-                checkBounds.Y -= 2;
-
-            g.DrawImageColorized(image, checkBounds, checkColor);
+            checkBounds = Rectangle.Union(checkBounds, new Rectangle(checkBounds.X, checkBounds.Y, minCheckSize, minCheckSize));
+            Bitmap checkImage = ControlPaintHelper.GetCheckImage(checkBounds.Size);
+            g.DrawImageColorized(checkImage, checkBounds, Color.Black, checkColor);
         }
-
-        #endregion
-
-        #region Private Methods
-
-        private static Bitmap GetCheckBoxImage(Color checkColor, Rectangle fullSize, ref Color cacheCheckColor, ref Bitmap? cacheCheckImage)
-        {
-            if (cacheCheckImage != null && cacheCheckColor.ToArgb() == checkColor.ToArgb() && cacheCheckImage.Size == fullSize.Size)
-                return cacheCheckImage;
-
-            cacheCheckImage?.Dispose();
-
-            var result = new Bitmap(fullSize.Width, fullSize.Height);
-            if (OSHelper.IsWindows)
-            {
-                RECT rect = RECT.FromXYWH(0, 0, fullSize.Width, fullSize.Height);
-                using (Graphics g = Graphics.FromImage(result))
-                {
-                    IntPtr hdc = g.GetHdc();
-                    try
-                    {
-                        User32.DrawFrameControl(hdc, ref rect, 2, 1);
-                    }
-                    finally
-                    {
-                        g.ReleaseHdcInternal(hdc);
-                    }
-                }
-
-                result.MakeTransparent();
-            }
-            else
-            {
-                using IReadWriteBitmapData bitmapData = result.GetReadWriteBitmapData();
-                int checkHeight = fullSize.Height / 5;
-                Color32 c = Color.Black;
-                int start = (int)(fullSize.Width * 0.25f);
-                int mid = (int)(fullSize.Width * 0.4f);
-                int end = (int)(fullSize.Width * 0.7f);
-                int y = (int)(fullSize.Height * 0.4f);
-                for (int x = start; x < end; x++)
-                {
-                    bitmapData.DrawLine(c, x, y, x, y + checkHeight);
-                    y += x < mid ? +1 : -1;
-                }
-            }
-
-            cacheCheckImage = result;
-            cacheCheckColor = checkColor;
-            return cacheCheckImage;
-        }
-
-        #endregion
 
         #endregion
 

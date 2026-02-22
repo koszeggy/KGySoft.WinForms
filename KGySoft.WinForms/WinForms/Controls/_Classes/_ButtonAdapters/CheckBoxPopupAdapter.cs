@@ -101,7 +101,7 @@ namespace KGySoft.WinForms.Controls
                 PaintImage(e, layout);
                 DrawCheckBackground(e, layout.CheckBounds, colors.ButtonFace, true, colors);
                 DrawPopupBorder(g, layout.CheckBounds, colors);
-                DrawCheckOnly(g, layout, colors, colors.WindowText, true, state);
+                DrawCheckOnly(g, layout.CheckOnlyBounds, colors, colors.WindowText, true, state);
                 AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
             }
@@ -121,7 +121,7 @@ namespace KGySoft.WinForms.Controls
                 PaintImage(e, layout);
                 DrawCheckBackground(e, layout.CheckBounds, colors.HighContrast ? colors.ButtonFace : colors.Highlight, true, colors);
                 DrawPopupBorder(g, layout.CheckBounds, colors);
-                DrawCheckOnly(g, layout, colors, colors.WindowText, true, state);
+                DrawCheckOnly(g, layout.CheckOnlyBounds, colors, colors.WindowText, true, state);
 
                 Region? originalClip = null;
                 if (!String.IsNullOrEmpty(state.Text))
@@ -152,7 +152,7 @@ namespace KGySoft.WinForms.Controls
                 PaintImage(e, layout);
                 DrawCheckBackground(e, layout.CheckBounds, colors.HighContrast ? colors.ButtonFace : colors.Highlight, true, colors);
                 DrawFlatBorder(g, layout.CheckBounds, colors.ButtonShadow);
-                DrawCheckOnly(g, layout, colors, colors.WindowText, true, state);
+                DrawCheckOnly(g, layout.CheckOnlyBounds, colors, colors.WindowText, true, state);
                 AdjustFocusRectangle(state, layout);
                 PaintField(e, layout, colors, true);
             }

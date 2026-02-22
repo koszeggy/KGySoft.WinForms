@@ -261,6 +261,7 @@ namespace KGySoft.WinForms.Controls
 
             // Caching it only for the drawing session is alright
             internal int PerMonitorDpiAwarenessLevel => perMonitorAwarenessLevel ??= ScaleHelper.PerMonitorDpiAwarenessVersion;
+            internal int FullCheckSize => CheckSize + CheckPaddingSize;
 
             #endregion
 
@@ -268,7 +269,6 @@ namespace KGySoft.WinForms.Controls
 
             private int FullBorderSize => OnePixExtraBorder ? BorderSize++ : BorderSize;
             private bool OnePixExtraBorder => GrowBorderBy1PxWhenDefault && IsDefault;
-            private int FullCheckSize => CheckSize + CheckPaddingSize;
 
             #endregion
 
@@ -777,6 +777,8 @@ namespace KGySoft.WinForms.Controls
         {
             #region Fields
 
+            internal readonly LayoutOptions Options;
+
             internal Rectangle Client;
             internal Rectangle Face;
             internal Rectangle CheckArea;
@@ -787,7 +789,12 @@ namespace KGySoft.WinForms.Controls
             internal Rectangle ImageBounds;
             internal Point ImageStart;
             internal int FocusWidth;
-            internal LayoutOptions Options;
+
+            #endregion
+
+            #region Properties
+
+            internal Rectangle CheckOnlyBounds => new Rectangle(CheckBounds.X, CheckBounds.Y, Options.FullCheckSize, Options.FullCheckSize);
 
             #endregion
 

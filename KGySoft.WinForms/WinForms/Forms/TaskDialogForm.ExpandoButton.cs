@@ -18,6 +18,7 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Windows.Forms;
 
@@ -366,48 +367,17 @@ namespace KGySoft.WinForms.Forms
             {
                 imageSize = GetImageSize();
                 Rectangle rect = GetButtonBounds(imageSize);
-                ButtonState state = ButtonState.Normal;
+
+                g.DrawBorder(isPressed ? AdvancedBorderStyle.SunkenLow : AdvancedBorderStyle.RaisedHigh, rect);
+                rect.Inflate(-2, -2);
+
                 if (isPressed)
-                    state = ButtonState.Pushed;
+                    rect.Offset(1, 1);
 
-                ControlPaint.DrawComboButton(g, rect, state);
-
-                if (isExpanded || isHovered)
-                {
-                    Bitmap image = new Bitmap(imageSize.Width, imageSize.Height, g);
-                    using (Graphics imageGraphics = Graphics.FromImage(image))
-                    {
-                        ControlPaint.DrawComboButton(imageGraphics, rect, state);
-                    }
-
-                    int offset = 0;
-                    if (isExpanded)
-                    {
-                        image.RotateFlip(RotateFlipType.Rotate180FlipNone);
-                        if (isPressed)
-                            offset = 2;
-                    }
-
-                    ImageAttributes? attr = null;
-                    try
-                    {
-                        if (isHovered && !isPressed)
-                        {
-                            attr = new ImageAttributes();
-                            ColorMap map = new ColorMap { OldColor = SystemColors.ControlText, NewColor = SystemColors.HotTrack };
-                            attr.SetRemapTable(new ColorMap[] { map }, ColorAdjustType.Bitmap);
-                        }
-
-                        rect.Inflate(-4, -4);
-                        g.DrawImage(image, new Rectangle(rect.Left + offset, rect.Top + offset, rect.Width, rect.Height),
-                            rect.Left, rect.Top, rect.Width, rect.Height, GraphicsUnit.Pixel, attr);
-                    }
-                    finally
-                    {
-                        attr?.Dispose();
-                    }
-                }
+                Color color = isHovered && !isPressed ? SystemColors.HotTrack : SystemColors.ControlText;
+                g.DrawImageColorized(ControlPaintHelper.GetArrowImage(rect.Size, isExpanded), rect, Color.Black, color);
             }
+
 
             #endregion
 

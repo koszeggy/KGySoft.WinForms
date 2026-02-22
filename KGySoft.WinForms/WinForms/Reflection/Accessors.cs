@@ -36,6 +36,14 @@ using KGySoft.Reflection;
 
 #endregion
 
+#region Suppressions
+
+#if NETFRAMEWORK
+// ReSharper disable RedundantSuppressNullableWarningExpression 
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Reflection
 {
     // ReSharper disable InconsistentNaming
@@ -81,9 +89,8 @@ namespace KGySoft.WinForms.Reflection
         private static readonly object methodButtonBase_Animate = new();
         private static readonly object methodErrorProvider_UnwireEvents = new();
         private static readonly object methodControlPaint_DrawBackgroundImage = new();
-        private static readonly object methodControlPaint_DrawImageColorized = new();
         private static readonly object methodControlPaint_DrawHighContrastFocusRectangle = new();
-        private static readonly Dictionary<object, Func<MethodInfo?>> methodLookup = new(14)
+        private static readonly Dictionary<object, Func<MethodInfo?>> methodLookup = new(13)
         {
             [methodControl_RtlTranslateContent] = () => FindMethod(typeof(Control), nameof(RtlTranslateContent), [typeof(ContentAlignment)], BindingFlags.Instance | BindingFlags.NonPublic),
             [methodControl_GetStyle] = () => FindMethod(typeof(Control), nameof(GetStyle), [typeof(ControlStyles)], BindingFlags.Instance | BindingFlags.NonPublic),
@@ -96,9 +103,8 @@ namespace KGySoft.WinForms.Reflection
             [methodControl_SetStyle] = () => FindMethod(typeof(Control), nameof(SetStyle), [typeof(ControlStyles), typeof(bool)], BindingFlags.Instance | BindingFlags.NonPublic),
             [methodButtonBase_Animate] = () => FindMethod(typeof(ButtonBase), nameof(Animate), [], BindingFlags.Instance | BindingFlags.NonPublic),
             [methodErrorProvider_UnwireEvents] = () => FindMethod(typeof(ErrorProvider), nameof(UnwireEvents), [typeof(BindingManagerBase)], BindingFlags.Instance | BindingFlags.NonPublic),
-            [methodControlPaint_DrawBackgroundImage] = () => FindMethod(typeof(ControlPaint), nameof(GraphicsExtensions.DrawBackgroundImage), [typeof(Graphics), typeof(Image), typeof(Color), typeof(ImageLayout), typeof(Rectangle), typeof(Rectangle), typeof(Point), typeof(RightToLeft)], BindingFlags.Static | BindingFlags.NonPublic),
-            [methodControlPaint_DrawImageColorized] = () => FindMethod(typeof(ControlPaint), nameof(GraphicsExtensions.DrawImageColorized), [typeof(Graphics), typeof(Image), typeof(Rectangle), typeof(Color)], BindingFlags.Static | BindingFlags.NonPublic),
-            [methodControlPaint_DrawHighContrastFocusRectangle] = () => FindMethod(typeof(ControlPaint), nameof(GraphicsExtensions.DrawHighContrastFocusRectangle), [typeof(Graphics), typeof(Rectangle), typeof(Color)], BindingFlags.Static | BindingFlags.NonPublic),
+            [methodControlPaint_DrawBackgroundImage] = () => FindMethod(typeof(ControlPaint), nameof(ControlPaintHelper.DrawBackgroundImage), [typeof(Graphics), typeof(Image), typeof(Color), typeof(ImageLayout), typeof(Rectangle), typeof(Rectangle), typeof(Point), typeof(RightToLeft)], BindingFlags.Static | BindingFlags.NonPublic),
+            [methodControlPaint_DrawHighContrastFocusRectangle] = () => FindMethod(typeof(ControlPaint), nameof(ControlPaintHelper.DrawHighContrastFocusRectangle), [typeof(Graphics), typeof(Rectangle), typeof(Color)], BindingFlags.Static | BindingFlags.NonPublic),
         };
 
         // Field keys and lookup callbacks. The DeclaredOnly flag is implicitly added by FindField.
@@ -291,15 +297,6 @@ namespace KGySoft.WinForms.Reflection
                 return false;
 
             accessor.Invoke(null, g, backgroundImage, backColor, backgroundImageLayout, bounds, clipRect, scrollOffset, rightToLeft);
-            return true;
-        }
-
-        internal static bool TryDrawImageColorized(this Graphics graphics, Image image, Rectangle destination, Color replaceBlack)
-        {
-            if (TryGetMethod(methodControlPaint_DrawImageColorized) is not MethodAccessor accessor)
-                return false;
-
-            accessor.InvokeStaticAction(graphics, image, destination, replaceBlack);
             return true;
         }
 

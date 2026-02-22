@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -24,6 +25,7 @@ using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
 using KGySoft.Collections;
+using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.Drawing.Imaging;
 using KGySoft.WinForms.Reflection;
@@ -36,21 +38,14 @@ using Microsoft.Win32;
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Provides helper methods for working with visual styles. We could use the VisualStyleRenderer class,
-    /// but it always re-validates the class name and part combinations, and does not allow some values, such as font properties.
+    /// Provides helper methods for working with visual styles. We could use the VisualStyleRenderer class, but it always re-validates the
+    /// class name and part combinations, it does not support some classes (e.g. DatePicker), and does not allow some values, such as font properties.
     /// </summary>
     internal static class VisualStyleHelper
     {
         #region Fields
 
         private static readonly ThreadSafeDictionary<int, (SynchronizationContext? Context, EventHandler? Handler)> visualStylesChangedHandlers = new();
-
-        private static readonly LockFreeCacheOptions themeBitmapsCacheProfile = new()
-        {
-            InitialCapacity = 4,
-            ThresholdCapacity = 32,
-            MergeInterval = TimeSpan.FromMilliseconds(100)
-        };
 
         private static readonly LockFreeCacheOptions hasDefaultAnimationCacheProfile = new()
         {
@@ -70,8 +65,9 @@ namespace KGySoft.WinForms
         private static bool? highContrast;
         private static bool? isComCtlV6Available;
 
-        // Using thread-safe caches to support multiple UI threads
-        private static IThreadSafeCacheAccessor<(IntPtr, int, int), Bitmap>? themeBitmapsCache;
+        // Using thread-safe caches to support multiple UI threads. For the Bitmaps using a Cache<,> wrapped into a LockingDictionary instead of an IThreadSafeCacheAccessor,
+        // so we can dispose the bitmaps when clearing the cache. Locking is not a problem, because we don't expect too many UI threads accessing the caches concurrently.
+        private static LockingDictionary<(IntPtr, int, int), Bitmap>? themeBitmapsCache;
         private static IThreadSafeCacheAccessor<(int, int, int), bool>? hasDefaultAnimationCache;
 
         #endregion
@@ -103,15 +99,21 @@ namespace KGySoft.WinForms
 
         #region Properties
 
-        private static IThreadSafeCacheAccessor<(IntPtr, int, int), Bitmap> ThemeBitmapsCache
+        private static LockingDictionary<(IntPtr, int, int), Bitmap> ThemeBitmapsCache
         {
             get
             {
                 Debug.Assert(OSHelper.IsWindowsXpOrLater);
                 var cache = themeBitmapsCache;
-                while (cache is null) // the while is needed because of ClearCaches
+
+                // unlike in HasDefaultAnimationCache, we don't need a while loop here, because this cache is instantiated once
+                if (cache is null) // the while is needed because of ClearCaches
                 {
-                    Interlocked.CompareExchange(ref themeBitmapsCache, ThreadSafeCacheFactory.Create<(IntPtr, int, int), Bitmap>(GetThemeBitmap, themeBitmapsCacheProfile), null);
+                    // Creating a locking cache so DisposeDroppedValues can be set.
+                    // Using AsThreadSafe instead of GetThreadSafeAccessor, so we can access not just the indexer, which is needed in ClearCaches.
+                    Interlocked.CompareExchange(ref themeBitmapsCache,
+                        new Cache<(IntPtr, int, int), Bitmap>(GetThemeBitmap, 32) { EnsureCapacity = true, DisposeDroppedValues = true }.AsThreadSafe(),
+                        null);
                     cache = themeBitmapsCache;
                 }
 
@@ -125,7 +127,9 @@ namespace KGySoft.WinForms
             {
                 Debug.Assert(OSHelper.IsWindowsVistaOrLater);
                 var cache = hasDefaultAnimationCache;
-                while (cache is null) // the while is needed because of ClearCaches
+
+                // the while is needed because we can nullify the instance in ClearCaches
+                while (cache is null)
                 {
                     Interlocked.CompareExchange(ref hasDefaultAnimationCache, ThreadSafeCacheFactory.Create<(int, int, int), bool>(GetHasDefaultAnimation, hasDefaultAnimationCacheProfile), null);
                     cache = hasDefaultAnimationCache;
@@ -297,9 +301,25 @@ namespace KGySoft.WinForms
             visualStylesAvailable = null;
             highContrast = null;
 
-            // Not disposing the cached bitmaps - they will be freed by the GC (unless a caller or GetThemeBitmap holds a reference to them).
-            Volatile.Write(ref themeBitmapsCache, null);
             Volatile.Write(ref hasDefaultAnimationCache, null);
+            LockingDictionary<(IntPtr, int, int), Bitmap>? bitmapsCache = themeBitmapsCache;
+            if (bitmapsCache == null)
+                return;
+
+            // disposing the cached bitmaps
+            ICollection<Bitmap> bitmaps;
+            bitmapsCache.Lock();
+            try
+            {
+                bitmaps = bitmapsCache.Values;
+                bitmapsCache.Clear();
+            }
+            finally
+            {
+                bitmapsCache.Unlock();
+            }
+
+            bitmaps.ForEach(b => b.Dispose());
         }
 
         internal static bool HasDefaultAnimation(int part, int state1, int state2)

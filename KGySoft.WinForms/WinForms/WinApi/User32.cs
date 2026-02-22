@@ -356,17 +356,6 @@ namespace KGySoft.WinForms.WinApi
         internal static extern IntPtr LoadCursor(IntPtr hInstance, int lpCursorName);
 
         /// <summary>
-        /// This function draws a frame control of the specified type and style.
-        /// </summary>
-        /// <param name="hDC">Handle to the device context of the window in which to draw the control.</param>
-        /// <param name="rect">Long pointer to a RECT structure that contains the logical coordinates of the bounding rectangle for frame control.</param>
-        /// <param name="type">Specifies the type of frame control to draw.</param>
-        /// <param name="state">Specifies the initial state of the frame control.</param>
-        /// <returns>Nonzero indicates success. Zero indicates failure.</returns>
-        [DllImport("user32.dll", CharSet = CharSet.Unicode, ExactSpelling = true)]
-        internal static extern bool DrawFrameControl(IntPtr hDC, ref RECT rect, int type, int state);
-
-        /// <summary>
         /// The current DPI_AWARENESS_CONTEXT for the thread.
         /// </summary>
         /// <returns>This method will return the latest DPI_AWARENESS_CONTEXT sent to SetThreadDpiAwarenessContext. If SetThreadDpiAwarenessContext was never called for this thread, then the return value will equal the default DPI_AWARENESS_CONTEXT for the process.</returns>

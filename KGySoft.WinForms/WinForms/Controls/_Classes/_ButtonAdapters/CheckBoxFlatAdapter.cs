@@ -45,20 +45,17 @@ namespace KGySoft.WinForms.Controls
             e.Graphics.DrawRectangle(checkBorder.GetPen(), checkBounds);
 
             checkBounds.Inflate(-1, -1);
+            checkBounds.Width++;
+            checkBounds.Height++;
             if (state.CheckState == CheckState.Indeterminate)
-            {
-                checkBounds.Width++;
-                checkBounds.Height++;
                 DrawDitheredFill(e.Graphics, colors.ButtonFace, checkBackground, checkBounds);
-            }
             else
-            {
-                checkBounds.Width++;
-                checkBounds.Height++;
                 e.Graphics.FillRectangle(checkBackground.GetBrush(), checkBounds);
-            }
 
-            DrawCheckOnly(e.Graphics, layout, colors, checkColor, true, state);
+            checkBounds = layout.CheckOnlyBounds;
+            checkBounds.Width++;
+            checkBounds.Height++;
+            DrawCheckOnly(e.Graphics, checkBounds, colors, checkColor, true, state);
         }
 
         #endregion
