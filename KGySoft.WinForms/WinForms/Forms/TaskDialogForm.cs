@@ -409,7 +409,16 @@ namespace KGySoft.WinForms.Forms
             lblFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
             if (!OSHelper.IsMono)
+            {
                 Font = ScaleHelper.MessageBoxFont;
+                return;
+        }
+
+            // Fix for Mono: Dock.Right does not work in a TableLayoutPanel, so embedding pnlButtons into an additional panel
+            pnlButtons.Parent = null;
+            var pnlButtonsContainer = new Panel { Dock = DockStyle.Fill };
+            pnlButtonsContainer.Controls.Add(pnlButtons);
+            pnlMainControls.Controls.Add(pnlButtonsContainer, 1, 0);
         }
 
         #endregion
