@@ -412,7 +412,7 @@ namespace KGySoft.WinForms.Forms
             {
                 Font = ScaleHelper.MessageBoxFont;
                 return;
-        }
+            }
 
             // Fix for Mono: Dock.Right does not work in a TableLayoutPanel, so embedding pnlButtons into an additional panel
             pnlButtons.Parent = null;
@@ -1340,26 +1340,26 @@ namespace KGySoft.WinForms.Forms
                             pnlProgressBar.Height = pbProgress.Height + pnlProgressBar.Padding.Vertical;
 
                         // pnlMain(Content) height (AutoSize does not work correctly)
-                        int mainControlsHeight;
+                        int mainContentHeight;
                         if (cfg.HasCommandLinks)
-                            mainControlsHeight = pnlCommandLinks.Top + pnlCommandLinks.Height;
+                            mainContentHeight = pnlCommandLinks.Top + pnlCommandLinks.Height;
                         else if (cfg.HasRadioButtons)
-                            mainControlsHeight = pnlRadioButtons.Top + pnlRadioButtons.Height;
+                            mainContentHeight = pnlRadioButtons.Top + pnlRadioButtons.Height;
                         else if (cfg.HasProgressBar)
-                            mainControlsHeight = pnlProgressBar.Top + pnlProgressBar.Height;
+                            mainContentHeight = pnlProgressBar.Top + pnlProgressBar.Height;
                         else if (cfg.HasMainText)
-                            mainControlsHeight = pnlMainTexts.Top + pnlMainTexts.Height;
+                            mainContentHeight = pnlMainTexts.Top + pnlMainTexts.Height;
                         else if (cfg.HasMainInstruction)
-                            mainControlsHeight = pnlMainInstruction.Top + pnlMainInstruction.Height + pnlMainTexts.MinimumSize.Height;
+                            mainContentHeight = pnlMainInstruction.Top + pnlMainInstruction.Height + pnlMainTexts.MinimumSize.Height;
                         else
-                            mainControlsHeight = pnlMainTexts.MinimumSize.Height;
+                            mainContentHeight = pnlMainTexts.MinimumSize.Height;
 
-                        pnlMain.Height = pnlMainContent.Height = Math.Max(mainControlsHeight, pnlMainTexts.MinimumSize.Height);
+                        pnlMain.Height = pnlMainContent.Height = Math.Max(mainContentHeight, pnlMainTexts.MinimumSize.Height);
 
                         // pnlMainControls.Height (AutoSize works after all, but causes for a moment to shrink the whole main window)
                         if (cfg.HasMainControls)
                         {
-                            mainControlsHeight = 0;
+                            int mainControlsHeight = 0;
                             if (cfg.HasVerification || cfg.HasDetails)
                             {
                                 if (cfg.HasDetails)
@@ -1373,7 +1373,7 @@ namespace KGySoft.WinForms.Forms
                             }
 
                             if (cfg.HasButtons)
-                                mainControlsHeight = Math.Max(mainControlsHeight, pnlButtons.GetPreferredSize(new Size(pnlButtons.Width, 0)).Height + pnlButtons.Margin.Vertical);
+                                mainControlsHeight = Math.Max(mainControlsHeight, pnlButtons.GetPreferredSize(new Size(pnlButtons.Width + (OSHelper.IsMono ? pnlButtons.Padding.Horizontal : 0), 0)).Height + pnlButtons.Margin.Vertical);
 
                             pnlMainControls.Height = mainControlsHeight;
                         }
