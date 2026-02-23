@@ -191,6 +191,7 @@ namespace KGySoft.WinForms.Forms
             internal bool IsDetailsExpanded { get; set; }
             internal bool IsDetailsInFooter { get; set; }
             internal bool IsExpanding { get; set; }
+            internal bool UseLinks { get; set; }
 
             #endregion
 
@@ -283,7 +284,6 @@ namespace KGySoft.WinForms.Forms
         private Color mainInstructionsColor;
         private bool? cacheMainInstructionsColor;
         private Font? mainInstructionsFont;
-        private bool useLinks;
         private bool isRadioButtonChecking;
         private bool isForcedClosing;
         private bool altF4Pressed;
@@ -727,7 +727,8 @@ namespace KGySoft.WinForms.Forms
                 IsRightToLeft = (host.Options & TaskDialogOptions.RightToLeftLayout) != TaskDialogOptions.None,
                 IsExpanding = isExpanding == true,
                 IsDetailsExpanded = isExpanding ?? (host.Options & TaskDialogOptions.DetailsExpanded) != TaskDialogOptions.None,
-                IsDetailsInFooter = (host.Options & TaskDialogOptions.ExpandFooterArea) != TaskDialogOptions.None
+                IsDetailsInFooter = (host.Options & TaskDialogOptions.ExpandFooterArea) != TaskDialogOptions.None,
+                UseLinks = (host.Options & TaskDialogOptions.HyperlinksEnabled) != TaskDialogOptions.None
             };
 
             result.HasMainText = result.HasMessage || (result.HasDetails && !result.IsDetailsInFooter && result.IsDetailsExpanded);
@@ -771,7 +772,6 @@ namespace KGySoft.WinForms.Forms
         {
             isDetailsExpanded = cfg.IsDetailsExpanded;
             isDetailsInFooter = cfg.IsDetailsInFooter;
-            useLinks = (host.Options & TaskDialogOptions.HyperlinksEnabled) != TaskDialogOptions.None;
 
             // options - Show... properties do not check their change so we do it here to prevent unnecessary style reset or handle recreation
             bool showControlBox = (host.Options & TaskDialogOptions.AllowCancel) != TaskDialogOptions.None
@@ -796,7 +796,7 @@ namespace KGySoft.WinForms.Forms
                     isReopening = true;
             }
 
-            HyperlinkResolveMode resolve = useLinks ? HyperlinkResolveMode.ResolveHrefsOnly : HyperlinkResolveMode.None;
+            HyperlinkResolveMode resolve = cfg.UseLinks ? HyperlinkResolveMode.ResolveHrefsOnly : HyperlinkResolveMode.None;
             lblMessage.ResolveHyperlinks = resolve;
             lblDetailsMain.ResolveHyperlinks = resolve;
             lblFooter.ResolveHyperlinks = resolve;
@@ -914,6 +914,17 @@ namespace KGySoft.WinForms.Forms
             chbCheckBox.Margin = checkBoxReferenceMargin.Scale(scale);
             lblFooter.Margin = footerReferenceMargin.Scale(scale);
             lblFooter.Padding = lblDetailsFooter.Padding = footerReferencePadding.Scale(scale);
+
+            // On Mono, the label rendering is broken with padding. AdvancedLabel fixes this, but only when there are no links in the text.
+            if (OSHelper.IsMono && cfg.UseLinks)
+            {
+                foreach (AdvancedLabel? label in new[] { lblMessage, lblDetailsMain, lblFooter, lblDetailsFooter })
+                {
+                    if (label.Text != label.RawText)
+                        label.Padding = Padding.Empty;
+                }
+            }
+
 
             ResetButtonMargins(cfg);
             ResetRadioButtonPaddings(cfg);
