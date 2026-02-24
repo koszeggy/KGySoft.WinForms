@@ -758,8 +758,8 @@ namespace KGySoft.WinForms.Forms
                 StartPosition = FormStartPosition.CenterScreen;
 
             pbProgress.Style = !VisualStyleHelper.InitializedWithVisualStyles || OSHelper.IsMono && !OSHelper.IsWindows ? AdvancedProgressBarStyle.Classic
-                : OSHelper.IsWindowsVistaOrLater ? AdvancedProgressBarStyle.System
-                : AdvancedProgressBarStyle.ThemedShiny;
+                : OSHelper.IsWindowsVistaOrLater && !OSHelper.IsMono ? AdvancedProgressBarStyle.System
+                : AdvancedProgressBarStyle.ThemedShiny; // Windows XP or Mono/Windows
 
             dialogStarted = DateTime.UtcNow; // for full compatibility it should be in ResetSettings
         }
