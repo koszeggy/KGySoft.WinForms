@@ -51,7 +51,7 @@ namespace KGySoft.WinForms.Example
         // Some global settings for testing purposes
         internal static bool AutoScaleFont { get; set; }
         internal static AutoScaleMode AutoScaleMode => AutoScaleMode.Font;
-        internal static FormStartPosition StartPosition => FormStartPosition.CenterParent; 
+        internal static FormStartPosition StartPosition => FormStartPosition.CenterParent;
 
         #endregion
 
@@ -63,7 +63,7 @@ namespace KGySoft.WinForms.Example
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main()
+        private static void Main()
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
@@ -76,7 +76,7 @@ namespace KGySoft.WinForms.Example
 
             dlg.Buttons["btnControlsTest"]!.Click += (sender, _) => ShowControlsTestMenu(((TaskDialogButton)sender!).Parent!);
             dlg.Buttons["btnTaskDialogTest"]!.Click += (sender, _) => ShowTaskDialogTestMenu(((TaskDialogButton)sender!).Parent!);
-            dlg.Buttons["btnMiscTests"]!.Click += (sender, _) => ShowMiscTestsMenu(((TaskDialogButton)sender!).Parent!); 
+            dlg.Buttons["btnMiscTests"]!.Click += (sender, _) => ShowMiscTestsMenu(((TaskDialogButton)sender!).Parent!);
 
             dlg.Show();
         }
@@ -311,7 +311,7 @@ namespace KGySoft.WinForms.Example
                 TaskDialog td = ((TaskDialogRadioButton)rb!).Parent!;
                 td.ProgressBarStyle = TaskDialogProgressBarStyle.Regular;
                 td.Buttons["btnPause"]!.Enabled = true;
-                td.Buttons["btnRestart"]!.Enabled = td.ProgressBarValue == td.ProgressBarMaximum;
+                td.Buttons["btnRestart"]!.Enabled = true;
             };
 
             int state = 0;
@@ -322,8 +322,6 @@ namespace KGySoft.WinForms.Example
                 {
                     if (td.ProgressBarValue < td.ProgressBarMaximum)
                         td.ProgressBarValue++;
-                    else
-                        td.Buttons["btnRestart"]!.Enabled = true;
                 }
 
                 switch (td.ProgressBarStyle)
@@ -357,7 +355,6 @@ namespace KGySoft.WinForms.Example
             {
                 TaskDialogButton button = (TaskDialogButton)btn!;
                 button.Parent!.ProgressBarValue = 0;
-                button.Enabled = false;
             };
 
             dlg.Show(senderDialog);

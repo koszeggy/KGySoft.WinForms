@@ -47,8 +47,9 @@ namespace KGySoft.WinForms.Example.Forms
             AutoScaleFont = Program.AutoScaleFont;
             AutoScaleMode = Program.AutoScaleMode;
             StartPosition = Program.StartPosition;
-            if (!IsDesignMode && SystemFonts.MessageBoxFont is Font font)
+            if (!IsDesignMode && !OSHelper.IsMono && SystemFonts.MessageBoxFont is Font font)
                 Font = font;
+            grdProperties.HelpVisible = false;
         }
 
         #endregion
