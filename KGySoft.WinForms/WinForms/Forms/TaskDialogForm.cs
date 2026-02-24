@@ -930,7 +930,7 @@ namespace KGySoft.WinForms.Forms
             ResetRadioButtonPaddings(cfg);
         }
 
-        private void ResetChecksWidth(Configuration cfg)
+        private void ResetMainControlsWidth(Configuration cfg)
         {
             // already 100% width is occupied by either the checkbox and the expando button, or the buttons
             if (!cfg.HasButtons || !cfg.HasDetails && !cfg.HasVerification)
@@ -1016,7 +1016,7 @@ namespace KGySoft.WinForms.Forms
                         }
 
                         if (dialogState != TaskDialogStatus.Initializing)
-                            ResetChecksWidth(cfg);
+                            ResetMainControlsWidth(cfg);
                     }
                 }
 
@@ -1541,7 +1541,7 @@ namespace KGySoft.WinForms.Forms
             }
 
             if (cfg.HasVerification || cfg.HasDetails)
-                ResetChecksWidth(cfg);
+                ResetMainControlsWidth(cfg);
         }
 
         private void SetWidth(int width, Rectangle suggestedBounds, Screen screen)
@@ -1874,7 +1874,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Updates text of a control (does not handle if it has to be appear now)
         /// </summary>
-        private void UpdateText(Control control, string? value, bool affectsVisibility, bool updateDescription)
+        private void UpdateText(Control control, string? value, bool affectsVisibility, bool updateDescription, bool isInMainControls)
         {
             if (!updateDescription && control.Text == value)
                 return;
@@ -1919,8 +1919,14 @@ namespace KGySoft.WinForms.Forms
                 preferredSize = control.Size;
             else
                 control.Size = preferredSize;
-            if (visibilityChange || origSize != preferredSize)
-                ResetHeights(cfg ?? GetConfiguration());
+            
+            if (!visibilityChange && origSize == preferredSize)
+                return;
+
+            cfg ??= GetConfiguration();
+            if (isInMainControls)
+                ResetMainControlsWidth(cfg);
+            ResetHeights(cfg);
         }
 
         private void UpdateButtonIcon(Control control, TaskDialogButton taskDialogButton)
@@ -2219,19 +2225,19 @@ namespace KGySoft.WinForms.Forms
             switch (propName)
             {
                 case TaskDialog.PropertyMessage:
-                    UpdateText(lblMessage, host.Message, true, false);
+                    UpdateText(lblMessage, host.Message, true, false, false);
                     return;
 
                 case TaskDialog.PropertyMainInstruction:
-                    UpdateText(lblMainInstruction, host.MainInstruction, true, false);
+                    UpdateText(lblMainInstruction, host.MainInstruction, true, false, false);
                     return;
 
                 case TaskDialog.PropertyFooterText:
-                    UpdateText(lblFooter, host.FooterText, true, false);
+                    UpdateText(lblFooter, host.FooterText, true, false, false);
                     return;
 
                 case TaskDialog.PropertyDetailsText:
-                    UpdateText(isDetailsInFooter ? lblDetailsFooter : lblDetailsMain, host.DetailsText, true, false);
+                    UpdateText(isDetailsInFooter ? lblDetailsFooter : lblDetailsMain, host.DetailsText, true, false, false);
                     return;
 
                 case TaskDialog.PropertyCaption:
@@ -2239,7 +2245,7 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 case TaskDialog.PropertyCheckBoxText:
-                    UpdateText(chbCheckBox, host.CheckBoxText, true, false);
+                    UpdateText(chbCheckBox, host.CheckBoxText, true, false, true);
                     return;
 
                 case TaskDialog.PropertyShowDetailsText:
@@ -2248,12 +2254,13 @@ namespace KGySoft.WinForms.Forms
                             || (!btnShowHideDetails.IsExpanded && propName == TaskDialog.PropertyShowDetailsText))
                         && (!String.IsNullOrEmpty(host.ShowDetailsText) && !String.IsNullOrEmpty(host.HideDetailsText)))
                     {
-                        UpdateText(btnShowHideDetails, propName == TaskDialog.PropertyShowDetailsText ? host.ShowDetailsText : host.HideDetailsText, false, false);
+                        UpdateText(btnShowHideDetails, propName == TaskDialog.PropertyShowDetailsText ? host.ShowDetailsText : host.HideDetailsText, false, false, true);
                     }
                     else
                     {
                         ResetShowHideDetailsText();
-                        ResetHeights(GetConfiguration());
+                        ResetMainControlsWidth(cfg = GetConfiguration());
+                        ResetHeights(cfg);
                     }
                     return;
 
@@ -2364,12 +2371,12 @@ namespace KGySoft.WinForms.Forms
                 switch (propName)
                 {
                     case TaskDialogButtonBase.PropertyText:
-                        UpdateText(control, button.Text, false, false);
+                        UpdateText(control, button.Text, false, false, control is not CommandLinkButton);
                         return;
 
                     case TaskDialogButtonBase.PropertyDescription:
                         if (control is CommandLinkButton)
-                            UpdateText(control, button.Description, false, true);
+                            UpdateText(control, button.Description, false, true, false);
                         else
                             ToolTip.SetToolTip(control, button.Description);
                         return;
@@ -2399,7 +2406,7 @@ namespace KGySoft.WinForms.Forms
                 switch (propName)
                 {
                     case TaskDialogButtonBase.PropertyText:
-                        UpdateText(control, radioButton.Text, false, false);
+                        UpdateText(control, radioButton.Text, false, false, false);
                         return;
 
                     case TaskDialogButtonBase.PropertyDescription:
