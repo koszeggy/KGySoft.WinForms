@@ -792,7 +792,7 @@ namespace KGySoft.WinForms.Forms
             if (ShowInTaskbar != showInTaskbar)
             {
                 ShowInTaskbar = showInTaskbar;
-                if (dialogState == TaskDialogStatus.Showing)
+                if (dialogState == TaskDialogStatus.Showing && !OSHelper.IsMono)
                     isReopening = true;
             }
 
@@ -802,13 +802,13 @@ namespace KGySoft.WinForms.Forms
             lblFooter.ResolveHyperlinks = resolve;
             lblDetailsFooter.ResolveHyperlinks = resolve;
             var rtl = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
-            isReopening |= dialogState == TaskDialogStatus.Showing && rtl != RightToLeft;
+            isReopening |= dialogState == TaskDialogStatus.Showing && rtl != RightToLeft && !OSHelper.IsMono;
             RightToLeft = rtl;
             pnlFooterIcon.Padding = cfg.IsRightToLeft ? footerPanelPaddingRtl : footerPanelPaddingLtr;
 
             // Modal forms on Windows: when changing RTL or ShowInTaskbar, the DialogResult is set to Cancel in older framework targets, causing the dialog to close.
             // To make it work the same way on all platforms, we set the DialogResult to Ignore (Cancel is used by standard buttons), signaling the check in OnFormClosing.
-            if (isReopening && OSHelper.IsWindows && !OSHelper.IsMono)
+            if (isReopening)
                 DialogResult = DialogResult.Ignore;
 
             // visibilities
