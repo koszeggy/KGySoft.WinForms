@@ -1384,7 +1384,13 @@ namespace KGySoft.WinForms.Forms
                             }
 
                             if (cfg.HasButtons)
+                            {
+                                // Mono bug: when FlowLayoutPanel is docked to one side, GetPreferredSize ignores the specified width,
+                                // so changing the docking to Fill to prevent it from growing infinitely without starting a second row of buttons.
+                                if (OSHelper.IsMono)
+                                    pnlButtons.Dock = pnlButtons.GetPreferredSize(Size.Empty).Width > pnlButtons.Parent.Width ? DockStyle.Fill : DockStyle.Right;
                                 mainControlsHeight = Math.Max(mainControlsHeight, pnlButtons.GetPreferredSize(new Size(pnlButtons.Width + (OSHelper.IsMono ? pnlButtons.Padding.Horizontal : 0), 0)).Height + pnlButtons.Margin.Vertical);
+                            }
 
                             pnlMainControls.Height = mainControlsHeight;
                         }
@@ -2580,9 +2586,7 @@ namespace KGySoft.WinForms.Forms
             TaskDialogTickEventArgs args = new TaskDialogTickEventArgs((int)(DateTime.UtcNow - dialogStarted).TotalMilliseconds);
             host.OnTick(args);
             if (args.Reset)
-            {
                 dialogStarted = DateTime.UtcNow;
-            }
         }
 
         private void AdvancedLabel_HyperlinkClicked(object? sender, HyperlinkClickedEventArgs e) => host.OnHyperlinkClicked(e);
