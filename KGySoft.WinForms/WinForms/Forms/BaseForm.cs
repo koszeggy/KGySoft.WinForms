@@ -996,13 +996,20 @@ namespace KGySoft.WinForms.Forms
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            // Mono bug workaround: If Dispose is called for an MDI child while the form is already disposed, we can finally dispose Events
+            if (OSHelper.IsMono && IsDisposed && IsMdiChild)
+                Events.Dispose();
+
             base.Dispose(disposing);
             LanguageSettings.DisplayLanguageChanged -= LanguageSettings_DisplayLanguageChanged;
             if (disposing)
             {
                 BaseToolTip.Dispose();
                 commandBindings.Dispose();
-                Events.Dispose();
+
+                // Mono bug: for MDI children the Dispose is called twice, the first before the Closed event, in which case we must not dispose the Events yet
+                if (!OSHelper.IsMono || !IsMdiChild)
+                    Events.Dispose();
                 smallIcon?.Dispose();
                 font?.Dispose();
                 defaultFont?.Dispose();
@@ -1293,6 +1300,12 @@ namespace KGySoft.WinForms.Forms
 
                 case Constants.WM_SETICON when m.WParam is Constants.ICON_SMALL && smallIcon != null && m.LParam != smallIcon.Handle:
                     m.LParam = smallIcon.Handle;
+                    base.WndProc(ref m);
+                    return;
+
+                // Mono issue: disabled forms cannot be closed even by explicit Close(). Explicitly calling Suspend fixes the issue.
+                case Constants.WM_CLOSE when OSHelper.IsMono && IsSuspended:
+                    Resume();
                     base.WndProc(ref m);
                     return;
 

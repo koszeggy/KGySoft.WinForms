@@ -51,6 +51,7 @@ namespace KGySoft.WinForms.WinApi
         internal const int WM_SIZE = 5;
         internal const int WM_SETTEXT = 0x000C;
         internal const int WM_PAINT = 0x000F;
+        internal const int WM_CLOSE = 0x0010;
         internal const int WM_ERASEBKGND = 0x0014;
         internal const int WM_WINDOWPOSCHANGING = 0x0046;
         internal const int WM_WINDOWPOSCHANGED = 0x0047;
