@@ -49,7 +49,6 @@ namespace KGySoft.WinForms.Example.Forms
             StartPosition = Program.StartPosition;
             if (!IsDesignMode && !OSHelper.IsMono && SystemFonts.MessageBoxFont is Font font)
                 Font = font;
-            grdProperties.HelpVisible = false;
         }
 
         #endregion

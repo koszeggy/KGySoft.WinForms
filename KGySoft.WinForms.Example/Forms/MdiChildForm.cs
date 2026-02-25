@@ -43,6 +43,8 @@ namespace KGySoft.WinForms.Example.Forms
         public MdiChildForm()
         {
             InitializeComponent();
+            if (OSHelper.IsMono && OSHelper.IsWindows)
+                lblStatus.UseCompatibleTextRendering = true; // Mono/Windows issue: TextRenderer does not render NewLine with MiddleCenter alignment
             msMenu.Visible = false; // to show only the merged menu in the MDI parent
             InitCommandBindings();
         }
