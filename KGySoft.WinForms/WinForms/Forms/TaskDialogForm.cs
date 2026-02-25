@@ -554,6 +554,13 @@ namespace KGySoft.WinForms.Forms
             hevent.Handled = true; // to prevent invoking host.OnHelpRequested() multiple times
         }
 
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+            if (OSHelper.IsMono && host.IsHelpRequestedAssigned && e.KeyData == Keys.F1)
+                host.OnHelpRequested();
+        }
+
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
@@ -782,7 +789,7 @@ namespace KGySoft.WinForms.Forms
             bool showMinimizeBox = executeNonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None;
             if (MinimizeBox != showMinimizeBox)
                 MinimizeBox = showMinimizeBox;
-            bool showHelpButton = host.IsHelpRequestedAssigned;
+            bool showHelpButton = host.IsHelpRequestedAssigned && !OSHelper.IsMono;
             if (HelpButton != showHelpButton)
                 HelpButton = showHelpButton;
             bool showIcon = executeNonModal || (host.Options & TaskDialogOptions.ForceShowSysMenu) != TaskDialogOptions.None;
