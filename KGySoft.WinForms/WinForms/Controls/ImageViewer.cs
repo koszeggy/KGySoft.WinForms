@@ -49,6 +49,7 @@ namespace KGySoft.WinForms.Controls
     /// When the displayed image is larger than the control, the scrollbars are automatically shown. Pan the image by dragging it with the mouse or by using the arrow keys.
     /// You can also use the <see cref="AutoZoom"/> property to <see langword="true"/> to automatically adjust the zoom to fit the image to the control.</para>
     /// </remarks>
+    [ToolboxBitmap(typeof(PictureBox))]
     public partial class ImageViewer : BaseControl, IPerMonitorDpiAware
     {
         #region InvalidateFlags enum

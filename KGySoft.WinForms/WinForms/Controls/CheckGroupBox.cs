@@ -40,6 +40,7 @@ namespace KGySoft.WinForms.Controls
     /// <summary>
     /// Represents a <see cref="GroupBox"/> control with a <see cref="CheckBox"/> that can be checked or unchecked to enable or disable the content of the group box.
     /// </summary>
+    [ToolboxBitmap(typeof(CheckGroupBox), "Resources.Toolbox.CheckGroupBox.png")]
     public partial class CheckGroupBox : GroupBox, ICustomLocalizable, IToolTipTargetProvider, IObservableParent, ISafePaintBackground // TODO: ISafePaintBackground into an AdvancedGroupBox
     {
         #region Nested Classes

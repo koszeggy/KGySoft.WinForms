@@ -41,6 +41,7 @@ namespace KGySoft.WinForms.Controls
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// </list>
     /// </remarks>
+    [ToolboxBitmap(typeof(AdvancedTextBox), "Resources.Toolbox.AdvancedTextBox.png")]
     [Description(@"A text box that provides the following features in addition to regular TextBox:
 - Adjustable colors in disabled state
 - AcceptsTab and AcceptsReturn are ignored in ReadOnly mode

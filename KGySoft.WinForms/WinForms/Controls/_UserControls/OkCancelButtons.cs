@@ -37,6 +37,7 @@ namespace KGySoft.WinForms.Controls
     /// <summary>
     /// Provides a user control with OK, Cancel and optionally Apply buttons.
     /// </summary>
+    [ToolboxBitmap(typeof(OkCancelButtons), "Resources.Toolbox.OkCancelButtons.png")]
     public sealed partial class OkCancelButtons : BaseUserControl, IPerMonitorDpiAware
     {
         #region Fields

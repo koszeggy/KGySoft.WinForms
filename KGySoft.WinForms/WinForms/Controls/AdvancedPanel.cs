@@ -17,6 +17,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Drawing;
 using System.Windows.Forms;
 
 using KGySoft.WinForms.Controls.Design;
@@ -29,6 +30,7 @@ namespace KGySoft.WinForms.Controls
     /// <summary>
     /// Represents an advanced panel with much more flexible <see cref="BorderStyle"/> than the original <see cref="Panel"/>.
     /// </summary>
+    [ToolboxBitmap(typeof(AdvancedPanel), "Resources.Toolbox.AdvancedPanel.png")]
     [Designer(typeof(AdvancedPanelDesigner))]
     public class AdvancedPanel : Panel, ISafePaintBackground
     {

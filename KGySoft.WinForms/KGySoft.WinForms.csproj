@@ -45,7 +45,12 @@
 
   <ItemGroup>
     <EmbeddedResource Include="WinForms\Controls\Resources\Toolbox.AdvancedLabel.png" />
+    <EmbeddedResource Include="WinForms\Controls\Resources\Toolbox.AdvancedPanel.png" />
+    <EmbeddedResource Include="WinForms\Controls\Resources\Toolbox.AdvancedTextBox.png" />
+    <EmbeddedResource Include="WinForms\Controls\Resources\Toolbox.CheckGroupBox.png" />
     <EmbeddedResource Include="WinForms\Controls\Resources\Toolbox.CommandLinkButton.png" />
+    <EmbeddedResource Include="WinForms\Controls\Resources\Toolbox.DecimalTextBox.png" />
+    <EmbeddedResource Include="WinForms\Controls\Resources\Toolbox.OkCancelButtons.png" />
   </ItemGroup>
 
   <ItemGroup>

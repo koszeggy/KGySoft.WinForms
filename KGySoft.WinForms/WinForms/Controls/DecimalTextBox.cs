@@ -18,6 +18,7 @@
 using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
+using System.Drawing;
 using System.Globalization;
 using System.Threading;
 using System.Windows.Forms;
@@ -65,6 +66,7 @@ namespace KGySoft.WinForms.Controls
 - Configurable number of decimal digits or rounding
 - Coloring in disabled mode (by the base AdvancedTextBox)
 - Auto scaling Font on all platform targets (by the base AdvancedTextBox)")]
+    [ToolboxBitmap(typeof(DecimalTextBox), "Resources.Toolbox.DecimalTextBox.png")]
     public class DecimalTextBox : AdvancedTextBox
     {
         #region Nested structs
