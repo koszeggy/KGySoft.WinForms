@@ -15,13 +15,21 @@
 
 #region Usings
 
+#region Used Namespaces
+
 using System;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
 
 using KGySoft.WinForms;
 
+#endregion
+
+#region Used Aliases
+
 using SystemDebug = System.Diagnostics.Debug;
+
+#endregion
 
 #endregion
 

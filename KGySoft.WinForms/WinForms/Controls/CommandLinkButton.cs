@@ -1753,7 +1753,8 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault && VisualStyleHelper.RenderWithVisualStyles && !VisualStyleHelper.HighContrast;
+            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault
+                && VisualStyleHelper.RenderWithVisualStyles && !VisualStyleHelper.HighContrast && fadingPainter.Enabled;
             if (enabled && (defaultAnimationTimer == null || !defaultAnimationTimer.Enabled))
             {
                 if (defaultAnimationTimer == null)

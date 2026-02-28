@@ -887,6 +887,7 @@ namespace KGySoft.WinForms.Controls
             VisualStyleHelper.VisualStylesChanged -= VisualStyleHelper_VisualStylesChanged;
             if (disposing)
             {
+                fadingPainter.Dispose();
                 font?.Dispose();
                 defaultFont?.Dispose();
                 font = null;

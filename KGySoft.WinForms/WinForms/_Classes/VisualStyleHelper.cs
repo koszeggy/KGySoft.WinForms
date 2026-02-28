@@ -425,7 +425,8 @@ namespace KGySoft.WinForms
 
             using Bitmap? bmp1 = PaintIntoBitmap(ButtonTheme, key.PartId, key.StateId1, Color.White, size);
             using Bitmap? bmp2 = PaintIntoBitmap(ButtonTheme, key.PartId, key.StateId2, Color.White, size);
-            return !bmp1.EqualsByContent(bmp2);
+
+            return bmp1 != null && !bmp1.EqualsByContent(bmp2);
         }
 
         private static Bitmap ReconstructWithAlpha(Bitmap blackBg, Bitmap whiteBg)
