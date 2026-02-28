@@ -32,10 +32,21 @@ namespace KGySoft.WinForms.Controls
     {
         #region Fields
 
+        #region Static Fields
+
+        [ThreadStatic]
+        private static int threadOperatingCount;
+
+        #endregion
+
+        #region Instance Fields
+
         private ISupportsFading<TState> host;
         private bool disposed;
         private bool operating;
         private bool isFailing;
+
+        #endregion
 
         #endregion
 
@@ -70,12 +81,27 @@ namespace KGySoft.WinForms.Controls
 
                 isFailing = false;
                 if (value)
-                    operating = FadingPainterInternal.IsSupported && UxTheme.BufferedPaintInit();
-                else
                 {
-                    UxTheme.BufferedPaintUnInit();
-                    operating = false;
+                    operating = FadingPainterInternal.IsSupported;
+                    if (!operating)
+                        return;
+
+                    if (threadOperatingCount == 0)
+                    {
+                        operating = UxTheme.BufferedPaintInit();
+                        if (!operating)
+                            return;
+                    }
+
+                    threadOperatingCount += 1;
+                    return;
                 }
+
+                operating = false;
+                Debug.Assert(threadOperatingCount > 0, "FadingPainter: More disabling than enabling detected in the current thread");
+                threadOperatingCount -= 1;
+                if (threadOperatingCount == 0)
+                    UxTheme.BufferedPaintUnInit();
             }
         }
 
