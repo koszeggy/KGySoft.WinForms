@@ -109,7 +109,6 @@ namespace KGySoft.WinForms.WinApi
 
                 // Note this will fail gracefully if themingManifestId does not exist in System.Windows.Forms.dll
                 activationContext = Kernel32.CreateActCtx(ref enableThemingActivationContext);
-                Debug.Assert(!activationContext.IsInvalid, "Theming activation context could not be created. The checks should prevent we reach this point with failure.");
                 return !activationContext.IsInvalid;
             }
         }
