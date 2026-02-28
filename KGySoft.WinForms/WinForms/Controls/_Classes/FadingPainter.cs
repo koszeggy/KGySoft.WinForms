@@ -35,6 +35,7 @@ namespace KGySoft.WinForms.Controls
         private ISupportsFading<TState> host;
         private bool disposed;
         private bool operating;
+        private bool isFailing;
 
         #endregion
 
@@ -52,15 +53,31 @@ namespace KGySoft.WinForms.Controls
 
         #region Internal Properties
 
-        /// <summary>
-        /// Gets whether the fading painter is enabled.
-        /// </summary>
         internal virtual bool Enabled
+        {
+            get
+            {
 #if NETFRAMEWORK || NET10_0_OR_GREATER
-            => operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported;
+                return operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported;
 #else
-            => operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported && CanUseSystemPaint();
+                return operating && !disposed && host.FadingAnimationsEnabled && FadingPainterInternal.IsSupported && CanUseSystemPaint();
 #endif
+            }
+            private protected set
+            {
+                if (value == operating)
+                    return;
+
+                isFailing = false;
+                if (value)
+                    operating = FadingPainterInternal.IsSupported && UxTheme.BufferedPaintInit();
+                else
+                {
+                    UxTheme.BufferedPaintUnInit();
+                    operating = false;
+                }
+            }
+        }
 
         #endregion
 
@@ -88,10 +105,10 @@ namespace KGySoft.WinForms.Controls
                 throw new ArgumentNullException(nameof(host), PublicResources.ArgumentNull);
 
             Debug.Assert(host is Control);
-            operating = FadingPainterInternal.IsSupported && UxTheme.BufferedPaintInit();
             State = initialState;
             this.host = host;
             HookEvents();
+            Enabled = true;
         }
 
         #endregion
@@ -137,7 +154,7 @@ namespace KGySoft.WinForms.Controls
             {
                 // exiting, if fading is in progress and OnPaint was invoked just because of the animation
                 if (UxTheme.BufferedPaintRenderAnimation(host.Handle, hdc))
-                    return;
+                    return; 
             }
             finally
             {
@@ -171,11 +188,6 @@ namespace KGySoft.WinForms.Controls
             if (speed == 0)
                 StopAnimations();
 
-            //// DEBUG: render to images
-            //Size size = Control.ClientSize;
-            //Bitmap prevStateImage = new Bitmap(size.Width, size.Height, e.Graphics);
-            //Bitmap newStateImage = new Bitmap(size.Width, size.Height, e.Graphics);
-
             IntPtr hbpAnimation;
             IntPtr hdc = e.Graphics.GetHdc();
             try
@@ -183,45 +195,16 @@ namespace KGySoft.WinForms.Controls
                 hbpAnimation = UxTheme.BeginBufferedAnimation(Control.Handle, hdc, Control.ClientRectangle, speed, out IntPtr hdcFrom, out IntPtr hdcTo);
                 if (hbpAnimation != IntPtr.Zero)
                 {
-                    //// DEBUG: render to images
-                    //using (BufferedGraphicsContext context = new BufferedGraphicsContext())
-                    //{
-                    //    using (Graphics graphicsImage = Graphics.FromImage(prevStateImage))
-                    //    {
-                    //        using (BufferedGraphics bg = context.Allocate(graphicsImage, new Rectangle(Point.Empty, size)))
-                    //        {
-                    //            host.PaintState(prevState, new PaintEventArgs(bg.Graphics, Control.ClientRectangle));
-                    //            bg.Render(graphicsImage);
-                    //        }
-                    //    }
-
-                    //    using (Graphics graphicsImage = Graphics.FromImage(newStateImage))
-                    //    {
-                    //        using (BufferedGraphics bg = context.Allocate(graphicsImage, new Rectangle(Point.Empty, size)))
-                    //        {
-                    //            host.PaintState(newState, new PaintEventArgs(bg.Graphics, Control.ClientRectangle));
-                    //            bg.Render(graphicsImage);
-                    //        }
-                    //    }
-                    //}
-
+                    isFailing = false;
                     if (hdcFrom != IntPtr.Zero)
                     {
-                        using (Graphics g = Graphics.FromHdc(hdcFrom))
-                        {
-                            host.PaintState(State ?? host.State, new PaintEventArgs(g, e.ClipRectangle));
-                            //g.DrawImage(prevStateImage, Control.ClientRectangle);
-                            //prevStateImage.Save(@"d:\temp\"+DateTime.UtcNow.ToFileTime()+".png", System.Drawing.Imaging.ImageFormat.Png);
-                        }
+                        using Graphics g = Graphics.FromHdc(hdcFrom);
+                        host.PaintState(State ?? host.State, new PaintEventArgs(g, e.ClipRectangle));
                     }
                     if (hdcTo != IntPtr.Zero)
                     {
-                        using (Graphics g = Graphics.FromHdc(hdcTo))
-                        {
-                            host.PaintState(newState, new PaintEventArgs(g, e.ClipRectangle));
-                            //g.DrawImage(newStateImage, Control.ClientRectangle);
-                            //newStateImage.Save(@"d:\temp\" + DateTime.UtcNow.ToFileTime() + ".png", System.Drawing.Imaging.ImageFormat.Png);
-                        }
+                        using Graphics g = Graphics.FromHdc(hdcTo);
+                        host.PaintState(newState, new PaintEventArgs(g, e.ClipRectangle));
                     }
 
                     State = newState;
@@ -237,8 +220,12 @@ namespace KGySoft.WinForms.Controls
             if (hbpAnimation != IntPtr.Zero || clientSize.Width <= 0 || clientSize.Height <= 0)
                 return;
 
-            // fallback
+            // Fallback: for two consecutive failures we turn off the animations for this control. Could be reset on visual styles change.
             State = newState;
+            if (isFailing)
+                Enabled = false;
+            else
+                isFailing = true;
             
             // On Windows, Mono throws an exception from BufferedGraphicsContext.Allocate, so leaving the paint without double buffering
             if (OSHelper.IsMono && OSHelper.IsWindows)
@@ -267,14 +254,13 @@ namespace KGySoft.WinForms.Controls
             // suspending if changing to classic theme
             if (operating && !FadingPainterInternal.IsSupported)
             {
-                UxTheme.BufferedPaintUnInit();
-                operating = false;
+                Enabled = false;
                 return;
             }
 
             // resuming if changing back to Vista theme
             if (!operating && FadingPainterInternal.IsSupported)
-                operating = UxTheme.BufferedPaintInit();
+                Enabled = true;
         }
 
         /// <summary>
@@ -328,7 +314,7 @@ namespace KGySoft.WinForms.Controls
             {
                 if (Control.IsHandleCreated)
                     UxTheme.BufferedPaintStopAllAnimations(Control.Handle);
-                UxTheme.BufferedPaintUnInit();
+                Enabled = false;
             }
 
             if (disposing)

@@ -253,9 +253,11 @@ namespace KGySoft.WinForms.Controls
                 e.Graphics.ReleaseHdc(hdc);
             }
 
-            // fallback
+            // Fallback - this should not occur, so turning off animation for this control
+            // Note: in base we have a tolerance for two consecutive failures, which we don't used here.
             if (hbpAnimation == IntPtr.Zero)
             {
+                Enabled = false;
                 prevStateImage?.Dispose();
                 prevStateImage = newStateImage;
                 State = newState;
