@@ -19,6 +19,7 @@ using System;
 using System.Collections;
 using System.ComponentModel;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Windows.Forms;
 
@@ -96,6 +97,7 @@ namespace KGySoft.WinForms.Components
         #region Static Fields
 
         private static Icon? defaultIcon;
+        private static bool? hasImageRes;
 
         #endregion
 
@@ -267,8 +269,20 @@ namespace KGySoft.WinForms.Components
         #region Properties
 
         #region Static Properties
+        
+        #region Internal Properties
 
-        internal static Icon DefaultIcon => defaultIcon ??= OSHelper.IsWindowsVistaOrLater ? Icons.FromFile("imageres", 116) : Resources.TaskDialogIcon;
+        internal static Icon DefaultIcon => defaultIcon ??= OSHelper.IsWindowsVistaOrLater && HasImageRes
+            ? Icons.FromFile("imageres", 116)
+            : Resources.TaskDialogIcon;
+
+        #endregion
+
+        #region Private Properties
+
+        private static bool HasImageRes => hasImageRes ??= File.Exists(Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), "imageres.dll"));
+
+        #endregion
 
         #endregion
 
