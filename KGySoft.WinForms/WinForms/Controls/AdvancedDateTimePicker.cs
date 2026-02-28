@@ -142,7 +142,7 @@ namespace KGySoft.WinForms.Controls
 
                 // 3. drop down
                 int dropDownSize = control.ScaleWidth(referenceDropDownWidth);
-                if (VisualStyleHelper.RenderWithVisualStyles && !control.ShowUpDown && OSHelper.IsWindowsVistaOrLater)
+                if (VisualStyleHelper.RenderWithVisualStyles && !control.ShowUpDown && OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.DatePickerTheme != IntPtr.Zero)
                 {
                     if (OSHelper.IsMono)
                         IsCalendarDropDown = true;
@@ -901,7 +901,7 @@ namespace KGySoft.WinForms.Controls
 
                 if (fullPaint)
                 {
-                    if (OSHelper.IsWindowsVistaOrLater)
+                    if (OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.DatePickerTheme != IntPtr.Zero)
                         VisualStyleHelper.Render(VisualStyleHelper.DatePickerTheme, this, g, (int)DATEPICKERPARTS.DP_DATEBORDER, state, ClientRectangle);
                     else // Windows XP: there is no DatePicker theme, but as the border is in the NC area, we can simply fill the background with back color
                         g.Clear(BackColor);

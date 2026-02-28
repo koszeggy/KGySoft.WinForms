@@ -55,11 +55,11 @@ namespace KGySoft.WinForms
         };
 
         // If a new theme is added, adjust the GetClassName and ClearCaches methods as well
-        private static IntPtr buttonThemeHandle;
-        private static IntPtr taskDialogThemeHandle;
-        private static IntPtr comboBoxThemeHandle;
-        private static IntPtr datePickerThemeHandle;
-        private static IntPtr spinThemeHandle;
+        private static IntPtr? buttonThemeHandle;
+        private static IntPtr? taskDialogThemeHandle;
+        private static IntPtr? comboBoxThemeHandle;
+        private static IntPtr? datePickerThemeHandle;
+        private static IntPtr? spinThemeHandle;
 
         private static bool? visualStylesAvailable;
         private static bool? highContrast;
@@ -181,25 +181,11 @@ namespace KGySoft.WinForms
 
         internal static bool HighContrast => highContrast ??= SystemInformation.HighContrast;
 
-        internal static IntPtr ButtonTheme => buttonThemeHandle != IntPtr.Zero
-            ? buttonThemeHandle
-            : buttonThemeHandle = UxTheme.OpenThemeDataGlobal(Constants.ThemeClassButton);
-
-        internal static IntPtr TaskDialogTheme => taskDialogThemeHandle != IntPtr.Zero
-            ? taskDialogThemeHandle
-            : taskDialogThemeHandle = UxTheme.OpenThemeDataGlobal(Constants.ThemeClassTaskDialog);
-
-        internal static IntPtr ComboBoxTheme => comboBoxThemeHandle != IntPtr.Zero
-            ? comboBoxThemeHandle
-            : comboBoxThemeHandle = UxTheme.OpenThemeDataGlobal(Constants.ThemeClassComboBox);
-
-        internal static IntPtr DatePickerTheme => datePickerThemeHandle != IntPtr.Zero
-            ? datePickerThemeHandle
-            : datePickerThemeHandle = UxTheme.OpenThemeDataGlobal(Constants.ThemeDatePicker);
-
-        internal static IntPtr SpinTheme => spinThemeHandle != IntPtr.Zero
-            ? spinThemeHandle
-            : spinThemeHandle = UxTheme.OpenThemeDataGlobal(Constants.ThemeSpin);
+        internal static IntPtr ButtonTheme => buttonThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeClassButton);
+        internal static IntPtr TaskDialogTheme => taskDialogThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeClassTaskDialog);
+        internal static IntPtr ComboBoxTheme => comboBoxThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeClassComboBox);
+        internal static IntPtr DatePickerTheme => datePickerThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeDatePicker);
+        internal static IntPtr SpinTheme => spinThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeSpin);
 
         #endregion
 
@@ -293,11 +279,11 @@ namespace KGySoft.WinForms
 
         internal static void ClearCaches()
         {
-            buttonThemeHandle = IntPtr.Zero;
-            taskDialogThemeHandle = IntPtr.Zero;
-            comboBoxThemeHandle = IntPtr.Zero;
-            datePickerThemeHandle = IntPtr.Zero;
-            spinThemeHandle = IntPtr.Zero;
+            buttonThemeHandle = null;
+            taskDialogThemeHandle = null;
+            comboBoxThemeHandle = null;
+            datePickerThemeHandle = null;
+            spinThemeHandle = null;
             visualStylesAvailable = null;
             highContrast = null;
 

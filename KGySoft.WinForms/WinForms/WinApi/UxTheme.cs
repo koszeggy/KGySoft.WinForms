@@ -212,16 +212,10 @@ namespace KGySoft.WinForms.WinApi
         #region Internal Methods
 
         /// <summary>
-        /// Gets a theme handle. It is not pre-validated if visual styles are available. Passes null pointer to hWnd,
-        /// so the result should not be closed.
+        /// Gets a theme handle. It is not pre-validated if visual styles are available.
+        /// Passes null pointer to hWnd, so the result should not be closed.
         /// </summary>
-        internal static IntPtr OpenThemeDataGlobal(string className)
-        {
-            IntPtr hTheme = NativeMethods.OpenThemeData(IntPtr.Zero, className);
-            if (hTheme == IntPtr.Zero)
-                ThrowError(nameof(className));
-            return hTheme;
-        }
+        internal static IntPtr OpenThemeDataGlobal(string className) => NativeMethods.OpenThemeData(IntPtr.Zero, className);
 
         /// <summary>
         /// The result must be closed with CloseThemeData.
