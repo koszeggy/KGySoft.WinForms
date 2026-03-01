@@ -21,6 +21,12 @@ using System;
 using Microsoft.Win32;
 #endif
 
+#region Suppressions
+
+// ReSharper disable InconsistentNaming - version numbers
+
+#endregion
+
 #endregion
 
 namespace KGySoft.WinForms
@@ -42,11 +48,14 @@ namespace KGySoft.WinForms
         private static bool? isWin11OrLater;
         private static bool? isWindows;
         private static bool? isMono;
+        private static bool? isWine;
         private static Version? windowsVersion;
 
         #endregion
 
         #region Properties
+
+        #region Public Properties
 
         /// <summary>
         /// Gets whether the current operating system is a Windows platform.
@@ -95,16 +104,28 @@ namespace KGySoft.WinForms
             => isWin10OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 10240);
 
         /// <summary>
+        /// Gets whether the current operating system is Windows 11 or a later version.
+        /// </summary>
+        public static bool IsWindows11OrLater
+            => isWin11OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 22000);
+
+        #endregion
+
+        #region Internal Properties
+
+        /// <summary>
         ///  Gets whether the current operating system is Windows 10 Anniversary Update (Redstone 1, build 14393, version 1607) or later version.
         /// </summary>
         internal static bool IsWindows10Build1607OrLater
             => isWin10Build1607OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 14393);
 
-        /// <summary>
-        /// Gets whether the current operating system is Windows 11 or a later version.
-        /// </summary>
-        public static bool IsWindows11OrLater
-            => isWin11OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 22000);
+        internal static bool IsWine
+            => isWine ??= !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WINELOADER"));
+
+        internal static bool IsFrameworkMono => IsMono && !IsWine;
+        internal static bool IsWindowsMono => IsFrameworkMono && IsWindows;
+
+        #endregion
 
         #endregion
 
@@ -163,6 +184,30 @@ namespace KGySoft.WinForms
 #endif
             return windowsVersion;
         }
+
+        // NOTE: Not too helpful, or requires checking the version in combination with IsWine.
+        // For example, many bugs that present in 6.12 (classic Mono) are still there in 6.14 (Framework Mono) but not in 6.13 (Wine Mono).
+        ///// <summary>
+        ///// Gets the Mono version, or <see langword="null"/> if the current executing engine is not Mono.
+        ///// </summary>
+        ///// <returns>The Mono version, or <see langword="null"/> if the current executing engine is not Mono.</returns>
+        //public static Version? GetMonoVersion()
+        //{
+        //    if (monoVersion != null)
+        //        return monoVersion;
+        //    if (!IsMono || monoRuntimeType is null)
+        //        return null;
+
+        //    // not using Accessors, because it's queried once
+        //    var version = (string)Reflector.InvokeMethod(monoRuntimeType, "GetDisplayName")!;
+
+        //    // the format is "major.minor.build[.revision] (build details string)"
+        //    int detailsPos = version.IndexOf('(');
+        //    if (detailsPos > 0)
+        //        version = version.Substring(0, detailsPos).Trim();
+        //    Version.TryParse(version, out monoVersion);
+        //    return monoVersion;
+        //}
 
         #endregion
     }

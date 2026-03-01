@@ -414,7 +414,10 @@ namespace KGySoft.WinForms.Forms
                 return;
             }
 
-            // Fix for Mono: Dock.Right does not work in a TableLayoutPanel, so embedding pnlButtons into an additional panel
+            if (OSHelper.IsWine)
+                return;
+
+            // Fix for Framework Mono: Dock.Right does not work in a TableLayoutPanel, so embedding pnlButtons into an additional panel
             pnlButtons.Parent = null;
             var pnlButtonsContainer = new Panel { Dock = DockStyle.Fill };
             pnlButtonsContainer.Controls.Add(pnlButtons);
@@ -557,7 +560,7 @@ namespace KGySoft.WinForms.Forms
         protected override void OnKeyDown(KeyEventArgs e)
         {
             base.OnKeyDown(e);
-            if (OSHelper.IsMono && host.IsHelpRequestedAssigned && e.KeyData == Keys.F1)
+            if (OSHelper.IsFrameworkMono && host.IsHelpRequestedAssigned && e.KeyData == Keys.F1)
                 host.OnHelpRequested();
         }
 
@@ -757,15 +760,15 @@ namespace KGySoft.WinForms.Forms
             selectedCustomButtonIndex = -1;
             chbCheckBox.Checked = host.CheckBoxChecked;
             if (ownerWindow != null && (host.Options & TaskDialogOptions.PositionRelativeToWindow) != TaskDialogOptions.None
-                || OSHelper.IsMono && OSHelper.IsWindows && ownerWindow != null) // Mono/Windows does not handle multiple monitors well, so this is needed to remain on a non-primary screen
+                || OSHelper.IsWindowsMono && ownerWindow != null) // Mono/Windows does not handle multiple monitors well, so this is needed to remain on a non-primary screen
             {
                 StartPosition = FormStartPosition.CenterParent;
             }
             else
                 StartPosition = FormStartPosition.CenterScreen;
 
-            pbProgress.Style = !VisualStyleHelper.InitializedWithVisualStyles || OSHelper.IsMono && !OSHelper.IsWindows ? AdvancedProgressBarStyle.Classic
-                : OSHelper.IsWindowsVistaOrLater && !OSHelper.IsMono ? AdvancedProgressBarStyle.System
+            pbProgress.Style = !VisualStyleHelper.InitializedWithVisualStyles || (OSHelper.IsMono || OSHelper.IsWine) && !VisualStyleHelper.RenderWithVisualStyles ? AdvancedProgressBarStyle.Classic
+                : OSHelper.IsWindowsVistaOrLater && !OSHelper.IsWindowsMono ? AdvancedProgressBarStyle.System
                 : AdvancedProgressBarStyle.ThemedShiny; // Windows XP or Mono/Windows
 
             dialogStarted = DateTime.UtcNow; // for full compatibility it should be in ResetSettings
@@ -789,7 +792,7 @@ namespace KGySoft.WinForms.Forms
             bool showMinimizeBox = executeNonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None;
             if (MinimizeBox != showMinimizeBox)
                 MinimizeBox = showMinimizeBox;
-            bool showHelpButton = host.IsHelpRequestedAssigned && !OSHelper.IsMono;
+            bool showHelpButton = host.IsHelpRequestedAssigned && !OSHelper.IsFrameworkMono; // hiding the ? button on Framework Mono as OnHelpButtonClicked is not executed
             if (HelpButton != showHelpButton)
                 HelpButton = showHelpButton;
             bool showIcon = executeNonModal || (host.Options & TaskDialogOptions.ForceShowSysMenu) != TaskDialogOptions.None;
@@ -799,7 +802,7 @@ namespace KGySoft.WinForms.Forms
             if (ShowInTaskbar != showInTaskbar)
             {
                 ShowInTaskbar = showInTaskbar;
-                if (dialogState == TaskDialogStatus.Showing && !OSHelper.IsMono)
+                if (dialogState == TaskDialogStatus.Showing && !OSHelper.IsFrameworkMono)
                     isReopening = true;
             }
 
@@ -809,7 +812,7 @@ namespace KGySoft.WinForms.Forms
             lblFooter.ResolveHyperlinks = resolve;
             lblDetailsFooter.ResolveHyperlinks = resolve;
             var rtl = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
-            isReopening |= dialogState == TaskDialogStatus.Showing && rtl != RightToLeft && !OSHelper.IsMono;
+            isReopening |= dialogState == TaskDialogStatus.Showing && rtl != RightToLeft && !OSHelper.IsFrameworkMono;
             RightToLeft = rtl;
             pnlFooterIcon.Padding = cfg.IsRightToLeft ? footerPanelPaddingRtl : footerPanelPaddingLtr;
 
@@ -922,8 +925,8 @@ namespace KGySoft.WinForms.Forms
             lblFooter.Margin = footerReferenceMargin.Scale(scale);
             lblFooter.Padding = lblDetailsFooter.Padding = footerReferencePadding.Scale(scale);
 
-            // On Mono, the label rendering is broken with padding. AdvancedLabel fixes this, but only when there are no links in the text.
-            if (OSHelper.IsMono && cfg.UseLinks)
+            // On Framework Mono the label rendering is broken with padding. AdvancedLabel fixes this, but only when there are no links in the text.
+            if (OSHelper.IsFrameworkMono && cfg.UseLinks)
             {
                 foreach (AdvancedLabel? label in new[] { lblMessage, lblDetailsMain, lblFooter, lblDetailsFooter })
                 {
@@ -931,7 +934,6 @@ namespace KGySoft.WinForms.Forms
                         label.Padding = Padding.Empty;
                 }
             }
-
 
             ResetButtonMargins(cfg);
             ResetRadioButtonPaddings(cfg);
@@ -1392,11 +1394,12 @@ namespace KGySoft.WinForms.Forms
 
                             if (cfg.HasButtons)
                             {
-                                // Mono bug: when FlowLayoutPanel is docked to one side, GetPreferredSize ignores the specified width,
+                                // Framework Mono bug: when FlowLayoutPanel is docked to one side, GetPreferredSize ignores the specified width,
                                 // so changing the docking to Fill to prevent it from growing infinitely without starting a second row of buttons.
-                                if (OSHelper.IsMono)
-                                    pnlButtons.Dock = pnlButtons.GetPreferredSize(Size.Empty).Width > pnlButtons.Parent.Width ? DockStyle.Fill : DockStyle.Right;
-                                mainControlsHeight = Math.Max(mainControlsHeight, pnlButtons.GetPreferredSize(new Size(pnlButtons.Width + (OSHelper.IsMono ? pnlButtons.Padding.Horizontal : 0), 0)).Height + pnlButtons.Margin.Vertical);
+                                if (OSHelper.IsFrameworkMono)
+                                    pnlButtons.Dock = pnlButtons.GetPreferredSize(Size.Empty).Width > pnlButtons.Parent!.Width ? DockStyle.Fill : DockStyle.Right;
+                                Size proposedSize = new Size(pnlButtons.Width + (OSHelper.IsFrameworkMono ? pnlButtons.Padding.Horizontal : 0), 0);
+                                mainControlsHeight = Math.Max(mainControlsHeight, pnlButtons.GetPreferredSize(proposedSize).Height + pnlButtons.Margin.Vertical);
                             }
 
                             pnlMainControls.Height = mainControlsHeight;
@@ -1404,9 +1407,7 @@ namespace KGySoft.WinForms.Forms
 
                         // pnlFooter.Height (AutoSize works after all, but causes for a moment to shrink the whole main window)
                         if (cfg.HasFooter)
-                        {
                             pnlFooter.Height = lblFooter.GetPreferredSize(new Size(lblFooter.Width, 0)).Height;
-                        }
                     }
                     finally
                     {
@@ -2173,7 +2174,7 @@ namespace KGySoft.WinForms.Forms
         TaskDialogResult ITaskDialog.Execute(TaskDialog taskDialog, IntPtr owner, out int selectedButtonIndex, out int selectedRadioButtonIndex, out bool checkBoxChecked)
         {
             host = taskDialog;
-            executeNonModal = owner == IntPtr.Zero && OSHelper.IsWindows && !OSHelper.IsMono;
+            executeNonModal = owner == IntPtr.Zero && OSHelper.IsWindows && !OSHelper.IsWindowsMono;
             if (owner != IntPtr.Zero)
                 ownerWindow = new Win32Window { Handle = owner };
             
