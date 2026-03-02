@@ -86,7 +86,7 @@ namespace KGySoft.WinForms.Example.Forms
                 case WM_LBUTTONDOWN: // when clicking over the disabled pnlTestArea (so the form gets the mouse down event)
                 case WM_PARENTNOTIFY when m.WParam.ToInt32() == WM_LBUTTONDOWN: // when clicking over a child control, even disabled ones
                     Control? child = FindControl(this, Cursor.Position);
-                    if (child == null || child == grdProperties || grdProperties.Contains(child))
+                    if (child == null || pnlProperties.Contains(child) || grdProperties.Contains(child) || customPropertySetter.Contains(child))
                         break;
 
                     if (child.Parent is CheckGroupBox)
@@ -214,7 +214,10 @@ namespace KGySoft.WinForms.Example.Forms
         {
             var selectedObjects = grdProperties.SelectedObjects;
             lblSelection.Text = @$"{(selectedObjects.Length == 1 ? (selectedObjects[0] as Control)?.Name ?? grdProperties.SelectedObject : $"{selectedObjects.Length} controls selected")}";
+            customPropertySetter.SelectedObjects = selectedObjects;
         }
+
+        private void customPropertySetter_SelectedObjectsPropertyChanged(object sender, PropertyChangedEventArgs e) => grdProperties.Refresh();
 
 #pragma warning restore IDE1006 // Naming Styles
         #endregion

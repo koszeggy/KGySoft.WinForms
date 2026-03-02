@@ -36,6 +36,8 @@
             this.splitter1 = new System.Windows.Forms.Splitter();
             this.pnlProperties = new System.Windows.Forms.Panel();
             this.grdProperties = new System.Windows.Forms.PropertyGrid();
+            this.splitter2 = new System.Windows.Forms.Splitter();
+            this.customPropertySetter = new KGySoft.WinForms.Example.Controls.CustomPropertySetter();
             this.lblSelection = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.pnlTestArea.SuspendLayout();
             this.cmsGridMenu.SuspendLayout();
@@ -51,7 +53,7 @@
             this.pnlTestArea.Size = new System.Drawing.Size(214, 260);
             this.pnlTestArea.TabIndex = 0;
             // 
-            // lblInstuction
+            // lblInstruction
             // 
             this.lblInstruction.AutoSize = true;
             this.lblInstruction.BorderStyle = KGySoft.WinForms.Controls.AdvancedBorderStyle.Flat;
@@ -92,6 +94,8 @@
             // pnlProperties
             // 
             this.pnlProperties.Controls.Add(this.grdProperties);
+            this.pnlProperties.Controls.Add(this.splitter2);
+            this.pnlProperties.Controls.Add(this.customPropertySetter);
             this.pnlProperties.Controls.Add(this.lblSelection);
             this.pnlProperties.Dock = System.Windows.Forms.DockStyle.Right;
             this.pnlProperties.Location = new System.Drawing.Point(217, 0);
@@ -103,11 +107,30 @@
             // 
             this.grdProperties.ContextMenuStrip = this.cmsGridMenu;
             this.grdProperties.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.grdProperties.Location = new System.Drawing.Point(0, 18);
+            this.grdProperties.Location = new System.Drawing.Point(0, 65);
             this.grdProperties.Name = "grdProperties";
-            this.grdProperties.Size = new System.Drawing.Size(213, 242);
+            this.grdProperties.Size = new System.Drawing.Size(213, 195);
             this.grdProperties.TabIndex = 2;
             this.grdProperties.SelectedObjectsChanged += new System.EventHandler(this.grdProperties_SelectedObjectsChanged);
+            // 
+            // splitter2
+            // 
+            this.splitter2.Dock = System.Windows.Forms.DockStyle.Top;
+            this.splitter2.Location = new System.Drawing.Point(0, 62);
+            this.splitter2.Name = "splitter2";
+            this.splitter2.Size = new System.Drawing.Size(213, 3);
+            this.splitter2.TabIndex = 5;
+            this.splitter2.TabStop = false;
+            // 
+            // customPropertySetter
+            // 
+            this.customPropertySetter.Dock = System.Windows.Forms.DockStyle.Top;
+            this.customPropertySetter.DynamicStringLocalization = KGySoft.WinForms.DynamicStringLocalization.Custom;
+            this.customPropertySetter.Location = new System.Drawing.Point(0, 18);
+            this.customPropertySetter.Name = "customPropertySetter";
+            this.customPropertySetter.Size = new System.Drawing.Size(213, 44);
+            this.customPropertySetter.TabIndex = 6;
+            this.customPropertySetter.SelectedObjectsPropertyChanged += new System.EventHandler<System.ComponentModel.PropertyChangedEventArgs>(this.customPropertySetter_SelectedObjectsPropertyChanged);
             // 
             // lblSelection
             // 
@@ -150,5 +173,7 @@
         private System.Windows.Forms.Panel pnlProperties;
         private System.Windows.Forms.PropertyGrid grdProperties;
         private KGySoft.WinForms.Controls.AdvancedLabel lblSelection;
+        private System.Windows.Forms.Splitter splitter2;
+        private Controls.CustomPropertySetter customPropertySetter;
     }
 }
