@@ -311,7 +311,9 @@ namespace KGySoft.WinForms.Forms
 #endif
 
         // Not using SystemDefault rendering quality because GDI and GDI+ may have different default rendering quality, which is very noticeable when the messages can contain links.
-        private static RenderingQuality RenderingQuality => SystemInformation.FontSmoothingType >= Constants.FontSmoothingType_ClearType ? RenderingQuality.High : RenderingQuality.Low;
+        private static RenderingQuality RenderingQuality => OSHelper.IsRealWindows || OSHelper.IsWindowsMono
+            ? SystemInformation.FontSmoothingType >= Constants.FontSmoothingType_ClearType ? RenderingQuality.High : RenderingQuality.Low
+            : RenderingQuality.High;
 
         #endregion
 

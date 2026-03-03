@@ -519,9 +519,9 @@ namespace KGySoft.WinForms.Controls
             // background
             PaintSimpleBackground(e);
 
-            // frame: when visual styles are disabled, there is already a frame in NC area, except in Mono, where the frame is in the client area
+            // frame: when visual styles are disabled, there is already a frame in NC area, except in Framework Mono, where the frame is in the client area
             Rectangle rect = ClientRectangle;
-            if (VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsMono)
+            if (VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsFrameworkMono)
             {
                 ControlPaint.DrawBorder3D(e.Graphics, rect, Border3DStyle.SunkenOuter);
                 rect.Inflate(-2, -2);

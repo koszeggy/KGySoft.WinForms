@@ -475,7 +475,7 @@ namespace KGySoft.WinForms.Controls
                         FlatStyle.Flat => new CheckBoxFlatAdapter(this),
                         FlatStyle.Popup => new CheckBoxPopupAdapter(this),
                         FlatStyle.Standard => new CheckBoxStandardAdapter(this),
-                        FlatStyle.System when OSHelper.IsMono => new CheckBoxStandardAdapter(this),
+                        FlatStyle.System when OSHelper.IsFrameworkMono => new CheckBoxStandardAdapter(this),
                         _ => throw new InvalidOperationException()
                     };
                     lastAdapterType = base.FlatStyle;
@@ -522,7 +522,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="proposedSize">The custom-sized area for a control.</param>
         public override Size GetPreferredSize(Size proposedSize)
         {
-            if (FlatStyle == FlatStyle.System && !OSHelper.IsMono)
+            if (FlatStyle == FlatStyle.System && !OSHelper.IsFrameworkMono)
                 return base.GetPreferredSize(proposedSize);
 
             if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out var preferredSize))
@@ -752,7 +752,7 @@ namespace KGySoft.WinForms.Controls
         {
             // ignoring next paint if check state will change; otherwise, because of double paints,
             // no animation is performed due to wrong transitions (unchecked hot -> unchecked pressed -> unchecked hot (ignored) -> checked hot)
-            if (isPressed && isHovered && !OSHelper.IsMono)
+            if (isPressed && isHovered && !OSHelper.IsFrameworkMono)
                 ignoreNextPaint = true;
 
             isPressed = false;
@@ -835,7 +835,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnForeColorChanged(EventArgs e)
         {
             base.OnForeColorChanged(e);
-            if (OSHelper.IsMono)
+            if (OSHelper.IsFrameworkMono)
                 Invalidate();
         }
 
@@ -843,10 +843,11 @@ namespace KGySoft.WinForms.Controls
         protected override void OnBackColorChanged(EventArgs e)
         {
             base.OnBackColorChanged(e);
-            if (!OSHelper.IsMono)
-                return;
-            Invalidate();
-            CheckStyles();
+            if (OSHelper.IsFrameworkMono)
+            {
+                Invalidate();
+                CheckStyles();
+            }
         }
 
         /// <summary>
@@ -923,7 +924,7 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            if (base.FlatStyle != FlatStyle.System || OSHelper.IsMono)
+            if (base.FlatStyle != FlatStyle.System || OSHelper.IsFrameworkMono)
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
         }
 

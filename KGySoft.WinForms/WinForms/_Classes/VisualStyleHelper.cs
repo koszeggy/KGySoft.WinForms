@@ -347,7 +347,7 @@ namespace KGySoft.WinForms
         private static Bitmap? PaintIntoBitmap(IntPtr hTheme, int part, int state, Color backColor, Size size)
         {
             Debug.Assert(OSHelper.IsWindowsXpOrLater);
-            if (!OSHelper.IsMono)
+            if (!OSHelper.IsFrameworkMono)
             {
                 // Using just the hdc of g would cause black alpha-blended pixels, but using BufferedGraphics solves the problem
                 var bitmap = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppRgb);
@@ -370,7 +370,7 @@ namespace KGySoft.WinForms
                 return bitmap;
             }
 
-            // On Windows, Mono throws an exception for BufferedGraphicsContext.Allocate, so going on with the native solution
+            // On Windows, Framework Mono throws an exception for BufferedGraphicsContext.Allocate, so going on with the native solution
             // This bitmap is needed just for reference, so 1x1 size is alright
             using var refBitmap = new Bitmap(1, 1, PixelFormat.Format32bppRgb);
             using Graphics refGraphics = Graphics.FromImage(refBitmap);

@@ -70,7 +70,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         internal override bool Enabled => base.Enabled && Host.FadingAnimationOptions != FadingOptions.None
             // turning off fading animations on Mono when back color is transparent or there is a background image to avoid heavy flickering
-            && !(OSHelper.IsMono && (Control.BackColor.A == 0 || Control.BackgroundImage is not null));
+            && !(OSHelper.IsFrameworkMono && (Control.BackColor.A == 0 || Control.BackgroundImage is not null));
 
         #endregion
 
@@ -135,7 +135,7 @@ namespace KGySoft.WinForms.Controls
 
             // On Windows Mono throws an exception from BufferedGraphicsContext.Allocate, so going on with the native solution if possible.
             // NOTE: Unlike on the normal path, we don't use fine tunings for cases when a paint should be ignored
-            if (OSHelper.IsMono)
+            if (OSHelper.IsWindowsMono)
             {
                 hdc = e.Graphics.GetHdc();
                 IntPtr compatibleDc = Gdi32.CreateCompatibleDC(hdc);

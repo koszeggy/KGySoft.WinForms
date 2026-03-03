@@ -68,6 +68,7 @@ namespace KGySoft.WinForms.Controls
             internal readonly Rectangle UpDownBounds; // Only on Mono with visual styles, represents the drawn bounds.
             internal readonly Rectangle TranslatedDropDownBounds;
             internal readonly Rectangle TextBounds;
+            internal readonly int HorizontalOffset;
             internal readonly bool IsCalendarDropDown;
             internal readonly bool IsRightToLeft;
 
@@ -77,10 +78,15 @@ namespace KGySoft.WinForms.Controls
 
             internal LayoutData(AdvancedDateTimePicker control, Graphics g)
             {
+                // Strange behavior: if the control is RTL, VisibleClipBounds.X is -1 so the calculated rects are off by one pixel.
+                // Cannot fix it simply by g.TranslateTransform, because it affects only GDI+ draw operations, but not theme drawing or some ControlPaint methods, so not applying it globally.
+                if (g.VisibleClipBounds.X < 0)
+                    HorizontalOffset = (int)g.VisibleClipBounds.X;
+
                 // 1. background
                 Rectangle bounds = control.ClientRectangle;
                 Rectangle textRect = bounds;
-                bool rtl = IsRightToLeft = control.RightToLeftLayout && control.RightToLeft == RightToLeft.Yes && !OSHelper.IsMono;
+                bool rtl = IsRightToLeft = control.RightToLeftLayout && control.RightToLeft == RightToLeft.Yes && !OSHelper.IsFrameworkMono;
 
                 // When EnableVisualStyles was called on Vista+, the border belongs to the client area (even if visual styles are actually not available),
                 // so we could omit this if VisualStyleHelper.InitializedWithVisualStyles is false,
@@ -89,23 +95,16 @@ namespace KGySoft.WinForms.Controls
                 BackgroundBounds = textRect;
 
                 // 2. check box
-                int checkBoxPadding = !control.ShowCheckBox ? 0
-                    : OSHelper.IsMono ? 21
+                int checkBoxPadding = !control.ShowCheckBox ? 0 
+                    : OSHelper.IsFrameworkMono ? 21
+                    : OSHelper.IsWine ? bounds.Height
                     : textRect.Height + 1;
                 if (checkBoxPadding > 0)
                 {
-                    if (OSHelper.IsMono)
+                    if (OSHelper.IsRealWindows)
                     {
-                        CheckBoxBounds = new Rectangle(textRect.X, (textRect.Y + textRect.Height / 2) - (checkBoxPadding - 5) / 2, checkBoxPadding - 5, checkBoxPadding - 5);
-                        if (!VisualStyleHelper.RenderWithVisualStyles)
-                        {
-                            CheckBoxBounds.Inflate(-1, -1);
-                            CheckBoxBounds.X += 1;
-                            CheckBoxBounds.Y += 1;
-                        }
-                    }
-                    else
-                    {
+                        // Real Windows: there is no actual checkbox inside the control, it's just drawn.
+                        // So we specify CheckBoxBounds to be drawn manually, and we try to use the same location as Windows uses.
                         CheckBoxBounds = new Rectangle(textRect.X, textRect.Y, checkBoxPadding - 1, checkBoxPadding - 1);
                         if (OSHelper.IsWindowsVistaOrLater)
                         {
@@ -128,6 +127,18 @@ namespace KGySoft.WinForms.Controls
                             }
                         }
                     }
+                    else if (OSHelper.IsFrameworkMono)
+                    {
+                        // Framework Mono: The checkbox is aligned to the middle vertically, but not scaled.
+                        CheckBoxBounds = new Rectangle(textRect.X, (textRect.Y + textRect.Height / 2) - (checkBoxPadding - 5) / 2, checkBoxPadding - 5, checkBoxPadding - 5);
+                        if (!VisualStyleHelper.RenderWithVisualStyles)
+                        {
+                            CheckBoxBounds.Inflate(-1, -1);
+                            CheckBoxBounds.X += 1;
+                            CheckBoxBounds.Y += 1;
+                        }
+                    }
+                    // else Wine: not setting CheckBoxBounds, because the control has a native checkbox that cannot be overdrawn, so just using the padding for the text.
 
                     textRect.Width -= checkBoxPadding;
                     TranslatedCheckBoxBounds = CheckBoxBounds;
@@ -135,16 +146,16 @@ namespace KGySoft.WinForms.Controls
                     // Strange visual style renderer behavior: in RTL mode it mirrors the X coordinates so we always must pretend if the checkbox was on the left side.
                     // Does not happen with ControlPaint though, so without visual styles in RTL mode we need to use translated coordinates.
                     if (rtl)
-                        TranslatedCheckBoxBounds.X = textRect.Right + 1;
+                        TranslatedCheckBoxBounds.X = textRect.Right + (VisualStyleHelper.InitializedWithVisualStyles ? 0 : 1);
                     else
                         textRect.X += checkBoxPadding;
                 }
 
                 // 3. drop down
-                int dropDownSize = control.ScaleWidth(referenceDropDownWidth);
+                int dropDownSize = control.ScaleWidth(OSHelper.IsWine ? referenceDropDownWidthWine : referenceDropDownWidth);
                 if (VisualStyleHelper.RenderWithVisualStyles && !control.ShowUpDown && OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.DatePickerTheme != IntPtr.Zero)
                 {
-                    if (OSHelper.IsMono)
+                    if (OSHelper.IsWindowsMono)
                         IsCalendarDropDown = true;
                     else
                     {
@@ -160,8 +171,8 @@ namespace KGySoft.WinForms.Controls
 
                 if (control.ShowUpDown)
                 {
-                    // Only on Mono. Otherwise, the up/down buttons are actual (native) child controls that cannot be overdrawn.
-                    if (OSHelper.IsMono)
+                    // Only on Framework Mono. Otherwise, the up/down buttons are actual (native) child controls that cannot be overdrawn.
+                    if (OSHelper.IsFrameworkMono)
                     {
                         BackgroundBounds.Width -= 17;
                         UpDownBounds = new Rectangle(BackgroundBounds.Right, BackgroundBounds.Top, 17, BackgroundBounds.Height);
@@ -169,34 +180,39 @@ namespace KGySoft.WinForms.Controls
                 }
                 else
                 {
-                    bool fullHeight = !VisualStyleHelper.InitializedWithVisualStyles // EnableVisualStyles was not called: full client area, border is in the NC area
-                        || OSHelper.IsWindows && !OSHelper.IsWindowsVistaOrLater && !OSHelper.IsMono // Windows XP: the border belongs to the NC even with visual styles
-                        || VisualStyleHelper.RenderWithVisualStyles && OSHelper.IsWindowsVistaOrLater; // Vista+ with visual styles: the calendar/drop/down occupies the border in the client area
+                    bool fullHeight = OSHelper.IsRealWindows ? !VisualStyleHelper.InitializedWithVisualStyles // EnableVisualStyles was not called: full client area, border is in the NC area
+                            || !OSHelper.IsWindowsVistaOrLater // Windows XP: the border belongs to the NC even with visual styles
+                            || VisualStyleHelper.RenderWithVisualStyles && OSHelper.IsWindowsVistaOrLater // Vista+ with visual styles: the calendar/drop/down occupies the border in the client area
+                        : OSHelper.IsFrameworkMono ? OSHelper.IsWindowsMono && VisualStyleHelper.RenderWithVisualStyles // Framework Mono: border is always in the client area, so using full height with visual styles
+                        : VisualStyleHelper.RenderWithVisualStyles || bounds.Height != control.Height; // other (e.g. Wine): using visual styles, or there is an NC area
 
                     // Strange visual style renderer behavior: in RTL mode it mirrors the X coordinates AND the glyph image.
                     // The image mirroring does not happen for the checkbox rendering though. And ControlPaint does not mirror the X coordinate either.
                     DropDownBounds = new Rectangle(fullHeight ? bounds.Right - dropDownSize : BackgroundBounds.Right - dropDownSize,
                         fullHeight ? 0 : textRect.Y, dropDownSize, fullHeight ? bounds.Height : textRect.Height);
-                    if (OSHelper.IsMono && !VisualStyleHelper.RenderWithVisualStyles)
+
+                    // Excluding the drop-down button from the background area on Framework Mono with no visual styles,
+                    // so even full repaint leaves the default drop-down drawing remain intact.
+                    if (OSHelper.IsFrameworkMono && !VisualStyleHelper.RenderWithVisualStyles)
                         BackgroundBounds.Width -= DropDownBounds.Width;
                     TranslatedDropDownBounds = DropDownBounds;
                     if (rtl)
-                        TranslatedDropDownBounds.X = fullHeight ? 0 : BackgroundBounds.X;
+                        TranslatedDropDownBounds.X = fullHeight ? HorizontalOffset : BackgroundBounds.X + HorizontalOffset;
                 }
 
                 // 4. text
                 textRect.Width -= dropDownSize;
                 if (rtl)
-                    textRect.X += dropDownSize;
+                    textRect.X += dropDownSize - HorizontalOffset;
 
-                // Even stranger TextRenderer behavior: Somehow it recognizes the RTL layout (is it in the native DC somewhere?)
+                // Even stranger TextRenderer behavior: Somehow it recognizes the RTL layout (is it in the native DC somewhere?),
                 // so we have to undo the translation that we made for the calculations above.
                 // This behavior is different from every other custom rendering that we use with TextRenderer and GetFormatFlags.
-                // Note that if we use g.DrawString instead, it needs the original flags and the original rectangle.
+                // Note that if we used g.DrawString instead, it would need the original flags and the original rectangle.
                 //TranslatedTextBounds = textRect; // TODO: uncomment if it will be needed, e.g. if Mono will support RTL, and it does not do the translation
                 if (rtl)
                     textRect.X -= dropDownSize - checkBoxPadding;
-                else if (OSHelper.IsMono)
+                else if (OSHelper.IsFrameworkMono)
                 {
                     if (VisualStyleHelper.RenderWithVisualStyles)
                         textRect.Y -= 2;
@@ -215,6 +231,7 @@ namespace KGySoft.WinForms.Controls
         #region Constants
 
         private const int referenceDropDownWidth = 17;
+        private const int referenceDropDownWidthWine = 15;
 
         #endregion
 
@@ -500,11 +517,12 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Properties
 
-        private bool IsCustomDropDownPaint => !ShowUpDown
-            && (VisualStyleHelper.RenderWithVisualStyles && (!Focused || (ShowCheckBox && !Checked) || OSHelper.IsMono) // custom calendar size both on .NET (horizontally) and Mono (vertically)
-                || !VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsMono); // fixing pressed rendering also in RTL mode with no visual styles
+        private bool IsCustomDropDownHovering => !ShowUpDown
+            && ((OSHelper.IsRealWindows || OSHelper.IsWine) && VisualStyleHelper.RenderWithVisualStyles && (!Focused || (ShowCheckBox && !Checked)) // custom calendar width on real Windows or just tracking hovered status on Wine
+                || OSHelper.IsWindowsMono && VisualStyleHelper.RenderWithVisualStyles // custom calendar height on Windows Mono
+                || !VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsFrameworkMono); // fixing pressed rendering also in RTL mode with no visual styles - except in Framework Mono, whose ControlPaint draws a transparent button (and RTL is not supported anyway)
 
-        private bool IsCustomUpDownPaint => OSHelper.IsMono && VisualStyleHelper.RenderWithVisualStyles && ShowUpDown; // fixing region on Mono with visual styles
+        private bool IsCustomUpDownBounds => OSHelper.IsWindowsMono && VisualStyleHelper.RenderWithVisualStyles && ShowUpDown; // fixing region on Mono/Windows with visual styles
 
         #endregion
 
@@ -520,12 +538,13 @@ namespace KGySoft.WinForms.Controls
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
-            
-            // Needed because in Mono the base ctor calls the overridden BackColor/ForeColor setters
-            if (!OSHelper.IsMono)
-                return;
-            EnabledBackColor = default;
-            EnabledForeColor = default;
+
+            // Needed because in Framework Mono the base ctor calls the overridden BackColor/ForeColor setters
+            if (OSHelper.IsFrameworkMono)
+            {
+                EnabledBackColor = default;
+                EnabledForeColor = default;
+            }
         }
 
         #endregion
@@ -556,40 +575,33 @@ namespace KGySoft.WinForms.Controls
                     // It's important that it's before the base.WndProc call, so there will not be extra paint if color changes cause invalidation.
                     ResetColors();
                     CheckDpiChange();
-                    bool isMono = OSHelper.IsMono;
 
                     // - On Vista and above the calendar button can be either a combo box drop down button or the regular calendar button, depending on the text length.
-                    //   As it's practically impossible to tell the actual button type of the system rendering, we always draw the non-Focused appearance ourselves with our preference.
-                    // - On Mono with visual styles, the buttons are not scaled to a larger font, and also the up/down buttons are rendered incorrectly
-                    // - On Mono with no visual styles, we never paint the buttons, even with full custom paint
+                    //   As it's practically impossible to tell the actual button type of the system rendering, we always draw the non-Focused appearance ourselves with our threshold.
+                    // - On Framework Mono with visual styles, the buttons are not scaled to a larger font, and also the up/down buttons are rendered incorrectly
+                    // - On Framework Mono with no visual styles, we never paint the buttons, even with full custom paint
                     bool fullCustomPaint = flags[isDroppedDown] || !Focused || ShowCheckBox && !Checked;
-                    if (fullCustomPaint && OSHelper.IsWindows && (!isMono || VisualStyleHelper.RenderWithVisualStyles))
+                    if (fullCustomPaint && OSHelper.IsWindows && (!OSHelper.IsFrameworkMono || VisualStyleHelper.RenderWithVisualStyles))
                         User32.ValidateRect(m.HWnd, IntPtr.Zero);
                     else
                         base.WndProc(ref m);
 
-                    // Accepting system rendering if the control is focused, rendering without visual styles and RTL mode is not enabled.
-                    bool rtl = RightToLeftLayout && RightToLeft == RightToLeft.Yes && !isMono;
-
+                    bool rtl = RightToLeftLayout && RightToLeft == RightToLeft.Yes && !OSHelper.IsFrameworkMono;
                     using (Graphics g = Graphics.FromHwnd(m.HWnd))
                     {
-                        // Strange behavior: if the control is RTL, VisibleClipBounds.X is -1 so the calculated rects are off by one pixel. Fixing it in a compatible way.
-                        if (g.VisibleClipBounds.X < 0)
-                            g.TranslateTransform(g.VisibleClipBounds.X, g.VisibleClipBounds.Y);
-
                         var layout = new LayoutData(this, g);
 
                         // 1. Background and border
                         PaintBackground(g, layout, fullCustomPaint);
 
-                        // 2. Check box: When visual styles are enabled, reflecting the hovered state.
-                        //    Otherwise, fixing RTL appearance (the borders would be mirrored)
-                        if (ShowCheckBox && (fullCustomPaint || rtl || VisualStyleHelper.RenderWithVisualStyles))
+                        // 2. Check box: When visual styles are enabled, reflecting the hovered state. Otherwise, fixing RTL appearance (the borders would be mirrored)
+                        //    NOTE: using CheckBoxBounds instead of ShowCheckBox, because bounds are empty if the original checkbox cannot be painted over (on Wine).
+                        if (!layout.CheckBoxBounds.IsEmpty() && (fullCustomPaint || rtl || VisualStyleHelper.RenderWithVisualStyles))
                             PaintCheckBox(g, layout, !fullCustomPaint);
 
                         // 3.a. Drop-down button. With visual styles we may use the wider calendar drop down button more likely than the native rendering.
                         //    With no visual styles we fix the RTL appearance - except when initializing without visual styles, because the button may be redrawn outside a WM_PAINT message...
-                        if (!ShowUpDown && (fullCustomPaint || !isMono && !VisualStyleHelper.RenderWithVisualStyles || isMono && VisualStyleHelper.RenderWithVisualStyles))
+                        if (!ShowUpDown && (fullCustomPaint || !OSHelper.IsFrameworkMono && !VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsFrameworkMono && VisualStyleHelper.RenderWithVisualStyles))
                             PaintDropDownButton(g, layout);
                         // 3.b. up/down button - only with Mono/Windows with visual styles, where it's totally broken
                         else if (!layout.UpDownBounds.IsEmpty())
@@ -668,7 +680,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnGotFocus(EventArgs e)
         {
             base.OnGotFocus(e);
-            if (!VisualStyleHelper.RenderWithVisualStyles || !OSHelper.IsWindowsVistaOrLater || OSHelper.IsMono)
+            if (!VisualStyleHelper.RenderWithVisualStyles || !OSHelper.IsWindowsVistaOrLater || !OSHelper.IsRealWindows)
                 Invalidate();
         }
 
@@ -734,8 +746,9 @@ namespace KGySoft.WinForms.Controls
         protected override void OnMouseLeave(EventArgs e)
         {
             base.OnMouseLeave(e);
+            bool dropDownHoveredChange = flags[isDropDownHovered];
             flags[isHovered | isDropDownHovered | isUpHovered | isDownHovered] = false;
-            if (flags[isPressed] && !VisualStyleHelper.RenderWithVisualStyles)
+            if (flags[isPressed] && !VisualStyleHelper.RenderWithVisualStyles || dropDownHoveredChange && VisualStyleHelper.RenderWithVisualStyles)
                 Invalidate();
         }
 
@@ -752,8 +765,8 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnMouseMove(e);
 
-            bool customDropDown = IsCustomDropDownPaint;
-            bool customUpDown = IsCustomUpDownPaint;
+            bool customDropDown = IsCustomDropDownHovering;
+            bool customUpDown = IsCustomUpDownBounds;
             if (!(customDropDown || customUpDown))
                 return;
 
@@ -761,11 +774,11 @@ namespace KGySoft.WinForms.Controls
             using (var g = Graphics.FromHwnd(Handle))
                 layout = new LayoutData(this, g);
 
-            // custom drop down: both on .NET and Mono with visual styles, and on .NET with no visual styles
+            // custom drop down: everywhere with visual styles, and everywhere but Framework Mono with no visual styles
             if (customDropDown)
             {
                 bool dropDownHovered = layout.DropDownBounds.Contains(e.Location);
-                if (flags[isDropDownHovered] == dropDownHovered && !(OSHelper.IsMono && flags[isPressed]))
+                if (flags[isDropDownHovered] == dropDownHovered && (!OSHelper.IsFrameworkMono || !flags[isPressed]))
                     return;
 
                 flags[isDropDownHovered] = dropDownHovered;
@@ -786,12 +799,12 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            // custom up/down: on Mono with visual styles
             if (Capture)
                 return;
 
+            // custom up/down: on Framework Mono with visual styles
             flags[isPressed] = false;
-            bool upDownHovered = layout.UpDownBounds.Contains(e.Location) // custom drawn bounds (can be higher than drawn by Mono)
+            bool upDownHovered = layout.UpDownBounds.Contains(e.Location) // custom drawn bounds (can be higher than drawn by Framework Mono)
                 || this.DropDownArrowRect()?.Contains(e.Location) == true; // calculated bounds by Mono (can be wider and vertically shorter than actually drawn)
 
             // our vertically fixed hovered flags
@@ -833,8 +846,8 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnLeave(EventArgs e)
         {
-            // On mono the OnCloseUp is never called, so using this method as a workaround
-            if (OSHelper.IsMono)
+            // On Framework Mono the OnCloseUp is never called, so using this method as a workaround
+            if (OSHelper.IsFrameworkMono)
             {
                 flags[isPressed | isDroppedDown] = false;
                 Invalidate();
@@ -885,15 +898,9 @@ namespace KGySoft.WinForms.Controls
         {
             if (VisualStyleHelper.RenderWithVisualStyles)
             {
-                // partial paint on .NET: the background can be ignored
-                if (!(fullPaint || OSHelper.IsMono))
+                // partial paint with visual styles everywhere but on Framework Mono: omitting the background, and using the default drawing
+                if ((!fullPaint && !OSHelper.IsFrameworkMono))
                     return;
-
-                // Non-full paint here means that we paint only the background of the drop-down button area. Needed for Mono to fix the messed-up calendar and up/down bounds.
-                // NOTE: This paints the custom back color for the button area. Doing this on Mono only, because on Windows the width of the drop-down button cannot be predicted.
-                Rectangle bounds = fullPaint ? layout.BackgroundBounds
-                    : IsCustomUpDownPaint ? layout.UpDownBounds
-                    : Rectangle.Intersect(layout.BackgroundBounds, layout.DropDownBounds);
 
                 int state = (int)(!Enabled ? DATEPICKERSTATES.DPS_DISABLED
                     : flags[isHovered] ? DATEPICKERSTATES.DPS_HOT
@@ -901,36 +908,52 @@ namespace KGySoft.WinForms.Controls
 
                 if (fullPaint)
                 {
-                    if (OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.DatePickerTheme != IntPtr.Zero)
+                    if (OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.DatePickerTheme != IntPtr.Zero) // both real Windows and Mono on Windows
                         VisualStyleHelper.Render(VisualStyleHelper.DatePickerTheme, this, g, (int)DATEPICKERPARTS.DP_DATEBORDER, state, ClientRectangle);
-                    else // Windows XP: there is no DatePicker theme, but as the border is in the NC area, we can simply fill the background with back color
+                    else // Windows XP or Wine: there is no DatePicker theme, but as the border is in the NC area, we can simply fill the background with back color
+                    {
                         g.Clear(BackColor);
+                        return;
+                    }
                 }
 
-                // Clearing the background only in disabled state or when a custom back color is specified; otherwise, preserving the theme back color
+                // Clearing the background only in disabled state, or when a custom back color is specified; otherwise, preserving the theme back color
                 // When there is partial paint, we paint the possibly specified custom back color. On Mono only, because on Windows the drop-down size change threshold is different.
                 if (state == (int)DATEPICKERSTATES.DPS_DISABLED || (ShowCheckBox && !Checked) || !enabledBackColor.IsEmpty || !fullPaint)
+                {
+                    // Non-full paint here means that we paint only the background of the drop-down button area. Needed for Framework Mono to fix the messed-up calendar and up/down bounds.
+                    // NOTE: This paints the custom back color for the button area. Doing this on Mono only, because on Windows the width of the drop-down button cannot be predicted.
+                    Rectangle bounds = fullPaint ? layout.BackgroundBounds
+                        : IsCustomUpDownBounds ? layout.UpDownBounds
+                        : Rectangle.Intersect(layout.BackgroundBounds, layout.DropDownBounds);
+
+                    if (g.VisibleClipBounds.X < 0)
+                        bounds.Offset(layout.HorizontalOffset, 0);
                     g.FillRectangle(BackColor.GetBrush(), bounds);
+                }
                 return;
             }
 
             if (fullPaint)
             {
-                if (OSHelper.IsMono)
+                // On Framework Mono not clearing the drop-down button area
+                if (OSHelper.IsFrameworkMono)
                     g.FillRectangle(BackColor.GetBrush(), layout.BackgroundBounds);
                 else
                     g.Clear(BackColor);
             }
 
             // If the application was initialized with visual styles (even if they are not enabled), the borders are in the client area, so we need to draw them.
-            // Otherwise, the border belongs to the NC area.
-            if (fullPaint && VisualStyleHelper.InitializedWithVisualStyles && OSHelper.IsWindowsVistaOrLater || OSHelper.IsMono)
+            // On Framework Mono the border is always in the client area, and we always draw it.
+            // Otherwise, the border belongs to the NC area, including the case when executing on Wine.
+            // Not applying layout.HorizontalOffset here, because ControlPaint seems to be unaffected by the possible offset in RTL mode
+            if (fullPaint && VisualStyleHelper.InitializedWithVisualStyles && OSHelper.IsWindowsVistaOrLater || OSHelper.IsFrameworkMono)
                 ControlPaint.DrawBorder3D(g, ClientRectangle, Border3DStyle.Sunken);
         }
 
         private void PaintCheckBox(Graphics g, LayoutData layout, bool paintBackground)
         {
-            Debug.Assert(ShowCheckBox);
+            Debug.Assert(ShowCheckBox && !OSHelper.IsWine);
             
             if (VisualStyleHelper.RenderWithVisualStyles)
             {
@@ -969,28 +992,29 @@ namespace KGySoft.WinForms.Controls
                 }
                 else
                     VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, drawnBounds);
+
+                return;
             }
-            else
+            
+            var buttonState = ButtonState.Normal;
+            if (!Enabled)
+                buttonState |= ButtonState.Inactive;
+            if (Checked)
+                buttonState |= ButtonState.Checked;
+
+            if (!layout.IsRightToLeft || OSHelper.IsWindowsVistaOrLater || VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsFrameworkMono)
             {
-                var checkState = ButtonState.Normal;
-                if (!Enabled)
-                    checkState |= ButtonState.Inactive;
-                if (Checked)
-                    checkState |= ButtonState.Checked;
-
-                if (!layout.IsRightToLeft || OSHelper.IsWindowsVistaOrLater || VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsMono)
-                {
-                    ControlPaint.DrawCheckBox(g, layout.TranslatedCheckBoxBounds, checkState);
-                    return;
-                }
-
-                // Windows XP with no visual styles in RTL mode: the checkbox is drawn mirrored by ControlPaint
-                using var bmpCheckBox = new Bitmap(layout.CheckBoxBounds.Width, layout.CheckBoxBounds.Height, PixelFormat.Format32bppPArgb);
-                using (Graphics gBitmap = Graphics.FromImage(bmpCheckBox))
-                    ControlPaint.DrawCheckBox(gBitmap, 0, 0, layout.CheckBoxBounds.Width, layout.CheckBoxBounds.Height, checkState);
-                bmpCheckBox.RotateFlip(RotateFlipType.RotateNoneFlipX);
-                g.DrawImage(bmpCheckBox, layout.CheckBoxBounds);
+                ControlPaint.DrawCheckBox(g, layout.TranslatedCheckBoxBounds, buttonState);
+                return;
             }
+
+            // Windows XP with no visual styles in RTL mode: the checkbox is drawn mirrored by ControlPaint.
+            // NOTE: This is the case also with Wine, though we cannot paint a fixed checkbox there, because it's a real embedded native control that we can't paint over.
+            using var bmpCheckBox = new Bitmap(layout.CheckBoxBounds.Width, layout.CheckBoxBounds.Height, PixelFormat.Format32bppPArgb);
+            using (Graphics gBitmap = Graphics.FromImage(bmpCheckBox))
+                ControlPaint.DrawCheckBox(gBitmap, 0, 0, layout.CheckBoxBounds.Width, layout.CheckBoxBounds.Height, buttonState);
+            bmpCheckBox.RotateFlip(RotateFlipType.RotateNoneFlipX);
+            g.DrawImage(bmpCheckBox, layout.CheckBoxBounds);
         }
 
         private void PaintDropDownButton(Graphics g, LayoutData layout)
@@ -1006,20 +1030,23 @@ namespace KGySoft.WinForms.Controls
 
                 IntPtr theme = layout.IsCalendarDropDown ? VisualStyleHelper.DatePickerTheme : VisualStyleHelper.ComboBoxTheme;
                 int part = layout.IsCalendarDropDown ? (int)DATEPICKERPARTS.DP_SHOWCALENDARBUTTONRIGHT
-                    : !OSHelper.IsWindowsVistaOrLater ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTON
+                    : !OSHelper.IsWindowsVistaOrLater || OSHelper.IsWine ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTON
                     : layout.IsRightToLeft ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;
                 VisualStyleHelper.Render(theme, this, g, part, state, layout.DropDownBounds);
+                return;
             }
-            else if (!OSHelper.IsMono)
-            {
-                Rectangle bounds = OSHelper.IsWindowsVistaOrLater ? layout.TranslatedDropDownBounds : layout.DropDownBounds;
-                ControlPaint.DrawComboButton(g, bounds, !Enabled ? ButtonState.Inactive : flags[isPressed] ? ButtonState.Pushed : ButtonState.Normal);
-            }
+
+            // Framework mono with no visual styles: not drawing over the dropdown button, because ControlPaint draws with transparent background
+            if (OSHelper.IsFrameworkMono)
+                return;
+
+            Rectangle bounds = OSHelper.IsWindowsVistaOrLater ? layout.TranslatedDropDownBounds : layout.DropDownBounds;
+            ControlPaint.DrawComboButton(g, bounds, !Enabled ? ButtonState.Inactive : flags[isPressed] ? ButtonState.Pushed : ButtonState.Normal);
         }
 
         private void PaintUpDownButton(Graphics g, LayoutData layout)
         {
-            Debug.Assert(ShowUpDown && OSHelper.IsMono);
+            Debug.Assert(ShowUpDown && OSHelper.IsFrameworkMono);
             if (!VisualStyleHelper.RenderWithVisualStyles)
                 return;
 

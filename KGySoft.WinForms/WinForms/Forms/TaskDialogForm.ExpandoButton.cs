@@ -18,8 +18,6 @@
 using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
-using System.Drawing.Drawing2D;
-using System.Drawing.Imaging;
 using System.Windows.Forms;
 
 using KGySoft.WinForms.Controls;
@@ -375,7 +373,7 @@ namespace KGySoft.WinForms.Forms
                     rect.Offset(1, 1);
 
                 Color color = isHovered && !isPressed ? SystemColors.HotTrack : SystemColors.ControlText;
-                g.DrawImageColorized(ControlPaintHelper.GetArrowImage(rect.Size, isExpanded), rect, Color.Black, color);
+                g.DrawImageColorized(ControlPaintHelper.GetArrowImage(rect.Size, isExpanded), rect, color);
             }
 
 

@@ -34,7 +34,8 @@ using KGySoft.WinForms.Reflection;
 
 #region Used Aliases
 
-using Pen = System.Drawing.Pen;
+using GdiPen = System.Drawing.Pen;
+using KGyPen = KGySoft.Drawing.Shapes.Pen;
 
 #endregion
 
@@ -55,6 +56,8 @@ namespace KGySoft.WinForms
             CheckMark,
             ArrowUp,
             ArrowDown,
+            CommandLinkArrow,
+            CommandLinkArrowRtl,
         }
 
         #endregion
@@ -62,7 +65,7 @@ namespace KGySoft.WinForms
         #region Fields
 
         // Need to use a locking cache to be able to use DisposeDroppedValues, but it shouldn't be an issue as we don't expect many concurrent UI threads.
-        // Contains black drawings on a transparent background. Use GraphicsExtensions.DrawImageColorized to paint the result with a custom color.
+        // Contains black drawings on a transparent background. Use GraphicsExtensions.DrawImageColorized[Alpha] to paint the result with a custom color.
         private static readonly IThreadSafeCacheAccessor<(ControlElement, int, int), Bitmap> bitmapsCache = new Cache<(ControlElement, int, int), Bitmap>(GetBitmap, 8)
         {
             EnsureCapacity = true,
@@ -193,13 +196,14 @@ namespace KGySoft.WinForms
                 return;
 
             // fallback solution: manually drawing a simple focus rectangle, ignoring such fine details like rounding, etc.
-            using Pen pen = new(color);
+            using GdiPen pen = new(color);
             pen.DashStyle = DashStyle.Dot;
             graphics.DrawRectangle(pen, rectangle.X, rectangle.Y, rectangle.Width - 1, rectangle.Height - 1);
         }
 
         internal static Bitmap GetCheckImage(Size checkBoxSize) => bitmapsCache[(ControlElement.CheckMark, checkBoxSize.Width, checkBoxSize.Height)];
         internal static Bitmap GetArrowImage(Size size, bool isUp) => bitmapsCache[(isUp ? ControlElement.ArrowUp : ControlElement.ArrowDown, size.Width, size.Height)];
+        internal static Bitmap GetCommandLinkArrowImage(Size size, bool isRightToLeft) => bitmapsCache[(isRightToLeft ? ControlElement.CommandLinkArrowRtl : ControlElement.CommandLinkArrow, size.Width, size.Height)];
 
         #endregion
 
@@ -209,6 +213,7 @@ namespace KGySoft.WinForms
         {
             ControlElement.CheckMark => GetCheckBitmap(new Size(key.Width, key.Height)),
             ControlElement.ArrowUp or ControlElement.ArrowDown => GetArrowBitmap(new Size(key.Width, key.Height), key.Element),
+            ControlElement.CommandLinkArrow or ControlElement.CommandLinkArrowRtl => GetCommandLinkArrow(new Size(key.Width, key.Height), key.Element is ControlElement.CommandLinkArrowRtl),
             _ => throw new InvalidOperationException(Res.InternalError($"Unexpected element: {key.Element}"))
         };
 
@@ -254,6 +259,24 @@ namespace KGySoft.WinForms
                 bitmapData.DrawLine(black, left + i, y, left + width - i - 1, y);
             }
 
+            return result;
+        }
+
+        private static Bitmap GetCommandLinkArrow(Size size, bool isRightToLeft)
+        {
+            // Originally this wad drawn directly into the Graphics, but some platforms behave differently (e.g. Wine does not support antialiasing, or on Mono the offsets are slightly off)
+            // So using out managed drawing to provide the same result on all platforms.
+            var result = new Bitmap(size.Width, size.Height, PixelFormat.Format32bppPArgb);
+            using var bitmapData = result.GetReadWriteBitmapData();
+            var options = new DrawingOptions { AntiAliasing = true, DrawPathPixelOffset = PixelOffset.Half };
+
+            float unit = size.Width / 20f;
+            var pen = new KGyPen(Color.Black, Math.Max(2, 1.5f * unit));
+            var y = 12 * unit + 0.5f;
+            var x1 = (isRightToLeft ? 7 : 12) * unit;
+            var x2 = (isRightToLeft ? 1 : 18) * unit;
+            bitmapData.DrawLine(pen, new PointF(unit, y), new PointF(18 * unit, y), options);
+            bitmapData.DrawLines(pen, new PointF[] { new(x1, 6 * unit + 0.5f), new(x2, y), new(x1, 18 * unit + 0.5f) }, options);
             return result;
         }
 

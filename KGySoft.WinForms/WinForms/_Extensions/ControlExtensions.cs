@@ -375,10 +375,10 @@ namespace KGySoft.WinForms
                 return;
             }
 
-            // NOTE: Rendering by VisualStyles works always well (though on Mono/Windows), but it has a big performance cost, and it is required
+            // NOTE: Rendering by VisualStyles works always well (except on Framework Mono), but it has a big performance cost, and it is required
             // for some controls (e.g. TabPage). Still, not checking the possibly existing RenderTransparencyWithVisualStyles property for the parent,
             // because if that exists, we almost surely exited at TryPaintTransparentBackground above, so it's not really expected to use this branch.
-            if (VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsMono)
+            if (VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsFrameworkMono)
             {
                 ButtonRenderer.DrawParentBackground(g, bounds, c);
                 return;
@@ -396,10 +396,10 @@ namespace KGySoft.WinForms
                 // because they are not parents in the first place, and they would paint both the background and the foreground in OnPaint below.
                 parent.OnPaintBackground(transformedArgs);
 
-                // Workaround for mono: for drawing the frame of the GroupBox, Mono resets our translation, so it will appear in the child controls
+                // Workaround for framework mono: for drawing the frame of the GroupBox, Mono resets our translation, so it will appear in the child controls
                 // (the text is placed correctly though). So on Mono, we simply do not call OnPaint when the control is in a group box.
                 // Not an issue if the group box has no custom paint, and the possibly transparent children are placed inside the frame.
-                if (!OSHelper.IsMono || !VisualStyleHelper.RenderWithVisualStyles || !IsInGroupBox(parent))
+                if (!OSHelper.IsFrameworkMono || !VisualStyleHelper.RenderWithVisualStyles || !IsInGroupBox(parent))
                     parent.OnPaint(transformedArgs);
             }
             finally

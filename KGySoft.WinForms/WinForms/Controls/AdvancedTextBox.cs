@@ -299,11 +299,12 @@ namespace KGySoft.WinForms.Controls
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
 
-            // Needed because in Mono the base ctor calls the overridden BackColor/ForeColor setters
-            if (!OSHelper.IsMono)
-                return;
-            EnabledBackColor = default;
-            EnabledForeColor = default;
+            // Needed because in Framework Mono the base ctor calls the overridden BackColor/ForeColor setters
+            if (OSHelper.IsFrameworkMono)
+            {
+                EnabledBackColor = default;
+                EnabledForeColor = default;
+            }
         }
 
         #endregion
@@ -360,7 +361,7 @@ namespace KGySoft.WinForms.Controls
             // Custom paint for disabled state. On Mono, OnPaint is never called; still, for future compatibility, calling PaintDisabled only when it's not called from WM_PAINT.
             if (Enabled)
                 base.OnPaint(e);
-            else if (!OSHelper.IsMono && VisualStyleHelper.RenderWithVisualStyles)
+            else if (!OSHelper.IsFrameworkMono && VisualStyleHelper.RenderWithVisualStyles)
                 PaintDisabled(e.Graphics);
         }
 
@@ -372,10 +373,10 @@ namespace KGySoft.WinForms.Controls
                 case Constants.WM_PAINT:
                     CheckDpiChange();
 
-                    // Mono with visual styles works differently than the Framework implementation: it's the back color that cannot be customized without custom paint.
+                    // Framework Mono on Windows with visual styles works differently than the Framework implementation: it's the back color that cannot be customized without custom paint.
                     // And we must do it from here, because OnPaint is never called on Mono, no matter what we set in SetStyle.
                     // ReSharper disable once PossiblyImpureMethodCallOnReadonlyVariable - needed for older frameworks
-                    if (OSHelper.IsMono && OSHelper.IsWindows && VisualStyleHelper.RenderWithVisualStyles && !Enabled && DisabledBackColor.ToArgb() != defaultDisabledOrReadOnlyBackColor.ToArgb())
+                    if (OSHelper.IsWindowsMono && VisualStyleHelper.RenderWithVisualStyles && !Enabled && DisabledBackColor.ToArgb() != defaultDisabledOrReadOnlyBackColor.ToArgb())
                     {
                         using Graphics g = Graphics.FromHwnd(m.HWnd);
                         PaintDisabled(g);
@@ -536,7 +537,7 @@ namespace KGySoft.WinForms.Controls
             SetStyle(ControlStyles.UserPaint, newUserPaint);
 
             // preventing font corruption. It can occur when TextAlign/WordWrap/etc. was changed in disabled state
-            if (!OSHelper.IsMono)
+            if (OSHelper.IsRealWindows)
                 SetFont(font ?? defaultFont);
         }
 
@@ -581,12 +582,12 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            int firstCharIndex = OSHelper.IsMono ? 0 // on Mono GetCharIndexFromPosition always returns 0, whereas GetLineFromCharIndex always returns 1, even for a single line TextBox
+            int firstCharIndex = OSHelper.IsFrameworkMono ? 0 // on Mono GetCharIndexFromPosition always returns 0, whereas GetLineFromCharIndex always returns 1, even for a single line TextBox
                 : multiline ? GetFirstCharIndexFromLine(User32.SendMessage(Handle, Constants.EM_GETFIRSTVISIBLELINE, IntPtr.Zero, IntPtr.Zero).ToInt32())
                 : GetCharIndexFromPosition(Point.Empty);
             string text = Text.Substring(firstCharIndex);
             Font f = Font;
-            if (!multiline && !OSHelper.IsMono && TextAlign != HorizontalAlignment.Left && TextRenderer.MeasureText(g, text, f).Width > textRect.Width)
+            if (!multiline && /*!OSHelper.IsMono &&*/ TextAlign != HorizontalAlignment.Left && TextRenderer.MeasureText(g, text, f).Width > textRect.Width)
                 flags &= ~(TextFormatFlags.HorizontalCenter | TextFormatFlags.Right);
             TextRenderer.DrawText(g, text, f, textRect, ForeColor, flags);
         }

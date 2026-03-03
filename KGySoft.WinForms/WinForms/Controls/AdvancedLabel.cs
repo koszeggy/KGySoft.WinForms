@@ -695,7 +695,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             {
                 base.OnMouseMove(e);
             }
-            catch (NullReferenceException) when (OSHelper.IsMono) // workaround for Mono bug
+            catch (NullReferenceException) when (OSHelper.IsFrameworkMono) // workaround for Mono bug
             {
                 // at System.Windows.Forms.LinkLabel.PointInLink (System.Int32 x, System.Int32 y)
                 return;
@@ -716,7 +716,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             {
                 base.OnMouseDown(e);
             }
-            catch (NullReferenceException) when (OSHelper.IsMono) // workaround for Mono bug
+            catch (NullReferenceException) when (OSHelper.IsFrameworkMono) // workaround for Mono bug
             {
             }
         }
@@ -728,7 +728,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
             {
                 base.OnMouseUp(e);
             }
-            catch (NullReferenceException) when (OSHelper.IsMono) // workaround for Mono bug
+            catch (NullReferenceException) when (OSHelper.IsFrameworkMono) // workaround for Mono bug
             {
             }
         }
@@ -737,7 +737,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         protected override void OnForeColorChanged(EventArgs e)
         {
             base.OnForeColorChanged(e);
-            if (OSHelper.IsMono)
+            if (OSHelper.IsFrameworkMono)
                 Invalidate();
         }
 
@@ -745,10 +745,11 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         protected override void OnBackColorChanged(EventArgs e)
         {
             base.OnBackColorChanged(e);
-            if (!OSHelper.IsMono)
-                return;
-            Invalidate();
-            CheckStyles();
+            if (OSHelper.IsFrameworkMono)
+            {
+                Invalidate();
+                CheckStyles();
+            }
         }
 
         /// <inheritdoc />
@@ -1154,7 +1155,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 return;
             }
 
-            if (base.FlatStyle != FlatStyle.System || OSHelper.IsMono)
+            if (base.FlatStyle != FlatStyle.System || OSHelper.IsFrameworkMono)
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
         }
 

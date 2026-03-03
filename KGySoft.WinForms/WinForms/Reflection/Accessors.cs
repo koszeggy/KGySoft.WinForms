@@ -241,26 +241,26 @@ namespace KGySoft.WinForms.Reflection
 
         internal static void SetMouseEvents(this ComboBox comboBox)
         {
-            Debug.Assert(!OSHelper.IsMono);
+            Debug.Assert(!OSHelper.IsFrameworkMono);
             TryGetField(fieldComboBox_mouseEvents)?.SetInstanceValue(comboBox, true);
             TryGetField(fieldComboBox_mousePressed)?.SetInstanceValue(comboBox, true);
         }
 
         internal static Control? InnerListBox(this ComboBox comboBox)
         {
-            Debug.Assert(OSHelper.IsMono);
+            Debug.Assert(OSHelper.IsFrameworkMono);
             return TryGetProperty(propComboBox_ComboListBox)?.GetInstanceValue<ComboBox, Control?>(comboBox);
         }
 
         internal static TextBox? InnerTextBox(this ComboBox comboBox)
         {
-            Debug.Assert(OSHelper.IsMono);
+            Debug.Assert(OSHelper.IsFrameworkMono);
             return TryGetProperty(propComboBox_TextBox)?.GetInstanceValue<ComboBox, TextBox?>(comboBox);
         }
 
         internal static Rectangle? GetButtonArea(this ComboBox comboBox)
         {
-            Debug.Assert(OSHelper.IsMono);
+            Debug.Assert(OSHelper.IsFrameworkMono);
             return TryGetProperty(propComboBox_ButtonArea)?.GetInstanceValue<ComboBox, Rectangle>(comboBox);
         }
 
@@ -270,7 +270,7 @@ namespace KGySoft.WinForms.Reflection
 
         internal static Rectangle? DropDownArrowRect(this DateTimePicker dateTimePicker)
         {
-            Debug.Assert(OSHelper.IsMono);
+            Debug.Assert(OSHelper.IsFrameworkMono);
             return TryGetProperty(propDateTimePicker_DropDownArrowRect)?.GetInstanceValue<DateTimePicker, Rectangle>(dateTimePicker);
         }
 

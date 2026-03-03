@@ -364,7 +364,7 @@ namespace KGySoft.WinForms.Controls
         public Color DisabledForeColor
         {
             get => !disabledForeColor.IsEmpty ? disabledForeColor
-                : VisualStyleHelper.RenderWithVisualStyles && SystemDrawDropDownListMode && !OSHelper.IsMono
+                : VisualStyleHelper.RenderWithVisualStyles && SystemDrawDropDownListMode && !OSHelper.IsFrameworkMono
                     && DropDownStyle is ComboBoxStyle.DropDownList && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedDisabledDropDownListColor
                 : defaultDisabledForeColor;
             set
@@ -561,8 +561,8 @@ namespace KGySoft.WinForms.Controls
                     ResetColors();
 
                 // Handling read-only changes on Mono. Otherwise, it's handled in the native controls directly.
-                if (OSHelper.IsMono)
-                    AdjustReadOnlyOnMono();
+                if (OSHelper.IsFrameworkMono)
+                    AdjustReadOnlyOnFrameworkMono();
                 OnReadOnlyChanged(EventArgs.Empty);
             }
         }
@@ -571,7 +571,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Properties
 
-        private bool DrawByVisualStylesWhenDisabled => systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsMono
+        private bool DrawByVisualStylesWhenDisabled => systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsFrameworkMono
             && OSHelper.IsWindowsVistaOrLater && DropDownStyle == ComboBoxStyle.DropDownList && FlatStyle is FlatStyle.System or FlatStyle.Standard;
 
         #endregion
@@ -661,8 +661,8 @@ namespace KGySoft.WinForms.Controls
             // The base.OnHandleCreated creates the inner native window for Simple and DropDown modes only.
             base.OnHandleCreated(e);
 
-            // Hooking the native inner controls on .NET [Framework] only. On mono, it's in OnDropDownStyleChanged.
-            if (!OSHelper.IsMono)
+            // Hooking the native inner controls on .NET [Framework] only. On Framework Mono, it's in OnDropDownStyleChanged.
+            if (!OSHelper.IsFrameworkMono)
                 InitHooks();
 
             // BUG workaround: If DropDownStyle is Simple or DropDown, setting the font recreates the handle again, which will end up in a Win32Exception.
@@ -723,7 +723,7 @@ namespace KGySoft.WinForms.Controls
                 e.SuppressKeyPress = true;
             }
 
-            if (!OSHelper.IsMono || !e.SuppressKeyPress)
+            if (!OSHelper.IsFrameworkMono || !e.SuppressKeyPress)
                 base.OnKeyDown(e);
         }
 
@@ -736,14 +736,14 @@ namespace KGySoft.WinForms.Controls
                 e.Handled = e.KeyChar != (char)3; //!e.KeyChar.In((char)3, (char)13, (char)27);
             }
 
-            if (!OSHelper.IsMono || !e.Handled)
+            if (!OSHelper.IsFrameworkMono || !e.Handled)
                 base.OnKeyPress(e);
         }
 
         /// <inheritdoc />
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            if (!OSHelper.IsMono || !readOnly || DropDownStyle == ComboBoxStyle.Simple)
+            if (!OSHelper.IsFrameworkMono || !readOnly || DropDownStyle == ComboBoxStyle.Simple)
             {
                 base.OnMouseDown(e);
                 return;
@@ -821,9 +821,9 @@ namespace KGySoft.WinForms.Controls
             AdjustDrawMode();
             ResetColors(); // because DisabledForeColor depends on this property
 
-            // Handling read-only for new style on Mono. Otherwise, it's handled in OnHandleCreated.
-            if (OSHelper.IsMono)
-                AdjustReadOnlyOnMono();
+            // Handling read-only for new style on Framework Mono. Otherwise, it's handled in OnHandleCreated.
+            if (OSHelper.IsFrameworkMono)
+                AdjustReadOnlyOnFrameworkMono();
         }
 
         /// <summary>
@@ -871,7 +871,7 @@ namespace KGySoft.WinForms.Controls
                     else
                         base.WndProc(ref m);
 
-                    if (systemDrawDropDownListMode && DropDownStyle == ComboBoxStyle.DropDownList && !OSHelper.IsMono)
+                    if (systemDrawDropDownListMode && DropDownStyle == ComboBoxStyle.DropDownList && !OSHelper.IsFrameworkMono)
                     {
                         var bounds = OSHelper.IsWindows
                             ? User32.GetClientRect(m.HWnd, out RECT rect) ? rect.ToRectangle() : Rectangle.Empty
@@ -977,7 +977,7 @@ namespace KGySoft.WinForms.Controls
 
         private void InitHooks()
         {
-            Debug.Assert(IsHandleCreated && !OSHelper.IsMono);
+            Debug.Assert(IsHandleCreated && !OSHelper.IsFrameworkMono);
             if (DropDownStyle == ComboBoxStyle.Simple)
             {
                 // Hooking inner list box the same way as the base class does. In Simple mode the first child is the list box.
@@ -1016,7 +1016,7 @@ namespace KGySoft.WinForms.Controls
 
             OnMouseDown(new MouseEventArgs(MouseButtons.Left, m.Msg is Constants.WM_LBUTTONDOWN ? 1 : 2, m.LParam.SignedLOWORD(), m.LParam.SignedHIWORD(), 0));
 
-            if (OSHelper.IsMono)
+            if (OSHelper.IsFrameworkMono)
                 return;
 
             // This is required to raise the Click event when the mouse button is released
@@ -1026,7 +1026,7 @@ namespace KGySoft.WinForms.Controls
 
         private void AdjustDrawMode()
         {
-            bool customDraw = DropDownStyle == ComboBoxStyle.Simple || !systemDrawDropDownListMode || OSHelper.IsMono;
+            bool customDraw = DropDownStyle == ComboBoxStyle.Simple || !systemDrawDropDownListMode || OSHelper.IsFrameworkMono;
             DrawMode drawMode = customDraw ? DrawMode.OwnerDrawFixed : DrawMode.Normal;
             if (base.DrawMode != drawMode)
                 base.DrawMode = drawMode;
@@ -1191,9 +1191,9 @@ namespace KGySoft.WinForms.Controls
                 SelectionLength = 0;
         }
 
-        private void AdjustReadOnlyOnMono()
+        private void AdjustReadOnlyOnFrameworkMono()
         {
-            Debug.Assert(OSHelper.IsMono);
+            Debug.Assert(OSHelper.IsFrameworkMono);
             var style = DropDownStyle;
             if (style == ComboBoxStyle.Simple)
                 this.InnerListBox()?.Enabled = !readOnly;

@@ -84,7 +84,7 @@ namespace KGySoft.WinForms.Controls
                 {
                     if (owner.DesignMode || value == owner.checkBox || value == owner.contentPanel
                         // Linux/Mono workaround: prevent disabling ErrorProvider's user control when the content is disabled
-                        || (!OSHelper.IsWindows || OSHelper.IsMono) && value.GetType().DeclaringType == typeof(ErrorProvider))
+                        || (!OSHelper.IsWindows || OSHelper.IsFrameworkMono) && value.GetType().DeclaringType == typeof(ErrorProvider))
                     {
                         base.Add(value);
                     }
@@ -466,7 +466,7 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnRightToLeftChanged(e);
             ResetCheckBoxLocation();
-            if (OSHelper.IsMono)
+            if (OSHelper.IsFrameworkMono)
                 ResetBaseText();
         }
 
@@ -563,13 +563,13 @@ namespace KGySoft.WinForms.Controls
 
             // Mono GroupBox does not support RTL, so preventing the rendering of a big gap at the lift side in RTL mode when the back color is transparent.
             // TODO: Remove the Mono condition after implementing an AdvancedGroupBox with RTL support on all platforms
-            if (checkBox.BackColor.A == Byte.MaxValue || OSHelper.IsMono && RightToLeft == RightToLeft.Yes)
+            if (checkBox.BackColor.A == Byte.MaxValue || OSHelper.IsFrameworkMono && RightToLeft == RightToLeft.Yes)
             {
                 changingBaseText = true;
 
                 // On Mono with visual styles, or on Linux we must use som non-empty text to avoid stretching the frame, so using a zero-width space character.
                 // Unfortunately, this still causes a visible gap, though matters only when using Right-to-Left layout.
-                base.Text = OSHelper.IsMono && (VisualStyleHelper.RenderWithVisualStyles || !OSHelper.IsWindows) ? "\u200b" : String.Empty;
+                base.Text = OSHelper.IsFrameworkMono && (VisualStyleHelper.RenderWithVisualStyles || !OSHelper.IsWindows) ? "\u200b" : String.Empty;
                 changingBaseText = false;
                 return;
             }
@@ -579,7 +579,7 @@ namespace KGySoft.WinForms.Controls
             // - Mono/Linux: TextRenderer.MeasureText ignores spaces so we would go into an infinite loop
             // - Mono/Windows/NoVisualStyles: TextRenderer provides a closer result, even when rendering with GDI+
             // - Relying on UseCompatibleTextRendering on non-Mono-Windows with no VisualStyles only
-            bool useTextRenderer = VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsWindows && (OSHelper.IsMono || !UseCompatibleTextRendering);
+            bool useTextRenderer = VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsWindows && (OSHelper.IsFrameworkMono || !UseCompatibleTextRendering);
             Font font = checkBox.Font;
             int desiredWidth = checkBox.Width + referencePlaceholderPadding.Scale(this.GetScale().X);
             using Graphics g = CreateGraphics();
@@ -615,7 +615,16 @@ namespace KGySoft.WinForms.Controls
             }
 
             changingBaseText = true;
-            base.Text = spaces + '\u200d'; // adding ZWJ, because in some cases (Mono or no visual styles with compatible rendering) multiple spaces are ignored by GroupBox.Text
+            string text = spaces;
+
+            // adding ZWJ, because in some cases (Mono or no visual styles with compatible rendering) multiple spaces are ignored by GroupBox.Text
+            if (OSHelper.IsRealWindows && !VisualStyleHelper.RenderWithVisualStyles && UseCompatibleTextRendering
+                || OSHelper.IsFrameworkMono && !VisualStyleHelper.RenderWithVisualStyles)
+            {
+                text += '\u200d';
+            }
+
+            base.Text = text;
             changingBaseText = false;
         }
 

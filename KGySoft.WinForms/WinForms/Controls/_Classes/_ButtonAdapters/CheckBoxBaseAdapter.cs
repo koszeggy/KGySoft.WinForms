@@ -72,7 +72,7 @@ namespace KGySoft.WinForms.Controls
 
             checkBounds = Rectangle.Union(checkBounds, new Rectangle(checkBounds.X, checkBounds.Y, minCheckSize, minCheckSize));
             Bitmap checkImage = ControlPaintHelper.GetCheckImage(checkBounds.Size);
-            g.DrawImageColorized(checkImage, checkBounds, Color.Black, checkColor);
+            g.DrawImageColorized(checkImage, checkBounds, checkColor);
         }
 
         #endregion

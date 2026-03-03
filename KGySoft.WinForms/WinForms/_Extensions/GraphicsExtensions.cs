@@ -56,16 +56,46 @@ namespace KGySoft.WinForms
             graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attrs);
         }
 
-        internal static void DrawImageColorized(this Graphics graphics, Image image, Rectangle destRect, Color refColor, Color targetColor)
+        internal static void DrawImageColorized(this Graphics graphics, Image image, Rectangle destRect, Color targetColor)
         {
             ImageAttributes? attr = null;
             try
             {
-                if (refColor.ToArgb() != targetColor.ToArgb())
+                if (targetColor.ToArgb() != Color.Black.ToArgb())
                 {
                     attr = new ImageAttributes();
-                    var map = new ColorMap { OldColor = refColor, NewColor = targetColor };
+                    var map = new ColorMap { OldColor = Color.Black, NewColor = targetColor };
                     attr.SetRemapTable([map], ColorAdjustType.Bitmap);
+                }
+
+                graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attr);
+            }
+            finally
+            {
+                attr?.Dispose();
+            }
+        }
+
+        internal static void DrawImageColorizedAlpha(this Graphics graphics, Image image, Rectangle destRect, Color targetColor)
+        {
+            ImageAttributes? attr = null;
+            try
+            {
+                if (targetColor.ToArgb() != Color.Black.ToArgb())
+                {
+                    attr = new ImageAttributes();
+                    var colorMatrix = new ColorMatrix(new float[][]
+                    {
+                        // Using the identity matrix for the RGBA multipliers, and the target color RGB for the added values.
+                        // This works if the original color is black.
+                        new float[] { 1f, 0f, 0f, 0f, 0f },
+                        new float[] { 0f, 1f, 0f, 0f, 0f },
+                        new float[] { 0f, 0f, 1f, 0f, 0f },
+                        new float[] { 0f, 0f, 0f, 1f, 0f },
+                        new float[] { targetColor.R / 255f, targetColor.G / 255f, targetColor.B / 255f, 0, 1f }
+                    });
+
+                    attr.SetColorMatrix(colorMatrix);
                 }
 
                 graphics.DrawImage(image, destRect, 0, 0, image.Width, image.Height, GraphicsUnit.Pixel, attr);

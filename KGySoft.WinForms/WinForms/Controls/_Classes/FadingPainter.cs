@@ -156,8 +156,8 @@ namespace KGySoft.WinForms.Controls
             {
                 State = host.State;
 
-                // On Windows, Mono throws an exception from BufferedGraphicsContext.Allocate, so leaving the paint without double buffering
-                if (OSHelper.IsMono && OSHelper.IsWindows)
+                // On Windows, Framework Mono throws an exception from BufferedGraphicsContext.Allocate, so leaving the paint without double buffering
+                if (OSHelper.IsWindowsMono)
                 {
                     host.PaintState(State, e);
                     return;
@@ -252,9 +252,9 @@ namespace KGySoft.WinForms.Controls
                 Enabled = false;
             else
                 isFailing = true;
-            
+
             // On Windows, Mono throws an exception from BufferedGraphicsContext.Allocate, so leaving the paint without double buffering
-            if (OSHelper.IsMono && OSHelper.IsWindows)
+            if (OSHelper.IsWindowsMono)
             {
                 host.PaintState(newState, e);
                 return;

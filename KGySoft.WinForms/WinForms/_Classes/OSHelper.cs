@@ -124,6 +124,7 @@ namespace KGySoft.WinForms
 
         internal static bool IsFrameworkMono => IsMono && !IsWine;
         internal static bool IsWindowsMono => IsFrameworkMono && IsWindows;
+        internal static bool IsRealWindows => IsWindows && !IsMono && !IsWine;
 
         #endregion
 

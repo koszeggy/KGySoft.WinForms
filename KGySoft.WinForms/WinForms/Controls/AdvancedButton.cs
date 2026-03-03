@@ -612,7 +612,7 @@ namespace KGySoft.WinForms.Controls
                         FlatStyle.Flat => new ButtonFlatAdapter(this),
                         FlatStyle.Popup => new ButtonPopupAdapter(this),
                         FlatStyle.Standard => new ButtonStandardAdapter(this),
-                        FlatStyle.System when OSHelper.IsMono => new ButtonStandardAdapter(this),
+                        FlatStyle.System when OSHelper.IsFrameworkMono => new ButtonStandardAdapter(this),
                         _ => throw new InvalidOperationException()
                     };
 
@@ -658,7 +658,7 @@ namespace KGySoft.WinForms.Controls
                 return preferredSize;
 
             // System mode
-            if (base.FlatStyle == FlatStyle.System && !OSHelper.IsMono)
+            if (base.FlatStyle == FlatStyle.System && !OSHelper.IsFrameworkMono)
             {
                 if (base.Image == null && !isElevated)
                     preferredSize = base.GetPreferredSize(proposedSize);
@@ -1027,7 +1027,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnForeColorChanged(EventArgs e)
         {
             base.OnForeColorChanged(e);
-            if (OSHelper.IsMono)
+            if (OSHelper.IsFrameworkMono)
                 Invalidate();
         }
 
@@ -1035,10 +1035,11 @@ namespace KGySoft.WinForms.Controls
         protected override void OnBackColorChanged(EventArgs e)
         {
             base.OnBackColorChanged(e);
-            if (!OSHelper.IsMono)
-                return;
-            Invalidate();
-            CheckStyles();
+            if (OSHelper.IsFrameworkMono)
+            {
+                Invalidate();
+                CheckStyles();
+            }
         }
 
         /// <summary>
@@ -1153,7 +1154,7 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            if (base.FlatStyle != FlatStyle.System || OSHelper.IsMono)
+            if (base.FlatStyle != FlatStyle.System || OSHelper.IsFrameworkMono)
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
         }
 
@@ -1206,7 +1207,9 @@ namespace KGySoft.WinForms.Controls
                 if (!isElevated && currentImage == base.Image
                     || currentImage == null && base.Image == null
                     || isElevated && (base.FlatStyle == FlatStyle.System ^ base.Image != null) && ReferenceEquals(currentImage, SecurityShieldImage))
+                {
                     return false;
+                }
             }
 
             // Resetting System FlatStyle if it was faked and there is no image anymore
@@ -1214,7 +1217,7 @@ namespace KGySoft.WinForms.Controls
                 base.FlatStyle = lastFlatStyle = FlatStyle.System;
 
             // Image > Elevated > no image
-            if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater && !OSHelper.IsMono)
+            if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater && !OSHelper.IsFrameworkMono)
                 this.SetSystemSize(new Size(Int32.MinValue, Int32.MinValue));
 
             Invalidate();
@@ -1225,14 +1228,17 @@ namespace KGySoft.WinForms.Controls
                 currentImage = base.Image;
                 if (base.FlatStyle == FlatStyle.System)
                 {
-                    if (!OSHelper.IsWindowsVistaOrLater || OSHelper.IsMono || !VisualStyleHelper.InitializedWithVisualStyles)
+                    // NOTE: BM_SETIMAGE would work also on Wine, but only as long as Image is not nullified, in which case on Wine the image is not removed by BCM_SETSHIELD null.
+                    if (!OSHelper.IsWindowsVistaOrLater || !OSHelper.IsRealWindows || !VisualStyleHelper.InitializedWithVisualStyles)
                     {
                         base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
                         return true;
                     }
 
-                    Bitmap bmp = base.Image as Bitmap ?? new Bitmap(base.Image); // TODO
+                    Bitmap bmp = base.Image as Bitmap ?? new Bitmap(base.Image);
                     User32.SendMessage(Handle, Constants.BM_SETIMAGE, new IntPtr(1), bmp.GetHicon());
+                    if (!ReferenceEquals(bmp, base.Image))
+                        bmp.Dispose();
                 }
 
                 return true;
@@ -1243,12 +1249,11 @@ namespace KGySoft.WinForms.Controls
             if (isElevated)
             {
                 currentImage = SecurityShieldImage;
-
-                if (base.FlatStyle != FlatStyle.System || !OSHelper.IsWindowsVistaOrLater || OSHelper.IsMono || !VisualStyleHelper.InitializedWithVisualStyles)
+                if (base.FlatStyle != FlatStyle.System || !OSHelper.IsWindowsVistaOrLater || !OSHelper.IsRealWindows || !VisualStyleHelper.InitializedWithVisualStyles)
                 {
                     base.Image = currentImage;
 
-                    if (!OSHelper.IsWindowsVistaOrLater || OSHelper.IsMono || !VisualStyleHelper.InitializedWithVisualStyles)
+                    if (base.FlatStyle == FlatStyle.System && (!OSHelper.IsWindowsVistaOrLater || !OSHelper.IsRealWindows || !VisualStyleHelper.InitializedWithVisualStyles))
                         base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
 
                     return true;
@@ -1257,10 +1262,8 @@ namespace KGySoft.WinForms.Controls
                 if (IsHandleCreated)
                     User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, new IntPtr(1));
             }
-            else if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater && !OSHelper.IsMono && IsHandleCreated)
-            {
+            else if (base.FlatStyle == FlatStyle.System && OSHelper.IsWindowsVistaOrLater && OSHelper.IsRealWindows && IsHandleCreated)
                 User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, IntPtr.Zero);
-            }
 
             return true;
         }

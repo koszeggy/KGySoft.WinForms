@@ -21,9 +21,18 @@ using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Runtime.CompilerServices;
 using System.Windows.Forms;
+
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Forms;
 using KGySoft.WinForms.WinApi;
+
+#endregion
+
+#region Suppressions
+
+#if NETFRAMEWORK
+// ReSharper disable NullCoalescingConditionIsAlwaysNotNullAccordingToAPIContract - Different nullability annotations in frameworks 
+#endif
 
 #endregion
 
@@ -653,7 +662,7 @@ namespace KGySoft.WinForms
             if (control == null!)
                 ThrowNull(nameof(control));
 
-            if (OSHelper.IsMono)
+            if (OSHelper.IsFrameworkMono)
                 return scrollbarFallbackReferenceSize.Scale(control.GetScale());
 
             int perMonitorDpiAwarenessVersion = PerMonitorDpiAwarenessVersion;
@@ -670,7 +679,7 @@ namespace KGySoft.WinForms
         /// <returns>A <see cref="Size"/> representing the recommended width and height of scrollbars.</returns>
         public static Size GetScrollBarSize(IntPtr hWnd)
         {
-            if (OSHelper.IsMono)
+            if (OSHelper.IsFrameworkMono)
                 return scrollbarFallbackReferenceSize.Scale(GetScale(hWnd));
 
             int perMonitorDpiAwarenessVersion = PerMonitorDpiAwarenessVersion;

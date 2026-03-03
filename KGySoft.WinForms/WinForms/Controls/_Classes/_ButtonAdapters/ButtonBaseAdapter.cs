@@ -131,7 +131,7 @@ namespace KGySoft.WinForms.Controls
                 if (colors.IsHighContrastHighlighted)
                     colors.ButtonFace = SystemColors.Highlight;
 
-                // On Mono, graphics.GetNearestColor returns the empty color
+                // On Mono (both Framework and Wine), graphics.GetNearestColor returns the empty color
                 if (!OSHelper.IsMono)
                 {
                     colors.ButtonFace = graphics.GetNearestColor(colors.ButtonFace);
@@ -329,7 +329,6 @@ namespace KGySoft.WinForms.Controls
             internal Size GetPreferredSizeCore(Graphics g, Size proposedSize)
             {
                 // Get space required for border and padding
-                //
                 int linearBorderAndPadding = BorderSize * 2 + PaddingSize * 2;
                 if (GrowBorderBy1PxWhenDefault)
                     linearBorderAndPadding += 2;
@@ -337,41 +336,23 @@ namespace KGySoft.WinForms.Controls
                 proposedSize -= bordersAndPadding;
 
                 // Get space required for Check
-                //
                 int checkSizeLinear = FullCheckSize;
                 Size checkSize = checkSizeLinear > 0 ? new Size(checkSizeLinear + 1, checkSizeLinear) : Size.Empty;
 
                 // Get space required for Image - textImageInset compensated for by expanding image.
-                //
                 Size textImageInsetSize = new Size(textImageInset * 2, textImageInset * 2);
                 Size requiredImageSize = (ImageSize != Size.Empty) ? ImageSize + textImageInsetSize : Size.Empty;
 
-                // Pack Text into remaning space
-                //
+                // Pack Text into remaining space
                 proposedSize -= textImageInsetSize;
                 proposedSize = Decompose(checkSize, requiredImageSize, proposedSize);
 
                 Size textSize = Size.Empty;
 
-                if (!string.IsNullOrEmpty(Text))
-                {
-                    // When Button.AutoSizeMode is set to GrowOnly TableLayoutPanel expects buttons not to automatically wrap on word break. If
-                    // there's enough room for the text to word-wrap then it will happen but the layout would not be adjusted to allow text wrapping.
-                    // If someone has a carriage return in the text we'll honor that for preferred size, but we wont wrap based on constraints.
-                    // See VSW#542448,537840,515227.
-                    //try
-                    //{
-                    //    //disableWordWrapping = true;
+                if (!String.IsNullOrEmpty(Text))
                     textSize = GetTextSize(g, proposedSize) + textImageInsetSize;
-                    //}
-                    //finally
-                    //{
-                    //    //disableWordWrapping = false;
-                    //}
-                }
 
                 // Combine pieces to get final preferred size
-                //
                 Size requiredSize = Compose(checkSize, ImageSize, textSize);
                 requiredSize += bordersAndPadding;
 
@@ -388,7 +369,6 @@ namespace KGySoft.WinForms.Controls
                 layout.Face = Rectangle.Inflate(layout.Client, -fullBorderSize, -fullBorderSize);
 
                 // checkBounds, checkArea, field
-                //
                 CalcCheckmarkRectangle(layout);
 
                 // imageBounds, imageLocation, textBounds
@@ -1085,7 +1065,7 @@ namespace KGySoft.WinForms.Controls
 
             // Mono/Windows bug: the VerticalCenter flag kills word wrapping, so clearing it for check box and radio button.
             // Centering is actually not really needed when AutoSize is true, at least when the preferred size can be applied properly.
-            if (OSHelper.IsMono && OSHelper.IsWindows && control.AutoSize && !IsButton)
+            if (OSHelper.IsWindowsMono && control.AutoSize && !IsButton)
                 formatFlags &= ~TextFormatFlags.VerticalCenter;
 
             // Draw text using GDI (.NET Framework 2.0+ feature).

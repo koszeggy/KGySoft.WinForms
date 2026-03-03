@@ -637,7 +637,7 @@ namespace KGySoft.WinForms.Controls
             // Standard/System flat style with visual styles: reporting transparent background. This fixes the ugly stripes issue
             // when the parent is enlarged while the control is partially invisible, for example.
             // Not applying on Mono, because it turns fading animations off to prevent flickering.
-            get => !OSHelper.IsMono && !DesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
+            get => !OSHelper.IsFrameworkMono && !DesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
                 : !enabledBackColor.IsEmpty ? enabledBackColor
                 : base.BackColor;
             set
@@ -680,7 +680,7 @@ namespace KGySoft.WinForms.Controls
             // Standard/System flat style with visual styles: reporting transparent background. This fixes the ugly stripes issue
             // when the parent is enlarged while the control is partially invisible, for example.
             // Not applying on Mono, because it turns fading animations off to prevent flickering.
-            get => !OSHelper.IsMono && !DesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
+            get => !OSHelper.IsFrameworkMono && !DesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
                 : !disabledBackColor.IsEmpty ? disabledBackColor
                 : base.BackColor;
             set
@@ -949,7 +949,7 @@ namespace KGySoft.WinForms.Controls
         /// Gets whether Vista+ system rendering is used.
         /// NOTE: it does NOT mean that theming is also used.
         /// </summary>
-        private bool IsNativeRendering => base.FlatStyle == FlatStyle.System && IsNativelySupported && !OSHelper.IsMono;
+        private bool IsNativeRendering => base.FlatStyle == FlatStyle.System && IsNativelySupported && !OSHelper.IsFrameworkMono;
 
         private Font DefaultTextFont
         {
@@ -1299,7 +1299,7 @@ namespace KGySoft.WinForms.Controls
         {
             switch (m.Msg)
             {
-                case Constants.WM_PAINT when base.FlatStyle == FlatStyle.System && !OSHelper.IsMono:
+                case Constants.WM_PAINT when base.FlatStyle == FlatStyle.System && !OSHelper.IsFrameworkMono:
                     // Image and FlatStyle are not overridable properties so in case of native rendering reacting their change here.
                     // (On custom rendering, image change is handled in OnPaint)
                     if (base.FlatStyle != lastFlatStyle)
@@ -1592,7 +1592,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnForeColorChanged(EventArgs e)
         {
             base.OnForeColorChanged(e);
-            if (OSHelper.IsMono)
+            if (OSHelper.IsFrameworkMono)
                 Invalidate();
         }
 
@@ -1600,10 +1600,11 @@ namespace KGySoft.WinForms.Controls
         protected override void OnBackColorChanged(EventArgs e)
         {
             base.OnBackColorChanged(e);
-            if (!OSHelper.IsMono)
-                return;
-            Invalidate();
-            CheckStyles();
+            if (OSHelper.IsFrameworkMono)
+            {
+                Invalidate();
+                CheckStyles();
+            }
         }
 
         /// <summary>
@@ -1742,7 +1743,7 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, base.FlatStyle != FlatStyle.System || OSHelper.IsMono);
+            SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, base.FlatStyle != FlatStyle.System || OSHelper.IsFrameworkMono);
         }
 
         private void CheckDefaultAnimation()
@@ -1787,7 +1788,7 @@ namespace KGySoft.WinForms.Controls
                 base.FlatStyle = lastFlatStyle = FlatStyle.Standard;
             }
 
-            if (recreateHandle && !OSHelper.IsMono)
+            if (recreateHandle && !OSHelper.IsFrameworkMono)
                 RecreateHandle();
             CheckDefaultAnimation();
 
@@ -2045,19 +2046,11 @@ namespace KGySoft.WinForms.Controls
                 // - if the size is not the same as the default size
                 if (isSimpleArrow && (isRightToLeft || isCustomDrawnArrow))
                 {
-                    e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-                    e.Graphics.PixelOffsetMode = PixelOffsetMode.Half;
                     var color = !state.Enabled ? DisabledForeColor
                         : state.Pressed ? PressedTextColor
                         : state.Hovered ? HighlightTextColor
                         : ForeColor;
-                    float unit = bounds.Width / 20f;
-                    using Pen pen = new Pen(color, Math.Max(2, 1.5f * unit));
-                    var y = bounds.Y + 12 * unit;
-                    var x1 = bounds.X + (isRightToLeft ? 7 : 12) * unit;
-                    var x2 = bounds.X + (isRightToLeft ? 1 : 18) * unit;
-                    e.Graphics.DrawLine(pen, bounds.X + unit, y, bounds.X + 18 * unit, y);
-                    e.Graphics.DrawLines(pen, new PointF[] { new(x1, bounds.Y + 6 * unit), new(x2, y), new(x1, bounds.Y + 18 * unit) });
+                    e.Graphics.DrawImageColorizedAlpha(ControlPaintHelper.GetCommandLinkArrowImage(bounds.Size, isRightToLeft), bounds, color);
 
                     return;
                 }

@@ -475,7 +475,7 @@ namespace KGySoft.WinForms.Controls
                         FlatStyle.Flat => new RadioButtonFlatAdapter(this),
                         FlatStyle.Popup => new RadioButtonPopupAdapter(this),
                         FlatStyle.Standard => new RadioButtonStandardAdapter(this),
-                        FlatStyle.System when OSHelper.IsMono => new RadioButtonStandardAdapter(this),
+                        FlatStyle.System when OSHelper.IsFrameworkMono => new RadioButtonStandardAdapter(this),
                         _ => throw new InvalidOperationException()
                     };
                     lastAdapterType = base.FlatStyle;
@@ -504,7 +504,7 @@ namespace KGySoft.WinForms.Controls
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
-            if (OSHelper.IsMono)
+            if (OSHelper.IsFrameworkMono)
                 SetAutoSizeMode(AutoSizeMode.GrowAndShrink);
         }
 
@@ -523,7 +523,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="proposedSize">The custom-sized area for a control.</param>
         public override Size GetPreferredSize(Size proposedSize)
         {
-            if (FlatStyle == FlatStyle.System && !OSHelper.IsMono)
+            if (FlatStyle == FlatStyle.System && !OSHelper.IsFrameworkMono)
                 return base.GetPreferredSize(proposedSize);
 
             if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out var preferredSize))
@@ -842,7 +842,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnForeColorChanged(EventArgs e)
         {
             base.OnForeColorChanged(e);
-            if (OSHelper.IsMono)
+            if (OSHelper.IsFrameworkMono)
                 Invalidate();
         }
 
@@ -850,10 +850,11 @@ namespace KGySoft.WinForms.Controls
         protected override void OnBackColorChanged(EventArgs e)
         {
             base.OnBackColorChanged(e);
-            if (!OSHelper.IsMono)
-                return;
-            Invalidate();
-            CheckStyles();
+            if (OSHelper.IsFrameworkMono)
+            {
+                Invalidate();
+                CheckStyles();
+            }
         }
 
         /// <summary>
@@ -948,7 +949,7 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            if (base.FlatStyle != FlatStyle.System || OSHelper.IsMono)
+            if (base.FlatStyle != FlatStyle.System || OSHelper.IsFrameworkMono)
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
         }
 
