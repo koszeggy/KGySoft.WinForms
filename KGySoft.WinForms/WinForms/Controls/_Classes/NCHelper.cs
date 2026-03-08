@@ -46,21 +46,24 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Draws a border in nonclient area.
         /// </summary>
-        internal static void DrawBorderNC(IntPtr hWnd, Size size, AdvancedBorderStyle borderStyle)
+        internal static void DrawBorderNC(IntPtr hWnd, Size size, AdvancedBorderStyle borderStyle, bool disableMirroring = false)
         {
             Debug.Assert(OSHelper.IsWindows);
             if (borderStyle == AdvancedBorderStyle.None)
                 return;
 
-            IntPtr hDC = User32.GetWindowDC(hWnd);
+            IntPtr hdc = User32.GetWindowDC(hWnd);
             try
             {
-                using Graphics g = Graphics.FromHdc(hDC);
+                // NOTE: Not passing disableMirroring to DrawBorder, which is intended. It is cheaper to disable mirroring before creating the Graphics instance.
+                if (disableMirroring)
+                    Gdi32.SetLayout(hdc, 0);
+                using Graphics g = Graphics.FromHdc(hdc);
                 g.DrawBorder(borderStyle, new Rectangle(Point.Empty, size));
             }
             finally
             {
-                User32.ReleaseDC(hWnd, hDC);
+                User32.ReleaseDC(hWnd, hdc);
             }
         }
 

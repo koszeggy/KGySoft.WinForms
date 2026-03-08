@@ -78,8 +78,8 @@ namespace KGySoft.WinForms.Controls
 
             internal LayoutData(AdvancedDateTimePicker control, Graphics g)
             {
-                // Strange behavior: if the control is RTL, VisibleClipBounds.X is -1 so the calculated rects are off by one pixel.
-                // Cannot fix it simply by g.TranslateTransform, because it affects only GDI+ draw operations, but not theme drawing or some ControlPaint methods, so not applying it globally.
+                // Strange behavior: if the control is RTL, VisibleClipBounds.X is -1 so the calculated rects are off by one pixel (on real Windows).
+                // Actually the bounds for rendering are still in ClientRectangle, but draw/fill operations are affected by it.
                 if (g.VisibleClipBounds.X < 0)
                     HorizontalOffset = (int)g.VisibleClipBounds.X;
 
@@ -205,10 +205,9 @@ namespace KGySoft.WinForms.Controls
                 if (rtl)
                     textRect.X += dropDownSize - HorizontalOffset;
 
-                // Even stranger TextRenderer behavior: Somehow it recognizes the RTL layout (is it in the native DC somewhere?),
+                // Even stranger TextRenderer behavior: It recognizes the RTL layout (though g.DrawString does not),
                 // so we have to undo the translation that we made for the calculations above.
-                // This behavior is different from every other custom rendering that we use with TextRenderer and GetFormatFlags.
-                // Note that if we used g.DrawString instead, it would need the original flags and the original rectangle.
+                // This behavior is different from every other control's custom rendering that we use with TextRenderer and GetFormatFlags.
                 //TranslatedTextBounds = textRect; // TODO: uncomment if it will be needed, e.g. if Mono will support RTL, and it does not do the translation
                 if (rtl)
                     textRect.X -= dropDownSize - checkBoxPadding;
@@ -570,6 +569,10 @@ namespace KGySoft.WinForms.Controls
                         g.FillRectangle(BackColor.GetBrush(), ClientRectangle);
                     return;
 
+                case Constants.WM_NCPAINT when OSHelper.IsWindows && !VisualStyleHelper.RenderWithVisualStyles && Size != ClientSize && RightToLeftLayout && RightToLeft == RightToLeft.Yes:
+                    NCHelper.DrawBorderNC(m.HWnd, Size, AdvancedBorderStyle.SunkenLow, true);
+                    return;
+
                 case Constants.WM_PAINT:
                     // Needed because there is no [On]CheckedChanged.
                     // It's important that it's before the base.WndProc call, so there will not be extra paint if color changes cause invalidation.
@@ -927,6 +930,7 @@ namespace KGySoft.WinForms.Controls
                         : IsCustomUpDownBounds ? layout.UpDownBounds
                         : Rectangle.Intersect(layout.BackgroundBounds, layout.DropDownBounds);
 
+                    // The offset of VisibleClipBounds in RTL mode actually should not matter when drawing, but with the default pixel offset mode it makes a difference.
                     if (g.VisibleClipBounds.X < 0)
                         bounds.Offset(layout.HorizontalOffset, 0);
                     g.FillRectangle(BackColor.GetBrush(), bounds);
@@ -944,11 +948,10 @@ namespace KGySoft.WinForms.Controls
             }
 
             // If the application was initialized with visual styles (even if they are not enabled), the borders are in the client area, so we need to draw them.
-            // On Framework Mono the border is always in the client area, and we always draw it.
-            // Otherwise, the border belongs to the NC area, including the case when executing on Wine.
-            // Not applying layout.HorizontalOffset here, because ControlPaint seems to be unaffected by the possible offset in RTL mode
-            if (fullPaint && VisualStyleHelper.InitializedWithVisualStyles && OSHelper.IsWindowsVistaOrLater || OSHelper.IsFrameworkMono)
-                ControlPaint.DrawBorder3D(g, ClientRectangle, Border3DStyle.Sunken);
+            // On Framework Mono the border is always in the client area, whereas in Windows XP or Wine the border is always in the NC area.
+            // Detecting the case by checking if the client size covers the whole control.
+            if (fullPaint && Size == ClientSize)
+                g.DrawBorder(AdvancedBorderStyle.SunkenLow, ClientRectangle, layout.IsRightToLeft);
         }
 
         private void PaintCheckBox(Graphics g, LayoutData layout, bool paintBackground)

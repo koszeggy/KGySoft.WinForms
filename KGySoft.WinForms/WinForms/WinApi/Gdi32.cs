@@ -81,6 +81,16 @@ namespace KGySoft.WinForms.WinApi
         [return: MarshalAs(UnmanagedType.Bool)]
         public static extern bool DeleteObject(IntPtr ho);
 
+        /// <summary>
+        /// The SetLayout function changes the layout of a device context (DC).
+        /// </summary>
+        /// <param name="hdc">A handle to the DC.</param>
+        /// <param name="l">The DC layout. This parameter can be one or more of the following values.</param>
+        /// <returns>If the function succeeds, it returns the previous layout of the DC.
+        /// If the function fails, it returns GDI_ERROR.</returns>
+        [DllImport("gdi32.dll")]
+        internal static extern uint SetLayout(IntPtr hdc, uint l);
+        
         #endregion
     }
 }
