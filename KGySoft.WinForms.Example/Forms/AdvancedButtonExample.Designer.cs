@@ -236,7 +236,7 @@
             this.advancedButton13.FlatStyle = System.Windows.Forms.FlatStyle.Flat;
             this.advancedButton13.Location = new System.Drawing.Point(186, 91);
             this.advancedButton13.Name = "advancedButton13";
-            this.advancedButton13.Size = new System.Drawing.Size(199, 23);
+            this.advancedButton13.Size = new System.Drawing.Size(220, 23);
             this.advancedButton13.TabIndex = 7;
             this.advancedButton13.Text = "AdvancedButton FlatStyle=Flat";
             this.advancedButton13.UseVisualStyleBackColor = true;
@@ -246,7 +246,7 @@
             this.advancedButton12.FlatStyle = System.Windows.Forms.FlatStyle.Popup;
             this.advancedButton12.Location = new System.Drawing.Point(186, 67);
             this.advancedButton12.Name = "advancedButton12";
-            this.advancedButton12.Size = new System.Drawing.Size(199, 23);
+            this.advancedButton12.Size = new System.Drawing.Size(220, 23);
             this.advancedButton12.TabIndex = 6;
             this.advancedButton12.Text = "AdvancedButton FlatStyle=Popup";
             this.advancedButton12.UseVisualStyleBackColor = true;
@@ -255,7 +255,7 @@
             // 
             this.advancedButton11.Location = new System.Drawing.Point(186, 43);
             this.advancedButton11.Name = "advancedButton11";
-            this.advancedButton11.Size = new System.Drawing.Size(199, 23);
+            this.advancedButton11.Size = new System.Drawing.Size(220, 23);
             this.advancedButton11.TabIndex = 5;
             this.advancedButton11.Text = "AdvancedButton FlatStyle=Standard";
             this.advancedButton11.UseVisualStyleBackColor = true;
@@ -265,7 +265,7 @@
             this.advancedButton10.FlatStyle = System.Windows.Forms.FlatStyle.System;
             this.advancedButton10.Location = new System.Drawing.Point(186, 19);
             this.advancedButton10.Name = "advancedButton10";
-            this.advancedButton10.Size = new System.Drawing.Size(199, 23);
+            this.advancedButton10.Size = new System.Drawing.Size(220, 23);
             this.advancedButton10.TabIndex = 4;
             this.advancedButton10.Text = "AdvancedButton FlatStyle=System";
             this.advancedButton10.UseVisualStyleBackColor = true;
@@ -313,7 +313,7 @@
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(650, 490);
+            this.ClientSize = new System.Drawing.Size(660, 490);
             this.Name = "AdvancedButtonExample";
             this.Text = "AdvancedButtonExample";
             this.pnlTestArea.ResumeLayout(false);

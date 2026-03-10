@@ -21,6 +21,7 @@ using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
@@ -79,7 +80,22 @@ namespace KGySoft.WinForms.Example.Controls
 
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            if (keyData == Keys.Enter)
+            #region Local Methods
+
+            [DllImport("user32.dll")]
+            static extern short GetKeyState(int nVirtKey);
+
+            // Gets whether Enter is really pressed. Needed because selecting a suggested item by mouse raises the ProcessCmdKey with Enter
+            static bool IsEnterDown()
+            {
+                if (!OSHelper.IsWindows)
+                    return true;
+                return GetKeyState((int)Keys.Enter) < 0;
+            }
+
+            #endregion
+
+            if (keyData == Keys.Enter && IsEnterDown())
             {
                 SetProperty();
                 return true;
@@ -203,6 +219,8 @@ namespace KGySoft.WinForms.Example.Controls
                         value = Image.FromFile(propertyValue);
                     else if (propertyDescriptor.PropertyType == typeof(Icon))
                         value = new Icon(propertyValue);
+                    else if (propertyDescriptor.PropertyType == typeof(bool))
+                        value = propertyValue.Convert<bool>(); // to allow 0 or 1
                     else
                     {
                         value = propertyDescriptor.Converter is TypeConverter converter && converter.CanConvertFrom(typeof(string))
