@@ -379,25 +379,49 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
-            if (!IsClassicAppearance && style == AdvancedProgressBarStyle.ThemedShiny)
-                this.PaintTransparentBackground(pevent);
-            else
-                base.OnPaintBackground(pevent);
+            // Framework Mono paints the whole progress bar before calling OnPaint, so deferring out custom paint until then.
+            if (OSHelper.IsFrameworkMono)
+                return;
+
+            if (IsMirrored)
+                FixRtlVisibleClip(pevent.Graphics);
+            PaintBackground(pevent);
         }
 
         /// <inheritdoc />
         protected override void OnPaint(PaintEventArgs e)
         {
-            // With style == System OnPaint should not be reached due to the SetStyle call, but on Mono we still get here
-            if (style != AdvancedProgressBarStyle.System)
+            if (IsMirrored)
+                FixRtlVisibleClip(e.Graphics);
+
+            // On Framework Mono we already have a complete default paint at this point
+            if (OSHelper.IsFrameworkMono)
             {
-                if (IsClassicAppearance)
-                    PaintClassicAppearance(e);
-                else if (style == AdvancedProgressBarStyle.ThemedShiny)
-                    PaintShinyAppearance(e);
-                else
-                    PaintFlatAppearance(e);
+                if (style == AdvancedProgressBarStyle.System)
+                    return;
+                PaintBackground(e);
             }
+
+            e.Graphics.EnsureCrossPlatformCorrectness(out float drawOffset);
+
+            //// Reference paint for debugging LTR/RTL correctness on various platforms
+            //e.Graphics.Clear(Color.Cyan);
+            //RectangleF rect = ClientRectangle;
+            //e.Graphics.DrawLine(Pens.Red, drawOffset, drawOffset, drawOffset, Height + drawOffset);
+            //e.Graphics.DrawLine(Pens.Green, Width - 1 + drawOffset, drawOffset, Width - 1 + drawOffset, Height + drawOffset);
+            //rect.Inflate(-1, -1);
+            //e.Graphics.FillRectangle(Brushes.Blue, rect);
+            //rect.Inflate(-1, -1);
+            //rect.Offset(drawOffset, drawOffset);
+            //e.Graphics.DrawRectangle(Pens.Yellow, rect.X, rect.Y, rect.Width - 1, rect.Height - 1);
+            //return;
+
+            if (IsClassicAppearance)
+                PaintClassicAppearance(e, drawOffset);
+            else if (style == AdvancedProgressBarStyle.ThemedShiny)
+                PaintShinyAppearance(e, drawOffset);
+            else
+                PaintFlatAppearance(e, drawOffset);
 
             // To raise the Paint event. Painting the System style has already occurred in WM_PAINT.
             base.OnPaint(e);
@@ -432,7 +456,12 @@ namespace KGySoft.WinForms.Controls
 
                     AdvanceAnimation();
                     break;
+
+                case Constants.WM_NCPAINT when OSHelper.IsWindows && Style != AdvancedProgressBarStyle.System && Size != ClientSize:
+                    NCHelper.DrawBorderNC(m.HWnd, Size, AdvancedBorderStyle.Sunken, IsMirrored);
+                    return;
             }
+
             base.WndProc(ref m);
         }
 
@@ -514,16 +543,21 @@ namespace KGySoft.WinForms.Controls
                 base.Style = ProgressBarStyle.Continuous;
         }
 
-        private void PaintClassicAppearance(PaintEventArgs e)
+        private void PaintBackground(PaintEventArgs e)
         {
-            // background
-            PaintSimpleBackground(e);
+            if (!IsClassicAppearance && style == AdvancedProgressBarStyle.ThemedShiny)
+                this.PaintTransparentBackground(e);
+            else
+                this.PaintBackground(e, e.ClipRectangle, BackColor);
+        }
 
+        private void PaintClassicAppearance(PaintEventArgs e, float offset)
+        {
             // frame: when visual styles are disabled, there is already a frame in NC area, except in Framework Mono, where the frame is in the client area
             Rectangle rect = ClientRectangle;
             if (VisualStyleHelper.RenderWithVisualStyles || OSHelper.IsFrameworkMono)
             {
-                ControlPaint.DrawBorder3D(e.Graphics, rect, Border3DStyle.SunkenOuter);
+                e.Graphics.DrawBorder(AdvancedBorderStyle.Sunken, rect, IsMirrored && !OSHelper.IsFrameworkMono ? Width : 0);
                 rect.Inflate(-2, -2);
             }
             else
@@ -532,21 +566,11 @@ namespace KGySoft.WinForms.Controls
             DrawBar(e.Graphics, GetBarRect(rect));
         }
 
-        private void PaintSimpleBackground(PaintEventArgs e)
-        {
-            if (BackColor == Color.Transparent)
-                this.PaintTransparentBackground(e);
-            else
-                e.Graphics.FillRectangle(BackColor.GetBrush(), e.ClipRectangle);
-        }
-
         private Rectangle GetBarRect(Rectangle rect)
         {
             // marquee style
             if (IsMarquee)
-            {
                 rect.Intersect(new Rectangle(animationOffset, rect.Top, MarqueeBlockWidth, rect.Height));
-            }
             // regular style
             else
             {
@@ -577,82 +601,66 @@ namespace KGySoft.WinForms.Controls
             _ => throw new ArgumentOutOfRangeException()
         };
 
-        private void PaintFlatAppearance(PaintEventArgs e)
+        private void PaintFlatAppearance(PaintEventArgs e, float offset)
         {
-            // background
-            PaintSimpleBackground(e);
-
             Rectangle rect = ClientRectangle;
-            rect.Width--;
-            rect.Height--;
             if (BackColor != Color.Transparent)
-                e.Graphics.DrawRectangle(BackColor.Dark(0.3f).GetPen(), rect);
+                e.Graphics.DrawRectangle(BackColor.Dark(0.3f).GetPen(), rect.X + offset, rect.Y + offset, rect.Width - 1, rect.Height - 1);
 
-            rect.Height++;
-            rect.Width++;
             rect.Inflate(-1, -1);
             DrawBar(e.Graphics, GetBarRect(rect));
-
         }
 
-        private void PaintShinyAppearance(PaintEventArgs e)
+        private void PaintShinyAppearance(PaintEventArgs e, float offset)
         {
-            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
-            e.Graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
-            DrawShinyBackground(e.Graphics);
-            if (isMarquee)
-                DrawShinyMarquee(e.Graphics);
-            else
-                DrawShinyBar(e.Graphics);
+            #region Local Methods
 
-            DrawShinyFrame(e.Graphics);
-        }
-
-        private void DrawShinyFrame(Graphics graphics)
-        {
-            // inner stroke
-            Rectangle rect = ClientRectangle;
-            rect.Inflate(-1, -1);
-            rect.Width--;
-            rect.Height--;
-            graphics.DrawRoundedRectangle(Color.FromArgb(100, Color.White).GetPen(), rect, 2);
-
-            // frame
-            rect = ClientRectangle;
-            rect.Width--;
-            rect.Height--;
-            graphics.DrawRoundedRectangle(BackColor.Dark(0.3f).GetPen(), rect, 2);
-        }
-
-        private void DrawShinyBackground(Graphics g)
-        {
-            Rectangle rect = ClientRectangle;
-            rect.Inflate(-1, -1);
-            if (rect.Width >= 1 && rect.Height >= 1)
-                g.FillRoundedRectangle(BackColor.Dark(0.1f).GetBrush(), rect, 2);
-
-            rect.Inflate(0, -1);
-            DrawShadows(g, rect, 10, 40);
-            DrawHighlight(g, new Rectangle(1, 1, Width - 2, Height - 2), BackColor);
-        }
-
-        private void DrawShinyBar(Graphics graphics)
-        {
-            Rectangle rect = ClientRectangle;
-            rect.Inflate(-1, -1);
-            rect = GetBarRect(rect);
-            DrawBar(graphics, rect);
-            DrawShadows(graphics, rect, 20, 100);
-            DrawHighlight(graphics, rect, GetActualForeColor());
-            if (state == ProgressBarState.Normal)
-                DrawGlow(graphics, rect);
-        }
-
-        private void DrawShinyMarquee(Graphics graphics)
-        {
-            graphics.SetClip(GetBarRect(ClientRectangle));
-            try
+            void DrawShinyBackground()
             {
+                Graphics g = e.Graphics;
+                Rectangle rect = ClientRectangle;
+                rect.Inflate(-1, -1);
+                if (rect.Width >= 1 && rect.Height >= 1)
+                    g.FillRoundedRectangle(BackColor.Dark(0.1f).GetBrush(), rect, 2);
+
+                rect.Inflate(0, -1);
+                DrawShadows(g, rect, 10, 40);
+                DrawHighlight(new Rectangle(1, 1, Width - 2, Height - 2), BackColor);
+            }
+
+            void DrawShinyBar()
+            {
+                Graphics g = e.Graphics;
+                Rectangle rect = ClientRectangle;
+                rect.Inflate(-1, -1);
+                rect = GetBarRect(rect);
+                DrawBar(g, rect);
+                DrawShadows(g, rect, 20, 100);
+                DrawHighlight(rect, GetActualForeColor());
+                if (state != ProgressBarState.Normal)
+                    return;
+
+                // glow: only when not in paused/error state
+                var savedState = g.Save();
+                g.IntersectClip(rect);
+                rect = new Rectangle(animationOffset, 0, 60, Height);
+                using var brush = new LinearGradientBrush(rect, Color.Transparent, ControlPaint.LightLight(ForeColor), LinearGradientMode.Horizontal);
+                var blend = new Blend(4)
+                {
+                    Factors = [0f, 0.5f, 0.5f, 0f],
+                    Positions = [0f, 0.5f, 0.6f, 1f]
+                };
+
+                brush.Blend = blend;
+                g.FillRectangle(brush, rect);
+                g.Restore(savedState);
+            }
+
+            void DrawShinyMarquee()
+            {
+                Graphics g = e.Graphics;
+                var savedState = g.Save();
+                g.IntersectClip(GetBarRect(Rectangle.Inflate(ClientRectangle, -1, -1)));
                 Rectangle rect = new Rectangle(animationOffset, 1, MarqueeBlockWidth, (Height - 2) / 2);
                 if (rect.Width <= 0 || rect.Height <= 0)
                     return;
@@ -668,7 +676,7 @@ namespace KGySoft.WinForms.Controls
 
                     brush.SetSigmaBellShape(0.5f);
                     brush.Blend = blend;
-                    graphics.FillRectangle(brush, rect);
+                    g.FillRectangle(brush, rect);
                 }
 
                 rect.Y = rect.Bottom;
@@ -682,60 +690,67 @@ namespace KGySoft.WinForms.Controls
 
                     brush.SetSigmaBellShape(0.5f);
                     brush.Blend = blend;
-                    graphics.FillRectangle(brush, rect);
+                    g.FillRectangle(brush, rect);
                 }
 
+                g.Restore(savedState);
             }
-            finally
+
+            void DrawHighlight(Rectangle clipRect, Color highlightColor)
             {
-                graphics.ResetClip();
+                Graphics g = e.Graphics;
+                int height = (Height - 2) / 2;
+                if (!isMarquee)
+                    height = Math.Min(6, height);
+
+                //Rectangle rect = new Rectangle(1, 1, Width - 1, height);
+                Rectangle rect = new Rectangle(clipRect.Location, new Size(clipRect.Width, height));
+                if (rect.Height <= 0 || rect.Width <= 0)
+                    return;
+
+                highlightColor = Color.FromArgb((highlightColor.R + 255) / 2, (highlightColor.G + 255) / 2, (highlightColor.B + 255) / 2);
+                using (Brush brush = new LinearGradientBrush(rect, highlightColor, Color.FromArgb(92, highlightColor), LinearGradientMode.Vertical))
+                    g.FillRectangle(brush, rect);
+
+                height = Math.Min(4, (clipRect.Height - 2) / 3);
+                if (height <= 0)
+                    return;
+
+                rect = new Rectangle(clipRect.Left, clipRect.Height - height, clipRect.Width, height);
+                using (Brush brush = new LinearGradientBrush(rect, Color.Transparent, Color.FromArgb(64, /*this.HighlightColor*/Color.White), LinearGradientMode.Vertical))
+                    g.FillRectangle(brush, rect);
             }
-        }
 
-        private void DrawHighlight(Graphics g, Rectangle clipRect, Color highlightColor)
-        {
-            int height = (Height - 2) / 2;
-            if (!isMarquee)
-                height = Math.Min(6, height);
-
-            //Rectangle rect = new Rectangle(1, 1, Width - 1, height);
-            Rectangle rect = new Rectangle(clipRect.Location, new Size(clipRect.Width, height));
-            if (rect.Height <= 0 || rect.Width <= 0)
-                return;
-
-            highlightColor = Color.FromArgb((highlightColor.R + 255) / 2, (highlightColor.G + 255) / 2, (highlightColor.B + 255) / 2);
-            using (Brush brush = new LinearGradientBrush(rect, highlightColor, Color.FromArgb(92, highlightColor), LinearGradientMode.Vertical))
-                g.FillRectangle(brush, rect);
-
-            height = Math.Min(4, (clipRect.Height - 2) / 3);
-            if (height <= 0)
-                return;
-
-            rect = new Rectangle(clipRect.Left, clipRect.Height - height, clipRect.Width, height);
-            using (Brush brush = new LinearGradientBrush(rect, Color.Transparent, Color.FromArgb(64, /*this.HighlightColor*/Color.White), LinearGradientMode.Vertical))
-                g.FillRectangle(brush, rect);
-        }
-
-        private void DrawGlow(Graphics g, Rectangle clipRect)
-        {
-            g.SetClip(clipRect);
-            try
+            void DrawShinyFrame()
             {
-                Rectangle rect = new Rectangle(animationOffset, 0, 60, Height);
-                using LinearGradientBrush brush = new LinearGradientBrush(rect, Color.Transparent, ControlPaint.LightLight(ForeColor), LinearGradientMode.Horizontal);
-                Blend blend = new Blend(4)
-                {
-                    Factors = new float[] { 0f, 0.5f, 0.5f, 0f },
-                    Positions = new float[] { 0f, 0.5f, 0.6f, 1f }
-                };
+                Graphics g = e.Graphics;
 
-                brush.Blend = blend;
-                g.FillRectangle(brush, rect);
+                // inner stroke
+                RectangleF rect = ClientRectangle;
+                rect.Inflate(-1, -1);
+                rect.Width--;
+                rect.Height--;
+                rect.Offset(offset, offset);
+                g.DrawRoundedRectangle(Color.FromArgb(100, Color.White).GetPen(), rect, 2);
+
+                // frame
+                rect = ClientRectangle;
+                rect.Width--;
+                rect.Height--;
+                rect.Offset(offset, offset);
+                g.DrawRoundedRectangle(BackColor.Dark(0.3f).GetPen(), rect, 2);
             }
-            finally
-            {
-                g.SetClip(ClientRectangle);
-            }
+
+            #endregion
+
+            e.Graphics.SmoothingMode = SmoothingMode.AntiAlias;
+            DrawShinyBackground();
+            if (isMarquee)
+                DrawShinyMarquee();
+            else
+                DrawShinyBar();
+
+            DrawShinyFrame();
         }
 
         private void AdvanceAnimation()
@@ -760,6 +775,24 @@ namespace KGySoft.WinForms.Controls
             animationOffset += 10;
             if (animationOffset > Width - glowPositionDefault)
                 animationOffset = glowPositionDefault;
+        }
+
+        private void FixRtlVisibleClip(Graphics g)
+        {
+            // On real windows with RTL layout the actual visible clip bounds are off by 1 pixel.
+            // With no double buffering (like in case of DateTimePicker) we wouldn't need to do anything, just draw in ClintRectangle, even though VisibleClipBounds.X is -1.
+            // With double buffering though, VisibleClipBounds is "fixed" initially (covers ClientRectangle), but in practice, the right side (X = 0 with mirroring) will be clipped,
+            // unless we restore the clip bounds with offset. To detect this case, we need to reset the clip bounds to reveal the whole size of the internal buffer
+            // and the initial clip for it. If it has a negative horizontal offset, we reset the original clip, but with applying the offset to the visible clip bounds.
+            if (!OSHelper.IsRealWindows || !DoubleBuffered)
+                return;
+
+            GraphicsState savedState = g.Save();
+            g.ResetClip();
+            PointF offset = g.VisibleClipBounds.Location;
+            g.Restore(savedState);
+            if (offset.X < 0)
+                g.TranslateClip(offset.X, offset.Y);
         }
 
         #endregion

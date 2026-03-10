@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -24,6 +25,7 @@ using System.Threading;
 using System.Windows.Forms;
 
 using KGySoft.Collections;
+using KGySoft.Drawing.Imaging;
 using KGySoft.Reflection;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Reflection;
@@ -359,6 +361,14 @@ namespace KGySoft.WinForms
 
             #endregion
 
+            // RTL layout: All the calls below (Control.PaintTransparentBackground, ButtonRenderer.DrawParentBackground, parent.OnPaint[Background]) are broken with mirroring
+            if (c.IsMirrored)
+            {
+                // See also the comment in PaintBackground
+                e.Graphics.Clear(c.Parent?.GetOpaqueBackColor() ?? SystemColors.Control);
+                return;
+            }
+
             if (bounds.IsEmpty())
                 bounds = c.ClientRectangle;
 
@@ -423,6 +433,17 @@ namespace KGySoft.WinForms
         /// either 0;0 or 1;1, so doesn't really make a difference, and can be ignored for Mono.</param>
         internal static void PaintBackground(this Control c, PaintEventArgs e, Rectangle rectangle, Color backColor, Point scrollOffset = default)
         {
+            // NOTE: the MS solution ignores the back color only for mirrored forms and MDI containers, but actually we should do it for every control
+            // (e.g. ProgressBar or DateTimePicker can also have a mirrored layout).
+            if (c.IsMirrored)
+            {
+                // Simply ignoring background image(s of parents), because we cannot tell whether they are supposed to be mirrored with RTL layout.
+                // If the control is double buffered, the caller should fix the visible clip bounds (see AdvancedProgressBar.FixRtlVisibleClip).
+                // We could use the DoubleBuffered() extension, but that uses reflection to access the protected property.
+                e.Graphics.Clear(backColor.A == Byte.MaxValue ? backColor : c.GetOpaqueBackColor().ToColor32().Blend(backColor));
+                return;
+            }
+
             if (c.TryPaintBackground(e, rectangle, backColor, scrollOffset))
                 return;
 
@@ -434,8 +455,7 @@ namespace KGySoft.WinForms
             if (renderTransparent && parent != null)
                 c.PaintTransparentBackground(e, rectangle);
 
-            // If the form or mdiclient is mirrored then we do not render the background image due to GDI+ issues.
-            Image? backgroundImage = VisualStyleHelper.HighContrast || (c is Form or MdiClient && c.IsMirrored) ? null : c.BackgroundImage;
+            Image? backgroundImage = VisualStyleHelper.HighContrast ? null : c.BackgroundImage;
 
             // No background image: painting the back color only
             // NOTE: the MS solution paints the backColor here also when the layout is tiled and the image has alpha.
@@ -474,6 +494,37 @@ namespace KGySoft.WinForms
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Gets the blended back colors of this control. Can be used for controls with RTL layouts where the background images are not drawn.
+        /// </summary>
+        internal static Color GetOpaqueBackColor(this Control control)
+        {
+            Color backColor = control.BackColor;
+            if (backColor.A == Byte.MaxValue)
+                return backColor;
+
+            var toBlend = new Stack<Color>();
+            if (backColor.A != 0)
+                toBlend.Push(backColor);
+
+            for (Control? c = control.Parent; c != null; c = c.Parent)
+            {
+                backColor = c.BackColor;
+                if (backColor.A == 0)
+                    continue;
+
+                toBlend.Push(backColor);
+                if (backColor.A == Byte.MaxValue)
+                    break;
+            }
+
+            // This performs sRGB blending, which is not quite color correct, but is compatible with GDI rendering.
+            PColor32 result = SystemColors.Control.ToPColor32();
+            foreach (Color color in toBlend)
+                result = color.ToPColor32().Blend(result);
+            return result.ToColor();
         }
 
         #endregion
