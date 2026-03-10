@@ -55,7 +55,6 @@ namespace KGySoft.WinForms.Controls
             IntPtr hdc = User32.GetWindowDC(hWnd);
             try
             {
-                // NOTE: Not passing disableMirroring to DrawBorder, which is intended. It is cheaper to disable mirroring before creating the Graphics instance.
                 if (disableMirroring)
                     Gdi32.SetLayout(hdc, 0);
                 using Graphics g = Graphics.FromHdc(hdc);

@@ -16,6 +16,7 @@
 #region Usings
 
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
 using System.Drawing.Text;
 
@@ -37,6 +38,26 @@ namespace KGySoft.WinForms
                 RenderingQuality.Low => isCompatibleTextRendering ? TextRenderingHint.SingleBitPerPixelGridFit : TextRenderingHint.AntiAlias,
                 _ => TextRenderingHint.SystemDefault,
             };
+        }
+
+        /// <summary>
+        /// Applies settings that ensure the same result for Draw/Fill operations on every platform, regardless of smoothing mode, RTL layout or zooming.
+        /// </summary>
+        /// <param name="g">The graphics. PixelOffsetMode should not be changed after the call.</param>
+        /// <param name="drawOffset">The offset to be applied to Draw operations where normally use integer coordinates would be used.</param>
+        internal static void EnsureCrossPlatformCorrectness(this Graphics g, out float drawOffset)
+        {
+            if (OSHelper.IsRealWindows || OSHelper.IsWindowsMono)
+            {
+                // PixelOffsetMode.Half + 0.5 drawOffset for Graphics.Draw* solves the offset issues between RTL/LTR on Windows
+                g.PixelOffsetMode = PixelOffsetMode.Half;
+                drawOffset = 0.5f;
+                return;
+            }
+
+            // Wine or Mono on non-Windows platforms
+            drawOffset = 0f;
+            g.PixelOffsetMode = PixelOffsetMode.None;
         }
 
         internal static void DrawImageGrayscale(this Graphics graphics, Image image, Rectangle destRect)

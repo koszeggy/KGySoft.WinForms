@@ -21,6 +21,7 @@ using System;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 using KGySoft.Collections;
@@ -29,7 +30,6 @@ using KGySoft.Drawing.Imaging;
 using KGySoft.Drawing.Shapes;
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Reflection;
-using KGySoft.WinForms.WinApi;
 
 #endregion
 
@@ -79,69 +79,110 @@ namespace KGySoft.WinForms
         
         #region Internal Methods
 
-        internal static void DrawBorder(this Graphics graphics, AdvancedBorderStyle borderStyle, Rectangle bounds, bool disableMirroring = false)
+        internal static void DrawBorder(this Graphics g, AdvancedBorderStyle borderStyle, Rectangle bounds, int rtlLayoutWidth = 0)
         {
-            Graphics g = graphics;
-            IntPtr hDC = IntPtr.Zero;
-            try
-            {
-                if (disableMirroring && OSHelper.IsWindows)
-                {
-                    hDC = graphics.GetHdc();
-                    Gdi32.SetLayout(hDC, 0);
+            // NOTE: NOT using ControlPaint.DrawBorder3D, because
+            // - it may omit the full drawing if clipping would allow a partial draw
+            // - we don't want mirrored frames even with RTL layout
+            // - it may have wrong colors (AdvancedBorderStyle.RaisedFrame vs. Border3DStyle.Bump)
+            GraphicsState state = g.Save();
+            g.SmoothingMode = SmoothingMode.None;
+            g.EnsureCrossPlatformCorrectness(out float offset);
 
-                    // we must create a new Graphics of the non-mirrored hDC
-                    g = Graphics.FromHdc(hDC);
+            switch (borderStyle)
+            {
+                case AdvancedBorderStyle.FixedSingle:
+                    DrawRectangle(SystemPens.WindowFrame, bounds.X, bounds.Y, bounds.Width - 1, bounds.Height - 1);
+                    break;
+
+                case AdvancedBorderStyle.Flat:
+                    DrawRectangle(SystemPens.ControlDark, bounds.X, bounds.Y, bounds.Width - 1, bounds.Height - 1);
+                    DrawRectangle(SystemPens.Control, bounds.X + 1, bounds.Y + 1, bounds.Width - 3, bounds.Height - 3);
+                    break;
+
+                case AdvancedBorderStyle.Raised:
+                    DrawTopLeft(SystemPens.ControlLightLight, bounds.X, bounds.Y, bounds.Width - 2, bounds.Height - 2);
+                    DrawBottomRight(SystemPens.ControlDark, bounds.X, bounds.Y, bounds.Width - 1, bounds.Height - 1);
+                    break;
+
+                case AdvancedBorderStyle.Sunken:
+                    DrawTopLeft(SystemPens.ControlDark, bounds.X, bounds.Y, bounds.Width - 2, bounds.Height - 2);
+                    DrawBottomRight(SystemPens.ControlLightLight, bounds.X, bounds.Y, bounds.Width - 1, bounds.Height - 1);
+                    break;
+
+                case AdvancedBorderStyle.RaisedHigh:
+                    DrawTopLeft(SystemPens.ControlLightLight, bounds.X + 1, bounds.Y + 1, bounds.Width - 4, bounds.Height - 4);
+                    DrawBottomRight(SystemPens.ControlDark, bounds.X + 1, bounds.Y + 1, bounds.Width - 3, bounds.Height - 3);
+                    DrawTopLeft(SystemPens.ControlLight, bounds.X, bounds.Y, bounds.Width - 2, bounds.Height - 2);
+                    DrawBottomRight(SystemPens.ControlDarkDark, bounds.X, bounds.Y, bounds.Width - 1, bounds.Height - 1);
+                    break;
+
+                case AdvancedBorderStyle.SunkenLow:
+                    DrawTopLeft(SystemPens.ControlDarkDark, bounds.X + 1, bounds.Y + 1, bounds.Width - 4, bounds.Height - 4);
+                    DrawBottomRight(SystemPens.ControlLight, bounds.X + 1, bounds.Y + 1, bounds.Width - 3, bounds.Height - 3);
+                    DrawTopLeft(SystemPens.ControlDark, bounds.X, bounds.Y, bounds.Width - 2, bounds.Height - 2);
+                    DrawBottomRight(SystemPens.ControlLightLight, bounds.X, bounds.Y, bounds.Width - 1, bounds.Height - 1);
+                    break;
+
+                case AdvancedBorderStyle.SunkenFrame:
+                    DrawTopLeft(SystemPens.ControlLightLight, bounds.X + 1, bounds.Y + 1, bounds.Width - 4, bounds.Height - 4);
+                    DrawBottomRight(SystemPens.ControlLightLight, bounds.X, bounds.Y, bounds.Width - 1, bounds.Height - 1);
+                    DrawRectangle(SystemPens.ControlDark, bounds.X, bounds.Y, bounds.Width - 2, bounds.Height - 2);
+                    break;
+
+                case AdvancedBorderStyle.RaisedFrame:
+                    DrawTopLeft(SystemPens.ControlDark, bounds.X + 1, bounds.Y + 1, bounds.Width - 4, bounds.Height - 4);
+                    DrawBottomRight(SystemPens.ControlDark, bounds.X, bounds.Y, bounds.Width - 1, bounds.Height - 1);
+                    DrawRectangle(SystemPens.ControlLightLight, bounds.X, bounds.Y, bounds.Width - 2, bounds.Height - 2);
+                    break;
+            }
+
+            g.Restore(state);
+
+            #region Local Methods
+
+            [MethodImpl(MethodImpl.AggressiveInlining)]
+            void DrawRectangle(GdiPen pen, int x, int y, int width, int height)
+            {
+                if (rtlLayoutWidth != 0)
+                    x = rtlLayoutWidth - (x + width) - 1;
+                g.DrawRectangle(pen, x + offset, y + offset, width, height);
+            }
+
+            [MethodImpl(MethodImpl.AggressiveInlining)]
+            void DrawTopLeft(GdiPen pen, int x, int y, int width, int height)
+            {
+                // On Wine the last pixel of the last line segment is not inclusive, so making sure it is as long as on a real Windows.
+                // In case it will be fixed later, the caller should arrange the order the drawing of the elements so it should not matter.
+                if (OSHelper.IsWine)
+                    width += 1;
+                if (rtlLayoutWidth == 0)
+                {
+                    g.DrawLines(pen, [new PointF(x + offset, y + height + offset), new PointF(x + offset, y + offset), new PointF(x + width + offset, y + offset)]);
+                    return;
                 }
 
-                switch (borderStyle)
-                {
-                    case AdvancedBorderStyle.FixedSingle:
-                        g.DrawRectangle(SystemPens.WindowFrame, 0, 0, bounds.Width - 1, bounds.Height - 1);
-                        break;
-                    case AdvancedBorderStyle.Raised:
-                    case AdvancedBorderStyle.Flat:
-                    case AdvancedBorderStyle.RaisedHigh:
-                    case AdvancedBorderStyle.Sunken:
-                    case AdvancedBorderStyle.SunkenLow:
-                        ControlPaint.DrawBorder3D(g, bounds, (Border3DStyle)borderStyle);
-                        break;
-                    case AdvancedBorderStyle.SunkenFrame:
-                        ControlPaint.DrawBorder(g, bounds, SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid);
-                        ControlPaint.DrawBorder(g, new Rectangle(1, 1, bounds.Width - 2, bounds.Height - 2),
-                            SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlDark, 1, ButtonBorderStyle.Solid);
-                        //ControlPaint.DrawBorder3D(g, rect, Border3DStyle.SunkenOuter);
-                        //ControlPaint.DrawBorder3D(g, new Rectangle(1, 1, Width - 2, Height - 2), Border3DStyle.RaisedInner);
-                        break;
-                    case AdvancedBorderStyle.RaisedFrame:
-                        ControlPaint.DrawBorder(g, bounds, SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlDark, 1, ButtonBorderStyle.Solid);
-                        ControlPaint.DrawBorder(g, new Rectangle(1, 1, bounds.Width - 2, bounds.Height - 2),
-                            SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlDark, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid,
-                            SystemColors.ControlLightLight, 1, ButtonBorderStyle.Solid);
-                        //ControlPaint.DrawBorder3D(g, rect, Border3DStyle.RaisedInner);
-                        //ControlPaint.DrawBorder3D(g, new Rectangle(1, 1, Width - 2, Height - 2), Border3DStyle.SunkenOuter);
-                        break;
-                }
+                x = rtlLayoutWidth - x - 1;
+                g.DrawLines(pen, [new PointF(x + offset, y + height + offset), new PointF(x + offset, y + offset), new PointF(x - width + offset, y + offset)]);
             }
-            finally
+
+            [MethodImpl(MethodImpl.AggressiveInlining)]
+            void DrawBottomRight(GdiPen pen, int x, int y, int width, int height)
             {
-                if (hDC != IntPtr.Zero)
+                // On Wine the last pixel of the last line segment is not inclusive, so making sure it is as long as on a real Windows
+                // In case it will be fixed later, the caller should arrange the order the drawing of the elements so it should not matter.
+                int additionalHeight = OSHelper.IsWine ? 1 : 0;
+                if (rtlLayoutWidth == 0)
                 {
-                    g.Dispose();
-                    graphics.ReleaseHdc(hDC);
+                    g.DrawLines(pen, [new PointF(x + offset, y + height + offset), new PointF(x + width + offset, y + height + offset), new PointF(x + width + offset, y + offset - additionalHeight)]);
+                    return;
                 }
+
+                x = rtlLayoutWidth - x - 1;
+                g.DrawLines(pen, [new PointF(x + offset, y + height + offset), new PointF(x - width + offset, y + height + offset), new PointF(x - width + offset, y + offset - additionalHeight)]);
             }
+
+            #endregion
         }
 
         internal static void DrawBackgroundImage(this Graphics g, Image backgroundImage, Color backColor, ImageLayout backgroundImageLayout, Rectangle bounds, Rectangle clipRect, Point scrollOffset, RightToLeft rightToLeft)

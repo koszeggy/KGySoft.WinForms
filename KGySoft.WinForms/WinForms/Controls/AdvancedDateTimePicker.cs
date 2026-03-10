@@ -569,7 +569,7 @@ namespace KGySoft.WinForms.Controls
                         g.FillRectangle(BackColor.GetBrush(), ClientRectangle);
                     return;
 
-                case Constants.WM_NCPAINT when OSHelper.IsWindows && !VisualStyleHelper.RenderWithVisualStyles && Size != ClientSize && RightToLeftLayout && RightToLeft == RightToLeft.Yes:
+                case Constants.WM_NCPAINT when OSHelper.IsWindows && !VisualStyleHelper.RenderWithVisualStyles && IsMirrored && Size != ClientSize:
                     NCHelper.DrawBorderNC(m.HWnd, Size, AdvancedBorderStyle.SunkenLow, true);
                     return;
 
@@ -589,7 +589,7 @@ namespace KGySoft.WinForms.Controls
                     else
                         base.WndProc(ref m);
 
-                    bool rtl = RightToLeftLayout && RightToLeft == RightToLeft.Yes && !OSHelper.IsFrameworkMono;
+                    bool rtl = IsMirrored && !OSHelper.IsFrameworkMono;
                     using (Graphics g = Graphics.FromHwnd(m.HWnd))
                     {
                         var layout = new LayoutData(this, g);
@@ -951,7 +951,7 @@ namespace KGySoft.WinForms.Controls
             // On Framework Mono the border is always in the client area, whereas in Windows XP or Wine the border is always in the NC area.
             // Detecting the case by checking if the client size covers the whole control.
             if (fullPaint && Size == ClientSize)
-                g.DrawBorder(AdvancedBorderStyle.SunkenLow, ClientRectangle, layout.IsRightToLeft);
+                g.DrawBorder(AdvancedBorderStyle.SunkenLow, ClientRectangle, layout.IsRightToLeft ? Width : 0);
         }
 
         private void PaintCheckBox(Graphics g, LayoutData layout, bool paintBackground)
