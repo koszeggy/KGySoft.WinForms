@@ -260,7 +260,8 @@ namespace KGySoft.WinForms.WinApi
             int hResult = NativeMethods.GetThemeFont(hTheme, IntPtr.Zero, part, state, prop, out LOGFONT logFont);
             return hResult != Constants.S_OK ? null
                 : !OSHelper.IsMono ? Font.FromLogFont(logFont)
-                // On Mono Font.FromLogFont casts the parameter to an internal LOGFONT by a direct cast, causing an InvalidCastException, so using an internal conversion
+                // On Framework Mono Font.FromLogFont casts the parameter to an internal LOGFONT by a direct cast, causing an InvalidCastException, so using an internal conversion
+                // Whereas on Wine Mono Font.FromLogFont simply returns a too small font, so ignoring that under any version of Mono
                 : new Font(logFont.lfFaceName, Math.Abs(logFont.lfHeight),
                     (logFont.lfWeight > 400 ? FontStyle.Bold : FontStyle.Regular) | (logFont.lfItalic == 0 ? FontStyle.Regular : FontStyle.Italic) | (logFont.lfStrikeOut == 0 ? FontStyle.Regular : FontStyle.Strikeout) | (logFont.lfUnderline == 0 ? FontStyle.Regular : FontStyle.Underline),
                     logFont.lfHeight > 0 ? GraphicsUnit.Point : GraphicsUnit.Pixel);

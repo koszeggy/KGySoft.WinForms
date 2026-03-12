@@ -742,7 +742,7 @@ namespace KGySoft.WinForms.Forms
 #if !NET5_0_OR_GREATER
         static BaseForm()
         {
-            if (!OSHelper.IsWindows || OSHelper.IsMono)
+            if (!OSHelper.IsWindows || OSHelper.IsFrameworkMono)
                 return;
 
             // Not using Accessors because it's obtained only once.
@@ -770,7 +770,7 @@ namespace KGySoft.WinForms.Forms
             };
 
 #if !NET35
-            if (!OSHelper.IsWindows11OrLater)
+            if (!OSHelper.IsWindows11OrLater || OSHelper.IsWine)
 #endif
             {
                 BaseToolTip.AutoPopDelay = Int16.MaxValue;
@@ -857,7 +857,7 @@ namespace KGySoft.WinForms.Forms
 
         /// <inheritdoc />
         protected override Control.ControlCollection CreateControlsInstance()
-            => OSHelper.IsMono ? new ControlCollectionMono(this) : new ControlCollection(this);
+            => OSHelper.IsFrameworkMono ? new ControlCollectionMono(this) : new ControlCollection(this);
 
         /// <inheritdoc />
         protected override void OnHandleCreated(EventArgs e)
@@ -997,7 +997,7 @@ namespace KGySoft.WinForms.Forms
         protected override void Dispose(bool disposing)
         {
             // Mono bug workaround: If Dispose is called for an MDI child while the form is already disposed, we can finally dispose Events
-            if (OSHelper.IsMono && IsDisposed && IsMdiChild)
+            if (OSHelper.IsFrameworkMono && IsDisposed && IsMdiChild)
                 Events.Dispose();
 
             base.Dispose(disposing);
@@ -1008,7 +1008,7 @@ namespace KGySoft.WinForms.Forms
                 commandBindings.Dispose();
 
                 // Mono bug: for MDI children the Dispose is called twice, the first before the Closed event, in which case we must not dispose the Events yet
-                if (!OSHelper.IsMono || !IsMdiChild)
+                if (!OSHelper.IsFrameworkMono || !IsMdiChild)
                     Events.Dispose();
                 smallIcon?.Dispose();
                 font?.Dispose();
@@ -1130,7 +1130,7 @@ namespace KGySoft.WinForms.Forms
             switch (m.Msg)
             {
 #if !NET5_0_OR_GREATER
-                case Constants.WM_NCHITTEST when OSHelper.IsWindows && !OSHelper.IsMono:
+                case Constants.WM_NCHITTEST when OSHelper.IsWindows && !OSHelper.IsFrameworkMono:
                     WmNCHitTest(ref m);
                     return;
 #endif
@@ -1304,7 +1304,7 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 // Mono issue: disabled forms cannot be closed even by explicit Close(). Explicitly calling Suspend fixes the issue.
-                case Constants.WM_CLOSE when OSHelper.IsMono && IsSuspended:
+                case Constants.WM_CLOSE when OSHelper.IsFrameworkMono && IsSuspended:
                     Resume();
                     base.WndProc(ref m);
                     return;

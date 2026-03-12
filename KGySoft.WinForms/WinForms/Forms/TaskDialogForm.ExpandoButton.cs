@@ -173,7 +173,7 @@ namespace KGySoft.WinForms.Forms
             public override Size GetPreferredSize(Size proposedSize)
             {
                 var imageSize = GetImageSize();
-                if (!IsHandleCreated && OSHelper.IsMono && OSHelper.IsWindows)
+                if (!IsHandleCreated && OSHelper.IsWindowsMono)
                     return LayoutUtils.UnionSizes(imageSize, proposedSize);
                 using Graphics g = Graphics.FromHwnd(IsHandleCreated ? Handle : IntPtr.Zero);
                 g.SetTextRenderingQuality(TextRenderingQuality, UseCompatibleTextRendering);

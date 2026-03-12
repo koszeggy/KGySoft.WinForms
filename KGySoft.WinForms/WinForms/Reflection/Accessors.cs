@@ -118,7 +118,7 @@ namespace KGySoft.WinForms.Reflection
         private static readonly Dictionary<object, Func<FieldInfo?>> fieldLookup = new(7)
         {
 #if NETFRAMEWORK
-            [fieldControl_PaintEvent] = () => FindField(typeof(Control), OSHelper.IsMono ? "PaintEvent" : "EventPaint", typeof(object), BindingFlags.Static | BindingFlags.NonPublic),
+            [fieldControl_PaintEvent] = () => FindField(typeof(Control), OSHelper.IsFrameworkMono ? "PaintEvent" : "EventPaint", typeof(object), BindingFlags.Static | BindingFlags.NonPublic),
 #else
             [fieldControl_PaintEvent] = () => FindField(typeof(Control), "s_paintEvent", typeof(object), BindingFlags.Static | BindingFlags.NonPublic),
 #endif

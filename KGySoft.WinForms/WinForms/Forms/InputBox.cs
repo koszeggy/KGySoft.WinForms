@@ -36,7 +36,7 @@ namespace KGySoft.WinForms.Forms
         public InputBox()
         {
             InitializeComponent();
-            if (OSHelper.IsMono && OSHelper.IsWindows)
+            if (OSHelper.IsWindowsMono)
                 StartPosition = FormStartPosition.CenterParent;
             RightToLeft = LanguageSettings.DisplayLanguage.TextInfo.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
             if (!OSHelper.IsMono)
