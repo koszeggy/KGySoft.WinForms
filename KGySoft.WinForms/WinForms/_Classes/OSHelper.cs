@@ -109,6 +109,21 @@ namespace KGySoft.WinForms
         public static bool IsWindows11OrLater
             => isWin11OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 22000);
 
+        /// <summary>
+        /// Gets whether the application is running on Wine.
+        /// </summary>
+        public static bool IsWine => isWine ??= !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WINELOADER"));
+
+        /// <summary>
+        /// Gets whether the application is running on the classic Mono runtime, lately called as Framework Mono (as a distinction from Wine Mono).
+        /// </summary>
+        public static bool IsFrameworkMono => IsMono && !IsWine;
+
+        /// <summary>
+        /// Gets whether the application is running on Wine's Mono runtime.
+        /// </summary>
+        public static bool IsWineMono => IsMono && IsWine;
+
         #endregion
 
         #region Internal Properties
@@ -119,10 +134,6 @@ namespace KGySoft.WinForms
         internal static bool IsWindows10Build1607OrLater
             => isWin10Build1607OrLater ??= GetWindowsVersion() is Version version && version >= new Version(10, 0, 14393);
 
-        internal static bool IsWine
-            => isWine ??= !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("WINELOADER"));
-
-        internal static bool IsFrameworkMono => IsMono && !IsWine;
         internal static bool IsWindowsMono => IsFrameworkMono && IsWindows;
         internal static bool IsRealWindows => IsWindows && !IsMono && !IsWine;
 
