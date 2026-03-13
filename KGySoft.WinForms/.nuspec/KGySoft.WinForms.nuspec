@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>KGySoft.WinForms</id>
-    <version>5.0.0-preview.1</version>
+    <version>5.0.0-rc.1</version>
     <title>KGy SOFT Windows Forms Libraries</title>
     <authors>György Kőszeg</authors>
     <owners>György Kőszeg</owners>
@@ -28,31 +28,31 @@ Find some more examples with images at the project site at https://github.com/ko
     <repository type="git" url="https://github.com/koszeggy/KGySoft.WinForms" />
     <dependencies>
       <group targetFramework=".NETFramework3.5">
-        <dependency id="KGySoft.Drawing" version="10.0.1" />
+        <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
       <group targetFramework=".NETFramework4.0">
-        <dependency id="KGySoft.Drawing" version="10.0.1" />
+        <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
       <group targetFramework=".NETFramework4.5">
-        <dependency id="KGySoft.Drawing" version="10.0.1" />
+        <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
       <group targetFramework=".NETFramework4.7">
-        <dependency id="KGySoft.Drawing" version="10.0.1" />
+        <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
       <group targetFramework="netcoreapp3.0" >
-        <dependency id="KGySoft.Drawing" version="10.0.1" />
+        <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
       <group targetFramework="netcoreapp3.1" >
-        <dependency id="KGySoft.Drawing" version="10.0.1" />
+        <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
       <group targetFramework="net5.0-windows7.0" >
-        <dependency id="KGySoft.Drawing" version="10.0.1" />
+        <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
       <group targetFramework="net6.0-windows7.0" >
-        <dependency id="KGySoft.Drawing" version="10.0.1" />
+        <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
       <group targetFramework="net10.0-windows7.0" >
-        <dependency id="KGySoft.Drawing" version="10.0.1" />
+        <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
     </dependencies>
   </metadata>
