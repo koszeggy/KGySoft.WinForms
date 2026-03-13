@@ -10,4 +10,6 @@
 
 using System.Diagnostics.CodeAnalysis;
 
+[assembly: SuppressMessage("Style", "IDE0028:Collection initialization can be simplified", Justification = "Decided individually")]
+[assembly: SuppressMessage("Style", "IDE0057:Use range operator", Justification = "Cannot be used because it is not supported in every targeted platform")]
 [assembly: SuppressMessage("Style", "IDE0305:Use collection expression for fluent", Justification = "Decided individually")]

@@ -28,6 +28,14 @@ using KGySoft.Resources;
 
 #endregion
 
+#region Suppressions
+
+#if NETCOREAPP3_0 || NETCOREAPP3_1
+#pragma warning disable CS8605 // Unboxing a possibly null value - inconsistent nullability annotations on different platforms
+#endif
+
+#endregion
+
 namespace KGySoft.WinForms.Example.ViewModel
 {
     internal class EditResourcesViewModel : ObservableObjectBase

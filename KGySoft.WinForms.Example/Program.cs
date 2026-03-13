@@ -21,6 +21,12 @@ using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
+#if NET471_OR_GREATER || NETCOREAPP
+using System.Runtime.InteropServices;
+#endif
+#if !NET35 && DEBUG
+using System.Runtime.Versioning;
+#endif
 using System.Windows.Forms;
 
 using KGySoft.Drawing;
@@ -67,6 +73,23 @@ namespace KGySoft.WinForms.Example
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
+
+#if DEBUG
+#if NET35
+            const string frameworkName = ".NET Framework 3.5";
+#else
+            TargetFrameworkAttribute attr = (TargetFrameworkAttribute)Attribute.GetCustomAttribute(typeof(Program).Assembly, typeof(TargetFrameworkAttribute))!;
+            string frameworkName = attr.FrameworkDisplayName is { Length: > 0 } name ? name : attr.FrameworkName;
+#endif
+            Console.WriteLine(frameworkName);
+            Console.WriteLine($"IsWindows: {OSHelper.IsWindows} {OSHelper.GetWindowsVersion()}");
+            Console.WriteLine($"IsMono: {OSHelper.IsMono} {(OSHelper.IsMono ? Reflector.InvokeMethod(Type.GetType("Mono.Runtime")!, "GetDisplayName") : null)}");
+            Console.WriteLine($"IsWine: {OSHelper.IsWine} {Environment.GetEnvironmentVariable("WINEPREFIX")}");
+            Console.WriteLine($"Environment.OSVersion.Platform: {Environment.OSVersion.Platform}");
+#if NET471_OR_GREATER || NETCOREAPP
+            Console.WriteLine($"RuntimeInformation.FrameworkDescription: {RuntimeInformation.FrameworkDescription}");
+#endif  
+#endif
 
             using var dlg = new TaskDialog();
             dlg.Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.UseCommandLinks;
@@ -195,15 +218,15 @@ namespace KGySoft.WinForms.Example
             btnDialogsTest.Click += btnDialogsTest_Click;
             td.Buttons.Add(btnDialogsTest);
 
-            var btnMisc = new TaskDialogButton("Misc Tests");
-            btnMisc.Click += (_, _) =>
-            {
-                using var frm = new MiscTest();
-                frm.ShowDialog();
-            };
-#if DEBUG
-            td.Buttons.Add(btnMisc);
-#endif
+//            var btnMisc = new TaskDialogButton("Misc Tests");
+//            btnMisc.Click += (_, _) =>
+//            {
+//                using var frm = new MiscTest();
+//                frm.ShowDialog();
+//            };
+//#if DEBUG
+//            td.Buttons.Add(btnMisc);
+//#endif
 
             td.Show(parent);
 
@@ -223,7 +246,7 @@ namespace KGySoft.WinForms.Example
             dlg.Message = "This is a <a href=\"https://kgysoft.net\">sample link</a>";
             dlg.Options = TaskDialogOptions.HyperlinksEnabled | TaskDialogOptions.UseCommandLinksNoIcon | TaskDialogOptions.DetailsExpanded | TaskDialogOptions.AllowCancel | TaskDialogOptions.AllowMinimize | TaskDialogOptions.ForceShowInTaskbar;
             dlg.FooterIcon = TaskDialogStandardIcons.Warning;
-            dlg.FooterText = "• UseCommandLinks has higher priority than and UseCommandLinksNoIcon" + Environment.NewLine
+            dlg.FooterText = "• UseCommandLinks has higher priority than UseCommandLinksNoIcon" + Environment.NewLine
                 + "• In native mode RightToLeftLayout cannot be undone" + Environment.NewLine
                 + "• AllowMinimize works only if the dialog was opened without an owner (modeless)" + Environment.NewLine
                 + "• AllowMinimize implicitly enables cancellation, as if AllowCancel was also set" + Environment.NewLine
@@ -602,13 +625,13 @@ namespace KGySoft.WinForms.Example
                     {
                         Description = "As a button, the native 16x16 icon is displayed on 100% DPI, which is resized (gets blurry) on higher DPIs." + Environment.NewLine
                             + "As a command link, always the native 16x16 icon is displayed.",
-                        CustomIcon = Icons.SystemInformation.Resize(new Size(16, 16))
+                        CustomIcon = Icons.SystemInformation.Resize(new Size(16, 16), ScalingMode.Auto)
                     },
                     new TaskDialogButton("Fix 256x256 icon")
                     {
                         Description = @"As a button, icon image is shrunk to 16x16 on 100% DPI." + Environment.NewLine
                             + "As a command link, rendered as a 64x64 icon on 100% DPI. When using 400% DPI or higher the unscaled 256x256 icon is displayed.",
-                        CustomIcon = Icons.SystemWarning.Resize(OSHelper.IsMono ? new Size(128, 128) : new Size(256, 256))
+                        CustomIcon = Icons.SystemWarning.Resize(OSHelper.IsMono ? new Size(128, 128) : new Size(256, 256), ScalingMode.Auto)
                     },
                 },
                 RadioButtons =
@@ -709,9 +732,9 @@ namespace KGySoft.WinForms.Example
                 StandardButtons = TaskDialogStandardButtonFlags.Close,
                 RadioButtons =
                 {
-                    new TaskDialogRadioButton("MessageBox") { Checked = true },
-                    new TaskDialogRadioButton("TaskDialog"),
-                    new TaskDialogRadioButton("AdvancedMessageDialog (obsolete)")
+                    new TaskDialogRadioButton("rbMessageBox", "MessageBox"),
+                    new TaskDialogRadioButton("rbTaskDialog","TaskDialog"),
+                    new TaskDialogRadioButton("rbAdvancedMessageDialog","AdvancedMessageDialog (obsolete)")
                 },
                 Buttons =
                 {
@@ -725,9 +748,16 @@ namespace KGySoft.WinForms.Example
             };
 
 #pragma warning disable CS0618 // Type or member is obsolete (Dialogs.UseAdvancedDialogs)
-            dlg.RadioButtons[0].Selected += (_, _) => Dialogs.UseTaskDialogs = Dialogs.UseAdvancedDialogs = false;
-            dlg.RadioButtons[1].Selected += (_, _) => Dialogs.UseAdvancedDialogs = !(Dialogs.UseTaskDialogs = true);
-            dlg.RadioButtons[2].Selected += (_, _) => Dialogs.UseTaskDialogs = !(Dialogs.UseAdvancedDialogs = true);
+            if (Dialogs.UseTaskDialogs)
+                dlg.RadioButtons["rbTaskDialog"]!.Checked = true;
+            else if (Dialogs.UseAdvancedDialogs)
+                dlg.RadioButtons["rbAdvancedMessageDialog"]!.Checked = true;
+            else
+                dlg.RadioButtons["rbMessageBox"]!.Checked = true;
+
+            dlg.RadioButtons["rbMessageBox"]!.Selected += (_, _) => Dialogs.UseTaskDialogs = Dialogs.UseAdvancedDialogs = false;
+            dlg.RadioButtons["rbTaskDialog"]!.Selected += (_, _) => Dialogs.UseAdvancedDialogs = !(Dialogs.UseTaskDialogs = true);
+            dlg.RadioButtons["rbAdvancedMessageDialog"]!.Selected += (_, _) => Dialogs.UseTaskDialogs = !(Dialogs.UseAdvancedDialogs = true);
 #pragma warning restore CS0618 // Type or member is obsolete
 
             dlg.Buttons["btnInformation"]!.Click += (_, _) => Dialogs.InfoMessage(sampleMessage);

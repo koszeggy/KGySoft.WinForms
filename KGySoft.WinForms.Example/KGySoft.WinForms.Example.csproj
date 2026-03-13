@@ -1,22 +1,27 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <!--<TargetFrameworks>net35;net40;net47;netcoreapp3.0;netcoreapp3.1;net5.0-windows;net6.0-windows</TargetFrameworks>-->
-    <TargetFrameworks>net35;net40;net47;net9.0-windows</TargetFrameworks>
+    <!--<TargetFrameworks>net35;net40;net45;net47;netcoreapp3.0;netcoreapp3.1;net5.0-windows;net6.0-windows;net10.0-windows</TargetFrameworks>-->
+
+    <!-- net40 is the highest version compatible with Windows XP -->
+    <!-- net462 is the highest version compatible with Framework Mono (6.14.x) -->
+    <TargetFrameworks>net40;net462;net10.0-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>KGySoft.WinForms.Example</RootNamespace>
     <LangVersion>latest</LangVersion>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <UseWindowsForms>true</UseWindowsForms>
-    <OutputType>WinExe</OutputType>
+    <OutputType Condition="'$(Configuration)'=='DEBUG'">Exe</OutputType>
+    <OutputType Condition="'$(Configuration)'!='DEBUG'">WinExe</OutputType>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <Nullable>Enable</Nullable>
 
     <!--Suppressions
-      - WFO0003: Remove high DPI settings from app.manifest - indended, required to test all possible configurations.
+      - WFO0003/WFAC010: Remove high DPI settings from app.manifest - indended, required to test all possible configurations.
       - WFO1000: This is an example project and its controls are not meant to be used by other projects, so it doesn't really matter what is serialized by the designer.
+      - NETSDK1138: The target framework 'tfm' is out of support - left for testing and comparison purposes
     -->
-    <NoWarn>$(NoWarn);WFO1000;WFO0003</NoWarn>
+    <NoWarn>$(NoWarn);WFO1000;WFO0003;WFAC010;NETSDK1138</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
