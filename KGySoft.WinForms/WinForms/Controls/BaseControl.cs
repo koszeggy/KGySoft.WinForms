@@ -68,7 +68,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Category("BaseControl")]
         [Description("Occurs when the horizontal mouse wheel is scrolled while the control has focus.")]
-        internal event EventHandler<HandledMouseEventArgs> MouseHWheel
+        public event EventHandler<HandledMouseEventArgs> MouseHWheel
         {
             add => Events.AddHandler(nameof(MouseHWheel), value);
             remove => Events.RemoveHandler(nameof(MouseHWheel), value);
