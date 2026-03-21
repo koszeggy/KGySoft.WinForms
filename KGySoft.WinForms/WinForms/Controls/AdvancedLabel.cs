@@ -487,10 +487,6 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
         /// <summary>
         /// Gets or sets whether to use compatible text rendering engine (GDI+) or not (GDI).
         /// </summary>
-#if NET9_0_OR_GREATER
-        [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.",
-            Justification = "False alarm, inherited from the base. Cannot redefine easily because LinkLabel uses a ShouldSerialize method calling internal members.")] 
-#endif
         public new bool UseCompatibleTextRendering
         {
             get => base.UseCompatibleTextRendering;
@@ -1155,7 +1151,7 @@ This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
                 return;
             }
 
-            if (base.FlatStyle != FlatStyle.System || OSHelper.IsFrameworkMono)
+            if (FlatStyle != FlatStyle.System || OSHelper.IsFrameworkMono)
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, true);
         }
 

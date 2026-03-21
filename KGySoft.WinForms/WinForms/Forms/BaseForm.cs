@@ -542,10 +542,6 @@ namespace KGySoft.WinForms.Forms
         public PointF DeviceScale => deviceScale;
 
         /// <inheritdoc cref="Form.Icon" />
-#if NET9_0_OR_GREATER
-        [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.",
-            Justification = "False alarm, inherited from the base. Cannot redefine easily because Form uses a ShouldSerialize method reurning a private state flag.")] 
-#endif
         public new Icon? Icon
         {
             get => base.Icon;

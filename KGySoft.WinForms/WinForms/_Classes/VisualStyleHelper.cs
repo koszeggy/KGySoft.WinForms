@@ -605,6 +605,8 @@ namespace KGySoft.WinForms
                 ClearCaches();
                 if (e.Category == UserPreferenceCategory.VisualStyle)
                     OnVisualStylesChanged(EventArgs.Empty);
+                //else if (e.Category == UserPreferenceCategory.General)
+                //    ThemeHelper.OnThemeChanged(EventArgs.Empty);
             }
         }
 

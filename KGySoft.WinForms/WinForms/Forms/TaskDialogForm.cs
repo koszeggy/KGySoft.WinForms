@@ -20,9 +20,6 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-#if NET9_0_OR_GREATER
-using System.Diagnostics.CodeAnalysis;
-#endif
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Drawing.Imaging;
@@ -124,9 +121,6 @@ namespace KGySoft.WinForms.Forms
         {
             #region Properties
 
-#if NET9_0_OR_GREATER
-            [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.", Justification = "False alarm, internal property")]
-#endif
             internal TaskDialogForm Owner { get; set; } = null!;
 
             #endregion

@@ -93,9 +93,6 @@ namespace KGySoft.WinForms.Forms
 
             #region Internal Properties
 
-#if NET9_0_OR_GREATER
-            [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.", Justification = "False alarm, internal property")]
-#endif
             internal bool IsExpanded
             {
                 get => isExpanded;
@@ -111,9 +108,6 @@ namespace KGySoft.WinForms.Forms
                 }
             }
 
-#if NET9_0_OR_GREATER
-            [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.", Justification = "False alarm, internal property")]
-#endif
             internal string? TextExpanded
             {
                 get => textExpanded;
@@ -131,9 +125,6 @@ namespace KGySoft.WinForms.Forms
                 }
             }
 
-#if NET9_0_OR_GREATER
-            [SuppressMessage("WinForms Security", "WFO1000:Property does not configure the code serialization for its property content.", Justification = "False alarm, internal property")]
-#endif
             internal string? TextCollapsed
             {
                 get => textCollapsed;
