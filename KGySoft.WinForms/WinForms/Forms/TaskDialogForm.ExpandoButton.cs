@@ -335,10 +335,11 @@ namespace KGySoft.WinForms.Forms
                 }
 
                 imageSize = GetImageSize();
-                if (imageSize == VisualStyleHelper.GetPartSize(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)EXPANDOBUTTONSTATES.TDLGEBS_NORMAL, true))
-                    VisualStyleHelper.Render(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)state, GetButtonBounds(imageSize));
+                IntPtr hwnd = Handle;
+                if (imageSize == VisualStyleHelper.GetPartSize(Constants.ThemeClassTaskDialog, hwnd, g, Constants.TDLG_EXPANDOBUTTON, (int)EXPANDOBUTTONSTATES.TDLGEBS_NORMAL, true))
+                    VisualStyleHelper.Render(Constants.ThemeClassTaskDialog, hwnd, g, Constants.TDLG_EXPANDOBUTTON, (int)state, GetButtonBounds(imageSize));
                 else
-                    VisualStyleHelper.RenderScaled(VisualStyleHelper.TaskDialogTheme, this, g, Constants.TDLG_EXPANDOBUTTON, (int)state, GetButtonBounds(imageSize));
+                    VisualStyleHelper.RenderScaled(Constants.ThemeClassTaskDialog, hwnd, g, Constants.TDLG_EXPANDOBUTTON, (int)state, GetButtonBounds(imageSize));
             }
 
             private void PaintThemedButton(Graphics g, out Size imageSize)

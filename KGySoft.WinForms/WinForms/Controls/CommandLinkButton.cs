@@ -218,10 +218,6 @@ namespace KGySoft.WinForms.Controls
 
         private static Font DefaultNonThemedTextFont => defaultNonThemedTextFont ??= new Font(ScaleHelper.DialogFont, FontStyle.Bold);
         private static bool IsNativeVisualStylesRenderingAvailable => IsNativelySupported && VisualStyleHelper.RenderWithVisualStyles;
-        private static Color ThemedForeColor => !IsNativeVisualStylesRenderingAvailable ? defaultEnabledThemedForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL, defaultEnabledThemedForeColor);
-        private static Color ThemedHoveredColor => !IsNativeVisualStylesRenderingAvailable ? defaultHoveredColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT, defaultHoveredColor);
-        private static Color ThemedPressedColor => !IsNativeVisualStylesRenderingAvailable ? defaultPressedColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED, defaultPressedColor);
-        private static Color ThemedDisabledColor => !IsNativeVisualStylesRenderingAvailable ? defaultDisabledThemedForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED, defaultDisabledThemedForeColor);
 
         #endregion
 
@@ -930,6 +926,11 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Properties
 
+        private Color ThemedForeColor => !IsNativeVisualStylesRenderingAvailable ? defaultEnabledThemedForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_NORMAL, defaultEnabledThemedForeColor);
+        private Color ThemedHoveredColor => !IsNativeVisualStylesRenderingAvailable ? defaultHoveredColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_HOT, defaultHoveredColor);
+        private Color ThemedPressedColor => !IsNativeVisualStylesRenderingAvailable ? defaultPressedColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_PRESSED, defaultPressedColor);
+        private Color ThemedDisabledColor => !IsNativeVisualStylesRenderingAvailable ? defaultDisabledThemedForeColor : GetDefaultTextColor(COMMANDLINKSTATES.CMDLS_DISABLED, defaultDisabledThemedForeColor);
+
         private Image SecurityShieldImage
         {
             get
@@ -960,8 +961,9 @@ namespace KGySoft.WinForms.Controls
 
                 if (themedFontLarge == null)
                 {
+                    // NOTE: Not passing the handle to GetFont, so doing the scaling by ourselves
                     if (IsNativeVisualStylesRenderingAvailable)
-                        themedFontLarge = VisualStyleHelper.GetFont(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_COMMANDLINK);
+                        themedFontLarge = VisualStyleHelper.GetFont(Constants.ThemeClassButton, IntPtr.Zero, (int)BUTTONPARTS.BP_COMMANDLINK);
 
                     if (themedFontLarge == null)
                     {
@@ -1150,8 +1152,12 @@ namespace KGySoft.WinForms.Controls
                             defaultGlyphSize = this.ScaleSize(referenceThemedGlyphSize);
                         else
                         {
-                            using Graphics g = Graphics.FromHwnd(IsHandleCreated ? Handle : IntPtr.Zero);
-                            defaultGlyphSize = VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, 1, false);
+                            IntPtr hwnd = this.GetHandleIfCreated();
+                            using Graphics g = Graphics.FromHwnd(hwnd);
+                            Size size = VisualStyleHelper.GetPartSize(Constants.ThemeClassButton, hwnd, g, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, 1, false);
+                            if (!IsHandleCreated)
+                                return size;
+                            defaultGlyphSize = size;
                         }
                     }
                     else
@@ -1204,8 +1210,11 @@ namespace KGySoft.WinForms.Controls
 
         #region Static Methods
 
-        private static Color GetDefaultTextColor(COMMANDLINKSTATES state, Color defaultColor) =>
-            VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_COMMANDLINK, (int)state, defaultColor);
+        private static int Adjust255(float percentage, int value)
+        {
+            int result = (int)(percentage * value);
+            return result > 255 ? 255 : result;
+        }
 
         #endregion
 
@@ -1681,17 +1690,8 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Methods
 
-        #region Static Methods
-
-        private static int Adjust255(float percentage, int value)
-        {
-            int result = (int)(percentage * value);
-            return result > 255 ? 255 : result;
-        }
-
-        #endregion
-
-        #region Instance Methods
+        private Color GetDefaultTextColor(COMMANDLINKSTATES state, Color defaultColor) =>
+            VisualStyleHelper.GetTextColor(Constants.ThemeClassButton, this.GetHandleIfCreated(), (int)BUTTONPARTS.BP_COMMANDLINK, (int)state, defaultColor);
 
         private ControlAppearanceState GetAppearance()
         {
@@ -1845,7 +1845,7 @@ namespace KGySoft.WinForms.Controls
 
             // Native rendering
             if (OSHelper.IsWindowsVistaOrLater)
-                VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, e.Graphics, state.SystemPartId, state.SystemStateId, clientRectangle);
+                VisualStyleHelper.Render(Constants.ThemeClassButton, Handle, e.Graphics, state.SystemPartId, state.SystemStateId, clientRectangle);
             else
             {
                 // Compatible rendering (Windows XP - mimicking the Vista appearance)
@@ -2032,7 +2032,7 @@ namespace KGySoft.WinForms.Controls
             {
                 bool isSimpleArrow = OSHelper.IsWindows10OrLater;
                 bool isRightToLeft = RightToLeft == RightToLeft.Yes;
-                bool isNonNativeSize = bounds.Size != VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, true);
+                bool isNonNativeSize = bounds.Size != VisualStyleHelper.GetPartSize(Constants.ThemeClassButton, Handle, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, true);
                 bool isCustomDrawnArrow = isSimpleArrow
                     && (VisualStyleHelper.HighContrast // high contrast with visual styles on Windows 10 or later: always drawing the arrow manually so it matches the theme colors
                         || isNonNativeSize
@@ -2059,9 +2059,9 @@ namespace KGySoft.WinForms.Controls
                 if (!isRightToLeft)
                 {
                     if (isNonNativeSize && visualsRenderingQuality == RenderingQuality.High)
-                        VisualStyleHelper.RenderScaled(VisualStyleHelper.ButtonTheme, this, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, bounds);
+                        VisualStyleHelper.RenderScaled(Constants.ThemeClassButton, Handle, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, bounds);
                     else
-                        VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, bounds);
+                        VisualStyleHelper.Render(Constants.ThemeClassButton, Handle, e.Graphics, (int)BUTTONPARTS.BP_COMMANDLINKGLYPH, state.SystemStateId, bounds);
                     return;
                 }
             }
@@ -2468,8 +2468,6 @@ namespace KGySoft.WinForms.Controls
 
         // ReSharper restore InconsistentNaming
 #pragma warning restore IDE1006 // Naming Styles
-        #endregion
-
         #endregion
 
         #endregion

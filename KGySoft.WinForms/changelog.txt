@@ -34,6 +34,7 @@
 ! DataGridViewTextAndImageColumn class: Removed, it was already obsolete.
 ! DataGridViewTextAndImageCell class: Removed, it was already obsolete.
 + New ScaleHelper class
++ New VisualStyleHelper class
 + New WinFormsModule class
 + New EventHandlerExtensions class
 + New AsyncTaskBase class: Migrated from the KGySoft.Drawing.ImagingTools project.

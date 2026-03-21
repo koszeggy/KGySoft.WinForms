@@ -334,7 +334,8 @@ namespace KGySoft.WinForms.Forms
                             try
                             {
                                 // VisualStyleRenderer throws an exception because only FontProperty.GlyphFont is accepted by VisualStyleRenderer.GetFont
-                                mainInstructionsFont = VisualStyleHelper.GetFont(VisualStyleHelper.TaskDialogTheme, Constants.TDLG_MAININSTRUCTIONPANE)
+                                // NOTE: Not passing the handle to GetFont, so doing the scaling by ourselves
+                                mainInstructionsFont = VisualStyleHelper.GetFont(Constants.ThemeClassTaskDialog, IntPtr.Zero, Constants.TDLG_MAININSTRUCTIONPANE)
                                     ?? new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
                             }
                             catch (Exception e) when (!e.IsCritical())
@@ -366,13 +367,14 @@ namespace KGySoft.WinForms.Forms
                 if (mainInstructionsColor.IsEmpty)
                 {
                     var color = OSHelper.IsWindowsVistaOrLater
-                        ? VisualStyleHelper.GetTextColor(VisualStyleHelper.TaskDialogTheme, Constants.TDLG_MAININSTRUCTIONPANE, 1, mainInstructionsDefaultThemedColor)
+                        ? VisualStyleHelper.GetTextColor(Constants.ThemeClassTaskDialog, lblMainInstruction.GetHandleIfCreated(), Constants.TDLG_MAININSTRUCTIONPANE, 1, mainInstructionsDefaultThemedColor)
                         : mainInstructionsDefaultThemedColor;
 
                     // ISSUE: When changing from high contrast to normal theme, the VisualStyleRenderer.GetColor(ColorProperty.TextColor) keeps returning
                     // the high contrast SystemColors.ControlText color for a while. Skipping the caching until returning from OnSystemColorsChanged or
                     // invalidating in the first Paint does not help. This is still not optimal, because the appearance can be invalid until the label is repainted.
-                    if (cacheMainInstructionsColor != true)
+                    // Also, not caching the color until the handle of the label is created.
+                    if (cacheMainInstructionsColor != true || !lblMainInstruction.IsHandleCreated)
                         return color;
                     mainInstructionsColor = color;
                 }

@@ -19,6 +19,8 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
+using KGySoft.WinForms.WinApi;
+
 #endregion
 
 namespace KGySoft.WinForms.Controls
@@ -116,7 +118,7 @@ namespace KGySoft.WinForms.Controls
             options.CheckPaddingSize = 1;
             options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
             if (VisualStyleHelper.RenderWithVisualStyles && (CheckBoxInstance.HasDefaultScaling() || options.PerMonitorDpiAwarenessLevel != 1))
-                options.CheckSize = VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, graphics, state.SystemPartId, state.SystemStateId, false).Width;
+                options.CheckSize = VisualStyleHelper.GetPartSize(Constants.ThemeClassButton, ButtonInstance.GetHandleIfCreated(), graphics, state.SystemPartId, state.SystemStateId, false).Width;
 
             return options;
         }
@@ -132,12 +134,12 @@ namespace KGySoft.WinForms.Controls
             {
                 if (CheckBoxInstance.VisualsRenderingQuality == RenderingQuality.High
                     && (layout.Options.Scale.X > 1f || layout.Options.PerMonitorDpiAwarenessLevel == 1) // just to omit querying part size at 100% DPI, unless per-monitor DPI version is 1
-                    && layout.Options.CheckSize != VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, true).Width)
+                    && layout.Options.CheckSize != VisualStyleHelper.GetPartSize(Constants.ThemeClassButton, ButtonInstance.Handle, e.Graphics, state.SystemPartId, state.SystemStateId, true).Width)
                 {
-                    VisualStyleHelper.RenderScaled(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
+                    VisualStyleHelper.RenderScaled(Constants.ThemeClassButton, ButtonInstance.Handle, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
                 }
                 else
-                    VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
+                    VisualStyleHelper.Render(Constants.ThemeClassButton, ButtonInstance.Handle, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
             }
             else if (state.CheckState == CheckState.Indeterminate)
                 ControlPaint.DrawMixedCheckBox(e.Graphics, layout.CheckBounds, GetButtonState(state));

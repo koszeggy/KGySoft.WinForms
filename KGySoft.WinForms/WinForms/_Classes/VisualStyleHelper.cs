@@ -38,10 +38,10 @@ using Microsoft.Win32;
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Provides helper methods for working with visual styles. We could use the VisualStyleRenderer class, but it always re-validates the
-    /// class name and part combinations, it does not support some classes (e.g. DatePicker), and does not allow some values, such as font properties.
+    /// Provides helper methods for working with visual styles. Unlike the public members of the <see cref="VisualStyleRenderer"/> class,
+    /// it supports high-DPI or custom themed styles (e.g. Windows 10+ dark theme), newer theme classes (e.g. DatePicker), and some additional visual style values, such as font properties.
     /// </summary>
-    internal static class VisualStyleHelper
+    public static class VisualStyleHelper
     {
         #region Fields
 
@@ -54,12 +54,9 @@ namespace KGySoft.WinForms
             MergeInterval = TimeSpan.FromMilliseconds(100)
         };
 
-        // If a new theme is added, adjust the GetClassName and ClearCaches methods as well
+        // If a new theme is added, adjust the ClearCaches method as well
         private static IntPtr? buttonThemeHandle;
-        private static IntPtr? taskDialogThemeHandle;
-        private static IntPtr? comboBoxThemeHandle;
         private static IntPtr? datePickerThemeHandle;
-        private static IntPtr? spinThemeHandle;
 
         private static bool? visualStylesAvailable;
         private static bool? highContrast;
@@ -76,11 +73,11 @@ namespace KGySoft.WinForms
 
         /// <summary>
         /// Occurs when the visual styles have changed.
-        /// Unlike Control.SystemColorsChanged, this event is raised for the VisualStyle category of UserPreferenceChanged, and
-        /// makes sure that the cached value of <see cref="RenderWithVisualStyles"/> is always up-to-date.
-        /// The event is raised from the same thread as event subscription. Make sure unsubscribing is done on the same thread as subscribing, otherwise the event may leak memory.
+        /// Unlike <see cref="Control.SystemColorsChanged">Control.SystemColorsChanged</see>, this event is raised for the <see cref="UserPreferenceCategory.VisualStyle"/> category
+        /// of the <see cref="SystemEvents.UserPreferenceChanged"/> event, and makes sure that the cached value of <see cref="RenderWithVisualStyles"/> is always up-to-date.
+        /// The event is raised from the same thread as the thread of the event subscription. Make sure unsubscribing is done from the same thread as subscribing, otherwise the event may leak memory.
         /// </summary>
-        internal static event EventHandler? VisualStylesChanged
+        public static event EventHandler? VisualStylesChanged
         {
             // Capturing the context when adding the first handler from a thread.
             // No need to combine the delegates in a thread-safe way, because the values themselves are always accessed from the same thread.
@@ -98,6 +95,73 @@ namespace KGySoft.WinForms
         #endregion
 
         #region Properties
+
+        #region Public Properties
+
+        /// <summary>
+        /// Gets a cached value indicating whether visual styles are available.
+        /// </summary>
+        /// <remarks>
+        /// <note>When using this property, use the <see cref="VisualStylesChanged"/> event of this class instead of <see cref="Control.SystemColorsChanged">Control.SystemColorsChanged</see>
+        /// or <see cref="SystemEvents.UserPreferenceChanged">SystemEvents.UserPreferenceChanged</see> to make sure the delegate of the event subscription
+        /// is always called in sync with the update of this property.</note>
+        /// </remarks>
+        public static bool RenderWithVisualStyles => visualStylesAvailable ??= Application.RenderWithVisualStyles;
+
+        /// <summary>
+        /// Gets a cached value indicating whether the operating system uses high contrast colors.
+        /// </summary>
+        /// <remarks>
+        /// <note>When using this property, use the <see cref="VisualStylesChanged"/> event of this class instead of <see cref="Control.SystemColorsChanged">Control.SystemColorsChanged</see>
+        /// or <see cref="SystemEvents.UserPreferenceChanged">SystemEvents.UserPreferenceChanged</see> to make sure the delegate of the event subscription
+        /// is always called in sync with the update of this property.</note>
+        /// </remarks>
+        public static bool HighContrast => highContrast ??= SystemInformation.HighContrast;
+
+        #endregion
+
+
+        #region Internal Properties
+
+        /// <summary>
+        /// Gets whether comctl32.dll V6 is available, without loading it explicitly.
+        /// After all tells, whether <see cref="Application.EnableVisualStyles"/> was already called in the current application.
+        /// </summary>
+        internal static bool InitializedWithVisualStyles
+        {
+            get
+            {
+                if (isComCtlV6Available.HasValue)
+                    return isComCtlV6Available.Value;
+
+                // pre-XP: no visual styles
+                if (!OSHelper.IsWindowsXpOrLater)
+                {
+                    isComCtlV6Available = false;
+                    return false;
+                }
+
+                // visual styles are actually used
+                if (RenderWithVisualStyles)
+                {
+                    isComCtlV6Available = true;
+                    return true;
+                }
+
+                // Here EnableVisualStyles was either called but classic theme is used (true result) or visual styles were not enabled at all (false result)
+                // We could use the Comctl32ActivationContext and get the dll version of comctl32, but then V6 would be loaded accidentally, causing that controls
+                // begin to use visual styles in non-System mode.
+                isComCtlV6Available = Accessors.ComCtlSupportsVisualStyles;
+                return isComCtlV6Available.Value;
+            }
+        }
+
+        internal static IntPtr ButtonTheme => buttonThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeClassButton);
+        internal static IntPtr DatePickerTheme => datePickerThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeDatePicker);
+
+        #endregion
+
+        #region Private Properties
 
         private static LockingDictionary<(IntPtr, int, int), Bitmap> ThemeBitmapsCache
         {
@@ -139,53 +203,7 @@ namespace KGySoft.WinForms
             }
         }
 
-        /// <summary>
-        /// Gets a cached value indicating whether visual styles are available.
-        /// NOTE: when using this property, use VisualStylesChanged of this class instead of Control.SystemColorsChanged or SystemEvents.UserPreferenceChanged
-        ///       to make sure the delegate of the event subscription is always called in sync with the update of this property.
-        /// </summary>
-        internal static bool RenderWithVisualStyles => visualStylesAvailable ??= Application.RenderWithVisualStyles;
-
-        /// <summary>
-        /// Gets whether comctl32.dll V6 is available, without loading it explicitly.
-        /// After all tells, whether <see cref="Application.EnableVisualStyles"/> was already called in the current application.
-        /// </summary>
-        internal static bool InitializedWithVisualStyles
-        {
-            get
-            {
-                if (isComCtlV6Available.HasValue)
-                    return isComCtlV6Available.Value;
-
-                // pre-XP: no visual styles
-                if (!OSHelper.IsWindowsXpOrLater)
-                {
-                    isComCtlV6Available = false;
-                    return false;
-                }
-
-                // visual styles are actually used
-                if (RenderWithVisualStyles)
-                {
-                    isComCtlV6Available = true;
-                    return true;
-                }
-
-                // Here EnableVisualStyles was either called but classic theme is used (true result) or visual styles were not enabled at all (false result)
-                // We could use the Comctl32ActivationContext and get the dll version of comctl32, but then V6 would be loaded accidentally, causing that controls
-                // begin to use visual styles in non-System mode.
-                isComCtlV6Available = Accessors.ComCtlSupportsVisualStyles;
-                return isComCtlV6Available.Value;
-            }
-        }
-
-        internal static bool HighContrast => highContrast ??= SystemInformation.HighContrast;
-
-        internal static IntPtr ButtonTheme => buttonThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeClassButton);
-        internal static IntPtr TaskDialogTheme => taskDialogThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeClassTaskDialog);
-        internal static IntPtr ComboBoxTheme => comboBoxThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeClassComboBox);
-        internal static IntPtr DatePickerTheme => datePickerThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeDatePicker);
-        internal static IntPtr SpinTheme => spinThemeHandle ??= UxTheme.OpenThemeDataGlobal(Constants.ThemeSpin);
+        #endregion
 
         #endregion
 
@@ -197,93 +215,183 @@ namespace KGySoft.WinForms
 
         #region Methods
 
-        #region Internal Methods
+        #region Public Methods
 
-        internal static Size GetPartSize(IntPtr hTheme, Control? control, Graphics g, int part, int state, bool actualSize)
+        /// <summary>
+        /// Gets the part size of a themed element.
+        /// </summary>
+        /// <param name="className">The class name of the visual style element.</param>
+        /// <param name="hwnd">A window handle to get the size of a specific control; otherwise, <see cref="IntPtr.Zero">IntPtr.Zero</see>.</param>
+        /// <param name="dc">The device context to use for the operation.</param>
+        /// <param name="part">An integer identifier that specifies the part to calculate the size of.</param>
+        /// <param name="state">An integer identifier that specifies the state of the part.</param>
+        /// <param name="actualSize"><see langword="true"/> to get the actual size of the themed glyph;
+        /// <see langword="false"/> to get the possibly scaled size when the part is drawn. Can make a difference with high DPI settings.</param>
+        /// <returns>A <see cref="Size"/> structure that receives the dimensions of the specified part.</returns>
+        /// <remarks>
+        /// <para>If <paramref name="hwnd"/> is not <see cref="IntPtr.Zero">IntPtr.Zero</see>, the result can consider the scaling of a
+        /// particular control when the application has per-monitor DPI awareness.</para>
+        /// <para>For <paramref name="className"/>, <paramref name="part"/> and <paramref name="state"/> you can use
+        /// the predefined nested classes of the <see cref="VisualStyleElement"/> class.
+        /// For more information see also the <a href="https://learn.microsoft.com/en-us/windows/win32/controls/parts-and-states" target="_blank">Parts and States</a> page.</para>
+        /// </remarks>
+        public static Size GetPartSize(string className, IntPtr hwnd, IDeviceContext dc, int part, int state, bool actualSize)
         {
-            IntPtr hThemeWindow = IntPtr.Zero;
-            IntPtr hdc = g.GetHdc();
+            IntPtr hTheme = IntPtr.Zero;
+            IntPtr hdc = dc.GetHdc();
             try
             {
-                if (control?.IsHandleCreated == true && !control.HasDefaultScaling())
-                    hThemeWindow = UxTheme.OpenThemeDataForWindow(control.Handle, GetClassName(hTheme));
-
-                return UxTheme.GetThemePartSize(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, hdc, part, state,
-                    (int)(actualSize ? ThemeSizeType.True : ThemeSizeType.Draw));
+                hTheme = UxTheme.OpenThemeDataForWindow(hwnd, className);
+                return UxTheme.GetThemePartSize(hTheme, hdc, part, state, (int)(actualSize ? ThemeSizeType.True : ThemeSizeType.Draw));
             }
             finally
             {
-                g.ReleaseHdc(hdc);
-                if (hThemeWindow != IntPtr.Zero && hTheme != hThemeWindow)
-                    UxTheme.CloseThemeData(hThemeWindow);
+                dc.ReleaseHdc();
+                if (hTheme != IntPtr.Zero && hwnd != IntPtr.Zero)
+                    UxTheme.CloseThemeData(hTheme);
             }
         }
 
-        internal static void Render(IntPtr hTheme, Control control, Graphics g, int part, int state, Rectangle bounds)
+
+        /// <summary>
+        /// Renders the visual style element of the specified class, <paramref name="part"/> and <paramref name="state"/> to the specified device context.
+        /// </summary>
+        /// <param name="className">The class name of the visual style element.</param>
+        /// <param name="hwnd">A window handle to use an instance-specific scaling or theme; otherwise, <see cref="IntPtr.Zero">IntPtr.Zero</see>.</param>
+        /// <param name="dc">The device context to use for the operation.</param>
+        /// <param name="part">An integer identifier that specifies the part to render.</param>
+        /// <param name="state">An integer identifier that specifies the state of the part.</param>
+        /// <param name="bounds">A <see cref="Rectangle"/> structure that specifies the bounds of the part to render.</param>
+        /// <remarks>
+        /// <para>If <paramref name="hwnd"/> is not <see cref="IntPtr.Zero">IntPtr.Zero</see>, the rendering can consider instance-specific
+        /// visual style details, such as dark style or the scaling of a particular control when the application has per-monitor DPI awareness.</para>
+        /// <para>For <paramref name="className"/>, <paramref name="part"/> and <paramref name="state"/> you can use
+        /// the predefined nested classes of the <see cref="VisualStyleElement"/> class.
+        /// For more information see also the <a href="https://learn.microsoft.com/en-us/windows/win32/controls/parts-and-states" target="_blank">Parts and States</a> page.</para>
+        /// <note>If the size of <paramref name="bounds"/> differs from the actual size of the visual element (see also <see cref="GetPartSize">GetPartSize</see>),
+        /// then the quality of the result may not be optimal. To render scaled visual style elements with high quality, use the <see cref="RenderScaled">RenderScaled</see> method.</note>
+        /// </remarks>
+        public static void Render(string className, IntPtr hwnd, IDeviceContext dc, int part, int state, Rectangle bounds)
         {
-            IntPtr hThemeWindow = IntPtr.Zero;
-            IntPtr hdc = g.GetHdc();
+            IntPtr hTheme = IntPtr.Zero;
+            IntPtr hdc = dc.GetHdc();
             try
             {
-                if (!control.HasDefaultScaling())
-                    hThemeWindow = UxTheme.OpenThemeDataForWindow(control.Handle, GetClassName(hTheme));
-
-                UxTheme.DrawThemeBackground(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, hdc, part, state, bounds);
+                hTheme = UxTheme.OpenThemeDataForWindow(hwnd, className);
+                UxTheme.DrawThemeBackground(hTheme, hdc, part, state, bounds);
             }
             finally
             {
-                g.ReleaseHdc(hdc);
-                if (hThemeWindow != IntPtr.Zero && hTheme != hThemeWindow)
-                    UxTheme.CloseThemeData(hThemeWindow);
+                dc.ReleaseHdc();
+                if (hTheme != IntPtr.Zero && hwnd != IntPtr.Zero)
+                    UxTheme.CloseThemeData(hTheme);
             }
         }
 
-        internal static void RenderScaled(IntPtr hTheme, Control control, Graphics g, int part, int state, Rectangle bounds)
+        /// <summary>
+        /// Renders the visual style element of the specified class, <paramref name="part"/> and <paramref name="state"/> by scaling actual glyph
+        /// to the desired size specified in the <paramref name="bounds"/> parameter.
+        /// </summary>
+        /// <param name="className">The class name of the visual style element.</param>
+        /// <param name="hwnd">A window handle to use an instance-specific scaling or theme; otherwise, <see cref="IntPtr.Zero">IntPtr.Zero</see>.</param>
+        /// <param name="graphics">A <see cref="Graphics"/> instance to use as the target of the rendering.</param>
+        /// <param name="part">An integer identifier that specifies the part to render.</param>
+        /// <param name="state">An integer identifier that specifies the state of the part.</param>
+        /// <param name="bounds">A <see cref="Rectangle"/> structure that specifies the bounds of the part to render.</param>
+        /// <remarks>
+        /// <para>If <paramref name="hwnd"/> is not <see cref="IntPtr.Zero">IntPtr.Zero</see>, the rendering can consider instance-specific
+        /// visual style details, such as dark style or the scaling of a particular control when the application has per-monitor DPI awareness.</para>
+        /// <para>For <paramref name="className"/>, <paramref name="part"/> and <paramref name="state"/> you can use
+        /// the predefined nested classes of the <see cref="VisualStyleElement"/> class.
+        /// For more information see also the <a href="https://learn.microsoft.com/en-us/windows/win32/controls/parts-and-states" target="_blank">Parts and States</a> page.</para>
+        /// <note>To render freely scalable visual elements such as push buttons, use always the <see cref="Render">Render</see> method instead.
+        /// This method is to scale visual elements of a fix size, such as a checkbox or radio button.</note>
+        /// </remarks>
+        public static void RenderScaled(string className, IntPtr hwnd, Graphics graphics, int part, int state, Rectangle bounds)
         {
-            Debug.Assert(OSHelper.IsWindowsXpOrLater);
-
-            IntPtr hThemeWindow = IntPtr.Zero;
-            GraphicsState gState = g.Save();
+            IntPtr hTheme = IntPtr.Zero;
+            GraphicsState gState = graphics.Save();
             try
             {
-                if (!control.HasDefaultScaling())
-                    hThemeWindow = UxTheme.OpenThemeDataForWindow(control.Handle, GetClassName(hTheme));
+                hTheme = UxTheme.OpenThemeDataForWindow(hwnd, className);
 
                 // Does not work with UxTheme.GetThemeBitmap, because it ignores DPI and returns the smallest glyphs, even if true size is larger
-                //using Bitmap bmp = UxTheme.GetThemeBitmap(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, part, state, realSize);
+                //using Bitmap bmp = UxTheme.GetThemeBitmap(hTheme, part, state, realSize);
 
                 // Caching by hTheme is OK, even if we open/close the theme data for the control, because opening with the same DPI/color scheme tends to return the same handle.
                 // Even if it wouldn't do so, the cache will drop and dispose the old bitmaps when it's full, or when the theme changes.
-                Bitmap bmp = ThemeBitmapsCache[(hThemeWindow == IntPtr.Zero ? hTheme : hThemeWindow, part, state)];
-                g.InterpolationMode = InterpolationMode.HighQualityBicubic;
-                g.PixelOffsetMode = PixelOffsetMode.Half;
-                g.DrawImage(bmp, bounds);
+                Bitmap bmp = ThemeBitmapsCache[(hTheme, part, state)];
+                graphics.InterpolationMode = InterpolationMode.HighQualityBicubic;
+                graphics.PixelOffsetMode = PixelOffsetMode.Half;
+                graphics.DrawImage(bmp, bounds);
             }
             catch (Exception e) when (!e.IsCritical())
             {
                 Debug.Fail($"Failed to render scaled theme part {part} state {state}: {e.Message}");
-                Render(hTheme, control, g, part, state, bounds);
+                Render(className, hwnd, graphics, part, state, bounds);
             }
             finally
             {
-                g.Restore(gState);
-                if (hThemeWindow != IntPtr.Zero && hTheme != hThemeWindow)
-                    UxTheme.CloseThemeData(hThemeWindow);
+                graphics.Restore(gState);
+                if (hTheme != IntPtr.Zero && hwnd != IntPtr.Zero)
+                    UxTheme.CloseThemeData(hTheme);
             }
         }
 
-        internal static Color GetTextColor(IntPtr hTheme, int part, int state, Color defaultColor)
-            => UxTheme.GetThemeColor(hTheme, part, state, Constants.TMT_COLOR, defaultColor);
+        /// <summary>
+        /// Gets the color of a themed element, or <paramref name="defaultColor"/>, if no color is defined for the specified class, part and state.
+        /// </summary>
+        /// <param name="className">The class name of the visual style element.</param>
+        /// <param name="hwnd">A window handle to use a possibly instance-specific theme; otherwise, <see cref="IntPtr.Zero">IntPtr.Zero</see>.</param>
+        /// <param name="part">An integer identifier that specifies the part to render.</param>
+        /// <param name="state">An integer identifier that specifies the state of the part.</param>
+        /// <param name="defaultColor">The color to return if no color is defined for the specified class, part and state.</param>
+        /// <returns>The color of the themed element, or <paramref name="defaultColor"/> if no color is defined for the specified class, part and state.</returns>
+        public static Color GetTextColor(string className, IntPtr hwnd, int part, int state, Color defaultColor)
+        {
+            IntPtr hTheme = IntPtr.Zero;
+            try
+            {
+                hTheme = UxTheme.OpenThemeDataForWindow(hwnd, className);
+                return UxTheme.GetThemeColor(hTheme, part, state, Constants.TMT_COLOR, defaultColor);
+            }
+            finally
+            {
+                if (hTheme != IntPtr.Zero && hwnd != IntPtr.Zero)
+                    UxTheme.CloseThemeData(hTheme);
+            }
+        }
 
-        internal static Font? GetFont(IntPtr hTheme, int part) => UxTheme.GetThemeFont(hTheme, part, 0, Constants.TMT_FONT);
+        /// <summary>
+        /// Gets the font of a visual style element, or <see langword="null"/>, if no font is defined for the specified class and part.
+        /// </summary>
+        /// <param name="className">The class name of the visual style element.</param>
+        /// <param name="hwnd">A window handle to use a possibly instance-specific scaling; otherwise, <see cref="IntPtr.Zero">IntPtr.Zero</see>.</param>
+        /// <param name="part">An integer identifier that specifies the part to render.</param>
+        /// <returns>The font of the themed element, or <see langword="null"/>, if no font is defined for the specified class and part.</returns>
+        public static Font? GetFont(string className, IntPtr hwnd, int part)
+        {
+            IntPtr hTheme = IntPtr.Zero;
+            try
+            {
+                hTheme = UxTheme.OpenThemeDataForWindow(hwnd, className);
+                return UxTheme.GetThemeFont(hTheme, part, 0, Constants.TMT_FONT);
+            }
+            finally
+            {
+                if (hTheme != IntPtr.Zero && hwnd != IntPtr.Zero)
+                    UxTheme.CloseThemeData(hTheme);
+            }
+        }
+
+        #endregion
+
+        #region Internal Methods
 
         internal static void ClearCaches()
         {
             buttonThemeHandle = null;
-            taskDialogThemeHandle = null;
-            comboBoxThemeHandle = null;
             datePickerThemeHandle = null;
-            spinThemeHandle = null;
             visualStylesAvailable = null;
             highContrast = null;
 
@@ -319,13 +427,6 @@ namespace KGySoft.WinForms
         #endregion
 
         #region Private Methods
-
-        private static string GetClassName(IntPtr hTheme) => hTheme == buttonThemeHandle ? Constants.ThemeClassButton
-            : hTheme == taskDialogThemeHandle ? Constants.ThemeClassTaskDialog
-            : hTheme == comboBoxThemeHandle ? Constants.ThemeClassComboBox
-            : hTheme == datePickerThemeHandle ? Constants.ThemeDatePicker
-            : hTheme == spinThemeHandle ? Constants.ThemeSpin
-            : String.Empty; // Not throwing here for performance reasons so the method can be inlined. The exception will be thrown by UxTheme
 
         private static Bitmap GetThemeBitmap((IntPtr ThemeHandle, int PartId, int StateId) key)
         {
@@ -406,11 +507,23 @@ namespace KGySoft.WinForms
 
             // DPI does not matter here, because the animation is the same for all DPIs
             Size size;
+            IntPtr hTheme;
             using (Graphics g = Graphics.FromHwnd(IntPtr.Zero))
-                size = GetPartSize(ButtonTheme, null, g, key.PartId, key.StateId1, true);
+            {
+                IntPtr hdc = g.GetHdc();
+                try
+                {
+                    hTheme = UxTheme.OpenThemeDataGlobal(Constants.ThemeClassButton);
+                    size = UxTheme.GetThemePartSize(hTheme, hdc, key.PartId, key.StateId1, (int)ThemeSizeType.True);
+                }
+                finally
+                {
+                    g.ReleaseHdc(hdc);
+                }
+            }
 
-            using Bitmap? bmp1 = PaintIntoBitmap(ButtonTheme, key.PartId, key.StateId1, Color.White, size);
-            using Bitmap? bmp2 = PaintIntoBitmap(ButtonTheme, key.PartId, key.StateId2, Color.White, size);
+            using Bitmap? bmp1 = PaintIntoBitmap(hTheme, key.PartId, key.StateId1, Color.White, size);
+            using Bitmap? bmp2 = PaintIntoBitmap(hTheme, key.PartId, key.StateId2, Color.White, size);
 
             return bmp1 != null && !bmp1.EqualsByContent(bmp2);
         }
@@ -482,7 +595,7 @@ namespace KGySoft.WinForms
         private static void SystemEvents_UserPreferenceChanged(object? sender, UserPreferenceChangedEventArgs e)
         {
             // Color: For compatibility reasons, Color is always raised besides VisualStyle when visual styles change, and Color change is emitted before VisualStyle.
-            //        Control.SystemColorsChanged is also triggered for the Color category.
+            //        Therefore, this category is not captured here. Btw, Control.SystemColorsChanged is also triggered for the Color category.
             // VisualStyle: Using this instead of Color. It's triggered even when switching between non-visual style themes, not just when toggling visual styles on and off.
             //              Though Application.RenderWithVisualStyles would be alright even after the Color event, some system functions (e.g. BCM_GETIDEALSIZE - used by
             //              CommandLinkButton.GetPreferredSize when FlatStyle is System) still return the old values after Color, but the good ones when VisualStyle is raised.

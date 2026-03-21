@@ -544,7 +544,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         private void ResetCheckBoxColor() => checkBox.EnabledForeColor = !explicitForeColor.IsEmpty ? explicitForeColor
-            : VisualStyleHelper.RenderWithVisualStyles ? VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, (int)BUTTONPARTS.BP_GROUPBOX, (int)GroupBoxState.Normal, default)
+            : VisualStyleHelper.RenderWithVisualStyles ? VisualStyleHelper.GetTextColor(Constants.ThemeClassButton, this.GetHandleIfCreated(), (int)BUTTONPARTS.BP_GROUPBOX, (int)GroupBoxState.Normal, default)
             : default;
 
         private void CheckBoxSizeChanged()

@@ -912,7 +912,7 @@ namespace KGySoft.WinForms.Controls
                 if (fullPaint)
                 {
                     if (OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.DatePickerTheme != IntPtr.Zero) // both real Windows and Mono on Windows
-                        VisualStyleHelper.Render(VisualStyleHelper.DatePickerTheme, this, g, (int)DATEPICKERPARTS.DP_DATEBORDER, state, ClientRectangle);
+                        VisualStyleHelper.Render(Constants.ThemeDatePicker, Handle, g, (int)DATEPICKERPARTS.DP_DATEBORDER, state, ClientRectangle);
                     else // Windows XP or Wine: there is no DatePicker theme, but as the border is in the NC area, we can simply fill the background with back color
                     {
                         g.Clear(BackColor);
@@ -973,10 +973,11 @@ namespace KGySoft.WinForms.Controls
                 if (paintBackground)
                     g.FillRectangle(OSHelper.IsWindowsVistaOrLater ? SystemBrushes.Window : BackColor.GetBrush(), layout.TranslatedCheckBoxBounds);
 
-                Size actualSize = VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, true);
+                IntPtr hwnd = Handle;
+                Size actualSize = VisualStyleHelper.GetPartSize(Constants.ThemeClassButton, hwnd, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, true);
                 Size drawnSize = layout.CheckBoxBounds.Height < actualSize.Height
                     ? layout.CheckBoxBounds.Size
-                    : VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, false);
+                    : VisualStyleHelper.GetPartSize(Constants.ThemeClassButton, hwnd, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, false);
                 if (drawnSize.Height > layout.CheckBoxBounds.Height)
                     drawnSize = layout.CheckBoxBounds.Size;
 
@@ -991,10 +992,10 @@ namespace KGySoft.WinForms.Controls
                     // No idea why the +2 is needed when drawing images on RTL Graphics, the FillRectangle above does not need it.
                     if (layout.CheckBoxBounds != layout.TranslatedCheckBoxBounds)
                         drawnBounds.X = Width - drawnBounds.Right + 2;
-                    VisualStyleHelper.RenderScaled(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, drawnBounds);
+                    VisualStyleHelper.RenderScaled(Constants.ThemeClassButton, hwnd, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, drawnBounds);
                 }
                 else
-                    VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, this, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, drawnBounds);
+                    VisualStyleHelper.Render(Constants.ThemeClassButton, hwnd, g, (int)BUTTONPARTS.BP_CHECKBOX, (int)checkState, drawnBounds);
 
                 return;
             }
@@ -1031,11 +1032,11 @@ namespace KGySoft.WinForms.Controls
                     : flags[isDropDownHovered] ? DATEPICKERSTATES.DPS_HOT
                     : DATEPICKERSTATES.DPS_NORMAL);
 
-                IntPtr theme = layout.IsCalendarDropDown ? VisualStyleHelper.DatePickerTheme : VisualStyleHelper.ComboBoxTheme;
+                string className = layout.IsCalendarDropDown ? Constants.ThemeDatePicker : Constants.ThemeClassComboBox;
                 int part = layout.IsCalendarDropDown ? (int)DATEPICKERPARTS.DP_SHOWCALENDARBUTTONRIGHT
                     : !OSHelper.IsWindowsVistaOrLater || OSHelper.IsWine ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTON
                     : layout.IsRightToLeft ? (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : (int)COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;
-                VisualStyleHelper.Render(theme, this, g, part, state, layout.DropDownBounds);
+                VisualStyleHelper.Render(className, Handle, g, part, state, layout.DropDownBounds);
                 return;
             }
 
@@ -1063,8 +1064,8 @@ namespace KGySoft.WinForms.Controls
             int stateDown = (int)(!Enabled ? SPINSTATES.SPNS_DISABLED
                 : flags[isDownHovered] ? flags[isPressed] ? SPINSTATES.SPNS_PRESSED : SPINSTATES.SPNS_HOT
                 : SPINSTATES.SPNS_NORMAL);
-            VisualStyleHelper.Render(VisualStyleHelper.SpinTheme, this, g, (int)SPINPARTS.SPNP_UP, stateUp, boundsUp);
-            VisualStyleHelper.Render(VisualStyleHelper.SpinTheme, this, g, (int)SPINPARTS.SPNP_DOWN, stateDown, boundsDown);
+            VisualStyleHelper.Render(Constants.ThemeSpin, Handle, g, (int)SPINPARTS.SPNP_UP, stateUp, boundsUp);
+            VisualStyleHelper.Render(Constants.ThemeSpin, Handle, g, (int)SPINPARTS.SPNP_DOWN, stateDown, boundsDown);
         }
 
         private bool ShouldSerializeFont() => font != null;

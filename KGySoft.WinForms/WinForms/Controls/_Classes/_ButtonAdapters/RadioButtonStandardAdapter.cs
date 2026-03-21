@@ -18,6 +18,8 @@
 using System.Drawing;
 using System.Windows.Forms;
 
+using KGySoft.WinForms.WinApi;
+
 #endregion
 
 namespace KGySoft.WinForms.Controls
@@ -82,7 +84,7 @@ namespace KGySoft.WinForms.Controls
             options.HintTextUp = false;
             options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
             if (VisualStyleHelper.RenderWithVisualStyles && (RadioButtonInstance.HasDefaultScaling() || options.PerMonitorDpiAwarenessLevel != 1))
-                options.CheckSize = VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, graphics, state.SystemPartId, state.SystemStateId, false).Width;
+                options.CheckSize = VisualStyleHelper.GetPartSize(Constants.ThemeClassButton, ButtonInstance.GetHandleIfCreated(), graphics, state.SystemPartId, state.SystemStateId, false).Width;
 
             return options;
         }
@@ -100,12 +102,12 @@ namespace KGySoft.WinForms.Controls
             {
                 if (RadioButtonInstance.VisualsRenderingQuality == RenderingQuality.High
                     && (layout.Options.Scale.X > 1f || layout.Options.PerMonitorDpiAwarenessLevel == 1) // just to omit querying part size at 100% DPI, unless per-monitor DPI version is 1
-                    && layout.Options.CheckSize != VisualStyleHelper.GetPartSize(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, true).Width)
+                    && layout.Options.CheckSize != VisualStyleHelper.GetPartSize(Constants.ThemeClassButton, ButtonInstance.Handle, e.Graphics, state.SystemPartId, state.SystemStateId, true).Width)
                 {
-                    VisualStyleHelper.RenderScaled(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
+                    VisualStyleHelper.RenderScaled(Constants.ThemeClassButton, ButtonInstance.Handle, e.Graphics, state.SystemPartId, state.SystemStateId, layout.CheckBounds);
                 }
                 else
-                    VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, g, state.SystemPartId, state.SystemStateId, checkBounds);
+                    VisualStyleHelper.Render(Constants.ThemeClassButton, ButtonInstance.Handle, g, state.SystemPartId, state.SystemStateId, checkBounds);
             }
             else
             {

@@ -1108,10 +1108,9 @@ namespace KGySoft.WinForms.Controls
             if (lastFlatStyle == FlatStyle.Standard && VisualStyleHelper.RenderWithVisualStyles
                 && (isEnabled && foreColor == defaultEnabledForeColor || !isEnabled && foreColor == defaultDisabledForeColor))
             {
-                foreColor = VisualStyleHelper.GetTextColor(VisualStyleHelper.ButtonTheme, partId, stateId, foreColor);
+                foreColor = VisualStyleHelper.GetTextColor(Constants.ThemeClassButton, this.GetHandleIfCreated(), partId, stateId, foreColor);
             }
 
-            //VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? ThemedDisabledColor
             return new ControlAppearanceState(partId, stateId)
             {
                 BackColor = BackColor,

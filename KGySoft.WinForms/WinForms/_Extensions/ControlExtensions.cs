@@ -527,6 +527,8 @@ namespace KGySoft.WinForms
             return result.ToColor();
         }
 
+        internal static IntPtr GetHandleIfCreated(this Control c) => c.IsHandleCreated ? c.Handle : IntPtr.Zero;
+
         #endregion
 
         #region Private Methods

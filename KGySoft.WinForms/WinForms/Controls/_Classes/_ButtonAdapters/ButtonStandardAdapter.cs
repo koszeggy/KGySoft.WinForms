@@ -20,7 +20,7 @@ using System.Drawing;
 using System.Windows.Forms;
 using System.Windows.Forms.VisualStyles;
 
-using KGySoft.WinForms.Reflection;
+using KGySoft.WinForms.WinApi;
 
 #endregion
 
@@ -222,7 +222,7 @@ namespace KGySoft.WinForms.Controls
             ControlAppearanceState state = e.State;
             if (ButtonRenderer.IsBackgroundPartiallyTransparent((PushButtonState)state.SystemStateId))
                 ButtonInstance.PaintTransparentBackground(e);
-            VisualStyleHelper.Render(VisualStyleHelper.ButtonTheme, ButtonInstance, e.Graphics, state.SystemPartId, state.SystemStateId, ButtonInstance.ClientRectangle);
+            VisualStyleHelper.Render(Constants.ThemeClassButton, ButtonInstance.Handle, e.Graphics, state.SystemPartId, state.SystemStateId, ButtonInstance.ClientRectangle);
             bounds.Inflate(-ButtonBorderSize, -ButtonBorderSize);
             if (!ButtonInstance.UseVisualStyleBackColor)
             {

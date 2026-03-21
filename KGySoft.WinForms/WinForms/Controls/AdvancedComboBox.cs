@@ -241,14 +241,6 @@ namespace KGySoft.WinForms.Controls
 
         #region Properties
 
-        #region Static Properties
-
-        private static Color ThemedDisabledDropDownListColor => VisualStyleHelper.GetTextColor(VisualStyleHelper.ComboBoxTheme, (int)COMBOBOXPARTS.CP_READONLY, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, defaultDisabledForeColor);
-
-        #endregion
-
-        #region Instance Properties
-        
         #region Public Properties
 
         /// <summary>
@@ -574,7 +566,8 @@ namespace KGySoft.WinForms.Controls
         private bool DrawByVisualStylesWhenDisabled => systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsFrameworkMono
             && OSHelper.IsWindowsVistaOrLater && DropDownStyle == ComboBoxStyle.DropDownList && FlatStyle is FlatStyle.System or FlatStyle.Standard;
 
-        #endregion
+        private Color ThemedDisabledDropDownListColor => VisualStyleHelper.GetTextColor(Constants.ThemeClassComboBox,
+            this.GetHandleIfCreated(), (int)COMBOBOXPARTS.CP_READONLY, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, defaultDisabledForeColor);
 
         #endregion
 
@@ -1104,7 +1097,7 @@ namespace KGySoft.WinForms.Controls
             if (DrawByVisualStylesWhenDisabled)
             {
                 Debug.Assert(OSHelper.IsWindowsVistaOrLater);
-                VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)COMBOBOXPARTS.CP_READONLY, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, clientRect);
+                VisualStyleHelper.Render(Constants.ThemeClassComboBox, Handle, g, (int)COMBOBOXPARTS.CP_READONLY, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, clientRect);
 
                 var part = rtl ? COMBOBOXPARTS.CP_DROPDOWNBUTTONLEFT : COMBOBOXPARTS.CP_DROPDOWNBUTTONRIGHT;
                 var buttonSize = new Size(dropDownButtonWidth, clientRect.Height);
@@ -1112,7 +1105,7 @@ namespace KGySoft.WinForms.Controls
                 if (!rtl)
                     dropDownButtonBounds.X = clientRect.Right - buttonSize.Width;
                 
-                VisualStyleHelper.Render(VisualStyleHelper.ComboBoxTheme, this, g, (int)part, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, dropDownButtonBounds);
+                VisualStyleHelper.Render(Constants.ThemeClassComboBox, Handle, g, (int)part, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, dropDownButtonBounds);
             }
             else
                 g.FillRectangle(BackColor.GetBrush(), bounds);
@@ -1324,7 +1317,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, <paramref name="displayMember"/> must be writable and should refer to a <see cref="string"/> property.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
-        /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
+        /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus items are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
         [Obsolete("LoadFrom methods are obsolete. Names are not auto-translated anymore and SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)
@@ -1336,7 +1329,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="collection">The source collection.</param>
         /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
-        /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
+        /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus items are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
         [Obsolete("LoadFrom methods are obsolete. SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember, SelectionPlusItems plusItems)
