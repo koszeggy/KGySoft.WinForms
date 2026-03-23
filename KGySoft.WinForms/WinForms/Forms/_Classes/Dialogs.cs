@@ -67,7 +67,8 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         /// <remarks>
         /// <para>The default value is <see langword="false"/> to maintain backward compatibility with previous versions,
-        /// but it is recommended to set this property to <see langword="true"/> in new applications, especially if your application uses per-monitor DPI awareness.</para>
+        /// but it is recommended to set this property to <see langword="true"/> in new applications, especially if your application uses per-monitor DPI awareness,
+        /// or you want to be able to localize the standard button texts of the dialogs.</para>
         /// <para>It is safe to set this property to <see langword="true"/> even if visual styles are not enabled or the application is not running on Windows Vista or later.</para>
         /// </remarks>
         public static bool UseTaskDialogs { get; set; }
@@ -102,7 +103,9 @@ namespace KGySoft.WinForms.Forms
         /// as <see cref="BaseForm"/> or <see cref="BaseUserControl"/> when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
         /// property is set to <see cref="DynamicStringLocalization.AssemblyScope"/> or <see cref="DynamicStringLocalization.LocalScope"/>, you can use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method.
-        /// To localize the window caption and buttons, set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
+        /// To localize the window caption, you can use the <see cref="InfoMessage(IWin32Window,string,string)"/> overload and pass a custom localized string to the <c>caption</c> parameter.
+        /// To localize both the window caption and buttons, opt-in to use task dialogs by setting the <see cref="UseTaskDialogs"/> property to <see langword="true"/>,
+        /// and set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
         /// property to <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
         /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
@@ -129,8 +132,10 @@ namespace KGySoft.WinForms.Forms
         /// <param name="owner">An optional window that will own the modal message dialog. If <see langword="null"/>, the <see cref="DialogsOwner"/> property will be taken.
         /// If <see cref="DialogsOwner"/> is also <see langword="null"/>, the currently active window will be used.</param>
         /// <param name="message">The message to display in the information dialog.</param>
-        public static void InfoMessage(IWin32Window? owner, string message)
-            => ShowMessage(owner, message, Res.DialogsInfoCaption, MessageBoxButtons.OK, MessageBoxIcon.Information);
+        /// <param name="caption">The caption of the dialog. If <see langword="null"/>, a localized string similar to <c>Information</c> will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public static void InfoMessage(IWin32Window? owner, string message, string? caption = null)
+            => ShowMessage(owner, message, caption ?? Res.DialogsInfoCaption, MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         #endregion
 
@@ -146,8 +151,9 @@ namespace KGySoft.WinForms.Forms
         /// as <see cref="BaseForm"/> or <see cref="BaseUserControl"/> when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
         /// property is set to <see cref="DynamicStringLocalization.AssemblyScope"/> or <see cref="DynamicStringLocalization.LocalScope"/>, you can use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method.
-        /// To localize the window caption and buttons, set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
-        /// property to <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
+        /// To localize the window caption, you can use the <see cref="ErrorMessage(IWin32Window,string,string)"/> overload and pass a custom localized string to the <c>caption</c> parameter.
+        /// To localize both the window caption and buttons, opt-in to use task dialogs by setting the <see cref="UseTaskDialogs"/> property to <see langword="true"/>,
+        /// and set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
         /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
@@ -173,8 +179,10 @@ namespace KGySoft.WinForms.Forms
         /// <param name="owner">An optional window that will own the modal message dialog. If <see langword="null"/>, the <see cref="DialogsOwner"/> property will be taken.
         /// If <see cref="DialogsOwner"/> is also <see langword="null"/>, the currently active window will be used.</param>
         /// <param name="message">The message to display in the error dialog.</param>
-        public static void ErrorMessage(IWin32Window? owner, string message)
-            => ShowMessage(owner, message, Res.DialogsErrorCaption, MessageBoxButtons.OK, MessageBoxIcon.Error);
+        /// <param name="caption">The caption of the dialog. If <see langword="null"/>, a localized string similar to <c>Error</c> will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public static void ErrorMessage(IWin32Window? owner, string message, string? caption = null)
+            => ShowMessage(owner, message, caption ?? Res.DialogsErrorCaption, MessageBoxButtons.OK, MessageBoxIcon.Error);
 
         #endregion
 
@@ -190,8 +198,9 @@ namespace KGySoft.WinForms.Forms
         /// as <see cref="BaseForm"/> or <see cref="BaseUserControl"/> when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
         /// property is set to <see cref="DynamicStringLocalization.AssemblyScope"/> or <see cref="DynamicStringLocalization.LocalScope"/>, you can use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method.
-        /// To localize the window caption and buttons, set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
-        /// property to <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
+        /// To localize the window caption, you can use the <see cref="WarningMessage(IWin32Window,string,string)"/> overload and pass a custom localized string to the <c>caption</c> parameter.
+        /// To localize both the window caption and buttons, opt-in to use task dialogs by setting the <see cref="UseTaskDialogs"/> property to <see langword="true"/>,
+        /// and set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
         /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
@@ -217,8 +226,10 @@ namespace KGySoft.WinForms.Forms
         /// <param name="owner">An optional window that will own the modal message dialog. If <see langword="null"/>, the <see cref="DialogsOwner"/> property will be taken.
         /// If <see cref="DialogsOwner"/> is also <see langword="null"/>, the currently active window will be used.</param>
         /// <param name="message">The message to display in the warning dialog.</param>
-        public static void WarningMessage(IWin32Window? owner, string message)
-            => ShowMessage(owner, message, Res.DialogsWarningCaption, MessageBoxButtons.OK, MessageBoxIcon.Warning);
+        /// <param name="caption">The caption of the dialog. If <see langword="null"/>, a localized string similar to <c>Warning</c> will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
+        public static void WarningMessage(IWin32Window? owner, string message, string? caption = null)
+            => ShowMessage(owner, message, caption ?? Res.DialogsWarningCaption, MessageBoxButtons.OK, MessageBoxIcon.Warning);
 
         #endregion
 
@@ -235,8 +246,9 @@ namespace KGySoft.WinForms.Forms
         /// as <see cref="BaseForm"/> or <see cref="BaseUserControl"/> when their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
         /// property is set to <see cref="DynamicStringLocalization.AssemblyScope"/> or <see cref="DynamicStringLocalization.LocalScope"/>, you can use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method.
-        /// To localize the window caption and buttons, set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
-        /// property to <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
+        /// To localize the window caption, you can use the <see cref="ConfirmMessage(IWin32Window,string,string,bool)"/> overload and pass a custom localized string to the <c>caption</c> parameter.
+        /// To localize both the window caption and buttons, opt-in to use task dialogs by setting the <see cref="UseTaskDialogs"/> property to <see langword="true"/>,
+        /// and set the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
         /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
@@ -252,7 +264,7 @@ namespace KGySoft.WinForms.Forms
         /// <param name="message">The message to display in the confirmation dialog.</param>
         /// <param name="isYesDefault"><see langword="true"/> if the Yes button should be the default button, <see langword="false"/> if No should be the default.</param>
         /// <returns><see langword="true"/> if the user clicked Yes, <see langword="false"/> if No was clicked or the dialog was closed.</returns>
-        public static bool ConfirmMessage(string message, bool isYesDefault) => ConfirmMessage(null, message, isYesDefault);
+        public static bool ConfirmMessage(string message, bool isYesDefault) => ConfirmMessage(null, message, null, isYesDefault);
 
         /// <summary>
         /// Shows a confirmation message dialog with Yes and No buttons.
@@ -274,11 +286,13 @@ namespace KGySoft.WinForms.Forms
         /// <param name="owner">An optional window that will own the modal message dialog. If <see langword="null"/>, the <see cref="DialogsOwner"/> property will be taken.
         /// If <see cref="DialogsOwner"/> is also <see langword="null"/>, the currently active window will be used.</param>
         /// <param name="message">The message to display in the confirmation dialog.</param>
+        /// <param name="caption">The caption of the dialog. If <see langword="null"/>, a localized string similar to <c>Confirmation</c> will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
         /// <param name="isYesDefault"><see langword="true"/> if the Yes button should be the default button, <see langword="false"/> if No should be the default. This parameter is optional.
         /// <br/>Default value: <see langword="true"/>.</param>
         /// <returns><see langword="true"/> if the user clicked Yes, <see langword="false"/> if No was clicked or the dialog was closed.</returns>
-        public static bool ConfirmMessage(IWin32Window? owner, string message, bool isYesDefault = true)
-            => ShowMessage(owner, message, Res.DialogsConfirmationCaption, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
+        public static bool ConfirmMessage(IWin32Window? owner, string message, string? caption = null, bool isYesDefault = true)
+            => ShowMessage(owner, message, caption ?? Res.DialogsConfirmationCaption, MessageBoxButtons.YesNo, MessageBoxIcon.Question,
                 isYesDefault ? MessageBoxDefaultButton.Button1 : MessageBoxDefaultButton.Button2) == true;
 
         /// <summary>
@@ -328,7 +342,7 @@ namespace KGySoft.WinForms.Forms
         /// <para>To show also only Yes and No buttons, use the <see cref="O:KGySoft.WinForms.Forms.Dialogs.ConfirmMessage">ConfirmMessage</see> methods instead.</para>
         /// </remarks>
         public static bool? CancellableConfirmMessage(string message, MessageBoxDefaultButton defaultButton = MessageBoxDefaultButton.Button1)
-            => CancellableConfirmMessage(null, message, defaultButton);
+            => CancellableConfirmMessage(null, message, null, defaultButton);
 
         /// <summary>
         /// Shows a confirmation message dialog with Yes, No and Cancel buttons.
@@ -336,6 +350,8 @@ namespace KGySoft.WinForms.Forms
         /// <param name="owner">An optional window that will own the modal message dialog. If <see langword="null"/>, the <see cref="DialogsOwner"/> property will be taken.
         /// If <see cref="DialogsOwner"/> is also <see langword="null"/>, the currently active window will be used.</param>
         /// <param name="message">The message to display in the confirmation dialog.</param>
+        /// <param name="caption">The caption of the dialog. If <see langword="null"/>, a localized string similar to <c>Confirmation</c> will be used. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
         /// <param name="defaultButton">The default button to select when the dialog is shown. This parameter is optional.
         /// <br/>Default value: <see cref="MessageBoxDefaultButton.Button1"/> (i.e. Yes is the default button).</param>
         /// <returns><see langword="true"/> if the user clicked Yes, <see langword="false"/> if No was clicked, or <see langword="null"/> if Cancel was clicked or the dialog was closed.</returns>
@@ -344,10 +360,12 @@ namespace KGySoft.WinForms.Forms
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
         /// <para>To show also only Yes and No buttons, use the <see cref="O:KGySoft.WinForms.Forms.Dialogs.ConfirmMessage">ConfirmMessage</see> methods instead.</para>
         /// </remarks>
-        public static bool? CancellableConfirmMessage(IWin32Window? owner, string message, MessageBoxDefaultButton defaultButton = MessageBoxDefaultButton.Button1)
-            => ShowMessage(owner, message, Res.DialogsConfirmationCaption, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, defaultButton);
+        public static bool? CancellableConfirmMessage(IWin32Window? owner, string message, string? caption = null, MessageBoxDefaultButton defaultButton = MessageBoxDefaultButton.Button1)
+            => ShowMessage(owner, message, caption ?? Res.DialogsConfirmationCaption, MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question, defaultButton);
 
         #endregion
+
+        #region Input Dialog
 
         /// <summary>
         /// Displays an input dialog with an editable value, and OK and Cancel buttons.
@@ -427,7 +445,7 @@ namespace KGySoft.WinForms.Forms
         /// <param name="prompt">A prompt text, explaining the purpose of the input dialog. If <see langword="null"/>, a localized string of <c>Value:</c> is used.</param>
         /// <param name="value">A reference to a string that contains the initial value of the input field. When this method returns <see langword="true"/>, this parameter will contain the value entered by the user.</param>
         /// <returns><see langword="true"/> if the user clicked OK or pressed Enter, <see langword="false"/> if the user clicked Cancel, pressed Esc or closed the dialog.</returns>
-        public static bool InputDialog(IWin32Window? owner, string? prompt, ref string value) => InputDialog(null, null, prompt, ref value);
+        public static bool InputDialog(IWin32Window? owner, string? prompt, ref string value) => InputDialog(owner, null, prompt, ref value);
 
         /// <summary>
         /// Displays an input dialog with an editable value, and OK and Cancel buttons.
@@ -445,7 +463,9 @@ namespace KGySoft.WinForms.Forms
         /// If <see cref="DialogsOwner"/> is also <see langword="null"/>, the currently active window will be used.</param>
         /// <param name="value">A reference to a string that contains the initial value of the input field. When this method returns <see langword="true"/>, this parameter will contain the value entered by the user.</param>
         /// <returns><see langword="true"/> if the user clicked OK or pressed Enter, <see langword="false"/> if the user clicked Cancel, pressed Esc or closed the dialog.</returns>
-        public static bool InputDialog(IWin32Window? owner, ref string value) => InputDialog(null, null, null, ref value);
+        public static bool InputDialog(IWin32Window? owner, ref string value) => InputDialog(owner, null, null, ref value);
+
+        #endregion
 
         #endregion
 
