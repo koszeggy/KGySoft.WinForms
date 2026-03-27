@@ -508,12 +508,12 @@ namespace KGySoft.WinForms.Controls
         public DecimalTextBox()
         {
             TextAlign = HorizontalAlignment.Right;
-            if (!DesignMode)
-            {
-                thousandSeparator = Thread.CurrentThread.CurrentCulture.NumberFormat.NumberGroupSeparator[0];
-                decimalSeparator = Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
-                negativeSign = Thread.CurrentThread.CurrentCulture.NumberFormat.NegativeSign[0];
-            }
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return;
+
+            thousandSeparator = Thread.CurrentThread.CurrentCulture.NumberFormat.NumberGroupSeparator[0];
+            decimalSeparator = Thread.CurrentThread.CurrentCulture.NumberFormat.NumberDecimalSeparator[0];
+            negativeSign = Thread.CurrentThread.CurrentCulture.NumberFormat.NegativeSign[0];
         }
 
         #endregion

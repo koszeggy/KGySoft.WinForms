@@ -185,6 +185,7 @@ namespace KGySoft.WinForms.Controls
         #region Instance Fields
 
         private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
+        private readonly bool isDesignMode = LicenseManager.UsageMode == LicenseUsageMode.Designtime; // needed because DesignMode does not work in a user control, and UsageMode does not work in WM_PAINT
 
         // NOTE: Unlike in ButtonBase descendants, we always set the base back and fore colors (see ResetColors) because we don't have a reimplemented adapter here,
         // so the base drawing routines still rely on them. Setting them even with default colors is not a problem because this control never inherits colors from the parent control.

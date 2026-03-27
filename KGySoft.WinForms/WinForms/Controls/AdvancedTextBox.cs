@@ -66,6 +66,7 @@ namespace KGySoft.WinForms.Controls
         #region Instance Fields
 
         private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
+        private readonly bool isDesignMode = LicenseManager.UsageMode == LicenseUsageMode.Designtime; // needed because DesignMode does not work in a user control, and UsageMode does not work in WM_PAINT
 
         // NOTE: Unlike in ButtonBase descendants, we always set the base back and fore colors (see ResetColors) because we don't have a reimplemented adapter here,
         // so the base drawing routines still rely on them. Setting them even with default colors is not a problem because this control never inherits colors from the parent control.
@@ -390,7 +391,7 @@ namespace KGySoft.WinForms.Controls
                 case Constants.WM_PAINT:
                     // Here is the delayed the actual setting of AutoCompleteMode to avoid possible "Error creating window handle" exceptions. It would not work from OnHandleCreated.
                     // It may occur when first showing the control on the secondary monitor and the primary monitor has a different DPI.
-                    if (!DesignMode && reportedAutoCompleteMode != base.AutoCompleteMode)
+                    if (!isDesignMode && reportedAutoCompleteMode != base.AutoCompleteMode)
                     {
                         base.AutoCompleteMode = reportedAutoCompleteMode;
                         return;

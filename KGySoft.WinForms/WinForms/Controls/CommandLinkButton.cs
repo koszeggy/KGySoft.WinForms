@@ -111,6 +111,7 @@ namespace KGySoft.WinForms.Controls
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
         private readonly FadingPainterInternal fadingPainter;
         private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
+        private readonly bool isDesignMode = LicenseManager.UsageMode == LicenseUsageMode.Designtime; // needed because DesignMode does not work in a user control, and UsageMode does not work in WM_PAINT
 
         // Unlike in AdvancedButton, we always have default fonts, even when AutoScaleFont is not set, because the fonts are not inherited from the parent.
         private readonly ScalingFont defaultTextFont;
@@ -633,7 +634,7 @@ namespace KGySoft.WinForms.Controls
             // Standard/System flat style with visual styles: reporting transparent background. This fixes the ugly stripes issue
             // when the parent is enlarged while the control is partially invisible, for example.
             // Not applying on Mono, because it turns fading animations off to prevent flickering.
-            get => !OSHelper.IsFrameworkMono && !DesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
+            get => !OSHelper.IsFrameworkMono && !isDesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
                 : !enabledBackColor.IsEmpty ? enabledBackColor
                 : base.BackColor;
             set
@@ -676,7 +677,7 @@ namespace KGySoft.WinForms.Controls
             // Standard/System flat style with visual styles: reporting transparent background. This fixes the ugly stripes issue
             // when the parent is enlarged while the control is partially invisible, for example.
             // Not applying on Mono, because it turns fading animations off to prevent flickering.
-            get => !OSHelper.IsFrameworkMono && !DesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
+            get => !OSHelper.IsFrameworkMono && !isDesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
                 : !disabledBackColor.IsEmpty ? disabledBackColor
                 : base.BackColor;
             set
