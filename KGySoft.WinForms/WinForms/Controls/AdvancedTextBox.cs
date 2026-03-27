@@ -81,6 +81,7 @@ namespace KGySoft.WinForms.Controls
         private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
         private PointF lastScale;
         private int dpiChangingCount;
+        private AutoCompleteMode reportedAutoCompleteMode;
 
         #endregion
 
@@ -287,6 +288,22 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
+        /// <inheritdoc cref="TextBox.AutoCompleteMode" />
+        [DefaultValue(AutoCompleteMode.None)]
+        public new AutoCompleteMode AutoCompleteMode
+        {
+            get => reportedAutoCompleteMode;
+            set
+            {
+                // Postponing the actual setting of AutoCompleteMode until the handle is created to prevent possible "Error creating window handle" exceptions.
+                // It may happen in .NET Framework when first showing the control on the secondary monitor and the primary monitor has a different DPI.
+                // NOTE: .NET Core has another issue when changing the DPI, that is handled in OnFontChanged.
+                reportedAutoCompleteMode = value;
+                if (IsHandleCreated)
+                    base.AutoCompleteMode = value;
+            }
+        }
+
         #endregion
 
         #region Constructors
@@ -371,6 +388,14 @@ namespace KGySoft.WinForms.Controls
             switch (m.Msg)
             {
                 case Constants.WM_PAINT:
+                    // Here is the delayed the actual setting of AutoCompleteMode to avoid possible "Error creating window handle" exceptions. It would not work from OnHandleCreated.
+                    // It may occur when first showing the control on the secondary monitor and the primary monitor has a different DPI.
+                    if (!DesignMode && reportedAutoCompleteMode != base.AutoCompleteMode)
+                    {
+                        base.AutoCompleteMode = reportedAutoCompleteMode;
+                        return;
+                    }
+
                     CheckDpiChange();
 
                     // Framework Mono on Windows with visual styles works differently than the Framework implementation: it's the back color that cannot be customized without custom paint.
@@ -502,7 +527,9 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnFontChanged(EventArgs e)
         {
-            if (suppressFontChanged)
+            // If AutoComplete mode is set, base.OnFontChanged always recreates the handle.
+            // But if parent is just changing the DPI in .NET 6+, an "Error creating window handle" may occur if we also changed the font previously.
+            if (suppressFontChanged || autoScaleFont && dpiChangingCount > 0 && base.AutoCompleteMode != AutoCompleteMode.None)
                 return;
             base.OnFontChanged(e);
         }
