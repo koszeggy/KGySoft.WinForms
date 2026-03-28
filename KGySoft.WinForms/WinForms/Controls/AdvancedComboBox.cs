@@ -199,12 +199,14 @@ namespace KGySoft.WinForms.Controls
         private string? textOnFocus;
         private InnerEditWindow? nativeEditorChild;
         private InnerListBoxWindow? nativeListBoxChild;
-        private AutoCompleteSource origCompleteSource = AutoCompleteSource.None;
-        private AutoCompleteMode origCompleteMode = AutoCompleteMode.None;
+        private AutoCompleteSource reportedAutoCompleteSource = AutoCompleteSource.None;
+        private AutoCompleteMode reportedAutoCompleteMode = AutoCompleteMode.None;
         private bool clearingText;
 
         private bool suppressFontChanged;
         private bool autoScaleFont = true;
+        private bool isRtl;
+        private bool pendingResetAutoComplete;
         private ScalingFont? font; // The explicitly set font.
         private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
         private PointF lastScale;
@@ -462,19 +464,20 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoCompleteMode.None)]
         public new AutoCompleteMode AutoCompleteMode
         {
-            get => readOnly ? origCompleteMode : base.AutoCompleteMode;
+            get => readOnly ? reportedAutoCompleteMode : base.AutoCompleteMode;
             set
             {
-                // When handle is created, we hook the inner text box, which accidentally stops auto complete from working in Simple mode.
+                // When handle is created, we hook the inner text box, which accidentally stops auto complete from working.
                 // Re-setting auto complete mode after handle creation does not work from code: it throws a NullReferenceException from the ComboBox.SetAutoComplete method.
                 // So another workaround if we make sure that the handle is created (and the hook is already set) before setting the AutoCompleteMode property.
-                if (!DesignMode && !IsHandleCreated && DropDownStyle == ComboBoxStyle.Simple)
+                // It will recreate the handle a couple of times, but it ensures that both the hooks and the auto complete function works.
+                if (!isDesignMode && !IsHandleCreated)
                     CreateHandle();
 
-                if (readOnly)
-                    origCompleteMode = value;
-                else
+                // DropDownList check: to let the exception come from the base
+                if (!readOnly || DropDownStyle == ComboBoxStyle.DropDownList)
                     base.AutoCompleteMode = value;
+                reportedAutoCompleteMode = value;
             }
         }
 
@@ -484,13 +487,13 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoCompleteSource.None)]
         public new AutoCompleteSource AutoCompleteSource
         {
-            get => readOnly ? origCompleteSource : base.AutoCompleteSource;
+            get => readOnly ? reportedAutoCompleteSource : base.AutoCompleteSource;
             set
             {
-                if (readOnly)
-                    origCompleteSource = value;
-                else
+                // DropDownList check: to let the exception come from the base
+                if (!readOnly || DropDownStyle == ComboBoxStyle.DropDownList)
                     base.AutoCompleteSource = value;
+                reportedAutoCompleteSource = value;
             }
         }
 
@@ -529,23 +532,17 @@ namespace KGySoft.WinForms.Controls
                 if (readOnly == value)
                     return;
 
-                var style = DropDownStyle;
-                if (value)
+                if (DropDownStyle != ComboBoxStyle.DropDownList)
                 {
-                    origCompleteSource = base.AutoCompleteSource;
-                    origCompleteMode = base.AutoCompleteMode;
-                    if (style != ComboBoxStyle.DropDownList)
+                    if (value)
                     {
                         base.AutoCompleteMode = AutoCompleteMode.None;
                         base.AutoCompleteSource = AutoCompleteSource.None;
                     }
-                }
-                else if (style != ComboBoxStyle.DropDownList)
-                {
-                    if (DropDownStyle != ComboBoxStyle.DropDownList)
+                    else
                     {
-                        base.AutoCompleteMode = origCompleteMode;
-                        base.AutoCompleteSource = origCompleteSource;
+                        base.AutoCompleteMode = reportedAutoCompleteMode;
+                        base.AutoCompleteSource = reportedAutoCompleteSource;
                     }
                 }
 
@@ -625,24 +622,6 @@ namespace KGySoft.WinForms.Controls
                 // without this Text may remain selected even if not focused
                 if (!Focused && style != ComboBoxStyle.DropDownList)
                     SelectionLength = 0;
-
-                // if readonly was changed in disabled style original auto complete should be restored here
-                if (!readOnly && origCompleteSource != AutoCompleteSource.None && DropDownStyle != ComboBoxStyle.DropDownList
-                    && (base.AutoCompleteSource != origCompleteSource || base.AutoCompleteMode != origCompleteMode))
-                {
-                    base.AutoCompleteMode = origCompleteMode;
-                    base.AutoCompleteSource = origCompleteSource;
-                }
-            }
-            // disabling
-            else
-            {
-                // saving current auto complete
-                if (!readOnly)
-                {
-                    origCompleteMode = base.AutoCompleteMode;
-                    origCompleteSource = base.AutoCompleteSource;
-                }
             }
 
             ResetColors();
@@ -659,7 +638,7 @@ namespace KGySoft.WinForms.Controls
             if (!OSHelper.IsFrameworkMono)
                 InitHooks();
 
-            // BUG workaround: If DropDownStyle is Simple or DropDown, setting the font recreates the handle again, which will end up in a Win32Exception.
+            // BUG workaround: If DropDownStyle is Simple or DropDown, setting the font recreates the handle again, which will end up in an "Error creating window handle" Win32Exception.
             // In this case waiting with the DPI resizing. In worst case we can still detect the DPI change in WM_PAINT.
             if (DropDownStyle == ComboBoxStyle.DropDownList)
                 CheckDpiChange();
@@ -678,6 +657,13 @@ namespace KGySoft.WinForms.Controls
             if (suppressFontChanged)
                 return;
             base.OnFontChanged(e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnRightToLeftChanged(EventArgs e)
+        {
+            base.OnRightToLeftChanged(e);
+            isRtl = RightToLeft == RightToLeft.Yes;
         }
 
         /// <inheritdoc />
@@ -818,6 +804,10 @@ namespace KGySoft.WinForms.Controls
             // Handling read-only for new style on Framework Mono. Otherwise, it's handled in OnHandleCreated.
             if (OSHelper.IsFrameworkMono)
                 AdjustReadOnlyOnFrameworkMono();
+
+            // Because switching to DropDownList clears AutoCompleteMode if AutoCompleteSource is not ListItems
+            if (DropDownStyle == ComboBoxStyle.DropDownList)
+                reportedAutoCompleteMode = base.AutoCompleteMode;
         }
 
         /// <summary>
@@ -838,8 +828,10 @@ namespace KGySoft.WinForms.Controls
                     {
                         // BUG workaround: In .NET 7+ the control resets the Font in WM_DPICHANGED_BEFOREPARENT, which causes a handle recreation and an immediate repaint.
                         // If we also set the font here, it will cause a Win32Exception (Error creating window handle)
-                        if (dpiChangingCount == 0)
+                        if (!isDesignMode && dpiChangingCount == 0)
                             CheckDpiChange();
+                        if (pendingResetAutoComplete)
+                            ResetAutoComplete();
                         base.WndProc(ref m);
                         return;
                     }
@@ -880,7 +872,12 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
+                    // When parent RightToLeft changes, the handle is recreated, and if the application has per-monitor DPI awareness,
+                    // RightToLeft here already has the new value, before On[Parent]RightToLeftChanged is triggered. We can use this to
+                    // filter out the DPI change, which may cause an "Error creating window handle" error when the font is set.
+                    bool rtlChanging = isRtl != (RightToLeft == RightToLeft.Yes);
                     dpiChangingCount += 1;
+                    suppressFontChanged = rtlChanging;
                     try
                     {
                         base.WndProc(ref m);
@@ -888,9 +885,20 @@ namespace KGySoft.WinForms.Controls
                     finally
                     {
                         dpiChangingCount -= 1;
+                        suppressFontChanged = false;
                     }
 
-                    CheckDpiChange();
+                    // If parent RTL is changing on a screen with non-default DPI, we get this event while the handle is recreated.
+                    // In this case we defer font update the until the next WM_PAINT, from where it causes no problem.
+                    if (!rtlChanging)
+                    {
+                        CheckDpiChange();
+                        if (!readOnly && DropDownStyle != ComboBoxStyle.DropDownList && reportedAutoCompleteMode != AutoCompleteMode.None)
+                            ResetAutoComplete();
+                    }
+                    else if (!readOnly && DropDownStyle != ComboBoxStyle.DropDownList && reportedAutoCompleteMode != AutoCompleteMode.None)
+                        pendingResetAutoComplete = true;
+
                     return;
 
                 case Constants.WM_DPICHANGED_AFTERPARENT:
@@ -971,6 +979,9 @@ namespace KGySoft.WinForms.Controls
 
         private void InitHooks()
         {
+            if (dpiChangingCount > 0)
+                return;
+
             Debug.Assert(IsHandleCreated && !OSHelper.IsFrameworkMono);
             if (DropDownStyle == ComboBoxStyle.Simple)
             {
@@ -997,6 +1008,10 @@ namespace KGySoft.WinForms.Controls
 
         private void ReleaseHooks()
         {
+            // TODO
+            //if (resettingHooksAndAutoComplete)
+            //    return;
+            //hooksInitialized = false;
             nativeListBoxChild?.ReleaseHandle();
             nativeListBoxChild = null;
             nativeEditorChild?.ReleaseHandle();
@@ -1105,7 +1120,7 @@ namespace KGySoft.WinForms.Controls
                 var dropDownButtonBounds = new Rectangle(Point.Empty, buttonSize);
                 if (!rtl)
                     dropDownButtonBounds.X = clientRect.Right - buttonSize.Width;
-                
+
                 VisualStyleHelper.Render(Constants.ThemeClassComboBox, Handle, g, (int)part, (int)COMBOBOXSTYLESTATES.CBXS_DISABLED, dropDownButtonBounds);
             }
             else
@@ -1193,6 +1208,14 @@ namespace KGySoft.WinForms.Controls
                 this.InnerListBox()?.Enabled = !readOnly;
             if (style != ComboBoxStyle.DropDownList)
                 this.InnerTextBox()?.ReadOnly = readOnly;
+        }
+
+        private void ResetAutoComplete()
+        {
+            Debug.Assert(!readOnly && DropDownStyle != ComboBoxStyle.DropDownList && reportedAutoCompleteMode != AutoCompleteMode.None);
+            pendingResetAutoComplete = false;
+            base.AutoCompleteMode = AutoCompleteMode.None;
+            base.AutoCompleteMode = reportedAutoCompleteMode;
         }
 
         #endregion
