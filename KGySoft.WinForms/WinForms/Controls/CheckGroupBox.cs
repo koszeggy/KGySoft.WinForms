@@ -478,6 +478,7 @@ namespace KGySoft.WinForms.Controls
                 case Constants.WM_DPICHANGED_AFTERPARENT:
                     base.WndProc(ref m);
                     checkBox.Top = 0;
+                    contentPanel.Size = ClientRectangle.Size;
                     break;
 
                 default:
