@@ -60,7 +60,7 @@ namespace KGySoft.WinForms
         public static bool IsEmpty(this ListControl control)
         {
             return control.SelectedValue == null || control.SelectedValue == DBNull.Value
-                || (control.SelectedValue is IConvertible convertible && convertible.ToInt32(CultureInfo.InvariantCulture) == ControlExtensions.NotSelectedValue);
+                || (control.SelectedValue is IConvertible convertible && convertible.TryConvert(CultureInfo.InvariantCulture, out int result) && result == ControlExtensions.NotSelectedValue);
         }
 
         /// <summary>
