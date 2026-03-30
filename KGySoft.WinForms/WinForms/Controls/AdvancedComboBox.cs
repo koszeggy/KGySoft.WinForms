@@ -211,6 +211,7 @@ namespace KGySoft.WinForms.Controls
         private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
         private PointF lastScale;
         private int dpiChangingCount;
+        private bool? canHaveNativeEdit;
 
         #endregion
 
@@ -467,13 +468,6 @@ namespace KGySoft.WinForms.Controls
             get => readOnly ? reportedAutoCompleteMode : base.AutoCompleteMode;
             set
             {
-                // When handle is created, we hook the inner text box, which accidentally stops auto complete from working.
-                // Re-setting auto complete mode after handle creation does not work from code: it throws a NullReferenceException from the ComboBox.SetAutoComplete method.
-                // So another workaround if we make sure that the handle is created (and the hook is already set) before setting the AutoCompleteMode property.
-                // It will recreate the handle a couple of times, but it ensures that both the hooks and the auto complete function works.
-                if (!isDesignMode && !IsHandleCreated)
-                    CreateHandle();
-
                 // DropDownList check: to let the exception come from the base
                 if (!readOnly || DropDownStyle == ComboBoxStyle.DropDownList)
                     base.AutoCompleteMode = value;
@@ -614,13 +608,12 @@ namespace KGySoft.WinForms.Controls
         protected override void OnEnabledChanged(EventArgs e)
         {
             base.OnEnabledChanged(e);
-            var style = DropDownStyle;
 
             // enabling
             if (Enabled)
             {
                 // without this Text may remain selected even if not focused
-                if (!Focused && style != ComboBoxStyle.DropDownList)
+                if (!Focused && DropDownStyle != ComboBoxStyle.DropDownList)
                     SelectionLength = 0;
             }
 
@@ -639,7 +632,7 @@ namespace KGySoft.WinForms.Controls
                 InitHooks();
 
             // BUG workaround: If DropDownStyle is Simple or DropDown, setting the font recreates the handle again, which will end up in an "Error creating window handle" Win32Exception.
-            // In this case waiting with the DPI resizing. In worst case we can still detect the DPI change in WM_PAINT.
+            // In this case waiting with the DPI resizing. In the worst case we still can detect the DPI change in WM_PAINT.
             if (DropDownStyle == ComboBoxStyle.DropDownList)
                 CheckDpiChange();
         }
@@ -664,6 +657,7 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnRightToLeftChanged(e);
             isRtl = RightToLeft == RightToLeft.Yes;
+            RegisterAutoCompleteFix();
         }
 
         /// <inheritdoc />
@@ -826,12 +820,16 @@ namespace KGySoft.WinForms.Controls
                 case Constants.WM_PAINT:
                     if (Enabled)
                     {
-                        // BUG workaround: In .NET 7+ the control resets the Font in WM_DPICHANGED_BEFOREPARENT, which causes a handle recreation and an immediate repaint.
-                        // If we also set the font here, it will cause a Win32Exception (Error creating window handle)
-                        if (!isDesignMode && dpiChangingCount == 0)
-                            CheckDpiChange();
-                        if (pendingResetAutoComplete)
-                            ResetAutoComplete();
+                        if (!isDesignMode)
+                        {
+                            // BUG workaround: In .NET 7+ the control resets the Font in WM_DPICHANGED_BEFOREPARENT, which causes a handle recreation and an immediate repaint.
+                            // If we also set the font here, it will cause a Win32Exception (Error creating window handle), so we check if DPI is being changed.
+                            if (dpiChangingCount == 0)
+                                CheckDpiChange();
+                            if (pendingResetAutoComplete)
+                                ResetAutoComplete();
+                        }
+
                         base.WndProc(ref m);
                         return;
                     }
@@ -890,15 +888,14 @@ namespace KGySoft.WinForms.Controls
 
                     // If parent RTL is changing on a screen with non-default DPI, we get this event while the handle is recreated.
                     // In this case we defer font update the until the next WM_PAINT, from where it causes no problem.
-                    if (!rtlChanging)
+                    if (!rtlChanging && Created)
                     {
                         CheckDpiChange();
-                        if (!readOnly && DropDownStyle != ComboBoxStyle.DropDownList && reportedAutoCompleteMode != AutoCompleteMode.None)
-                            ResetAutoComplete();
+                        ResetAutoComplete();
+                        return;
                     }
-                    else if (!readOnly && DropDownStyle != ComboBoxStyle.DropDownList && reportedAutoCompleteMode != AutoCompleteMode.None)
-                        pendingResetAutoComplete = true;
 
+                    RegisterAutoCompleteFix();
                     return;
 
                 case Constants.WM_DPICHANGED_AFTERPARENT:
@@ -979,11 +976,12 @@ namespace KGySoft.WinForms.Controls
 
         private void InitHooks()
         {
-            if (dpiChangingCount > 0)
+            if (dpiChangingCount > 0 || canHaveNativeEdit == false)
                 return;
 
             Debug.Assert(IsHandleCreated && !OSHelper.IsFrameworkMono);
-            if (DropDownStyle == ComboBoxStyle.Simple)
+            ComboBoxStyle style = DropDownStyle;
+            if (style == ComboBoxStyle.Simple)
             {
                 // Hooking inner list box the same way as the base class does. In Simple mode the first child is the list box.
                 IntPtr hwnd = User32.GetWindow(Handle, Constants.GW_CHILD);
@@ -994,24 +992,21 @@ namespace KGySoft.WinForms.Controls
                 }
             }
 
-            if (DropDownStyle != ComboBoxStyle.DropDownList)
+            if (style == ComboBoxStyle.DropDownList)
+                return;
+
+            // hooking inner text box to capture WM_PASTE and others
+            IntPtr lhWnd = User32.FindWindowEx(Handle, IntPtr.Zero, "EDIT", null);
+            canHaveNativeEdit = lhWnd != IntPtr.Zero;
+            if (lhWnd != IntPtr.Zero)
             {
-                // hooking inner text box to capture WM_PASTE and others
-                IntPtr lhWnd = User32.FindWindowEx(Handle, IntPtr.Zero, "EDIT", null);
-                if (lhWnd != IntPtr.Zero)
-                {
-                    nativeEditorChild = new InnerEditWindow(this);
-                    nativeEditorChild.AssignHandle(lhWnd);
-                }
+                nativeEditorChild = new InnerEditWindow(this);
+                nativeEditorChild.AssignHandle(lhWnd);
             }
         }
 
         private void ReleaseHooks()
         {
-            // TODO
-            //if (resettingHooksAndAutoComplete)
-            //    return;
-            //hooksInitialized = false;
             nativeListBoxChild?.ReleaseHandle();
             nativeListBoxChild = null;
             nativeEditorChild?.ReleaseHandle();
@@ -1165,6 +1160,7 @@ namespace KGySoft.WinForms.Controls
             if (value == null)
             {
                 base.Font = null!;
+                RegisterAutoCompleteFix();
                 return;
             }
 
@@ -1198,6 +1194,8 @@ namespace KGySoft.WinForms.Controls
             // without this Text may get selected even if not focused
             if (!Focused && DropDownStyle != ComboBoxStyle.DropDownList)
                 SelectionLength = 0;
+
+            RegisterAutoCompleteFix();
         }
 
         private void AdjustReadOnlyOnFrameworkMono()
@@ -1210,10 +1208,40 @@ namespace KGySoft.WinForms.Controls
                 this.InnerTextBox()?.ReadOnly = readOnly;
         }
 
+        private void RegisterAutoCompleteFix()
+        {
+            if (OSHelper.IsFrameworkMono)
+                return;
+            pendingResetAutoComplete = DropDownStyle != ComboBoxStyle.DropDownList
+                && (!readOnly && reportedAutoCompleteMode != AutoCompleteMode.None || nativeEditorChild == null);
+        }
+
         private void ResetAutoComplete()
         {
-            Debug.Assert(!readOnly && DropDownStyle != ComboBoxStyle.DropDownList && reportedAutoCompleteMode != AutoCompleteMode.None);
+            if (OSHelper.IsFrameworkMono || DropDownStyle == ComboBoxStyle.DropDownList)
+                return;
+
+            if (!Created)
+            {
+                pendingResetAutoComplete = true;
+                return;
+            }
+
             pendingResetAutoComplete = false;
+
+            if (readOnly || reportedAutoCompleteMode == AutoCompleteMode.None)
+            {
+                // As Created is true here, hooks are expected to be initialized. They still can be uninitialized here if dpiChangingCount was > 0 when the handle was created.
+                // To fix the hooks, we could just call InitHooks, but in .NET7+ we need to recreate the handle to fix another possible issue of incorrect height
+                // (even if the font size is correct), which can occur if the application has per-monitor DPI awareness, and the parent form is opened on a monitor,
+                // whose DPI is different from the system default DPI.
+                if (nativeEditorChild == null && canHaveNativeEdit != false)
+                    RecreateHandle();
+
+                return;
+            }
+
+            // Auto complete fixup. As it recreates the handle, it implicitly resets the hooks as well.
             base.AutoCompleteMode = AutoCompleteMode.None;
             base.AutoCompleteMode = reportedAutoCompleteMode;
         }
