@@ -34,33 +34,46 @@ namespace KGySoft.WinForms.Components
     {
         #region Constants
 
+        #region Public Constants
+
         /// <summary>
         /// Gets the name of the <see cref="IsElevated"/> property.
         /// Can be used to identify the property in <see cref="TaskDialogControl.PropertyChanged"/> event.
         /// </summary>
-        public const string PropertyIsElevated = "IsElevated";
+        [EditorBrowsable(EditorBrowsableState.Never)] // Since we have nameof(), this is not really needed anymore
+        public const string PropertyIsElevated = nameof(IsElevated);
 
         /// <summary>
         /// Gets the name of the <see cref="CustomIcon"/> property.
         /// Can be used to identify the property in <see cref="TaskDialogControl.PropertyChanged"/> event.
         /// </summary>
-        public const string PropertyCustomIcon = "CustomIcon";
+        [EditorBrowsable(EditorBrowsableState.Never)] // Since we have nameof(), this is not really needed anymore
+        public const string PropertyCustomIcon = nameof(CustomIcon);
 
         /// <summary>
         /// Gets the name of the <see cref="IsDefault"/> property.
         /// Can be used to identify the property in <see cref="TaskDialogControl.PropertyChanged"/> event.
         /// </summary>
-        public const string PropertyIsDefault = "IsDefault";
+        [EditorBrowsable(EditorBrowsableState.Never)] // Since we have nameof(), this is not really needed anymore
+        public const string PropertyIsDefault = nameof(IsDefault);
 
+        #endregion
+
+        #region Private Constants
+
+        // See more flags in the base classes
+        private const int isElevated = 1 << 16;
+        private const int isDefault = isElevated << 1;
+
+        #endregion
+        
         #endregion
 
         #region Fields
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private EventHandler<HandledEventArgs>? click;
-        private bool isElevated;
         private Icon? customIcon;
-        private bool isDefault;
 
         #endregion
 
@@ -90,14 +103,14 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public bool IsElevated
         {
-            get => isElevated;
+            get => flags[isElevated];
             set
             {
-                if (isElevated == value)
+                if (flags[isElevated] == value)
                     return;
 
                 CheckChangePropertyValue();
-                isElevated = value;
+                flags[isElevated] = value;
                 OnPropertyChanged(PropertyIsElevated);
             }
         }
@@ -127,14 +140,14 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public bool IsDefault
         {
-            get => isDefault;
+            get => flags[isDefault];
             set
             {
-                if (isDefault == value)
+                if (flags[isDefault] == value)
                     return;
 
                 CheckChangePropertyValue();
-                isDefault = value;
+                flags[isDefault] = value;
                 OnPropertyChanged(PropertyIsDefault);
             }
         }

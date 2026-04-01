@@ -26,6 +26,7 @@ namespace KGySoft.WinForms
         #region Methods
 
         internal static bool Any(this BitVector32 data, int bits) => (data.Data & bits) != 0;
+        internal static bool None(this BitVector32 data, int bits) => (data.Data & bits) == 0;
 
         #endregion
     }

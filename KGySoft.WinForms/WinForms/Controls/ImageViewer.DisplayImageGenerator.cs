@@ -110,16 +110,6 @@ namespace KGySoft.WinForms.Controls
 
             private readonly ImageViewer owner;
 
-            private volatile bool disposed;
-
-            /// <summary>
-            /// true if generator can generate new content. Turned off on low memory or by <see cref="Free"/>. Invalidating the image enables it again.
-            /// </summary>
-            private volatile bool enabled;
-
-            private GenerateDefaultImageTask? generateDefaultImageTask;
-            private GenerateResizedImageTask? generateResizedImageTask;
-
             /// <summary>
             /// The default image to be displayed when no resized display image is needed or while its generation is in progress.
             /// Set by <see cref="GenerateDefaultImage"/>. If <see cref="isDefaultImageCloned"/> is true, then contains
@@ -129,7 +119,17 @@ namespace KGySoft.WinForms.Controls
             /// If <see cref="enabled"/> is false, then may contain the original image even if it cannot be displayed.
             /// </summary>
             private volatile Image? defaultDisplayImage;
+
             private volatile bool isDefaultImageCloned;
+            private volatile bool disposed;
+
+            /// <summary>
+            /// true if generator can generate new content. Turned off on low memory or by <see cref="Free"/>. Invalidating the image enables it again.
+            /// </summary>
+            private volatile bool enabled;
+
+            private GenerateDefaultImageTask? generateDefaultImageTask;
+            private GenerateResizedImageTask? generateResizedImageTask;
 
             /// <summary>
             /// The clone of the original image that is used to safely generate the resized display image.
@@ -249,9 +249,10 @@ namespace KGySoft.WinForms.Controls
                 }
 
                 InterpolationMode interpolationMode = InterpolationMode.NearestNeighbor;
+                bool smoothing = owner.flags[smoothingEnabled];
 
                 // 1.) Returning with a size adjusted display image
-                if (owner.smoothingEnabled && resizedDisplayImageSize == owner.targetRectangle.Size)
+                if (smoothing && resizedDisplayImageSize == owner.targetRectangle.Size)
                     return (resizedDisplayImage, interpolationMode);
 
                 // 2.) Checking if there is an already available default image. It might have to be resized on painting.
@@ -268,7 +269,7 @@ namespace KGySoft.WinForms.Controls
 
                 // Smoothing Bitmap: leaving NearestNeighbor if a resized image is expected to be generated;
                 // otherwise, using some interpolation to be applied during painting
-                if (!owner.isMetafile && owner.smoothingEnabled)
+                if (!owner.flags[isMetafile] && smoothing)
                 {
                     float zoom = owner.zoom;
                     Size size = owner.imageSize;
@@ -369,7 +370,7 @@ namespace KGySoft.WinForms.Controls
                     // for non-PARGB32 images larger than 256x256 - note: leaving even slow formats unconverted below sizeThreshold / 4
                     || owner.pixelFormat != PixelFormat.Format32bppPArgb && (owner.imageSize.Width > sizeThreshold >> 2 || owner.imageSize.Height > sizeThreshold >> 2)
                     // and for native icons: converting because icons are handled oddly by GDI+, for example, the first column has half pixel width
-                    || owner.isIcon);
+                    || owner.flags[isIcon]);
 
                 // skipping generating clone if we are running on low memory, and it would only serve performance
                 // x4: because we want to convert it to 32bpp
@@ -394,7 +395,7 @@ namespace KGySoft.WinForms.Controls
                 var task = new GenerateDefaultImageTask
                 {
                     SourceBitmap = bitmap!,
-                    InvalidateOwner = owner.isIcon
+                    InvalidateOwner = owner.flags[isIcon]
                 };
 
                 bool operateAsync = owner.AllowUnsafeCooperativeLocking && !owner.IsDesignMode;
@@ -421,7 +422,7 @@ namespace KGySoft.WinForms.Controls
 
                 // Metafile: If smoothing edges is enabled
                 // Bitmap: If smoothing resize is enabled, the image is shrunk and image size is larger than 1024x1024
-                bool isGenerateNeeded = owner.smoothingEnabled && (owner.isMetafile
+                bool isGenerateNeeded = owner.flags[smoothingEnabled] && (owner.flags[isMetafile]
                     || owner.zoom < 1f && (owner.imageSize.Width > sizeThreshold || owner.imageSize.Height > sizeThreshold));
 
                 // Not canceling the possible generate task here. It will call an invalidate in the end, and we can see whether we use the result.
@@ -784,7 +785,7 @@ namespace KGySoft.WinForms.Controls
                         }
 
                         Debug.Assert(ReferenceEquals(owner.image, defaultDisplayImage), "If isDefaultImageCloned is false, then defaultDisplayImage is expected to be the original instance here.");
-                        Debug.Assert(owner.isMetafile || owner.pixelFormat == PixelFormat.Format32bppPArgb, "Clone is expected to be missing for metafiles and 32bpp PARGB bitmaps only.");
+                        Debug.Assert(owner.flags[isMetafile] || owner.pixelFormat == PixelFormat.Format32bppPArgb, "Clone is expected to be missing for metafiles and 32bpp PARGB bitmaps only.");
                         Image clone;
 
                         // This may block the UI in OnPaint but once the clone is created OnPaint will use that instead of the original image.

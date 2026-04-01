@@ -37,6 +37,12 @@ namespace KGySoft.WinForms.Forms
     {
         private sealed class ExpandoButton : AdvancedButton
         {
+            #region Constants
+
+            private const int isExpanded = 1 << 16;
+
+            #endregion
+
             #region Fields
 
             #region Static Fields
@@ -47,10 +53,6 @@ namespace KGySoft.WinForms.Forms
 
             #region Instance Fields
 
-            private bool isHovered;
-            private bool isMouseDown;
-            private bool isPressed;
-            private bool isExpanded;
             private string? textExpanded;
             private string? textCollapsed;
 
@@ -82,7 +84,7 @@ namespace KGySoft.WinForms.Forms
                 get => base.Text;
                 set
                 {
-                    if (isExpanded)
+                    if (IsExpanded)
                         TextExpanded = value;
                     else
                         TextCollapsed = value;
@@ -95,14 +97,14 @@ namespace KGySoft.WinForms.Forms
 
             internal bool IsExpanded
             {
-                get => isExpanded;
+                get => flags[isExpanded];
                 set
                 {
-                    if (isExpanded == value)
+                    if (flags[isExpanded] == value)
                         return;
 
-                    isExpanded = value;
-                    base.Text = isExpanded ? textExpanded : textCollapsed;
+                    flags[isExpanded] = value;
+                    base.Text = value ? textExpanded : textCollapsed;
                     ExpandedChanged?.Invoke(this, EventArgs.Empty);
                     Invalidate();
                 }
@@ -117,7 +119,7 @@ namespace KGySoft.WinForms.Forms
                         return;
 
                     textExpanded = value;
-                    if (isExpanded)
+                    if (IsExpanded)
                         base.Text = value;
 
                     PerformLayout();
@@ -134,7 +136,7 @@ namespace KGySoft.WinForms.Forms
                         return;
 
                     textCollapsed = value;
-                    if (!isExpanded)
+                    if (!IsExpanded)
                         base.Text = value;
 
                     PerformLayout();
@@ -193,45 +195,7 @@ namespace KGySoft.WinForms.Forms
             protected override void OnClick(EventArgs e)
             {
                 base.OnClick(e);
-                IsExpanded = !isExpanded;
-            }
-
-            protected override void OnMouseLeave(EventArgs e)
-            {
-                isHovered = false;
-                Invalidate();
-                base.OnMouseLeave(e);
-            }
-
-            protected override void OnMouseEnter(EventArgs e)
-            {
-                isHovered = true;
-                Invalidate();
-                base.OnMouseEnter(e);
-            }
-
-            protected override void OnMouseUp(MouseEventArgs e)
-            {
-                isPressed = false;
-                isMouseDown = false;
-                Invalidate();
-                base.OnMouseUp(e);
-            }
-
-            protected override void OnMouseDown(MouseEventArgs e)
-            {
-                isPressed = e.Button == MouseButtons.Left;
-                isMouseDown = isPressed;
-                Invalidate();
-                base.OnMouseDown(e);
-            }
-
-            protected override void OnMouseMove(MouseEventArgs mevent)
-            {
-                if (isMouseDown)
-                    isPressed = mevent.X >= 0 && mevent.X < Width && mevent.Y >= 0 && mevent.Y < Height;
-
-                base.OnMouseMove(mevent);
+                IsExpanded = !IsExpanded;
             }
 
             protected override void OnPaintState(PaintStateEventArgs e)
@@ -250,7 +214,7 @@ namespace KGySoft.WinForms.Forms
                 else
                     PaintClassicButton(g, out imageSize);
 
-                Size textSize = GetTextSize(g, imageSize, isExpanded, Size);
+                Size textSize = GetTextSize(g, imageSize, IsExpanded, Size);
                 TextFormatFlags formatFlags = this.GetFormatFlags();
                 Rectangle textRect = new Rectangle(Margin.Left + imageSize.Width, Margin.Top, textSize.Width, textSize.Height);
                 if ((formatFlags & TextFormatFlags.RightToLeft) != 0)
@@ -298,28 +262,28 @@ namespace KGySoft.WinForms.Forms
                     proposedSize.Height = Int32.MaxValue;
 
                 proposedSize -= new Size(Margin.Left + imageSize.Width, Margin.Top);
-                TextFormatFlags flags = this.GetFormatFlags();
-                return LayoutUtils.UnionSizes(!expanded.HasValue || expanded.Value ? TextRenderer.MeasureText(g, TextExpanded, Font, proposedSize, flags) : Size.Empty,
-                    !expanded.HasValue || !expanded.Value ? TextRenderer.MeasureText(g, TextCollapsed, Font, proposedSize, flags) : Size.Empty);
+                TextFormatFlags formatFlags = this.GetFormatFlags();
+                return LayoutUtils.UnionSizes(!expanded.HasValue || expanded.Value ? TextRenderer.MeasureText(g, TextExpanded, Font, proposedSize, formatFlags) : Size.Empty,
+                    !expanded.HasValue || !expanded.Value ? TextRenderer.MeasureText(g, TextCollapsed, Font, proposedSize, formatFlags) : Size.Empty);
             }
 
             private void PaintNativeButton(Graphics g, out Size imageSize)
             {
                 EXPANDOBUTTONSTATES state;
-                if (!isExpanded)
+                if (!IsExpanded)
                 {
-                    if (isPressed)
+                    if (IsPressed)
                         state = EXPANDOBUTTONSTATES.TDLGEBS_PRESSED;
-                    else if (isHovered)
+                    else if (IsHovered)
                         state = EXPANDOBUTTONSTATES.TDLGEBS_HOVER;
                     else
                         state = EXPANDOBUTTONSTATES.TDLGEBS_NORMAL;
                 }
                 else
                 {
-                    if (isPressed)
+                    if (IsPressed)
                         state = EXPANDOBUTTONSTATES.TDLGEBS_EXPANDEDPRESSED;
-                    else if (isHovered)
+                    else if (IsHovered)
                         state = EXPANDOBUTTONSTATES.TDLGEBS_EXPANDEDHOVER;
                     else
                         state = EXPANDOBUTTONSTATES.TDLGEBS_EXPANDEDNORMAL;
@@ -336,16 +300,16 @@ namespace KGySoft.WinForms.Forms
             private void PaintThemedButton(Graphics g, out Size imageSize)
             {
                 Bitmap image;
-                if (!isExpanded)
+                if (!IsExpanded)
                 {
-                    image = isPressed ? DefaultImagePressedDown
-                        : isHovered ? DefaultImageHoveredDown
+                    image = IsPressed ? DefaultImagePressedDown
+                        : IsHovered ? DefaultImageHoveredDown
                         : DefaultImageNormalDown;
                 }
                 else
                 {
-                    image = isPressed ? DefaultImagePressedUp
-                        : isHovered ? DefaultImageHoveredUp
+                    image = IsPressed ? DefaultImagePressedUp
+                        : IsHovered ? DefaultImageHoveredUp
                         : DefaultImageNormalUp;
                 }
 
@@ -358,14 +322,14 @@ namespace KGySoft.WinForms.Forms
                 imageSize = GetImageSize();
                 Rectangle rect = GetButtonBounds(imageSize);
 
-                g.DrawBorder(isPressed ? AdvancedBorderStyle.SunkenLow : AdvancedBorderStyle.RaisedHigh, rect);
+                g.DrawBorder(IsPressed ? AdvancedBorderStyle.SunkenLow : AdvancedBorderStyle.RaisedHigh, rect);
                 rect.Inflate(-2, -2);
 
-                if (isPressed)
+                if (IsPressed)
                     rect.Offset(1, 1);
 
-                Color color = isHovered && !isPressed ? SystemColors.HotTrack : SystemColors.ControlText;
-                g.DrawImageColorized(ControlPaintHelper.GetArrowImage(rect.Size, isExpanded), rect, color);
+                Color color = IsHovered && !IsPressed ? SystemColors.HotTrack : SystemColors.ControlText;
+                g.DrawImageColorized(ControlPaintHelper.GetArrowImage(rect.Size, IsExpanded), rect, color);
             }
 
 

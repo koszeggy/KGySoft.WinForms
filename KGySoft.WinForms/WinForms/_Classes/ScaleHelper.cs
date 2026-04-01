@@ -192,7 +192,7 @@ namespace KGySoft.WinForms
                             }
                         }
 
-                        // If we have two forms, it means topForm is and MDI parent form: no need to subscribe its parent change
+                        // If we have two forms, it means topForm is an MDI parent form: no need to subscribe its parent change
                         if (topForm != null && childForm != null)
                             break;
 

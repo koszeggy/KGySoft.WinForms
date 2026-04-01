@@ -17,9 +17,7 @@
 
 using System;
 using System.Collections.Generic;
-#if !NET5_0_OR_GREATER
 using System.Collections.Specialized;
-#endif
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
@@ -122,14 +120,14 @@ namespace KGySoft.WinForms.Forms
             /// <inheritdoc />
             public override void Add(Control? value)
             {
-                owner.isAddingControl = true;
+                owner.flags[isAddingControl] = true;
                 try
                 {
                     base.Add(value);
                 }
                 finally
                 {
-                    owner.isAddingControl = false;
+                    owner.flags[isAddingControl] = false;
                 }
             }
 
@@ -138,10 +136,10 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
-        #region ControlCollection class
+        #region ControlCollectionMono class
 
         /// <summary>
-        /// Needed for Mono compatibility, because Form.ControlCollection.Add casts every Control to Form on Mono.
+        /// Needed for Framework Mono compatibility, because Form.ControlCollection.Add casts every Control to Form on Mono.
         /// </summary>
         private sealed class ControlCollectionMono : Control.ControlCollection
         {
@@ -170,14 +168,14 @@ namespace KGySoft.WinForms.Forms
             /// <inheritdoc />
             public override void Add(Control? value)
             {
-                owner.isAddingControl = true;
+                owner.flags[isAddingControl] = true;
                 try
                 {
                     base.Add(value);
                 }
                 finally
                 {
-                    owner.isAddingControl = false;
+                    owner.flags[isAddingControl] = false;
                 }
             }
 
@@ -185,6 +183,21 @@ namespace KGySoft.WinForms.Forms
         }
 
         #endregion
+
+        #endregion
+
+        #region Constants
+
+        // We could use BitVector32.CreateMask, but then we should use static fields, whose access is slower than using constants.
+        // NOTE: there are further flags in the derived InputBox/TaskDialogForm classes
+        private const int autoScaleFont = 1;
+        private const int suppressFontChanged = autoScaleFont << 1;
+        private const int isPerMonitorDpiAwarenessV1 = suppressFontChanged << 1;
+        private const int translateControls = isPerMonitorDpiAwarenessV1 << 1;
+        private const int isLoaded = translateControls << 1;
+        private const int isOnAutoResizedPending = isLoaded << 1;
+        private const int isAddingControl = isOnAutoResizedPending << 1;
+        private const int isChangingFont = isAddingControl << 1;
 
         #endregion
 
@@ -201,7 +214,7 @@ namespace KGySoft.WinForms.Forms
         #region Instance Fields
 
         #region Protected Fields
-        
+
         /// <summary>
         /// Gets the <see cref="System.Windows.Forms.ToolTip"/> of the <see cref="BaseForm"/>.
         /// Kept for compatibility, if a derived form uses it from the designer.
@@ -212,15 +225,17 @@ namespace KGySoft.WinForms.Forms
 
         #endregion
 
+        #region Private Protected Fields
+
+        private protected BitVector32 flags;
+
+        #endregion
+
         #region Private Fields
-        
+
         private readonly CommandBindingsCollection commandBindings = new WinFormsCommandBindingsCollection();
         private readonly InvokeMarshaller invoker;
-        private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the form because an instance is tied to the same thread
 
-        private bool translateControls;
-        private bool isLoaded;
-        private bool autoScaleFont = true;
         private Form? suspendingMdiChild;
         private HashSet<Form>? ownedMdiChildren;
         private MdiClient? mdiClient;
@@ -236,10 +251,6 @@ namespace KGySoft.WinForms.Forms
         private Rectangle dpiChangedSuggestedBounds; // must be a field to handle reentrancy and for the triggering conditions of the DeviceScaleAutoResized event
         private PointF lastScaleAsChild; // Plays a role when this form is not a top-level form, i.e. when it is an MDI child. Otherwise, DeviceScale is used.
         private int dpiChangingAsChildCount; // Plays a role when this form is an MDI child. Otherwise, DPI changes are processed in WndProc.
-        private bool isOnAutoResizedPending;
-        private bool suppressFontChanged;
-        private bool isAddingControl;
-        private bool isChangingFont;
 
         #endregion
 
@@ -448,8 +459,8 @@ namespace KGySoft.WinForms.Forms
         [Browsable(false)]
         public bool TranslateControls
         {
-            get => translateControls;
-            set => translateControls = value;
+            get => flags[translateControls];
+            set => flags[translateControls] = value;
         }
 
         /// <summary>
@@ -507,7 +518,7 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 LanguageSettings.DisplayLanguageChanged += LanguageSettings_DisplayLanguageChanged;
-                if (isLoaded)
+                if (flags[isLoaded])
                     ApplyStringResources();
             }
         }
@@ -585,14 +596,14 @@ namespace KGySoft.WinForms.Forms
         [Description("True to auto scale Font when DPI changes and inherit the font when it's not explicitly set; False to rely on the default behavior of the current executing platform.")]
         public bool AutoScaleFont
         {
-            get => autoScaleFont;
+            get => flags[autoScaleFont];
             set
             {
                 Debug.Assert(AutoScaleFont ^ defaultFont == null);
-                if (autoScaleFont == value)
+                if (flags[autoScaleFont] == value)
                     return;
 
-                autoScaleFont = value;
+                flags[autoScaleFont] = value;
                 Debug.Assert(deviceScale == this.GetScale());
                 font?.ResetFrom(font.Font, value ? deviceScale : ScaleHelper.SystemScale);
                 if (value)
@@ -665,10 +676,10 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Gets whether the form has already been loaded. This property is <see langword="true"/> after the <see cref="Form.Load"/> event is raised for the first time,
         /// and remains <see langword="true"/> even if the form is shown as a dialog multiple times or the handle is recreated (e.g. because <see cref="Control.RightToLeft"/> changes).
-        /// Can be useful if we overload the <see cref="Form.OnLoad"/> method and want to avoid executing some initialization more than once.
+        /// Can be useful if you override the <see cref="Form.OnLoad"/> method, and you want to avoid executing some initialization more than once.
         /// </summary>
         [Browsable(false)]
-        protected bool IsLoaded => isLoaded;
+        protected bool IsLoaded => flags[isLoaded];
 
         /// <summary>
         /// Gets the corresponding MDI client of the form, or <see langword="null"/>, if this form is neither an MDI container nor an MDI child.
@@ -724,8 +735,8 @@ namespace KGySoft.WinForms.Forms
 
         #region Explicitly Implemented Interface Properties
 
-        bool IObservableParent.IsAddingControl => isAddingControl;
-        bool IObservableParent.IsChangingFont => isChangingFont;
+        bool IObservableParent.IsAddingControl => flags[isAddingControl];
+        bool IObservableParent.IsChangingFont => flags[isChangingFont];
 
         #endregion
 
@@ -755,10 +766,12 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         public BaseForm()
         {
+            flags[autoScaleFont] = true;
             invoker = new InvokeMarshaller(this);
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             SetFont(defaultFont);
             this.RegisterPerMonitorAwarenessNotifications();
+            flags[isPerMonitorDpiAwarenessV1] = ScaleHelper.PerMonitorDpiAwarenessVersion == 1;
             BaseToolTip = new ToolTip
             {
                 InitialDelay = 500,
@@ -818,8 +831,8 @@ namespace KGySoft.WinForms.Forms
                 if (suspendCaller)
                     Suspend(child);
                 {
-                    if (mdiParent is BaseForm bf)
-                        bf.isAddingControl = true;
+                    if (mdiParent is BaseForm frm)
+                        frm.flags[isAddingControl] = true;
                 }
                 try
                 {
@@ -827,8 +840,8 @@ namespace KGySoft.WinForms.Forms
                 }
                 finally
                 {
-                    if (mdiParent is BaseForm bf)
-                        bf.isAddingControl = false;
+                    if (mdiParent is BaseForm frm)
+                        frm.flags[isAddingControl] = false;
                 }
                 child.Show();
             }
@@ -878,12 +891,12 @@ namespace KGySoft.WinForms.Forms
         /// <inheritdoc />
         protected override void OnLoad(EventArgs e)
         {
-            bool loaded = isLoaded;
+            bool loaded = IsLoaded;
             base.OnLoad(e);
             if (loaded)
                 return;
 
-            isLoaded = true;
+            flags[isLoaded] = true;
 #if NETFRAMEWORK
             // Possible bug in .NET Framework: if the StartPosition is WindowsDefaultBounds or WindowsDefaultLocation,
             // the form may have an unmatching scale from its screen, which fixes itself when moving or resizing the form for the first time.
@@ -904,7 +917,7 @@ namespace KGySoft.WinForms.Forms
         /// <inheritdoc />
         protected override void OnFontChanged(EventArgs e)
         {
-            if (suppressFontChanged)
+            if (flags[suppressFontChanged])
                 return;
             base.OnFontChanged(e);
         }
@@ -1019,7 +1032,7 @@ namespace KGySoft.WinForms.Forms
                 }
             }
 
-            autoScaleFont = false;
+            flags[autoScaleFont] = false;
             mdiClient = null;
         }
 
@@ -1031,21 +1044,21 @@ namespace KGySoft.WinForms.Forms
         /// <note type="warning">This method is obsolete. It does not perform any translation anymore, it just removes the possible postfixes from the control's text properties.
         /// Use the <see cref="DynamicStringLocalization"/> property and the <see cref="ApplyStringResources">ApplyStringResources</see> method instead.</note>
         /// </remarks>
-        [Obsolete("Translation does not work anymore, it just removes the possible postfixes.")]
+        [Obsolete("Translation does not work anymore, it just removes the possible postfixes. Use the DynamicStringLocalization property instead.")]
         protected void PerformTranslate(Control control)
         {
-            if (translateControls)
-            {
-                if (LanguageWinForms.TranslateControl(control, out bool finished))
-                    TranslateToolTip(control);
-                if (finished)
-                    return;
+            if (!flags[translateControls])
+                return;
 
-                if (control.HasChildren)
-                {
-                    foreach (Control c in control.Controls)
-                        PerformTranslate(c!);
-                }
+            if (LanguageWinForms.TranslateControl(control, out bool finished))
+                TranslateToolTip(control);
+            if (finished)
+                return;
+
+            if (control.HasChildren)
+            {
+                foreach (Control c in control.Controls)
+                    PerformTranslate(c!);
             }
         }
 
@@ -1132,7 +1145,7 @@ namespace KGySoft.WinForms.Forms
 #endif
 
                 case Constants.WM_NCCREATE:
-                    if (isPerMonitorDpiAwarenessV1 && OSHelper.IsWindows10Build1607OrLater)
+                    if (flags[isPerMonitorDpiAwarenessV1] && OSHelper.IsWindows10Build1607OrLater)
                     {
                         Debug.Assert(IsHandleCreated);
                         User32.EnableNonClientDpiScaling(Handle);
@@ -1200,15 +1213,15 @@ namespace KGySoft.WinForms.Forms
                             // we must check if the current font scaling is still valid.
                             before = Bounds;
                             CheckDpiChangeAsTopLevelForm();
-                        } while (autoScaleFont && (font ?? defaultFont)?.CurrentScale != deviceScale);
+                        } while (AutoScaleFont && (font ?? defaultFont)?.CurrentScale != deviceScale);
 
                         OnDeviceScaleChanged(args.Reset(dpiChangedSuggestedBounds, deviceScale, previousScale));
                         Rectangle after = Bounds;
 
                         // If neither us, nor the DeviceScaleChanged event handlers changed the size, we can expect Windows to apply the suggested bounds
                         // in a later WM_WINDOWPOSCHANGED message (V1 awareness: it always happens).
-                        if (isPerMonitorDpiAwarenessV1 || before == after)
-                            isOnAutoResizedPending = true;
+                        if (flags[isPerMonitorDpiAwarenessV1] || before == after)
+                            flags[isOnAutoResizedPending] = true;
                     }
                     finally
                     {
@@ -1217,12 +1230,12 @@ namespace KGySoft.WinForms.Forms
 
                     return;
 
-                case Constants.WM_WINDOWPOSCHANGED when isOnAutoResizedPending && dpiChangedSuggestedBounds.Size == Size:
+                case Constants.WM_WINDOWPOSCHANGED when flags[isOnAutoResizedPending] && dpiChangedSuggestedBounds.Size == Size:
                     base.WndProc(ref m);
                     dpiChangedSuggestedBounds = Rectangle.Empty;
-                    if (!isPerMonitorDpiAwarenessV1 || ActiveForm != this)
+                    if (!flags[isPerMonitorDpiAwarenessV1] || ActiveForm != this)
                     {
-                        isOnAutoResizedPending = false;
+                        flags[isOnAutoResizedPending] = false;
                         OnDeviceScaleAutoResized(EventArgs.Empty);
                     }
 
@@ -1230,8 +1243,8 @@ namespace KGySoft.WinForms.Forms
 
                 case Constants.WM_EXITSIZEMOVE:
                     base.WndProc(ref m);
-                    bool raiseAutoResized = isPerMonitorDpiAwarenessV1 && isOnAutoResizedPending;
-                    isOnAutoResizedPending = false;
+                    bool raiseAutoResized = flags[isPerMonitorDpiAwarenessV1 | isOnAutoResizedPending];
+                    flags[isOnAutoResizedPending] = false;
                     if (raiseAutoResized)
                         OnDeviceScaleAutoResized(EventArgs.Empty);
                     return;
@@ -1270,7 +1283,7 @@ namespace KGySoft.WinForms.Forms
                             // This can also cause reentrancy (though quite unlikely) if something nasty happens when the font changes (e.g. blowing up the container form).
                             // The reentrancy is handled above, but each time we exit from an inner call, we must check if the current font scaling is still valid.
                             CheckDpiChangeAsMdiChild();
-                        } while (autoScaleFont && (font ?? defaultFont)?.CurrentScale != deviceScale);
+                        } while (AutoScaleFont && (font ?? defaultFont)?.CurrentScale != deviceScale);
                         
                         OnDeviceScaleChanged(args.Reset(default, deviceScale, previousScale));
                     }
@@ -1465,7 +1478,7 @@ namespace KGySoft.WinForms.Forms
 
         private void SetFont(ScalingFont? value)
         {
-            isChangingFont = true;
+            flags[isChangingFont] = true;
             try
             {
                 if (value == null)
@@ -1486,18 +1499,18 @@ namespace KGySoft.WinForms.Forms
                     if (!force && (ReferenceEquals(oldFont, newFont) || !oldFont.IsDisposed()))
                         return;
 
-                    suppressFontChanged = true;
+                    flags[suppressFontChanged] = true;
                     try
                     {
                         base.Font = null!;
 
                         // setting base.Font caused reentrancy: not letting the outer call to set the font again
-                        if (!suppressFontChanged)
+                        if (!flags[suppressFontChanged])
                             return;
                     }
                     finally
                     {
-                        suppressFontChanged = false;
+                        flags[suppressFontChanged] = false;
                     }
                 }
 
@@ -1505,7 +1518,7 @@ namespace KGySoft.WinForms.Forms
             }
             finally
             {
-                isChangingFont = false;
+                flags[isChangingFont] = false;
             }
         }
 
@@ -1517,7 +1530,7 @@ namespace KGySoft.WinForms.Forms
         {
             Debug.Assert(IsMdiChild);
             dpiChangingAsChildCount += 1;
-            if (isPerMonitorDpiAwarenessV1 && IsMdiChild)
+            if (flags[isPerMonitorDpiAwarenessV1] && IsMdiChild)
                 CheckDpiChangeAsMdiChild();
         }
 

@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Drawing;
 using System.IO;
@@ -64,6 +65,8 @@ namespace KGySoft.WinForms.Components
     {
         #region Constants
 
+        #region Internal Constants
+
         internal const string PropertyMessage = "Message";
         internal const string PropertyMainInstruction = "MainInstruction";
         internal const string PropertyCaption = "Caption";
@@ -92,6 +95,18 @@ namespace KGySoft.WinForms.Components
 
         #endregion
 
+        #region Private Constants
+
+        private const int isDisposed = 1;
+        private const int forceCompatibilityMode = isDisposed << 1;
+        private const int isEmulatedStandardMainIcon = forceCompatibilityMode << 1;
+        private const int isEmulatedStandardFooterIcon = isEmulatedStandardMainIcon << 1;
+        private const int checkBoxChecked = isEmulatedStandardFooterIcon << 1;
+
+        #endregion
+
+        #endregion
+
         #region Fields
 
         #region Static Fields
@@ -103,13 +118,12 @@ namespace KGySoft.WinForms.Components
 
         #region Instance Fields
 
-        private bool disposed;
+        private BitVector32 flags;
         private ITaskDialog? dialogInstance;
         private string? message;
         private string? mainInstruction;
         private string? caption;
         private string? footerText;
-        private bool forceCompatibilityMode;
         private string? checkBoxText;
         private string? detailsText;
         private TaskDialogOptions options;
@@ -119,12 +133,9 @@ namespace KGySoft.WinForms.Components
         private Icon? customIcon;
         private TaskDialogStandardIcons footerIcon;
         private Icon? customFooterIcon;
-        private bool isEmulatedStandardMainIcon;
-        private bool isEmulatedStandardFooterIcon;
         private Icon? formIcon;
         private TaskDialogStandardButtonFlags standardButtons;
         private TaskDialogStandardButtons defaultStandardButton;
-        private bool checkBoxChecked;
         private TaskDialogControlCollection<TaskDialogButton> buttons;
         private TaskDialogControlCollection<TaskDialogRadioButton> radioButtons;
         private TaskDialogProgressBarStyle progressBarStyle;
@@ -394,14 +405,14 @@ namespace KGySoft.WinForms.Components
         /// <seealso cref="CheckBoxText"/>
         public bool CheckBoxChecked
         {
-            get => checkBoxChecked;
+            get => flags[checkBoxChecked];
             set
             {
-                if (checkBoxChecked == value)
+                if (flags[checkBoxChecked] == value)
                     return;
 
                 CheckCanChangeProperty();
-                checkBoxChecked = value;
+                flags[checkBoxChecked] = value;
 
                 if (IsDialogShowing)
                     dialogInstance!.PropertyChanged(PropertyCheckBoxChecked);
@@ -513,7 +524,7 @@ namespace KGySoft.WinForms.Components
                 if (!value.IsDefined())
                     throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
-                isEmulatedStandardMainIcon = false;
+                flags[isEmulatedStandardMainIcon] = false;
                 customIcon = null;
                 formIcon = null;
                 icon = value;
@@ -528,14 +539,14 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public Icon? CustomIcon
         {
-            get => isEmulatedStandardMainIcon ? null : customIcon;
+            get => flags[isEmulatedStandardMainIcon] ? null : customIcon;
             set
             {
                 if (customIcon == value)
                     return;
 
                 CheckCanChangeProperty();
-                isEmulatedStandardMainIcon = false;
+                flags[isEmulatedStandardMainIcon] = false;
                 icon = TaskDialogStandardIcons.None;
                 customIcon = value;
                 formIcon = value;
@@ -561,7 +572,7 @@ namespace KGySoft.WinForms.Components
                 if (!value.IsDefined())
                     throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
-                isEmulatedStandardFooterIcon = false;
+                flags[isEmulatedStandardFooterIcon] = false;
                 customFooterIcon = null;
                 footerIcon = value;
                 if (IsDialogShowing)
@@ -575,14 +586,14 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public Icon? CustomFooterIcon
         {
-            get => isEmulatedStandardFooterIcon ? null : customFooterIcon;
+            get => flags[isEmulatedStandardFooterIcon] ? null : customFooterIcon;
             set
             {
                 if (customFooterIcon == value)
                     return;
 
                 CheckCanChangeProperty();
-                isEmulatedStandardFooterIcon = false;
+                flags[isEmulatedStandardFooterIcon] = false;
                 footerIcon = TaskDialogStandardIcons.None;
                 customFooterIcon = value;
                 if (IsDialogShowing)
@@ -852,13 +863,13 @@ namespace KGySoft.WinForms.Components
         /// </remarks>
         public bool ForceCompatibilityMode
         {
-            get => forceCompatibilityMode;
+            get => flags[forceCompatibilityMode];
             set
             {
                 if (dialogInstance != null)
                     throw new InvalidOperationException(Res.TaskDialogPropertyChange(nameof(ForceCompatibilityMode)));
 
-                forceCompatibilityMode = value;
+                flags[forceCompatibilityMode] = value;
             }
         }
 
@@ -932,10 +943,10 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         internal Icon? EmulatedStandardMainIcon
         {
-            get => isEmulatedStandardMainIcon ? customIcon : null;
+            get => flags[isEmulatedStandardMainIcon] ? customIcon : null;
             set
             {
-                isEmulatedStandardMainIcon = true;
+                flags[isEmulatedStandardMainIcon] = true;
                 customIcon = value;
                 formIcon = value;
                 if (IsDialogShowing)
@@ -949,10 +960,10 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         internal Icon? EmulatedStandardFooterIcon
         {
-            get => isEmulatedStandardFooterIcon ? customFooterIcon : null;
+            get => flags[isEmulatedStandardFooterIcon] ? customFooterIcon : null;
             set
             {
-                isEmulatedStandardFooterIcon = true;
+                flags[isEmulatedStandardFooterIcon] = true;
                 customFooterIcon = value;
                 if (IsDialogShowing)
                     dialogInstance!.PropertyChanged(PropertyCustomFooterIcon);
@@ -1153,7 +1164,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         internal void OnCheckBoxCheckedChanged(bool isChecked)
         {
-            checkBoxChecked = isChecked;
+            flags[checkBoxChecked] = isChecked;
             checkBoxCheckedChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -1178,7 +1189,7 @@ namespace KGySoft.WinForms.Components
 
         private void CheckDisposed()
         {
-            if (disposed)
+            if (flags[isDisposed])
                 throw new ObjectDisposedException("TaskDialog", PublicResources.ObjectDisposed);
         }
 
@@ -1194,10 +1205,11 @@ namespace KGySoft.WinForms.Components
             CreateDialogInstance();
             try
             {
-                dialogResult = dialogInstance!.Execute(this, owner, out selectedButtonIndex, out selectedRadioButtonIndex, out checkBoxChecked);
+                dialogResult = dialogInstance!.Execute(this, owner, out selectedButtonIndex, out selectedRadioButtonIndex, out bool isChecked);
+                flags[checkBoxChecked] = isChecked;
                 customButtonIndex = selectedButtonIndex;
                 radioButtonIndex = selectedRadioButtonIndex;
-                verificationTextChecked = checkBoxChecked;
+                verificationTextChecked = isChecked;
                 return dialogResult;
             }
             finally
@@ -1209,7 +1221,7 @@ namespace KGySoft.WinForms.Components
 
         private void CreateDialogInstance()
         {
-            dialogInstance = forceCompatibilityMode || IsNonNativeFeatureRequired() || !NativeTaskDialog.IsAvailable
+            dialogInstance = ForceCompatibilityMode || IsNonNativeFeatureRequired() || !NativeTaskDialog.IsAvailable
                 ? new TaskDialogForm()
                 : new NativeTaskDialog();
         }
@@ -1226,7 +1238,7 @@ namespace KGySoft.WinForms.Components
 
         private void Dispose(bool disposing)
         {
-            disposed = true;
+            flags[isDisposed] = true;
 
             // clearing events in all circumstances
             created = null;

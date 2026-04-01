@@ -119,6 +119,18 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Constants
+
+        // We could use BitVector32.CreateMask, but then we should use static fields, whose access is slower than using constants.
+        // NOTE: LSB flags are in the base AdvancedTextBox class, so starting with bit 16
+        private const int focused = 1 << 16; // needed, because the real Focused is still true in the Leave event
+        private const int isBlank = focused << 1;
+        private const int blankEnabled = isBlank << 1;
+        private const int changeValueOnTextChange = blankEnabled << 1;
+        private const int textChanging = changeValueOnTextChange << 1;
+
+        #endregion
+
         #region Fields
 
         private readonly char[] multipliers = { 'y', 'm', 't' };
@@ -129,16 +141,11 @@ namespace KGySoft.WinForms.Controls
         private decimal value;
         private DecimalFormat format = DecimalFormat.Number;
         private sbyte decimalDigits; // decimals after the decimal separator
-        private bool focused;  // because the real Focused is still true in the Leave event
-        private bool blank = true;
         private string blankText = "";
-        private bool blankEnabled = true;
         private DecimalRange range = DecimalRange.Any; // when violated, going to Blank, or exception
         private DecimalMinMax rangeMinMax = new DecimalMinMax(0, 0);
         private HorizontalAlignment align = HorizontalAlignment.Right;
         private DecimalValueOnBlank valueOnBlank = DecimalValueOnBlank.Zero;
-        private bool changeValueOnTextChange;
-        private bool textChanging;
 
         #endregion
 
@@ -181,16 +188,16 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool Blank
         {
-            get => blank;
+            get => flags[isBlank];
             set
             {
                 bool refresh = false;
 
-                if (blank != value && (blankEnabled || !value))
+                if (flags[isBlank] != value && (BlankEnabled || !value))
                 {
                     // when turning off blank, making sure Value is in range
-                    bool blankOld = blank;
-                    blank = value;
+                    bool blankOld = flags[isBlank];
+                    flags[isBlank] = value;
                     if (!value)
                     {
                         decimal scale = decimalDigits < 0 ? Convert.ToDecimal(Math.Pow(10, -decimalDigits)) : 1;
@@ -212,11 +219,11 @@ namespace KGySoft.WinForms.Controls
                     if (refresh)
                         RefreshValue();
                     OnBlankChanged(EventArgs.Empty);
-                    if (blankOld != blank && this.value != BlankValue)
+                    if (blankOld != value && this.value != BlankValue)
                         OnValueChanged(EventArgs.Empty);
 
                 }
-                else if (blank && Text != blankText)
+                else if (value && Text != blankText)
                     RefreshValue();
 
                 AdjustAlignment();
@@ -235,7 +242,8 @@ namespace KGySoft.WinForms.Controls
             set
             {
                 blankText = value;
-                if (blank) RefreshValue();
+                if (Blank)
+                    RefreshValue();
             }
         }
 
@@ -249,14 +257,12 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool BlankEnabled
         {
-            get => blankEnabled;
+            get => flags[blankEnabled];
             set
             {
-                blankEnabled = value;
-                if (!value && blank)
-                {
+                flags[blankEnabled] = value;
+                if (!value && Blank)
                     Blank = false;
-                }
             }
 
         }
@@ -308,7 +314,8 @@ namespace KGySoft.WinForms.Controls
                     rangeMinMax.MinValue = RoundTo(rangeMinMax.MinValue, -decimalDigits);
                     rangeMinMax.MaxValue = RoundTo(rangeMinMax.MaxValue, -decimalDigits);
                 }
-                if (!blank)
+
+                if (!Blank)
                 {
                     // because the value may change when decreasing the decimal digits
                     SetValue(this.value, false);
@@ -390,7 +397,7 @@ namespace KGySoft.WinForms.Controls
         [RefreshProperties(RefreshProperties.All)]
         public decimal Value
         {
-            get => !blank ? value : BlankValue;
+            get => !Blank ? value : BlankValue;
             set => SetValue(value, true);
         }
 
@@ -431,8 +438,8 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool ChangeValueOnTextChange
         {
-            get => changeValueOnTextChange;
-            set => changeValueOnTextChange = value;
+            get => flags[changeValueOnTextChange];
+            set => flags[changeValueOnTextChange] = value;
         }
 
         #endregion
@@ -507,6 +514,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public DecimalTextBox()
         {
+            flags[isBlank | blankEnabled] = true;
             TextAlign = HorizontalAlignment.Right;
             if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
                 return;
@@ -548,7 +556,7 @@ namespace KGySoft.WinForms.Controls
             base.OnEnter(e);
             if (ReadOnly)
                 return;
-            focused = true;
+            flags[focused] = true;
             RefreshValue();
         }
 
@@ -558,10 +566,10 @@ namespace KGySoft.WinForms.Controls
             base.OnLeave(e);
             if (ReadOnly)
                 return;
-            focused = false;
+            flags[focused] = false;
             if (IsValid(Text, true))
                 SetText(Text); // Setting the new value. Validation is needed because Leave executes before Validate
-            else if (blankEnabled && string.IsNullOrEmpty(Text))
+            else if (BlankEnabled && string.IsNullOrEmpty(Text))
                 Blank = true;  // and if it's invalid while not blank, Validating does not allow to leave the control
         }
 
@@ -575,6 +583,7 @@ namespace KGySoft.WinForms.Controls
                 return;
 
             // invalidating: thousands separator (or space)...
+            bool blank = Blank;
             if (e.KeyChar == thousandSeparator || e.KeyChar == ' '
                 // ...negative sign not at the first position...
                 || (!blank && e.KeyChar == negativeSign && Text.IndexOf(negativeSign) >= 0)
@@ -606,7 +615,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnValidating(CancelEventArgs e)
         {
             base.OnValidating(e);
-            if (ReadOnly || blank)
+            if (ReadOnly || Blank)
                 return;
             if (!IsValid(Text, true))
             {
@@ -618,20 +627,20 @@ namespace KGySoft.WinForms.Controls
         protected override void OnTextChanged(EventArgs e)
         {
             base.OnTextChanged(e);
-            if (textChanging)
+            if (flags[textChanging])
                 return;
 
             // Switching to Blank if needed
-            if (!blank && blankEnabled && Text.Length == 0)
+            if (!Blank && BlankEnabled && Text.Length == 0)
             {
                 Blank = true;
                 return;
             }
 
             // changing Value property for any Text change if ChangeValueOnTextChange is true
-            if (!changeValueOnTextChange || ReadOnly)
+            if (!ChangeValueOnTextChange || ReadOnly)
                 return;
-            textChanging = true;
+            flags[textChanging] = true;
             try
             {
                 if (!Blank && IsValid(Text, true))
@@ -639,7 +648,7 @@ namespace KGySoft.WinForms.Controls
             }
             finally
             {
-                textChanging = false;
+                flags[textChanging] = false;
             }
         }
 
@@ -661,7 +670,7 @@ namespace KGySoft.WinForms.Controls
             // Suppressing keys in Blank mode. Further checks are in KeyPress where key can be checked as char.
             base.OnKeyDown(e);
 
-            if (blank && e.KeyCode.In(Keys.Delete, Keys.Back))
+            if (Blank && e.KeyCode.In(Keys.Delete, Keys.Back))
             {
                 e.Handled = true;
                 e.SuppressKeyPress = true;
@@ -672,26 +681,33 @@ namespace KGySoft.WinForms.Controls
         protected override void WndProc(ref Message m)
         {
             // pasting attempt from clipboard
-            if (m.Msg == Constants.WM_PASTE) // WM_PASTE
+            switch (m.Msg)
             {
-                if (!Clipboard.ContainsText())
+                case Constants.WM_PASTE:
+                    if (!Clipboard.ContainsText())
+                        return;
+
+                    bool blank = Blank;
+                    string text = blank
+                        ? Clipboard.GetText()
+                        : $"{Text.Substring(0, SelectionStart)}{Clipboard.GetText()}{Text.Substring(SelectionStart + SelectionLength)}";
+                    if (IsValid(text, false))
+                    {
+                        int selStart = blank ? 0 : SelectionStart;
+                        ApplyText(Clipboard.GetText(), !blank);
+                        SelectionStart = selStart + Clipboard.GetText().Length;
+                    }
+
                     return;
 
-                string text = blank
-                    ? Clipboard.GetText()
-                    : $"{Text.Substring(0, SelectionStart)}{Clipboard.GetText()}{Text.Substring(SelectionStart + SelectionLength)}";
-                if (IsValid(text, false))
-                {
-                    int selstart = blank ? 0 : SelectionStart;
-                    ApplyText(Clipboard.GetText(), !blank);
-                    SelectionStart = selstart + Clipboard.GetText().Length;
-                }
+                case Constants.WM_CUT or Constants.WM_CLEAR when Blank:
+                    // suppressing editing in Blank mode
+                    return;
+
+                default:
+                    base.WndProc(ref m);
+                    return;
             }
-            // suppressing editing in Blank mode
-            else if (blank && m.Msg.In(Constants.WM_CUT, Constants.WM_CLEAR))
-                return;
-            else
-                base.WndProc(ref m);
         }
 
         #endregion
@@ -726,35 +742,32 @@ namespace KGySoft.WinForms.Controls
             }
             else
                 this.value = rounded; // because e.g. 1 and 1.0 are different, though they equal
-            if (!textChanging)
+            if (!flags[textChanging])
                 RefreshValue();
         }
 
         private void RefreshValue()
         {
-            if (blank)
+            if (Blank)
             {
                 base.Text = blankText;
                 return;
             }
+
             CultureInfo ci = new CultureInfo(Thread.CurrentThread.CurrentCulture.Name, true);
             ci.NumberFormat.NumberDecimalDigits = decimalDigits >= 0 ? Convert.ToInt32(decimalDigits) : 0;
-            if (focused)
+            if (flags[focused])
             {
                 base.Text = value.ToString("F", ci);
+                return;
             }
-            else
+
+            base.Text = format switch
             {
-                switch (format)
-                {
-                    case DecimalFormat.Fixed:
-                        base.Text = value.ToString("F", ci);
-                        break;
-                    case DecimalFormat.Number:
-                        base.Text = value.ToString("N", ci);
-                        break;
-                }
-            }
+                DecimalFormat.Fixed => value.ToString("F", ci),
+                DecimalFormat.Number => value.ToString("N", ci),
+                _ => base.Text
+            };
         }
 
         /// <summary>
@@ -778,12 +791,12 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private bool CheckRange(decimal value, bool alert)
         {
-            bool result;
             decimal scale = decimalDigits < 0 ? Convert.ToDecimal(Math.Pow(10, -decimalDigits)) : 1;
 
-            if (blank) return true;
+            if (Blank)
+                return true;
 
-            result = range switch
+            bool result = range switch
             {
                 DecimalRange.Negative => value <= -scale,
                 DecimalRange.NegativeNull => value <= 0,
@@ -795,7 +808,7 @@ namespace KGySoft.WinForms.Controls
 
             if (result)
                 return true;
-            if (!blankEnabled)
+            if (!BlankEnabled)
             {
                 // if blank is not enabled, then we may need to correct the Value
                 Value = range switch
@@ -820,20 +833,20 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         private void BlankOff()
         {
-            if (!blank)
+            if (!Blank)
                 return;
 
-            blank = false;
+            flags[isBlank] = false;
             OnBlankChanged(EventArgs.Empty);
 
-            textChanging = true;
+            flags[textChanging] = true;
             try
             {
                 base.Text = String.Empty;
             }
             finally
             {
-                textChanging = false;
+                flags[textChanging] = false;
             }
             AdjustAlignment();
         }
@@ -843,7 +856,7 @@ namespace KGySoft.WinForms.Controls
             decimal d;
             if (String.IsNullOrEmpty(txt))
             {
-                if (blankEnabled)
+                if (BlankEnabled)
                 {
                     Blank = true;
                     return;
@@ -888,7 +901,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="insert">When true replaces only selected text; otherwise, replaces thr whole text</param>
         private void ApplyText(string text, bool insert)
         {
-            if (blank)
+            if (Blank)
                 insert = false;
 
             if (insert)

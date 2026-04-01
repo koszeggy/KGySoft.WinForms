@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
@@ -56,6 +57,23 @@ namespace KGySoft.WinForms.Controls
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
     public class AdvancedRadioButton : RadioButton, ISupportsDisabledColor, ISupportButtonAdapter, ISupportsFadingInternal, IPerMonitorDpiAware
     {
+        #region Constants
+
+        // We could use BitVector32.CreateMask, but then we should use static fields, whose access is slower than using constants.
+        private const int autoScaleFont = 1;
+        private const int suppressFontChanged = autoScaleFont << 1;
+        private const int isPerMonitorDpiAwarenessV1 = suppressFontChanged << 1;
+        private const int fadingAnimationsEnabled = isPerMonitorDpiAwarenessV1 << 1;
+        private const int ignoreNextPaint = fadingAnimationsEnabled << 1;
+        private const int hasPaintError = ignoreNextPaint << 1;
+        private const int isHovered = hasPaintError << 1;
+        private const int isMouseDown = isHovered << 1;
+        private const int isPressed = isMouseDown << 1;
+        private const int entered = isPressed << 1;
+        private const int left = entered << 1;
+
+        #endregion
+
         #region Fields
 
         #region Static Fields
@@ -69,8 +87,8 @@ namespace KGySoft.WinForms.Controls
 
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
         private readonly FadingPainterInternal fadingPainter;
-        private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
 
+        private BitVector32 flags;
         private RenderingQuality textRenderingQuality;
         private RenderingQuality visualsRenderingQuality = RenderingQuality.High;
         private FlatStyle lastFlatStyle = FlatStyle.Standard;
@@ -84,19 +102,8 @@ namespace KGySoft.WinForms.Controls
         private Color disabledForeColor;
 
         private ButtonBaseAdapter? adapter;
-        private bool isHovered;
-        private bool isMouseDown;
-        private bool isPressed;
-        private bool fadingAnimationsEnabled = true;
         private int fadingAnimationDefaultSpeed = 500;
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
-        private bool left;
-        private bool ignoreNextPaint;
-        private bool entered;
-        private bool hasPaintError;
-
-        private bool suppressFontChanged;
-        private bool autoScaleFont = true;
         private int dpiChangingCount;
         private ScalingFont? font; // The explicitly set font.
         private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
@@ -293,13 +300,13 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above, with non-classic themes.")]
         public bool FadingAnimationsEnabled
         {
-            get => fadingAnimationsEnabled;
+            get => flags[fadingAnimationsEnabled];
             set
             {
-                if (fadingAnimationsEnabled == value)
+                if (flags[fadingAnimationsEnabled] == value)
                     return;
 
-                fadingAnimationsEnabled = value;
+                flags[fadingAnimationsEnabled] = value;
                 CheckStyles();
             }
         }
@@ -382,13 +389,13 @@ namespace KGySoft.WinForms.Controls
         [Description("True to auto scale Font when DPI changes and inherit the font when it's not explicitly set; False to rely on the default behavior of the current executing platform.")]
         public bool AutoScaleFont
         {
-            get => autoScaleFont;
+            get => flags[autoScaleFont];
             set
             {
-                if (autoScaleFont == value)
+                if (flags[autoScaleFont] == value)
                     return;
 
-                autoScaleFont = value;
+                flags[autoScaleFont] = value;
                 font?.ResetFrom(font.Font, value ? this.GetScale() : ScaleHelper.SystemScale);
                 if (value)
                 {
@@ -499,10 +506,12 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public AdvancedRadioButton()
         {
+            flags[autoScaleFont | fadingAnimationsEnabled] = true;
             fadingPainter = new FadingPainterInternal(this, Constants.ThemeClassButton);
             CheckStyles();
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
+            flags[isPerMonitorDpiAwarenessV1] = ScaleHelper.PerMonitorDpiAwarenessVersion == 1;
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
             if (OSHelper.IsFrameworkMono)
                 SetAutoSizeMode(AutoSizeMode.GrowAndShrink);
@@ -566,7 +575,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnFontChanged(EventArgs e)
         {
-            if (suppressFontChanged)
+            if (flags[suppressFontChanged])
                 return;
 
             ResetSizeCache();
@@ -597,20 +606,20 @@ namespace KGySoft.WinForms.Controls
             // when focus is changed with cursor multiple paints occur that may cause flickering
             // leave -> focused (ignored) -> not focused
             // entered -> not focused unchecked (ignored) -> not focused checked (ignored) -> focused
-            if (left || entered)
+            if (flags.Any(left | entered))
             {
                 bool focused = Focused;
-                if (left && focused || entered && !focused)
-                    ignoreNextPaint = true;
+                if (flags[left] && focused || flags[entered] && !focused)
+                    flags[ignoreNextPaint] = true;
 
-                left = false;
+                flags[left] = false;
                 if (focused) // clearing entered only when focused because 2 paints have to be ignored
-                    entered = false;
+                    flags[entered] = false;
             }
 
-            if (ignoreNextPaint)
+            if (flags[ignoreNextPaint])
             {
-                ignoreNextPaint = false;
+                flags[ignoreNextPaint] = false;
                 Invalidate();
                 return;
             }
@@ -621,15 +630,15 @@ namespace KGySoft.WinForms.Controls
             {
                 fadingPainter.State ??= GetAppearance();
                 fadingPainter.Paint(e);
-                hasPaintError = false;
+                flags[hasPaintError] = false;
             }
             catch (Exception ex) when (!ex.IsCritical())
             {
                 // We tolerate one exception if we can recover from it in the next paint.
                 // But if exceptions are thrown in two consecutive paints, we let the second one propagate.
-                if (hasPaintError)
+                if (flags[hasPaintError])
                     throw;
-                hasPaintError = true;
+                flags[hasPaintError] = true;
                 lastScale = PointF.Empty;
                 CheckDpiChange();
                 Invalidate();
@@ -751,7 +760,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseLeave(EventArgs e)
         {
-            isHovered = false;
+            flags[isHovered] = false;
             Invalidate();
             base.OnMouseLeave(e);
         }
@@ -759,7 +768,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseEnter(EventArgs e)
         {
-            isHovered = true;
+            flags[isHovered] = true;
             Invalidate();
             base.OnMouseEnter(e);
         }
@@ -768,55 +777,53 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            isPressed = false;
-            isMouseDown = false;
+            flags[isPressed | isMouseDown] = false;
             base.OnMouseUp(e);
         }
 
         /// <inheritdoc />
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            bool prevPressed = isPressed;
-            isPressed = e.Button == MouseButtons.Left;
-            isMouseDown = isPressed;
+            bool prevPressed = flags[isPressed];
+            flags[isPressed | isMouseDown] = e.Button == MouseButtons.Left;
             base.OnMouseDown(e);
 
             // workaround for base Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
-            if (isPressed != prevPressed)
+            if (flags[isPressed] != prevPressed)
                 Invalidate();
         }
 
         /// <inheritdoc />
         protected override void OnMouseMove(MouseEventArgs mevent)
         {
-            bool prevPressed = isPressed;
-            if (isMouseDown)
-                isPressed = mevent.X >= 0 && mevent.X < Width && mevent.Y >= 0 && mevent.Y < Height;
+            bool prevPressed = flags[isPressed];
+            if (flags[isMouseDown])
+                flags[isPressed] = mevent.X >= 0 && mevent.X < Width && mevent.Y >= 0 && mevent.Y < Height;
 
             base.OnMouseMove(mevent);
 
             // workaround for base Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
-            if (isPressed != prevPressed)
+            if (flags[isPressed] != prevPressed)
                 Invalidate();
         }
 
         /// <inheritdoc />
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            bool prevPressed = isPressed;
-            if (e.KeyData == Keys.Space && !isPressed)
-                isPressed = true;
+            bool prevPressed = flags[isPressed];
+            if (e.KeyData == Keys.Space && !prevPressed)
+                flags[isPressed] = true;
 
             base.OnKeyDown(e);
-            if (isPressed != prevPressed)
+            if (flags[isPressed] != prevPressed)
                 Invalidate(); // workaround for base ResetFlagsandPaint call, which calls Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
         }
 
         /// <inheritdoc />
         protected override void OnKeyUp(KeyEventArgs e)
         {
-            if (e.KeyData == Keys.Space && isPressed)
-                isPressed = false;
+            if (e.KeyData == Keys.Space && flags[isPressed])
+                flags[isPressed] = false;
 
             base.OnKeyUp(e);
         }
@@ -895,7 +902,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnEnter(EventArgs e)
         {
             if (FadingAnimationsEnabled && FadingPainterInternal.IsSupported)
-                entered = true;
+                flags[entered] = true;
             base.OnEnter(e);
         }
 
@@ -903,7 +910,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnLeave(EventArgs e)
         {
             if (FadingAnimationsEnabled && FadingPainterInternal.IsSupported)
-                left = true;
+                flags[left] = true;
             base.OnLeave(e);
         }
 
@@ -942,7 +949,7 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckStyles()
         {
-            if (fadingAnimationsEnabled && fadingPainter.Enabled)
+            if (FadingAnimationsEnabled && fadingPainter.Enabled)
             {
                 // to enable animations, double buffering must be disabled
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
@@ -971,8 +978,8 @@ namespace KGySoft.WinForms.Controls
                 BackColor = BackColor,
                 ForeColor = foreColor,
                 Enabled = Enabled,
-                Hovered = isHovered,
-                Pressed = isPressed,
+                Hovered = flags[isHovered],
+                Pressed = flags[isPressed],
                 IsDefault = IsDefault,
                 Focused = Focused,
                 CheckState = Checked ? CheckState.Checked : CheckState.Unchecked,
@@ -989,9 +996,9 @@ namespace KGySoft.WinForms.Controls
                 RadioButtonState result = RadioButtonState.UncheckedNormal;
                 if (!Enabled)
                     result = RadioButtonState.UncheckedDisabled;
-                else if (isPressed)
+                else if (flags[isPressed])
                     result = RadioButtonState.UncheckedPressed;
-                else if (isHovered)
+                else if (flags[isHovered])
                     result = RadioButtonState.UncheckedHot;
 
                 if (Checked)
@@ -1005,10 +1012,10 @@ namespace KGySoft.WinForms.Controls
 
             // NOTE: The base RadioButton renders checked state with Button appearance as pressed, which is not distinguishable from normal state
             // in high contrast mode when visual styles are enabled, so using the HOT state for a checked radio button instead.
-            if (isPressed)
+            if (flags[isPressed])
                 return (int)PUSHBUTTONSTATES.PBS_PRESSED;
 
-            if (isHovered || Checked)
+            if (flags[isHovered] || Checked)
                 return (int)PUSHBUTTONSTATES.PBS_HOT;
 
             if (Focused)
@@ -1071,7 +1078,7 @@ namespace KGySoft.WinForms.Controls
                     // Non-reference equality: we are alright if the old font is not disposed...
                     // ...except in .NET Core 3.0 - .NET 5.0 when FlatStyle is System and using v1 per-monitor DPI awareness, in which case the font gets corrupted
 #if NETCOREAPP && !NET6_0_OR_GREATER
-                    if (!oldFont.IsDisposed() && !(isPerMonitorDpiAwarenessV1 && base.FlatStyle == FlatStyle.System && OSHelper.IsWindows && !OSHelper.IsMono))
+                    if (!oldFont.IsDisposed() && !(flags[isPerMonitorDpiAwarenessV1] && base.FlatStyle == FlatStyle.System && OSHelper.IsWindows && !OSHelper.IsMono))
 #else
                     if (!oldFont.IsDisposed())
 #endif 
@@ -1083,18 +1090,18 @@ namespace KGySoft.WinForms.Controls
                     }
                 }
 
-                suppressFontChanged = true;
+                flags[suppressFontChanged] = true;
                 try
                 {
                     base.Font = null!;
 
                     // setting base.Font caused reentrancy: not letting the outer call to set the font again
-                    if (!suppressFontChanged)
+                    if (!flags[suppressFontChanged])
                         return;
                 }
                 finally
                 {
-                    suppressFontChanged = false;
+                    flags[suppressFontChanged] = false;
                 }
             }
 
@@ -1124,14 +1131,14 @@ namespace KGySoft.WinForms.Controls
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {
             dpiChangingCount += 1;
-            if (isPerMonitorDpiAwarenessV1)
+            if (flags[isPerMonitorDpiAwarenessV1])
                 CheckDpiChange();
         }
 
         void IPerMonitorDpiAware.ParentFormDpiChanged()
         {
             dpiChangingCount -= 1;
-            if (isPerMonitorDpiAwarenessV1 && AutoSize)
+            if (flags[isPerMonitorDpiAwarenessV1] && AutoSize)
                 PerformLayout();
         }
 

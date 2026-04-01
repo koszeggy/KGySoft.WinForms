@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Data;
 using System.Diagnostics.CodeAnalysis;
@@ -82,7 +83,7 @@ namespace KGySoft.WinForms.Controls
                 {
                     // workaround: AutoComplete clears text in Simple mode
                     // Note: WM_SETTEXT is visible also in ComboBox.WndProc but solves only Append/SuggestAppend mode. Here Suggest mode is solved, too
-                    case Constants.WM_SETTEXT when parent is { readOnly: false, clearingText: false, DropDownStyle: ComboBoxStyle.Simple, AutoCompleteMode: not AutoCompleteMode.None }:
+                    case Constants.WM_SETTEXT when parent.flags.None(isReadOnly | clearingText) && parent is { DropDownStyle: ComboBoxStyle.Simple, AutoCompleteMode: not AutoCompleteMode.None }:
                         string origText = parent.Text;
                         int selectionStart = parent.SelectionStart;
                         int selectionLength = parent.SelectionLength;
@@ -96,7 +97,7 @@ namespace KGySoft.WinForms.Controls
                         return;
 
                     // Suppressing cut, paste, clear and undo in ReadOnly mode
-                    case Constants.WM_CUT or Constants.WM_CLEAR or Constants.WM_PASTE or Constants.WM_UNDO when parent.readOnly:
+                    case Constants.WM_CUT or Constants.WM_CLEAR or Constants.WM_PASTE or Constants.WM_UNDO when parent.flags[isReadOnly]:
                         return;
 
                     // Special handling for disabled painting
@@ -147,7 +148,7 @@ namespace KGySoft.WinForms.Controls
             {
                 switch (m.Msg)
                 {
-                    case Constants.WM_LBUTTONDOWN or Constants.WM_LBUTTONDBLCLK when parent.readOnly:
+                    case Constants.WM_LBUTTONDOWN or Constants.WM_LBUTTONDBLCLK when parent.flags[isReadOnly]:
                         parent.ProcessReadOnlyMouseDown(ref m);
                         return;
 
@@ -168,6 +169,17 @@ namespace KGySoft.WinForms.Controls
 
         private const int referenceDropDownWidth = 17;
 
+        // We could use BitVector32.CreateMask, but then we should use static fields, whose access is slower than using constants.
+        private const int autoScaleFont = 1;
+        private const int suppressFontChanged = autoScaleFont << 1;
+        private const int isPerMonitorDpiAwarenessV1 = suppressFontChanged << 1;
+        private const int isDesignMode = isPerMonitorDpiAwarenessV1 << 1; // needed because DesignMode does not work in a user control, and LicenseManager.UsageMode does not work in WM_PAINT
+        private const int isReadOnly = isDesignMode << 1;
+        private const int systemDrawDropDownListMode = isReadOnly << 1;
+        private const int clearingText = systemDrawDropDownListMode << 1;
+        private const int isRtl = clearingText << 1;
+        private const int pendingResetAutoComplete = isRtl << 1;
+
         #endregion
 
         #region Fields
@@ -180,12 +192,13 @@ namespace KGySoft.WinForms.Controls
         private static readonly Color defaultDisabledForeColor = SystemColors.GrayText;
         private static readonly Color defaultReadOnlyForeColor = SystemColors.ControlText;
 
+        private static bool? canHaveNativeEdit; // true on a real Windows, may be false in the future or on a non-Windows OS
+
         #endregion
 
         #region Instance Fields
 
-        private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
-        private readonly bool isDesignMode = LicenseManager.UsageMode == LicenseUsageMode.Designtime; // needed because DesignMode does not work in a user control, and UsageMode does not work in WM_PAINT
+        private BitVector32 flags;
 
         // NOTE: Unlike in ButtonBase descendants, we always set the base back and fore colors (see ResetColors) because we don't have a reimplemented adapter here,
         // so the base drawing routines still rely on them. Setting them even with default colors is not a problem because this control never inherits colors from the parent control.
@@ -194,24 +207,16 @@ namespace KGySoft.WinForms.Controls
         private Color disabledBackColor;
         private Color disabledForeColor;
         private FlatStyle lastFlatStyle = FlatStyle.Standard; // would not be needed if there was an overridable OnFlatStyleChanged method
-        private bool systemDrawDropDownListMode = true;
-        private bool readOnly;
         private string? textOnFocus;
         private InnerEditWindow? nativeEditorChild;
         private InnerListBoxWindow? nativeListBoxChild;
         private AutoCompleteSource reportedAutoCompleteSource = AutoCompleteSource.None;
         private AutoCompleteMode reportedAutoCompleteMode = AutoCompleteMode.None;
-        private bool clearingText;
 
-        private bool suppressFontChanged;
-        private bool autoScaleFont = true;
-        private bool isRtl;
-        private bool pendingResetAutoComplete;
         private ScalingFont? font; // The explicitly set font.
         private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
         private PointF lastScale;
         private int dpiChangingCount;
-        private bool? canHaveNativeEdit;
 
         #endregion
 
@@ -387,14 +392,14 @@ namespace KGySoft.WinForms.Controls
         [Description("True to auto scale Font when DPI changes and inherit the font when it's not explicitly set; False to rely on the default behavior of the current executing platform.")]
         public bool AutoScaleFont
         {
-            get => autoScaleFont;
+            get => flags[autoScaleFont];
             set
             {
                 Debug.Assert(AutoScaleFont ^ defaultFont == null);
-                if (autoScaleFont == value)
+                if (flags[autoScaleFont] == value)
                     return;
 
-                autoScaleFont = value;
+                flags[autoScaleFont] = value;
                 font?.ResetFrom(font.Font, value ? this.GetScale() : ScaleHelper.SystemScale);
                 if (value)
                 {
@@ -465,11 +470,11 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoCompleteMode.None)]
         public new AutoCompleteMode AutoCompleteMode
         {
-            get => readOnly ? reportedAutoCompleteMode : base.AutoCompleteMode;
+            get => flags[isReadOnly] ? reportedAutoCompleteMode : base.AutoCompleteMode;
             set
             {
                 // DropDownList check: to let the exception come from the base
-                if (!readOnly || DropDownStyle == ComboBoxStyle.DropDownList)
+                if (!flags[isReadOnly] || DropDownStyle == ComboBoxStyle.DropDownList)
                     base.AutoCompleteMode = value;
                 reportedAutoCompleteMode = value;
             }
@@ -481,11 +486,11 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(AutoCompleteSource.None)]
         public new AutoCompleteSource AutoCompleteSource
         {
-            get => readOnly ? reportedAutoCompleteSource : base.AutoCompleteSource;
+            get => flags[isReadOnly] ? reportedAutoCompleteSource : base.AutoCompleteSource;
             set
             {
                 // DropDownList check: to let the exception come from the base
-                if (!readOnly || DropDownStyle == ComboBoxStyle.DropDownList)
+                if (!flags[isReadOnly] || DropDownStyle == ComboBoxStyle.DropDownList)
                     base.AutoCompleteSource = value;
                 reportedAutoCompleteSource = value;
             }
@@ -503,10 +508,10 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool SystemDrawDropDownListMode
         {
-            get => systemDrawDropDownListMode;
+            get => flags[systemDrawDropDownListMode];
             set
             {
-                systemDrawDropDownListMode = value;
+                flags[systemDrawDropDownListMode] = value;
                 AdjustDrawMode();
                 ResetColors(); // because DisabledForeColor depends on this property
             }
@@ -520,10 +525,10 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool ReadOnly
         {
-            get => readOnly;
+            get => flags[isReadOnly];
             set
             {
-                if (readOnly == value)
+                if (flags[isReadOnly] == value)
                     return;
 
                 if (DropDownStyle != ComboBoxStyle.DropDownList)
@@ -540,7 +545,7 @@ namespace KGySoft.WinForms.Controls
                     }
                 }
 
-                readOnly = value;
+                flags[isReadOnly] = value;
                 if (Enabled)
                     ResetColors();
 
@@ -555,7 +560,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Private Properties
 
-        private bool DrawByVisualStylesWhenDisabled => systemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsFrameworkMono
+        private bool DrawByVisualStylesWhenDisabled => SystemDrawDropDownListMode && VisualStyleHelper.RenderWithVisualStyles && !OSHelper.IsFrameworkMono
             && OSHelper.IsWindowsVistaOrLater && DropDownStyle == ComboBoxStyle.DropDownList && FlatStyle is FlatStyle.System or FlatStyle.Standard;
 
         private Color ThemedDisabledDropDownListColor => VisualStyleHelper.GetTextColor(Constants.ThemeClassComboBox,
@@ -572,9 +577,12 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public AdvancedComboBox()
         {
+            flags[autoScaleFont | systemDrawDropDownListMode] = true;
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
             this.RegisterPerMonitorAwarenessNotifications();
+            flags[isPerMonitorDpiAwarenessV1] = ScaleHelper.PerMonitorDpiAwarenessVersion == 1;
+            flags[isDesignMode] = LicenseManager.UsageMode == LicenseUsageMode.Designtime;
         }
 
         #endregion
@@ -589,14 +597,14 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public void Clear()
         {
-            clearingText = true;
+            flags[clearingText] = true;
             try
             {
                 Text = String.Empty;
             }
             finally
             {
-                clearingText = false;
+                flags[clearingText] = false;
             }
         }
 
@@ -647,7 +655,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnFontChanged(EventArgs e)
         {
-            if (suppressFontChanged)
+            if (flags[suppressFontChanged])
                 return;
             base.OnFontChanged(e);
         }
@@ -656,7 +664,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnRightToLeftChanged(EventArgs e)
         {
             base.OnRightToLeftChanged(e);
-            isRtl = RightToLeft == RightToLeft.Yes;
+            flags[isRtl] = RightToLeft == RightToLeft.Yes;
             RegisterAutoCompleteFix();
         }
 
@@ -690,7 +698,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnKeyDown(KeyEventArgs e)
         {
             // suppressing deleting and navigation (selecting item from list) because these cannot be suppressed in KeyPress
-            if (readOnly && (e.KeyCode is Keys.Delete or Keys.Back or Keys.Up or Keys.Down or Keys.PageUp or Keys.PageDown
+            if (flags[isReadOnly] && (e.KeyCode is Keys.Delete or Keys.Back or Keys.Up or Keys.Down or Keys.PageUp or Keys.PageDown
                 || DropDownStyle == ComboBoxStyle.DropDownList && e.KeyCode is Keys.Space or Keys.Right or Keys.Left or Keys.Home or Keys.End))
             {
                 e.Handled = true;
@@ -704,7 +712,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnKeyPress(KeyPressEventArgs e)
         {
-            if (readOnly)
+            if (flags[isReadOnly])
             {
                 // allowing only Ctrl+C (Copy) - Ctrl+Insert is not captured here
                 e.Handled = e.KeyChar != (char)3; //!e.KeyChar.In((char)3, (char)13, (char)27);
@@ -717,7 +725,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            if (!OSHelper.IsFrameworkMono || !readOnly || DropDownStyle == ComboBoxStyle.Simple)
+            if (!OSHelper.IsFrameworkMono || !flags[isReadOnly] || DropDownStyle == ComboBoxStyle.Simple)
             {
                 base.OnMouseDown(e);
                 return;
@@ -820,13 +828,13 @@ namespace KGySoft.WinForms.Controls
                 case Constants.WM_PAINT:
                     if (Enabled)
                     {
-                        if (!isDesignMode)
+                        if (!flags[isDesignMode])
                         {
                             // BUG workaround: In .NET 7+ the control resets the Font in WM_DPICHANGED_BEFOREPARENT, which causes a handle recreation and an immediate repaint.
                             // If we also set the font here, it will cause a Win32Exception (Error creating window handle), so we check if DPI is being changed.
                             if (dpiChangingCount == 0)
                                 CheckDpiChange();
-                            if (pendingResetAutoComplete)
+                            if (flags[pendingResetAutoComplete])
                                 ResetAutoComplete();
                         }
 
@@ -855,7 +863,7 @@ namespace KGySoft.WinForms.Controls
                     else
                         base.WndProc(ref m);
 
-                    if (systemDrawDropDownListMode && DropDownStyle == ComboBoxStyle.DropDownList && !OSHelper.IsFrameworkMono)
+                    if (SystemDrawDropDownListMode && DropDownStyle == ComboBoxStyle.DropDownList && !OSHelper.IsFrameworkMono)
                     {
                         var bounds = OSHelper.IsWindows
                             ? User32.GetClientRect(m.HWnd, out RECT rect) ? rect.ToRectangle() : Rectangle.Empty
@@ -873,9 +881,9 @@ namespace KGySoft.WinForms.Controls
                     // When parent RightToLeft changes, the handle is recreated, and if the application has per-monitor DPI awareness,
                     // RightToLeft here already has the new value, before On[Parent]RightToLeftChanged is triggered. We can use this to
                     // filter out the DPI change, which may cause an "Error creating window handle" error when the font is set.
-                    bool rtlChanging = isRtl != (RightToLeft == RightToLeft.Yes);
+                    bool rtlChanging = flags[isRtl] != (RightToLeft == RightToLeft.Yes);
                     dpiChangingCount += 1;
-                    suppressFontChanged = rtlChanging;
+                    flags[suppressFontChanged] = rtlChanging;
                     try
                     {
                         base.WndProc(ref m);
@@ -883,7 +891,7 @@ namespace KGySoft.WinForms.Controls
                     finally
                     {
                         dpiChangingCount -= 1;
-                        suppressFontChanged = false;
+                        flags[suppressFontChanged] = false;
                     }
 
                     // If parent RTL is changing on a screen with non-default DPI, we get this event while the handle is recreated.
@@ -1030,7 +1038,7 @@ namespace KGySoft.WinForms.Controls
 
         private void AdjustDrawMode()
         {
-            bool customDraw = DropDownStyle == ComboBoxStyle.Simple || !systemDrawDropDownListMode || OSHelper.IsFrameworkMono;
+            bool customDraw = DropDownStyle == ComboBoxStyle.Simple || !SystemDrawDropDownListMode || OSHelper.IsFrameworkMono;
             DrawMode drawMode = customDraw ? DrawMode.OwnerDrawFixed : DrawMode.Normal;
             if (base.DrawMode != drawMode)
                 base.DrawMode = drawMode;
@@ -1042,6 +1050,7 @@ namespace KGySoft.WinForms.Controls
             Color baseBackColor = base.BackColor;
             Color baseForeColor = base.ForeColor;
             bool changed = false;
+            bool readOnly = flags[isReadOnly];
 
             if (enabled && !readOnly && EnabledBackColor is Color enabledBgColor && enabledBgColor != baseBackColor)
             {
@@ -1174,18 +1183,18 @@ namespace KGySoft.WinForms.Controls
             // and the system scale wad changed after starting the application.
             if (Equals(oldFont, newFont))
             {
-                suppressFontChanged = true;
+                flags[suppressFontChanged] = true;
                 try
                 {
                     base.Font = null!;
 
                     // setting base.Font caused reentrancy: not letting the outer call to set the font again
-                    if (!suppressFontChanged)
+                    if (!flags[suppressFontChanged])
                         return;
                 }
                 finally
                 {
-                    suppressFontChanged = false;
+                    flags[suppressFontChanged] = false;
                 }
             }
 
@@ -1201,7 +1210,8 @@ namespace KGySoft.WinForms.Controls
         private void AdjustReadOnlyOnFrameworkMono()
         {
             Debug.Assert(OSHelper.IsFrameworkMono);
-            var style = DropDownStyle;
+            ComboBoxStyle style = DropDownStyle;
+            bool readOnly = flags[isReadOnly];
             if (style == ComboBoxStyle.Simple)
                 this.InnerListBox()?.Enabled = !readOnly;
             if (style != ComboBoxStyle.DropDownList)
@@ -1212,8 +1222,8 @@ namespace KGySoft.WinForms.Controls
         {
             if (OSHelper.IsFrameworkMono)
                 return;
-            pendingResetAutoComplete = DropDownStyle != ComboBoxStyle.DropDownList
-                && (!readOnly && reportedAutoCompleteMode != AutoCompleteMode.None || nativeEditorChild == null);
+            flags[pendingResetAutoComplete] = DropDownStyle != ComboBoxStyle.DropDownList
+                && (!flags[isReadOnly] && reportedAutoCompleteMode != AutoCompleteMode.None || nativeEditorChild == null);
         }
 
         private void ResetAutoComplete()
@@ -1223,13 +1233,13 @@ namespace KGySoft.WinForms.Controls
 
             if (!Created)
             {
-                pendingResetAutoComplete = true;
+                flags[pendingResetAutoComplete] = true;
                 return;
             }
 
-            pendingResetAutoComplete = false;
+            flags[pendingResetAutoComplete] = false;
 
-            if (readOnly || reportedAutoCompleteMode == AutoCompleteMode.None)
+            if (flags[isReadOnly] || reportedAutoCompleteMode == AutoCompleteMode.None)
             {
                 // As Created is true here, hooks are expected to be initialized. They still can be uninitialized here if dpiChangingCount was > 0 when the handle was created.
                 // To fix the hooks, we could just call InitHooks, but in .NET7+ we need to recreate the handle to fix another possible issue of incorrect height
@@ -1253,7 +1263,7 @@ namespace KGySoft.WinForms.Controls
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {
             dpiChangingCount += 1;
-            if (isPerMonitorDpiAwarenessV1)
+            if (flags[isPerMonitorDpiAwarenessV1])
                 CheckDpiChange();
         }
 

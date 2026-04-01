@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.ComponentModel;
 using System.Globalization;
 
 #endregion
@@ -25,21 +26,32 @@ namespace KGySoft.WinForms.Components
     /// <summary>
     /// Represents a custom button in a <see cref="TaskDialog"/> that can be added to <see cref="TaskDialog.RadioButtons"/> collection.
     /// </summary>
-    public sealed class TaskDialogRadioButton: TaskDialogButtonBase
+    public sealed class TaskDialogRadioButton : TaskDialogButtonBase
     {
         #region Constants
+
+        #region Public Constants
 
         /// <summary>
         /// Gets the name of the <see cref="Checked"/> property.
         /// Can be used to identify the property in <see cref="TaskDialogControl.PropertyChanged"/> event.
         /// </summary>
-        public const string PropertyChecked = "Checked";
+        [EditorBrowsable(EditorBrowsableState.Never)] // Since we have nameof(), this is not really needed anymore
+        public const string PropertyChecked = nameof(Checked);
+        
+        #endregion
 
+        #region Private Constants
+
+        // See more flags in the base classes
+        private const int isChecked = 1 << 16;
+
+        #endregion
+        
         #endregion
 
         #region Fields
 
-        private bool isChecked;
         private EventHandler? selected;
 
         #endregion
@@ -71,15 +83,15 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public bool Checked
         {
-            get => isChecked;
+            get => flags[isChecked];
             set
             {
-                if (isChecked == value)
+                if (flags[isChecked] == value)
                     return;
 
                 CheckChangePropertyValue();
-                isChecked = value;
-                if (isChecked)
+                flags[isChecked] = value;
+                if (value)
                     OnSelected();
                 OnPropertyChanged(PropertyChecked);
             }
@@ -96,7 +108,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         internal bool CheckedInternal
         {
-            set => isChecked = value;
+            set => flags[isChecked] = value;
         }
 
         #endregion

@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
@@ -66,6 +67,20 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Constants
+
+        private const int isMetafile = 1;
+        private const int isIcon = isMetafile << 1;
+        private const int smoothingEnabled = isIcon << 1;
+        private const int autoZoom = smoothingEnabled << 1;
+        private const int sbHorizontalVisible = autoZoom << 1;
+        private const int sbVerticalVisible = sbHorizontalVisible << 1;
+        private const int isApplyingZoom = sbVerticalVisible << 1;
+        private const int isDragging = isApplyingZoom << 1;
+        private const int isPerMonitorDpiAwarenessV1 = isDragging << 1;
+
+        #endregion
+
         #region Fields
 
         #region Static Fields
@@ -77,8 +92,8 @@ namespace KGySoft.WinForms.Controls
         #region Instance Fields
 
         private readonly DisplayImageGenerator displayImageGenerator;
-        private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
 
+        private BitVector32 flags;
         private Image? image;
         private Rectangle targetRectangle;
         private Rectangle clientRectangle;
@@ -86,15 +101,6 @@ namespace KGySoft.WinForms.Controls
         private Size scrollbarSize;
         private Size imageSize; // must be used instead of Image.Size when the Image is not locked
         private PixelFormat pixelFormat;
-
-        private bool isMetafile;
-        private bool smoothingEnabled;
-        private bool autoZoom;
-        private bool sbHorizontalVisible;
-        private bool sbVerticalVisible;
-        private bool isApplyingZoom;
-        private bool isDragging;
-        private bool isIcon;
 
         private int scrollFractionVertical;
         private int scrollFractionHorizontal;
@@ -221,7 +227,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool AutoZoom
         {
-            get => autoZoom;
+            get => flags[autoZoom];
             set => SetAutoZoom(value, true);
         }
 
@@ -257,12 +263,12 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool SmoothingEnabled
         {
-            get => smoothingEnabled;
+            get => flags[smoothingEnabled];
             set
             {
-                if (smoothingEnabled == value)
+                if (flags[smoothingEnabled] == value)
                     return;
-                smoothingEnabled = value;
+                flags[smoothingEnabled] = value;
                 Invalidate(InvalidateFlags.DisplayImage);
             }
         }
@@ -431,6 +437,7 @@ namespace KGySoft.WinForms.Controls
 
             displayImageGenerator = new DisplayImageGenerator(this);
             this.RegisterPerMonitorAwarenessNotifications();
+            flags[isPerMonitorDpiAwarenessV1] = ScaleHelper.PerMonitorDpiAwarenessVersion == 1;
         }
 
         #endregion
@@ -449,7 +456,7 @@ namespace KGySoft.WinForms.Controls
             if (image == null)
                 return;
 
-            var flags = InvalidateFlags.Image | InvalidateFlags.DisplayImage;
+            var invalidateFlags = InvalidateFlags.Image | InvalidateFlags.DisplayImage;
             Size newImageSize;
             bool lockOnImage = AllowUnsafeCooperativeLocking;
             if (lockOnImage)
@@ -468,10 +475,10 @@ namespace KGySoft.WinForms.Controls
             if (newImageSize != imageSize)
             {
                 imageSize = newImageSize;
-                flags |= InvalidateFlags.Sizes;
+                invalidateFlags |= InvalidateFlags.Sizes;
             }
 
-            Invalidate(flags);
+            Invalidate(invalidateFlags);
         }
 
         /// <summary>
@@ -506,7 +513,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         public override string ToString() => image is null
             ? base.ToString()
-            : $"{image.GetType().Name} {imageSize.Width} x {imageSize.Height}{(isMetafile ? null : $" {pixelFormat}")}";
+            : $"{image.GetType().Name} {imageSize.Width} x {imageSize.Height}{(flags[isMetafile] ? null : $" {pixelFormat}")}";
 
         #endregion
 
@@ -530,7 +537,7 @@ namespace KGySoft.WinForms.Controls
         protected override void OnSizeChanged(EventArgs e)
         {
             base.OnSizeChanged(e);
-            Invalidate(InvalidateFlags.Sizes | (autoZoom ? InvalidateFlags.DisplayImage : InvalidateFlags.None));
+            Invalidate(InvalidateFlags.Sizes | (AutoZoom ? InvalidateFlags.DisplayImage : InvalidateFlags.None));
         }
 
         /// <inheritdoc />
@@ -594,9 +601,9 @@ namespace KGySoft.WinForms.Controls
         {
             base.OnMouseDown(e);
             Focus();
-            if (!(sbHorizontalVisible || sbVerticalVisible) || (e.Button & MouseButtons.Left) == MouseButtons.None)
+            if (flags.None(sbHorizontalVisible | sbVerticalVisible) || (e.Button & MouseButtons.Left) == MouseButtons.None)
                 return;
-            isDragging = true;
+            flags[isDragging] = true;
             draggingOrigin = new Size(e.Location);
             scrollingOrigin = new Point(sbHorizontal.Value, sbVertical.Value);
             Cursor = CursorsCache.HandGrab;
@@ -608,20 +615,20 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseUp(e);
             if ((e.Button & MouseButtons.Left) == MouseButtons.None)
                 return;
-            isDragging = false;
-            Cursor = sbHorizontalVisible || sbVerticalVisible ? CursorsCache.HandOpen : null;
+            flags[isDragging] = false;
+            Cursor = flags.Any(sbHorizontalVisible | sbVerticalVisible) ? CursorsCache.HandOpen : null;
         }
 
         /// <inheritdoc />
         protected override void OnMouseMove(MouseEventArgs e)
         {
             base.OnMouseMove(e);
-            if (!isDragging)
+            if (!flags[isDragging])
                 return;
             Point distance = e.Location - draggingOrigin;
-            if (sbHorizontalVisible && distance.X != 0)
+            if (flags[sbHorizontalVisible] && distance.X != 0)
                 sbHorizontal.SetValueSafe(scrollingOrigin.X - distance.X);
-            if (sbVerticalVisible && distance.Y != 0)
+            if (flags[sbVerticalVisible] && distance.Y != 0)
                 sbVertical.SetValueSafe(scrollingOrigin.Y - distance.Y);
         }
 
@@ -633,7 +640,7 @@ namespace KGySoft.WinForms.Controls
             {
                 // zoom
                 case Keys.Control:
-                    if (autoZoom)
+                    if (AutoZoom)
                         SetAutoZoom(false, false);
                     float delta = (float)e.Delta / MouseWheelScrollDelta / 5;
                     ApplyZoomChange(delta);
@@ -694,14 +701,14 @@ namespace KGySoft.WinForms.Controls
         private void SetImage(Image? value)
         {
             image = value;
-            isMetafile = image is Metafile;
+            flags[isMetafile] = image is Metafile;
             imageSize = image?.Size ?? default;
             pixelFormat = image?.PixelFormat ?? default;
-            isIcon = !isMetafile && image?.RawFormat.Guid == ImageFormat.Icon.Guid;
+            flags[isIcon] = !flags[isMetafile] && image?.RawFormat.Guid == ImageFormat.Icon.Guid;
             Invalidate(InvalidateFlags.All);
 
             // making sure image is not under or over-zoomed
-            if (!autoZoom && !isMetafile)
+            if (flags.None(autoZoom | isMetafile))
                 SetZoom(zoom);
         }
 
@@ -725,14 +732,14 @@ namespace KGySoft.WinForms.Controls
             sbHorizontal.SetValueSafe(newValue);
         }
 
-        private void Invalidate(InvalidateFlags flags)
+        private void Invalidate(InvalidateFlags invalidateFlags)
         {
-            if ((flags & InvalidateFlags.Sizes) != InvalidateFlags.None)
+            if ((invalidateFlags & InvalidateFlags.Sizes) != InvalidateFlags.None)
                 AdjustSizes();
 
-            if ((flags & InvalidateFlags.Image) != InvalidateFlags.None)
+            if ((invalidateFlags & InvalidateFlags.Image) != InvalidateFlags.None)
                 displayImageGenerator.InvalidateImages();
-            else if ((flags & InvalidateFlags.DisplayImage) != InvalidateFlags.None)
+            else if ((invalidateFlags & InvalidateFlags.DisplayImage) != InvalidateFlags.None)
                 displayImageGenerator.InvalidateDisplayImage();
 
             Invalidate();
@@ -742,7 +749,8 @@ namespace KGySoft.WinForms.Controls
         {
             if (imageSize.IsEmpty)
             {
-                sbHorizontal.Visible = sbVertical.Visible = sbHorizontalVisible = sbVerticalVisible = false;
+                sbHorizontal.Visible = sbVertical.Visible = false;
+                flags[sbHorizontalVisible | sbVerticalVisible] = false;
                 targetRectangle = Rectangle.Empty;
                 Cursor = null;
                 return;
@@ -757,7 +765,7 @@ namespace KGySoft.WinForms.Controls
 
             Point targetLocation;
             Size scaledSize;
-            if (autoZoom)
+            if (AutoZoom)
             {
                 zoom = Math.Min((float)clientSize.Width / imageSize.Width, (float)clientSize.Height / imageSize.Height);
                 scaledSize = imageSize.Scale(zoom);
@@ -766,7 +774,8 @@ namespace KGySoft.WinForms.Controls
 
                 targetRectangle = new Rectangle(targetLocation, scaledSize);
                 clientRectangle = new Rectangle(Point.Empty, clientSize);
-                sbHorizontal.Visible = sbVertical.Visible = sbHorizontalVisible = sbVerticalVisible = false;
+                sbHorizontal.Visible = sbVertical.Visible = false;
+                flags[sbHorizontalVisible | sbVerticalVisible] = false;
                 Cursor = null;
                 return;
             }
@@ -774,14 +783,17 @@ namespace KGySoft.WinForms.Controls
             scaledSize = imageSize.Scale(zoom);
 
             // scrollbars visibility
-            sbHorizontalVisible = scaledSize.Width > clientSize.Width
+            bool isHorizontalVisible = scaledSize.Width > clientSize.Width
                 || scaledSize.Width > clientSize.Width - scrollbarSize.Width && scaledSize.Height > clientSize.Height;
-            sbVerticalVisible = scaledSize.Height > clientSize.Height
-                || scaledSize.Height > clientSize.Height - scrollbarSize.Height && scaledSize.Width > clientSize.Width;
+            flags[sbHorizontalVisible] = isHorizontalVisible;
 
-            if (sbHorizontalVisible)
+            bool isVerticalVisible = scaledSize.Height > clientSize.Height
+                || scaledSize.Height > clientSize.Height - scrollbarSize.Height && scaledSize.Width > clientSize.Width;
+            flags[sbVerticalVisible] = isVerticalVisible;
+
+            if (isHorizontalVisible)
                 clientSize.Height -= scrollbarSize.Height;
-            if (sbVerticalVisible)
+            if (isVerticalVisible)
                 clientSize.Width -= scrollbarSize.Width;
             if (clientSize.Width < 1 || clientSize.Height < 1)
             {
@@ -796,7 +808,7 @@ namespace KGySoft.WinForms.Controls
             bool isRtl = RightToLeft == RightToLeft.Yes;
 
             // both scrollbars
-            if (sbHorizontalVisible && sbVerticalVisible)
+            if (isHorizontalVisible || isVerticalVisible)
             {
                 sbHorizontal.Dock = sbVertical.Dock = DockStyle.None;
                 sbHorizontal.Width = clientSize.Width;
@@ -806,18 +818,18 @@ namespace KGySoft.WinForms.Controls
                 sbVertical.Left = isRtl ? 0 : clientSize.Width;
             }
             // horizontal scrollbar
-            else if (sbHorizontalVisible)
+            else if (isHorizontalVisible)
             {
                 sbHorizontal.Dock = DockStyle.Bottom;
             }
             // vertical scrollbar
-            else if (sbVerticalVisible)
+            else if (isVerticalVisible)
             {
                 sbVertical.Dock = isRtl ? DockStyle.Left : DockStyle.Right;
             }
 
             // adjust scrollbar values
-            if (sbHorizontalVisible)
+            if (flags[sbHorizontalVisible])
             {
                 float origCenter = sbHorizontal.Visible
                     ? (sbHorizontal.Value + sbHorizontal.LargeChange / 2f) / sbHorizontal.Maximum
@@ -830,7 +842,7 @@ namespace KGySoft.WinForms.Controls
                 sbHorizontal.Value = Math.Min(Math.Max(newValue, 0), sbHorizontal.Maximum - sbHorizontal.LargeChange);
             }
 
-            if (sbVerticalVisible)
+            if (isVerticalVisible)
             {
                 if (isRtl)
                 {
@@ -849,14 +861,14 @@ namespace KGySoft.WinForms.Controls
                 sbVertical.Value = Math.Min(Math.Max(newValue, 0), sbVertical.Maximum - sbVertical.LargeChange);
             }
 
-            sbHorizontal.Visible = sbHorizontalVisible;
-            sbVertical.Visible = sbVerticalVisible;
-            Cursor = sbHorizontalVisible || sbVerticalVisible ? CursorsCache.HandOpen : null;
-            isDragging = false;
+            sbHorizontal.Visible = isHorizontalVisible;
+            sbVertical.Visible = isVerticalVisible;
+            Cursor = isHorizontalVisible || isVerticalVisible ? CursorsCache.HandOpen : null;
+            flags[isDragging] = false;
 
             clientRectangle = new Rectangle(clientLocation, clientSize);
             targetRectangle = new Rectangle(targetLocation, scaledSize);
-            if (!isRtl || !sbVerticalVisible)
+            if (!isRtl || !isVerticalVisible)
                 return;
 
             clientRectangle.X = scrollbarSize.Width;
@@ -866,9 +878,9 @@ namespace KGySoft.WinForms.Controls
         {
             g.IntersectClip(clientRectangle);
             Rectangle dest = targetRectangle;
-            if (sbHorizontalVisible)
+            if (flags[sbHorizontalVisible])
                 dest.X -= sbHorizontal.Value + targetRectangle.X;
-            if (sbVerticalVisible)
+            if (flags[sbVerticalVisible])
                 dest.Y -= sbVertical.Value + targetRectangle.Y;
 
             // This lock ensures that no disposed image is painted. The generator also locks on it when frees the cached preview.
@@ -919,19 +931,19 @@ namespace KGySoft.WinForms.Controls
 
         private void SetAutoZoom(bool value, bool resetIfBitmap)
         {
-            if (autoZoom == value)
+            if (flags[autoZoom] == value)
                 return;
-            autoZoom = value;
-            if (resetIfBitmap && !autoZoom && !isMetafile)
+            flags[autoZoom] = value;
+            if (resetIfBitmap && !value && !flags[isMetafile])
                 SetZoom(1f);
 
-            Invalidate(InvalidateFlags.Sizes | (autoZoom ? InvalidateFlags.DisplayImage : InvalidateFlags.None));
+            Invalidate(InvalidateFlags.Sizes | (value ? InvalidateFlags.DisplayImage : InvalidateFlags.None));
             OnAutoZoomChanged(EventArgs.Empty);
         }
 
         private void SetZoom(float value)
         {
-            if (autoZoom || isApplyingZoom)
+            if (flags.Any(autoZoom | isApplyingZoom))
                 return;
 
             if (Single.IsNaN(value))
@@ -943,7 +955,7 @@ namespace KGySoft.WinForms.Controls
             Size screenSize = Screen.GetBounds(this).Size;
             float maxZoom;
 
-            if (isMetafile)
+            if (flags[isMetafile])
             {
                 // For metafiles the max zoom is between 1x and 2x screen size. 2x screen size is allowed if that is below 10,000 pixels
                 const int maxMetafileSize = 10_000;
@@ -969,14 +981,14 @@ namespace KGySoft.WinForms.Controls
 
             zoom = value;
             Invalidate(InvalidateFlags.Sizes | InvalidateFlags.DisplayImage);
-            isApplyingZoom = true;
+            flags[isApplyingZoom] = true;
             try
             {
                 OnZoomChanged(EventArgs.Empty);
             }
             finally
             {
-                isApplyingZoom = false;
+                flags[isApplyingZoom] = false;
             }
         }
 
@@ -995,7 +1007,7 @@ namespace KGySoft.WinForms.Controls
 
         [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
         private bool ShouldSerializeCursor() => false;
-        private bool ShouldSerializeZoom() => !autoZoom && !zoom.Equals(1f);
+        private bool ShouldSerializeZoom() => !AutoZoom && !zoom.Equals(1f);
         private bool ShouldSerializePadding() => !Padding.Equals(DefaultPadding);
 
         #endregion
@@ -1004,7 +1016,7 @@ namespace KGySoft.WinForms.Controls
 
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {
-            if (isPerMonitorDpiAwarenessV1)
+            if (flags[isPerMonitorDpiAwarenessV1])
                 CheckDpiChange();
         }
 

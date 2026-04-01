@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
@@ -51,6 +52,17 @@ namespace KGySoft.WinForms.Controls
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
     public class AdvancedTextBox : TextBox, ISupportsDisabledColor, IPerMonitorDpiAware
     {
+        #region Constants
+
+        // We could use BitVector32.CreateMask, but then we should use static fields, whose access is slower than using constants.
+        // NOTE: there are further flags in the derived DecimalTextBox class
+        private const int autoScaleFont = 1;
+        private const int suppressFontChanged = autoScaleFont << 1;
+        private const int isPerMonitorDpiAwarenessV1 = suppressFontChanged << 1;
+        private const int isDesignMode = isPerMonitorDpiAwarenessV1 << 1; // needed because DesignMode does not work in a user control, and LicenseManager.UsageMode does not work in WM_PAINT
+
+        #endregion
+
         #region Fields
 
         #region Static Fields
@@ -65,8 +77,13 @@ namespace KGySoft.WinForms.Controls
 
         #region Instance Fields
 
-        private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
-        private readonly bool isDesignMode = LicenseManager.UsageMode == LicenseUsageMode.Designtime; // needed because DesignMode does not work in a user control, and UsageMode does not work in WM_PAINT
+        #region Private Protected Fields
+
+        private protected BitVector32 flags;
+
+        #endregion
+
+        #region Private Fields
 
         // NOTE: Unlike in ButtonBase descendants, we always set the base back and fore colors (see ResetColors) because we don't have a reimplemented adapter here,
         // so the base drawing routines still rely on them. Setting them even with default colors is not a problem because this control never inherits colors from the parent control.
@@ -76,13 +93,13 @@ namespace KGySoft.WinForms.Controls
         private Color disabledForeColor;
         private string origValue = String.Empty; // content at getting focused
 
-        private bool suppressFontChanged;
-        private bool autoScaleFont = true;
         private ScalingFont? font; // The explicitly set font.
         private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
         private PointF lastScale;
         private int dpiChangingCount;
         private AutoCompleteMode reportedAutoCompleteMode;
+
+        #endregion
 
         #endregion
 
@@ -230,14 +247,14 @@ namespace KGySoft.WinForms.Controls
         [Description("True to auto scale Font when DPI changes and inherit the font when it's not explicitly set; False to rely on the default behavior of the current executing platform.")]
         public bool AutoScaleFont
         {
-            get => autoScaleFont;
+            get => flags[autoScaleFont];
             set
             {
                 Debug.Assert(AutoScaleFont ^ defaultFont == null);
-                if (autoScaleFont == value)
+                if (flags[autoScaleFont] == value)
                     return;
 
-                autoScaleFont = value;
+                flags[autoScaleFont] = value;
                 font?.ResetFrom(font.Font, value ? this.GetScale() : ScaleHelper.SystemScale);
                 if (value)
                 {
@@ -314,8 +331,11 @@ namespace KGySoft.WinForms.Controls
         ///</summary>
         public AdvancedTextBox()
         {
+            flags[autoScaleFont] = true;
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
+            flags[isPerMonitorDpiAwarenessV1] = ScaleHelper.PerMonitorDpiAwarenessVersion == 1;
+            flags[isDesignMode] = LicenseManager.UsageMode == LicenseUsageMode.Designtime;
 
             // Needed because in Framework Mono the base ctor calls the overridden BackColor/ForeColor setters
             if (OSHelper.IsFrameworkMono)
@@ -391,7 +411,7 @@ namespace KGySoft.WinForms.Controls
                 case Constants.WM_PAINT:
                     // Here is the delayed the actual setting of AutoCompleteMode to avoid possible "Error creating window handle" exceptions. It would not work from OnHandleCreated.
                     // It may occur when first showing the control on the secondary monitor and the primary monitor has a different DPI.
-                    if (!isDesignMode && reportedAutoCompleteMode != base.AutoCompleteMode)
+                    if (!flags[isDesignMode] && reportedAutoCompleteMode != base.AutoCompleteMode)
                     {
                         base.AutoCompleteMode = reportedAutoCompleteMode;
                         return;
@@ -530,7 +550,7 @@ namespace KGySoft.WinForms.Controls
         {
             // If AutoComplete mode is set, base.OnFontChanged always recreates the handle.
             // But if parent is just changing the DPI in .NET 6+, an "Error creating window handle" may occur if we also changed the font previously.
-            if (suppressFontChanged || autoScaleFont && dpiChangingCount > 0 && base.AutoCompleteMode != AutoCompleteMode.None)
+            if (flags[suppressFontChanged] || AutoScaleFont && dpiChangingCount > 0 && base.AutoCompleteMode != AutoCompleteMode.None)
                 return;
             base.OnFontChanged(e);
         }
@@ -594,7 +614,7 @@ namespace KGySoft.WinForms.Controls
             g.FillRectangle(BackColor.GetBrush(), clientRect);
 
             Rectangle textRect = clientRect;
-            TextFormatFlags flags = this.GetFormatFlags();
+            TextFormatFlags formatFlags = this.GetFormatFlags();
             textRect.Inflate(-1, -1);
 
             // The multiline textbox is rendered with some settings that are impossible to reproduce with TextFormatFlags.
@@ -606,7 +626,7 @@ namespace KGySoft.WinForms.Controls
                 textRect.Width += 1;
             if (UseSystemPasswordChar)
             {
-                TextRenderer.DrawText(g, new String(PasswordChar, Text.Length), Font, textRect, ForeColor, flags);
+                TextRenderer.DrawText(g, new String(PasswordChar, Text.Length), Font, textRect, ForeColor, formatFlags);
                 return;
             }
 
@@ -616,8 +636,8 @@ namespace KGySoft.WinForms.Controls
             string text = Text.Substring(firstCharIndex);
             Font f = Font;
             if (!multiline && /*!OSHelper.IsMono &&*/ TextAlign != HorizontalAlignment.Left && TextRenderer.MeasureText(g, text, f).Width > textRect.Width)
-                flags &= ~(TextFormatFlags.HorizontalCenter | TextFormatFlags.Right);
-            TextRenderer.DrawText(g, text, f, textRect, ForeColor, flags);
+                formatFlags &= ~(TextFormatFlags.HorizontalCenter | TextFormatFlags.Right);
+            TextRenderer.DrawText(g, text, f, textRect, ForeColor, formatFlags);
         }
 
         private bool ShouldSerializeFont() => font != null;
@@ -665,18 +685,18 @@ namespace KGySoft.WinForms.Controls
             // and the form is opened on a different screen with a different DPI than the owner form's screen.
             if (Equals(oldFont, newFont))
             {
-                suppressFontChanged = true;
+                flags[suppressFontChanged] = true;
                 try
                 {
                     base.Font = null!;
 
                     // setting base.Font caused reentrancy: not letting the outer call to set the font again
-                    if (!suppressFontChanged)
+                    if (!flags[suppressFontChanged])
                         return;
                 }
                 finally
                 {
-                    suppressFontChanged = false;
+                    flags[suppressFontChanged] = false;
                 }
             }
 
@@ -690,7 +710,7 @@ namespace KGySoft.WinForms.Controls
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {
             dpiChangingCount += 1;
-            if (isPerMonitorDpiAwarenessV1)
+            if (flags[isPerMonitorDpiAwarenessV1])
                 CheckDpiChange();
         }
 

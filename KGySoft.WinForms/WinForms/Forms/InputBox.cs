@@ -25,9 +25,10 @@ namespace KGySoft.WinForms.Forms
 {
     internal sealed partial class InputBox : DialogBaseForm
     {
-        #region Fields
+        #region Constants
 
-        private bool isResettingHeight;
+        // NOTE: LSB flags are in the base BaseForm class, so starting with bit 16
+        private const int isResettingHeight = 1 << 16;
 
         #endregion
 
@@ -104,16 +105,16 @@ namespace KGySoft.WinForms.Forms
 
         private void CheckHeight()
         {
-            if (isResettingHeight || !IsHandleCreated)
+            if (flags[isResettingHeight] || !IsHandleCreated)
                 return;
             int desiredHeight = lblPrompt.GetPreferredSize(new Size(lblPrompt.Width, 0)).Height;
             if (lblPrompt.Height != desiredHeight)
             {
-                isResettingHeight = true;
+                flags[isResettingHeight] = true;
                 var bounds = Bounds;
                 int newHeight = bounds.Height + (desiredHeight - lblPrompt.Height);
                 Bounds = new Rectangle(bounds.X, bounds.Y, bounds.Width, newHeight).EnsureScreen(Screen.FromRectangle(bounds), false);
-                isResettingHeight = false;
+                flags[isResettingHeight] = false;
             }
         }
 

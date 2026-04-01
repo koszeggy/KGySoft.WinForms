@@ -18,6 +18,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
@@ -38,7 +39,7 @@ namespace KGySoft.WinForms.Components
 {
 
     /// <summary>
-    /// A wrapper class around the in-built task dialog available from Vista
+    /// A wrapper class around the built-in task dialog available from Windows Vista
     /// </summary>
     internal sealed class NativeTaskDialog : ITaskDialog
     {
@@ -78,7 +79,7 @@ namespace KGySoft.WinForms.Components
 
                         // The condition of reallocation is actually more complex, but in worst case the UpdateCustomIcon call(s) below
                         // will reallocate the dialog. If this happens, it might be reallocated twice, but for the next time isEverReallocated will be true.
-                        if ((customFooterIcon != null || customMainIcon != null) && owner.isEverReallocated)
+                        if ((customFooterIcon != null || customMainIcon != null) && owner.flags[isEverReallocated])
                         {
                             owner.ReallocateDialog();
                             return;
@@ -106,6 +107,13 @@ namespace KGySoft.WinForms.Components
         private const int firstButtonId = 1000;
         private const int firstRadioButtonId = 10000;
 
+        private const int isForcedClosing = 1;
+        private const int ignoreFirstRadioButtonCheck = isForcedClosing << 1;
+        private const int isReallocatePending = ignoreFirstRadioButtonCheck << 1;
+        private const int isCheckedChanging = isReallocatePending << 1;
+        private const int isRadioButtonClicked = isCheckedChanging << 1;
+        private const int isEverReallocated = isRadioButtonClicked << 1;
+
         #endregion
 
         #region Fields
@@ -120,19 +128,14 @@ namespace KGySoft.WinForms.Components
 
         private readonly TaskDialogCallbackProc callback;
 
+        private BitVector32 flags;
         private TaskDialogStatus dialogState = TaskDialogStatus.Initializing;
         private TaskDialog host = null!;
         private IntPtr ownerHandle;
         private IntPtr dialogHandle;
         private Dictionary<TASKDIALOG_ELEMENTS, IntPtr>? updatedTexts;
-        private bool isForcedClosing;
-        private bool ignoreFirstRadioButtonCheck;
-        TASKDIALOGCONFIG config;
+        private TASKDIALOGCONFIG config;
         private int eventHandlerCount;
-        private bool isReallocatePending;
-        private bool isCheckedChanging;
-        private bool isRadioButtonClicked;
-        private bool isEverReallocated;
         private Icon? mainIcon;
         private Icon? footerIcon;
         private Icon? smallFormIcon;
@@ -387,7 +390,7 @@ namespace KGySoft.WinForms.Components
                 if (checkedRadioButton != null)
                 {
                     config.nDefaultRadioButton = checkedRadioButton.Id;
-                    ignoreFirstRadioButtonCheck = true;
+                    flags[ignoreFirstRadioButtonCheck] = true;
                 }
                 else
                     config.dwFlags |= TASKDIALOG_FLAGS.TDF_NO_DEFAULT_RADIO_BUTTON;
@@ -438,7 +441,7 @@ namespace KGySoft.WinForms.Components
                         // this is executed multiple times, even when the dialog is reallocated, though the handle is always the same
                         dialogHandle = hwnd;
                         host.Handle = hwnd;
-                        return 0;
+                        return Constants.S_OK;
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_CREATED:
                         // performing the rest of the initialization, which needs an already created dialog - executed only once
@@ -460,12 +463,12 @@ namespace KGySoft.WinForms.Components
                         }
 
                         host.OnCreated();
-                        return 0;
+                        return Constants.S_OK;
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_NAVIGATED:
                         // performing the rest of the initialization after the dialog is reallocated
                         InitializeCreatedDialog(false);
-                        return 0;
+                        return Constants.S_OK;
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_BUTTON_CLICKED:
                         // explicit Close call (or setting DialogResult) fires a click event so handling Click only when not already closing
@@ -489,10 +492,10 @@ namespace KGySoft.WinForms.Components
                         if (isClosing)
                         {
                             // closing from dispose: omitting Closing event
-                            if (isForcedClosing)
+                            if (flags[isForcedClosing])
                             {
                                 dialogState = TaskDialogStatus.Closing;
-                                return 0;
+                                return Constants.S_OK;
                             }
 
                             // TODO? is a DialogResult/button index required in event args? (from wParam)
@@ -504,14 +507,14 @@ namespace KGySoft.WinForms.Components
                             dialogState = isClosing ? TaskDialogStatus.Closing : TaskDialogStatus.Showing;
                         }
 
-                        return Convert.ToInt32(!isClosing);
+                        return isClosing ? Constants.S_OK : Constants.S_FALSE;
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_HYPERLINK_CLICKED:
                         {
                             string link = Marshal.PtrToStringUni(lParam)!;
                             HyperlinkClickedEventArgs e = new HyperlinkClickedEventArgs(link);
                             host.OnHyperlinkClicked(e);
-                            return Convert.ToInt32(e.Handled);
+                            return e.Handled ? Constants.S_FALSE : Constants.S_OK;
                         }
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_TIMER:
@@ -519,7 +522,7 @@ namespace KGySoft.WinForms.Components
                             // called only when host.Tick is subscribed so it is not a waste to create event args here
                             TaskDialogTickEventArgs e = new TaskDialogTickEventArgs((int)wParam);
                             host.OnTick(e);
-                            return Convert.ToInt32(e.Reset);
+                            return e.Reset ? Constants.S_FALSE : Constants.S_OK;
                         }
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_DESTROYED:
@@ -527,18 +530,18 @@ namespace KGySoft.WinForms.Components
                         host.Handle = IntPtr.Zero;
 
                         // closing from dispose: omitting Closed event
-                        if (!isForcedClosing)
+                        if (!flags[isForcedClosing])
                             host.OnClosed();
 
-                        return 0;
+                        return Constants.S_OK;
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_RADIO_BUTTON_CLICKED:
                         {
                             // if there is a default radio button, this event is fired even without clicking it
-                            if (ignoreFirstRadioButtonCheck)
+                            if (flags[ignoreFirstRadioButtonCheck])
                             {
-                                ignoreFirstRadioButtonCheck = false;
-                                return 0;
+                                flags[ignoreFirstRadioButtonCheck] = false;
+                                return Constants.S_OK;
                             }
 
                             int index = (int)wParam - firstRadioButtonId;
@@ -546,41 +549,41 @@ namespace KGySoft.WinForms.Components
                             // setting the radio button as checked (if this is a change, event will be fired)
                             if (index >= 0 && index < host.RadioButtons.Count)
                             {
-                                isRadioButtonClicked = true;
+                                flags[isRadioButtonClicked] = true;
                                 try
                                 {
                                     host.RadioButtons[index].Checked = true;
                                 }
                                 finally
                                 {
-                                    isRadioButtonClicked = false;
+                                    flags[isRadioButtonClicked] = false;
                                 }
                             }
 
-                            return 0;
+                            return Constants.S_OK;
                         }
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_VERIFICATION_CLICKED:
                         host.OnCheckBoxCheckedChanged((int)wParam == 1);
-                        return 0;
+                        return Constants.S_OK;
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_HELP:
                         host.OnHelpRequested();
-                        return 0;
+                        return Constants.S_OK;
 
                     case TASKDIALOG_NOTIFICATIONS.TDN_EXPANDO_BUTTON_CLICKED:
                         host.OnDetailsVisibleChanged(new TaskDialogDetailsVisibleChangedEventArgs(wParam != IntPtr.Zero));
-                        return 0;
+                        return Constants.S_OK;
 
                     default:
                         Debug.Fail("Unsupported notification");
-                        return 0;
+                        return Constants.S_OK;
                 }
             }
             finally
             {
                 eventHandlerCount--;
-                if (isReallocatePending)
+                if (flags[isReallocatePending])
                     ReallocateDialog();
             }
         }
@@ -765,7 +768,7 @@ namespace KGySoft.WinForms.Components
 
             // Recreating, if standard icon was used, or when the dialog was previously reallocated.
             // Otherwise, an AccessViolationException or ExecutionEngineException may occur when sending the TDM_UPDATE_ICON message.
-            if (isEverReallocated
+            if (flags[isEverReallocated]
                 || ((element == Constants.TDI_MAIN) && (config.dwFlags & TASKDIALOG_FLAGS.TDF_USE_HICON_MAIN) == 0) // standard current main icon
                 || ((element == Constants.TDI_FOOTER) && (config.dwFlags & TASKDIALOG_FLAGS.TDF_USE_HICON_FOOTER) == 0)) // standard current footer icon
             {
@@ -861,12 +864,12 @@ namespace KGySoft.WinForms.Components
             // If called from callback, deferred until the end of the callback
             if (eventHandlerCount > 0)
             {
-                isReallocatePending = true;
+                flags[isReallocatePending] = true;
                 return;
             }
 
-            isReallocatePending = false;
-            isEverReallocated = true;
+            flags[isReallocatePending] = false;
+            flags[isEverReallocated] = true;
 
             FreeUpdatedTexts();
             FreeButtons(config.pButtons, config.cButtons);
@@ -910,10 +913,10 @@ namespace KGySoft.WinForms.Components
             // Happens only when TaskDialog.Dispose was called while showing: forcing close and waiting for being closed
             if (dialogState != TaskDialogStatus.Closed)
             {
-                if (isForcedClosing)
+                if (flags[isForcedClosing])
                     return;
 
-                isForcedClosing = true;
+                flags[isForcedClosing] = true;
                 DoClose(TaskDialogResult.Close);
 
                 // waiting for being closed
@@ -1157,10 +1160,10 @@ namespace KGySoft.WinForms.Components
                         return;
 
                     case TaskDialogRadioButton.PropertyChecked:
-                        if (isCheckedChanging)
+                        if (flags[isCheckedChanging])
                             return;
 
-                        isCheckedChanging = true;
+                        flags[isCheckedChanging] = true;
                         try
                         {
                             // unchecking: reallocating so "none checked" status can be reset
@@ -1178,14 +1181,14 @@ namespace KGySoft.WinForms.Components
                             }
 
                             // if not raised from callback (so not the user actually clicked), but set by Checked property, then checking the actual radio button
-                            if (!isRadioButtonClicked)
+                            if (!flags[isRadioButtonClicked])
                                 User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_RADIO_BUTTON, new IntPtr(radioButton.Id), IntPtr.Zero);
                             return;
 
                         }
                         finally
                         {
-                            isCheckedChanging = false;
+                            flags[isCheckedChanging] = false;
                         }
 
                     default:

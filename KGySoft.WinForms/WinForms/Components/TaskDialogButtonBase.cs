@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.ComponentModel;
 
 #endregion
 
@@ -24,34 +25,47 @@ namespace KGySoft.WinForms.Components
     /// <summary>
     /// Base class of task dialog buttons property.
     /// </summary>
-    public abstract class TaskDialogButtonBase: TaskDialogControl
+    public abstract class TaskDialogButtonBase : TaskDialogControl
     {
         #region Constants
+
+        #region Public Constants
 
         /// <summary>
         /// Gets the name of the <see cref="Text"/> property.
         /// Can be used to identify the property in <see cref="TaskDialogControl.PropertyChanged"/> event.
         /// </summary>
-        public const string PropertyText = "Text";
+        [EditorBrowsable(EditorBrowsableState.Never)] // Since we have nameof(), this is not really needed anymore
+        public const string PropertyText = nameof(Text);
 
         /// <summary>
         /// Gets the name of the <see cref="Description"/> property.
         /// Can be used to identify the property in <see cref="TaskDialogControl.PropertyChanged"/> event.
         /// </summary>
-        public const string PropertyDescription = "Description";
+        [EditorBrowsable(EditorBrowsableState.Never)] // Since we have nameof(), this is not really needed anymore
+        public const string PropertyDescription = nameof(Description);
 
         /// <summary>
         /// Gets the name of the <see cref="Enabled"/> property.
         /// Can be used to identify the property in <see cref="TaskDialogControl.PropertyChanged"/> event.
         /// </summary>
-        public const string PropertyEnabled = "Enabled";
+        [EditorBrowsable(EditorBrowsableState.Never)] // Since we have nameof(), this is not really needed anymore
+        public const string PropertyEnabled = nameof(Enabled);
+
+        #endregion
+        
+        #region Private Constants
+
+        // See more flags in the base and derived classes
+        private const int isEnabled = 1 << 8;
+        
+        #endregion
 
         #endregion
 
         #region Fields
 
         private string? text;
-        private bool enabled = true;
         private string? description;
 
         #endregion
@@ -99,14 +113,14 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         public bool Enabled
         {
-            get => enabled;
+            get => flags[isEnabled];
             set
             {
-                if (enabled == value)
+                if (flags[isEnabled] == value)
                     return;
 
                 CheckChangePropertyValue();
-                enabled = value;
+                flags[isEnabled] = value;
                 OnPropertyChanged(PropertyEnabled);
             }
         }
@@ -121,6 +135,7 @@ namespace KGySoft.WinForms.Components
         /// Creates a new instance of a task dialog button.
         /// </summary>
         protected TaskDialogButtonBase()
+            : this(null, null)
         {
         }
 
@@ -129,9 +144,9 @@ namespace KGySoft.WinForms.Components
         /// the specified text.
         /// </summary>
         /// <param name="text">The text of the button.</param>
-        protected TaskDialogButtonBase(string text)
+        protected TaskDialogButtonBase(string? text)
+            : this(null, text)
         {
-            this.text = text;
         }
 
         /// <summary>
@@ -140,10 +155,11 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         /// <param name="name">The name of the button.</param>
         /// <param name="text">The text of the button.</param>
-        protected TaskDialogButtonBase(string name, string text)
+        protected TaskDialogButtonBase(string? name, string? text)
             : base(name)
         {
             this.text = text;
+            flags[isEnabled] = true;
         }
 
         #endregion

@@ -232,6 +232,17 @@ namespace KGySoft.WinForms.Controls
         private const int referenceDropDownWidth = 17;
         private const int referenceDropDownWidthWine = 15;
 
+        // We could use BitVector32.CreateMask, but then we should use static fields, whose access is slower than using constants.
+        private const int autoScaleFont = 1;
+        private const int suppressFontChanged = autoScaleFont << 1;
+        private const int isPerMonitorDpiAwarenessV1 = suppressFontChanged << 1;
+        private const int isHovered = isPerMonitorDpiAwarenessV1 << 1;
+        private const int isDropDownHovered = isHovered << 1;
+        private const int isPressed = isDropDownHovered << 1;
+        private const int isDroppedDown = isPressed << 1;
+        private const int isUpHovered = isDroppedDown << 1;
+        private const int isDownHovered = isUpHovered << 1;
+
         #endregion
 
         #region Fields
@@ -243,18 +254,11 @@ namespace KGySoft.WinForms.Controls
         private static readonly Color defaultDisabledBackColor = SystemColors.Control;
         private static readonly Color defaultDisabledForeColor = SystemColors.GrayText;
 
-        private static readonly int isHovered = BitVector32.CreateMask();
-        private static readonly int isDropDownHovered = BitVector32.CreateMask(isHovered);
-        private static readonly int isPressed = BitVector32.CreateMask(isDropDownHovered);
-        private static readonly int isDroppedDown = BitVector32.CreateMask(isPressed);
-        private static readonly int isUpHovered = BitVector32.CreateMask(isDroppedDown);
-        private static readonly int isDownHovered = BitVector32.CreateMask(isUpHovered);
-
         #endregion
 
         #region Instance Fields
 
-        private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
+        private BitVector32 flags;
 
         // NOTE: Similar to AdvancedTextBox, we always set the base back (and fore) colors (see ResetColors) because we don't have a reimplemented adapter here,
         // so the base drawing routines still rely on them. Setting them even with default colors is not a problem because this control never inherits colors from the parent control.
@@ -264,15 +268,12 @@ namespace KGySoft.WinForms.Controls
         private Color disabledBackColor;
         private Color disabledForeColor;
 
-        private bool suppressFontChanged;
-        private bool autoScaleFont = true;
         private ScalingFont? font; // The explicitly set font.
         private ScalingFont? defaultFont; // The font when Font is not set. Used only when AutoScaleFont is set; otherwise, actual Parent.Font is used.
         private PointF lastScale;
         private int dpiChangingCount;
 
         private RenderingQuality checkBoxRenderingQuality = RenderingQuality.High;
-        private BitVector32 flags;
 
         #endregion
 
@@ -430,14 +431,14 @@ namespace KGySoft.WinForms.Controls
         [Description("True to auto scale Font when DPI changes and inherit the font when it's not explicitly set; False to rely on the default behavior of the current executing platform.")]
         public bool AutoScaleFont
         {
-            get => autoScaleFont;
+            get => flags[autoScaleFont];
             set
             {
                 Debug.Assert(AutoScaleFont ^ defaultFont == null);
-                if (autoScaleFont == value)
+                if (flags[autoScaleFont] == value)
                     return;
 
-                autoScaleFont = value;
+                flags[autoScaleFont] = value;
                 font?.ResetFrom(font.Font, value ? this.GetScale() : ScaleHelper.SystemScale);
                 if (value)
                 {
@@ -534,8 +535,10 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public AdvancedDateTimePicker()
         {
+            flags[autoScaleFont] = true;
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
+            flags[isPerMonitorDpiAwarenessV1] = ScaleHelper.PerMonitorDpiAwarenessVersion == 1;
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
 
             // Needed because in Framework Mono the base ctor calls the overridden BackColor/ForeColor setters
@@ -690,7 +693,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnFontChanged(EventArgs e)
         {
-            if (suppressFontChanged)
+            if (flags[suppressFontChanged])
                 return;
             base.OnFontChanged(e);
         }
@@ -1113,18 +1116,18 @@ namespace KGySoft.WinForms.Controls
             // on a different screen with a different DPI than the owner form's screen.
             if (Equals(oldFont, newFont))
             {
-                suppressFontChanged = true;
+                flags[suppressFontChanged] = true;
                 try
                 {
                     base.Font = null!;
 
                     // setting base.Font caused reentrancy: not letting the outer call to set the font again
-                    if (!suppressFontChanged)
+                    if (!flags[suppressFontChanged])
                         return;
                 }
                 finally
                 {
-                    suppressFontChanged = false;
+                    flags[suppressFontChanged] = false;
                 }
             }
 
@@ -1138,7 +1141,7 @@ namespace KGySoft.WinForms.Controls
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {
             dpiChangingCount += 1;
-            if (isPerMonitorDpiAwarenessV1)
+            if (flags[isPerMonitorDpiAwarenessV1])
                 CheckDpiChange();
         }
 

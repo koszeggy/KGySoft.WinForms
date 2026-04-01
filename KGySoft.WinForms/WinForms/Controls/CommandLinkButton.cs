@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.ComponentModel.Design;
 using System.Diagnostics.CodeAnalysis;
@@ -84,6 +85,25 @@ namespace KGySoft.WinForms.Controls
 
         #endregion
 
+        #region Constants
+
+        // We could use BitVector32.CreateMask, but then we should use static fields, whose access is slower than using constants.
+        private const int autoScaleFont = 1;
+        private const int suppressFontChanged = autoScaleFont << 1;
+        private const int isPerMonitorDpiAwarenessV1 = suppressFontChanged << 1;
+        private const int fadingAnimationsEnabled = isPerMonitorDpiAwarenessV1 << 1;
+        private const int isElevated = fadingAnimationsEnabled << 1;
+        private const int isImageUpToDate = isElevated << 1;
+        private const int isAlternativeDefaultImage = isImageUpToDate << 1;
+        private const int hasPaintError = isAlternativeDefaultImage << 1;
+        private const int useDefaultGlyph = hasPaintError << 1;
+        private const int isHovered = useDefaultGlyph << 1;
+        private const int isMouseDown = isHovered << 1;
+        private const int isPressed = isMouseDown << 1;
+        private const int isDesignMode = isPressed << 1; // needed because DesignMode does not work in a user control, and LicenseManager.UsageMode does not work in WM_PAINT
+
+        #endregion
+
         #region Fields
 
         #region Static Fields
@@ -110,20 +130,12 @@ namespace KGySoft.WinForms.Controls
 
         private readonly Dictionary<long, Size> preferredSizeCache = new Dictionary<long, Size>(4);
         private readonly FadingPainterInternal fadingPainter;
-        private readonly bool isPerMonitorDpiAwarenessV1 = ScaleHelper.PerMonitorDpiAwarenessVersion == 1; // it's alright to cache it for the control because an instance is tied to the same thread
-        private readonly bool isDesignMode = LicenseManager.UsageMode == LicenseUsageMode.Designtime; // needed because DesignMode does not work in a user control, and UsageMode does not work in WM_PAINT
 
         // Unlike in AdvancedButton, we always have default fonts, even when AutoScaleFont is not set, because the fonts are not inherited from the parent.
         private readonly ScalingFont defaultTextFont;
         private readonly ScalingFont defaultDescriptionFont;
 
-        private bool isHovered;
-        private bool isMouseDown;
-        private bool isPressed;
-        private bool isElevated;
-        private bool useDefaultGlyph = true;
-        private bool isImageUpToDate = true;
-        private bool hasPaintError;
+        private BitVector32 flags;
         private int dpiChangingCount;
         //private bool isLoaded; // see the commented OnCreateControl
         private string? description;
@@ -168,10 +180,6 @@ namespace KGySoft.WinForms.Controls
         private FadingOptions fadingOptions = FadingOptions.StandardEffects;
         private int fadingAnimationDefaultSpeed = 500;
         private Timer? defaultAnimationTimer;
-        private bool fadingAnimationsEnabled = true;
-        private bool isAlternativeDefaultImage;
-        private bool suppressFontChanged;
-        private bool autoScaleFont = true;
 
         #endregion
 
@@ -235,13 +243,13 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above, with non-classic themes.")]
         public bool FadingAnimationsEnabled
         {
-            get => fadingAnimationsEnabled;
+            get => flags[fadingAnimationsEnabled];
             set
             {
-                if (fadingAnimationsEnabled == value)
+                if (flags[fadingAnimationsEnabled] == value)
                     return;
 
-                fadingAnimationsEnabled = value;
+                flags[fadingAnimationsEnabled] = value;
                 CheckStyles();
             }
         }
@@ -308,14 +316,14 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(false)]
         public bool IsElevated
         {
-            get => isElevated;
+            get => flags[isElevated];
             set
             {
-                if (isElevated == value)
+                if (flags[isElevated] == value)
                     return;
 
-                isElevated = value;
-                isImageUpToDate = false;
+                flags[isElevated] = value;
+                flags[isImageUpToDate] = false;
                 CheckImage();
 
                 Invalidate();
@@ -332,14 +340,14 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(true)]
         public bool UseDefaultGlyph
         {
-            get => useDefaultGlyph;
+            get => flags[useDefaultGlyph];
             set
             {
-                if (useDefaultGlyph == value)
+                if (flags[useDefaultGlyph] == value)
                     return;
 
-                useDefaultGlyph = value;
-                isImageUpToDate = false;
+                flags[useDefaultGlyph] = value;
+                flags[isImageUpToDate] = false;
                 CheckImage();
 
                 Invalidate();
@@ -473,13 +481,13 @@ namespace KGySoft.WinForms.Controls
             + "which scales Font on the newer .NET versions only and never scales DescriptionFont.")]
         public bool AutoScaleFont
         {
-            get => autoScaleFont;
+            get => flags[autoScaleFont];
             set
             {
-                if (autoScaleFont == value)
+                if (flags[autoScaleFont] == value)
                     return;
 
-                autoScaleFont = value;
+                flags[autoScaleFont] = value;
                 PointF scale = value ? this.GetScale() : ScaleHelper.SystemScale;
                 textFont?.ResetFrom(textFont.Font, scale);
                 descriptionFont?.ResetFrom(descriptionFont.Font, scale);
@@ -634,7 +642,7 @@ namespace KGySoft.WinForms.Controls
             // Standard/System flat style with visual styles: reporting transparent background. This fixes the ugly stripes issue
             // when the parent is enlarged while the control is partially invisible, for example.
             // Not applying on Mono, because it turns fading animations off to prevent flickering.
-            get => !OSHelper.IsFrameworkMono && !isDesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
+            get => !OSHelper.IsFrameworkMono && !flags[isDesignMode] && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
                 : !enabledBackColor.IsEmpty ? enabledBackColor
                 : base.BackColor;
             set
@@ -677,7 +685,7 @@ namespace KGySoft.WinForms.Controls
             // Standard/System flat style with visual styles: reporting transparent background. This fixes the ugly stripes issue
             // when the parent is enlarged while the control is partially invisible, for example.
             // Not applying on Mono, because it turns fading animations off to prevent flickering.
-            get => !OSHelper.IsFrameworkMono && !isDesignMode && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
+            get => !OSHelper.IsFrameworkMono && !flags[isDesignMode] && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
                 : !disabledBackColor.IsEmpty ? disabledBackColor
                 : base.BackColor;
             set
@@ -742,7 +750,7 @@ namespace KGySoft.WinForms.Controls
                 if (highlightTextColor == value)
                     return;
                 highlightTextColor = value;
-                if (isHovered)
+                if (flags[isHovered])
                     Invalidate();
             }
         }
@@ -760,7 +768,7 @@ namespace KGySoft.WinForms.Controls
                 if (highlightDescriptionColor == value)
                     return;
                 highlightDescriptionColor = value;
-                if (isHovered)
+                if (flags[isHovered])
                     Invalidate();
             }
         }
@@ -780,7 +788,7 @@ namespace KGySoft.WinForms.Controls
                 if (pressedTextColor == value)
                     return;
                 pressedTextColor = value;
-                if (isPressed)
+                if (flags[isPressed])
                     Invalidate();
             }
         }
@@ -798,7 +806,7 @@ namespace KGySoft.WinForms.Controls
                 if (pressedDescriptionColor == value)
                     return;
                 pressedDescriptionColor = value;
-                if (isPressed)
+                if (flags[isPressed])
                     Invalidate();
             }
         }
@@ -896,7 +904,7 @@ namespace KGySoft.WinForms.Controls
             set
             {
                 base.Image = value;
-                isImageUpToDate = false;
+                flags[isImageUpToDate] = false;
                 CheckImage();
                 PerformLayout();
             }
@@ -1133,8 +1141,8 @@ namespace KGySoft.WinForms.Controls
         private int ImageTextMargin => UsesTheming ? 1 : 4;
 
         private Size ImageSize => base.Image != null ? base.Image.Size
-            : isElevated ? SecurityShieldImage.Size // note: cachedSecurityShieldImageSize is the scaled reference size, not necessarily the actual extracted size
-            : useDefaultGlyph ? DefaultGlyphSize
+            : IsElevated ? SecurityShieldImage.Size // note: cachedSecurityShieldImageSize is the scaled reference size, not necessarily the actual extracted size
+            : UseDefaultGlyph ? DefaultGlyphSize
             : new Size(1, 1);
 
         private Image DefaultGlyphNormal => cachedDefaultGlyphNormal ??= GetScaledDefaultGlyph(Resources.CommandLinkNormal, nameof(Resources.CommandLinkNormal));
@@ -1188,6 +1196,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public CommandLinkButton()
         {
+            flags[autoScaleFont | fadingAnimationsEnabled | isImageUpToDate | useDefaultGlyph] = true;
             AutoSize = true;
             AutoSizeMode = AutoSizeMode.GrowAndShrink;
             base.AutoEllipsis = true;
@@ -1199,9 +1208,11 @@ namespace KGySoft.WinForms.Controls
             defaultTextFont = new ScalingFont(DefaultTextFont, ScaleHelper.SystemScale);
             defaultDescriptionFont = new ScalingFont(DefaultDescriptionFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
+            flags[isPerMonitorDpiAwarenessV1] = ScaleHelper.PerMonitorDpiAwarenessVersion == 1;
+            flags[isDesignMode] = LicenseManager.UsageMode == LicenseUsageMode.Designtime;
 
             // Using this instead of overriding OnSystemColorsChanged so GetPreferredSize
-            // works correctly when FlayStyle is System and visual styles are turned on or off.
+            // works correctly when FlatStyle is System and visual styles are turned on or off.
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
         }
 
@@ -1356,9 +1367,9 @@ namespace KGySoft.WinForms.Controls
                     if (IsNativeRendering)
                     {
                         // Without this the custom image is replaced by the shield icon on DPI change if it was ever displayed
-                        if (isElevated && base.Image != null)
+                        if (IsElevated && base.Image != null)
                         {
-                            isImageUpToDate = false;
+                            flags[isImageUpToDate] = false;
                             Invalidate();
                         }
 #if NETFRAMEWORK
@@ -1366,7 +1377,7 @@ namespace KGySoft.WinForms.Controls
                         // Note: Would not be needed for .NET Framework 4.7+ when V2 awareness is set both in the app.config and the manifest
                         if (Created)
                             RecreateHandle();
-                        isImageUpToDate = false;
+                        flags[isImageUpToDate] = false;
 #endif
                     }
 
@@ -1443,7 +1454,7 @@ namespace KGySoft.WinForms.Controls
             {
                 fadingPainter.State ??= GetAppearance();
                 fadingPainter.Paint(e);
-                hasPaintError = false;
+                flags[hasPaintError] = false;
             }
             catch (Exception ex) when (!ex.IsCritical())
             {
@@ -1451,9 +1462,9 @@ namespace KGySoft.WinForms.Controls
                 // But if exceptions are thrown in two consecutive paints, we let the second one propagate.
                 // A recoverable exception may occur on Windows 7 when switching from Aero to classic or high contrast theme,
                 // when visual styles are turned off in the middle of the painting session.
-                if (hasPaintError)
+                if (flags[hasPaintError])
                     throw;
-                hasPaintError = true;
+                flags[hasPaintError] = true;
                 ResetCaches();
                 CheckDpiChange();
                 Invalidate();
@@ -1489,7 +1500,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnFontChanged(EventArgs e)
         {
-            if (suppressFontChanged)
+            if (flags[suppressFontChanged])
                 return;
 
             ResetSizeCache();
@@ -1499,7 +1510,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseLeave(EventArgs e)
         {
-            isHovered = false;
+            flags[isHovered] = false;
             Invalidate();
             base.OnMouseLeave(e);
         }
@@ -1507,7 +1518,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseEnter(EventArgs e)
         {
-            isHovered = true;
+            flags[isHovered] = true;
             Invalidate();
             base.OnMouseEnter(e);
         }
@@ -1515,8 +1526,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseUp(MouseEventArgs e)
         {
-            isPressed = false;
-            isMouseDown = false;
+            flags[isPressed | isMouseDown] = false;
             Invalidate();
             base.OnMouseUp(e);
         }
@@ -1524,8 +1534,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseDown(MouseEventArgs e)
         {
-            isPressed = e.Button == MouseButtons.Left;
-            isMouseDown = isPressed;
+            flags[isPressed | isMouseDown] = e.Button == MouseButtons.Left;
             Invalidate();
             base.OnMouseDown(e);
         }
@@ -1533,8 +1542,8 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnMouseMove(MouseEventArgs mevent)
         {
-            if (isMouseDown)
-                isPressed = mevent.X >= 0 && mevent.X < Width && mevent.Y >= 0 && mevent.Y < Height;
+            if (flags[isMouseDown])
+                flags[isPressed] = mevent.X >= 0 && mevent.X < Width && mevent.Y >= 0 && mevent.Y < Height;
 
             base.OnMouseMove(mevent);
         }
@@ -1542,10 +1551,8 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnKeyDown(KeyEventArgs e)
         {
-            if (e.KeyData == Keys.Space && !isPressed)
-            {
-                isPressed = true;
-            }
+            if (e.KeyData == Keys.Space && !flags[isPressed])
+                flags[isPressed] = true;
 
             base.OnKeyDown(e);
         }
@@ -1553,10 +1560,8 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnKeyUp(KeyEventArgs e)
         {
-            if (e.KeyData == Keys.Space && isPressed)
-            {
-                isPressed = false;
-            }
+            if (e.KeyData == Keys.Space && flags[isPressed])
+                flags[isPressed] = false;
 
             base.OnKeyUp(e);
         }
@@ -1575,9 +1580,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnEnabledChanged(EventArgs e)
         {
-            isHovered = false;
-            isPressed = false;
-            isMouseDown = false;
+            flags[isHovered | isPressed | isMouseDown] = false;
             FreeBrushes();
             base.OnEnabledChanged(e);
         }
@@ -1701,8 +1704,8 @@ namespace KGySoft.WinForms.Controls
                 BackColor = BackColor,
                 ForeColor = ForeColor,
                 Enabled = Enabled,
-                Hovered = isHovered,
-                Pressed = isPressed,
+                Hovered = flags[isHovered],
+                Pressed = flags[isPressed],
                 IsDefault = IsDefault,
                 Focused = Focused,
                 Text = base.Text,
@@ -1721,14 +1724,14 @@ namespace KGySoft.WinForms.Controls
             if (!Enabled)
                 return COMMANDLINKSTATES.CMDLS_DISABLED;
 
-            if (isPressed)
+            if (flags[isPressed])
                 return COMMANDLINKSTATES.CMDLS_PRESSED;
 
-            if (isHovered)
+            if (flags[isHovered])
                 return COMMANDLINKSTATES.CMDLS_HOT;
 
             if (IsDefault)
-                return fadingAnimationsEnabled && (fadingOptions & FadingOptions.StandardEffects) != FadingOptions.None && isAlternativeDefaultImage
+                return FadingAnimationsEnabled && (fadingOptions & FadingOptions.StandardEffects) != FadingOptions.None && flags[isAlternativeDefaultImage]
                 ? COMMANDLINKSTATES.CMDLS_DEFAULTED_ANIMATING
                 : COMMANDLINKSTATES.CMDLS_DEFAULTED;
 
@@ -1737,7 +1740,7 @@ namespace KGySoft.WinForms.Controls
 
         private void CheckStyles()
         {
-            if (fadingAnimationsEnabled && fadingPainter.Enabled)
+            if (FadingAnimationsEnabled && fadingPainter.Enabled)
             {
                 // to enable animations, double buffering must be disabled
                 SetStyle(ControlStyles.OptimizedDoubleBuffer | ControlStyles.DoubleBuffer | ControlStyles.AllPaintingInWmPaint, false);
@@ -1755,7 +1758,7 @@ namespace KGySoft.WinForms.Controls
                 return;
             }
 
-            bool enabled = base.FlatStyle == FlatStyle.Standard && !isPressed && !isHovered && IsDefault
+            bool enabled = base.FlatStyle == FlatStyle.Standard && flags.None(isPressed | isHovered) && IsDefault
                 && VisualStyleHelper.RenderWithVisualStyles && !VisualStyleHelper.HighContrast && fadingPainter.Enabled;
             if (enabled && (defaultAnimationTimer == null || !defaultAnimationTimer.Enabled))
             {
@@ -1771,13 +1774,13 @@ namespace KGySoft.WinForms.Controls
                     defaultAnimationTimer.Tick += defaultAnimationTimer_Tick;
                 }
 
-                isAlternativeDefaultImage = false;
+                flags[isAlternativeDefaultImage] = false;
                 defaultAnimationTimer.Enabled = true;
             }
             else if (!enabled && defaultAnimationTimer != null && defaultAnimationTimer.Enabled)
             {
                 defaultAnimationTimer.Enabled = false;
-                isAlternativeDefaultImage = false;
+                flags[isAlternativeDefaultImage] = false;
             }
         }
 
@@ -1794,7 +1797,7 @@ namespace KGySoft.WinForms.Controls
             CheckDefaultAnimation();
 
             ResetNativeDescription();
-            isImageUpToDate = false;
+            flags[isImageUpToDate] = false;
             if (!ignoreCheckImage)
                 CheckImage();
 
@@ -2029,7 +2032,7 @@ namespace KGySoft.WinForms.Controls
             var state = e.State;
 
             // default glyph when visual styles are available
-            if (IsNativeVisualStylesRenderingAvailable && !isElevated && image == null && useDefaultGlyph)
+            if (IsNativeVisualStylesRenderingAvailable && !IsElevated && image == null && UseDefaultGlyph)
             {
                 bool isSimpleArrow = OSHelper.IsWindows10OrLater;
                 bool isRightToLeft = RightToLeft == RightToLeft.Yes;
@@ -2072,9 +2075,9 @@ namespace KGySoft.WinForms.Controls
             bool asDisabled = !state.Enabled;
             if (img == null)
             {
-                if (isElevated)
+                if (IsElevated)
                     img = SecurityShieldImage;
-                else if (useDefaultGlyph)
+                else if (UseDefaultGlyph)
                 {
                     asDisabled = false; // we have specific disabled image
                     img = !state.Enabled ? DefaultGlyphDisabled
@@ -2212,7 +2215,7 @@ namespace KGySoft.WinForms.Controls
                 return true;
 
             // if image is up-to-date checking consistency only (to handle setting base.Image)
-            if (isImageUpToDate)
+            if (flags[isImageUpToDate])
             {
                 if (lastImageAlign == ImageAlign &&
                     (currentImage == base.Image
@@ -2224,7 +2227,7 @@ namespace KGySoft.WinForms.Controls
             Invalidate();
             ResetSizeCache();
             lastImageAlign = ImageAlign;
-            isImageUpToDate = true;
+            flags[isImageUpToDate] = true;
             if (base.Image != null)
             {
                 currentImage = base.Image;
@@ -2241,9 +2244,9 @@ namespace KGySoft.WinForms.Controls
             if (!IsNativeRendering)
                 return true;
 
-            if (isElevated)
+            if (IsElevated)
                 User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, new IntPtr(1));
-            else if (useDefaultGlyph)
+            else if (UseDefaultGlyph)
                 User32.SendMessage(Handle, Constants.BCM_SETSHIELD, IntPtr.Zero, IntPtr.Zero);
             else
             {
@@ -2391,18 +2394,18 @@ namespace KGySoft.WinForms.Controls
                 if (!force && (ReferenceEquals(oldFont, newFont) || !oldFont.IsDisposed()))
                     return;
 
-                suppressFontChanged = true;
+                flags[suppressFontChanged] = true;
                 try
                 {
                     base.Font = null!;
 
                     // setting base.Font caused reentrancy: not letting the outer call to set the font again
-                    if (!suppressFontChanged)
+                    if (!flags[suppressFontChanged])
                         return;
                 }
                 finally
                 {
-                    suppressFontChanged = false;
+                    flags[suppressFontChanged] = false;
                 }
             }
 
@@ -2441,7 +2444,7 @@ namespace KGySoft.WinForms.Controls
         void IPerMonitorDpiAware.ParentFormDpiChanging()
         {
             dpiChangingCount += 1;
-            if (isPerMonitorDpiAwarenessV1)
+            if (flags[isPerMonitorDpiAwarenessV1])
                 CheckDpiChange();
         }
 
@@ -2449,7 +2452,7 @@ namespace KGySoft.WinForms.Controls
         {
             Debug.Assert(dpiChangingCount > 0);
             dpiChangingCount -= 1;
-            if (isPerMonitorDpiAwarenessV1 && AutoSize)
+            if (flags[isPerMonitorDpiAwarenessV1] && AutoSize)
                 PerformLayout();
         }
 
@@ -2461,7 +2464,7 @@ namespace KGySoft.WinForms.Controls
 
         void defaultAnimationTimer_Tick(object? sender, EventArgs e)
         {
-            isAlternativeDefaultImage = !isAlternativeDefaultImage;
+            flags[isAlternativeDefaultImage] = !flags[isAlternativeDefaultImage];
             Invalidate();
         }
 

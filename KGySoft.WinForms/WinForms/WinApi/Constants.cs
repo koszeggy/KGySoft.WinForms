@@ -35,6 +35,7 @@ namespace KGySoft.WinForms.WinApi
         internal const string ThemeSpin = "SPIN";
 
         internal const int S_OK = 0;
+        internal const int S_FALSE = 1;
 
         internal const uint HTERROR = unchecked((uint)-2);
         internal const int HTGROWBOX = 4;

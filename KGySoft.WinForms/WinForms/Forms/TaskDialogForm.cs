@@ -130,7 +130,7 @@ namespace KGySoft.WinForms.Forms
             protected override void OnPaintBackground(PaintEventArgs e)
             {
                 // if base was called, flickering would happen when expanding/collapsing details with themed background
-                if (DesignMode || !Owner.isSpecialHeadColors)
+                if (DesignMode || !Owner.flags[isSpecialHeadColors])
                 {
                     // in design mode avoiding unpainted effect
                     base.OnPaintBackground(e);
@@ -139,7 +139,7 @@ namespace KGySoft.WinForms.Forms
 
             protected override void OnPaint(PaintEventArgs e)
             {
-                if (!DesignMode && Owner.isSpecialHeadColors)
+                if (!DesignMode && Owner.flags[isSpecialHeadColors])
                 {
                     using LinearGradientBrush brush = new LinearGradientBrush(ClientRectangle, Owner.gradientStart, Owner.gradientEnd, LinearGradientMode.Horizontal);
                     e.Graphics.FillRectangle(brush, ClientRectangle);
@@ -219,6 +219,24 @@ namespace KGySoft.WinForms.Forms
         private const int checkBoxAndExpandoColumnReferenceWidth = 180;
         private const int progressBarReferenceHeight = 15;
 
+        // We could use BitVector32.CreateMask, but then we should use static fields, whose access is slower than using constants.
+        // NOTE: LSB flags are in the base BaseForm class, so starting with bit 16
+        private const int isDetailsExpanded = 1 << 16; // Indicates only the state if details is not empty. Does not mean it is visible.
+        private const int isDetailsInFooter = isDetailsExpanded << 1;
+        private const int isSpecialHeadColors = isDetailsInFooter << 1;
+        private const int cacheMainInstructionsColorHasValue = isSpecialHeadColors << 1; // Nullable<bool>.HasValue
+        private const int cacheMainInstructionsColorValue = cacheMainInstructionsColorHasValue << 1; // Nullable<bool>.Value
+        private const int isRadioButtonChecking = cacheMainInstructionsColorValue << 1;
+        private const int isForcedClosing = isRadioButtonChecking << 1;
+        private const int altF4Pressed = isForcedClosing << 1;
+        private const int isResettingHeight = altF4Pressed << 1;
+        private const int isResettingVisibilities = isResettingHeight << 1;
+        private const int isResetHeightPending = isResettingVisibilities << 1;
+        private const int isCheckboxChecking = isResetHeightPending << 1;
+        private const int isReopening = isCheckboxChecking << 1;
+        private const int executeNonModal = isReopening << 1;
+        private const int isResettingScrollbar = executeNonModal << 1;
+
         #endregion
 
         #region Fields
@@ -269,25 +287,11 @@ namespace KGySoft.WinForms.Forms
         private TaskDialog host = null!;
         private IWin32Window? ownerWindow;
         private int selectedCustomButtonIndex;
-        private bool isDetailsExpanded; // Indicates only the state if details is not empty. Does not mean it is visible.
-        private bool isDetailsInFooter;
-        private bool isSpecialHeadColors;
         private DateTime dialogStarted;
         private Color gradientStart;
         private Color gradientEnd;
         private Color mainInstructionsColor;
-        private bool? cacheMainInstructionsColor;
         private Font? mainInstructionsFont;
-        private bool isRadioButtonChecking;
-        private bool isForcedClosing;
-        private bool altF4Pressed;
-        private bool isResettingHeight;
-        private bool isResettingVisibilities;
-        private bool isResetHeightPending;
-        private bool isCheckboxChecking;
-        private bool isReopening;
-        private bool executeNonModal;
-        private bool isResettingScrollbar;
         private Point location;
 
         #endregion
@@ -368,7 +372,7 @@ namespace KGySoft.WinForms.Forms
                     // the high contrast SystemColors.ControlText color for a while. Skipping the caching until returning from OnSystemColorsChanged or
                     // invalidating in the first Paint does not help. This is still not optimal, because the appearance can be invalid until the label is repainted.
                     // Also, not caching the color until the handle of the label is created.
-                    if (cacheMainInstructionsColor != true || !lblMainInstruction.IsHandleCreated)
+                    if (!flags[cacheMainInstructionsColorHasValue] || !flags[cacheMainInstructionsColorValue] || !lblMainInstruction.IsHandleCreated)
                         return color;
                     mainInstructionsColor = color;
                 }
@@ -495,10 +499,10 @@ namespace KGySoft.WinForms.Forms
             if (isLoaded) // can happen when RightToLeft changes
             {
                 Debug.Assert(dialogState == TaskDialogStatus.Showing);
-                if (!isReopening)
+                if (!flags[isReopening])
                     return;
 
-                isReopening = false;
+                flags[isReopening] = false;
                 Location = location;
                 return;
             }
@@ -533,7 +537,7 @@ namespace KGySoft.WinForms.Forms
                     CopyToClipboard();
                     break;
                 case Keys.Alt | Keys.F4:
-                    altF4Pressed = true;
+                    flags[altF4Pressed] = true;
                     break;
                 case Keys.Escape when ControlBox:
                     DialogResult = DialogResult.Cancel;
@@ -566,28 +570,28 @@ namespace KGySoft.WinForms.Forms
         {
             base.OnShown(e);
 
+            if (!flags[executeNonModal])
+                return;
+
             // if the dialog was opened without an owner, simulating the native task dialog behavior that opens in a non-modal way
-            if (executeNonModal)
+            Debug.Assert(OSHelper.IsWindows);
+
+            // Removing the owner and making the form non-modal (Owner is always null here, so not setting that).
+            User32.SetWindowLong(Handle, Constants.GWLP_HWNDPARENT, IntPtr.Zero);
+            this.SetState(Constants.ControlStates_Modal, false); // without this, the form cannot be closed before closing possible child windows
+
+            // Enabling every top-level window that do not own other windows (not using Application.OpenForms because that ignores native Win32 windows).
+            // Now that we cleared the owner of this form, the caller form will be among the windows to enable.
+            var threadWindows = new Dictionary<IntPtr, IntPtr>(); // key: self window handle, value: owner window handle (if any)
+            GCHandle handle = GCHandle.Alloc(threadWindows);
+            User32.EnumThreadWindows(Kernel32.GetCurrentThreadId(), enumThreadWindowsCallback, GCHandle.ToIntPtr(handle));
+            handle.Free();
+            var owners = new HashSet<IntPtr>(threadWindows.Values.Where(h => h != IntPtr.Zero));
+            foreach (IntPtr hWnd in threadWindows.Keys)
             {
-                Debug.Assert(OSHelper.IsWindows);
-
-                // Removing the owner and making the form non-modal (Owner is always null here, so not setting that).
-                User32.SetWindowLong(Handle, Constants.GWLP_HWNDPARENT, IntPtr.Zero);
-                this.SetState(Constants.ControlStates_Modal, false); // without this, the form cannot be closed before closing possible child windows
-
-                // Enabling every top-level window that do not own other windows (not using Application.OpenForms because that ignores native Win32 windows).
-                // Now that we cleared the owner of this form, the caller form will be among the windows to enable.
-                var threadWindows = new Dictionary<IntPtr, IntPtr>(); // key: self window handle, value: owner window handle (if any)
-                GCHandle handle = GCHandle.Alloc(threadWindows);
-                User32.EnumThreadWindows(Kernel32.GetCurrentThreadId(), enumThreadWindowsCallback, GCHandle.ToIntPtr(handle));
-                handle.Free();
-                var owners = new HashSet<IntPtr>(threadWindows.Values.Where(h => h != IntPtr.Zero));
-                foreach (IntPtr hWnd in threadWindows.Keys)
-                {
-                    // enabling the window only if it does not own any other window
-                    if (!owners.Contains(hWnd))
-                        User32.EnableWindow(hWnd, true);
-                }
+                // enabling the window only if it does not own any other window
+                if (!owners.Contains(hWnd))
+                    User32.EnableWindow(hWnd, true);
             }
         }
 
@@ -630,10 +634,10 @@ namespace KGySoft.WinForms.Forms
             if (e.CloseReason == CloseReason.UserClosing)
             {
                 // preventing ALT+F4 if there is no X (Cancel) option
-                if (altF4Pressed && !ControlBox)
+                if (flags[altF4Pressed] && !ControlBox)
                 {
                     e.Cancel = true;
-                    altF4Pressed = false;
+                    flags[altF4Pressed] = false;
                     return;
                 }
 
@@ -644,13 +648,13 @@ namespace KGySoft.WinForms.Forms
                 if (args.Cancel)
                     selectedCustomButtonIndex = -1;
             }
-            else if (isReopening)
+            else if (flags[isReopening])
             {
                 // Changing RightToLeft or ShowInTaskbar causes the dialog to close. We let it happen because the parent's RTL may also change,
                 // and if we cancel the closing here, then a dialog may turn to a non-modal form. Reopening as a dialog is handled in ITaskDialog.Execute
                 if (DialogResult != DialogResult.Ignore)
                 {
-                    isReopening = false;
+                    flags[isReopening] = false;
                     dialogState = TaskDialogStatus.Closing;
                 }
                 else
@@ -658,7 +662,7 @@ namespace KGySoft.WinForms.Forms
             }
             else
             {
-                isForcedClosing = true;
+                flags[isForcedClosing] = true;
                 dialogState = TaskDialogStatus.Closing;
             }
         }
@@ -666,14 +670,14 @@ namespace KGySoft.WinForms.Forms
         protected override void OnFormClosed(FormClosedEventArgs e)
         {
             base.OnFormClosed(e);
-            if (isReopening)
+            if (flags[isReopening])
                 return;
 
             dialogState = TaskDialogStatus.Closed;
             host.Handle = IntPtr.Zero;
 
             // closing from dispose or other serious reason: omitting Closed event
-            if (!isForcedClosing)
+            if (!flags[isForcedClosing])
                 host.OnClosed();
         }
 
@@ -686,7 +690,7 @@ namespace KGySoft.WinForms.Forms
             // Happens only when TaskDialog.Dispose was called while showing: forcing close and waiting for being closed
             if (dialogState != TaskDialogStatus.Closed)
             {
-                isForcedClosing = true;
+                flags[isForcedClosing] = true;
                 dialogState = TaskDialogStatus.Closed;
             }
 
@@ -778,30 +782,31 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         private void ResetSettings(Configuration cfg)
         {
-            isDetailsExpanded = cfg.IsDetailsExpanded;
-            isDetailsInFooter = cfg.IsDetailsInFooter;
+            flags[isDetailsExpanded] = cfg.IsDetailsExpanded;
+            flags[isDetailsInFooter] = cfg.IsDetailsInFooter;
+            bool nonModal = flags[executeNonModal];
 
             // options - Show... properties do not check their change so we do it here to prevent unnecessary style reset or handle recreation
             bool showControlBox = (host.Options & TaskDialogOptions.AllowCancel) != TaskDialogOptions.None
-                || executeNonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None
+                || nonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None
                 || (host.StandardButtons & TaskDialogStandardButtonFlags.Cancel) != TaskDialogStandardButtonFlags.None;
             if (ControlBox != showControlBox)
                 ControlBox = showControlBox;
-            bool showMinimizeBox = executeNonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None;
+            bool showMinimizeBox = nonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None;
             if (MinimizeBox != showMinimizeBox)
                 MinimizeBox = showMinimizeBox;
             bool showHelpButton = host.IsHelpRequestedAssigned && !OSHelper.IsFrameworkMono; // hiding the ? button on Framework Mono as OnHelpButtonClicked is not executed
             if (HelpButton != showHelpButton)
                 HelpButton = showHelpButton;
-            bool showIcon = executeNonModal || (host.Options & TaskDialogOptions.ForceShowSysMenu) != TaskDialogOptions.None;
+            bool showIcon = nonModal || (host.Options & TaskDialogOptions.ForceShowSysMenu) != TaskDialogOptions.None;
             if (ShowIcon != showIcon)
                 ShowIcon = showIcon;
-            bool showInTaskbar = executeNonModal || (host.Options & TaskDialogOptions.ForceShowInTaskbar) != TaskDialogOptions.None;
+            bool showInTaskbar = nonModal || (host.Options & TaskDialogOptions.ForceShowInTaskbar) != TaskDialogOptions.None;
             if (ShowInTaskbar != showInTaskbar)
             {
                 ShowInTaskbar = showInTaskbar;
                 if (dialogState == TaskDialogStatus.Showing && !OSHelper.IsFrameworkMono)
-                    isReopening = true;
+                    flags[isReopening] = true;
             }
 
             HyperlinkResolveMode resolve = cfg.UseLinks ? HyperlinkResolveMode.ResolveHrefsOnly : HyperlinkResolveMode.None;
@@ -810,13 +815,13 @@ namespace KGySoft.WinForms.Forms
             lblFooter.ResolveHyperlinks = resolve;
             lblDetailsFooter.ResolveHyperlinks = resolve;
             var rtl = cfg.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
-            isReopening |= dialogState == TaskDialogStatus.Showing && rtl != RightToLeft && !OSHelper.IsFrameworkMono;
+            flags[isReopening] |= dialogState == TaskDialogStatus.Showing && rtl != RightToLeft && !OSHelper.IsFrameworkMono;
             RightToLeft = rtl;
             pnlFooterIcon.Padding = cfg.IsRightToLeft ? footerPanelPaddingRtl : footerPanelPaddingLtr;
 
             // Modal forms on Windows: when changing RTL or ShowInTaskbar, the DialogResult is set to Cancel in older framework targets, causing the dialog to close.
             // To make it work the same way on all platforms, we set the DialogResult to Ignore (Cancel is used by standard buttons), signaling the check in OnFormClosing.
-            if (isReopening)
+            if (flags[isReopening])
                 DialogResult = DialogResult.Ignore;
 
             // visibilities
@@ -833,8 +838,8 @@ namespace KGySoft.WinForms.Forms
             ResetCaption();
             lblMainInstruction.Text = cfg.HasMainInstruction ? host.MainInstruction : String.Empty;
             lblMessage.Text = cfg.HasMessage ? host.Message : String.Empty;
-            lblDetailsFooter.Text = cfg.HasDetails && isDetailsInFooter ? host.DetailsText : String.Empty;
-            lblDetailsMain.Text = cfg.HasDetails && !isDetailsInFooter ? host.DetailsText : String.Empty;
+            lblDetailsFooter.Text = cfg.HasDetails && cfg.IsDetailsInFooter ? host.DetailsText : String.Empty;
+            lblDetailsMain.Text = cfg.HasDetails && !cfg.IsDetailsInFooter ? host.DetailsText : String.Empty;
             ResetShowHideDetailsText();
             chbCheckBox.Text = cfg.HasVerification ? host.CheckBoxText : String.Empty;
             lblFooter.Text = cfg.HasFooter ? host.FooterText : String.Empty;
@@ -857,7 +862,7 @@ namespace KGySoft.WinForms.Forms
             ResetDefaultButton(cfg);
 
             // Adjusting expando button (this can change height)
-            btnShowHideDetails.IsExpanded = isDetailsExpanded;
+            btnShowHideDetails.IsExpanded = cfg.IsDetailsExpanded;
         }
 
         private void ResetLayout(Configuration cfg, Rectangle suggestedBounds = default)
@@ -910,7 +915,7 @@ namespace KGySoft.WinForms.Forms
         {
             // No need to reset the icons paddings, because they are centered anyway. The default padding just ensures that bigger icons have some space around them.
             PointF scale = DeviceScale;
-            lblMainInstruction.Padding = isSpecialHeadColors ? mainInstructionSpecialColorsReferencePadding.Scale(scale) : mainInstructionReferencePadding.Scale(scale);
+            lblMainInstruction.Padding = flags[isSpecialHeadColors] ? mainInstructionSpecialColorsReferencePadding.Scale(scale) : mainInstructionReferencePadding.Scale(scale);
             pnlMainTexts.Padding = textsPanelReferencePadding.Scale(scale);
             lblMessage.Padding = lblDetailsMain.Padding = labelReferencePadding.Scale(scale);
             pnlProgressBar.Padding = progressBarReferencePadding.Scale(scale);
@@ -968,7 +973,7 @@ namespace KGySoft.WinForms.Forms
 
         private void ResetVisibilities(Configuration cfg)
         {
-            isResettingVisibilities = true;
+            flags[isResettingVisibilities] = true;
             try
             {
                 lblDetailsMain.FadingAnimationOptions = FadingOptions.StandardEffects;
@@ -979,7 +984,7 @@ namespace KGySoft.WinForms.Forms
                     lblDetailsFooter.FadingAnimationOptions |= FadingOptions.Appearing;
                 pnlMainInstruction.Visible = cfg.HasMainInstruction;
                 lblMessage.Visible = cfg.HasMessage;
-                lblDetailsMain.Visible = cfg.HasDetails && !isDetailsInFooter && isDetailsExpanded;
+                lblDetailsMain.Visible = cfg.HasDetails && !flags[isDetailsInFooter] && flags[isDetailsExpanded];
 
                 pnlProgressBar.Visible = cfg.HasProgressBar;
                 pnlRadioButtons.Visible = host.RadioButtons.Count > 0;
@@ -1038,7 +1043,7 @@ namespace KGySoft.WinForms.Forms
             }
             finally
             {
-                isResettingVisibilities = false;
+                flags[isResettingVisibilities] = false;
             }
         }
 
@@ -1298,12 +1303,12 @@ namespace KGySoft.WinForms.Forms
         private void ResetHeights(Configuration cfg, Rectangle suggestedBounds = default)
         {
             // ResetHeights is always called after resetting visibilities
-            if (isResettingVisibilities)
+            if (flags[isResettingVisibilities])
                 return;
 
-            if (isResettingHeight)
+            if (flags[isResettingHeight])
             {
-                isResetHeightPending = true;
+                flags[isResetHeightPending] = true;
                 return;
             }
 
@@ -1312,7 +1317,7 @@ namespace KGySoft.WinForms.Forms
                 Screen screen = !suggestedBounds.IsEmpty() ? Screen.FromRectangle(suggestedBounds) : Screen.FromControl(this);
                 Rectangle screenBounds = screen.WorkingArea;
                 int screenHeight = screenBounds.Height;
-                isResettingHeight = true;
+                flags[isResettingHeight] = true;
                 try
                 {
                     SuspendLayout();
@@ -1322,12 +1327,12 @@ namespace KGySoft.WinForms.Forms
                         pnlMainIconBackground.Height = pnlMainIconBackground.MinimumSize.Height;
                         if (cfg.HasMainInstruction)
                         {
-                            if (isSpecialHeadColors)
+                            if (flags[isSpecialHeadColors])
                                 pnlMainInstruction.Height = pnlMainIconBackground.Height = Math.Max(lblMainInstruction.Height, pnlMainIconBackground.MinimumSize.Height);
                             else
                                 pnlMainInstruction.Height = lblMainInstruction.Height + pnlMainInstruction.Padding.Vertical;
                         }
-                        else if (isSpecialHeadColors)
+                        else if (flags[isSpecialHeadColors])
                             pnlMainIconBackground.Height = pnlMainIconBackground.MinimumSize.Height;
 
                         // Workaround: pnlMainTexts.Height (AutoSize does not work)
@@ -1431,12 +1436,12 @@ namespace KGySoft.WinForms.Forms
                 }
                 finally
                 {
-                    isResettingHeight = false;
+                    flags[isResettingHeight] = false;
                 }
 
-                if (!isResetHeightPending)
+                if (!flags[isResetHeightPending])
                     break;
-                isResetHeightPending = false;
+                flags[isResetHeightPending] = false;
             }
         }
 
@@ -1500,7 +1505,7 @@ namespace KGySoft.WinForms.Forms
                     }
 
                     // details in main (regardless visibility)
-                    if (cfg.HasDetails && !isDetailsInFooter && desiredWidth < maxWidth)
+                    if (cfg.HasDetails && !flags[isDetailsInFooter] && desiredWidth < maxWidth)
                     {
                         int preferredWidth = lblDetailsMain.GetPreferredSize(Size.Empty).Width + pnlMainTexts.Padding.Horizontal;
                         if (cfg.HasMainIcon)
@@ -1578,15 +1583,15 @@ namespace KGySoft.WinForms.Forms
             newBounds.Width = origBounds.Width; // keeping the original width
             newBounds.Height = height;
             Bounds = newBounds.EnsureScreen(screen, suggestedBounds.IsEmpty());
-            Debug.Assert(!isResettingScrollbar);
-            isResettingScrollbar = true;
+            Debug.Assert(!flags[isResettingScrollbar]);
+            flags[isResettingScrollbar] = true;
             try
             {
-                AutoScroll = showScrollbar; // this may cause triggering Control_SizeChanged, causing a new resize session
+                AutoScroll = showScrollbar; // this may trigger Control_SizeChanged, causing a new resize session
             }
             finally
             {
-                isResettingScrollbar = false;
+                flags[isResettingScrollbar] = false;
             }
         }
 
@@ -1703,7 +1708,13 @@ namespace KGySoft.WinForms.Forms
             // colors
             bool isThemed = VisualStyleHelper.RenderWithVisualStyles;
             bool highContrast = VisualStyleHelper.HighContrast;
-            cacheMainInstructionsColor ??= isThemed; // Not allowing caching the themed fore color if starting with non-themed rendering. See more details in ThemedMainInstructionsColor.
+            if (!flags[cacheMainInstructionsColorHasValue])
+            {
+                // Not allowing caching the themed fore color if starting with non-themed rendering. See more details in ThemedMainInstructionsColor.
+                flags[cacheMainInstructionsColorHasValue] = true;
+                flags[cacheMainInstructionsColorValue] = isThemed;
+            }
+
             pnlMain.BackColor = isThemed ? SystemColors.Window : SystemColors.Control;
             pnlMain.ForeColor = isThemed ?
                 SystemColors.WindowText :
@@ -1719,7 +1730,7 @@ namespace KGySoft.WinForms.Forms
             pnlDividerFooterTop.BackColor = dividerTop;
             pnlDividerFooterBottom.BackColor = dividerBottom;
             pnlDividerDetailsFooterTop.BackColor = dividerTop;
-            if (isSpecialHeadColors)
+            if (flags[isSpecialHeadColors])
             {
                 lblMainInstruction.ForeColor = host.Icon == TaskDialogStandardIcons.SecurityWarning ? Color.Black : Color.White;
                 pnlMainIconBackground.BackColor = gradientStart;
@@ -1811,15 +1822,15 @@ namespace KGySoft.WinForms.Forms
 
             bool requireSpecialHeadColors = !VisualStyleHelper.HighContrast && host.Icon.In(iconsWithColoredHeader);
             if (dialogState != TaskDialogStatus.Initializing &&
-                (isSpecialHeadColors != requireSpecialHeadColors || requireSpecialHeadColors))
+                (flags[isSpecialHeadColors] != requireSpecialHeadColors || requireSpecialHeadColors))
             {
-                isSpecialHeadColors = requireSpecialHeadColors;
+                flags[isSpecialHeadColors] = requireSpecialHeadColors;
                 ResetTheme();
                 pnlMainInstruction.Invalidate();
                 ResetHeights(cfg, suggestedBounds);
             }
             else
-                isSpecialHeadColors = requireSpecialHeadColors;
+                flags[isSpecialHeadColors] = requireSpecialHeadColors;
         }
 
         private void ResetFooterIconConfiguration(Configuration cfg) => pnlFooterIcon.Visible = cfg.HasFooterIcon;
@@ -2060,7 +2071,7 @@ namespace KGySoft.WinForms.Forms
                 result.AppendLine(host.Message);
             }
 
-            if (cfg.HasDetails && !isDetailsInFooter)
+            if (cfg.HasDetails && !flags[isDetailsInFooter])
             {
                 result.AppendLine();
                 result.AppendLine(Res.TaskDialogDetails);
@@ -2094,7 +2105,7 @@ namespace KGySoft.WinForms.Forms
             if (cfg.HasDetails)
             {
                 result.AppendLine();
-                result.Append(isDetailsExpanded ? Res.TaskDialogExpandoButtonExpanded(Strip(btnShowHideDetails.Text)) : Res.TaskDialogExpandoButtonCollapsed(Strip(btnShowHideDetails.Text)));
+                result.Append(flags[isDetailsExpanded] ? Res.TaskDialogExpandoButtonExpanded(Strip(btnShowHideDetails.Text)) : Res.TaskDialogExpandoButtonCollapsed(Strip(btnShowHideDetails.Text)));
                 if (cfg.HasVerification || !cfg.HasButtons)
                     result.AppendLine();
             }
@@ -2139,7 +2150,7 @@ namespace KGySoft.WinForms.Forms
                 result.AppendLine(host.FooterText);
             }
 
-            if (cfg.HasDetails && isDetailsInFooter)
+            if (cfg.HasDetails && flags[isDetailsInFooter])
             {
                 result.AppendLine();
                 result.AppendLine(Res.TaskDialogDetails);
@@ -2172,7 +2183,7 @@ namespace KGySoft.WinForms.Forms
         TaskDialogResult ITaskDialog.Execute(TaskDialog taskDialog, IntPtr owner, out int selectedButtonIndex, out int selectedRadioButtonIndex, out bool checkBoxChecked)
         {
             host = taskDialog;
-            executeNonModal = owner == IntPtr.Zero && OSHelper.IsWindows && !OSHelper.IsWindowsMono;
+            flags[executeNonModal] = owner == IntPtr.Zero && OSHelper.IsWindows && !OSHelper.IsWindowsMono;
             if (owner != IntPtr.Zero)
                 ownerWindow = new Win32Window { Handle = owner };
             
@@ -2192,13 +2203,13 @@ namespace KGySoft.WinForms.Forms
                     ShowDialog(ownerWindow);
 
                 // the handle of the owner may change, too
-                if (isReopening && ownerWindow != null && OSHelper.IsWindows)
+                if (flags[isReopening] && ownerWindow != null && OSHelper.IsWindows)
                 {
                     IntPtr newOwner = User32.GetActiveWindow();
                     if (newOwner != IntPtr.Zero)
                         ownerWindow = new Win32Window { Handle = newOwner };
                 }
-            } while (isReopening);
+            } while (flags[isReopening]);
 
             // mapping result
             TaskDialogResult result;
@@ -2249,7 +2260,7 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 case TaskDialog.PropertyDetailsText:
-                    UpdateText(isDetailsInFooter ? lblDetailsFooter : lblDetailsMain, host.DetailsText, true, false, false);
+                    UpdateText(flags[isDetailsInFooter] ? lblDetailsFooter : lblDetailsMain, host.DetailsText, true, false, false);
                     return;
 
                 case TaskDialog.PropertyCaption:
@@ -2315,14 +2326,14 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 case TaskDialog.PropertyCheckBoxChecked:
-                    isCheckboxChecking = true;
+                    flags[isCheckboxChecking] = true;
                     try
                     {
                         chbCheckBox.Checked = host.CheckBoxChecked;
                     }
                     finally
                     {
-                        isCheckboxChecking = false;
+                        flags[isCheckboxChecking] = false;
                     }
                     return;
 
@@ -2431,7 +2442,7 @@ namespace KGySoft.WinForms.Forms
 
                     case TaskDialogRadioButton.PropertyChecked:
                         // if invoked from Checked event handler, exiting, because TaskDialogRadioButton is set there
-                        if (isRadioButtonChecking)
+                        if (flags[isRadioButtonChecking])
                             return;
 
                         // index 0. is at bottom, so indexing backwards
@@ -2517,14 +2528,14 @@ namespace KGySoft.WinForms.Forms
         private void RadioButton_CheckedChanged(object? sender, EventArgs e)
         {
             RadioButton rb = (RadioButton)sender!;
-            isRadioButtonChecking = true;
+            flags[isRadioButtonChecking] = true;
             try
             {
                 ((TaskDialogRadioButton)rb.Tag!).Checked = rb.Checked;
             }
             finally
             {
-                isRadioButtonChecking = false;
+                flags[isRadioButtonChecking] = false;
             }
         }
 
@@ -2543,11 +2554,11 @@ namespace KGySoft.WinForms.Forms
 
         private void btnShowHideDetails_ExpandedChanged(object? sender, EventArgs e)
         {
-            isDetailsExpanded = btnShowHideDetails.IsExpanded;
+            flags[isDetailsExpanded] = btnShowHideDetails.IsExpanded;
             if (String.IsNullOrEmpty(host.DetailsText) || dialogState == TaskDialogStatus.Initializing)
                 return;
 
-            Configuration cfg = GetConfiguration(isDetailsExpanded);
+            Configuration cfg = GetConfiguration(flags[isDetailsExpanded]);
 
             ResetVisibilities(cfg);
             ResetHeights(cfg);
@@ -2566,13 +2577,13 @@ namespace KGySoft.WinForms.Forms
             }
 
             // invoking host change
-            host.OnDetailsVisibleChanged(new TaskDialogDetailsVisibleChangedEventArgs(isDetailsExpanded));
+            host.OnDetailsVisibleChanged(new TaskDialogDetailsVisibleChangedEventArgs(flags[isDetailsExpanded]));
         }
 
         private void Control_SizeChanged(object? sender, EventArgs e)
         {
             // watching this event to recalculate sizes if scrollbar of the form appears/disappears
-            if (!isResettingScrollbar)
+            if (!flags[isResettingScrollbar])
                 return;
 
             ResetHeights(GetConfiguration());
@@ -2580,7 +2591,7 @@ namespace KGySoft.WinForms.Forms
 
         private void cbCheckBox_CheckedChanged(object? sender, EventArgs e)
         {
-            if (dialogState == TaskDialogStatus.Initializing || isCheckboxChecking)
+            if (dialogState == TaskDialogStatus.Initializing || flags[isCheckboxChecking])
                 return;
 
             host.OnCheckBoxCheckedChanged(chbCheckBox.Checked);

@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 
 #endregion
@@ -33,16 +34,32 @@ namespace KGySoft.WinForms.Components
     /// <summary>
     /// Represents a dialog control hosted by a <see cref="TaskDialog"/> instance.
     /// </summary>
-    public abstract class TaskDialogControl: IDisposable, INotifyPropertyChanged
+    public abstract class TaskDialogControl : IDisposable, INotifyPropertyChanged
     {
+        #region Constants
+
+        // There are further flags in the derived classes
+        private const int isDisposed = 1;
+
+        #endregion
+
         #region Fields
 
-        private bool disposed;
+        #region Private Protected Fields
+
+        private protected BitVector32 flags;
+
+        #endregion
+        
+        #region Private Fields
+        
         private PropertyChangedEventHandler? propertyChanged;
         private TaskDialog? parent;
         private string? name;
         private object? tag;
 
+        #endregion
+        
         #endregion
 
         #region Events
@@ -116,21 +133,10 @@ namespace KGySoft.WinForms.Components
         #region Constructors
 
         /// <summary>
-        /// Creates a new instance of a dialog control without name
-        /// </summary>
-        protected TaskDialogControl()
-        {
-        }
-
-        /// <summary>
         /// Creates a new instance of a dialog control with the specified name.
         /// </summary>
         /// <param name="name">The name of the control.</param>
-        protected TaskDialogControl(string name)
-            : this()
-        {
-            Name = name;
-        }
+        protected TaskDialogControl(string? name) => Name = name;
 
         #endregion
 
@@ -150,21 +156,17 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         protected virtual void Dispose(bool disposing)
         {
-            if (disposed)
-            {
+            if (flags[isDisposed])
                 return;
-            }
 
-            disposed = true;
+            flags[isDisposed] = true;
 
             // always clearing event subscriptions to prevent memory leaks
             propertyChanged = null;
 
             // on explicit disposing nullifying other references
             if (disposing)
-            {
                 parent = null;
-            }
         }
 
         #endregion
@@ -205,7 +207,7 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         protected void CheckDisposed()
         {
-            if (disposed)
+            if (flags[isDisposed])
                 throw new ObjectDisposedException(ToString(), PublicResources.ObjectDisposed);
         }
 
