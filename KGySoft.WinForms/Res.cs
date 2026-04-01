@@ -228,6 +228,19 @@ namespace KGySoft
 
         #endregion
 
+        #region DecimalTextBox
+
+        /// <summary>Value '{0}' violates current Range.</summary>
+        internal static string DecimalTextBoxInvalidValue(decimal value) => Get("DecimalTextBox_InvalidValueFormat", value);
+
+        /// <summary>Text '{0}' cannot be parsed as a decimal number.</summary>
+        internal static string DecimalTextBoxInvalidText(string value) => Get("DecimalTextBox_InvalidTextFormat", value);
+
+        /// <summary>Value '{0}' does not fit in a decimal number's range.</summary>
+        internal static string DecimalTextBoxOverflow(string value) => Get("DecimalTextBox_OverflowFormat", value);
+
+        #endregion
+
         #region Localization
 
         /// <summary>Localization of key {0} failed because the format string {1} arguments: {2}</summary>

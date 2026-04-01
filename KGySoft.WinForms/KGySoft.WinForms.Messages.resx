@@ -116,6 +116,15 @@
   <data name="BaseForm_AlreadySuspended" xml:space="preserve">
     <value>This form is already suspended by another MDI child.</value>
   </data>
+  <data name="DecimalTextBox_InvalidValueFormat" xml:space="preserve">
+    <value>Value '{0}' violates current Range.</value>
+  </data>
+  <data name="DecimalTextBox_InvalidTextFormat" xml:space="preserve">
+    <value>Text '{0}' cannot be parsed as a decimal number.</value>
+  </data>
+  <data name="DecimalTextBox_OverflowFormat" xml:space="preserve">
+    <value>Value '{0}' does not fit in a decimal number's range.</value>
+  </data>
   <data name="Dialogs_InfoCaption" xml:space="preserve">
     <value>Information</value>
   </data>

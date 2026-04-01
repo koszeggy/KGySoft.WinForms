@@ -211,6 +211,7 @@
 + New ImageViewer class: Migrated from the KGySoft.Drawing.ImagingTools project.
 + New ImageViewerOptimizationOptions enum
 + New CheckGroupBox class: Migrated from the KGySoft.Drawing.ImagingTools project.
+- DecimalTextBox class: No more Ding sound when a valid multiplier is applied.
 
 ! KGySoft.WinForms.Forms namespace:
 ===================================

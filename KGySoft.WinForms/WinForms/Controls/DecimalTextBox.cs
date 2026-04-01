@@ -456,38 +456,38 @@ namespace KGySoft.WinForms.Controls
                 switch (valueOnBlank)
                 {
                     case DecimalValueOnBlank.Zero:
-                        return decimal.Zero;
+                        return Decimal.Zero;
                     case DecimalValueOnBlank.Value:
                         return value;
                     case DecimalValueOnBlank.LowerLimitMinusOne:
                         switch (Range)
                         {
                             case DecimalRange.Positive:
-                                return decimal.Zero;
+                                return Decimal.Zero;
                             case DecimalRange.PositiveNull:
-                                return decimal.MinusOne;
+                                return Decimal.MinusOne;
                             case DecimalRange.MinMax:
-                                if (RangeMinValue > decimal.MinValue)
+                                if (RangeMinValue > Decimal.MinValue)
                                     return RangeMinValue - 1;
                                 else
-                                    return decimal.MinValue;
+                                    return Decimal.MinValue;
                             default:
-                                return decimal.MinValue;
+                                return Decimal.MinValue;
                         }
                     case DecimalValueOnBlank.UpperLimitPlusOne:
                         switch (Range)
                         {
                             case DecimalRange.Negative:
-                                return decimal.Zero;
+                                return Decimal.Zero;
                             case DecimalRange.NegativeNull:
-                                return decimal.One;
+                                return Decimal.One;
                             case DecimalRange.MinMax:
-                                if (RangeMaxValue < decimal.MaxValue)
+                                if (RangeMaxValue < Decimal.MaxValue)
                                     return RangeMaxValue + 1;
                                 else
-                                    return decimal.MaxValue;
+                                    return Decimal.MaxValue;
                             default:
-                                return decimal.MaxValue;
+                                return Decimal.MaxValue;
                         }
                     case DecimalValueOnBlank.MinInt:
                         return Int32.MinValue;
@@ -498,7 +498,7 @@ namespace KGySoft.WinForms.Controls
                     case DecimalValueOnBlank.MaxDecimal:
                         return Decimal.MaxValue;
                     default:
-                        return decimal.Zero;
+                        return Decimal.Zero;
                 }
             }
         }
@@ -588,18 +588,18 @@ namespace KGySoft.WinForms.Controls
                 // ...negative sign not at the first position...
                 || (!blank && e.KeyChar == negativeSign && Text.IndexOf(negativeSign) >= 0)
                 //  ...when the result would not be valid (IsValid allows multiplier at the last position)
-                || (!blank && !char.IsControl(e.KeyChar) &&
+                || (!blank && !Char.IsControl(e.KeyChar) &&
                     !IsValid(Text.Substring(0, SelectionStart) + e.KeyChar + Text.Substring(SelectionStart + SelectionLength), false)))
+            {
                 e.KeyChar = '\0';
-
+            }
             // valid char in Blank: turning off blank mode
-            else if (blank && !char.IsControl(e.KeyChar))
+            else if (blank && !Char.IsControl(e.KeyChar))
             {
                 if (IsValid(e.KeyChar.ToString(), false))
-                {
                     BlankOff();
-                }
-                else e.KeyChar = '\0';
+                else
+                    e.KeyChar = '\0';
             }
 
             // applying multipliers
@@ -608,6 +608,7 @@ namespace KGySoft.WinForms.Controls
                 ApplyText(e.KeyChar.ToString(), true);
                 SelectionStart = Text.Length;
                 e.KeyChar = '\0';
+                e.Handled = true;
             }
         }
 
@@ -618,9 +619,7 @@ namespace KGySoft.WinForms.Controls
             if (ReadOnly || Blank)
                 return;
             if (!IsValid(Text, true))
-            {
                 e.Cancel = true;
-            }
         }
 
         /// <inheritdoc />
@@ -670,7 +669,7 @@ namespace KGySoft.WinForms.Controls
             // Suppressing keys in Blank mode. Further checks are in KeyPress where key can be checked as char.
             base.OnKeyDown(e);
 
-            if (Blank && e.KeyCode.In(Keys.Delete, Keys.Back))
+            if (Blank && e.KeyCode is Keys.Delete or Keys.Back)
             {
                 e.Handled = true;
                 e.SuppressKeyPress = true;
@@ -725,23 +724,23 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Set value and refreshes text.
+        /// Set value and refresh text.
         /// </summary>
-        /// <param name="value">Value to set</param>
+        /// <param name="newValue">The new value to set</param>
         /// <param name="alert">When true exception will be thrown if BlankEnabled is false and value violates range</param>
-        private void SetValue(decimal value, bool alert)
+        private void SetValue(decimal newValue, bool alert)
         {
-            decimal rounded = RoundTo(value, -decimalDigits);
+            decimal rounded = RoundTo(newValue, -decimalDigits);
             Blank = false;
             if (!CheckRange(rounded, alert))
                 return;
-            if (this.value != rounded)
+            if (value != rounded)
             {
-                this.value = rounded;
+                value = rounded;
                 OnValueChanged(EventArgs.Empty);
             }
             else
-                this.value = rounded; // because e.g. 1 and 1.0 are different, though they equal
+                value = rounded; // because e.g. 1 and 1.0 are different, though they equal
             if (!flags[textChanging])
                 RefreshValue();
         }
@@ -780,7 +779,7 @@ namespace KGySoft.WinForms.Controls
             decimal d = 0;
             bool result = (!strong && (s == "-" || s == ""
                             || s[s.Length - 1].ToString().ToLowerInvariant().IndexOfAny(multipliers) >= 0))
-                    || decimal.TryParse(s, out d);
+                    || Decimal.TryParse(s, out d);
             if (result && strong)
                 result = CheckRange(d, false);
             return result;
@@ -789,7 +788,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Checks range. On violation sets Blank or when it is not enabled fixes Value and if alert is true throws exception.
         /// </summary>
-        private bool CheckRange(decimal value, bool alert)
+        private bool CheckRange(decimal checkedValue, bool alert)
         {
             decimal scale = decimalDigits < 0 ? Convert.ToDecimal(Math.Pow(10, -decimalDigits)) : 1;
 
@@ -798,11 +797,11 @@ namespace KGySoft.WinForms.Controls
 
             bool result = range switch
             {
-                DecimalRange.Negative => value <= -scale,
-                DecimalRange.NegativeNull => value <= 0,
-                DecimalRange.Positive => value >= scale,
-                DecimalRange.PositiveNull => value >= 0,
-                DecimalRange.MinMax => value >= rangeMinMax.MinValue && value <= rangeMinMax.MaxValue,
+                DecimalRange.Negative => checkedValue <= -scale,
+                DecimalRange.NegativeNull => checkedValue <= 0,
+                DecimalRange.Positive => checkedValue >= scale,
+                DecimalRange.PositiveNull => checkedValue >= 0,
+                DecimalRange.MinMax => checkedValue >= rangeMinMax.MinValue && checkedValue <= rangeMinMax.MaxValue,
                 _ => true
             };
 
@@ -815,12 +814,12 @@ namespace KGySoft.WinForms.Controls
                 {
                     DecimalRange.Negative => -1 * scale,
                     DecimalRange.Positive => 1 * scale,
-                    DecimalRange.MinMax => value < rangeMinMax.MinValue ? rangeMinMax.MinValue : rangeMinMax.MaxValue,
+                    DecimalRange.MinMax => checkedValue < rangeMinMax.MinValue ? rangeMinMax.MinValue : rangeMinMax.MaxValue,
                     _ => 0
                 };
 
                 if (alert)
-                    throw new OverflowException("Value \"" + value + "\" violates current Range");
+                    throw new OverflowException(Res.DecimalTextBoxInvalidValue(checkedValue));
             }
             else
                 Blank = true;
@@ -872,22 +871,24 @@ namespace KGySoft.WinForms.Controls
                 if (mult.ToString().IndexOfAny(multipliers) >= 0)
                     text = text.Substring(0, text.Length - 1);
 
-                if (!decimal.TryParse(text, out d))
-                    throw new InvalidOperationException("Cannot assign value as decimal number: " + txt);
+                if (!Decimal.TryParse(text, out d))
+                    throw new InvalidOperationException(Res.DecimalTextBoxInvalidText(txt));
 
                 try
                 {
                     if (d != 0)
+                    {
                         switch (mult)
                         {
-                            case 't': d *= 1000M; break;
-                            case 'm': d *= 1000000M; break;
-                            case 'y': d *= 1000000000M; break;
+                            case 't': d *= 1000m; break;
+                            case 'm': d *= 1_000_000m; break;
+                            case 'y': d *= 1_000_000_000m; break;
                         }
+                    }
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    throw new OverflowException("Value does not fit in a decimal number's range: " + txt, e);
+                    throw new OverflowException(Res.DecimalTextBoxOverflow(txt));
                 }
             }
 
