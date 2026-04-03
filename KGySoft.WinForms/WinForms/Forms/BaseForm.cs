@@ -752,8 +752,8 @@ namespace KGySoft.WinForms.Forms
             if (!OSHelper.IsWindows || OSHelper.IsFrameworkMono)
                 return;
 
-            // Not using Accessors because it's obtained only once.
-            formStateRenderSizeGrip = Reflector.TryGetField(typeof(Form), "FormStateRenderSizeGrip", out object? value) && value is BitVector32.Section section ? section : default;
+            // Using System reflection way and not the Accessors class, because it's obtained only once.
+            formStateRenderSizeGrip = Reflector.TryGetField(typeof(Form), "FormStateRenderSizeGrip", out object? value, ReflectionWays.SystemReflection) && value is BitVector32.Section section ? section : default;
         }
 #endif
 
