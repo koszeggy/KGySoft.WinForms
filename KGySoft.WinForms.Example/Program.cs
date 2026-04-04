@@ -55,7 +55,7 @@ namespace KGySoft.WinForms.Example
         #region Properties
 
         // Some global settings for testing purposes
-        internal static bool AutoScaleFont { get; set; }
+        internal static bool AutoScaleFont { get; set; } = true;
         internal static AutoScaleMode AutoScaleMode => AutoScaleMode.Font;
         internal static FormStartPosition StartPosition => FormStartPosition.CenterParent;
 
