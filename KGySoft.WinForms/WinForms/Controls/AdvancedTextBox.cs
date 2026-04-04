@@ -60,6 +60,7 @@ namespace KGySoft.WinForms.Controls
         private const int suppressFontChanged = autoScaleFont << 1;
         private const int isPerMonitorDpiAwarenessV1 = suppressFontChanged << 1;
         private const int isDesignMode = isPerMonitorDpiAwarenessV1 << 1; // needed because DesignMode does not work in a user control, and LicenseManager.UsageMode does not work in WM_PAINT
+        private const int isRtl = isDesignMode << 1;
 
         #endregion
 
@@ -434,6 +435,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 case Constants.WM_DPICHANGED_BEFOREPARENT:
+                    bool rtlChanging = flags[isRtl] != (RightToLeft == RightToLeft.Yes);
                     dpiChangingCount += 1;
                     try
                     {
@@ -444,7 +446,11 @@ namespace KGySoft.WinForms.Controls
                         dpiChangingCount -= 1;
                     }
 
-                    CheckDpiChange();
+                    // If parent RTL is changing on a screen with non-default DPI, we get this event while the handle is recreated.
+                    // In this case we defer font update the until the next WM_PAINT, from where it causes no problem.
+                    if (!rtlChanging && Created)
+                        CheckDpiChange();
+
                     return;
 
                 case Constants.WM_DPICHANGED_AFTERPARENT:
@@ -553,6 +559,13 @@ namespace KGySoft.WinForms.Controls
             if (flags[suppressFontChanged] || AutoScaleFont && dpiChangingCount > 0 && base.AutoCompleteMode != AutoCompleteMode.None)
                 return;
             base.OnFontChanged(e);
+        }
+
+        /// <inheritdoc />
+        protected override void OnRightToLeftChanged(EventArgs e)
+        {
+            base.OnRightToLeftChanged(e);
+            flags[isRtl] = RightToLeft == RightToLeft.Yes;
         }
 
         /// <inheritdoc />
