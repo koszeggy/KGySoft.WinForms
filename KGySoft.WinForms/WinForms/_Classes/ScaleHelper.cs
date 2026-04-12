@@ -753,6 +753,7 @@ namespace KGySoft.WinForms
 
             // For now, we only check if an IObservableParent is adding a control, and stop crawling up if a parent has a different font.
             Font parentFont = parent.Font;
+            Control? firstParentWithDifferentFont = null;
             for (Control? c = parent; c != null; c = c.Parent)
             {
                 if (c is IObservableParent op && (op.IsAddingControl || op.IsChangingFont))
@@ -761,10 +762,21 @@ namespace KGySoft.WinForms
                 // Important: we only know that we should stop the search when a different font is found, but cannot be sure
                 // that we already passed the triggering control (e.g. if it resets default font), so not returning c.GetScale() here.
                 if (!parentFont.Equals(c.Font))
+                {
+                    firstParentWithDifferentFont = c;
                     break;
+                }
             }
 
-            // Here we cannot be sure which parent triggered the font change, so we just return the scale of the direct parent.
+            // Here we cannot be sure which parent triggered the font change, only the possible first parent that was NOT the initiator if firstParentWithDifferentFont is set.
+            // First we try to return the scale of the first parent whose handle is created.
+            for (Control? c = parent; c != null && c != firstParentWithDifferentFont; c = c.Parent)
+            {
+                if (c.IsHandleCreated)
+                    return c.GetScale();
+            }
+
+            // No created parent has been found, so we just return the scale of the direct parent.
             return parent.GetScale();
         }
 
