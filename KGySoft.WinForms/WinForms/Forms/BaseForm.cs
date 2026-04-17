@@ -1166,7 +1166,8 @@ namespace KGySoft.WinForms.Forms
                     base.WndProc(ref m);
                     unsafe
                     {
-                        var scale = new PointF(m.WParam.LOWORD() / ScaleHelper.DefaultDpi, m.WParam.HIWORD() / ScaleHelper.DefaultDpi);
+                        // NOTE: unlike in WM_DPICHANGED, the m.WParam contains only a single DPI value (HIWORD is zero).
+                        var scale = new PointF(m.WParam.LOWORD() / ScaleHelper.DefaultDpi, m.WParam.LOWORD() / ScaleHelper.DefaultDpi);
                         SIZE* suggestedSize = (SIZE*)m.LParam;
                         var args = new DeviceScaleGetNewSizeEventArgs(suggestedSize->ToSize(), scale, deviceScale, m.Result != IntPtr.Zero);
                         OnDeviceScaleGetNewSize(args);
