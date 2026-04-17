@@ -448,7 +448,7 @@ namespace KGySoft.WinForms.Controls
 
                     // If parent RTL is changing on a screen with non-default DPI, we get this event while the handle is recreated.
                     // In this case we defer font update the until the next WM_PAINT, from where it causes no problem.
-                    if (!rtlChanging && Created)
+                    if (!rtlChanging && Created && base.AutoCompleteMode == AutoCompleteMode.None)
                         CheckDpiChange();
 
                     return;
