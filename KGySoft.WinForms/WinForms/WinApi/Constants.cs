@@ -170,7 +170,7 @@ namespace KGySoft.WinForms.WinApi
 
         internal const int ControlStates_Modal = 0x00000020;
 
-#if NETFRAMEWORK && !NET47_OR_GREATER
+#if NETFRAMEWORK
         internal const int SM_CXVSCROLL = 2;
         internal const int SM_CYHSCROLL = 3;
 #endif

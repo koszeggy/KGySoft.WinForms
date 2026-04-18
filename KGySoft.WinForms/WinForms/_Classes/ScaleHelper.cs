@@ -836,7 +836,9 @@ namespace KGySoft.WinForms
 
             if (perMonitorDpiAwarenessVersion >= 2)
             {
-#if NET47_OR_GREATER || NETCOREAPP
+#if NETCOREAPP
+                // NOTE: though SystemInformation.Get*ScrollBarWidthForDpi exists also in .NET Framework 4.7+,
+                // its behavior depends on the app.config settings of the consumer application, so using it only for .NET Core+
                 return new Size(SystemInformation.GetVerticalScrollBarWidthForDpi(dpi.X), SystemInformation.GetHorizontalScrollBarHeightForDpi(dpi.Y));
 #else
                 var result = new Size(User32.GetSystemMetricsForDpi(Constants.SM_CXVSCROLL, (uint)dpi.X),
