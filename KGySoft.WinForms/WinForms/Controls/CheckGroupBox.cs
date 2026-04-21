@@ -477,8 +477,8 @@ namespace KGySoft.WinForms.Controls
             {
                 case Constants.WM_DPICHANGED_AFTERPARENT:
                     base.WndProc(ref m);
-                    checkBox.Top = 0;
                     contentPanel.Size = ClientRectangle.Size;
+                    ResetCheckBoxLocation();
                     break;
 
                 default:
@@ -538,10 +538,14 @@ namespace KGySoft.WinForms.Controls
             if (!isInitialized)
                 return;
 
+            // Ensuring that the checkbox does not cover the content (so its top may be below zero a bit, but it does not affect visibility).
+            // NOTE: Alternatively, we could override DisplayRectangle so its top is at checkBox.Height, but then the docked content would be slightly shifted
+            //       compared to a regular GroupBox, and in practice that causes strange issues, too: on DPI change the controls in contentPanel may jump randomly.
+            int top = Math.Min(0, DisplayRectangle.Top - checkBox.Height);
             int indent = referenceIndent.Scale(this.GetScale().X);
-            checkBox.Left = RightToLeft == RightToLeft.No
-                ? indent
-                : Width - checkBox.Width - indent;
+            checkBox.Location = RightToLeft == RightToLeft.No
+                ? new Point(indent, top)
+                : new Point(Width - checkBox.Width - indent, top);
         }
 
         private void ResetCheckBoxColor() => checkBox.EnabledForeColor = !explicitForeColor.IsEmpty ? explicitForeColor
