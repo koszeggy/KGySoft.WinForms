@@ -549,7 +549,13 @@ namespace KGySoft.WinForms.Controls
         }
 
         private void ResetCheckBoxColor() => checkBox.EnabledForeColor = !explicitForeColor.IsEmpty ? explicitForeColor
-            : VisualStyleHelper.RenderWithVisualStyles ? VisualStyleHelper.GetTextColor(Constants.ThemeClassButton, this.GetHandleIfCreated(), (int)BUTTONPARTS.BP_GROUPBOX, (int)GroupBoxState.Normal, default)
+            : VisualStyleHelper.RenderWithVisualStyles ?
+#if NET9_0_OR_GREATER
+                // VisualStyleHelper.GetTextColor returns a black color for group box text even in dark mode, so falling back to regular system colors in dark mode
+                !VisualStyleHelper.HighContrast && (Application.ColorMode == SystemColorMode.Dark || Application.ColorMode == SystemColorMode.System && Application.SystemColorMode == SystemColorMode.Dark) ? default :
+#endif
+                // GroupBox may have a distinct fore color with visual styles (e.g. it has a blueish color in Windows XP with the Luna theme)
+                VisualStyleHelper.GetTextColor(Constants.ThemeClassButton, this.GetHandleIfCreated(), (int)BUTTONPARTS.BP_GROUPBOX, (int)GroupBoxState.Normal, default)
             : default;
 
         private void CheckBoxSizeChanged()
