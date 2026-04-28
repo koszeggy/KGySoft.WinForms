@@ -1,11 +1,10 @@
-﻿[![KGy SOFT .net](https://user-images.githubusercontent.com/27336165/124292367-c93f3d00-db55-11eb-8003-6d943ee7d7fa.png)](https://kgysoft.net)
-
+﻿<!--[![KGy SOFT .net](https://user-images.githubusercontent.com/27336165/124292367-c93f3d00-db55-11eb-8003-6d943ee7d7fa.png)](https://kgysoft.net)-->
 # KGy SOFT WinForms Libraries
 
 KGy SOFT WinForms Libraries offer advanced Windows Forms controls and other useful components for .NET Framework and .NET Core applications. The libraries support every Windows version starting with Windows XP, and every platform target starting with .NET Framework 3.5 and .NET Core 3.0.<!-- With some limitations, Mono/Linux is also supported.-->
 
 <!--[![Website](https://img.shields.io/website/https/kgysoft.net/winforms.svg)](https://kgysoft.net/winforms)-->
-<!--[![Online Help](https://img.shields.io/website/https/docs.kgysoft.net/winforms.svg?label=online%20help&up_message=available)](https://docs.kgysoft.net/winforms)-->
+<!--[![Online Help](https://img.shields.io/website/https/koszeggy.github.io/docs/winforms.svg?label=online%20help&up_message=available)](https://koszeggy.github.io/docs/winforms)-->
 [![GitHub Repo](https://img.shields.io/github/repo-size/koszeggy/KGySoft.WinForms.svg?label=github)](https://github.com/koszeggy/KGySoft.WinForms)
 [![Nuget](https://img.shields.io/nuget/vpre/KGySoft.WinForms.svg)](https://www.nuget.org/packages/KGySoft.WinForms)
 
@@ -41,8 +40,8 @@ Find the project site at [kgysoft.net](https://kgysoft.net/winforms/).
 
 ## Documentation
 
-* You can find the online KGy SOFT Core Libraries documentation [here](https://docs.kgysoft.net/winforms).
-* See [this](https://docs.kgysoft.net) link to access the online documentation of all KGy SOFT libraries.
+* You can find the online KGy SOFT Core Libraries documentation [here](https://koszeggy.github.io/docs/winforms).
+* See [this](https://koszeggy.github.io/docs) link to access the online documentation of all KGy SOFT libraries.
 -->
 
 ## Release Notes
@@ -147,7 +146,7 @@ Regular `DateTimePicker` control does not allow custom colors, it does not even 
 
 <p align="center">
   <img alt="AdvancedDateTimePicker in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/559d88ee-ab03-4fec-81a0-3434ec366f06"/>
-  <br/><em><code>DateTimePicker</code> vs. <code>AdvancedDateTimePicker></code> on Windows 11 with high DPI (125%), targeting .NET 9.0</em>
+  <br/><em><code>DateTimePicker</code> vs. <code>AdvancedDateTimePicker</code> on Windows 11 with high DPI (125%), targeting .NET 9.0</em>
 </p>
 
 </details>
@@ -226,7 +225,7 @@ The `CheckGroupBox` control is a specialized `GroupBox` that has a check box in 
 <details>
 <summary><strong><code>CommandLinkButton</code></strong><a id="commandlinkbutton"/></summary><p/>
 
-A command link is a special button that can be used used to present a choice of action to the user. It is practically a `Button`, but it has a larger size, and it can display an icon and a description text below the main text. The `CommandLinkButton` control is a specialized button that supports this functionality.
+A command link is a special button that can be used to present a choice of action to the user. It is practically a `Button`, but it has a larger size, and it can display an icon and a description text below the main text. The `CommandLinkButton` control is a specialized button that supports this functionality.
 
 When `FlatStyle` is set to `System`, the control is rendered by the system on Windows Vista and later, when visual styles are enabled. Otherwise, a compatible rendering is used. The actual appearance can be quite different on different Windows versions, with or without visual styles and with high contrast mode enabled.
 
@@ -293,10 +292,10 @@ The static `Dialogs` class has various `InputDialog` overloads that can be used 
 </details>
 
 ## License
-KGy SOFT Core Libraries are under the [KGy SOFT License 1.0](https://github.com/koszeggy/KGySoft.CoreLibraries/blob/master/LICENSE), which is a permissive GPL-like license. It allows you to copy and redistribute the material in any medium or format for any purpose, even commercially. The only thing is not allowed is to distribute a modified material as yours: though you are free to change and re-use anything, do that by giving appropriate credit. See the [LICENSE](https://github.com/koszeggy/KGySoft.CoreLibraries/blob/master/LICENSE) file for details.
+KGy SOFT WinForms Libraries are under the [KGy SOFT License 1.0](https://github.com/koszeggy/KGySoft.CoreLibraries/blob/master/LICENSE), which is a permissive GPL-like license. It allows you to copy and redistribute the material in any medium or format for any purpose, even commercially. The only thing is not allowed is to distribute a modified material as yours: though you are free to change and re-use anything, do that by giving appropriate credit. See the [LICENSE](https://github.com/koszeggy/KGySoft.CoreLibraries/blob/master/LICENSE) file for details.
 
----
+<!-----
+See the complete KGy SOFT WinForms Libraries documentation with even more examples at the [docs](https://koszeggy.github.io/docs/winforms) site.-->
 
-See the complete KGy SOFT Core Libraries documentation with even more examples at [docs.kgysoft.net](https://docs.kgysoft.net/corelibraries).
-
-[![KGy SOFT .net](https://user-images.githubusercontent.com/27336165/124292367-c93f3d00-db55-11eb-8003-6d943ee7d7fa.png)](https://kgysoft.net)
+<!--[![KGy SOFT .net](https://user-images.githubusercontent.com/27336165/124292367-c93f3d00-db55-11eb-8003-6d943ee7d7fa.png)](https://kgysoft.net)
+-->

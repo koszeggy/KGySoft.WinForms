@@ -76,7 +76,7 @@ namespace KGySoft.WinForms.Forms
     /// Note that it affects font scaling only (which may indirectly affect also size and content scaling if <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.Font"/>),
     /// but basically auto-sizing behavior still depends on the current platform.</item>
     /// <item>The <see cref="DynamicStringLocalization"/> property allows creating dynamically generated localizations for any language.</item>
-    /// <item><see cref="CommandBindings"/> property. See the <a href="https://kgysoft.net/corelibraries#command-binding" target="_blank">online documentation</a> for details.</item>
+    /// <item><see cref="CommandBindings"/> property. See the <a href="https://github.com/koszeggy/KGySoft.CoreLibraries#command-binding" target="_blank">online documentation</a> for details.</item>
     /// <item>Advanced MDI application support, see the <see cref="ShowMdiChild"/> method and <see cref="OwnedMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
     /// <item>Fixes a <a href="https://github.com/dotnet/winforms/issues/1504" target="_blank">resizing bug</a> that exists in .NET Framework and .NET Core 3.x that can occur with multiple displays.</item>
     /// <item><see cref="ToolTip"/> property to create tool tips for the controls on the form.</item>

@@ -186,7 +186,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         /// <remarks>
         /// <para>When value is <see cref="HyperlinkResolveMode.ResolveHrefsOnly"/>, hyperlinks will be resolved only in the following form:
-        /// <example><c>This is a &lt;a href="https://kgysoft.net"&gt;hyperlink&lt;/a&gt;</c></example>
+        /// <example><c>This is a &lt;a href="https://github.com/koszeggy"&gt;hyperlink&lt;/a&gt;</c></example>
         /// </para>
         /// <para>When value is <see cref="HyperlinkResolveMode.ResolveAll"/>, simple inline hyperlinks will be resolved, too.</para>
         /// <para>When value is <see cref="HyperlinkResolveMode.None"/>, you need to explicitly set <see cref="LinkArea"/> to specify a
@@ -196,7 +196,7 @@ namespace KGySoft.WinForms.Controls
         [DefaultValue(HyperlinkResolveMode.None)]
         [Description(@"Gets or sets whether hyperlinks should be resolved.
 When value is ""ResolveHrefsOnly"", hyperlinks will be resolved only in the following form:
-This is a <a href=""https://kgysoft.net"">hyperlink</a>
+This is a <a href=""https://github.com/koszeggy"">hyperlink</a>
 When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
         public HyperlinkResolveMode ResolveHyperlinks
         {
@@ -255,12 +255,12 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
         /// <summary>
         /// Gets or sets text of the label. When <see cref="ResolveHyperlinks"/> is not <see cref="HyperlinkResolveMode.None"/>,
         /// hyperlinks in text like the following will be converted to hyperlinks:
-        /// <example><c>This is a &lt;a href="http://kgysoft.net"&gt;hyperlink&lt;/a&gt;</c></example>
+        /// <example><c>This is a &lt;a href=https://github.com/koszeggy"&gt;hyperlink&lt;/a&gt;</c></example>
         /// </summary>
         [RefreshProperties(RefreshProperties.Repaint)]
         [Category("AdvancedLabel")]
         [Description(@"Gets or sets text of the label. When ResolveHyperlinks is set, hyperlinks in text like the following will be converted to hyperlinks:
-This is a <a href=""http://kgysoft.net"">hyperlink</a>")]
+This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
         [AllowNull]
         public override string Text
         {

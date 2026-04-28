@@ -371,8 +371,9 @@
             this.advancedLabel18.Dock = System.Windows.Forms.DockStyle.Top;
             this.advancedLabel18.Location = new System.Drawing.Point(3, 16);
             this.advancedLabel18.Name = "advancedLabel18";
-            this.advancedLabel18.RawText = "An AdvancedLabel may contain hyperlinks such as <a href=\"https://kgysoft.net\">hyp" +
-    "erlink</a> or https://kgysoft.net. See ResolveHyperlinks property.";
+            this.advancedLabel18.RawText = "An AdvancedLabel may contain hyperlinks such as " +
+                "<a href=\"https://github.com/koszeggy/KGySoft.WinForms\">hyperlink</a> or " +
+                "https://github.com/koszeggy. See ResolveHyperlinks property.";
             this.advancedLabel18.ResolveHyperlinks = KGySoft.WinForms.HyperlinkResolveMode.ResolveAll;
             this.advancedLabel18.Size = new System.Drawing.Size(444, 30);
             this.advancedLabel18.TabIndex = 0;

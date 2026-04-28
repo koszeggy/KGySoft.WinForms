@@ -22,7 +22,7 @@
   KGySoft.WinForms namespace. As a low-level solution, you can also use the DynamicResourceManager class directly
   from the KGySoft.CoreLibraries package. For more details, see:
   - The example application contains a localization example: https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example
-  - DynamicResourceManager class: https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm
+  - DynamicResourceManager class: https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm
 
 ! Language class: It has been made obsolete. See the note above.
   ! The RedirectTranslate event has been removed. Use the LocalizationHelper.LocalizationRequested event instead.

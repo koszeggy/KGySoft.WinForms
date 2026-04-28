@@ -196,8 +196,8 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Applies the string resources of the <see cref="OkCancelButtons"/> control. By default, if <see cref="BaseUserControl.DynamicStringLocalization"/>
         /// is <see cref="DynamicStringLocalization.Disabled"/>, it applies the English string resources from the <c>KGySoft.WinForms</c> assembly, whose localization
-        /// is turned off by default and can be opt-in by setting the <a href="https://docs.kgysoft.net/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
-        /// property to <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a>.
+        /// is turned off by default and can be opt-in by setting the <a href="https://koszeggy.github.io/docs/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
+        /// property to <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a>.
         /// Otherwise, it applies the dynamic string localization as it is described in the <see cref="BaseUserControl.ApplyStringResources">BaseUserControl.ApplyStringResources</see> method.
         /// </summary>
         protected override void ApplyStringResources()

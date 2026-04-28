@@ -44,7 +44,7 @@ namespace KGySoft.Libraries.Language
     /// To overcome all these issues and still use .resx-based dynamically generated localizations you can use the
     /// <see cref="LocalizationHelper"/> class (recommended when you use the <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
     /// property of <see cref="BaseForm"/> or <see cref="BaseUserControl"/> classes), or the
-    /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note>
+    /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note>
     /// </remarks>
     /// <seealso cref="LocalizationHelper"/>
     /// <seealso cref="LocalizationHelper.GetString(string,LocalizationContext)"/>
@@ -73,7 +73,7 @@ namespace KGySoft.Libraries.Language
         /// <param name="text">The text to translate.</param>
         /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possibly existing distinction postfix. Use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method or the
-        /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
+        /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
         public static string Translate(string? text)
         {
             if (text == null!)
@@ -121,7 +121,7 @@ namespace KGySoft.Libraries.Language
         /// <returns></returns>
         /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possibly existing distinction postfix. Use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext,object[])">LocalizationHelper.GetString</see> method or the
-        /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
+        /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
         public static string Translate(string text, params object[]? args) => args is null || args.Length == 0
             ? Translate(text)
             : String.Format(LanguageSettings.FormattingLanguage, Translate(text), args);
@@ -136,7 +136,7 @@ namespace KGySoft.Libraries.Language
         /// <returns></returns>
         /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possibly existing distinction postfix. Use the
         /// <see cref="LocalizationHelper.GetString(CultureInfo,string,LocalizationContext,object[])">LocalizationHelper.GetString</see> method or the
-        /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
+        /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
         public static string Translate(CultureInfo formattingCulture, string text, params object[]? args) => args is null || args.Length == 0
             ? Translate(text)
             : String.Format(formattingCulture, Translate(text), args);
@@ -145,7 +145,7 @@ namespace KGySoft.Libraries.Language
         /// Saves the dictionary if <see cref="ActiveLanguage"/> is not the invariant culture.
         /// </summary>
         /// <remarks><note type="warning">This method doesn't do anything anymore. Use the
-        /// <a href="https://docs.kgysoft.net/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
+        /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
         public static void SaveDictionary()
         {
             //SaveDictionary(Assembly.GetCallingAssembly());
