@@ -42,7 +42,7 @@ using System.Security;
 // by using the '*' as shown below:
 [assembly: AssemblyVersion("5.0.0.0")]
 [assembly: AssemblyFileVersion("5.0.0.0")]
-[assembly: AssemblyInformationalVersion("5.0.0-rc.2")]
+[assembly: AssemblyInformationalVersion("5.0.0-rc.3")]
 #if NET5_0_OR_GREATER
 [assembly: SupportedOSPlatform("windows")] 
 #endif

@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>KGySoft.WinForms</id>
-    <version>5.0.0-rc.2</version>
+    <version>5.0.0-rc.3</version>
     <title>KGy SOFT Windows Forms Libraries</title>
     <authors>György Kőszeg</authors>
     <owners>György Kőszeg</owners>
@@ -51,6 +51,9 @@ Find some more examples with images at the project site at https://github.com/ko
       <group targetFramework="net6.0-windows7.0" >
         <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
+      <group targetFramework="net9.0-windows7.0" >
+        <dependency id="KGySoft.Drawing" version="10.0.2" />
+      </group>
       <group targetFramework="net10.0-windows7.0" >
         <dependency id="KGySoft.Drawing" version="10.0.2" />
       </group>
@@ -77,6 +80,8 @@ Find some more examples with images at the project site at https://github.com/ko
     <file src="..\bin\Release\net5.0-windows\KGySoft.WinForms.xml" target="lib\net5.0-windows7.0" />
     <file src="..\bin\Release\net6.0-windows\KGySoft.WinForms.dll" target="lib\net6.0-windows7.0" />
     <file src="..\bin\Release\net6.0-windows\KGySoft.WinForms.xml" target="lib\net6.0-windows7.0" />
+    <file src="..\bin\Release\net9.0-windows\KGySoft.WinForms.dll" target="lib\net9.0-windows7.0" />
+    <file src="..\bin\Release\net9.0-windows\KGySoft.WinForms.xml" target="lib\net9.0-windows7.0" />
     <file src="..\bin\Release\net10.0-windows\KGySoft.WinForms.dll" target="lib\net10.0-windows7.0" />
     <file src="..\bin\Release\net10.0-windows\KGySoft.WinForms.xml" target="lib\net10.0-windows7.0" />
   </files>
