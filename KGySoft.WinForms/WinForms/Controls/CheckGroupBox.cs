@@ -33,6 +33,10 @@ using KGySoft.WinForms.WinApi;
 #pragma warning disable CS8604 // Possible null reference argument. - Controls items are never null
 #endif
 
+#if NET9_0
+#pragma warning disable WFO5001 // System.Windows.Forms.SystemColorMode is for evaluation purposes only and is subject to change or removal in future updates.
+#endif
+
 #endregion
 
 namespace KGySoft.WinForms.Controls
