@@ -806,6 +806,8 @@ namespace KGySoft.WinForms.Controls
                 (clientSize.Height >> 1) - (scaledSize.Height >> 1));
 
             bool isRtl = RightToLeft == RightToLeft.Yes;
+            bool scrollbarsChanged = isHorizontalVisible != sbHorizontal.Visible || isVerticalVisible != sbVertical.Visible
+                || isHorizontalVisible && sbHorizontal.Maximum != scaledSize.Width || isVerticalVisible && sbVertical.Maximum != scaledSize.Height;
 
             // both scrollbars
             if (isHorizontalVisible || isVerticalVisible)
@@ -829,7 +831,7 @@ namespace KGySoft.WinForms.Controls
             }
 
             // adjust scrollbar values
-            if (flags[sbHorizontalVisible])
+            if (isHorizontalVisible)
             {
                 float origCenter = sbHorizontal.Visible
                     ? (sbHorizontal.Value + sbHorizontal.LargeChange / 2f) / sbHorizontal.Maximum
@@ -863,8 +865,11 @@ namespace KGySoft.WinForms.Controls
 
             sbHorizontal.Visible = isHorizontalVisible;
             sbVertical.Visible = isVerticalVisible;
-            Cursor = isHorizontalVisible || isVerticalVisible ? CursorsCache.HandOpen : null;
-            flags[isDragging] = false;
+            if (scrollbarsChanged)
+            {
+                Cursor = isHorizontalVisible || isVerticalVisible ? CursorsCache.HandOpen : null;
+                flags[isDragging] = false;
+            }
 
             clientRectangle = new Rectangle(clientLocation, clientSize);
             targetRectangle = new Rectangle(targetLocation, scaledSize);
