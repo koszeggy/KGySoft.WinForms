@@ -233,7 +233,7 @@ namespace KGySoft.WinForms.Forms
 
         #region Private Fields
 
-        private readonly CommandBindingsCollection commandBindings = new WinFormsCommandBindingsCollection();
+        private readonly WinFormsCommandBindingsCollection commandBindings = new();
         private readonly InvokeMarshaller invoker;
 
         private Form? suspendingMdiChild;
@@ -530,12 +530,13 @@ namespace KGySoft.WinForms.Forms
         public bool IsSuspended => suspendingMdiChild != null;
 
         /// <summary>
-        /// Gets the command bindings of this form. The <see cref="O:KGySoft.ComponentModel.CommandBindingsCollection.Add">Add</see> methods also add
-        /// the <see cref="PropertyCommandStateUpdater"/> to the created bindings.
+        /// Gets the command bindings of this form. Being a <see cref="WinFormsCommandBindingsCollection"/>,
+        /// the <a href="https://koszeggy.github.io/docs/corelibraries/html/Overload_KGySoft_ComponentModel_CommandBindingsCollection_Add.htm" target="_blank">Add</a>
+        /// methods also add the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_PropertyCommandStateUpdater.htm" target="_blank">PropertyCommandStateUpdater</a> to the created bindings.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public CommandBindingsCollection CommandBindings => commandBindings;
+        public WinFormsCommandBindingsCollection CommandBindings => commandBindings;
 
         /// <summary>
         /// Gets the current scale of the form's display device. Before loading the form, or when per-monitor DPI awareness is not enabled,

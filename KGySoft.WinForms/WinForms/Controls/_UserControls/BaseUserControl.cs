@@ -45,7 +45,7 @@ namespace KGySoft.WinForms.Controls
     {
         #region Fields
 
-        private readonly CommandBindingsCollection commandBindings = new WinFormsCommandBindingsCollection();
+        private readonly WinFormsCommandBindingsCollection commandBindings = new();
         private readonly InvokeMarshaller invoker;
 
         private bool isLoaded;
@@ -73,12 +73,13 @@ namespace KGySoft.WinForms.Controls
         #region Public Properties
 
         /// <summary>
-        /// Gets the command bindings of this form. The <see cref="O:KGySoft.ComponentModel.CommandBindingsCollection.Add">Add</see> methods also add
-        /// the <see cref="PropertyCommandStateUpdater"/> to the created bindings.
+        /// Gets the command bindings of this user control. Being a <see cref="WinFormsCommandBindingsCollection"/>,
+        /// the <a href="https://koszeggy.github.io/docs/corelibraries/html/Overload_KGySoft_ComponentModel_CommandBindingsCollection_Add.htm" target="_blank">Add</a>
+        /// methods also add the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_PropertyCommandStateUpdater.htm" target="_blank">PropertyCommandStateUpdater</a> to the created bindings.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
-        public CommandBindingsCollection CommandBindings => commandBindings;
+        public WinFormsCommandBindingsCollection CommandBindings => commandBindings;
 
         /// <summary>
         /// Gets or sets the dynamic string localization strategy of the user control. It allows using potentially auto-generated string resources from .resx files.
