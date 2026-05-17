@@ -72,6 +72,12 @@ namespace KGySoft.WinForms
             {
                 // it can happen that both Disposing and IsDisposed returned false, but actual Invoke is started to execute only after disposing has started
             }
+            catch (InvalidOperationException) when (!owner.IsHandleCreated || owner.IsDisposed)
+            {
+                // "Invoke or BeginInvoke cannot be called on a control until the window handle has been created."
+                // Similar to the ObjectDisposedException catch, but in some cases even the Invoke call succeeds to marshal the delegate,
+                // but by the time the actual execution starts, the control is already disposed.
+            }
         }
 
         #endregion
