@@ -61,6 +61,16 @@ namespace System.Threading
             }
         }
 
+        internal bool Wait(int millisecondsTimeout)
+        {
+            lock (syncRoot)
+            {
+                if (isDisposed || IsSet)
+                    return true;
+                return Monitor.Wait(syncRoot, millisecondsTimeout);
+            }
+        }
+
         #endregion
 
         #endregion

@@ -46,6 +46,11 @@ namespace KGySoft.WinForms
         /// </summary>
         public bool IsCanceled => isCanceled;
 
+        /// <summary>
+        /// Gets whether the task has been completed.
+        /// </summary>
+        public bool IsCompleted => completedEvent.IsSet;
+
         #endregion
 
         #region Protected Properties
@@ -100,6 +105,29 @@ namespace KGySoft.WinForms
             {
                 // it can happen that the task has just been completed after querying IsCompleted but this part
                 // must not be in a lock because that may cause deadlocks
+            }
+        }
+
+        /// <summary>
+        /// Waits for the task to complete, with a specified timeout. This method blocks
+        /// the calling thread until the task is completed or the specified timeout has elapsed, whichever comes first.
+        /// </summary>
+        /// <param name="millisecondsTimeout">The number of milliseconds to wait, or <see cref="Timeout.Infinite"/> (-1) to wait indefinitely.</param>
+        /// <returns><see langword="true"/> if the task completed within the specified timeout; otherwise, <see langword="false"/>.</returns>
+        public bool Wait(int millisecondsTimeout)
+        {
+            if (IsDisposed)
+                return true;
+
+            try
+            {
+                return completedEvent.Wait(millisecondsTimeout);
+            }
+            catch (ObjectDisposedException)
+            {
+                // it can happen that the task has just been completed after querying IsCompleted but this part
+                // must not be in a lock because that may cause deadlocks
+                return true;
             }
         }
 
