@@ -216,14 +216,10 @@ namespace KGySoft.WinForms.Components
                 return;
             }
 
-            if (click != null)
-            {
-                click.Invoke(this, e);
-            }
+            if (click is EventHandler<HandledEventArgs> handler)
+                handler.Invoke(this, e);
             else
-            {
                 e.Handled = false;
-            }
         }
 
         #endregion

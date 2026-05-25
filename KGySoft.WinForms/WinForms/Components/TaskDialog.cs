@@ -275,6 +275,19 @@ namespace KGySoft.WinForms.Components
             remove => closing -= value;
         }
 
+        /// <summary>
+        /// Occurs when the dialog has been closed.
+        /// </summary>
+        public event EventHandler Closed
+        {
+            add
+            {
+                CheckDisposed();
+                closed += value;
+            }
+            remove => closed -= value;
+        }
+
         #endregion
 
         #region Properties

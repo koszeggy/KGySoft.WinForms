@@ -22,7 +22,7 @@ namespace KGySoft.WinForms.Components
     {
         /// <summary>
         /// Indicates none of the possible results.
-        /// Usually meand that the dialog is not closed yet.
+        /// Usually means that the dialog is not closed yet.
         /// </summary>
         None = 0,
 
