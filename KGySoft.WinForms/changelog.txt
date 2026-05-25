@@ -72,6 +72,7 @@
   - Native mode: fixing some rare exception cases during Dispose
   - Native mode: when owner was not specified, the caller window remained enabled
   - Compatibility mode: opening without an owner was still modal, which is not how the native TaskDialog works.
+  - Compatibility mode: fixing the font of the main instruction text if it is set after showing the dialog.
   * Compatibility mode: improving expando button image quality, showing ? button if HelpRequested event is assigned,
     adjusting sizes of custom button icons.
 + TaskDialogOptions enum:

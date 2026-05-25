@@ -2252,6 +2252,8 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 case TaskDialog.PropertyMainInstruction:
+                    if (lblMainInstruction.Text.Length == 0 && !String.IsNullOrEmpty(host.MainInstruction))
+                        lblMainInstruction.Font = MainInstructionsFont; // needed when the main instruction is set after displaying the window
                     UpdateText(lblMainInstruction, host.MainInstruction, true, false, false);
                     return;
 
