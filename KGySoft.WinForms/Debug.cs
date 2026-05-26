@@ -94,9 +94,21 @@ namespace KGySoft
         internal static void WriteLine(string? message = null)
         {
             if (OSHelper.IsMono || !Debugger.IsAttached)
+            {
                 Console.WriteLine(message);
-            else
+                return;
+            }
+
+            try
+            {
                 SystemDebug.WriteLine(message);
+            }
+            catch (Exception e) when (!e.IsCritical())
+            {
+                // It can occur for the first time if the app.config contains the .NET Framework 4.x-specific high DPI section, so the 2nd time it will succeed.
+                if (e.GetType().Name == "ConfigurationErrorsException")
+                    SystemDebug.WriteLine(message);
+            }
         }
 
         #endregion

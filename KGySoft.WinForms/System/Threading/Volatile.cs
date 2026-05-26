@@ -7,11 +7,14 @@ namespace System.Threading
     {
         #region Methods
 
-        internal static void Write<T>(ref T location, T value)
+        internal static void Write<T>(ref T location, T value) where T : class
         {
             Thread.MemoryBarrier();
             location = value;
         }
+
+        internal static long Read(ref long location) => Thread.VolatileRead(ref location);
+        internal static void Write(ref long location, long value) => Thread.VolatileWrite(ref location, value);
 
         #endregion
     }

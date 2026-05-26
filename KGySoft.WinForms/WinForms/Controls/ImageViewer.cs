@@ -254,12 +254,15 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// When a <see cref="Bitmap"/> is assigned to <see cref="Image"/>, gets or sets whether rendering with resize uses interpolation (that is when <see cref="Zoom"/> is not 1).
-        /// When a <see cref="Metafile"/> is assigned to <see cref="Image"/>, gets or sets whether the metafile is rendered with antialiasing.
+        /// When a <see cref="Metafile"/> is assigned to <see cref="Image"/>, gets or sets whether the metafile is rendered with antialiasing. Smoothing metafiles might be turned off automatically on higher zooming levels.
         /// Default value: <see langword="false"/>.
         /// </summary>
+        /// <remarks>
+        /// <para>Smoothing metafiles may not have a noticeable effect if the metafile already contains drawing records with antialiasing, or when the metafile contains bitmap images only.</para>
+        /// </remarks>
         [Category("ImageViewer")]
         [Description("When a Bitmap is assigned to Image, determines whether rendering with resize uses interpolation (that is when Zoom is not 1). "
-            + "When a Metafile is assigned to Image, determines whether the metafile is rendered with antialiasing.")]
+            + "When a Metafile is assigned to Image, determines whether the metafile is rendered with antialiasing. Smoothing metafiles might be turned off automatically on higher zooming levels.")]
         [DefaultValue(false)]
         public bool SmoothingEnabled
         {

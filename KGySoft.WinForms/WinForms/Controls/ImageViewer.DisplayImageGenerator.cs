@@ -81,7 +81,8 @@ namespace KGySoft.WinForms.Controls
 
             #region Constants
 
-            private const int sizeThreshold = 1024;
+            private const int minBitmapSizeThreshold = 1024;
+            private const int metafileDoublingTimeThreshold = 100; // in milliseconds
 
             #endregion
 
@@ -155,6 +156,13 @@ namespace KGySoft.WinForms.Controls
             /// then <see cref="resizedDisplayImage"/> can be displayed.
             /// </summary>
             private Size requestedSize;
+
+            /// <summary>
+            /// Interpreted as a size in number of pixels, and gets the smallest size above which a metafile is not resized.
+            /// Needed because metafiles with bitmaps might be drawn very slowly, because the DrawImage operation
+            /// uses a process-wide lock, so not even the background thread helps. Written in multiple threads, so accessed always by volatile reads/writes.
+            /// </summary>
+            private long maxMetafileSizeThreshold = Int64.MaxValue;
 
             #endregion
 
@@ -275,14 +283,14 @@ namespace KGySoft.WinForms.Controls
                     Size size = owner.imageSize;
 
                     // >4x zoom or shrunk image that is not greater than generating threshold: using HighQualityBicubic 
-                    if (zoom >= 4f || zoom < 1f && size.Width <= sizeThreshold && size.Height <= sizeThreshold)
+                    if (zoom >= 4f || zoom < 1f && size.Width <= minBitmapSizeThreshold && size.Height <= minBitmapSizeThreshold)
                         interpolationMode = InterpolationMode.HighQualityBicubic;
                     // 1-4x zoom: HighQualityBilinear for large images to prevent heavy lagging; otherwise, HighQualityBicubic
                     else if (zoom > 1f)
-                        interpolationMode = size.Width > sizeThreshold || size.Height > sizeThreshold ? InterpolationMode.HighQualityBilinear : InterpolationMode.HighQualityBicubic;
+                        interpolationMode = size.Width > minBitmapSizeThreshold || size.Height > minBitmapSizeThreshold ? InterpolationMode.HighQualityBilinear : InterpolationMode.HighQualityBicubic;
                     // Shrinking larger images if generating is disabled: applying a hopefully-not-too-slow fallback interpolation
                     else if (!GenerateResizedBitmap && zoom < 1f)
-                        interpolationMode = owner.targetRectangle.Width > sizeThreshold || owner.targetRectangle.Height > sizeThreshold ? InterpolationMode.Bilinear : InterpolationMode.Bicubic;
+                        interpolationMode = owner.targetRectangle.Width > minBitmapSizeThreshold || owner.targetRectangle.Height > minBitmapSizeThreshold ? InterpolationMode.Bilinear : InterpolationMode.Bicubic;
                 }
 
                 // 4.) Returning either a generated display or the original image
@@ -336,6 +344,7 @@ namespace KGySoft.WinForms.Controls
                 WaitForPendingGenerate(generateResizedImageTask);
 
                 requestedSize = default;
+                Volatile.Write(ref maxMetafileSizeThreshold, Int64.MaxValue);
 
                 lock (SyncRoot)
                 {
@@ -368,7 +377,7 @@ namespace KGySoft.WinForms.Controls
                 // Bitmap: generating a new default image for unsupported formats,
                 bool isGenerateNeeded = bitmap != null && (owner.pixelFormat.In(unsupportedFormats)
                     // for non-PARGB32 images larger than 256x256 - note: leaving even slow formats unconverted below sizeThreshold / 4
-                    || owner.pixelFormat != PixelFormat.Format32bppPArgb && (owner.imageSize.Width > sizeThreshold >> 2 || owner.imageSize.Height > sizeThreshold >> 2)
+                    || owner.pixelFormat != PixelFormat.Format32bppPArgb && (owner.imageSize.Width > minBitmapSizeThreshold >> 2 || owner.imageSize.Height > minBitmapSizeThreshold >> 2)
                     // and for native icons: converting because icons are handled oddly by GDI+, for example, the first column has half pixel width
                     || owner.flags[isIcon]);
 
@@ -419,14 +428,15 @@ namespace KGySoft.WinForms.Controls
                 Debug.Assert(owner.image != null && owner.pixelFormat != default);
 
                 Image image = owner.image!;
+                Size size = owner.targetRectangle.Size;
+                bool metafile = owner.flags[isMetafile];
 
-                // Metafile: If smoothing edges is enabled
+                // Metafile: If smoothing edges is enabled and the doubled metafile can be drawn fast enough
                 // Bitmap: If smoothing resize is enabled, the image is shrunk and image size is larger than 1024x1024
-                bool isGenerateNeeded = owner.flags[smoothingEnabled] && (owner.flags[isMetafile]
-                    || owner.zoom < 1f && (owner.imageSize.Width > sizeThreshold || owner.imageSize.Height > sizeThreshold));
+                bool isGenerateNeeded = owner.flags[smoothingEnabled] && (metafile && (long)size.Width * size.Height < Volatile.Read(ref maxMetafileSizeThreshold)
+                    || !metafile && owner.zoom < 1f && (owner.imageSize.Width > minBitmapSizeThreshold || owner.imageSize.Height > minBitmapSizeThreshold));
 
                 // Not canceling the possible generate task here. It will call an invalidate in the end, and we can see whether we use the result.
-                Size size = owner.targetRectangle.Size;
                 if (!isGenerateNeeded || size.Width < 1 || size.Height < 1)
                 {
                     requestedSize = default;
@@ -462,7 +472,7 @@ namespace KGySoft.WinForms.Controls
                     task.SourceImage = image;
                 else
                 {
-                    // Turning of optimizations if there is not enough memory to generate a clone bitmap
+                    // Turning off optimizations if there is not enough memory to generate a clone bitmap
                     if (CheckMemoryUsage && image is Bitmap)
                     {
                         // Getting stride without locking the bitmap. Assuming stride is always aligned to 4 bytes
@@ -620,7 +630,26 @@ namespace KGySoft.WinForms.Controls
                             Monitor.Enter(task.SourceImage);
                         try
                         {
-                            doubled = new Bitmap(task.SourceImage, task.Size.Width << 1, task.Size.Height << 1);
+                            // NOTE: not using the image drawing constructor here, because it uses bilinear interpolation, which may cause ugly black edges for bitmap drawing records for legacy GDI metafile types.
+                            var doubledSize = new Size(task.Size.Width << 1, task.Size.Height << 1);
+                            doubled = new Bitmap(doubledSize.Width, doubledSize.Height, PixelFormat.Format32bppPArgb);
+                            long timestampStart, timestampEnd;
+                            using (var g = Graphics.FromImage(doubled))
+                            {
+                                // Interpolation mode must always be NN here. Matters when the metafile contains image drawing records, and the metafile type is WMF or EmfOnly.
+                                // In this case the enlarged result with interpolation may cause ugly black contours at transparent edges.
+                                g.InterpolationMode = InterpolationMode.NearestNeighbor;
+                                timestampStart = TimeHelper.GetTimeStamp();
+                                g.DrawImage(task.SourceImage, new Rectangle(Point.Empty, doubledSize));
+                                timestampEnd = TimeHelper.GetTimeStamp();
+                            }
+
+                            // Not just the antialiasing, but also the doubling time of a metafile can be really slow, especially if the metafile contains bitmap drawing records.
+                            // This is more problematic than the shrinking, because the DrawImage operation uses a process-wide lock, blocking every other drawing operation in other threads as well.
+                            // Therefore, limiting the size of this operation even though it is likely still faster than the shrinking afterward.
+                            Debug.WriteLine($"Metafile doubling time: {TimeHelper.GetTimeSpan(timestampEnd - timestampStart).TotalMilliseconds:N2} ms");
+                            if (timestampEnd - timestampStart > TimeHelper.GetInterval(metafileDoublingTimeThreshold))
+                                Volatile.Write(ref maxMetafileSizeThreshold, (long)task.Size.Width * task.Size.Height);
                         }
                         finally
                         {
