@@ -79,6 +79,10 @@ namespace KGySoft.WinForms.Controls
         private const int isDragging = isApplyingZoom << 1;
         private const int isPerMonitorDpiAwarenessV1 = isDragging << 1;
 
+        // For metafiles the max zoom is theoretically unlimited. In practice, for a typical metafile the rendering stops working when the zoomed image size is around 120M ^ 2 pixels.
+        // Setting the limit to ~4 million width or height, which usually works even in special cases.
+        private const int maxMetafileZoomedSize = 1 << 22;
+
         #endregion
 
         #region Fields
@@ -960,21 +964,14 @@ namespace KGySoft.WinForms.Controls
             if (value < minZoom)
                 value = minZoom;
 
-            Size screenSize = Screen.GetBounds(this).Size;
             float maxZoom;
 
             if (flags[isMetafile])
-            {
-                // For metafiles the max zoom is between 1x and 2x screen size. 2x screen size is allowed if that is below 10,000 pixels
-                const int maxMetafileSize = 10_000;
-                maxZoom = Math.Max(
-                    Math.Min(Math.Max(screenSize.Width, maxMetafileSize), screenSize.Width << 1),
-                    Math.Min(Math.Max(screenSize.Height, maxMetafileSize), screenSize.Height << 1))
-                    / (float)Math.Max(imageSize.Width, imageSize.Height);
-            }
+                maxZoom = maxMetafileZoomedSize / (float)Math.Max(imageSize.Width, imageSize.Height);
             else
             {
                 // For bitmaps the default maximum size is image size * 10 (adjusted with DPI) but at least screen size x 2
+                Size screenSize = Screen.GetBounds(this).Size;
                 PointF scale = this.GetScale();
                 maxZoom = image == null ? 1f : Math.Max(
                     Math.Max(scale.X * 10, (screenSize.Width << 1) / (float)imageSize.Width),

@@ -1255,7 +1255,7 @@ namespace KGySoft.WinForms.Controls
                         return true;
                     }
 
-                    Bitmap bmp = base.Image as Bitmap ?? new Bitmap(base.Image);
+                    Bitmap bmp = base.Image.AsBitmap();
                     User32.SendMessage(Handle, Constants.BM_SETIMAGE, new IntPtr(1), bmp.GetHicon());
                     if (!ReferenceEquals(bmp, base.Image))
                         bmp.Dispose();

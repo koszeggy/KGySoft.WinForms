@@ -7,7 +7,7 @@ namespace System.Threading
     {
         #region Methods
 
-        internal static void Write<T>(ref T location, T value) where T : class
+        internal static void Write<T>(ref T location, T value) where T : class?
         {
             Thread.MemoryBarrier();
             location = value;

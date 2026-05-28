@@ -81,7 +81,8 @@ namespace KGySoft.WinForms.Controls
 
             #region Constants
 
-            private const int minBitmapSizeThreshold = 1024;
+            private const int minBitmapSmoothingSizeThreshold = 1024; // Minimum size in either dimensions to generate a shrunk preview image. For non-PARGB32 formats its quarter is the limit.
+            private const int maxMetafileSizeSmoothingThreshold = 10_000; // maximum size in either dimension to generate an anti-aliased preview from a doubled image (~1.5GB)
             private const int metafileDoublingTimeThreshold = 100; // in milliseconds
 
             #endregion
@@ -158,11 +159,12 @@ namespace KGySoft.WinForms.Controls
             private Size requestedSize;
 
             /// <summary>
-            /// Interpreted as a size in number of pixels, and gets the smallest size above which a metafile is not resized.
+            /// Interpreted as a size in number of pixels, and dynamically gets the smallest size above which a metafile is not doubled for smoothing.
+            /// The value is updated when drawing the doubled bitmap hits <see cref="metafileDoublingTimeThreshold"/>.
             /// Needed because metafiles with bitmaps might be drawn very slowly, because the DrawImage operation
             /// uses a process-wide lock, so not even the background thread helps. Written in multiple threads, so accessed always by volatile reads/writes.
             /// </summary>
-            private long maxMetafileSizeThreshold = Int64.MaxValue;
+            private long dynamicMetafileSizeThreshold = Int64.MaxValue;
 
             #endregion
 
@@ -283,14 +285,14 @@ namespace KGySoft.WinForms.Controls
                     Size size = owner.imageSize;
 
                     // >4x zoom or shrunk image that is not greater than generating threshold: using HighQualityBicubic 
-                    if (zoom >= 4f || zoom < 1f && size.Width <= minBitmapSizeThreshold && size.Height <= minBitmapSizeThreshold)
+                    if (zoom >= 4f || zoom < 1f && size.Width <= minBitmapSmoothingSizeThreshold && size.Height <= minBitmapSmoothingSizeThreshold)
                         interpolationMode = InterpolationMode.HighQualityBicubic;
                     // 1-4x zoom: HighQualityBilinear for large images to prevent heavy lagging; otherwise, HighQualityBicubic
                     else if (zoom > 1f)
-                        interpolationMode = size.Width > minBitmapSizeThreshold || size.Height > minBitmapSizeThreshold ? InterpolationMode.HighQualityBilinear : InterpolationMode.HighQualityBicubic;
+                        interpolationMode = size.Width > minBitmapSmoothingSizeThreshold || size.Height > minBitmapSmoothingSizeThreshold ? InterpolationMode.HighQualityBilinear : InterpolationMode.HighQualityBicubic;
                     // Shrinking larger images if generating is disabled: applying a hopefully-not-too-slow fallback interpolation
                     else if (!GenerateResizedBitmap && zoom < 1f)
-                        interpolationMode = owner.targetRectangle.Width > minBitmapSizeThreshold || owner.targetRectangle.Height > minBitmapSizeThreshold ? InterpolationMode.Bilinear : InterpolationMode.Bicubic;
+                        interpolationMode = owner.targetRectangle.Width > minBitmapSmoothingSizeThreshold || owner.targetRectangle.Height > minBitmapSmoothingSizeThreshold ? InterpolationMode.Bilinear : InterpolationMode.Bicubic;
                 }
 
                 // 4.) Returning either a generated display or the original image
@@ -344,7 +346,7 @@ namespace KGySoft.WinForms.Controls
                 WaitForPendingGenerate(generateResizedImageTask);
 
                 requestedSize = default;
-                Volatile.Write(ref maxMetafileSizeThreshold, Int64.MaxValue);
+                Volatile.Write(ref dynamicMetafileSizeThreshold, Int64.MaxValue);
 
                 lock (SyncRoot)
                 {
@@ -377,7 +379,7 @@ namespace KGySoft.WinForms.Controls
                 // Bitmap: generating a new default image for unsupported formats,
                 bool isGenerateNeeded = bitmap != null && (owner.pixelFormat.In(unsupportedFormats)
                     // for non-PARGB32 images larger than 256x256 - note: leaving even slow formats unconverted below sizeThreshold / 4
-                    || owner.pixelFormat != PixelFormat.Format32bppPArgb && (owner.imageSize.Width > minBitmapSizeThreshold >> 2 || owner.imageSize.Height > minBitmapSizeThreshold >> 2)
+                    || owner.pixelFormat != PixelFormat.Format32bppPArgb && (owner.imageSize.Width > minBitmapSmoothingSizeThreshold >> 2 || owner.imageSize.Height > minBitmapSmoothingSizeThreshold >> 2)
                     // and for native icons: converting because icons are handled oddly by GDI+, for example, the first column has half pixel width
                     || owner.flags[isIcon]);
 
@@ -431,10 +433,10 @@ namespace KGySoft.WinForms.Controls
                 Size size = owner.targetRectangle.Size;
                 bool metafile = owner.flags[isMetafile];
 
-                // Metafile: If smoothing edges is enabled and the doubled metafile can be drawn fast enough
+                // Metafile: If smoothing edges is enabled, the zoomed size is not too big, and the doubled metafile can be drawn fast enough
                 // Bitmap: If smoothing resize is enabled, the image is shrunk and image size is larger than 1024x1024
-                bool isGenerateNeeded = owner.flags[smoothingEnabled] && (metafile && (long)size.Width * size.Height < Volatile.Read(ref maxMetafileSizeThreshold)
-                    || !metafile && owner.zoom < 1f && (owner.imageSize.Width > minBitmapSizeThreshold || owner.imageSize.Height > minBitmapSizeThreshold));
+                bool isGenerateNeeded = owner.flags[smoothingEnabled] && (metafile && Math.Max(size.Width, size.Height) <= maxMetafileSizeSmoothingThreshold && (long)size.Width * size.Height < Volatile.Read(ref dynamicMetafileSizeThreshold)
+                    || !metafile && owner.zoom < 1f && Math.Max(owner.imageSize.Width, owner.imageSize.Height) > minBitmapSmoothingSizeThreshold);
 
                 // Not canceling the possible generate task here. It will call an invalidate in the end, and we can see whether we use the result.
                 if (!isGenerateNeeded || size.Width < 1 || size.Height < 1)
@@ -630,7 +632,8 @@ namespace KGySoft.WinForms.Controls
                             Monitor.Enter(task.SourceImage);
                         try
                         {
-                            // NOTE: not using the image drawing constructor here, because it uses bilinear interpolation, which may cause ugly black edges for bitmap drawing records for legacy GDI metafile types.
+                            // NOTE: not using the image drawing constructor here, because it uses bilinear interpolation,
+                            //       which may cause ugly black edges for bitmap drawing records in case of legacy GDI metafile types.
                             var doubledSize = new Size(task.Size.Width << 1, task.Size.Height << 1);
                             doubled = new Bitmap(doubledSize.Width, doubledSize.Height, PixelFormat.Format32bppPArgb);
                             long timestampStart, timestampEnd;
@@ -649,7 +652,7 @@ namespace KGySoft.WinForms.Controls
                             // Therefore, limiting the size of this operation even though it is likely still faster than the shrinking afterward.
                             Debug.WriteLine($"Metafile doubling time: {TimeHelper.GetTimeSpan(timestampEnd - timestampStart).TotalMilliseconds:N2} ms");
                             if (timestampEnd - timestampStart > TimeHelper.GetInterval(metafileDoublingTimeThreshold))
-                                Volatile.Write(ref maxMetafileSizeThreshold, (long)task.Size.Width * task.Size.Height);
+                                Volatile.Write(ref dynamicMetafileSizeThreshold, (long)task.Size.Width * task.Size.Height);
                         }
                         finally
                         {
@@ -803,7 +806,7 @@ namespace KGySoft.WinForms.Controls
                             return;
                         }
 
-                        if (CheckMemoryUsage && !owner.pixelFormat.In(unsupportedFormats))
+                        if (!owner.flags[isMetafile] && CheckMemoryUsage && !owner.pixelFormat.In(unsupportedFormats))
                         {
                             long memoryPressure = (long)owner.imageSize.Width * owner.imageSize.Height * 4L;
                             if (!MemoryHelper.IsAvailableUnmanaged(memoryPressure))
