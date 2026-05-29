@@ -493,6 +493,8 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public void IncreaseZoom()
         {
+            if (image == null)
+                return;
             SetAutoZoom(false, false);
             ApplyZoomChange(0.25f);
         }
@@ -502,6 +504,8 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public void DecreaseZoom()
         {
+            if (image == null)
+                return;
             SetAutoZoom(false, false);
             ApplyZoomChange(-0.25f);
         }
@@ -511,10 +515,9 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         public void ResetZoom()
         {
-            if (zoom.Equals(1f))
-                return;
             AutoZoom = false;
-            Zoom = 1f;
+            if (!zoom.Equals(1f))
+                Zoom = 1f;
         }
 
         /// <inheritdoc />
@@ -643,6 +646,8 @@ namespace KGySoft.WinForms.Controls
         protected override void OnMouseWheel(MouseEventArgs e)
         {
             base.OnMouseWheel(e);
+            if (image == null)
+                return;
             switch (ModifierKeys)
             {
                 // zoom
