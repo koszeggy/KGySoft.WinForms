@@ -9,6 +9,12 @@
 ! v5.0.0:
 ~~~~~~~~~
 
+NOTE: This is the first public version of KGySoft.WinForms (though the packages of the earlier versions have also
+been made public since releasing the first preview of v5.0.0). This is the main reason for the large number of
+breaking changes. Normally, KGy SOFT libraries do not contain such a large number of breaking changes, not even
+in new major versions. But even if you happen to be using an earlier version of KGySoft.WinForms, the migration
+to v5.0.0 should be relatively easy, as most of the breaking changes are just renames and obsoletions.
+
 + Assembly changes:
 ===================
 + Targeting also .NET Framework 4.7, .NET Core 3.1, .NET 5.0, 6.0, 9.0 and 10.0.
@@ -60,9 +66,11 @@
 ====================================
 + New WinFormsBitmapDataExtensions class
 
-
-* KGySoft.WinForms.Components namespace:
+! KGySoft.WinForms.Components namespace:
 ========================================
+! TaskDialogStandardIcons enum: it has been renamed to TaskDialogStandardIcon.
+! TaskDialogStandardButtonFlags enum: it has been renamed to TaskDialogStandardButtons.
+! TaskDialogStandardButtons enum: it has been renamed to TaskDialogStandardButton.
 + AdvancedSaveFileDialog: it has been made disposable
 * TaskDialog class:
   + Supporting high DPI and per-monitor DPI awareness.

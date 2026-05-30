@@ -120,7 +120,7 @@ namespace KGySoft.WinForms.Components
 
         #region Static Fields
 
-        private static readonly TaskDialogStandardIcons[] whiteBackgroundIcons = new[] { TaskDialogStandardIcons.None, TaskDialogStandardIcons.Information, TaskDialogStandardIcons.Warning, TaskDialogStandardIcons.Error, TaskDialogStandardIcons.SecurityShield };
+        private static readonly TaskDialogStandardIcon[] whiteBackgroundIcons = new[] { TaskDialogStandardIcon.None, TaskDialogStandardIcon.Information, TaskDialogStandardIcon.Warning, TaskDialogStandardIcon.Error, TaskDialogStandardIcon.SecurityShield };
 
         #endregion
 
@@ -267,7 +267,7 @@ namespace KGySoft.WinForms.Components
             Marshal.FreeHGlobal(buttonsArray);
         }
 
-        private static bool IsBackgroundDifferent(TaskDialogStandardIcons icon1, TaskDialogStandardIcons icon2)
+        private static bool IsBackgroundDifferent(TaskDialogStandardIcon icon1, TaskDialogStandardIcon icon2)
             => icon1 != icon2 && !(icon1.In(whiteBackgroundIcons) && icon2.In(whiteBackgroundIcons));
 
         #endregion
@@ -313,7 +313,7 @@ namespace KGySoft.WinForms.Components
             config.cxWidth = (uint)host.Width;
 
             // setting custom main icon
-            if (host.Icon is TaskDialogStandardIcons.Question or TaskDialogStandardIcons.SecurityQuestion || host.CustomIcon != null)
+            if (host.Icon is TaskDialogStandardIcon.Question or TaskDialogStandardIcon.SecurityQuestion || host.CustomIcon != null)
             {
                 config.dwFlags |= TASKDIALOG_FLAGS.TDF_USE_HICON_MAIN;
                 if (host.CustomIcon is Icon customIcon)
@@ -328,7 +328,7 @@ namespace KGySoft.WinForms.Components
             }
 
             // setting custom footer icon
-            if (host.FooterIcon is TaskDialogStandardIcons.Question or TaskDialogStandardIcons.SecurityQuestion || host.CustomFooterIcon != null)
+            if (host.FooterIcon is TaskDialogStandardIcon.Question or TaskDialogStandardIcon.SecurityQuestion || host.CustomFooterIcon != null)
             {
                 config.dwFlags |= TASKDIALOG_FLAGS.TDF_USE_HICON_FOOTER;
                 if (host.CustomFooterIcon is Icon customFooterIcon)
@@ -449,7 +449,7 @@ namespace KGySoft.WinForms.Components
                         scale = default;
                         InitializeCreatedDialog(true);
                         dialogState = TaskDialogStatus.Showing;
-                        if (host.Icon == TaskDialogStandardIcons.Question)
+                        if (host.Icon == TaskDialogStandardIcon.Question)
                             SystemSounds.Question.Play();
                         if (ScaleHelper.IsThreadPerMonitorAware)
                             nativeHandler = new NativeWindowHandler(this);
@@ -617,7 +617,7 @@ namespace KGySoft.WinForms.Components
                 {
                     if (isFirstCreate)
                         host.FormIcon = host.Icon.ToIcon(); // including None, which is the default icon
-                    else if (host.Icon == TaskDialogStandardIcons.None)
+                    else if (host.Icon == TaskDialogStandardIcon.None)
                         User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, Constants.TDI_MAIN, IntPtr.Zero);
                 }
                 // removing the icon
@@ -633,7 +633,7 @@ namespace KGySoft.WinForms.Components
             }
 
             // only when reallocating the dialog (may happen after a custom -> standard icon change), otherwise, will be changed by UpdateStandardIcon
-            else if (config.hwndParent == IntPtr.Zero && /*host.Icon != TaskDialogStandardIcons.None &&*/ !isFirstCreate) // on first init this is redundant but when icon has been changed from custom to standard, NAVIGATE does not update title icon
+            else if (config.hwndParent == IntPtr.Zero && /*host.Icon != TaskDialogStandardIcon.None &&*/ !isFirstCreate) // on first init this is redundant but when icon has been changed from custom to standard, NAVIGATE does not update title icon
                 User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, Constants.TDI_MAIN, (IntPtr)host.Icon);
 
             // Progress bar
@@ -709,13 +709,13 @@ namespace KGySoft.WinForms.Components
             User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_SET_ELEMENT_TEXT, (IntPtr)element, ptrText);
         }
 
-        private void UpdateStandardIcon(IntPtr element, TaskDialogStandardIcons icon)
+        private void UpdateStandardIcon(IntPtr element, TaskDialogStandardIcon icon)
         {
             if (element == Constants.TDI_FOOTER && String.IsNullOrEmpty(host.FooterText))
                 return;
 
             // (Security)Question icon is emulated
-            if (icon == TaskDialogStandardIcons.Question || icon == TaskDialogStandardIcons.SecurityQuestion)
+            if (icon == TaskDialogStandardIcon.Question || icon == TaskDialogStandardIcon.SecurityQuestion)
             {
                 // it will trigger UpdateCustomIcon
                 if (element == Constants.TDI_MAIN)
@@ -731,13 +731,13 @@ namespace KGySoft.WinForms.Components
             // Recreating if needed
             if (((element == Constants.TDI_MAIN) && (config.dwFlags & TASKDIALOG_FLAGS.TDF_USE_HICON_MAIN) != 0) // currently a custom current main icon is used
                 || ((element == Constants.TDI_FOOTER) && (config.dwFlags & TASKDIALOG_FLAGS.TDF_USE_HICON_FOOTER) != 0) // currently a custom current footer icon is used
-                || element == Constants.TDI_MAIN && IsBackgroundDifferent(icon, (TaskDialogStandardIcons)config.hMainIcon) // background color changes
+                || element == Constants.TDI_MAIN && IsBackgroundDifferent(icon, (TaskDialogStandardIcon)config.hMainIcon) // background color changes
                 )
             {
                 ReallocateDialog();
 
                 // Switching from custom icon to None does not restore the default form icon, which is fixed here
-                if (icon == TaskDialogStandardIcons.None && element == Constants.TDI_MAIN && HasFormIcon)
+                if (icon == TaskDialogStandardIcon.None && element == Constants.TDI_MAIN && HasFormIcon)
                     User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, Constants.TDI_MAIN, IntPtr.Zero);
                 return;
             }
@@ -779,9 +779,9 @@ namespace KGySoft.WinForms.Components
             // storing icon handle in config so it can be compared later again
             IntPtr iconHandle;
             if (element == Constants.TDI_MAIN)
-                config.hMainIcon = iconHandle = ResetMainIcon(host.Icon != TaskDialogStandardIcons.None ? host.EmulatedStandardMainIcon! : icon)?.Handle ?? IntPtr.Zero;
+                config.hMainIcon = iconHandle = ResetMainIcon(host.Icon != TaskDialogStandardIcon.None ? host.EmulatedStandardMainIcon! : icon)?.Handle ?? IntPtr.Zero;
             else
-                config.hFooterIcon = iconHandle = ResetFooterIcon(host.FooterIcon != TaskDialogStandardIcons.None ? host.EmulatedStandardFooterIcon! : icon)?.Handle ?? IntPtr.Zero;
+                config.hFooterIcon = iconHandle = ResetFooterIcon(host.FooterIcon != TaskDialogStandardIcon.None ? host.EmulatedStandardFooterIcon! : icon)?.Handle ?? IntPtr.Zero;
 
             User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_UPDATE_ICON, element, iconHandle);
             if (element == Constants.TDI_MAIN && HasFormIcon && host.FormIcon != null)

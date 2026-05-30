@@ -108,7 +108,7 @@ namespace KGySoft.WinForms.Example
         {
             using var td = new TaskDialog();
             td.Options = TaskDialogOptions.UseCommandLinks;
-            td.StandardButtons = TaskDialogStandardButtonFlags.Cancel;
+            td.StandardButtons = TaskDialogStandardButtons.Cancel;
             td.MainInstruction = "Select a control to test";
             td.CheckBoxText = "Set BaseForm.AutoScaleFont to true";
             td.CheckBoxChecked = AutoScaleFont;
@@ -148,7 +148,7 @@ namespace KGySoft.WinForms.Example
             using var dlg = new TaskDialog();
             dlg.Caption = "Dialogs demo";
             dlg.MainInstruction = "Pick a task";
-            dlg.StandardButtons = TaskDialogStandardButtonFlags.Close;
+            dlg.StandardButtons = TaskDialogStandardButtons.Close;
             dlg.CheckBoxText = "Force compatibility mode";
             dlg.Options = TaskDialogOptions.UseCommandLinks | TaskDialogOptions.AllowCancel;
 
@@ -195,7 +195,7 @@ namespace KGySoft.WinForms.Example
         {
             using var td = new TaskDialog();
             td.Options = TaskDialogOptions.UseCommandLinks;
-            td.StandardButtons = TaskDialogStandardButtonFlags.Cancel;
+            td.StandardButtons = TaskDialogStandardButtons.Cancel;
 
             td.Buttons.Add(new TaskDialogButton("LocalizationExample", "Dynamic localization example"));
             td.Buttons.Add(new TaskDialogButton("MdiDemoForm", "MDI Form Example"));
@@ -245,14 +245,14 @@ namespace KGySoft.WinForms.Example
             dlg.DetailsText = "This is the DetailsText";
             dlg.Message = "This is a <a href=\"https://github.com/koszeggy/KGySoft.WinForms\">sample link</a>";
             dlg.Options = TaskDialogOptions.HyperlinksEnabled | TaskDialogOptions.UseCommandLinksNoIcon | TaskDialogOptions.DetailsExpanded | TaskDialogOptions.AllowCancel | TaskDialogOptions.AllowMinimize | TaskDialogOptions.ForceShowInTaskbar;
-            dlg.FooterIcon = TaskDialogStandardIcons.Warning;
+            dlg.FooterIcon = TaskDialogStandardIcon.Warning;
             dlg.FooterText = "• UseCommandLinks has higher priority than UseCommandLinksNoIcon" + Environment.NewLine
                 + "• In native mode RightToLeftLayout cannot be undone" + Environment.NewLine
                 + "• AllowMinimize works only if the dialog was opened without an owner (modeless)" + Environment.NewLine
                 + "• AllowMinimize implicitly enables cancellation, as if AllowCancel was also set" + Environment.NewLine
                 + "• In native mode enabling AllowMinimize after showing the dialog will show a non-functional button" + Environment.NewLine
                 + "• In native mode toggling ForceShowInTaskbar works only if it was initially enabled";
-            dlg.StandardButtons = TaskDialogStandardButtonFlags.Close;
+            dlg.StandardButtons = TaskDialogStandardButtons.Close;
 
             dlg.Buttons.Add(new TaskDialogButton("Toggle HyperlinksEnabled") { Description = "On", Tag = TaskDialogOptions.HyperlinksEnabled });
             dlg.Buttons.Add(new TaskDialogButton("Toggle AllowCancel") { Description = "On", Tag = TaskDialogOptions.AllowCancel });
@@ -299,7 +299,7 @@ namespace KGySoft.WinForms.Example
             dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
             dlg.Caption = "Progress Bar test";
             dlg.Options = TaskDialogOptions.AllowCancel | TaskDialogOptions.UseCommandLinks;
-            dlg.StandardButtons = TaskDialogStandardButtonFlags.Close;
+            dlg.StandardButtons = TaskDialogStandardButtons.Close;
             dlg.MainInstruction = "Please Wait...";
 
             dlg.RadioButtons.Add(new TaskDialogRadioButton("rbNone", "No progress bar"));
@@ -391,7 +391,7 @@ namespace KGySoft.WinForms.Example
             dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
             dlg.Caption = "Timer demo";
             dlg.MainInstruction = "Elapsed: 0 seconds";
-            dlg.StandardButtons = TaskDialogStandardButtonFlags.Close;
+            dlg.StandardButtons = TaskDialogStandardButtons.Close;
 
             bool resetRequested = false;
             dlg.Buttons.Add(new TaskDialogButton("Reset Timer"));
@@ -423,7 +423,7 @@ namespace KGySoft.WinForms.Example
 
             using var dlg = new TaskDialog();
             dlg.ForceCompatibilityMode = senderDialog.CheckBoxChecked;
-            dlg.Icon = TaskDialogStandardIcons.Information;
+            dlg.Icon = TaskDialogStandardIcon.Information;
             dlg.CustomFooterIcon = Icons.Application;
             dlg.Width = 300;
 
@@ -438,7 +438,7 @@ namespace KGySoft.WinForms.Example
 
             dlg.Options = TaskDialogOptions.HyperlinksEnabled | TaskDialogOptions.UseCommandLinksNoIcon | TaskDialogOptions.AllowCancel | TaskDialogOptions.DetailsExpanded;
 
-            dlg.StandardButtons = TaskDialogStandardButtonFlags.Close;
+            dlg.StandardButtons = TaskDialogStandardButtons.Close;
             dlg.Buttons.Add(new TaskDialogButton("btnCaption", "Toggle Caption") { Description = "On" });
             dlg.Buttons.Add(new TaskDialogButton("btnMainInstruction", "Toggle MainInstruction") { Description = "On" });
             dlg.Buttons.Add(new TaskDialogButton("btnMessage", "Toggle Message") { Description = "On" });
@@ -523,7 +523,7 @@ namespace KGySoft.WinForms.Example
             dlg.Message = "OK and Cancel buttons are standard ones, while Custom button is a custom one." + Environment.NewLine
                 + "You can define radio buttons, too.";
 
-            dlg.StandardButtons = TaskDialogStandardButtonFlags.OK | TaskDialogStandardButtonFlags.Cancel;
+            dlg.StandardButtons = TaskDialogStandardButtons.OK | TaskDialogStandardButtons.Cancel;
 
             dlg.Buttons.Add(new TaskDialogButton("btnCustom", "Custom") { Description = "I am a custom button" });
             dlg.Buttons["btnCustom"]!.Click += (btn, args) =>
@@ -532,9 +532,9 @@ namespace KGySoft.WinForms.Example
                 using var dlgQuestion = new TaskDialog();
                 dlgQuestion.ForceCompatibilityMode = owner.ForceCompatibilityMode;
                 dlgQuestion.Caption = "Confirmation";
-                dlgQuestion.Icon = TaskDialogStandardIcons.Question;
+                dlgQuestion.Icon = TaskDialogStandardIcon.Question;
                 dlgQuestion.Message = "Do you want to close the Buttons test dialog?";
-                dlgQuestion.StandardButtons = TaskDialogStandardButtonFlags.Yes | TaskDialogStandardButtonFlags.No;
+                dlgQuestion.StandardButtons = TaskDialogStandardButtons.Yes | TaskDialogStandardButtons.No;
                 args.Handled = dlgQuestion.Show(owner) == TaskDialogResult.No;
             };
 
@@ -565,19 +565,19 @@ namespace KGySoft.WinForms.Example
             dlg.Caption = "Icons test";
             dlg.MainInstruction = "Select an icon";
             dlg.FooterText = "Footer can have an icon, too.";
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("None") { Checked = true, Tag = TaskDialogStandardIcons.None });
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Information") { Tag = TaskDialogStandardIcons.Information });
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Warning") { Tag = TaskDialogStandardIcons.Warning });
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Question") { Tag = TaskDialogStandardIcons.Question });
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Error") { Tag = TaskDialogStandardIcons.Error });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("None") { Checked = true, Tag = TaskDialogStandardIcon.None });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Information") { Tag = TaskDialogStandardIcon.Information });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Warning") { Tag = TaskDialogStandardIcon.Warning });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Question") { Tag = TaskDialogStandardIcon.Question });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Error") { Tag = TaskDialogStandardIcon.Error });
             dlg.RadioButtons.Add(new TaskDialogRadioButton("rbCustom", "Custom Icon"));
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield") { Tag = TaskDialogStandardIcons.SecurityShield });
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield Gray") { Tag = TaskDialogStandardIcons.SecurityShieldGray });
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield Blue") { Tag = TaskDialogStandardIcons.SecurityShieldBlue });
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Success") { Tag = TaskDialogStandardIcons.SecuritySuccess });
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Warning") { Tag = TaskDialogStandardIcons.SecurityWarning });
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Error") { Tag = TaskDialogStandardIcons.SecurityError });
-            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Question") { Tag = TaskDialogStandardIcons.SecurityQuestion });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield") { Tag = TaskDialogStandardIcon.SecurityShield });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield Gray") { Tag = TaskDialogStandardIcon.SecurityShieldGray });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Shield Blue") { Tag = TaskDialogStandardIcon.SecurityShieldBlue });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Success") { Tag = TaskDialogStandardIcon.SecuritySuccess });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Warning") { Tag = TaskDialogStandardIcon.SecurityWarning });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Error") { Tag = TaskDialogStandardIcon.SecurityError });
+            dlg.RadioButtons.Add(new TaskDialogRadioButton("Security Question") { Tag = TaskDialogStandardIcon.SecurityQuestion });
 
             foreach (TaskDialogRadioButton radioButton in dlg.RadioButtons)
             {
@@ -588,7 +588,7 @@ namespace KGySoft.WinForms.Example
                     if (rb.Name == "rbCustom")
                         rb.Parent!.CustomIcon = rb.Parent.CustomFooterIcon = Icons.Application;
                     else
-                        rb.Parent!.Icon = rb.Parent.FooterIcon = (TaskDialogStandardIcons)rb.Tag!;
+                        rb.Parent!.Icon = rb.Parent.FooterIcon = (TaskDialogStandardIcon)rb.Tag!;
                 };
             }
 
@@ -704,8 +704,8 @@ namespace KGySoft.WinForms.Example
                     Caption = "Help",
                     MainInstruction = "This is the help dialog.",
                     Message = "Help was requested",
-                    Icon = TaskDialogStandardIcons.Question,
-                    StandardButtons = TaskDialogStandardButtonFlags.Close,
+                    Icon = TaskDialogStandardIcon.Question,
+                    StandardButtons = TaskDialogStandardButtons.Close,
                     Options = TaskDialogOptions.AllowCancel
                 };
                 helpDlg.Show((TaskDialog)tdSender!);
@@ -729,7 +729,7 @@ namespace KGySoft.WinForms.Example
                     + "• If the static AutoRightToLeftLayout property is true, then the MessageBox and TaskDialog options use right-to-left layout if the current thread's UI culture is an RTL language\r\n"
                     + "• The AdvancedMessageDialog supports none of above, though the message can be selected and copied manually",
                 Options = TaskDialogOptions.UseCommandLinks | TaskDialogOptions.AllowCancel,
-                StandardButtons = TaskDialogStandardButtonFlags.Close,
+                StandardButtons = TaskDialogStandardButtons.Close,
                 RadioButtons =
                 {
                     new TaskDialogRadioButton("rbMessageBox", "MessageBox"),

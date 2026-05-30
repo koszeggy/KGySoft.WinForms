@@ -129,13 +129,13 @@ namespace KGySoft.WinForms.Components
         private TaskDialogOptions options;
         private string? showDetailsText;
         private string? hideDetailsText;
-        private TaskDialogStandardIcons icon;
+        private TaskDialogStandardIcon icon;
         private Icon? customIcon;
-        private TaskDialogStandardIcons footerIcon;
+        private TaskDialogStandardIcon footerIcon;
         private Icon? customFooterIcon;
         private Icon? formIcon;
-        private TaskDialogStandardButtonFlags standardButtons;
-        private TaskDialogStandardButtons defaultStandardButton;
+        private TaskDialogStandardButtons standardButtons;
+        private TaskDialogStandardButton defaultStandardButton;
         private TaskDialogControlCollection<TaskDialogButton> buttons;
         private TaskDialogControlCollection<TaskDialogRadioButton> radioButtons;
         private TaskDialogProgressBarStyle progressBarStyle;
@@ -524,7 +524,7 @@ namespace KGySoft.WinForms.Components
         /// Gets or sets one of the standard icons as the main icon for the dialog.
         /// Setting this property clears <see cref="CustomIcon"/> and vice versa.
         /// </summary>
-        public TaskDialogStandardIcons Icon
+        public TaskDialogStandardIcon Icon
         {
             get => icon;
             set
@@ -560,7 +560,7 @@ namespace KGySoft.WinForms.Components
 
                 CheckCanChangeProperty();
                 flags[isEmulatedStandardMainIcon] = false;
-                icon = TaskDialogStandardIcons.None;
+                icon = TaskDialogStandardIcon.None;
                 customIcon = value;
                 formIcon = value;
                 if (IsDialogShowing)
@@ -572,7 +572,7 @@ namespace KGySoft.WinForms.Components
         /// Gets or sets one of the standard icons as the footer icon for the dialog.
         /// Setting this property clears <see cref="CustomFooterIcon"/> and vice versa.
         /// </summary>
-        public TaskDialogStandardIcons FooterIcon
+        public TaskDialogStandardIcon FooterIcon
         {
             get => footerIcon;
             set
@@ -607,7 +607,7 @@ namespace KGySoft.WinForms.Components
 
                 CheckCanChangeProperty();
                 flags[isEmulatedStandardFooterIcon] = false;
-                footerIcon = TaskDialogStandardIcons.None;
+                footerIcon = TaskDialogStandardIcon.None;
                 customFooterIcon = value;
                 if (IsDialogShowing)
                     dialogInstance!.PropertyChanged(PropertyCustomFooterIcon);
@@ -620,7 +620,7 @@ namespace KGySoft.WinForms.Components
         /// By default, these buttons will use the current windows language, unless <see cref="TaskDialogOptions.TranslateStandardButtons"/> is set
         /// in <see cref="Options"/>.
         /// </summary>
-        public TaskDialogStandardButtonFlags StandardButtons
+        public TaskDialogStandardButtons StandardButtons
         {
             get => standardButtons;
             set
@@ -643,7 +643,7 @@ namespace KGySoft.WinForms.Components
         /// by <see cref="TaskDialogButton.IsDefault"/>, then this property is ignored.
         /// If neither standard nor custom buttons are specified as default, the first button will be the default one.
         /// </summary>
-        public TaskDialogStandardButtons DefaultStandardButton
+        public TaskDialogStandardButton DefaultStandardButton
         {
             get => defaultStandardButton;
             set
@@ -861,7 +861,7 @@ namespace KGySoft.WinForms.Components
         /// <item>The operating system is not Windows Vista or later.</item>
         /// <item><see cref="Application.EnableVisualStyles"/> was not called on launching the application.</item>
         /// <item><see cref="TaskDialogOptions.TranslateStandardButtons"/> is set in <see cref="Options"/>.</item>
-        /// <item><see cref="Icon"/> is <see cref="TaskDialogStandardIcons.SecurityQuestion"/> (so the special header colors can be applied).</item>
+        /// <item><see cref="Icon"/> is <see cref="TaskDialogStandardIcon.SecurityQuestion"/> (so the special header colors can be applied).</item>
         /// <item>There is at least one button in <see cref="Buttons"/> that has a custom icon (<see cref="TaskDialogButton.CustomIcon"/> is set).</item>
         /// </list></para>
         /// <para>When this property is set to <see langword="true"/>, the following improvements can be observed:
@@ -951,7 +951,7 @@ namespace KGySoft.WinForms.Components
         internal bool IsNativeDialog => dialogInstance is NativeTaskDialog;
 
         /// <summary>
-        /// When an <see cref="ITaskDialog"/> implementation does not support one of the <see cref="TaskDialogStandardIcons"/>, it can set this property
+        /// When an <see cref="ITaskDialog"/> implementation does not support one of the <see cref="TaskDialogStandardIcon"/>, it can set this property
         /// to handle a standard icon as a custom one.
         /// </summary>
         internal Icon? EmulatedStandardMainIcon
@@ -968,7 +968,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// When an <see cref="ITaskDialog"/> implementation does not support one of the <see cref="TaskDialogStandardIcons"/>, it can set this property
+        /// When an <see cref="ITaskDialog"/> implementation does not support one of the <see cref="TaskDialogStandardIcon"/>, it can set this property
         /// to handle a standard icon as a custom one.
         /// </summary>
         internal Icon? EmulatedStandardFooterIcon
@@ -1245,7 +1245,7 @@ namespace KGySoft.WinForms.Components
         private bool IsNonNativeFeatureRequired()
         {
             return ((options & TaskDialogOptions.TranslateStandardButtons) != 0) // options not supported natively
-                || icon == TaskDialogStandardIcons.SecurityQuestion // security question icon (due to blue background)
+                || icon == TaskDialogStandardIcon.SecurityQuestion // security question icon (due to blue background)
                 || buttons.Any(b => b.CustomIcon != null); // custom button icons
         }
 

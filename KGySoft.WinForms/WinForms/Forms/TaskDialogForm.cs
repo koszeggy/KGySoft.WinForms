@@ -253,7 +253,7 @@ namespace KGySoft.WinForms.Forms
         private static readonly IThreadSafeCacheAccessor<SystemTextIds, string> systemTextCache
             = ThreadSafeCacheFactory.Create(GetSystemText, Comparer, cacheProfile);
 
-        private static readonly TaskDialogStandardIcons[] iconsWithColoredHeader = [TaskDialogStandardIcons.SecuritySuccess, TaskDialogStandardIcons.SecurityWarning, TaskDialogStandardIcons.SecurityError, TaskDialogStandardIcons.SecurityShieldGray, TaskDialogStandardIcons.SecurityShieldBlue, TaskDialogStandardIcons.SecurityQuestion];
+        private static readonly TaskDialogStandardIcon[] iconsWithColoredHeader = [TaskDialogStandardIcon.SecuritySuccess, TaskDialogStandardIcon.SecurityWarning, TaskDialogStandardIcon.SecurityError, TaskDialogStandardIcon.SecurityShieldGray, TaskDialogStandardIcon.SecurityShieldBlue, TaskDialogStandardIcon.SecurityQuestion];
 
         private static readonly Color mainInstructionsDefaultThemedColor = Color.FromArgb(0, 51, 153);
         private static readonly Color dividerBottomDefaultThemedColor = Color.FromArgb(223, 223, 223);
@@ -511,16 +511,16 @@ namespace KGySoft.WinForms.Forms
             dialogState = TaskDialogStatus.Showing;
             switch (host.Icon)
             {
-                case TaskDialogStandardIcons.Information:
+                case TaskDialogStandardIcon.Information:
                     SystemSounds.Asterisk.Play();
                     break;
-                case TaskDialogStandardIcons.Warning:
+                case TaskDialogStandardIcon.Warning:
                     SystemSounds.Exclamation.Play();
                     break;
-                case TaskDialogStandardIcons.Error:
+                case TaskDialogStandardIcon.Error:
                     SystemSounds.Hand.Play();
                     break;
-                case TaskDialogStandardIcons.Question:
+                case TaskDialogStandardIcon.Question:
                     SystemSounds.Question.Play();
                     break;
             }
@@ -730,8 +730,8 @@ namespace KGySoft.WinForms.Forms
                 HasMessage = !String.IsNullOrEmpty(host.Message),
                 HasDetails = !String.IsNullOrEmpty(host.DetailsText),
                 HasRadioButtons = host.RadioButtons.Count > 0,
-                HasMainIcon = host.CustomIcon != null || host.Icon != TaskDialogStandardIcons.None,
-                HasFooterIcon = host.CustomFooterIcon != null || host.FooterIcon != TaskDialogStandardIcons.None,
+                HasMainIcon = host.CustomIcon != null || host.Icon != TaskDialogStandardIcon.None,
+                HasFooterIcon = host.CustomFooterIcon != null || host.FooterIcon != TaskDialogStandardIcon.None,
                 HasFooter = !String.IsNullOrEmpty(host.FooterText),
                 HasCommandLinks = ((host.Options & (TaskDialogOptions.UseCommandLinks | TaskDialogOptions.UseCommandLinksNoIcon)) != TaskDialogOptions.None) && host.Buttons.Count > 0,
                 HasVerification = !String.IsNullOrEmpty(host.CheckBoxText),
@@ -744,8 +744,8 @@ namespace KGySoft.WinForms.Forms
             };
 
             result.HasMainText = result.HasMessage || (result.HasDetails && !result.IsDetailsInFooter && result.IsDetailsExpanded);
-            result.HasButtons = host.StandardButtons != TaskDialogStandardButtonFlags.None
-                || (host.StandardButtons == TaskDialogStandardButtonFlags.None && host.Buttons.Count == 0) // This creates an OK button
+            result.HasButtons = host.StandardButtons != TaskDialogStandardButtons.None
+                || (host.StandardButtons == TaskDialogStandardButtons.None && host.Buttons.Count == 0) // This creates an OK button
                 || (!result.HasCommandLinks && host.Buttons.Count > 0);
             result.HasMainControls = result.HasDetails || result.HasVerification || result.HasButtons;
             result.IsDetailsVisibleInFooter = result.HasDetails && result.IsDetailsInFooter && result.IsDetailsExpanded;
@@ -789,7 +789,7 @@ namespace KGySoft.WinForms.Forms
             // options - Show... properties do not check their change so we do it here to prevent unnecessary style reset or handle recreation
             bool showControlBox = (host.Options & TaskDialogOptions.AllowCancel) != TaskDialogOptions.None
                 || nonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None
-                || (host.StandardButtons & TaskDialogStandardButtonFlags.Cancel) != TaskDialogStandardButtonFlags.None;
+                || (host.StandardButtons & TaskDialogStandardButtons.Cancel) != TaskDialogStandardButtons.None;
             if (ControlBox != showControlBox)
                 ControlBox = showControlBox;
             bool showMinimizeBox = nonModal && (host.Options & TaskDialogOptions.AllowMinimize) != TaskDialogOptions.None;
@@ -1120,8 +1120,8 @@ namespace KGySoft.WinForms.Forms
                 return;
 
             // a simple OK button
-            if (host.StandardButtons == TaskDialogStandardButtonFlags.None && host.Buttons.Count == 0)
-                AddStandardButton(TaskDialogStandardButtonFlags.OK);
+            if (host.StandardButtons == TaskDialogStandardButtons.None && host.Buttons.Count == 0)
+                AddStandardButton(TaskDialogStandardButtons.OK);
             else
             {
                 // custom buttons
@@ -1152,9 +1152,9 @@ namespace KGySoft.WinForms.Forms
                 }
 
                 // standard buttons
-                if (host.StandardButtons != TaskDialogStandardButtonFlags.None)
+                if (host.StandardButtons != TaskDialogStandardButtons.None)
                 {
-                    foreach (TaskDialogStandardButtonFlags flag in Enum<TaskDialogStandardButtonFlags>.GetFlags(host.StandardButtons))
+                    foreach (TaskDialogStandardButtons flag in Enum<TaskDialogStandardButtons>.GetFlags(host.StandardButtons))
                         AddStandardButton(flag);
                 }
             }
@@ -1284,10 +1284,10 @@ namespace KGySoft.WinForms.Forms
             {
                 // standard button
                 defaultButton = null;
-                if (host.DefaultStandardButton != TaskDialogStandardButtons.None)
+                if (host.DefaultStandardButton != TaskDialogStandardButton.None)
                 {
                     defaultButton = pnlButtons.Controls.Cast<Button>().FirstOrDefault(b => b.DialogResult == (DialogResult)host.DefaultStandardButton
-                        || (host.DefaultStandardButton == TaskDialogStandardButtons.Close && b.DialogResult == DialogResult.Abort));
+                        || (host.DefaultStandardButton == TaskDialogStandardButton.Close && b.DialogResult == DialogResult.Abort));
                 }
 
                 // neither custom nor standard: first button is the default
@@ -1595,7 +1595,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-        private void AddStandardButton(TaskDialogStandardButtonFlags standardButton)
+        private void AddStandardButton(TaskDialogStandardButtons standardButton)
         {
             AdvancedButton btn = new AdvancedButton
             {
@@ -1609,22 +1609,22 @@ namespace KGySoft.WinForms.Forms
             {
                 switch (standardButton)
                 {
-                    case TaskDialogStandardButtonFlags.OK:
+                    case TaskDialogStandardButtons.OK:
                         btn.Text = systemTextCache[SystemTextIds.OK];
                         break;
-                    case TaskDialogStandardButtonFlags.Cancel:
+                    case TaskDialogStandardButtons.Cancel:
                         btn.Text = systemTextCache[SystemTextIds.Cancel];
                         break;
-                    case TaskDialogStandardButtonFlags.Close:
+                    case TaskDialogStandardButtons.Close:
                         btn.Text = systemTextCache[SystemTextIds.Close];
                         break;
-                    case TaskDialogStandardButtonFlags.Retry:
+                    case TaskDialogStandardButtons.Retry:
                         btn.Text = systemTextCache[SystemTextIds.Retry];
                         break;
-                    case TaskDialogStandardButtonFlags.Yes:
+                    case TaskDialogStandardButtons.Yes:
                         btn.Text = systemTextCache[SystemTextIds.Yes];
                         break;
-                    case TaskDialogStandardButtonFlags.No:
+                    case TaskDialogStandardButtons.No:
                         btn.Text = systemTextCache[SystemTextIds.No];
                         break;
                     default:
@@ -1634,22 +1634,22 @@ namespace KGySoft.WinForms.Forms
 
             switch (standardButton)
             {
-                case TaskDialogStandardButtonFlags.OK:
+                case TaskDialogStandardButtons.OK:
                     btn.DialogResult = DialogResult.OK;
                     break;
-                case TaskDialogStandardButtonFlags.Cancel:
+                case TaskDialogStandardButtons.Cancel:
                     btn.DialogResult = DialogResult.Cancel;
                     break;
-                case TaskDialogStandardButtonFlags.Close:
+                case TaskDialogStandardButtons.Close:
                     btn.DialogResult = DialogResult.Abort;
                     break;
-                case TaskDialogStandardButtonFlags.Retry:
+                case TaskDialogStandardButtons.Retry:
                     btn.DialogResult = DialogResult.Retry;
                     break;
-                case TaskDialogStandardButtonFlags.Yes:
+                case TaskDialogStandardButtons.Yes:
                     btn.DialogResult = DialogResult.Yes;
                     break;
-                case TaskDialogStandardButtonFlags.No:
+                case TaskDialogStandardButtons.No:
                     btn.DialogResult = DialogResult.No;
                     break;
                 default:
@@ -1732,7 +1732,7 @@ namespace KGySoft.WinForms.Forms
             pnlDividerDetailsFooterTop.BackColor = dividerTop;
             if (flags[isSpecialHeadColors])
             {
-                lblMainInstruction.ForeColor = host.Icon == TaskDialogStandardIcons.SecurityWarning ? Color.Black : Color.White;
+                lblMainInstruction.ForeColor = host.Icon == TaskDialogStandardIcon.SecurityWarning ? Color.Black : Color.White;
                 pnlMainIconBackground.BackColor = gradientStart;
             }
             else
@@ -1764,24 +1764,24 @@ namespace KGySoft.WinForms.Forms
 
             switch (host.Icon)
             {
-                case TaskDialogStandardIcons.SecuritySuccess:
+                case TaskDialogStandardIcon.SecuritySuccess:
                     gradientStart = Color.FromArgb(21, 118, 21);
                     gradientEnd = Color.FromArgb(57, 150, 63);
                     break;
-                case TaskDialogStandardIcons.SecurityWarning:
+                case TaskDialogStandardIcon.SecurityWarning:
                     gradientStart = Color.FromArgb(242, 177, 0);
                     gradientEnd = Color.FromArgb(254, 205, 72);
                     break;
-                case TaskDialogStandardIcons.SecurityError:
+                case TaskDialogStandardIcon.SecurityError:
                     gradientStart = Color.FromArgb(172, 1, 0);
                     gradientEnd = Color.FromArgb(227, 1, 0);
                     break;
-                case TaskDialogStandardIcons.SecurityShieldBlue:
-                case TaskDialogStandardIcons.SecurityQuestion:
+                case TaskDialogStandardIcon.SecurityShieldBlue:
+                case TaskDialogStandardIcon.SecurityQuestion:
                     gradientStart = Color.FromArgb(4, 80, 130);
                     gradientEnd = Color.FromArgb(28, 120, 133);
                     break;
-                case TaskDialogStandardIcons.SecurityShieldGray:
+                case TaskDialogStandardIcon.SecurityShieldGray:
                     gradientStart = Color.FromArgb(157, 143, 133);
                     gradientEnd = Color.FromArgb(164, 152, 144);
                     break;
@@ -2020,7 +2020,7 @@ namespace KGySoft.WinForms.Forms
                     return pnlCommandLinks.Controls[host.Buttons.Count - taskDialogControl.Id - 1];
 
                 // custom button - if there is no standard button, direct indexing
-                if (host.StandardButtons == TaskDialogStandardButtonFlags.None)
+                if (host.StandardButtons == TaskDialogStandardButtons.None)
                     return pnlButtons.Controls[taskDialogControl.Id];
 
                 // if there are standard buttons, searching
@@ -2295,7 +2295,7 @@ namespace KGySoft.WinForms.Forms
                     try
                     {
                         // updating visibilities if the buttons panel will just appear/disappear
-                        if (!pnlButtons.Visible || host.StandardButtons == TaskDialogStandardButtonFlags.None && !cfg.HasButtons)
+                        if (!pnlButtons.Visible || host.StandardButtons == TaskDialogStandardButtons.None && !cfg.HasButtons)
                             ResetVisibilities(cfg);
                         ResetButtons(cfg);
                         ResetButtonMargins(cfg);

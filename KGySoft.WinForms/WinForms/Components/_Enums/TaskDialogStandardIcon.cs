@@ -1,7 +1,7 @@
 ﻿#region Copyright
 
 ///////////////////////////////////////////////////////////////////////////////
-//  File: TaskDialogStandardIcons.cs
+//  File: TaskDialogStandardIcon.cs
 ///////////////////////////////////////////////////////////////////////////////
 //  Copyright (C) KGy SOFT, 2005-2026 - All Rights Reserved
 //
@@ -24,7 +24,7 @@ namespace KGySoft.WinForms.Components
     /// <summary>
     /// Represents possible standard icons for <see cref="TaskDialog"/>.
     /// </summary>
-    public enum TaskDialogStandardIcons
+    public enum TaskDialogStandardIcon
     {
         /// <summary>
         /// Represents no icon.

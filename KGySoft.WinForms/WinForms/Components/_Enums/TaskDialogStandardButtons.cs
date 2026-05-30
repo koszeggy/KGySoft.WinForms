@@ -13,56 +13,55 @@
 
 #endregion
 
+#region Usings
+
+using System;
+
+#endregion
+
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Represents a single standard button in <see cref="TaskDialog"/>
+    /// Identifies the possible standard buttons that
+    /// can be displayed via <see cref="TaskDialog"/>.
     /// </summary>
+    [Flags]
     public enum TaskDialogStandardButtons
     {
         /// <summary>
-        /// Represents none of the buttons.
+        /// Represents none of the standard buttons.
         /// </summary>
-        None = 0,
-        
-        /// <summary>
-        /// Identifies the OK button
-        /// </summary>
-        OK = 1,
+        None = 0x0000,
 
         /// <summary>
-        /// Identifies the Cancel button
+        /// The task dialog contains the push button: OK.
         /// </summary>
-        Cancel = 2,
-
-        ///// <summary>
-        ///// Identifies the Abort button
-        ///// </summary>
-        //Abort = 3,
+        OK = 0x0001,
 
         /// <summary>
-        /// Identifies the Retry button
+        /// The task dialog contains the push button: Yes.
         /// </summary>
-        Retry = 4,
-
-        ///// <summary>
-        ///// Identifies the Ignore button
-        ///// </summary>
-        //Ignore = 5,
+        Yes = 0x0002,
 
         /// <summary>
-        /// Identifies the Yes button
+        /// The task dialog contains the push button: No.
         /// </summary>
-        Yes = 6,
+        No = 0x0004,
 
         /// <summary>
-        /// Identifies the No button
+        /// The task dialog contains the push button: Cancel.
+        /// If this button is specified, the task dialog will respond to typical cancel actions (Alt-F4 and Escape).
         /// </summary>
-        No = 7,
+        Cancel = 0x0008,
 
         /// <summary>
-        /// Identifies the Close button
+        /// The task dialog contains the push button: Retry.
         /// </summary>
-        Close = 8
+        Retry = 0x0010,
+
+        /// <summary>
+        /// The task dialog contains the push button: Close.
+        /// </summary>
+        Close = 0x0020
     }
 }

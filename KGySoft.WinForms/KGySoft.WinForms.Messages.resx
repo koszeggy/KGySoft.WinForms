@@ -227,22 +227,22 @@
   <data name="Localization_InvalidResourceFormat" xml:space="preserve">
     <value>Localization of key {0} failed because the format string {1} arguments: {2}</value>
   </data>
-  <data name="TaskDialogStandardButtonFlags.OK" xml:space="preserve">
+  <data name="TaskDialogStandardButtons.OK" xml:space="preserve">
     <value>&amp;OK</value>
   </data>
-  <data name="TaskDialogStandardButtonFlags.Yes" xml:space="preserve">
+  <data name="TaskDialogStandardButtons.Yes" xml:space="preserve">
     <value>&amp;Yes</value>
   </data>
-  <data name="TaskDialogStandardButtonFlags.No" xml:space="preserve">
+  <data name="TaskDialogStandardButtons.No" xml:space="preserve">
     <value>&amp;No</value>
   </data>
-  <data name="TaskDialogStandardButtonFlags.Cancel" xml:space="preserve">
+  <data name="TaskDialogStandardButtons.Cancel" xml:space="preserve">
     <value>&amp;Cancel</value>
   </data>
-  <data name="TaskDialogStandardButtonFlags.Retry" xml:space="preserve">
+  <data name="TaskDialogStandardButtons.Retry" xml:space="preserve">
     <value>&amp;Retry</value>
   </data>
-  <data name="TaskDialogStandardButtonFlags.Close" xml:space="preserve">
+  <data name="TaskDialogStandardButtons.Close" xml:space="preserve">
     <value>&amp;Close</value>
   </data>
   <data name="General_NoVisualStyles" xml:space="preserve">

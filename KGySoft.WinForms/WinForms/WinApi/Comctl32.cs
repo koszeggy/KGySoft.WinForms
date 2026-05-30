@@ -35,7 +35,7 @@ namespace KGySoft.WinForms.WinApi
         /// </summary>
         /// <param name="pTaskConfig">Pointer to a <see cref="TASKDIALOGCONFIG"/> structure that contains information used to display the task dialog.</param>
         /// <param name="pnButton">Address of a variable that receives either one of the button IDs specified in the pButtons member of the pTaskConfig parameter,
-        /// or one of the values of <see cref="TaskDialogStandardButtons"/></param>
+        /// or one of the values of <see cref="TaskDialogStandardButton"/></param>
         /// <param name="pnRadioButton">Address of a variable that receives one of the button IDs specified in the pRadioButtons member of the pTaskConfig parameter. If this parameter is NULL, no value is returned.</param>
         /// <param name="pfVerificationFlagChecked">Address of a variable that indicates whether the verification checkbox was checked when the dialog was dismissed.</param>
         /// <returns></returns>

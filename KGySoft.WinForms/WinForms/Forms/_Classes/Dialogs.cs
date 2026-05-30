@@ -483,24 +483,24 @@ namespace KGySoft.WinForms.Forms
                     Message = message,
                     StandardButtons = buttons switch
                     {
-                        MessageBoxButtons.YesNo => TaskDialogStandardButtonFlags.Yes | TaskDialogStandardButtonFlags.No,
-                        MessageBoxButtons.YesNoCancel => TaskDialogStandardButtonFlags.Yes | TaskDialogStandardButtonFlags.No | TaskDialogStandardButtonFlags.Cancel,
-                        _ => TaskDialogStandardButtonFlags.OK
+                        MessageBoxButtons.YesNo => TaskDialogStandardButtons.Yes | TaskDialogStandardButtons.No,
+                        MessageBoxButtons.YesNoCancel => TaskDialogStandardButtons.Yes | TaskDialogStandardButtons.No | TaskDialogStandardButtons.Cancel,
+                        _ => TaskDialogStandardButtons.OK
                     },
                     Icon = icon switch
                     {
-                        MessageBoxIcon.Information => TaskDialogStandardIcons.Information,
-                        MessageBoxIcon.Error => TaskDialogStandardIcons.Error,
-                        MessageBoxIcon.Warning => TaskDialogStandardIcons.Warning,
-                        MessageBoxIcon.Question => TaskDialogStandardIcons.Question,
-                        _ => TaskDialogStandardIcons.None
+                        MessageBoxIcon.Information => TaskDialogStandardIcon.Information,
+                        MessageBoxIcon.Error => TaskDialogStandardIcon.Error,
+                        MessageBoxIcon.Warning => TaskDialogStandardIcon.Warning,
+                        MessageBoxIcon.Question => TaskDialogStandardIcon.Question,
+                        _ => TaskDialogStandardIcon.None
                     },
                     Options = TaskDialogOptions.ForceShowSysMenu,
                     DefaultStandardButton = defaultButton switch
                     {
-                        MessageBoxDefaultButton.Button2 => TaskDialogStandardButtons.No,
-                        MessageBoxDefaultButton.Button3 => TaskDialogStandardButtons.Cancel,
-                        _ => buttons == MessageBoxButtons.OK ? TaskDialogStandardButtons.OK : TaskDialogStandardButtons.Yes
+                        MessageBoxDefaultButton.Button2 => TaskDialogStandardButton.No,
+                        MessageBoxDefaultButton.Button3 => TaskDialogStandardButton.Cancel,
+                        _ => buttons == MessageBoxButtons.OK ? TaskDialogStandardButton.OK : TaskDialogStandardButton.Yes
                     },
                 };
 

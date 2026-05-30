@@ -75,18 +75,18 @@ namespace KGySoft.WinForms
             return bitmap;
         }
 
-        internal static Icon ToIcon(this TaskDialogStandardIcons icon) => icon switch
+        internal static Icon ToIcon(this TaskDialogStandardIcon icon) => icon switch
         {
-            TaskDialogStandardIcons.Information => Icons.SystemInformation,
-            TaskDialogStandardIcons.Warning => Icons.SystemWarning,
-            TaskDialogStandardIcons.Error => Icons.SystemError,
-            TaskDialogStandardIcons.Question => Icons.SystemQuestion,
-            TaskDialogStandardIcons.SecuritySuccess => Icons.SystemSecuritySuccess,
-            TaskDialogStandardIcons.SecurityWarning => Icons.SystemSecurityWarning,
-            TaskDialogStandardIcons.SecurityError => Icons.SystemSecurityError,
-            TaskDialogStandardIcons.SecurityShield or TaskDialogStandardIcons.SecurityShieldBlue or TaskDialogStandardIcons.SecurityShieldGray => Icons.SystemShield,
-            TaskDialogStandardIcons.SecurityQuestion => Icons.SystemSecurityQuestion,
-            TaskDialogStandardIcons.None => TaskDialog.DefaultIcon,
+            TaskDialogStandardIcon.Information => Icons.SystemInformation,
+            TaskDialogStandardIcon.Warning => Icons.SystemWarning,
+            TaskDialogStandardIcon.Error => Icons.SystemError,
+            TaskDialogStandardIcon.Question => Icons.SystemQuestion,
+            TaskDialogStandardIcon.SecuritySuccess => Icons.SystemSecuritySuccess,
+            TaskDialogStandardIcon.SecurityWarning => Icons.SystemSecurityWarning,
+            TaskDialogStandardIcon.SecurityError => Icons.SystemSecurityError,
+            TaskDialogStandardIcon.SecurityShield or TaskDialogStandardIcon.SecurityShieldBlue or TaskDialogStandardIcon.SecurityShieldGray => Icons.SystemShield,
+            TaskDialogStandardIcon.SecurityQuestion => Icons.SystemSecurityQuestion,
+            TaskDialogStandardIcon.None => TaskDialog.DefaultIcon,
             _ => throw new ArgumentOutOfRangeException()
         };
 

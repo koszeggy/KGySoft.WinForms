@@ -60,7 +60,7 @@ namespace KGySoft.WinForms.WinApi
         /// Specifies the push buttons displayed in the task dialog.
         /// If no common buttons are specified and no custom buttons are specified using the cButtons and pButtons members, the task dialog will contain the OK button by default.
         /// </summary>
-        public TaskDialogStandardButtonFlags dwCommonButtons;
+        public TaskDialogStandardButtons dwCommonButtons;
 
         /// <summary>
         /// Pointer that references the string to be used for the task dialog title.
@@ -74,7 +74,7 @@ namespace KGySoft.WinForms.WinApi
         /// This member is ignored unless the TDF_USE_HICON_MAIN flag is specified.
         /// If this member is NULL and the TDF_USE_HICON_MAIN is specified, no icon will be displayed.
         /// -or-
-        /// An integer resource identifier of one of the predefined values in <see cref="TaskDialogStandardIcons"/>.
+        /// An integer resource identifier of one of the predefined values in <see cref="TaskDialogStandardIcon"/>.
         /// </summary>
         public IntPtr hMainIcon;
 
@@ -163,7 +163,7 @@ namespace KGySoft.WinForms.WinApi
         /// This member is ignored unless the TDF_USE_HICON_FOOTER flag is specified and the pszFooterIcon is not.
         /// If this member is NULL and the TDF_USE_HICON_FOOTER is specified, no icon is displayed.
         /// -or-
-        /// An integer resource identifier of one of the predefined values in <see cref="TaskDialogStandardIcons"/>.
+        /// An integer resource identifier of one of the predefined values in <see cref="TaskDialogStandardIcon"/>.
         /// </summary>
         public IntPtr hFooterIcon;
 
