@@ -15,13 +15,12 @@
 
 #region Usings
 
-using KGySoft.WinForms.Reflection;
-
 #region Used Namespaces
 
 using System;
 using System.Collections.Specialized;
 using System.Drawing;
+using System.Drawing.Drawing2D;
 using System.Windows.Forms;
 
 #endregion
@@ -797,7 +796,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Properties
 
-        protected virtual int ButtonBorderSize => 4;
+        protected virtual int ButtonBorderSize => 3; // it's 4 in original WinForms code, which causes trimming images that would fit by native rendering
         protected ButtonBase ButtonInstance => control;
         protected bool ShowFocusCues => ((ISupportButtonAdapter)control).ShowFocusCues;
         protected virtual bool IsButton => true;
@@ -991,19 +990,18 @@ namespace KGySoft.WinForms.Controls
 
         private void DrawImageCore(Graphics graphics, Image image, Rectangle imageBounds, Point imageStart, LayoutData layout, ControlAppearanceState state)
         {
-            Region oldClip = graphics.Clip;
+            GraphicsState? graphicsState = null;
 
             if (!layout.Options.DotNetOneButtonCompat)
             {
-                Rectangle bounds = new Rectangle(ButtonBorderSize, ButtonBorderSize, control.Width - (2 * ButtonBorderSize), control.Height - (2 * ButtonBorderSize));
+                Debug.Assert(VisualStyleHelper.RenderWithVisualStyles);
+                graphicsState = graphics.Save();
+                graphics.IntersectClip(imageBounds);
 
-                Region newClip = oldClip.Clone();
-                newClip.Intersect(bounds);
-
-                // If we don't do this, DrawImageUnscaled will happily draw the entire image, even though imageBounds
-                // is smaller than the image size.
-                newClip.Intersect(imageBounds);
-                graphics.Clip = newClip;
+                int borderSize = ButtonBorderSize;
+                Rectangle bounds = new Rectangle(borderSize, borderSize, control.Width - (2 * borderSize), control.Height - (2 * borderSize));
+                bounds.Intersect(imageBounds);
+                graphics.IntersectClip(bounds);
             }
             else
             {
@@ -1027,8 +1025,8 @@ namespace KGySoft.WinForms.Controls
 
             finally
             {
-                if (!layout.Options.DotNetOneButtonCompat)
-                    graphics.Clip = oldClip;
+                if (graphicsState != null)
+                    graphics.Restore(graphicsState);
             }
         }
 

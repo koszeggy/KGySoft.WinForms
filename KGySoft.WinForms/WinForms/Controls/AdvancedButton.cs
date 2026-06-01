@@ -44,7 +44,7 @@ namespace KGySoft.WinForms.Controls
     /// <item>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</item>
     /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
     /// <item>Fading animations (only on Vista and above with visual styles enabled, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</item>
-    /// <item>Slightly different appearance in some cases (e.g. focus rectangle size and width, image shifts along with text in classic or popup appearance,
+    /// <item>Slightly different appearance in some cases (e.g. focus rectangle size and width, better fit of images, image shifts along with text in classic or popup appearance,
     /// fixed highlight fore color in high contrast mode with visual styles enabled, etc.).</item>
     /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>

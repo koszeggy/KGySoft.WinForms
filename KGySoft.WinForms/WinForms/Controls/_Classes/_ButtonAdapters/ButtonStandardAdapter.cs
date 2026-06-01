@@ -211,7 +211,7 @@ namespace KGySoft.WinForms.Controls
         private LayoutOptions PaintLayout(ControlAppearanceState state, bool up)
         {
             LayoutOptions options = CommonLayout(state);
-            options.ForceDoubleFocusWidth = OSHelper.IsWindows10OrLater && OSHelper.IsRealWindows;
+            options.ForceDoubleFocusWidth = OSHelper.IsWindows10OrLater && !OSHelper.IsWindows11OrLater && OSHelper.IsRealWindows; // only on Windows 10
             options.TextOffset = !up;
             options.GrowBorderBy1PxWhenDefault = options.DotNetOneButtonCompat = !VisualStyleHelper.RenderWithVisualStyles;
             return options;

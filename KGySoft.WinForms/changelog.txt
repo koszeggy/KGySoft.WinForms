@@ -95,8 +95,9 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
   if you used ucCaptionedContainer for the check box to be able to disable the inner controls, use the new
   CheckGroupBox class instead.
 ! AdvancedButton class:
-  ! Changing Standard classic (when there are no visual styles) and Popup FlatStyle rendering with images: just like
-    the text, the image is also shifted when the button is pressed. This is how the native rendering also works.
+  ! Small image rendering changes: When visual styles are enabled, there is a bit more room for the image.
+    Also, in classic style (when there are no visual styles) and with Popup FlatStyle rendering the Image is shifted
+    along with the text when the button is pressed. This is how the native rendering also works.
   ! Default DisabledForeColor is SystemColors.GrayText rather than ControlDarkDark (when FlatStyle is Popup or Flat,
     or visual styles are not available).
   ! BackColor/ForeColor: when the control is not Enabled, they get/set the disabled colors. The Changed events are
