@@ -258,7 +258,7 @@ namespace KGySoft.WinForms.Forms
         private static readonly Color mainInstructionsDefaultThemedColor = Color.FromArgb(0, 51, 153);
         private static readonly Color dividerBottomDefaultThemedColor = Color.FromArgb(223, 223, 223);
 
-        private static readonly Size buttonReferenceSize = new Size(78, 24); // the native version is 23 high, but it is not enough for a 16x16 icon with Standard FlatStyle
+        private static readonly Size buttonReferenceSize = new Size(78, 23);
 
         private static readonly Padding buttonsReferenceMargin = new Padding(3, 0, 3, 0);
         private static readonly Padding mainInstructionReferencePadding = new Padding(8, 12, 8, 5);
