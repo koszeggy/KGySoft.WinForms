@@ -457,7 +457,7 @@ namespace KGySoft.WinForms.Controls
                 }
                 else
                 {
-                    // Rearrage text/image to prevent overlay.  Pack text into maxBounds - space reserved for image
+                    // Rearrange text/image to prevent overlay.  Pack text into maxBounds - space reserved for image
                     Size maxTextSize = LayoutUtils.SubAlignedRegion(maxBounds.Size, ImageSize, textImageRelation);
                     Size textSize = GetTextSize(g, maxTextSize);
                     Rectangle maxCombinedBounds = maxBounds;
@@ -1014,11 +1014,7 @@ namespace KGySoft.WinForms.Controls
             try
             {
                 if (!state.Enabled)
-                {
-                    // this always creates a new bitmap, but this is what happens also in the original ControlPaint.DrawImageDisabled
-                    // when the internal overload is called with unscaledImage = true
-                    graphics.DrawImageGrayscale(image, new Rectangle(imageBounds.X, imageBounds.Y, image.Width, image.Height));
-                }
+                    ControlPaint.DrawImageDisabled(graphics, image, imageBounds.X, imageBounds.Y, default);
                 else
                     graphics.DrawImage(image, imageBounds.X, imageBounds.Y, image.Width, image.Height);
             }

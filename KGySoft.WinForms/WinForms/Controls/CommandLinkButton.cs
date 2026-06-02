@@ -2097,7 +2097,7 @@ namespace KGySoft.WinForms.Controls
             if (img != null)
             {
                 if (asDisabled)
-                    e.Graphics.DrawImageGrayscale(img, bounds);
+                    ControlPaint.DrawImageDisabled(e.Graphics, img, bounds.X, bounds.Y, default);
                 else
                     e.Graphics.DrawImage(img, bounds);
             }
