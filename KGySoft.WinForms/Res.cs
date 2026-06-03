@@ -148,7 +148,7 @@ namespace KGySoft
 
         #region InvokeMarshaller
 
-        /// <summary>Invoke is required but no SynchronizationContext was captured and the handle of the owner is not created yet.</summary>
+        /// <summary>Invoking on UI thread is requested, but no SynchronizationContext was captured.</summary>
         internal static string InvokeMarshallerNoSynchronizationContext => Get("InvokeMarshaller_NoSynchronizationContext");
 
         #endregion

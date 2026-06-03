@@ -61,9 +61,12 @@ namespace KGySoft.WinForms
                 }
 
                 // invoking from a foreign thread
-                if (owner.IsHandleCreated)
-                    owner.Invoke(action);
-                else if (synchronizationContext != null)
+                // NOTE: NOT using owner.Invoke, because in very extreme cases it may block the caller thread forever in a Wait call, never invoking the callback, while the UI remains responsive.
+                //       Example: owner is a modal dialog, RTL changes, and during handle recreation a callback is requested.
+                //if (owner.IsHandleCreated)
+                //    owner.Invoke(action);
+                //else 
+                if (synchronizationContext != null)
                     synchronizationContext.Send(_ => action.Invoke(), null);
                 else
                     throw new InvalidOperationException(Res.InvokeMarshallerNoSynchronizationContext);
@@ -77,6 +80,7 @@ namespace KGySoft.WinForms
                 // "Invoke or BeginInvoke cannot be called on a control until the window handle has been created."
                 // Similar to the ObjectDisposedException catch, but in some cases even the Invoke call succeeds to marshal the delegate,
                 // but by the time the actual execution starts, the control is already disposed.
+                // NOTE: maybe this is not even relevant anymore, as not using owner.Invoke.
             }
         }
 
