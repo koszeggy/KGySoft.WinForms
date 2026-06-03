@@ -961,8 +961,8 @@ namespace KGySoft.WinForms.Forms
             if (desiredWidth < maxWidth)
                 desiredWidth = Math.Max(desiredWidth, btnShowHideDetails.GetPreferredSize(Size.Empty).Width) + btnShowHideDetails.Margin.Horizontal + pnlChecks.Margin.Horizontal;
 
-            // Including button sizes. Precondition: form width and button widths are calculated now.
-            int buttonsDesiredWidth = pnlButtons.Width + pnlButtons.Margin.Horizontal;
+            // Including button sizes. Precondition: button widths are set now.
+            int buttonsDesiredWidth = pnlButtons.GetPreferredSize(Size.Empty).Width + pnlButtons.Margin.Horizontal + pnlButtons.Padding.Horizontal;
 
             // There isn't enough place for everyone without wrapping
             if (desiredWidth + buttonsDesiredWidth > pnlMainControls.Width)
@@ -1447,13 +1447,13 @@ namespace KGySoft.WinForms.Forms
 
         private void ResetWidths(Configuration cfg, Rectangle suggestedBounds = default)
         {
-            PointF scale = DeviceScale;
             // setting form width
             // This forces to create the handle. May cause some resets and additional DPI changes, but it's still better than handling
             // the side effects of the deferred handle creation (e.g. the ResumeLayout in ResetHeights may change the screen,
             // recursive reentrancy in OnDeviceScaleChanged when setting MinimumSize in ResetConstraints, etc.).
             // NOTE: we could force the handle creation earlier (in Execute), but due to a strange bug in .NET 5.0 it causes
             // that OnLoad and OnShown are not called, causing some issues, e.g. the timer is not initialized and system sounds are not played.
+            PointF scale = DeviceScale;
             Screen screen = !suggestedBounds.IsEmpty() ? Screen.FromRectangle(suggestedBounds) : Screen.FromControl(this);
             Rectangle screenBounds = screen.WorkingArea;
             int screenWidth = screenBounds.Width;
