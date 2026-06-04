@@ -198,6 +198,7 @@ namespace KGySoft.WinForms.Forms
         private const int isOnAutoResizedPending = isLoaded << 1;
         private const int isAddingControl = isOnAutoResizedPending << 1;
         private const int isChangingFont = isAddingControl << 1;
+        private const int suppressNextNonSuggestedSizeChange = isChangingFont << 1;
 
         #endregion
 
@@ -1221,9 +1222,15 @@ namespace KGySoft.WinForms.Forms
                         Rectangle after = Bounds;
 
                         // If neither us, nor the DeviceScaleChanged event handlers changed the size, we can expect Windows to apply the suggested bounds
-                        // in a later WM_WINDOWPOSCHANGED message (V1 awareness: it always happens).
+                        // in a later WM_WINDOWPOSCHANGED message (V1 awareness: Windows always forcibly applies the new size).
+                        // V2 awareness: if we didn't change the size manually, Windows will apply the new size, but first a WM_WINDOWPOSCHANGED message
+                        // with the original size may arrive. In such case we suppress the first WM_WINDOWPOSCHANGED that is not the applied size.
                         if (flags[isPerMonitorDpiAwarenessV1] || before == after)
+                        {
                             flags[isOnAutoResizedPending] = true;
+                            if (!flags[isPerMonitorDpiAwarenessV1])
+                                flags[suppressNextNonSuggestedSizeChange] = true;
+                        }
                     }
                     finally
                     {
@@ -1232,12 +1239,22 @@ namespace KGySoft.WinForms.Forms
 
                     return;
 
-                case Constants.WM_WINDOWPOSCHANGED when flags[isOnAutoResizedPending] && dpiChangedSuggestedBounds.Size == Size:
+                case Constants.WM_WINDOWPOSCHANGED when flags[isOnAutoResizedPending]:
                     base.WndProc(ref m);
+
+                    // The first WM_WINDOWPOSCHANGED after WM_DPICHANGED may come with the original size, and just the next one with the applied new size.
+                    // Actually we accept any new size if we already skipped one message, because if the size is too big to fit in screen bounds, we may never
+                    // get a message with the actually suggested size.
+                    if (dpiChangedSuggestedBounds.Size != Size && flags[suppressNextNonSuggestedSizeChange])
+                    {
+                        flags[suppressNextNonSuggestedSizeChange] = false;
+                        return;
+                    }
+
                     dpiChangedSuggestedBounds = Rectangle.Empty;
                     if (!flags[isPerMonitorDpiAwarenessV1] || ActiveForm != this)
                     {
-                        flags[isOnAutoResizedPending] = false;
+                        flags[isOnAutoResizedPending | suppressNextNonSuggestedSizeChange] = false;
                         OnDeviceScaleAutoResized(EventArgs.Empty);
                     }
 
