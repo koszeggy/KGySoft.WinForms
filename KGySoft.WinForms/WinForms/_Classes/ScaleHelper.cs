@@ -541,11 +541,10 @@ namespace KGySoft.WinForms
             if (screen == null!)
                 ThrowNull(nameof(screen));
 
-            if (!IsThreadPerMonitorAware)
+            if (!IsThreadPerMonitorAware || !OSHelper.IsWindows)
                 return systemScale;
 
             // Unfortunately screen.Handle (HMONITOR) is not exposed publicly so we retrieve it by WinAPI.
-            Debug.Assert(OSHelper.IsWindows, "Non-Windows platform per-monitor awareness");
             var rect = new RECT(screen.Bounds);
             IntPtr hMonitor = User32.MonitorFromRect(ref rect, Constants.MONITOR_DEFAULTTONEAREST);
             if (ShCore.TryGetDpiForMonitor(hMonitor, MONITOR_DPI_TYPE.MDT_EFFECTIVE_DPI, out uint dpiX, out uint dpiY))
@@ -751,7 +750,7 @@ namespace KGySoft.WinForms
             if (parent == null)
                 return control.GetScale();
 
-            // For now, we only check if an IObservableParent is adding a control, and stop crawling up if a parent has a different font.
+            // For now, we only check if an IObservableParent is adding a control or changing the font, and stop crawling up if a parent has a different font.
             Font parentFont = parent.Font;
             Control? firstParentWithDifferentFont = null;
             for (Control? c = parent; c != null; c = c.Parent)
@@ -812,7 +811,7 @@ namespace KGySoft.WinForms
                 // Windows 8.1 or later
                 else
                 {
-                    Debug.Assert(OSHelper.IsWindows81OrLater, "Supporting per-monitor awareness is expected on Windows only");
+                    Debug.Assert(OSHelper.IsWindows81OrLater, "Supporting per-monitor awareness is expected on Windows 8.1+ only");
                     IntPtr hMonitor = User32.MonitorFromWindow(hwnd, Constants.MONITOR_DEFAULTTONEAREST);
                     if (ShCore.TryGetDpiForMonitor(hMonitor, MONITOR_DPI_TYPE.MDT_EFFECTIVE_DPI, out uint dpiX, out uint dpiY))
                         return new Point((int)dpiX, (int)dpiY);

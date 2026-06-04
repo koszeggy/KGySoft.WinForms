@@ -418,7 +418,7 @@ namespace KGySoft.WinForms.Forms
         /// in the <see cref="DeviceScaleChanging"/> or <see cref="DeviceScaleChanged"/> events. This event still can be used to manually scale the contents of the form, for example.</para>
         /// <para>When using per-monitor DPI awareness V1, Windows always (re)applies the non-customizable "suggested" size after the <see cref="DeviceScaleChanged"/> event,
         /// even if you set custom bounds in the <see cref="DeviceScaleChanging"/> or <see cref="DeviceScaleChanged"/> events. This event is raised when it is already safe to apply a new custom size.
-        /// When you drag the form to a different display, this event might be raised only after the user finished dragging the form.</para>
+        /// When the form is dragged to a different display, this event might be raised only after the user finished dragging the form.</para>
         /// </remarks>
         [Category("BaseForm")]
         [Description("Occurs with per-monitor DPI awareness, when the form is resized automatically after the DeviceScaleChanged event. "

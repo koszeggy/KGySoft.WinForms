@@ -89,6 +89,7 @@ namespace KGySoft.WinForms.Example
 #if NET471_OR_GREATER || NETCOREAPP
             Console.WriteLine($"RuntimeInformation.FrameworkDescription: {RuntimeInformation.FrameworkDescription}");
 #endif  
+            Console.WriteLine($"System default scale: {ScaleHelper.SystemScale}");
 #endif
 
             using var dlg = new TaskDialog();
