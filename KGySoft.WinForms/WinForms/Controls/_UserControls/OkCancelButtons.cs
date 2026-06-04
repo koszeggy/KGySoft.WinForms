@@ -271,7 +271,7 @@ namespace KGySoft.WinForms.Controls
         void IPerMonitorDpiAware.ParentFormDpiChanging() { }
         void IPerMonitorDpiAware.ParentFormDpiChanged()
         {
-            if (ScaleHelper.PerMonitorDpiAwarenessVersion == 1)
+            if (autoScale && ScaleHelper.PerMonitorDpiAwarenessVersion == 1)
                 ResetSizes();
         }
 

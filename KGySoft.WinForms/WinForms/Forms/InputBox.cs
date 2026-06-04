@@ -87,6 +87,10 @@ namespace KGySoft.WinForms.Forms
         protected override void OnDeviceScaleAutoResized(EventArgs e)
         {
             base.OnDeviceScaleAutoResized(e);
+
+            // this triggers an auto resize of the buttons panel, which otherwise would occur later, in WM_DPICHANGED_AFTERPARENT (with per-monitor DPI awareness V2)
+            pnlButtons.AutoScale = false;
+            pnlButtons.AutoScale = true;
             CheckHeight();
         }
 
@@ -107,6 +111,7 @@ namespace KGySoft.WinForms.Forms
         {
             if (flags[isResettingHeight] || !IsHandleCreated)
                 return;
+
             int desiredHeight = lblPrompt.GetPreferredSize(new Size(lblPrompt.Width, 0)).Height;
             if (lblPrompt.Height != desiredHeight)
             {
