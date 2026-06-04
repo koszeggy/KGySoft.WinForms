@@ -15,7 +15,6 @@
 
 #region Usings
 
-using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Globalization;
@@ -35,10 +34,19 @@ namespace KGySoft.WinForms
 
         private class CursorInfo
         {
+            #region Constants
+
+            private const int referenceSize = 20;
+
+            #endregion
+
             #region Fields
 
+
             private readonly Icon icon;
-            private readonly Dictionary<int, (CursorHandle Handle, Cursor Cursor)> createdCursors = new();
+
+            // Not a cache, because items are never dropped. CursorHandle is part of the value to prevent disposing it.
+            private readonly ThreadSafeDictionary<int, (CursorHandle Handle, Cursor Cursor)> createdCursors = new();
 
             #endregion
 
@@ -49,19 +57,27 @@ namespace KGySoft.WinForms
             #endregion
 
             #region Methods
+            
+            #region Internal Methods
 
-            internal Cursor GetCreateCursor(Size desiredSize)
+            internal Cursor Get(Control control)
             {
-                if (createdCursors.TryGetValue(desiredSize.Width, out var value))
-                    return value.Cursor;
-
-                // extracting bitmap and not icon so any sizes should work on all platforms
-                using Bitmap image = icon.ExtractNearestBitmap(desiredSize, PixelFormat.Format32bppArgb);
-                CursorHandle handle = image.ToCursorHandle(new Point(image.Width >> 1, image.Height >> 1));
-                Cursor result = new Cursor(handle);
-                createdCursors[desiredSize.Width] = (handle, result);
-                return result;
+                int size = control.ScaleWidth(referenceSize);
+                return createdCursors.GetOrAdd(size, Create).Cursor;
             }
+
+            #endregion
+
+            #region Private Methods
+
+            (CursorHandle Handle, Cursor Cursor) Create(int size)
+            {
+                using Icon image = icon.ExtractNearestIcon(new Size(size, size), PixelFormat.Format32bppArgb);
+                CursorHandle handle = image.ToCursorHandle(new Point(image.Width >> 1, image.Height >> 1));
+                return (handle, new Cursor(handle));
+            }
+
+            #endregion
 
             #endregion
         }
@@ -70,28 +86,27 @@ namespace KGySoft.WinForms
 
         #region Fields
 
-        private static readonly Size referenceSize = new Size(16, 16);
-        private static readonly StringKeyedDictionary<CursorInfo> cursors = new StringKeyedDictionary<CursorInfo>();
-
-        #endregion
-
-        #region Properties
-
-        internal static Cursor HandOpen => GetCreateCursor() ?? Cursors.Hand;
-        internal static Cursor HandGrab => GetCreateCursor() ?? Cursors.NoMove2D;
+        private static CursorInfo? handOpen;
+        private static CursorInfo? handGrab;
 
         #endregion
 
         #region Methods
 
-        private static Cursor? GetCreateCursor([CallerMemberName] string resourceName = null!)
-        {
-            if (!OSHelper.IsWindows)
-                return null;
-            if (!cursors.TryGetValue(resourceName, out CursorInfo? info))
-                cursors[resourceName] = info = new CursorInfo((Icon)Properties.Resources.ResourceManager.GetObject(resourceName, CultureInfo.InvariantCulture)!);
-            return info.GetCreateCursor(referenceSize.Scale(ScaleHelper.SystemScale));
-        }
+        #region Internal Methods
+
+        internal static Cursor HandOpen(Control control) => (handOpen ??= GetCreateCursorInfo())?.Get(control) ?? Cursors.Hand;
+        internal static Cursor HandGrab(Control control) => (handGrab ??= GetCreateCursorInfo())?.Get(control) ?? Cursors.NoMove2D;
+
+        #endregion
+
+        #region Private Methods
+
+        private static CursorInfo? GetCreateCursorInfo([CallerMemberName]string resourceName = null!) => OSHelper.IsWindows
+            ? new CursorInfo((Icon)Properties.Resources.ResourceManager.GetObject(resourceName, CultureInfo.InvariantCulture)!)
+            : null;
+
+        #endregion
 
         #endregion
     }

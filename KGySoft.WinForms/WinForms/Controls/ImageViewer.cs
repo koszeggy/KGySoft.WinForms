@@ -616,7 +616,7 @@ namespace KGySoft.WinForms.Controls
             flags[isDragging] = true;
             draggingOrigin = new Size(e.Location);
             scrollingOrigin = new Point(sbHorizontal.Value, sbVertical.Value);
-            Cursor = CursorsCache.HandGrab;
+            Cursor = CursorsCache.HandGrab(this);
         }
 
         /// <inheritdoc />
@@ -626,7 +626,7 @@ namespace KGySoft.WinForms.Controls
             if ((e.Button & MouseButtons.Left) == MouseButtons.None)
                 return;
             flags[isDragging] = false;
-            Cursor = flags.Any(sbHorizontalVisible | sbVerticalVisible) ? CursorsCache.HandOpen : null;
+            Cursor = flags.Any(sbHorizontalVisible | sbVerticalVisible) ? CursorsCache.HandOpen(this) : null;
         }
 
         /// <inheritdoc />
@@ -879,7 +879,7 @@ namespace KGySoft.WinForms.Controls
             sbVertical.Visible = isVerticalVisible;
             if (scrollbarsChanged)
             {
-                Cursor = isHorizontalVisible || isVerticalVisible ? CursorsCache.HandOpen : null;
+                Cursor = isHorizontalVisible || isVerticalVisible ? CursorsCache.HandOpen(this) : null;
                 flags[isDragging] = false;
             }
 
@@ -1013,7 +1013,12 @@ namespace KGySoft.WinForms.Controls
             sbVertical.Width = scrollbarSize.Width;
             sbHorizontal.Height = scrollbarSize.Height;
             targetRectangle = Rectangle.Empty; // forces calling AdjustSizes on the next paint
+            ResetCurrentCursor();
         }
+
+        private void ResetCurrentCursor() => Cursor = flags[isDragging] ? CursorsCache.HandGrab(this)
+            : flags[sbHorizontalVisible | sbVerticalVisible] ? CursorsCache.HandOpen(this)
+            : null;
 
         [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
         private bool ShouldSerializeCursor() => false;
