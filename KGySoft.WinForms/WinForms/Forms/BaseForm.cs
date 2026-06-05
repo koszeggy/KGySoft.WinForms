@@ -1242,15 +1242,17 @@ namespace KGySoft.WinForms.Forms
                 case Constants.WM_WINDOWPOSCHANGED when flags[isOnAutoResizedPending]:
                     base.WndProc(ref m);
 
-                    // The first WM_WINDOWPOSCHANGED after WM_DPICHANGED may come with the original size, and just the next one with the applied new size.
-                    // Actually we accept any new size if we already skipped one message, because if the size is too big to fit in screen bounds, we may never
-                    // get a message with the actually suggested size.
+                    // With V2 awareness, the first WM_WINDOWPOSCHANGED after WM_DPICHANGED may come with the original size, and just the next one with
+                    // the applied new size. Actually we accept any new size if we already skipped one message, because if the size is too big to fit
+                    // in screen bounds, we may never get a message with the actually suggested size.
                     if (dpiChangedSuggestedBounds.Size != Size && flags[suppressNextNonSuggestedSizeChange])
                     {
                         flags[suppressNextNonSuggestedSizeChange] = false;
                         return;
                     }
 
+                    // For V1 awareness we rise DeviceScaleAutoResized only when this is not the active form, because when a DPI change occurs due to dragging
+                    // the form to another screen, Windows will forcibly reapply the suggested size until the dragging is complete.
                     dpiChangedSuggestedBounds = Rectangle.Empty;
                     if (!flags[isPerMonitorDpiAwarenessV1] || ActiveForm != this)
                     {
@@ -1260,12 +1262,11 @@ namespace KGySoft.WinForms.Forms
 
                     return;
 
-                case Constants.WM_EXITSIZEMOVE:
+                case Constants.WM_EXITSIZEMOVE when flags[isOnAutoResizedPending]:
                     base.WndProc(ref m);
-                    bool raiseAutoResized = flags[isPerMonitorDpiAwarenessV1 | isOnAutoResizedPending];
+                    Debug.Assert(flags[isPerMonitorDpiAwarenessV1], "The expected route of raising DeviceScaleAutoResized for V2 awareness did not work.");
                     flags[isOnAutoResizedPending] = false;
-                    if (raiseAutoResized)
-                        OnDeviceScaleAutoResized(EventArgs.Empty);
+                    OnDeviceScaleAutoResized(EventArgs.Empty);
                     return;
 
                 case Constants.WM_WINDOWPOSCHANGING when IsSuspended:
