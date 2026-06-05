@@ -610,22 +610,14 @@ namespace KGySoft.WinForms.Forms
             base.OnDeviceScaleGetNewSize(e);
         }
 
-        protected override void OnDeviceScaleChanged(DeviceScaleChangeEventArgs e)
-        {
-            base.OnDeviceScaleChanged(e);
-            if (dialogState != TaskDialogStatus.Showing)
-                return;
-            if (ScaleHelper.PerMonitorDpiAwarenessVersion > 1)
-                ResetLayout(GetConfiguration(), e.SuggestedBounds);
-        }
-
         protected override void OnDeviceScaleAutoResized(EventArgs e)
         {
             base.OnDeviceScaleAutoResized(e);
             if (dialogState != TaskDialogStatus.Showing)
                 return;
-            if (ScaleHelper.PerMonitorDpiAwarenessVersion == 1)
-                ResetLayout(GetConfiguration(), Bounds);
+
+            // We could use OnDeviceScaleChanged with V2 awareness, but when that method is executed, Width - ClientSize.Width returns the difference for the old DPI
+            ResetLayout(GetConfiguration(), Bounds);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -1580,6 +1572,8 @@ namespace KGySoft.WinForms.Forms
             Point cursor;
             int origin = !suggestedBounds.IsEmpty() && Bounds.Contains(cursor = Cursor.Position) ? cursor.Y : origBounds.GetCenter().Y;
             newBounds.Y = origin - (int)((float)(origin - origBounds.Y) / origBounds.Height * height);
+            if (newBounds.Y < 0 && suggestedBounds.Y > 0)
+                newBounds.Y = suggestedBounds.Y;
             newBounds.Width = origBounds.Width; // keeping the original width
             newBounds.Height = height;
             Bounds = newBounds.EnsureScreen(screen, suggestedBounds.IsEmpty());
