@@ -54,8 +54,18 @@ namespace KGySoft.WinForms
         /// <returns>The adjusted <see cref="Rectangle"/>.</returns>
         public static Rectangle EnsureScreen(this Rectangle suggestedBounds, Screen screen, bool forceSingleScreen)
         {
+            // Framework Mono: AllScreens may always return a single screen, even in multi-display environment.
             if (OSHelper.IsFrameworkMono && Screen.AllScreens.Length <= 1)
-                return suggestedBounds;
+            {
+                if (!forceSingleScreen)
+                    return suggestedBounds;
+
+                // If single screen is forced, and suggested bounds already mainly cover the specified screen (which may or may not be the only screen),
+                // then we assume that screen is really the one that we want to use. Cannot use Screen.From... here, as it always would return the primary screen.
+                Rectangle overlap = Rectangle.Intersect(suggestedBounds, screen.Bounds);
+                if (overlap.Width < suggestedBounds.Width / 2 || overlap.Height < suggestedBounds.Height / 2)
+                    return suggestedBounds; // too small overlap, assuming multiple screens that we cannot query
+            }
 
             Rectangle screenBounds;
             if (!forceSingleScreen)
@@ -96,7 +106,7 @@ namespace KGySoft.WinForms
                     return suggestedBounds;
             }
 
-            // the suggested rectangle is not on the given screen, so ensuring that it is entirely on the given screen
+            // here ensuring that the suggested bounds are entirely within the given screen - we may reach this point even when it is not forced
             screenBounds = screen.WorkingArea;
             if (suggestedBounds.Left < screenBounds.Left)
                 suggestedBounds.X = screenBounds.Left;
@@ -113,6 +123,7 @@ namespace KGySoft.WinForms
 
             // If the rectangle is still not on the given screen, then it must be (much) bigger than the screen.
             // In this case we center it on the screen - this time using the screen bounds instead of the working area.
+            // NOTE: this may mean that the top is not visible, because if we adjust the top, Screen.FromRectangle returns another screen.
             return FromCenter(screen.Bounds.GetCenter(), suggestedBounds.Size);
         }
 

@@ -569,6 +569,9 @@ namespace KGySoft.WinForms.Forms
         protected override void OnShown(EventArgs e)
         {
             base.OnShown(e);
+            Point fixedLocation = Bounds.EnsureScreen(Screen.FromRectangle(Bounds), true).Location;
+            if (Location != fixedLocation)
+                Location = fixedLocation;
 
             if (!flags[executeNonModal])
                 return;
@@ -1558,8 +1561,11 @@ namespace KGySoft.WinForms.Forms
             Rectangle origBounds = Bounds;
             Rectangle newBounds = suggestedBounds.IsEmpty() ? Bounds : suggestedBounds;
             Point cursor;
-            int origin = !suggestedBounds.IsEmpty() && Bounds.Contains(cursor = Cursor.Position) ? cursor.X : origBounds.GetCenter().X;
+            int origin = dialogState != TaskDialogStatus.Initializing && !suggestedBounds.IsEmpty() && Bounds.Contains(cursor = Cursor.Position)
+                ? cursor.X
+                : origBounds.GetCenter().X;
             newBounds.X = origin - (int)((float)(origin - origBounds.X) / origBounds.Width * width);
+
             newBounds.Width = width;
             newBounds.Height = origBounds.Height; // keeping the original height
             Bounds = newBounds.EnsureScreen(screen, suggestedBounds.IsEmpty());
@@ -1570,13 +1576,18 @@ namespace KGySoft.WinForms.Forms
             Rectangle origBounds = Bounds;
             Rectangle newBounds = suggestedBounds.IsEmpty() ? Bounds : suggestedBounds;
             Point cursor;
-            int origin = !suggestedBounds.IsEmpty() && Bounds.Contains(cursor = Cursor.Position) ? cursor.Y : origBounds.GetCenter().Y;
+            int origin = dialogState != TaskDialogStatus.Initializing && !suggestedBounds.IsEmpty() && Bounds.Contains(cursor = Cursor.Position)
+                ? cursor.Y
+                : origBounds.GetCenter().Y;
             newBounds.Y = origin - (int)((float)(origin - origBounds.Y) / origBounds.Height * height);
-            if (newBounds.Y < 0 && suggestedBounds.Y > 0)
+
+            // making sure that the top is within the suggested bounds (note: cannot check screen bounds due to multi-display support uncertainty, see EnsureScreen)
+            if (!suggestedBounds.IsEmpty() && newBounds.Y < suggestedBounds.Y)
                 newBounds.Y = suggestedBounds.Y;
             newBounds.Width = origBounds.Width; // keeping the original width
             newBounds.Height = height;
             Bounds = newBounds.EnsureScreen(screen, suggestedBounds.IsEmpty());
+
             Debug.Assert(!flags[isResettingScrollbar]);
             flags[isResettingScrollbar] = true;
             try
