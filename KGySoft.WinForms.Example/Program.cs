@@ -89,7 +89,8 @@ namespace KGySoft.WinForms.Example
 #if NET471_OR_GREATER || NETCOREAPP
             Console.WriteLine($"RuntimeInformation.FrameworkDescription: {RuntimeInformation.FrameworkDescription}");
 #endif  
-            Console.WriteLine($"System default scale: {ScaleHelper.SystemScale}");
+            Console.WriteLine($"System scale: {ScaleHelper.SystemScale}");
+            Console.WriteLine($"Per-monitor DPI awareness version: {ScaleHelper.PerMonitorDpiAwarenessVersion}");
 #endif
 
             using var dlg = new TaskDialog();
