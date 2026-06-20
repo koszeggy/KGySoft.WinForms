@@ -570,7 +570,7 @@ namespace KGySoft.WinForms.Controls
         {
             // marquee style
             if (IsMarquee)
-                rect.Intersect(new Rectangle(animationOffset, rect.Top, MarqueeBlockWidth, rect.Height));
+                rect = rect.IntersectSafe(new Rectangle(animationOffset, rect.Top, MarqueeBlockWidth, rect.Height));
             // regular style
             else
             {

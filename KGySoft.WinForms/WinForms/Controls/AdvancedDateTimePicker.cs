@@ -931,7 +931,7 @@ namespace KGySoft.WinForms.Controls
                     // NOTE: This paints the custom back color for the button area. Doing this on Mono only, because on Windows the width of the drop-down button cannot be predicted.
                     Rectangle bounds = fullPaint ? layout.BackgroundBounds
                         : IsCustomUpDownBounds ? layout.UpDownBounds
-                        : Rectangle.Intersect(layout.BackgroundBounds, layout.DropDownBounds);
+                        : layout.BackgroundBounds.IntersectSafe(layout.DropDownBounds);
 
                     // The offset of VisibleClipBounds in RTL mode actually should not matter when drawing, but with the default pixel offset mode it makes a difference.
                     if (g.VisibleClipBounds.X < 0)

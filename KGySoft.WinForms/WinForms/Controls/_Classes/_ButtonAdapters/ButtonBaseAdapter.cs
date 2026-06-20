@@ -533,7 +533,7 @@ namespace KGySoft.WinForms.Controls
                     layout.TextBounds.Y = layout.ImageBounds.Y + layout.ImageBounds.Height;
                 }
                 //make sure that textBound is contained in layout.field
-                layout.TextBounds = Rectangle.Intersect(layout.TextBounds, layout.Field);
+                layout.TextBounds = layout.TextBounds.IntersectSafe(layout.Field);
                 if (HintTextUp)
                     layout.TextBounds.Y--;
                 if (TextOffset)
@@ -543,7 +543,7 @@ namespace KGySoft.WinForms.Controls
                 if (layout.Options.DotNetOneButtonCompat)
                 {
                     layout.ImageStart = layout.ImageBounds.Location;
-                    layout.ImageBounds = Rectangle.Intersect(layout.ImageBounds, layout.Field);
+                    layout.ImageBounds = layout.ImageBounds.IntersectSafe(layout.Field);
                 }
                 else if (!VisualStyleHelper.RenderWithVisualStyles)
                 {
@@ -1000,7 +1000,7 @@ namespace KGySoft.WinForms.Controls
 
                 int borderSize = ButtonBorderSize;
                 Rectangle bounds = new Rectangle(borderSize, borderSize, control.Width - (2 * borderSize), control.Height - (2 * borderSize));
-                bounds.Intersect(imageBounds);
+                bounds = bounds.IntersectSafe(imageBounds);
                 graphics.IntersectClip(bounds);
             }
             else

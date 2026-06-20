@@ -15,7 +15,9 @@
 
 #region Usings
 
+using System;
 using System.Drawing;
+using System.Runtime.CompilerServices;
 using System.Windows.Forms;
 
 #endregion
@@ -62,7 +64,7 @@ namespace KGySoft.WinForms
 
                 // If single screen is forced, and suggested bounds already mainly cover the specified screen (which may or may not be the only screen),
                 // then we assume that screen is really the one that we want to use. Cannot use Screen.From... here, as it always would return the primary screen.
-                Rectangle overlap = Rectangle.Intersect(suggestedBounds, screen.Bounds);
+                Rectangle overlap = suggestedBounds.IntersectSafe(screen.Bounds);
                 if (overlap.Width < suggestedBounds.Width / 2 || overlap.Height < suggestedBounds.Height / 2)
                     return suggestedBounds; // too small overlap, assuming multiple screens that we cannot query
             }
@@ -79,7 +81,7 @@ namespace KGySoft.WinForms
                 screenBounds = screen.WorkingArea;
                 foreach (int minimumWidth in new[] { suggestedBounds.Width / 2 + 1, suggestedBounds.Width * 2 / 3, suggestedBounds.Width * 3 / 4 })
                 {
-                    if (Rectangle.Intersect(screenBounds, suggestedBounds).Width < minimumWidth)
+                    if (screenBounds.IntersectSafe(suggestedBounds).Width < minimumWidth)
                     {
                         if (suggestedBounds.Left < screenBounds.Left)
                             suggestedBounds.X = screenBounds.Left + minimumWidth - suggestedBounds.Width;
@@ -94,7 +96,7 @@ namespace KGySoft.WinForms
                 // After the adjustments above at least the 3/4 of the rectangle should be on the given screen horizontally,
                 // so vertically we ensure only the half of the rectangle.
                 int minimumHeight = suggestedBounds.Height / 2 + 1;
-                if (Rectangle.Intersect(screenBounds, suggestedBounds).Height < minimumHeight)
+                if (screenBounds.IntersectSafe(suggestedBounds).Height < minimumHeight)
                 {
                     if (suggestedBounds.Top < screenBounds.Top)
                         suggestedBounds.Y = screenBounds.Top + minimumHeight - suggestedBounds.Height;
@@ -132,6 +134,25 @@ namespace KGySoft.WinForms
         /// Not just faster than the IsEmpty property but also works better when Intersect returns a non-default practically zero rectangle.
         /// </summary>
         public static bool IsEmpty(this Rectangle rect) => rect.Width == 0 || rect.Height == 0;
+
+        /// <summary>
+        /// Like Rectangle.Intersect, but works with big ranges, and returns Rectangle.Empty if the result would be a practically zero rectangle.
+        /// </summary>
+        [MethodImpl(MethodImpl.AggressiveInlining)]
+        internal static Rectangle IntersectSafe(this Rectangle a, Rectangle b)
+        {
+            int x1 = Math.Max(a.X, b.X);
+            long x2 = Math.Min((long)a.X + a.Width, (long)b.X + b.Width);
+            int y1 = Math.Max(a.Y, b.Y);
+            long y2 = Math.Min((long)a.Y + a.Height, (long)b.Y + b.Height);
+
+            // The original Rectangle.Intersect method has >= checks, which can return non-default zero height or width rectangles.
+            if (x2 > x1 && y2 > y1)
+                // The (int) cast is safe because the result is guaranteed to be in the int range as intersection can only reduce height and width.
+                return new Rectangle(x1, y1, (int)(x2 - x1), (int)(y2 - y1));
+
+            return Rectangle.Empty;
+        }
 
         #endregion
     }

@@ -90,7 +90,7 @@ namespace KGySoft.WinForms.Controls
 
                 layout.Focus.Offset(-(focusRectFixup + 1), -2);
                 layout.Focus.Width = layout.TextBounds.Width + layout.ImageBounds.Width - 1;
-                layout.Focus.Intersect(layout.TextBounds);
+                layout.Focus = layout.Focus.IntersectSafe(layout.TextBounds);
 
                 if (!layout.Options.TextAlign.AnyLeft()
                     && layout.Options.UseCompatibleTextRendering
