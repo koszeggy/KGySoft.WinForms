@@ -26,6 +26,9 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Media;
+#if NET47_OR_GREATER
+using System.Runtime.CompilerServices;
+#endif
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
@@ -397,6 +400,19 @@ namespace KGySoft.WinForms.Forms
 
         public TaskDialogForm()
         {
+            #region Local Methods
+
+#if NET47_OR_GREATER
+            // Needed for Framework Mono, because it does not have the DpiChanged event in Form (as of 6.12/14), so just overriding OnDpiChanged would crash the runtime:
+            // TypeLoadException: VTable setup of type KGySoft.WinForms.Forms.TaskDialogForm failed: Could not load signature of KGySoft.WinForms.Forms.TaskDialogForm:OnDpiChanged.
+            // Parameter type DpiChangedArgument may also be missing, but as long as someone does not try to reflect the generated private method, we are alright.
+            // Not unsubscribing explicitly in Dispose is not a problem, because BaseForm.Dispose removes all event subscriptions.
+            [MethodImpl(MethodImplOptions.NoInlining)]
+            void SubscribeDpiChangedSafe() => DpiChanged += (_, e) => e.Cancel = true;
+#endif
+
+            #endregion
+
             InitializeComponent();
             pnlMainInstruction.Owner = this;
             btnShowHideDetails.ExpandedChanged += btnShowHideDetails_ExpandedChanged;
@@ -415,6 +431,11 @@ namespace KGySoft.WinForms.Forms
                 Font = ScaleHelper.MessageBoxFont;
                 return;
             }
+
+#if NET47_OR_GREATER
+            if (typeof(Form).GetEvent(nameof(DpiChanged)) != null)
+                SubscribeDpiChangedSafe();
+#endif
 
             if (OSHelper.IsWine)
                 return;
@@ -598,7 +619,7 @@ namespace KGySoft.WinForms.Forms
             }
         }
 
-#if NET47_OR_GREATER || NETCOREAPP
+#if NETCOREAPP
         protected override void OnDpiChanged(DpiChangedEventArgs e)
         {
             e.Cancel = true;

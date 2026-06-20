@@ -4,8 +4,8 @@
     <!--<TargetFrameworks>net35;net40;net45;net47;netcoreapp3.0;netcoreapp3.1;net5.0-windows;net6.0-windows;net9.0-windows;net10.0-windows</TargetFrameworks>-->
 
     <!-- net40 is the highest version compatible with Windows XP -->
-    <!-- net462 is the highest version compatible with Framework Mono (as of today, that is Mono 6.14.x); though Wine Mono is compatible with higher versions as well -->
-    <TargetFrameworks>net40;net462;net10.0-windows</TargetFrameworks>
+    <!-- net47 is the oldest framework version with built-in high-DPI support (requires also manifest and app.config settings) - it's good to test possible interferences -->
+    <TargetFrameworks>net35;net40;net47;net10.0-windows</TargetFrameworks>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>KGySoft.WinForms.Example</RootNamespace>
     <LangVersion>latest</LangVersion>
