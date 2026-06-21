@@ -26,14 +26,14 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Media;
-#if NET47_OR_GREATER
-using System.Runtime.CompilerServices;
-#endif
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Forms;
 
 using KGySoft.Collections;
+#if NET47_OR_GREATER
+using KGySoft.ComponentModel;
+#endif
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
 using KGySoft.Drawing.Imaging;
@@ -401,16 +401,12 @@ namespace KGySoft.WinForms.Forms
         public TaskDialogForm()
         {
             #region Local Methods
-
 #if NET47_OR_GREATER
-            // Needed for Framework Mono, because it does not have the DpiChanged event in Form (as of 6.12/14), so just overriding OnDpiChanged would crash the runtime:
-            // TypeLoadException: VTable setup of type KGySoft.WinForms.Forms.TaskDialogForm failed: Could not load signature of KGySoft.WinForms.Forms.TaskDialogForm:OnDpiChanged.
-            // Parameter type DpiChangedArgument may also be missing, but as long as someone does not try to reflect the generated private method, we are alright.
-            // Not unsubscribing explicitly in Dispose is not a problem, because BaseForm.Dispose removes all event subscriptions.
-            [MethodImpl(MethodImplOptions.NoInlining)]
-            void SubscribeDpiChangedSafe() => DpiChanged += (_, e) => e.Cancel = true;
-#endif
 
+            // .NET 4.7+: As a command handler rather than overriding OnDpiChanged. See the comments below.
+            void OnDpiChangedCommand(ICommandSource<CancelEventArgs> src) => src.EventArgs.Cancel = true;
+
+#endif
             #endregion
 
             InitializeComponent();
@@ -433,8 +429,15 @@ namespace KGySoft.WinForms.Forms
             }
 
 #if NET47_OR_GREATER
+            // The check is needed for Framework Mono, because it does not have the DpiChanged event in Form (as of 6.12/14), so just overriding OnDpiChanged would crash the runtime:
+            // TypeLoadException: VTable setup of type KGySoft.WinForms.Forms.TaskDialogForm failed: Could not load signature of KGySoft.WinForms.Forms.TaskDialogForm:OnDpiChanged.
             if (typeof(Form).GetEvent(nameof(DpiChanged)) != null)
-                SubscribeDpiChangedSafe();
+            {
+                // We cannot use a regular event subscription. Even when specifying CancelEventArgs in the handler method instead of DpiChangedEventArgs to avoid BadImageFormatException
+                // due to missing metadata token, using the DpiChanged event outside of a nameof() expression would cause a TypeLoadException: could not resolve type DpiChangedEventHandler.
+                CommandBindings.Add<CancelEventArgs>(OnDpiChangedCommand)
+                    .AddSource(this, nameof(DpiChanged));
+            }
 #endif
 
             if (OSHelper.IsWine)
@@ -620,6 +623,7 @@ namespace KGySoft.WinForms.Forms
         }
 
 #if NETCOREAPP
+        // For .NET Framework 4.7+ it is handled in a command binding. See the comments in the constructor.
         protected override void OnDpiChanged(DpiChangedEventArgs e)
         {
             e.Cancel = true;
@@ -2647,6 +2651,7 @@ namespace KGySoft.WinForms.Forms
 
         // ReSharper restore InconsistentNaming
 #pragma warning restore IDE1006 // Naming Styles
+
         #endregion
 
         #endregion
