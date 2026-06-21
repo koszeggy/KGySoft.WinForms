@@ -136,10 +136,12 @@ namespace KGySoft.WinForms
         public static bool IsEmpty(this Rectangle rect) => rect.Width == 0 || rect.Height == 0;
 
         /// <summary>
-        /// Like Rectangle.Intersect, but works with big ranges, and returns Rectangle.Empty if the result would be a practically zero rectangle.
+        /// Like <see cref="Rectangle.Intersect(Rectangle,Rectangle)"/>, but works with big ranges, and returns <see cref="Rectangle.Empty"/> if the result would be a practically zero rectangle.
+        /// As a contrast, the <see cref="Rectangle.Intersect(Rectangle,Rectangle)"/> method can return a non-<see cref="Rectangle.Empty"/> rectangle with
+        /// zero <see cref="Rectangle.Width"/> or <see cref="Rectangle.Height"/>.
         /// </summary>
         [MethodImpl(MethodImpl.AggressiveInlining)]
-        internal static Rectangle IntersectSafe(this Rectangle a, Rectangle b)
+        public static Rectangle IntersectSafe(this Rectangle a, Rectangle b)
         {
             int x1 = Math.Max(a.X, b.X);
             long x2 = Math.Min((long)a.X + a.Width, (long)b.X + b.Width);
