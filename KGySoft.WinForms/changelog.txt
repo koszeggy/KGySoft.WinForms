@@ -19,6 +19,10 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
 ===================
 + Targeting also .NET Framework 4.7, .NET Core 3.1, .NET 5.0, 6.0, 9.0 and 10.0.
 
++ General changes:
+==================
++ Making the library compatible with Mono and Wine.
+
 ! KGySoft.Libraries.Language namespace
 ======================================
 ! Every type in this namespace has been marked as obsolete. This is a legacy namespace from the old

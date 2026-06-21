@@ -685,7 +685,7 @@ namespace KGySoft.WinForms.Controls
 
 #if NET47_OR_GREATER || NETCOREAPP
             // The parent is rescaling its font out of a WM_DPICHANGED event (occurs typically in .NET 7+ during form handle creation)
-            if (this.IsParentScalingWhileCreated())
+            if (!OSHelper.IsFrameworkMono && this.IsParentScalingWhileCreated())
                 return;
 #endif
 
