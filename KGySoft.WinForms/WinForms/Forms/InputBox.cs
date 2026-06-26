@@ -40,8 +40,7 @@ namespace KGySoft.WinForms.Forms
             if (OSHelper.IsWindowsMono)
                 StartPosition = FormStartPosition.CenterParent;
             RightToLeft = LanguageSettings.DisplayLanguage.TextInfo.IsRightToLeft ? RightToLeft.Yes : RightToLeft.No;
-            if (!OSHelper.IsMono)
-                Font = ScaleHelper.MessageBoxFont;
+            Font = ScaleHelper.MessageBoxFont;
         }
 
         #endregion

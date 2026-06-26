@@ -196,8 +196,9 @@ namespace KGySoft.WinForms.Forms
 
             internal int DluToPixelsX(int dialogUnitX)
             {
+                // IsRealWindows: on Wine the result is DPI-dependent
                 if (baseUnitX == 0)
-                    baseUnitX = OSHelper.IsWindows ? (int)User32.GetDialogBaseUnits() & 0xFFFF : 8;
+                    baseUnitX = OSHelper.IsRealWindows ? (int)User32.GetDialogBaseUnits() & 0xFFFF : 8;
 
                 return dialogUnitX * baseUnitX / 4;
             }
@@ -330,7 +331,13 @@ namespace KGySoft.WinForms.Forms
                 {
                     if (VisualStyleHelper.RenderWithVisualStyles)
                     {
-                        if (OSHelper.IsWindowsVistaOrLater)
+                        if (OSHelper.IsWine)
+                        {
+                            // UxTheme.GetThemeFont returns a too small, unscaled font under Wine. Using the same ratio as the font has under real Windows.
+                            var baseFont = ScaleHelper.MessageBoxFont;
+                            mainInstructionsFont = new Font(baseFont.FontFamily, baseFont.Size * (1f / 0.75f), baseFont.Style);
+                        }
+                        else if (OSHelper.IsWindowsVistaOrLater)
                         {
                             try
                             {
@@ -422,14 +429,12 @@ namespace KGySoft.WinForms.Forms
             lblDetailsFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             lblFooter.HyperlinkClicked += AdvancedLabel_HyperlinkClicked;
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
-            if (!OSHelper.IsMono)
-            {
-                Font = ScaleHelper.MessageBoxFont;
+            Font = ScaleHelper.MessageBoxFont;
+            if (OSHelper.IsRealWindows)
                 return;
-            }
 
 #if NET47_OR_GREATER
-            // The check is needed for Framework Mono, because it does not have the DpiChanged event in Form (as of 6.12/14), so just overriding OnDpiChanged would crash the runtime:
+            // The check is needed for Framework Mono, because it does not have the DpiChanged event in Form (as of v6.12/14), so just overriding OnDpiChanged would crash the runtime:
             // TypeLoadException: VTable setup of type KGySoft.WinForms.Forms.TaskDialogForm failed: Could not load signature of KGySoft.WinForms.Forms.TaskDialogForm:OnDpiChanged.
             if (typeof(Form).GetEvent(nameof(DpiChanged)) != null)
             {

@@ -396,7 +396,7 @@ namespace KGySoft.WinForms
 #if NETFRAMEWORK
                 if (defaultFont == null)
                 {
-                    if (!OSHelper.IsWindows || !IsProcessPerMonitorAware && IsDefaultSystemScale)
+                    if (!OSHelper.IsRealWindows || !IsProcessPerMonitorAware && IsDefaultSystemScale)
                         defaultFont = Control.DefaultFont;
                     else
                     {
@@ -438,7 +438,10 @@ namespace KGySoft.WinForms
 
         // Not making these properties public because the names are somewhat misleading, and they are cached, which could be an issue if they are misused.
         internal static Font DialogFont => dialogFont ??= SystemFonts.DialogFont;
-        internal static Font MessageBoxFont => messageBoxFont ??= SystemFonts.MessageBoxFont ?? SystemFonts.DialogFont;
+
+        internal static Font MessageBoxFont => messageBoxFont ??= OSHelper.IsRealWindows
+            ? SystemFonts.MessageBoxFont ?? SystemFonts.DialogFont
+            : DefaultFont;
 
         #endregion
 

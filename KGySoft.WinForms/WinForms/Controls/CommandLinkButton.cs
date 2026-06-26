@@ -970,17 +970,27 @@ namespace KGySoft.WinForms.Controls
 
                 if (themedFontLarge == null)
                 {
-                    // NOTE: Not passing the handle to GetFont, so doing the scaling by ourselves
-                    if (IsNativeVisualStylesRenderingAvailable)
-                        themedFontLarge = VisualStyleHelper.GetFont(Constants.ThemeClassButton, IntPtr.Zero, (int)BUTTONPARTS.BP_COMMANDLINK);
-
-                    if (themedFontLarge == null)
+                    if (OSHelper.IsWine)
                     {
-                        themedFontLarge = new Font("Segoe UI", 12f, FontStyle.Regular, GraphicsUnit.Point);
-                        if (themedFontLarge.Name != "Segoe UI")
+                        // UxTheme.GetThemeFont returns a zero-size font under Wine/Mono, or simply just a too small font under Wine + real .NET (Tahoma 6.5 in points)
+                        // Using the same ratio as the font has under real Windows.
+                        var baseFont = ScaleHelper.MessageBoxFont;
+                        themedFontLarge = new Font(baseFont.FontFamily, baseFont.Size * (1f / 0.75f), baseFont.Style);
+                    }
+                    else
+                    {
+                        // NOTE: Not passing the handle to GetFont, so doing the scaling by ourselves
+                        if (IsNativeVisualStylesRenderingAvailable)
+                            themedFontLarge = VisualStyleHelper.GetFont(Constants.ThemeClassButton, IntPtr.Zero, (int)BUTTONPARTS.BP_COMMANDLINK);
+
+                        if (themedFontLarge == null)
                         {
-                            themedFontLarge.Dispose();
-                            themedFontLarge = new Font("MS Shell Dlg 2", 12f, FontStyle.Regular, GraphicsUnit.Point);
+                            themedFontLarge = new Font("Segoe UI", 12f, FontStyle.Regular, GraphicsUnit.Point);
+                            if (themedFontLarge.Name != "Segoe UI")
+                            {
+                                themedFontLarge.Dispose();
+                                themedFontLarge = new Font("MS Shell Dlg 2", 12f, FontStyle.Regular, GraphicsUnit.Point);
+                            }
                         }
                     }
                 }
@@ -998,7 +1008,7 @@ namespace KGySoft.WinForms.Controls
 
                 if (themedFontSmall == null)
                 {
-                    if (IsNativeVisualStylesRenderingAvailable)
+                    if (IsNativeVisualStylesRenderingAvailable || OSHelper.IsWine)
                     {
                         var largeFont = DefaultTextFont;
                         themedFontSmall = new Font(largeFont.FontFamily, largeFont.SizeInPoints * 0.75f, largeFont.Style, GraphicsUnit.Point, largeFont.GdiCharSet, largeFont.GdiVerticalFont);

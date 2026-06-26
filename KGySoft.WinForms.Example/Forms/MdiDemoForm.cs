@@ -36,7 +36,7 @@ namespace KGySoft.WinForms.Example.Forms
         {
             InitializeComponent();
             InitCommandBindings();
-            if (!IsDesignMode && SystemFonts.MessageBoxFont is Font font)
+            if (!IsDesignMode && OSHelper.IsWindows && !OSHelper.IsMono && !OSHelper.IsWine && SystemFonts.MessageBoxFont is Font font)
                 Font = font;
         }
 
