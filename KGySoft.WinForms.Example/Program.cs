@@ -633,7 +633,7 @@ namespace KGySoft.WinForms.Example
                     {
                         Description = @"As a button, icon image is shrunk to 16x16 on 100% DPI." + Environment.NewLine
                             + "As a command link, rendered as a 64x64 icon on 100% DPI. When using 400% DPI or higher the unscaled 256x256 icon is displayed.",
-                        CustomIcon = Icons.SystemWarning.Resize(OSHelper.IsMono ? new Size(128, 128) : new Size(256, 256), ScalingMode.Auto)
+                        CustomIcon = Icons.SystemWarning.Resize(OSHelper.IsMono ? new Size(255, 255) : new Size(256, 256), ScalingMode.Auto)
                     },
                 },
                 RadioButtons =
