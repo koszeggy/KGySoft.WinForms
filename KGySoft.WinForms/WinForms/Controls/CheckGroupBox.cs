@@ -582,7 +582,7 @@ namespace KGySoft.WinForms.Controls
             {
                 changingBaseText = true;
 
-                // On Mono with visual styles, or on Linux we must use som non-empty text to avoid stretching the frame, so using a zero-width space character.
+                // On Mono with visual styles, or on Linux we must use some non-empty text to avoid stretching the frame, so using a zero-width space character.
                 // Unfortunately, this still causes a visible gap, though matters only when using Right-to-Left layout.
                 base.Text = OSHelper.IsFrameworkMono && (VisualStyleHelper.RenderWithVisualStyles || !OSHelper.IsWindows) ? "\u200b" : String.Empty;
                 changingBaseText = false;

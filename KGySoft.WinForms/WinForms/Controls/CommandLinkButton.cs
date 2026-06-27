@@ -985,11 +985,11 @@ namespace KGySoft.WinForms.Controls
 
                         if (themedFontLarge == null)
                         {
-                            themedFontLarge = new Font("Segoe UI", 12f, FontStyle.Regular, GraphicsUnit.Point);
-                            if (themedFontLarge.Name != "Segoe UI")
+                            themedFontLarge = new Font(Constants.FontFamilySegoeUI, 12f, FontStyle.Regular, GraphicsUnit.Point);
+                            if (themedFontLarge.Name != Constants.FontFamilySegoeUI)
                             {
                                 themedFontLarge.Dispose();
-                                themedFontLarge = new Font("MS Shell Dlg 2", 12f, FontStyle.Regular, GraphicsUnit.Point);
+                                themedFontLarge = new Font(Constants.FontFamilyMsShellDlg, 12f, FontStyle.Regular, GraphicsUnit.Point);
                             }
                         }
                     }
@@ -1015,11 +1015,11 @@ namespace KGySoft.WinForms.Controls
                     }
                     else
                     {
-                        themedFontSmall = new Font("Segoe UI", 9f, FontStyle.Regular, GraphicsUnit.Point);
-                        if (themedFontSmall.Name != "Segoe UI")
+                        themedFontSmall = new Font(Constants.FontFamilySegoeUI, 9f, FontStyle.Regular, GraphicsUnit.Point);
+                        if (themedFontSmall.Name != Constants.FontFamilySegoeUI)
                         {
                             themedFontSmall.Dispose();
-                            themedFontSmall = new Font("MS Shell Dlg 2", 9f, FontStyle.Regular, GraphicsUnit.Point);
+                            themedFontSmall = new Font(Constants.FontFamilyMsShellDlg, 9f, FontStyle.Regular, GraphicsUnit.Point);
                         }
                     }
                 }

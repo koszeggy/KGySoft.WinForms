@@ -344,17 +344,17 @@ namespace KGySoft.WinForms.Forms
                                 // VisualStyleRenderer throws an exception because only FontProperty.GlyphFont is accepted by VisualStyleRenderer.GetFont
                                 // NOTE: Not passing the handle to GetFont, so doing the scaling by ourselves
                                 mainInstructionsFont = VisualStyleHelper.GetFont(Constants.ThemeClassTaskDialog, IntPtr.Zero, Constants.TDLG_MAININSTRUCTIONPANE)
-                                    ?? new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
+                                    ?? new Font(Constants.FontFamilySegoeUI, 12, FontStyle.Regular, GraphicsUnit.Point);
                             }
                             catch (Exception e) when (!e.IsCritical())
                             {
-                                mainInstructionsFont = new Font("Segoe UI", 12, FontStyle.Regular, GraphicsUnit.Point);
+                                mainInstructionsFont = new Font(Constants.FontFamilySegoeUI, 12, FontStyle.Regular, GraphicsUnit.Point);
                             }
                         }
                         else
                         {
                             // Windows XP
-                            mainInstructionsFont = new Font("Arial", 11.75f, FontStyle.Regular, GraphicsUnit.Point);
+                            mainInstructionsFont = new Font(Constants.FontFamilyArial, 11.75f, FontStyle.Regular, GraphicsUnit.Point);
                         }
                     }
                     else
@@ -2079,7 +2079,7 @@ namespace KGySoft.WinForms.Forms
                 if (text == null || !text.Contains('&'))
                     return text;
                 
-                if (!text.Contains("&&"))
+                if (!text.Contains("&&", StringComparison.Ordinal))
                     return text.Replace("&", String.Empty);
 
                 return text.Split(["&&"], StringSplitOptions.None).Select(s => s.Replace("&", String.Empty)).Join('&');
@@ -2192,28 +2192,25 @@ namespace KGySoft.WinForms.Forms
                 result.AppendLine(host.DetailsText);
             }
 
-            Clipboard.SetText(result.ToString());
+            try
+            {
+                Clipboard.SetText(result.ToString());
+            }
+            catch (ExternalException)
+            {
+            }
         }
 
         #endregion
 
         #region Explicitly Implemented Interface Methods
 
-        void ITaskDialog.Close(TaskDialogResult result)
+        void ITaskDialog.Close(TaskDialogResult result) => DialogResult = result switch
         {
-            switch (result)
-            {
-                case TaskDialogResult.Close:
-                    DialogResult = DialogResult.Abort;
-                    break;
-                case TaskDialogResult.Custom:
-                    DialogResult = DialogResult.Ignore;
-                    break;
-                default:
-                    DialogResult = (DialogResult)result;
-                    break;
-            }
-        }
+            TaskDialogResult.Close => DialogResult.Abort,
+            TaskDialogResult.Custom => DialogResult.Ignore,
+            _ => (DialogResult)result
+        };
 
         TaskDialogResult ITaskDialog.Execute(TaskDialog taskDialog, IntPtr owner, out int selectedButtonIndex, out int selectedRadioButtonIndex, out bool checkBoxChecked)
         {

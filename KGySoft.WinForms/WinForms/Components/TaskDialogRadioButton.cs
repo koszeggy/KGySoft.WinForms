@@ -17,7 +17,6 @@
 
 using System;
 using System.ComponentModel;
-using System.Globalization;
 
 #endregion
 
@@ -170,10 +169,7 @@ namespace KGySoft.WinForms.Components
         /// Returns the string representation of this button.
         /// </summary>
         /// <returns>A <see cref="System.String"/>.</returns>
-        public override string ToString()
-        {
-            return base.ToString() + ", Checked: " + Checked.ToString(CultureInfo.InvariantCulture);
-        }
+        public override string ToString() => $"{base.ToString()}, Checked: {Checked}";
 
         #endregion
 

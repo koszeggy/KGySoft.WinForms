@@ -33,6 +33,8 @@ namespace KGySoft.WinForms.WinApi
         internal const string ThemeClassComboBox = "COMBOBOX";
         internal const string ThemeDatePicker = "DATEPICKER";
         internal const string ThemeSpin = "SPIN";
+        
+        internal const string ClassNameEdit = "EDIT";
 
         internal const int S_OK = 0;
         internal const int S_FALSE = 1;
@@ -178,6 +180,10 @@ namespace KGySoft.WinForms.WinApi
         internal const int FontSmoothingType_ClearType = 2;
 
         internal const uint GBF_DIRECT = 0x00000001;
+
+        internal const string FontFamilySegoeUI = "Segoe UI";
+        internal const string FontFamilyArial = "Arial";
+        internal const string FontFamilyMsShellDlg = "MS Shell Dlg 2";
 
         #endregion
     }

@@ -190,10 +190,7 @@ namespace KGySoft.WinForms.Components
         /// Returns the string representation of this button.
         /// </summary>
         /// <returns>A <see cref="System.String"/>.</returns>
-        public override string ToString()
-        {
-            return base.ToString() + " {" + (text ?? String.Empty) + "}";
-        }
+        public override string ToString() => $"{base.ToString()} {{{(text ?? String.Empty)}}}";
 
         #endregion
 

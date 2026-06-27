@@ -1004,7 +1004,7 @@ namespace KGySoft.WinForms.Controls
                 return;
 
             // hooking inner text box to capture WM_PASTE and others
-            IntPtr lhWnd = User32.FindWindowEx(Handle, IntPtr.Zero, "EDIT", null);
+            IntPtr lhWnd = User32.FindWindowEx(Handle, IntPtr.Zero, Constants.ClassNameEdit, null);
             canHaveNativeEdit = lhWnd != IntPtr.Zero;
             if (lhWnd != IntPtr.Zero)
             {
