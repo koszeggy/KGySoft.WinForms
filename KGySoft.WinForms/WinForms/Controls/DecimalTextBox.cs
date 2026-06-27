@@ -141,7 +141,7 @@ namespace KGySoft.WinForms.Controls
         private decimal value;
         private DecimalFormat format = DecimalFormat.Number;
         private sbyte decimalDigits; // decimals after the decimal separator
-        private string blankText = "";
+        private string blankText = String.Empty;
         private DecimalRange range = DecimalRange.Any; // when violated, going to Blank, or exception
         private DecimalMinMax rangeMinMax = new DecimalMinMax(0, 0);
         private HorizontalAlignment align = HorizontalAlignment.Right;
@@ -686,15 +686,22 @@ namespace KGySoft.WinForms.Controls
                     if (!Clipboard.ContainsText())
                         return;
 
-                    bool blank = Blank;
-                    string text = blank
-                        ? Clipboard.GetText()
-                        : $"{Text.Substring(0, SelectionStart)}{Clipboard.GetText()}{Text.Substring(SelectionStart + SelectionLength)}";
-                    if (IsValid(text, false))
+                    try
                     {
-                        int selStart = blank ? 0 : SelectionStart;
-                        ApplyText(Clipboard.GetText(), !blank);
-                        SelectionStart = selStart + Clipboard.GetText().Length;
+                        bool blank = Blank;
+                        string clipboardText = Clipboard.GetText();
+                        string text = blank
+                            ? clipboardText
+                            : $"{Text.Substring(0, SelectionStart)}{clipboardText}{Text.Substring(SelectionStart + SelectionLength)}";
+                        if (IsValid(text, false))
+                        {
+                            int selStart = blank ? 0 : SelectionStart;
+                            ApplyText(clipboardText, !blank);
+                            SelectionStart = selStart + clipboardText.Length;
+                        }
+                    }
+                    catch (Exception e) when (!e.IsCritical())
+                    {
                     }
 
                     return;
@@ -777,9 +784,9 @@ namespace KGySoft.WinForms.Controls
         private bool IsValid(string s, bool strong)
         {
             decimal d = 0;
-            bool result = (!strong && (s == "-" || s == ""
-                            || s[s.Length - 1].ToString().ToLowerInvariant().IndexOfAny(multipliers) >= 0))
-                    || Decimal.TryParse(s, out d);
+            bool result = (!strong && (s is "-" or ""
+                    || s[s.Length - 1].ToString().ToLowerInvariant().IndexOfAny(multipliers) >= 0))
+                || Decimal.TryParse(s, out d);
             if (result && strong)
                 result = CheckRange(d, false);
             return result;
