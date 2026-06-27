@@ -302,7 +302,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 if (fadingAnimationDefaultSpeed < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.ArgumentMustBeGreaterThanOrEqualTo(0));
 
                 fadingAnimationDefaultSpeed = value;
             }

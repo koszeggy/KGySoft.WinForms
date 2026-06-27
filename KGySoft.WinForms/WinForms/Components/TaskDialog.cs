@@ -1203,7 +1203,7 @@ namespace KGySoft.WinForms.Components
         private void CheckDisposed()
         {
             if (flags[isDisposed])
-                throw new ObjectDisposedException("TaskDialog", PublicResources.ObjectDisposed);
+                throw new ObjectDisposedException(nameof(TaskDialog), PublicResources.ObjectDisposed);
         }
 
         private TaskDialogResult ShowInternal(IntPtr owner, out int customButtonIndex, out int radioButtonIndex, out bool verificationTextChecked)

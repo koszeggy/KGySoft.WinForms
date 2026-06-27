@@ -94,6 +94,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Gets or sets whether <see cref="CustomControl"/> should be resized when the file dialog is resized.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         public bool CustomControlAutoSize { get; set; }
 
@@ -108,19 +109,22 @@ namespace KGySoft.WinForms.Components
         public string? InitialDirectory { get; set; }
 
         /// <summary>
-        /// Gets or sets whether path of given file must exist. Default value is true.
+        /// Gets or sets whether path of given file must exist.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         public bool PathMustExist { get; set; }
 
         /// <summary>
         /// Gets or sets forcing the showing of system and hidden files, thus overriding the user setting to show or not show hidden files.
-        /// However, a file that is marked both system and hidden is not shown. Default is false.
+        /// However, a file that is marked both system and hidden is not shown.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         public bool ForceShowHiddenFiles { get; set; }
 
         /// <summary>
         /// Gets or sets whether Save As dialog box to generate a message box if the selected file already exists.
-        /// The user must confirm whether to overwrite the file. Default is true;
+        /// The user must confirm whether to overwrite the file.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         public bool PromptOverride { get; set; }
 
@@ -244,12 +248,9 @@ namespace KGySoft.WinForms.Components
             //showing the dialog
             if (!Comdlg32.GetSaveFileName(ref ofn))
             {
-                int ret = Comdlg32.CommDlgExtendedError();
-
-                if (ret != 0)
-                {
-                    throw new InvalidOperationException("Couldn't show file dialog - " + ret);
-                }
+                int errCode = Comdlg32.CommDlgExtendedError();
+                if (errCode != 0)
+                    throw new InvalidOperationException(Res.SaveDialogCannotShow(errCode));
 
                 return DialogResult.Cancel;
             }

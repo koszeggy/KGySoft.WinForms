@@ -144,6 +144,9 @@ namespace KGySoft
         /// <summary>Cannot change this property while the TaskDialog is being initialized.</summary>
         internal static string TaskDialogInitializing => Get("TaskDialog_Initializing");
 
+        /// <summary>The task dialog property cannot be changed in the current state.</summary>
+        internal static string TaskDialogInvalidState => Get("TaskDialog_InvalidState");
+
         #endregion
 
         #region InvokeMarshaller
@@ -188,7 +191,7 @@ namespace KGySoft
 
         #endregion
 
-        #region TaskDialog
+        #region Dialogs
 
         /// <summary>(O) {0}</summary>
         internal static string TaskDialogRadioButtonChecked(string? text) => Get("TaskDialog_RadioButtonCheckedFormat", text);
@@ -225,6 +228,9 @@ namespace KGySoft
 
         /// <summary>Changing property '{0}' is not allowed while the dialog is displayed.</summary>
         internal static string TaskDialogPropertyChange(string name) => Get("TaskDialog_PropertyChangeFormat", name);
+
+        /// <summary>Could not show the save file dialog. Error code: #{0}</summary>
+        internal static string SaveDialogCannotShow(int errCode) => Get("SaveDialog_CannotShowFormat", errCode);
 
         #endregion
 

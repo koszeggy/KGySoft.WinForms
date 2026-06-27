@@ -993,7 +993,7 @@ namespace KGySoft.WinForms.Components
         void ITaskDialog.PropertyChanged(string propName)
         {
             if (dialogState == TaskDialogStatus.Initializing || dialogState == TaskDialogStatus.Closed)
-                throw new InvalidOperationException("Changing property in invalid state.");
+                throw new InvalidOperationException(Res.TaskDialogInvalidState);
 
             switch (propName)
             {
@@ -1078,125 +1078,123 @@ namespace KGySoft.WinForms.Components
                     return;
 
                 default:
-                    throw new NotSupportedException("Not supported property: " + propName);
+                    throw new InvalidOperationException(Res.InternalError($"Unexpected property: {propName}"));
             }
         }
 
         void ITaskDialog.ControlPropertyChanged(TaskDialogControl control, string propName)
         {
             if (dialogState == TaskDialogStatus.Initializing || dialogState == TaskDialogStatus.Closed)
-            {
-                throw new InvalidOperationException("Changing property in invalid state.");
-            }
+                throw new InvalidOperationException(Res.TaskDialogInvalidState);
 
-            if (control is TaskDialogButton button)
+            switch (control)
             {
-                switch (propName)
-                {
-                    case TaskDialogButtonBase.PropertyText:
-                        ReallocateDialog();
-                        return;
-
-                    case TaskDialogButtonBase.PropertyDescription:
-                        // updating description only when it has effect
-                        if ((config.dwFlags & (TASKDIALOG_FLAGS.TDF_USE_COMMAND_LINKS | TASKDIALOG_FLAGS.TDF_USE_COMMAND_LINKS_NO_ICON)) != 0)
+                case TaskDialogButton button:
+                    switch (propName)
+                    {
+                        case TaskDialogButtonBase.PropertyText:
                             ReallocateDialog();
-
-                        return;
-
-                    case TaskDialogButtonBase.PropertyEnabled:
-                        UpdateButtonEnabled(button);
-                        return;
-
-                    case TaskDialogButton.PropertyIsElevated:
-                        UpdateElevatedStatus(button);
-                        return;
-
-                    case TaskDialogButton.PropertyIsDefault:
-                        // updating only if the change has effect
-                        TaskDialogButton? realDefault = host.Buttons.FirstOrDefault(b => b.IsDefault);
-
-                        if (button.IsDefault)
-                        {
-                            // IsDefault set: has effect only if there are no defaults before the button
-                            if (realDefault == button)
-                                ReallocateDialog();
-                        }
-                        else
-                        {
-                            // default flag cleared: has only effect if... 
-                            if ((realDefault != null && realDefault.Id > button.Id) // real default has larger index
-                                || (realDefault == null)) // or, when there is no default custom button anymore (now either a standard button or the first custom button will be the default)
-                            {
-                                ReallocateDialog();
-                            }
-                        }
-
-                        return;
-
-                    case TaskDialogButton.PropertyCustomIcon:
-                        // not supported: ignoring
-                        return;
-
-                    default:
-                        throw new NotSupportedException("Not supported button property: " + propName);
-                }
-            }
-
-            if (control is TaskDialogRadioButton radioButton)
-            {
-                switch (propName)
-                {
-                    case TaskDialogButtonBase.PropertyText:
-                        ReallocateDialog();
-                        return;
-
-                    case TaskDialogButtonBase.PropertyDescription:
-                        // not supported: ignoring
-                        return;
-
-                    case TaskDialogButtonBase.PropertyEnabled:
-                        UpdateRadioButtonEnabled(radioButton);
-                        return;
-
-                    case TaskDialogRadioButton.PropertyChecked:
-                        if (flags[isCheckedChanging])
                             return;
 
-                        flags[isCheckedChanging] = true;
-                        try
-                        {
-                            // unchecking: reallocating so "none checked" status can be reset
-                            if (!radioButton.Checked)
-                            {
+                        case TaskDialogButtonBase.PropertyDescription:
+                            // updating description only when it has effect
+                            if ((config.dwFlags & (TASKDIALOG_FLAGS.TDF_USE_COMMAND_LINKS | TASKDIALOG_FLAGS.TDF_USE_COMMAND_LINKS_NO_ICON)) != 0)
                                 ReallocateDialog();
+
+                            return;
+
+                        case TaskDialogButtonBase.PropertyEnabled:
+                            UpdateButtonEnabled(button);
+                            return;
+
+                        case TaskDialogButton.PropertyIsElevated:
+                            UpdateElevatedStatus(button);
+                            return;
+
+                        case TaskDialogButton.PropertyIsDefault:
+                            // updating only if the change has effect
+                            TaskDialogButton? realDefault = host.Buttons.FirstOrDefault(b => b.IsDefault);
+
+                            if (button.IsDefault)
+                            {
+                                // IsDefault set: has effect only if there are no defaults before the button
+                                if (realDefault == button)
+                                    ReallocateDialog();
+                            }
+                            else
+                            {
+                                // default flag cleared: has only effect if... 
+                                if ((realDefault != null && realDefault.Id > button.Id) // real default has larger index
+                                    || (realDefault == null)) // or, when there is no default custom button anymore (now either a standard button or the first custom button will be the default)
+                                {
+                                    ReallocateDialog();
+                                }
+                            }
+
+                            return;
+
+                        case TaskDialogButton.PropertyCustomIcon:
+                            // not supported: ignoring
+                            return;
+
+                        default:
+                            throw new InvalidOperationException(Res.InternalError($"Unexpected TaskDialogButton property: {propName}"));
+                    }
+
+                case TaskDialogRadioButton radioButton:
+                    switch (propName)
+                    {
+                        case TaskDialogButtonBase.PropertyText:
+                            ReallocateDialog();
+                            return;
+
+                        case TaskDialogButtonBase.PropertyDescription:
+                            // not supported: ignoring
+                            return;
+
+                        case TaskDialogButtonBase.PropertyEnabled:
+                            UpdateRadioButtonEnabled(radioButton);
+                            return;
+
+                        case TaskDialogRadioButton.PropertyChecked:
+                            if (flags[isCheckedChanging])
                                 return;
-                            }
 
-                            // checking: first unchecking others (this may raise unchecking events, which are ignored)
-                            foreach (TaskDialogRadioButton rb in host.RadioButtons)
+                            flags[isCheckedChanging] = true;
+                            try
                             {
-                                if (rb != radioButton && rb.Checked)
-                                    rb.Checked = false;
+                                // unchecking: reallocating so "none checked" status can be reset
+                                if (!radioButton.Checked)
+                                {
+                                    ReallocateDialog();
+                                    return;
+                                }
+
+                                // checking: first unchecking others (this may raise unchecking events, which are ignored)
+                                foreach (TaskDialogRadioButton rb in host.RadioButtons)
+                                {
+                                    if (rb != radioButton && rb.Checked)
+                                        rb.Checked = false;
+                                }
+
+                                // if not raised from callback (so not the user actually clicked), but set by Checked property, then checking the actual radio button
+                                if (!flags[isRadioButtonClicked])
+                                    User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_RADIO_BUTTON, new IntPtr(radioButton.Id), IntPtr.Zero);
+                                return;
+
+                            }
+                            finally
+                            {
+                                flags[isCheckedChanging] = false;
                             }
 
-                            // if not raised from callback (so not the user actually clicked), but set by Checked property, then checking the actual radio button
-                            if (!flags[isRadioButtonClicked])
-                                User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_RADIO_BUTTON, new IntPtr(radioButton.Id), IntPtr.Zero);
-                            return;
+                        default:
+                            throw new InvalidOperationException(Res.InternalError($"Unexpected TaskDialogRadioButton property: {propName}"));
+                    }
 
-                        }
-                        finally
-                        {
-                            flags[isCheckedChanging] = false;
-                        }
-
-                    default:
-                        throw new NotSupportedException("Not supported radio button property: " + propName);
-                }
+                default:
+                    throw new InvalidOperationException(Res.InternalError($"Unexpected TaskDialogControl type: {control.GetType().FullName}"));
             }
-
-            throw new InvalidOperationException("Invalid control type");
         }
 
         void ITaskDialog.CustomButtonsChanged(TaskDialogControlCollectionChangeTypes changeType, int index) => ReallocateDialog();

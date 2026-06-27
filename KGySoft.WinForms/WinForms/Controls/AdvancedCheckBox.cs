@@ -326,7 +326,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 if (!Enum<FadingOptions>.AllFlagsDefined(value))
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 fadingOptions = value;
 
@@ -353,7 +353,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 if (fadingAnimationDefaultSpeed < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.ArgumentMustBeGreaterThanOrEqualTo(0));
 
                 fadingAnimationDefaultSpeed = value;
             }
@@ -484,7 +484,7 @@ namespace KGySoft.WinForms.Controls
                         FlatStyle.Popup => new CheckBoxPopupAdapter(this),
                         FlatStyle.Standard => new CheckBoxStandardAdapter(this),
                         FlatStyle.System when OSHelper.IsFrameworkMono => new CheckBoxStandardAdapter(this),
-                        _ => throw new InvalidOperationException()
+                        _ => throw new InvalidOperationException(Res.InternalError($"Unexpected flat style in Adapter: {base.FlatStyle}"))
                     };
                     lastAdapterType = base.FlatStyle;
                 }

@@ -87,7 +87,7 @@ namespace KGySoft.WinForms
             TaskDialogStandardIcon.SecurityShield or TaskDialogStandardIcon.SecurityShieldBlue or TaskDialogStandardIcon.SecurityShieldGray => Icons.SystemShield,
             TaskDialogStandardIcon.SecurityQuestion => Icons.SystemSecurityQuestion,
             TaskDialogStandardIcon.None => TaskDialog.DefaultIcon,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(nameof(icon), PublicResources.EnumOutOfRange(icon))
         };
 
 

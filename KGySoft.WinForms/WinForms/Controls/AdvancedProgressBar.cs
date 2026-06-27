@@ -91,7 +91,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 if (!Enum<ProgressBarState>.IsDefined(value))
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 if (IsHandleCreated && OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles)
                 {
@@ -129,7 +129,7 @@ namespace KGySoft.WinForms.Controls
                     return;
 
                 if (!Enum<AdvancedProgressBarStyle>.IsDefined(value))
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 style = value;
                 SetStyle(ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, style != AdvancedProgressBarStyle.System);
@@ -598,7 +598,7 @@ namespace KGySoft.WinForms.Controls
             ProgressBarState.Normal => ForeColor,
             ProgressBarState.Error => ErrorStateColor,
             ProgressBarState.Paused => PausedStateColor,
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new InvalidOperationException(Res.InternalError($"Unexpected state: {state}"))
         };
 
         private void PaintFlatAppearance(PaintEventArgs e, float offset)

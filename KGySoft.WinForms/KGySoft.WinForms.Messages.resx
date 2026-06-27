@@ -164,6 +164,9 @@
   <data name="Dialogs_DefaultPrompt" xml:space="preserve">
     <value>Value:</value>
   </data>
+  <data name="SaveDialog_CannotShowFormat" xml:space="preserve">
+    <value>Could not show the save file dialog. Error code: #{0}</value>
+  </data>
   <data name="TaskDialog_ShowDetails" xml:space="preserve">
     <value>See &amp;details</value>
   </data>
@@ -187,6 +190,9 @@
   </data>
   <data name="TaskDialog_Initializing" xml:space="preserve">
     <value>Cannot change this property while the TaskDialog is being initialized.</value>
+  </data>
+  <data name="TaskDialog_InvalidState" xml:space="preserve">
+    <value>The task dialog property cannot be changed in the current state.</value>
   </data>
   <data name="TaskDialog_RadioButtonCheckedFormat" xml:space="preserve">
     <value>(O) {0}</value>

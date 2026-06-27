@@ -2419,79 +2419,79 @@ namespace KGySoft.WinForms.Forms
                     return;
 
                 default:
-                    throw new NotSupportedException("Not supported property: " + propName);
+                    throw new InvalidOperationException(Res.InternalError($"Unexpected property: {propName}"));
             }
         }
 
         void ITaskDialog.ControlPropertyChanged(TaskDialogControl taskDialogControl, string propName)
         {
-            if (taskDialogControl is TaskDialogButton button)
+            switch (taskDialogControl)
             {
-                Control control = GetControl(button);
-                switch (propName)
-                {
-                    case TaskDialogButtonBase.PropertyText:
-                        UpdateText(control, button.Text, false, false, control is not CommandLinkButton);
-                        return;
-
-                    case TaskDialogButtonBase.PropertyDescription:
-                        if (control is CommandLinkButton)
-                            UpdateText(control, button.Description, false, true, false);
-                        else
-                            ToolTip.SetToolTip(control, button.Description);
-                        return;
-
-                    case TaskDialogButtonBase.PropertyEnabled:
-                        control.Enabled = button.Enabled;
-                        return;
-
-                    case TaskDialogButton.PropertyIsDefault:
-                        ResetDefaultButton(GetConfiguration());
-                        return;
-
-                    case TaskDialogButton.PropertyIsElevated:
-                    case TaskDialogButton.PropertyCustomIcon:
-                        UpdateButtonIcon(control, button);
-                        return;
-
-                    default:
-                        throw new NotSupportedException("Not supported button property: " + propName);
-                }
-            }
-
-            if (taskDialogControl is TaskDialogRadioButton radioButton)
-            {
-                Debug.Assert(pnlRadioButtons.Controls.Count > radioButton.Id);
-                Control control = GetControl(radioButton);
-                switch (propName)
-                {
-                    case TaskDialogButtonBase.PropertyText:
-                        UpdateText(control, radioButton.Text, false, false, false);
-                        return;
-
-                    case TaskDialogButtonBase.PropertyDescription:
-                        ToolTip.SetToolTip(control, radioButton.Description);
-                        return;
-
-                    case TaskDialogButtonBase.PropertyEnabled:
-                        control.Enabled = radioButton.Enabled;
-                        return;
-
-                    case TaskDialogRadioButton.PropertyChecked:
-                        // if invoked from Checked event handler, exiting, because TaskDialogRadioButton is set there
-                        if (flags[isRadioButtonChecking])
+                case TaskDialogButton button:
+                    Control control = GetControl(button);
+                    switch (propName)
+                    {
+                        case TaskDialogButtonBase.PropertyText:
+                            UpdateText(control, button.Text, false, false, control is not CommandLinkButton);
                             return;
 
-                        // index 0. is at bottom, so indexing backwards
-                        ((RadioButton)pnlRadioButtons.Controls[host.RadioButtons.Count - radioButton.Id - 1]).Checked = radioButton.Checked;
-                        return;
+                        case TaskDialogButtonBase.PropertyDescription:
+                            if (control is CommandLinkButton)
+                                UpdateText(control, button.Description, false, true, false);
+                            else
+                                ToolTip.SetToolTip(control, button.Description);
+                            return;
 
-                    default:
-                        throw new NotSupportedException("Not supported radio button property: " + propName);
-                }
+                        case TaskDialogButtonBase.PropertyEnabled:
+                            control.Enabled = button.Enabled;
+                            return;
+
+                        case TaskDialogButton.PropertyIsDefault:
+                            ResetDefaultButton(GetConfiguration());
+                            return;
+
+                        case TaskDialogButton.PropertyIsElevated:
+                        case TaskDialogButton.PropertyCustomIcon:
+                            UpdateButtonIcon(control, button);
+                            return;
+
+                        default:
+                            throw new InvalidOperationException(Res.InternalError($"Unexpected TaskDialogButton property: {propName}"));
+                    }
+
+                case TaskDialogRadioButton radioButton:
+                    Debug.Assert(pnlRadioButtons.Controls.Count > radioButton.Id);
+                    control = GetControl(radioButton);
+                    switch (propName)
+                    {
+                        case TaskDialogButtonBase.PropertyText:
+                            UpdateText(control, radioButton.Text, false, false, false);
+                            return;
+
+                        case TaskDialogButtonBase.PropertyDescription:
+                            ToolTip.SetToolTip(control, radioButton.Description);
+                            return;
+
+                        case TaskDialogButtonBase.PropertyEnabled:
+                            control.Enabled = radioButton.Enabled;
+                            return;
+
+                        case TaskDialogRadioButton.PropertyChecked:
+                            // if invoked from Checked event handler, exiting, because TaskDialogRadioButton is set there
+                            if (flags[isRadioButtonChecking])
+                                return;
+
+                            // index 0. is at bottom, so indexing backwards
+                            ((RadioButton)pnlRadioButtons.Controls[host.RadioButtons.Count - radioButton.Id - 1]).Checked = radioButton.Checked;
+                            return;
+
+                        default:
+                            throw new InvalidOperationException(Res.InternalError($"Unexpected TaskDialogRadioButton property: {propName}"));
+                    }
+
+                default:
+                    throw new InvalidOperationException(Res.InternalError($"Unexpected TaskDialogControl type: {taskDialogControl.GetType().FullName}"));
             }
-
-            throw new InvalidOperationException("Invalid control type");
         }
 
         void ITaskDialog.CustomButtonsChanged(TaskDialogControlCollectionChangeTypes changeType, int index)

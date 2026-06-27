@@ -207,7 +207,7 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
                     return;
 
                 if (!Enum<HyperlinkResolveMode>.IsDefined(value))
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 // when switching back to None, removing previous links
                 if (value == HyperlinkResolveMode.None)
@@ -460,7 +460,7 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
                     return;
 
                 if (!Enum<FadingOptions>.AllFlagsDefined(value))
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
 
                 fadingOptions = value;
 
@@ -487,7 +487,7 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
                     return;
 
                 if (fadingAnimationDefaultSpeed < 0)
-                    throw new ArgumentOutOfRangeException(nameof(value));
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.ArgumentMustBeGreaterThanOrEqualTo(0));
 
                 fadingAnimationDefaultSpeed = value;
             }
