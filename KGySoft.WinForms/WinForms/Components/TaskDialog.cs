@@ -67,30 +67,6 @@ namespace KGySoft.WinForms.Components
 
         #region Internal Constants
 
-        internal const string PropertyMessage = "Message";
-        internal const string PropertyMainInstruction = "MainInstruction";
-        internal const string PropertyCaption = "Caption";
-        internal const string PropertyFooterText = "FooterText";
-        internal const string PropertyDetailsText = "DetailsText";
-        internal const string PropertyCheckBoxText = "CheckBoxText";
-        internal const string PropertyCheckBoxChecked = "CheckBoxChecked";
-        internal const string PropertyShowDetailsText = "ShowDetailsText";
-        internal const string PropertyHideDetailsText = "HideDetailsText";
-        internal const string PropertyIcon = "Icon";
-        internal const string PropertyCustomIcon = "CustomIcon";
-        internal const string PropertyFooterIcon = "FooterIcon";
-        internal const string PropertyCustomFooterIcon = "CustomFooterIcon";
-        internal const string PropertyStandardButtons = "StandardButtons";
-        internal const string PropertyDefaultStandardButton = "DefaultStandardButton";
-        internal const string PropertyOptions = "Options";
-        internal const string PropertyWidth = "Width";
-        internal const string PropertyProgressBarStyle = "ProgressBarStyle";
-        internal const string PropertyProgressBarState = "ProgressBarState";
-        internal const string PropertyProgressBarMinimum = "ProgressBarMinimum";
-        internal const string PropertyProgressBarMaximum = "ProgressBarMaximum";
-        internal const string PropertyProgressBarValue = "ProgressBarValue";
-        internal const string PropertyProgressBarMarqueeAnimationSpeed = "ProgressBarMarqueeAnimationSpeed";
-
         internal const int NativeOptionsMask = 0xFFFF;
 
         #endregion
@@ -329,7 +305,7 @@ namespace KGySoft.WinForms.Components
                 message = value;
 
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyMessage);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -348,7 +324,7 @@ namespace KGySoft.WinForms.Components
                 mainInstruction = value;
 
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyMainInstruction);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -367,7 +343,7 @@ namespace KGySoft.WinForms.Components
                 caption = value;
 
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyCaption);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -386,7 +362,7 @@ namespace KGySoft.WinForms.Components
                 footerText = value;
 
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyFooterText);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -405,7 +381,7 @@ namespace KGySoft.WinForms.Components
                 checkBoxText = value;
 
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyCheckBoxText);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -428,7 +404,7 @@ namespace KGySoft.WinForms.Components
                 flags[checkBoxChecked] = value;
 
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyCheckBoxChecked);
+                    dialogInstance!.PropertyChanged();
 
                 OnCheckBoxCheckedChanged(value);
             }
@@ -449,7 +425,7 @@ namespace KGySoft.WinForms.Components
                 detailsText = value;
 
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyDetailsText);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -470,7 +446,7 @@ namespace KGySoft.WinForms.Components
 
                 options = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyOptions);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -493,7 +469,7 @@ namespace KGySoft.WinForms.Components
                 showDetailsText = value;
 
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyShowDetailsText);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -516,7 +492,7 @@ namespace KGySoft.WinForms.Components
                 hideDetailsText = value;
 
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyHideDetailsText);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -542,7 +518,7 @@ namespace KGySoft.WinForms.Components
                 formIcon = null;
                 icon = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyIcon);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -564,7 +540,7 @@ namespace KGySoft.WinForms.Components
                 customIcon = value;
                 formIcon = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyCustomIcon);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -589,7 +565,7 @@ namespace KGySoft.WinForms.Components
                 customFooterIcon = null;
                 footerIcon = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyFooterIcon);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -610,7 +586,7 @@ namespace KGySoft.WinForms.Components
                 footerIcon = TaskDialogStandardIcon.None;
                 customFooterIcon = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyCustomFooterIcon);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -634,7 +610,7 @@ namespace KGySoft.WinForms.Components
 
                 standardButtons = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyStandardButtons);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -657,7 +633,7 @@ namespace KGySoft.WinForms.Components
 
                 defaultStandardButton = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyDefaultStandardButton);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -681,7 +657,7 @@ namespace KGySoft.WinForms.Components
 
                 width = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyWidth);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -727,7 +703,7 @@ namespace KGySoft.WinForms.Components
 
                 progressBarStyle = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyProgressBarStyle);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -749,7 +725,7 @@ namespace KGySoft.WinForms.Components
 
                 progressBarState = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyProgressBarState);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -774,7 +750,7 @@ namespace KGySoft.WinForms.Components
 
                 progressBarMinimum = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyProgressBarMinimum);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -800,7 +776,7 @@ namespace KGySoft.WinForms.Components
 
                 progressBarMaximum = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyProgressBarMaximum);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -823,7 +799,7 @@ namespace KGySoft.WinForms.Components
 
                 progressBarValue = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyProgressBarValue);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -847,7 +823,7 @@ namespace KGySoft.WinForms.Components
 
                 progressBarMarqueeAnimationSpeed = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyProgressBarMarqueeAnimationSpeed);
+                    dialogInstance!.PropertyChanged();
             }
         }
 
@@ -963,7 +939,7 @@ namespace KGySoft.WinForms.Components
                 customIcon = value;
                 formIcon = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyCustomIcon);
+                    dialogInstance!.PropertyChanged(nameof(CustomIcon));
             }
         }
 
@@ -979,7 +955,7 @@ namespace KGySoft.WinForms.Components
                 flags[isEmulatedStandardFooterIcon] = true;
                 customFooterIcon = value;
                 if (IsDialogShowing)
-                    dialogInstance!.PropertyChanged(PropertyCustomFooterIcon);
+                    dialogInstance!.PropertyChanged(nameof(CustomFooterIcon));
             }
         }
 

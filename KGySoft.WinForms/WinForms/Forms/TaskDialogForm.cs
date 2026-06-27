@@ -2282,39 +2282,39 @@ namespace KGySoft.WinForms.Forms
             Configuration cfg;
             switch (propName)
             {
-                case TaskDialog.PropertyMessage:
+                case nameof(TaskDialog.Message):
                     UpdateText(lblMessage, host.Message, true, false, false);
                     return;
 
-                case TaskDialog.PropertyMainInstruction:
+                case nameof(TaskDialog.MainInstruction):
                     if (lblMainInstruction.Text.Length == 0 && !String.IsNullOrEmpty(host.MainInstruction))
                         lblMainInstruction.Font = MainInstructionsFont; // needed when the main instruction is set after displaying the window
                     UpdateText(lblMainInstruction, host.MainInstruction, true, false, false);
                     return;
 
-                case TaskDialog.PropertyFooterText:
+                case nameof(TaskDialog.FooterText):
                     UpdateText(lblFooter, host.FooterText, true, false, false);
                     return;
 
-                case TaskDialog.PropertyDetailsText:
+                case nameof(TaskDialog.DetailsText):
                     UpdateText(flags[isDetailsInFooter] ? lblDetailsFooter : lblDetailsMain, host.DetailsText, true, false, false);
                     return;
 
-                case TaskDialog.PropertyCaption:
+                case nameof(TaskDialog.Caption):
                     ResetCaption();
                     return;
 
-                case TaskDialog.PropertyCheckBoxText:
+                case nameof(TaskDialog.CheckBoxText):
                     UpdateText(chbCheckBox, host.CheckBoxText, true, false, true);
                     return;
 
-                case TaskDialog.PropertyShowDetailsText:
-                case TaskDialog.PropertyHideDetailsText:
-                    if (((btnShowHideDetails.IsExpanded && propName == TaskDialog.PropertyHideDetailsText)
-                            || (!btnShowHideDetails.IsExpanded && propName == TaskDialog.PropertyShowDetailsText))
+                case nameof(TaskDialog.ShowDetailsText):
+                case nameof(TaskDialog.HideDetailsText):
+                    if (((btnShowHideDetails.IsExpanded && propName == nameof(TaskDialog.HideDetailsText))
+                            || (!btnShowHideDetails.IsExpanded && propName == nameof(TaskDialog.ShowDetailsText)))
                         && (!String.IsNullOrEmpty(host.ShowDetailsText) && !String.IsNullOrEmpty(host.HideDetailsText)))
                     {
-                        UpdateText(btnShowHideDetails, propName == TaskDialog.PropertyShowDetailsText ? host.ShowDetailsText : host.HideDetailsText, false, false, true);
+                        UpdateText(btnShowHideDetails, propName == nameof(TaskDialog.ShowDetailsText) ? host.ShowDetailsText : host.HideDetailsText, false, false, true);
                     }
                     else
                     {
@@ -2324,7 +2324,7 @@ namespace KGySoft.WinForms.Forms
                     }
                     return;
 
-                case TaskDialog.PropertyStandardButtons:
+                case nameof(TaskDialog.StandardButtons):
                     cfg = GetConfiguration();
                     SuspendLayout();
                     try
@@ -2348,21 +2348,21 @@ namespace KGySoft.WinForms.Forms
                     ResetHeights(cfg);
                     return;
 
-                case TaskDialog.PropertyDefaultStandardButton:
+                case nameof(TaskDialog.DefaultStandardButton):
                     ResetDefaultButton(GetConfiguration());
                     return;
 
-                case TaskDialog.PropertyWidth:
+                case nameof(TaskDialog.Width):
                     ResetWidths(cfg = GetConfiguration());
                     ResetHeights(cfg);
                     return;
 
-                case TaskDialog.PropertyOptions:
+                case nameof(TaskDialog.Options):
                     ResetSettings(cfg = GetConfiguration());
                     ResetLayout(cfg);
                     return;
 
-                case TaskDialog.PropertyCheckBoxChecked:
+                case nameof(TaskDialog.CheckBoxChecked):
                     flags[isCheckboxChecking] = true;
                     try
                     {
@@ -2374,19 +2374,19 @@ namespace KGySoft.WinForms.Forms
                     }
                     return;
 
-                case TaskDialog.PropertyIcon:
-                case TaskDialog.PropertyCustomIcon:
+                case nameof(TaskDialog.Icon):
+                case nameof(TaskDialog.CustomIcon):
                     ResetMainIconConfiguration(cfg = GetConfiguration());
                     ResetMainIcon(cfg);
                     return;
 
-                case TaskDialog.PropertyFooterIcon:
-                case TaskDialog.PropertyCustomFooterIcon:
+                case nameof(TaskDialog.FooterIcon):
+                case nameof(TaskDialog.CustomFooterIcon):
                     ResetFooterIconConfiguration(cfg = GetConfiguration());
                     ResetFooterIcon(cfg);
                     return;
 
-                case TaskDialog.PropertyProgressBarStyle:
+                case nameof(TaskDialog.ProgressBarStyle):
                     if (host.ProgressBarStyle == TaskDialogProgressBarStyle.None || !pbProgress.Visible)
                     {
                         pnlProgressBar.Visible = host.ProgressBarStyle != TaskDialogProgressBarStyle.None;
@@ -2398,23 +2398,23 @@ namespace KGySoft.WinForms.Forms
 
                     return;
 
-                case TaskDialog.PropertyProgressBarState:
+                case nameof(TaskDialog.ProgressBarState):
                     pbProgress.State = host.ProgressBarState;
                     return;
 
-                case TaskDialog.PropertyProgressBarMinimum:
+                case nameof(TaskDialog.ProgressBarMinimum):
                     pbProgress.Minimum = host.ProgressBarMinimum;
                     return;
 
-                case TaskDialog.PropertyProgressBarMaximum:
+                case nameof(TaskDialog.ProgressBarMaximum):
                     pbProgress.Maximum = host.ProgressBarMaximum;
                     return;
 
-                case TaskDialog.PropertyProgressBarValue:
+                case nameof(TaskDialog.ProgressBarValue):
                     pbProgress.Value = host.ProgressBarValue;
                     return;
 
-                case TaskDialog.PropertyProgressBarMarqueeAnimationSpeed:
+                case nameof(TaskDialog.ProgressBarMarqueeAnimationSpeed):
                     pbProgress.MarqueeAnimationSpeed = host.ProgressBarMarqueeAnimationSpeed;
                     return;
 

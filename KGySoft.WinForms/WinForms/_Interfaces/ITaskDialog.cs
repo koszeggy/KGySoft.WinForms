@@ -16,6 +16,7 @@
 #region Usings
 
 using System;
+using System.Runtime.CompilerServices;
 
 using KGySoft.WinForms.Components;
 
@@ -59,7 +60,7 @@ namespace KGySoft.WinForms
         /// <summary>
         /// Indicates that a <see cref="TaskDialog"/> property has been changed.
         /// </summary>
-        void PropertyChanged(string propName);
+        void PropertyChanged([CallerMemberName]string propName = null!);
 
         /// <summary>
         /// Indicates that a <see cref="TaskDialogControl"/> property has been changed.

@@ -997,83 +997,83 @@ namespace KGySoft.WinForms.Components
 
             switch (propName)
             {
-                case TaskDialog.PropertyMessage:
+                case nameof(TaskDialog.Message):
                     if (String.IsNullOrEmpty((host.Message)) || String.IsNullOrEmpty(config.pszContent))
                         ReallocateDialog();
                     else
                         UpdateText(TASKDIALOG_ELEMENTS.TDE_CONTENT, config.pszContent = host.Message);
                     return;
 
-                case TaskDialog.PropertyMainInstruction:
+                case nameof(TaskDialog.MainInstruction):
                     if (String.IsNullOrEmpty((host.MainInstruction)) || String.IsNullOrEmpty(config.pszMainInstruction))
                         ReallocateDialog();
                     else
                         UpdateText(TASKDIALOG_ELEMENTS.TDE_MAIN_INSTRUCTION, host.MainInstruction);
                     return;
 
-                case TaskDialog.PropertyFooterText:
+                case nameof(TaskDialog.FooterText):
                     if (String.IsNullOrEmpty((host.FooterText)) || String.IsNullOrEmpty(config.pszFooter))
                         ReallocateDialog();
                     else
                         UpdateText(TASKDIALOG_ELEMENTS.TDE_FOOTER, config.pszFooter = host.FooterText);
                     return;
 
-                case TaskDialog.PropertyDetailsText:
+                case nameof(TaskDialog.DetailsText):
                     if (String.IsNullOrEmpty((host.DetailsText)) || String.IsNullOrEmpty(config.pszExpandedInformation))
                         ReallocateDialog();
                     else
                         UpdateText(TASKDIALOG_ELEMENTS.TDE_EXPANDED_INFORMATION, config.pszExpandedInformation = host.DetailsText);
                     return;
 
-                case TaskDialog.PropertyCaption:
-                case TaskDialog.PropertyCheckBoxText:
-                case TaskDialog.PropertyShowDetailsText:
-                case TaskDialog.PropertyHideDetailsText:
-                case TaskDialog.PropertyStandardButtons:
-                case TaskDialog.PropertyDefaultStandardButton:
-                case TaskDialog.PropertyWidth:
-                case TaskDialog.PropertyOptions:
+                case nameof(TaskDialog.Caption):
+                case nameof(TaskDialog.CheckBoxText):
+                case nameof(TaskDialog.ShowDetailsText):
+                case nameof(TaskDialog.HideDetailsText):
+                case nameof(TaskDialog.StandardButtons):
+                case nameof(TaskDialog.DefaultStandardButton):
+                case nameof(TaskDialog.Width):
+                case nameof(TaskDialog.Options):
                     ReallocateDialog();
                     return;
 
-                case TaskDialog.PropertyCheckBoxChecked:
+                case nameof(TaskDialog.CheckBoxChecked):
                     User32.SendMessage(dialogHandle, (int)TASKDIALOG_MESSAGES.TDM_CLICK_VERIFICATION, new IntPtr(host.CheckBoxChecked ? 1 : 0), IntPtr.Zero);
                     return;
 
-                case TaskDialog.PropertyIcon:
+                case nameof(TaskDialog.Icon):
                     UpdateStandardIcon(Constants.TDI_MAIN, host.Icon);
                     return;
 
-                case TaskDialog.PropertyCustomIcon:
+                case nameof(TaskDialog.CustomIcon):
                     UpdateCustomIcon(Constants.TDI_MAIN, host.CustomIcon);
                     return;
 
-                case TaskDialog.PropertyFooterIcon:
+                case nameof(TaskDialog.FooterIcon):
                     UpdateStandardIcon(Constants.TDI_FOOTER, host.FooterIcon);
                     return;
 
-                case TaskDialog.PropertyCustomFooterIcon:
+                case nameof(TaskDialog.CustomFooterIcon):
                     UpdateCustomIcon(Constants.TDI_FOOTER, host.CustomFooterIcon);
                     return;
 
-                case TaskDialog.PropertyProgressBarStyle:
+                case nameof(TaskDialog.ProgressBarStyle):
                     UpdateProgressBarStyle(host.ProgressBarStyle);
                     return;
 
-                case TaskDialog.PropertyProgressBarState:
+                case nameof(TaskDialog.ProgressBarState):
                     UpdateProgressBarState(host.ProgressBarState);
                     return;
 
-                case TaskDialog.PropertyProgressBarMinimum:
-                case TaskDialog.PropertyProgressBarMaximum:
+                case nameof(TaskDialog.ProgressBarMinimum):
+                case nameof(TaskDialog.ProgressBarMaximum):
                     UpdateProgressBarRange(host.ProgressBarMinimum, host.ProgressBarMaximum);
                     return;
 
-                case TaskDialog.PropertyProgressBarValue:
+                case nameof(TaskDialog.ProgressBarValue):
                     UpdateProgressBarValue(host.ProgressBarValue);
                     return;
 
-                case TaskDialog.PropertyProgressBarMarqueeAnimationSpeed:
+                case nameof(TaskDialog.ProgressBarMarqueeAnimationSpeed):
                     UpdateProgressBarMarqueeAnimationSpeed(host.ProgressBarMarqueeAnimationSpeed);
                     return;
 
