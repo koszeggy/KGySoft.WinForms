@@ -33,8 +33,8 @@ namespace KGySoft.Libraries.Language
         /// <summary>
         /// Translates the control.
         /// </summary>
-        /// <param name="translationFinished">If an implementer returns true, no further translation will be performed on child elements.</param>
-        /// <returns>Should return false is translation is disabled for the control for some internal reason, otherwise, true. </returns>
+        /// <param name="translationFinished">If an implementer returns <see langword="true"/>, no further translation will be performed on child elements.</param>
+        /// <returns><see langword="false"/> if translation is disabled for the control; otherwise, <see langword="true"/>.</returns>
         bool TranslateControl(out bool translationFinished);
 
         #endregion

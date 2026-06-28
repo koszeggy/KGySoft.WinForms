@@ -32,9 +32,8 @@ using KGySoft.WinForms.Forms;
 namespace KGySoft.Libraries.Language
 {
     /// <summary>
-    /// A class that makes localization possible in a very simple way, without the need of additional .dll files.
-    /// Resources are stored in .resx files, which can be both read and created on-the-fly.
-    /// Dynamic expansion of dictionaries are supported, including create new dictionaries for new languages.
+    /// Used to be a class that made localization possible in a simple way, directly from .resx files.
+    /// Use the <see cref="LocalizationHelper"/> or <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm">DynamicResourceManager</a> classes instead.
     /// </summary>
     /// <remarks>
     /// <note type="warning">This class has been obsoleted. The way it worked was really non-professional:
@@ -44,7 +43,8 @@ namespace KGySoft.Libraries.Language
     /// To overcome all these issues and still use .resx-based dynamically generated localizations you can use the
     /// <see cref="LocalizationHelper"/> class (recommended when you use the <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see>
     /// property of <see cref="BaseForm"/> or <see cref="BaseUserControl"/> classes), or the
-    /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note>
+    /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class
+    /// from the KGy SOFT Core Libraries package instead.</note>
     /// </remarks>
     /// <seealso cref="LocalizationHelper"/>
     /// <seealso cref="LocalizationHelper.GetString(string,LocalizationContext)"/>
@@ -58,10 +58,26 @@ namespace KGySoft.Libraries.Language
 
         /// <summary>
         /// Indicates a distinction part of the string that will be removed on translation.
-        /// Using DistinctionSeparator with a custom postfix makes possible store different
-        /// translations for the same words or texts in different occasions.
         /// </summary>
+        [Obsolete("Maintained for compatibility reasons, do not use it anymore.")]
         public const string DistinctionSeparator = "__";
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets or sets the currently used display language. When set, it used to save a single resource file of the previous language.
+        /// Now it is redirected to get and set the <a href="https://koszeggy.github.io/docs/corelibraries/html/P_KGySoft_LanguageSettings_DisplayLanguage.htm" target="_blank">DisplayLanguage</a>
+        /// property, which is now in the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_LanguageSettings.htm" target="_blank">LanguageSettings</a> class
+        /// of the dependent KGy SOFT Core Libraries package.
+        /// </summary>
+        [Obsolete("Use the LanguageSettings.DisplayLanguage property from KGySoft.CoreLibraries instead")]
+        public static CultureInfo ActiveLanguage
+        {
+            get => LanguageSettings.DisplayLanguage;
+            set => LanguageSettings.DisplayLanguage = value;
+        }
 
         #endregion
 
@@ -71,9 +87,11 @@ namespace KGySoft.Libraries.Language
         /// Translates the given invariant text to the currently set <see cref="ActiveLanguage"/>.
         /// </summary>
         /// <param name="text">The text to translate.</param>
+        /// <returns>The translated text.</returns>
         /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possibly existing distinction postfix. Use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method or the
         /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
+        [Obsolete("Use the LocalizationHelper.GetString method instead")]
         public static string Translate(string? text)
         {
             if (text == null!)
@@ -118,10 +136,11 @@ namespace KGySoft.Libraries.Language
         /// </summary>
         /// <param name="text">Invariant text with placeholders.</param>
         /// <param name="args">Arguments for placeholders.</param>
-        /// <returns></returns>
+        /// <returns>The translated text.</returns>
         /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possibly existing distinction postfix. Use the
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext,object[])">LocalizationHelper.GetString</see> method or the
         /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
+        [Obsolete("Use the LocalizationHelper.GetString method instead")]
         public static string Translate(string text, params object[]? args) => args is null || args.Length == 0
             ? Translate(text)
             : String.Format(LanguageSettings.FormattingLanguage, Translate(text), args);
@@ -133,10 +152,11 @@ namespace KGySoft.Libraries.Language
         /// <param name="formattingCulture">Culture for formatting arguments.</param>
         /// <param name="text">Invariant text with placeholders.</param>
         /// <param name="args">Arguments for placeholders.</param>
-        /// <returns></returns>
+        /// <returns>The translated text.</returns>
         /// <remarks><note type="warning">This method does not translate anything anymore, just removes the possibly existing distinction postfix. Use the
         /// <see cref="LocalizationHelper.GetString(CultureInfo,string,LocalizationContext,object[])">LocalizationHelper.GetString</see> method or the
         /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
+        [Obsolete("Use the LocalizationHelper.GetString method instead")]
         public static string Translate(CultureInfo formattingCulture, string text, params object[]? args) => args is null || args.Length == 0
             ? Translate(text)
             : String.Format(formattingCulture, Translate(text), args);
@@ -144,8 +164,10 @@ namespace KGySoft.Libraries.Language
         /// <summary>
         /// Saves the dictionary if <see cref="ActiveLanguage"/> is not the invariant culture.
         /// </summary>
-        /// <remarks><note type="warning">This method doesn't do anything anymore. Use the
-        /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> class instead.</note></remarks>
+        /// <remarks><note type="warning">This method doesn't do anything anymore. Use the <see cref="LocalizationHelper"/>,
+        /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_LanguageSettings.htm" target="_blank">LanguageSettings</a> or
+        /// <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm" target="_blank">DynamicResourceManager</a> classes instead.</note></remarks>
+        [Obsolete("Use the LocalizationHelper.SavePendingScopedResources or LanguageSettings.SavePendingResources methods instead")]
         public static void SaveDictionary()
         {
             //SaveDictionary(Assembly.GetCallingAssembly());
@@ -158,7 +180,7 @@ namespace KGySoft.Libraries.Language
         /// <param name="translationEnabled">True if translation is enabled for the object, otherwise, false.</param>
         /// <remarks>
         /// <note>
-        /// "Unmarking" objects is not necessary because this method does not keep any reference of the marked objects.
+        /// "Unmarking" objects is not necessary, because this method creates weak references to the marked objects.
         /// In other words, using this method does not disturb garbage collection and causes no memory leak.
         /// </note>
         /// </remarks>
@@ -172,9 +194,11 @@ namespace KGySoft.Libraries.Language
 
         /// <summary>
         /// Gets whether an object is localizable. By default, an object is localizable.
-        /// This can be changed either by making a type not localizable with <see cref="LocalizableAttribute"/>
-        /// or by <see cref="MarkLocalizable"/> method, which works also at runtime.
+        /// This can be changed either by making a type not localizable by <see cref="LocalizableAttribute"/>
+        /// or by the <see cref="MarkLocalizable"/> method, which works also at runtime.
         /// </summary>
+        /// <param name="obj">The object to check.</param>
+        /// <returns><see langword="true"/>, if the object is localizable; otherwise, <see langword="false"/>.</returns>
         public static bool IsObjectLocalizable(object obj)
         {
             AttributeCollection attrs = TypeDescriptor.GetAttributes(obj);
@@ -189,24 +213,26 @@ namespace KGySoft.Libraries.Language
         }
 
         /// <summary>
-        /// Gets whether a property is localizable. By default, a property is not localizable unless it is marked
-        /// by <see cref="LocalizableAttribute"/>.
+        /// Gets whether a property is localizable. By default, a property is not localizable unless it is marked so by <see cref="LocalizableAttribute"/>.
         /// </summary>
+        /// <param name="obj">The object to check.</param>
+        /// <param name="propertyName">The property of the specified object to check.</param>
+        /// <returns><see langword="true"/>, if the property is localizable; otherwise, <see langword="false"/>.</returns>
         /// <remarks>
-        /// A property is not considered localizable by default, because here only properties with LocalizableAttribute should be checked.
-        /// <note>Checking whether a property is localizable in a .NET framework class could be needed only in case of virtual properties.</note>
+        /// A property is not considered localizable by default, because here only properties decorated by <see cref="LocalizableAttribute"/> should be checked.
         /// </remarks>
         public static bool IsPropertyLocalizable(object obj, string propertyName) => TypeDescriptor.GetProperties(obj)[propertyName]?.IsLocalizable == true;
 
         /// <summary>
-        /// Formats captions:
-        /// <para>- Capitalizes first letter</para>
-        /// <para>- Inserts spaces before capitals except in case of multiple capitals</para>
+        /// Formats captions by capitalizing first letter and inserting spaces before capitals except in case of multiple capitals.
         /// </summary>
+        /// <param name="caption">The caption to format.</param>
+        /// <returns>The formatted caption</returns>
         /// <example>
-        /// For example:
-        /// <para>"columnHeader" -> "Column Header"</para>
-        /// <para>"KGySOFTLibraries" -> "KGy SOFT Libraries"</para>
+        /// <list type="bullet">
+        /// <item><c>columnHeader</c>: <c>Column Header</c></item>
+        /// <item><c>KGySOFTLibraries</c>: <c>KGy SOFT Libraries</c></item>
+        /// </list>
         /// </example>
         public static string FormatCaption(string caption)
         {

@@ -30,11 +30,13 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
   the possible distinction postfixes if present. To localize your application in a similar way with auto-generated
   resources, use the new LocalizationHelper class and/or the BaseForm.DynamicStringLocalization property in the
   KGySoft.WinForms namespace. As a low-level solution, you can also use the DynamicResourceManager class directly
-  from the KGySoft.CoreLibraries package. For more details, see:
-  - The example application contains a localization example: https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example
+  from the KGySoft.CoreLibraries package, along with its LanguageSettings class. For more details, see:
+  - The example application using the new LocalizationHelper class: https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example
   - DynamicResourceManager class: https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_DynamicResourceManager.htm
+  - LanguageSettings class: https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_LanguageSettings.htm
 
 ! Language class: It has been made obsolete. See the note above.
+  ! All properties but ActiveLanguage have been removed.
   ! The RedirectTranslate event has been removed. Use the LocalizationHelper.LocalizationRequested event instead.
 ! ICustomTranslated interface: It has been made obsolete. See the note above.
 ! The RedirectTranslateEventArgs class has been removed.
