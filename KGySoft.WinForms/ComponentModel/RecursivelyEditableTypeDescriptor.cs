@@ -17,14 +17,23 @@
 
 using System;
 using System.ComponentModel;
+using System.Windows.Forms;
 
 #endregion
 
 namespace KGySoft.ComponentModel
 {
     /// <summary>
-    /// Represents a custom type descriptor that allows editing the properties recursively.
+    /// Represents a custom type descriptor that can wrap any object to allow editing its properties recursively in a <see cref="PropertyGrid"/>.
     /// </summary>
+    /// <remarks>
+    /// <para>This class can be used as a wrapper of any object to make its properties recursively expandable at run time in a <see cref="PropertyGrid"/>:
+    /// <code lang="C#">propertyGrid1.SelectedObject = new RecursivelyEditableTypeDescriptor(myObjectToEdit);</code></para>
+    /// <para>Alternatively, you can use the <see cref="RecursivelyEditableTypeDescriptor"/> to mark individual properties expandable at design time.</para>
+    /// <note type="tip">To load/save object graphs that are recursively editable in a <see cref="PropertyGrid"/>, you can use
+    /// the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Serialization_Xml_XmlSerializer.htm" target="_blank">XmlSerializer</a> class
+    /// from the KGy SOFT Core Libraries package.</note>
+    /// </remarks>
     public class RecursivelyEditableTypeDescriptor : ICustomTypeDescriptor
     {
         #region Properties
@@ -41,7 +50,7 @@ namespace KGySoft.ComponentModel
         /// <summary>
         /// Initializes a new instance of the <see cref="RecursivelyEditableTypeDescriptor"/> class for the specified object.
         /// </summary>
-        /// <param name="obj">The object, whose properties should be recursively expandable and editable.</param>
+        /// <param name="obj">The object, whose properties should be recursively expandable and editable in a <see cref="PropertyGrid"/>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="obj"/> is <see langword="null"/>.</exception>
         public RecursivelyEditableTypeDescriptor(object obj)
         {

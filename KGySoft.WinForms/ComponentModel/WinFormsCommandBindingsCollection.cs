@@ -21,16 +21,24 @@ using System.Diagnostics.CodeAnalysis;
 using System.Windows.Forms;
 
 using KGySoft.Reflection;
+using KGySoft.WinForms.Controls;
+using KGySoft.WinForms.Forms;
 
 #endregion
 
 namespace KGySoft.ComponentModel
 {
     /// <summary>
-    /// A specialized <see cref="CommandBindingsCollection"/> that can be used for commands with <see cref="Control"/> sources.
-    /// By using this collection the <see cref="ICommandState"/> properties (e.g. <see cref="ICommandState.Enabled"/> but also any other added property)
-    /// of the added bindings will be synced with the command sources.
+    /// A specialized <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_CommandBindingsCollection.htm">CommandBindingsCollection</a>
+    /// that can be used for commands with <see cref="Control"/> sources. By using this collection, the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ICommandState.htm">ICommandState</a> properties
+    /// (e.g. <a href="https://koszeggy.github.io/docs/corelibraries/html/P_KGySoft_ComponentModel_ICommandState_Enabled.htm">Enabled</a>,
+    /// but also any other dynamically added property) of the added bindings will be synced with the command sources.
+    /// It also supports cross-thread updates, if its <see cref="SupportCrossThreadStateUpdates"/> property is set to <see langword="true"/>.
     /// </summary>
+    /// <remarks>
+    /// <note><see cref="BaseForm"/> and <see cref="BaseUserControl"/> types already have a <see cref="BaseForm.CommandBindings"/> property, whose
+    /// type is <see cref="WinFormsCommandBindingsCollection"/>.</note>
+    /// </remarks>
     public class WinFormsCommandBindingsCollection : CommandBindingsCollection
     {
         #region CrossThreadEnabledStateUpdater class
@@ -102,9 +110,10 @@ namespace KGySoft.ComponentModel
 
         /// <summary>
         /// Gets or sets whether cross-thread state updates are supported.
-        /// It is relevant when the command source is a <see cref="Control"/> or a <see cref="ToolStripItem"/>, and the command state changes
-        /// (such as <see cref="ICommandState.Enabled"/>) can be updated from a different thread than the one the command binding was created on.
-        /// <br/>Default value: <see langrowd="false"/>.
+        /// It is relevant when the command source is a <see cref="Control"/> or a <see cref="ToolStripItem"/>, and the command states
+        /// (e.g. <a href="https://koszeggy.github.io/docs/corelibraries/html/P_KGySoft_ComponentModel_ICommandState_Enabled.htm">Enabled</a>)
+        /// may change from a different thread than the one the command binding was created on.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         /// <remarks>
         /// <note>This property should be set before adding a binding to the collection. Already added bindings will not be affected by this property.</note>

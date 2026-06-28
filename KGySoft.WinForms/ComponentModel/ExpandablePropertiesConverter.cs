@@ -17,6 +17,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Windows.Forms;
 
 #endregion
 
@@ -32,9 +33,23 @@ using System.ComponentModel;
 namespace KGySoft.ComponentModel
 {
     /// <summary>
-    /// Provides a type converter to convert objects allowing expanding their properties.
-    /// This class is similar to <see cref="ExpandableObjectConverter"/>, but this one allows expanding the properties recursively.
+    /// Provides a type converter that allows expanding the properties recursively in a <see cref="PropertyGrid"/>.
+    /// This class is similar to <see cref="ExpandableObjectConverter">System.ComponentModel.ExpandableObjectConverter</see>, but that one allows expanding the top-level properties only.
     /// </summary>
+    /// <remarks>
+    /// <para>This can be used to decorate properties by <see cref="TypeConverterAttribute"/>.
+    /// Alternatively, you can use the <see cref="RecursivelyEditableTypeDescriptor"/> to wrap any object to make its properties expandable in a <see cref="PropertyGrid"/>.</para>
+    /// <note type="tip">To load/save object graphs that are recursively editable in a <see cref="PropertyGrid"/>, you can use
+    /// the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Serialization_Xml_XmlSerializer.htm" target="_blank">XmlSerializer</a> class
+    /// from the KGy SOFT Core Libraries package.</note>
+    /// </remarks>
+    /// <example>
+    /// To make a property recursively expandable in a <see cref="PropertyGrid"/>, use the <see cref="TypeConverterAttribute"/>:
+    /// <code lang="C#"><![CDATA[
+    /// [TypeConverter(typeof(ExpandablePropertiesConverter))]
+    /// public MyComplexType MyComplexProperty { get; set; }
+    /// ]]></code>
+    /// </example>
     public class ExpandablePropertiesConverter : TypeConverter
     {
         #region Nested classes
