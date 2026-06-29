@@ -38,9 +38,22 @@ using KGySoft.WinForms.Reflection;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Provides a <see cref="SetMessage"/> event, which is triggered if the <see cref="ErrorProvider.DataSource"/> property is set and the message
+    /// An <see cref="ErrorProvider"/> with a <see cref="SetMessage"/> event, which is triggered if the <see cref="ErrorProvider.DataSource"/> property is set and the message
     /// of a bound property is about to be retrieved.
     /// </summary>
+    /// <remarks>
+    /// <para>If the original <see cref="ErrorProvider"/> is used with WinForms data binding (by setting the <see cref="ErrorProvider.DataSource"/> property), the bound items
+    /// must implement the <see cref="IDataErrorInfo"/> interface to make the error messages appear on the controls.
+    /// The <see cref="AdvancedErrorProvider"/> class allows customizing this behavior by providing a <see cref="SetMessage"/> event, which can be handled
+    /// to allow the messages to be retrieved from any custom source.</para>
+    /// <para>If the bound objects implement the <see cref="IDataErrorInfo"/> interface, the error messages are preinitialized in
+    /// the <see cref="SetMessageEventArgs.Message">SetMessageEventArgs.Message</see> property when the <see cref="SetMessage"/> event is raised.</para>
+    /// <note type="tip">To provide error/message/info messages for objects, create three instances of this class. Set their icon accordingly (you can use the
+    /// properties of the <a href="https://koszeggy.github.io/docs/drawing/html/T_KGySoft_Drawing_Icons.htm">Icons</a> class from <c>KGySoft.Drawing</c>),
+    /// and handle the <see cref="SetMessage"/> event. You can derive the bound objects from the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm">ValidatingObjectBase</a> class
+    /// (or implement the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_IValidatingObject.htm">IValidatingObject</a> interface)
+    /// to provide error/warning/info messages for the bound properties.</note>
+    /// </remarks>
     /// <seealso cref="ErrorProvider" />
     [ToolboxBitmap(typeof(ErrorProvider))]
     public class AdvancedErrorProvider : ErrorProvider
@@ -92,7 +105,7 @@ namespace KGySoft.WinForms.Components
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="AdvancedErrorProvider" /> class with the default settings.
+        /// Initializes a new instance of the <see cref="AdvancedErrorProvider" /> class with default settings.
         /// </summary>
         public AdvancedErrorProvider() => Initialize();
 
@@ -107,32 +120,6 @@ namespace KGySoft.WinForms.Components
         /// </summary>
         /// <param name="container">The container.</param>
         public AdvancedErrorProvider(IContainer container) : base(container) => Initialize();
-
-        private void RewireEvents(BindingManagerBase? bindingManager)
-        {
-            if (lastManager != null)
-                UnwireRedirectedEvents(lastManager);
-
-            lastManager = bindingManager;
-
-            if (bindingManager == null)
-                return;
-
-            // removing the originally set event handlers
-            this.UnwireEvents(bindingManager);
-
-            // wiring the fixed event handlers
-            bindingManager.CurrentChanged += BindingManager_CurrentChanged;
-            bindingManager.BindingComplete += BindingManager_BindingComplete;
-            if (bindingManager is CurrencyManager currencyManager)
-            {
-                currencyManager.ItemChanged += CurrencyManager_ItemChanged;
-                currencyManager.Bindings.CollectionChanged += CurrencyManager_BindingsCollectionChanged;
-            }
-
-            // as we are coming from a newly triggered CurrentChanged we let the rewired handler to go
-            ApplyMessagesFromBinding();
-        }
 
         #endregion
 
@@ -189,6 +176,32 @@ namespace KGySoft.WinForms.Components
             this.SetCurrentChanged(injectedCurrentChanged);
         }
 
+        private void RewireEvents(BindingManagerBase? bindingManager)
+        {
+            if (lastManager != null)
+                UnwireRedirectedEvents(lastManager);
+
+            lastManager = bindingManager;
+
+            if (bindingManager == null)
+                return;
+
+            // removing the originally set event handlers
+            this.UnwireEvents(bindingManager);
+
+            // wiring the fixed event handlers
+            bindingManager.CurrentChanged += BindingManager_CurrentChanged;
+            bindingManager.BindingComplete += BindingManager_BindingComplete;
+            if (bindingManager is CurrencyManager currencyManager)
+            {
+                currencyManager.ItemChanged += CurrencyManager_ItemChanged;
+                currencyManager.Bindings.CollectionChanged += CurrencyManager_BindingsCollectionChanged;
+            }
+
+            // as we are coming from a newly triggered CurrentChanged we let the rewired handler to go
+            ApplyMessagesFromBinding();
+        }
+
         private void UnwireRedirectedEvents(BindingManagerBase manager)
         {
             manager.CurrentChanged -= BindingManager_CurrentChanged;
@@ -240,7 +253,7 @@ namespace KGySoft.WinForms.Components
         #region Event handlers
 
         /// <summary>
-        /// This is the new target of the base.currentChanged delegate field. If this is invoked, we can sure that the base manager is not fixed yet.
+        /// This is the new target of the base.currentChanged delegate field. If this is invoked, we can be sure that the base manager is not fixed yet.
         /// </summary>
         private void InjectedCurrentChanged(object? sender, EventArgs eventArgs) => RewireEvents(sender as BindingManagerBase);
 

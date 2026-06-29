@@ -22,25 +22,23 @@ using System;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Contains arguments of <see cref="TaskDialog.DetailsVisibleChanged"/> event.
+    /// Provides arguments for the <see cref="TaskDialog.DetailsVisibleChanged"/> event.
     /// </summary>
     public class TaskDialogDetailsVisibleChangedEventArgs : EventArgs
     {
         #region Properties
 
         /// <summary>
-        /// Gets whether details text is visible.
+        /// Gets whether the details text is visible. That is, when <see cref="TaskDialog.DetailsText"/> is not <see langword="null"/>,
+        /// and the expando button is in expanded state.
         /// </summary>
-        public bool DetailsVisible { get; private set; }
+        public bool DetailsVisible { get; }
 
         #endregion
 
         #region Constructors
 
-        internal TaskDialogDetailsVisibleChangedEventArgs(bool visible)
-        {
-            DetailsVisible = visible;
-        }
+        internal TaskDialogDetailsVisibleChangedEventArgs(bool visible) => DetailsVisible = visible;
 
         #endregion
     }

@@ -23,7 +23,7 @@ using System.ComponentModel;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Base class of task dialog buttons property.
+    /// Represents the base class for <see cref="TaskDialog"/> buttons.
     /// </summary>
     public abstract class TaskDialogButtonBase : TaskDialogControl
     {
@@ -90,9 +90,13 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets description of the button. If the button is displayed as a command link, description is displayed
-        /// under the main text. Otherwise, the description might be displayed as a tooltip (only when <see cref="TaskDialog"/> is used in compatibility mode).
+        /// Gets or sets the description of the button. If the button is displayed as a command link, description is displayed
+        /// under the main text. Otherwise, the description can be displayed as a tooltip (when the <see cref="TaskDialog"/> is used in compatibility mode).
         /// </summary>
+        /// <remarks>
+        /// <para>You can set the <see cref="TaskDialog.ForceCompatibilityMode"/> property to <see langword="true"/> to make sure that the description
+        /// is displayed as a tooltip when the button is not displayed as command link.</para>
+        /// </remarks>
         /// <seealso cref="TaskDialog.ForceCompatibilityMode"/>
         public string? Description
         {
@@ -109,7 +113,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets a value that determines whether the button is enabled.
+        /// Gets or sets whether the button is enabled.
         /// </summary>
         public bool Enabled
         {
@@ -127,58 +131,24 @@ namespace KGySoft.WinForms.Components
 
         #endregion
 
-        #region Construction and Destruction
-
         #region Constructors
 
-        /// <summary>
-        /// Creates a new instance of a task dialog button.
-        /// </summary>
-        protected TaskDialogButtonBase()
+        private protected TaskDialogButtonBase()
             : this(null, null)
         {
         }
 
-        /// <summary>
-        /// Creates a new instance of a task dialog button with
-        /// the specified text.
-        /// </summary>
-        /// <param name="text">The text of the button.</param>
-        protected TaskDialogButtonBase(string? text)
+        private protected TaskDialogButtonBase(string? text)
             : this(null, text)
         {
         }
 
-        /// <summary>
-        /// Creates a new instance of a task dialog button with
-        /// the specified name and text.
-        /// </summary>
-        /// <param name="name">The name of the button.</param>
-        /// <param name="text">The text of the button.</param>
-        protected TaskDialogButtonBase(string? name, string? text)
+        private protected TaskDialogButtonBase(string? name, string? text)
             : base(name)
         {
             this.text = text;
             flags[isEnabled] = true;
         }
-
-        #endregion
-
-        #region Explicit Disposing
-
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            // on explicit disposing nullifying other references (except text because that is displayed in ToString)
-            if (disposing)
-            {
-                description = null;
-            }
-        }
-
-        #endregion
 
         #endregion
 
@@ -189,8 +159,23 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Returns the string representation of this button.
         /// </summary>
-        /// <returns>A <see cref="System.String"/>.</returns>
+        /// <returns>The string representation of this button.</returns>
         public override string ToString() => $"{base.ToString()} {{{(text ?? String.Empty)}}}";
+
+        #endregion
+
+        #region Private Protected Methods
+
+        private protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            // on explicit disposing nullifying other references (except text because that is displayed in ToString)
+            if (disposing)
+            {
+                description = null;
+            }
+        }
 
         #endregion
 

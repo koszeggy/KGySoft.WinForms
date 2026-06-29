@@ -22,20 +22,21 @@ using System;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Contains arguments of <see cref="AdvancedSaveFileDialog.FileTypeChanged"/> event.
+    /// Provides arguments for the <see cref="AdvancedSaveFileDialog.FileTypeChanged"/> event.
     /// </summary>
+    [Obsolete("It belongs to the obsoleted AdvancedSaveFileDialog class")]
     public sealed class FileTypeChangedEventArgs : EventArgs
     {
         #region Properties
 
         /// <summary>
-        /// Gets selected index of the file type combo box in <see cref="AdvancedSaveFileDialog"/>.
+        /// Gets the selected index of the file type combo box in <see cref="AdvancedSaveFileDialog"/>.
         /// Unlike as <see cref="AdvancedSaveFileDialog.FilterIndex"/>, this is a zero-based index.
         /// </summary>
         public int SelectedIndex { get; }
 
         /// <summary>
-        /// Gets selected file type filter in <see cref="AdvancedSaveFileDialog"/> or null when
+        /// Gets the selected file type filter in <see cref="AdvancedSaveFileDialog"/>, or <see langword="null"/> when
         /// <see cref="AdvancedSaveFileDialog.Filter"/> was not correctly defined.
         /// </summary>
         public string? Filter { get; }

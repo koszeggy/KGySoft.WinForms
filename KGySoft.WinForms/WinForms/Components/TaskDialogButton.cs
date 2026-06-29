@@ -26,7 +26,7 @@ namespace KGySoft.WinForms.Components
 {
     /// <summary>
     /// Represents a custom button in a <see cref="TaskDialog"/> that can be added to the <see cref="TaskDialog.Buttons"/> collection.
-    /// The button can be either a regular push button or a command link depending on <see cref="TaskDialog.Options"/> property flags.
+    /// The button can be either a regular push button or a command link, depending on the <see cref="TaskDialog.Options"/> property flags.
     /// </summary>
     /// <seealso cref="TaskDialogControlCollection{T}"/>
     /// <seealso cref="TaskDialogOptions"/>
@@ -80,9 +80,9 @@ namespace KGySoft.WinForms.Components
         #region Events
 
         /// <summary>
-        /// Occurs when the task dialog button is clicked.
-        /// If not subscribed, <see cref="TaskDialog"/> will be closed when the button is clicked.
-        /// Otherwise, <see cref="HandledEventArgs.Handled"/> property should be set to <see langword="false"/> to let the system close the window.
+        /// Occurs when this <see cref="TaskDialogButton"/> is clicked.
+        /// If not subscribed, the <see cref="TaskDialog"/> will be closed when the button is clicked.
+        /// Otherwise, <see cref="HandledEventArgs.Handled"/> property can be set to <see langword="false"/> to let the system close the <see cref="TaskDialog"/>.
         /// </summary>
         public event EventHandler<HandledEventArgs> Click
         {
@@ -99,7 +99,8 @@ namespace KGySoft.WinForms.Components
         #region Properties
 
         /// <summary>
-        /// Gets or sets whether an elevation icon is displayed on the button.
+        /// Gets or sets whether an elevated shield icon is displayed on the button.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         public bool IsElevated
         {
@@ -116,7 +117,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets ot sets a custom icon of the button. Has effect only when <see cref="TaskDialog"/> is used in compatibility mode.
+        /// Gets ot sets a custom icon for this <see cref="TaskDialogButton"/>. Has effect only when <see cref="TaskDialog"/> is used in compatibility mode.
         /// If <see cref="IsElevated"/> is also set, the elevated icon is displayed.
         /// </summary>
         /// <seealso cref="TaskDialog.ForceCompatibilityMode"/>
@@ -137,6 +138,7 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets or sets whether this button is the default button.
         /// If there are more default buttons in a collection, the first one will be the default button when the dialog appears.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         public bool IsDefault
         {
@@ -154,20 +156,17 @@ namespace KGySoft.WinForms.Components
 
         #endregion
 
-        #region Construction and Destruction
-
         #region Constructors
 
         /// <summary>
-        /// Creates a new instance of a task dialog button.
+        /// Creates a new instance of the <see cref="TaskDialogButton"/> class.
         /// </summary>
         public TaskDialogButton()
         {
         }
 
         /// <summary>
-        /// Creates a new instance of a task dialog button with
-        /// the specified text.
+        /// Creates a new instance of the <see cref="TaskDialogButton"/> class with the specified text.
         /// </summary>
         /// <param name="text">The text of the button.</param>
         public TaskDialogButton(string text)
@@ -176,8 +175,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Creates a new instance of a task dialog button with
-        /// the specified name and text.
+        /// Creates a new instance of the <see cref="TaskDialogButton"/> with the specified name and text.
         /// </summary>
         /// <param name="name">The name of the button.</param>
         /// <param name="text">The text of the button.</param>
@@ -188,25 +186,9 @@ namespace KGySoft.WinForms.Components
 
         #endregion
 
-        #region Explicit Disposing
-
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-
-            // always clearing event subscriptions to prevent memory leaks
-            click = null;
-
-            if (disposing)
-                customIcon = null;
-        }
-
-        #endregion
-
-        #endregion
-
         #region Methods
+
+        #region Internal Methods
 
         internal void OnClick(HandledEventArgs e)
         {
@@ -221,6 +203,23 @@ namespace KGySoft.WinForms.Components
             else
                 e.Handled = false;
         }
+
+        #endregion
+
+        #region Private Protected Methods
+
+        private protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+
+            // always clearing event subscriptions to prevent memory leaks
+            click = null;
+
+            if (disposing)
+                customIcon = null;
+        }
+
+        #endregion
 
         #endregion
     }

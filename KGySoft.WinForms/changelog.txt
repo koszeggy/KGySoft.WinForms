@@ -74,10 +74,14 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
 
 ! KGySoft.WinForms.Components namespace:
 ========================================
+! AdvancedSaveFileDialog:
+  ! It has been made obsolete along with the FileTypeChangedEventArgs and SelectedFileChangedEventArgs classes.
+  + Now it implements IDisposable (it only had a finalizer previously)
 ! TaskDialogStandardIcons enum: it has been renamed to TaskDialogStandardIcon.
 ! TaskDialogStandardButtonFlags enum: it has been renamed to TaskDialogStandardButtons.
 ! TaskDialogStandardButtons enum: it has been renamed to TaskDialogStandardButton.
-+ AdvancedSaveFileDialog: it has been made disposable
+! TaskDialogControl and TaskDialogButtonBase classes: the visibility of the constructors and the protected methods
+  have been made private protected to prevent deriving from these classes outside the assembly.
 * TaskDialog class:
   + Supporting high DPI and per-monitor DPI awareness.
   + Ctrl+C copies the textual content of the task dialog to the clipboard even in compatibility mode.

@@ -22,13 +22,13 @@ using System;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Represents possible options of a <see cref="TaskDialog"/>
+    /// Represents the possible options of a <see cref="TaskDialog"/>.
     /// </summary>
     [Flags]
     public enum TaskDialogOptions
     {
         /// <summary>
-        /// Represents no options
+        /// Represents no options.
         /// </summary>
         None = 0,
 
@@ -42,8 +42,8 @@ namespace KGySoft.WinForms.Components
         //UseFooterIcon = 0x0004,
 
         /// <summary>
-        /// Indicates that the <see cref="TaskDialog"/> should be able to be closed using Alt-F4, Escape and the title bar’s
-        /// close button even if no cancel button is specified in <see cref="TaskDialog.StandardButtons"/>.
+        /// Indicates that the <see cref="TaskDialog"/> should be able to be closed by Alt+F4, the Escape button, and the title bar’s
+        /// close button, even if no cancel button is specified in <see cref="TaskDialog.StandardButtons"/>.
         /// </summary>
         AllowCancel = 1 << 3,
 
@@ -56,14 +56,16 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Determines whether the <see cref="TaskDialog.Buttons"/> should be displayed as command links
-        /// (without a glyph) instead of simple push buttons.
+        /// (without displaying the default) instead of simple push buttons.
         /// If both <see cref="UseCommandLinks"/> and <see cref="UseCommandLinksNoIcon"/> are set, glyphs will be visible.
+        /// <note>If the <see cref="TaskDialogButton.CustomIcon"/> property is set for a <see cref="TaskDialogButton"/>,
+        /// the custom icon will be displayed, regardless of this property.</note>
         /// </summary>
         UseCommandLinksNoIcon = 1 << 5,
 
         /// <summary>
         /// Indicates that the details text of a <see cref="TaskDialog"/> should be displayed at the footer area instead of
-        /// immediately after the message. This flag is ignored when <see cref="TaskDialog.DetailsText"/> is empty
+        /// immediately after the message. This flag is ignored when <see cref="TaskDialog.DetailsText"/> is not set.
         /// </summary>
         ExpandFooterArea = 1 << 6,
 
@@ -80,7 +82,7 @@ namespace KGySoft.WinForms.Components
         //UseCallbackTimer = 0x0800,
 
         /// <summary>
-        /// Indicates that the <see cref="TaskDialog"/> should be centered to the owner window rather than the monitor.
+        /// Indicates that the <see cref="TaskDialog"/> should be centered to the owner window rather than the current display.
         /// </summary>
         PositionRelativeToWindow = 1 << 12,
 
@@ -102,7 +104,7 @@ namespace KGySoft.WinForms.Components
         // NOTE: Below there are non-native features. These flags should be masked out when assigning to TASKDIALOG_FLAGS
 
         /// <summary>
-        /// Indicates that texts of <see cref="TaskDialog.StandardButtons"/> are localized from the library resources
+        /// Indicates that the texts of <see cref="TaskDialog.StandardButtons"/> are localized from the library resources
         /// rather than using Windows resources. On non-Windows platforms this flag is ignored, as if it was always set.
         /// <note>This flag causes to use <see cref="TaskDialog"/> in compatibility mode.</note>
         /// </summary>

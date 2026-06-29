@@ -26,6 +26,7 @@ namespace KGySoft.WinForms.Components
     /// <summary>
     /// Represents a collection of <see cref="TaskDialogControl"/> instances.
     /// </summary>
+    /// <typeparam name="T">The type of the elements in the collection.</typeparam>
     public sealed class TaskDialogControlCollection<T>: Collection<T>, IDisposable
         where T: TaskDialogControl
     {
@@ -41,8 +42,9 @@ namespace KGySoft.WinForms.Components
         /// Gets an item of the <see cref="TaskDialogControlCollection{T}"/> by name.
         /// </summary>
         /// <param name="name">Name of the control</param>
-        /// <returns>A <see cref="TaskDialogControl"/> instance with the searched name or <see langword="null"/> if no control found with such name.</returns>
-        public T? this[string name] => Items.FirstOrDefault(x => x.Name == name);
+        /// <returns>The <see cref="TaskDialogControl"/> instance with the specified <paramref name="name"/> within the collection
+        /// or <see langword="null"/> if no control was found with such a name.</returns>
+        public T? this[string name] => Items.FirstOrDefault(ctrl => ctrl.Name == name);
 
         #endregion
 

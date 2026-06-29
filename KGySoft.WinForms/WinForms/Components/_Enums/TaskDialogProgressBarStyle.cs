@@ -16,12 +16,12 @@
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Represents possible progress bar styles of a <see cref="TaskDialog"/>.
+    /// Represents the possible progress bar styles of a <see cref="TaskDialog"/>.
     /// </summary>
     public enum TaskDialogProgressBarStyle
     {
         /// <summary>
-        /// Indicated that no progress bar should be displayed on the dialog.
+        /// Indicates that no progress bar should be displayed on the dialog.
         /// </summary>
         None,
 
@@ -31,7 +31,7 @@ namespace KGySoft.WinForms.Components
         Regular,
 
         /// <summary>
-        /// Represents a marquee progress bar style
+        /// Represents the marquee progress bar style
         /// </summary>
         Marquee
     }

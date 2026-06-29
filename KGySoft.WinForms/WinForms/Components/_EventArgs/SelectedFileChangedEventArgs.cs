@@ -22,34 +22,23 @@ using System;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Contains arguments of <see cref="AdvancedSaveFileDialog.SelectedFileChanged"/> event.
+    /// Provides arguments for the <see cref="AdvancedSaveFileDialog.SelectedFileChanged"/> event.
     /// </summary>
+    [Obsolete("It belongs to the obsoleted AdvancedSaveFileDialog class")]
     public class SelectedFileChangedEventArgs : EventArgs
     {
-        #region Fields
-
-        private readonly string fileName;
-
-        #endregion
-
         #region Properties
 
         /// <summary>
-        /// Gets selected file name
+        /// Gets the selected file name
         /// </summary>
-        public string FileName
-        {
-            get { return fileName; }
-        }
+        public string FileName { get; }
 
         #endregion
 
         #region Constructors
 
-        internal SelectedFileChangedEventArgs(string fileName)
-        {
-            this.fileName = fileName;
-        }
+        internal SelectedFileChangedEventArgs(string fileName) => FileName = fileName;
 
         #endregion
     }

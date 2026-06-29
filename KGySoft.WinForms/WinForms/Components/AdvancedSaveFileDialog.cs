@@ -38,8 +38,9 @@ namespace KGySoft.WinForms.Components
 {
     // TODO: Use current Windows appearance, see Windows API Code Pack 1.1 CustomCommonFileDialogsDemo
     /// <summary>
-    /// Windows save file dialog that can host a custom control and can raise events.
+    /// A Windows save file dialog that can host a custom control and can raise events.
     /// </summary>
+    [Obsolete("This class does not support the modern Explorer-like dialog that is available since Windows Vista.")]
     public sealed class AdvancedSaveFileDialog : IDisposable
     {
         #region Fields
@@ -55,24 +56,21 @@ namespace KGySoft.WinForms.Components
         #region Properties
 
         /// <summary>
-        /// Gets or sets the index of the <see cref="Filter"/> currently selected in the file dialog box as
-        /// a one-based index.
-        /// The default value is 1.
+        /// Gets or sets the index of the <see cref="Filter"/> currently selected in the file dialog box as a one-based index.
+        /// <br/>Default value: 1.
         /// </summary>
         public int FilterIndex { get; set; }
 
         /// <summary>
         /// Gets or sets default extension.
         /// The dialog appends this extension to the file name if the user fails to type an extension.
-        /// The string should not contain a period (.). If this member is NULL and the user fails to type an extension, no extension is appended.
+        /// The string should not contain a period (.). If this member is <see langword="null"/> and the user fails to type an extension, no extension is appended.
         /// </summary>
         public string? DefaultExt { get; set; }
 
         /// <summary>
         /// Gets or sets file types filter.
-        /// <example>
-        /// Example: "C# files|*.cs|All files|*.*"
-        /// </example>
+        /// <br/>Example: <c>C# files|*.cs|All files|*.*</c>
         /// </summary>
         public string? Filter { get; set; }
 
@@ -88,7 +86,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// A custom control that will be placed under the file type combo. It must be allocated and disposed by
-        /// the user, <see cref="AdvancedSaveFileDialog"/> adjusts only its size if <see cref="CustomControlAutoSize"/> is true.
+        /// the caller, <see cref="AdvancedSaveFileDialog"/> adjusts only its size if <see cref="CustomControlAutoSize"/> is <see langword="true"/>.
         /// </summary>
         public Control? CustomControl { get; set; }
 
@@ -104,41 +102,41 @@ namespace KGySoft.WinForms.Components
         public string? CustomControlLabel { get; set; }
 
         /// <summary>
-        /// Gets or sets initial directory
+        /// Gets or sets the initial directory.
         /// </summary>
         public string? InitialDirectory { get; set; }
 
         /// <summary>
-        /// Gets or sets whether path of given file must exist.
+        /// Gets or sets whether the path of the given file must exist.
         /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         public bool PathMustExist { get; set; }
 
         /// <summary>
-        /// Gets or sets forcing the showing of system and hidden files, thus overriding the user setting to show or not show hidden files.
+        /// Gets or sets whether to show system and hidden files, thus overriding the user setting to show or not to show hidden files.
         /// However, a file that is marked both system and hidden is not shown.
         /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         public bool ForceShowHiddenFiles { get; set; }
 
         /// <summary>
-        /// Gets or sets whether Save As dialog box to generate a message box if the selected file already exists.
+        /// Gets or sets whether the Save As dialog box displays a message box if the selected file already exists.
         /// The user must confirm whether to overwrite the file.
         /// <br/>Default value: <see langword="true"/>.
         /// </summary>
-        public bool PromptOverride { get; set; }
+        public bool PromptOverwrite { get; set; }
 
         #endregion
 
         #region Events
 
         /// <summary>
-        /// Occurs when user selects another value in file type combo box.
+        /// Occurs when the user selects another value in file type combo box.
         /// </summary>
         public event EventHandler<FileTypeChangedEventArgs>? FileTypeChanged;
 
         /// <summary>
-        /// Occurs when user selects a file in the browser.
+        /// Occurs when the user selects a file in the browser.
         /// </summary>
         public event EventHandler<SelectedFileChangedEventArgs>? SelectedFileChanged;
 
@@ -153,7 +151,7 @@ namespace KGySoft.WinForms.Components
         {
             FilterIndex = 1;
             PathMustExist = true;
-            PromptOverride = true;
+            PromptOverwrite = true;
         }
 
         /// <inheritdoc />
@@ -230,7 +228,7 @@ namespace KGySoft.WinForms.Components
                 flags |= Constants.OFN_PATHMUSTEXIST;
             if (ForceShowHiddenFiles)
                 flags |= Constants.OFN_FORCESHOWHIDDEN;
-            if (PromptOverride)
+            if (PromptOverwrite)
                 flags |= Constants.OFN_OVERWRITEPROMPT;
             ofn.Flags = flags;
 

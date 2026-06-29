@@ -23,7 +23,7 @@ using System.ComponentModel;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Represents a custom button in a <see cref="TaskDialog"/> that can be added to <see cref="TaskDialog.RadioButtons"/> collection.
+    /// Represents a radio button in a <see cref="TaskDialog"/> that can be added to the <see cref="TaskDialog.RadioButtons"/> collection.
     /// </summary>
     public sealed class TaskDialogRadioButton : TaskDialogButtonBase
     {
@@ -58,8 +58,8 @@ namespace KGySoft.WinForms.Components
         #region Events
 
         /// <summary>
-        /// Occurs when <see cref="TaskDialogRadioButton"/> is selected. That is, when <see cref="Checked"/> becomes <see langword="true"/>.
-        /// If you need a notification even if <see cref="Checked"/> bacames <see langword="false"/>, use the <see cref="TaskDialogControl.PropertyChanged"/> event instead.
+        /// Occurs when this <see cref="TaskDialogRadioButton"/> is selected. That is, when <see cref="Checked"/> becomes <see langword="true"/>.
+        /// If you need a notification even when <see cref="Checked"/> bacomes <see langword="false"/>, use the <see cref="TaskDialogControl.PropertyChanged"/> event instead.
         /// </summary>
         public event EventHandler Selected
         {
@@ -114,50 +114,33 @@ namespace KGySoft.WinForms.Components
 
         #endregion
 
-        #region Construction and Destruction
-
         #region Constructors
 
         /// <summary>
-        /// Creates a new instance of a task dialog radio button.
+        /// Creates a new instance of the <see cref="TaskDialogRadioButton"/> class.
         /// </summary>
         public TaskDialogRadioButton()
         {
         }
 
         /// <summary>
-        /// Creates a new instance of a task dialog radio button with
-        /// the specified text.
+        /// Creates a new instance of the <see cref="TaskDialogRadioButton"/> class with the specified text.
         /// </summary>
-        /// <param name="text">The text of the button.</param>
+        /// <param name="text">The text of the radio button.</param>
         public TaskDialogRadioButton(string text)
             : base(text)
         {
         }
 
         /// <summary>
-        /// Creates a new instance of a task dialog radio button with
-        /// the specified name and text.
+        /// Creates a new instance of the <see cref="TaskDialogRadioButton"/> class with the specified name and text.
         /// </summary>
-        /// <param name="name">The name of the button.</param>
-        /// <param name="text">The text of the button.</param>
+        /// <param name="name">The name of the radio button.</param>
+        /// <param name="text">The text of the radio button.</param>
         public TaskDialogRadioButton(string name, string text)
             : base(name, text)
         {
         }
-
-        #endregion
-
-        #region Explicit Disposing
-
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-            base.Dispose(disposing);
-            selected = null;
-        }
-
-        #endregion
 
         #endregion
 
@@ -166,15 +149,25 @@ namespace KGySoft.WinForms.Components
         #region Public Methods
 
         /// <summary>
-        /// Returns the string representation of this button.
+        /// Returns the string representation of this <see cref="TaskDialogRadioButton"/>.
         /// </summary>
-        /// <returns>A <see cref="System.String"/>.</returns>
+        /// <returns>The string representation of this radio button.</returns>
         public override string ToString() => $"{base.ToString()}, Checked: {Checked}";
 
         #endregion
 
+        #region Private Protected Methods
+
+        private protected override void Dispose(bool disposing)
+        {
+            base.Dispose(disposing);
+            selected = null;
+        }
+
+        #endregion
+
         #region Private Methods
-        
+
         private void OnSelected() => selected?.Invoke(this, EventArgs.Empty);
 
         #endregion

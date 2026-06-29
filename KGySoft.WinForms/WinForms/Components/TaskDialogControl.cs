@@ -32,7 +32,7 @@ using System.ComponentModel;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Represents a dialog control hosted by a <see cref="TaskDialog"/> instance.
+    /// Represents a control hosted by a <see cref="TaskDialog"/> instance.
     /// </summary>
     public abstract class TaskDialogControl : IDisposable, INotifyPropertyChanged
     {
@@ -105,7 +105,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets a tag to the <see cref="TaskDialogControl"/>.
+        /// Gets or sets a tag for this <see cref="TaskDialogControl"/>.
         /// A tag can be any object for custom purposes.
         /// </summary>
         public object? Tag
@@ -128,48 +128,9 @@ namespace KGySoft.WinForms.Components
 
         #endregion
 
-        #region Construction and Destruction
-
         #region Constructors
 
-        /// <summary>
-        /// Creates a new instance of a dialog control with the specified name.
-        /// </summary>
-        /// <param name="name">The name of the control.</param>
-        protected TaskDialogControl(string? name) => Name = name;
-
-        #endregion
-
-        #region Explicit Disposing
-
-        /// <summary>
-        /// Disposes the <see cref="TaskDialogControl"/> instance.
-        /// </summary>
-        public void Dispose()
-        {
-            Dispose(true);
-            GC.SuppressFinalize(this);
-        }
-
-        /// <summary>
-        /// Releases the resources of the current <see cref="TaskDialogControl"/> instance.
-        /// </summary>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (flags[isDisposed])
-                return;
-
-            flags[isDisposed] = true;
-
-            // always clearing event subscriptions to prevent memory leaks
-            propertyChanged = null;
-
-            // on explicit disposing nullifying other references
-            if (disposing)
-                parent = null;
-        }
-
-        #endregion
+        private protected TaskDialogControl(string? name) => Name = name;
 
         #endregion
 
@@ -178,9 +139,19 @@ namespace KGySoft.WinForms.Components
         #region Public Methods
 
         /// <summary>
-        /// Returns the string representation of this instance.
+        /// Returns the string representation of this control.
         /// </summary>
+        /// <returns>The string representation of this control.</returns>
         public override string ToString() => !String.IsNullOrEmpty(Name) ? Name : base.ToString()!;
+
+        /// <summary>
+        /// Disposes this <see cref="TaskDialogControl"/> instance.
+        /// </summary>
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
 
         #endregion
 
@@ -200,36 +171,40 @@ namespace KGySoft.WinForms.Components
 
         #endregion
 
-        #region Protected Methods
+        #region Private Protected Methods
 
-        /// <summary>
-        /// Checks whether the current <see cref="TaskDialogControl"/> instance is disposed and if so, throws an <see cref="ObjectDisposedException"/>.
-        /// </summary>
-        protected void CheckDisposed()
+        private protected void CheckDisposed()
         {
             if (flags[isDisposed])
                 throw new ObjectDisposedException(ToString(), PublicResources.ObjectDisposed);
         }
 
-        ///<summary>
-        /// Checks whether property changing is allowed.
-        /// If not, throws a <see cref="NotSupportedException"/>.
-        /// </summary>
-        protected void CheckChangePropertyValue()
+        private protected void CheckChangePropertyValue()
         {
             CheckDisposed();
             parent?.CheckCanChangeProperty();
         }
 
-        ///<summary>
-        /// Invokes refreshing property in host as well as <see cref="PropertyChanged"/> event.
-        /// </summary>
-        /// <param name="propName">The name of the property that is changing.</param>
-        protected void OnPropertyChanged(string propName)
+        private protected void OnPropertyChanged(string propName)
         {
-            Debug.Assert(!string.IsNullOrEmpty(propName), "Changed property name is empty");
+            Debug.Assert(!String.IsNullOrEmpty(propName), "Changed property name is empty");
             parent?.ControlPropertyChanged(this, propName);
             propertyChanged?.Invoke(this, new PropertyChangedEventArgs(propName));
+        }
+
+        private protected virtual void Dispose(bool disposing)
+        {
+            if (flags[isDisposed])
+                return;
+
+            flags[isDisposed] = true;
+
+            // always clearing event subscriptions to prevent memory leaks
+            propertyChanged = null;
+
+            // on explicit disposing nullifying other references
+            if (disposing)
+                parent = null;
         }
 
         #endregion

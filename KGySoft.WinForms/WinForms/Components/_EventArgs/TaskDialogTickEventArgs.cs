@@ -22,19 +22,21 @@ using System;
 namespace KGySoft.WinForms.Components
 {
     /// <summary>
-    /// Contain arguments of <see cref="TaskDialog.Tick"/> event.
+    /// Provides arguments for the <see cref="TaskDialog.Tick">TaskDialog.Tick</see> event.
     /// </summary>
     public class TaskDialogTickEventArgs : EventArgs
     {
         #region Properties
 
         /// <summary>
-        /// Gets the elapsed time in milliseconds since the dialog is created, or reallocated due to a special property change, or the last reset.
+        /// Gets the elapsed time, in milliseconds, since the dialog is created or reallocated due to a special property change, or the last reset.
         /// </summary>
-        public int Elapsed { get; private set; }
+        public int Elapsed { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating that timer count should be reset.
+        /// Gets or sets whether the timer should be reset. If set to <see langword="true"/>, the <see cref="Elapsed"/> property
+        /// of the next <see cref="TaskDialog.Tick"/> event will be relative to the current time rather than continuing from the current <see cref="Elapsed"/> value.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         public bool Reset { get; set; }
 
@@ -42,10 +44,7 @@ namespace KGySoft.WinForms.Components
 
         #region Constructors
 
-        internal TaskDialogTickEventArgs(int elapsed)
-        {
-            Elapsed = elapsed;
-        }
+        internal TaskDialogTickEventArgs(int elapsed) => Elapsed = elapsed;
 
         #endregion
     }

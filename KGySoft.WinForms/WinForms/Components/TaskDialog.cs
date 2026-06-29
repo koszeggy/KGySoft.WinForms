@@ -48,14 +48,14 @@ namespace KGySoft.WinForms.Components
 
     /// <summary>
     /// Represents a task dialog window that is able to display regular buttons, Vista-like command links,
-    /// radio buttons and progress bar. Can work in compatibility mode so the dialog can be used even with Windows XP or when visual styles are not available.
+    /// radio buttons and a progress bar. Can work in compatibility mode so the dialog can be used even with Windows XP or when visual styles are not available.
     /// </summary>
     /// <remarks>
     /// <note type="warning">.NET 5 also introduced task dialogs, so when targeting .NET 5 or later, referencing <see cref="TaskDialog"/>, <see cref="TaskDialogControl"/>,
     /// <see cref="TaskDialogButton"/> and <see cref="TaskDialogRadioButton"/> button classes may require to use fully qualified names or aliases
     /// like <c>using TaskDialog = KGySoft.WinForms.Components.TaskDialog;</c> to avoid ambiguity with the recently added WinForms classes.
-    /// Please also note that the <see cref="System.Windows.Forms.TaskDialog">System.Windows.Forms.TaskDialog</see> cannot be used on Windows XP, on Linux/Mono, or when visual styles are not enabled.</note>
-    /// <note>But you might want to choose the KGy SOFT version even when running on Windows Vista or later with visual styles enabled for the additional features
+    /// Please also note that unlike this class, <see cref="System.Windows.Forms.TaskDialog">System.Windows.Forms.TaskDialog</see> cannot be used on Windows XP, on Linux/Mono, or when visual styles are not enabled.</note>
+    /// <note>But you might want to choose the KGy SOFT version even when running on Windows Vista or later with visual styles enabled, because it offers additional features
     /// like custom images on the buttons and command links. If you set <see cref="ForceCompatibilityMode"/> to <see langword="true"/>, then always the alternative implementation
     /// is used, allowing some small improvements to the native version such as tool tips for regular buttons and radio buttons, more detailed info when copying the
     /// content to the clipboard by <c>Ctrl+C</c>, fixing possible color issues in high contrast mode, etc.</note>
@@ -141,7 +141,7 @@ namespace KGySoft.WinForms.Components
         #region Events
 
         /// <summary>
-        /// Occurs when the <see cref="TaskDialog"/> has been created and is before displayed.
+        /// Occurs when the <see cref="TaskDialog"/> has been created and is about to be displayed.
         /// </summary>
         public event EventHandler Created
         {
@@ -154,7 +154,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Occurs approximately every 200 milliseconds.
+        /// Occurs in approximately every 200 milliseconds.
         /// Can be used to update progress information.
         /// </summary>
         public event EventHandler<TaskDialogTickEventArgs> Tick
@@ -184,11 +184,13 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Occurs when <see cref="TaskDialogOptions.HyperlinksEnabled"/> is set in <see cref="Options"/>
-        /// and user clicks a hyperlink. If this event is not subscribed or <see cref="HandledEventArgs.Handled"/> is set to <see langword="false"/> in <see cref="HyperlinkClickedEventArgs"/>,
-        /// then system tries to resolve the hyperlink.
-        /// <note>Resolving the link by the operating system might be blocked so usually the best way is to subscribe this event.</note>
+        /// Occurs when <see cref="TaskDialogOptions.HyperlinksEnabled"/> is set in <see cref="Options"/>,
+        /// and the user clicks a hyperlink. If this event is not subscribed or <see cref="HandledEventArgs.Handled"/> is set to <see langword="false"/> in <see cref="HyperlinkClickedEventArgs"/>,
+        /// then the system tries to resolve the hyperlink.
         /// </summary>
+        /// <remarks>
+        /// <note>Resolving the link by the operating system might be blocked so usually the best way is to subscribe this event.</note>
+        /// </remarks>
         public event EventHandler<HyperlinkClickedEventArgs> HyperlinkClicked
         {
             add
@@ -200,7 +202,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Occurs when <see cref="CheckBoxChecked"/> property changes.
+        /// Occurs when the <see cref="CheckBoxChecked"/> property changes.
         /// </summary>
         public event EventHandler CheckBoxCheckedChanged
         {
@@ -213,7 +215,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Occurs when user presses F1 on the dialog.
+        /// Occurs when the user presses F1 on the <see cref="TaskDialog"/>.
         /// </summary>
         public event EventHandler HelpRequested
         {
@@ -226,7 +228,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Occurs when visibility of the Show/Hide Details expando button changes.
+        /// Occurs when the visibility of the details text (the state of the expando button) changes.
         /// </summary>
         public event EventHandler<TaskDialogDetailsVisibleChangedEventArgs> DetailsVisibleChanged
         {
@@ -239,7 +241,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Occurs when the dialog about to be closed.
+        /// Occurs when the <see cref="TaskDialog"/> about to be closed.
         /// </summary>
         public event EventHandler<CancelEventArgs> Closing
         {
@@ -252,7 +254,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Occurs when the dialog has been closed.
+        /// Occurs when the <see cref="TaskDialog"/> has been closed.
         /// </summary>
         public event EventHandler Closed
         {
@@ -329,7 +331,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets the caption of the task dialog. If caption is <see langword="null"/>, the filename of the executable program is used.
+        /// Gets or sets the caption of the task dialog. If caption is <see langword="null"/>, the filename of the executable program is displayed.
         /// </summary>
         public string? Caption
         {
@@ -367,7 +369,8 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets the verification text of the checkbox of the task dialog. The checkbox will be visible when this property is not empty when the dialog is shown.
+        /// Gets or sets the text of the verification checkbox of the <see cref="TaskDialog"/>.
+        /// The checkbox will be visible when this property is not empty when the dialog is shown.
         /// </summary>
         public string? CheckBoxText
         {
@@ -387,6 +390,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Gets or sets whether the verification check box is checked. This property is ignored when <see cref="CheckBoxText"/> is empty.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedButtonIndex"/>
@@ -411,7 +415,8 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets the details text. See/Hide details button will be visible only when this property is not empty.
+        /// Gets or sets the details text. The expando button with <see cref="ShowDetailsText"/> or <see cref="HideDetailsText"/>
+        /// will be visible only when this property is not empty.
         /// </summary>
         public string? DetailsText
         {
@@ -430,7 +435,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets the options of the task dialog.
+        /// Gets or sets the options of the <see cref="TaskDialog"/>.
         /// </summary>
         public TaskDialogOptions Options
         {
@@ -451,7 +456,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets the text of the Show Details button. The Show Details button is visible only when <see cref="DetailsText"/> is not empty.
+        /// Gets or sets the text of the expando button is collapsed state. The expando button is visible only when <see cref="DetailsText"/> is not empty.
         /// </summary>
         /// <remarks>
         /// When both <see cref="ShowDetailsText"/> and <see cref="HideDetailsText"/> properties are empty, a default text will be displayed. When one
@@ -474,7 +479,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets the text of the Hide Details button. The Hide Details button is visible only when <see cref="DetailsText"/> is not empty.
+        /// Gets or sets the text of the expando button in expanded state. The expando button is visible only when <see cref="DetailsText"/> is not empty.
         /// </summary>
         /// <remarks>
         /// When both <see cref="ShowDetailsText"/> and <see cref="HideDetailsText"/> properties are empty, a default text will be displayed. When one
@@ -497,8 +502,9 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets one of the standard icons as the main icon for the dialog.
+        /// Gets or sets one of the standard icons as the main icon for this <see cref="TaskDialog"/>.
         /// Setting this property clears <see cref="CustomIcon"/> and vice versa.
+        /// <br/>Default value: <see cref="TaskDialogStandardIcon.None"/>.
         /// </summary>
         public TaskDialogStandardIcon Icon
         {
@@ -523,7 +529,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets a custom <see cref="System.Drawing.Icon"/> as the main icon for the dialog.
+        /// Gets or sets a custom <see cref="System.Drawing.Icon"/> as the main icon for this <see cref="TaskDialog"/>.
         /// Setting this property clears <see cref="Icon"/> and vice versa.
         /// </summary>
         public Icon? CustomIcon
@@ -545,8 +551,9 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets one of the standard icons as the footer icon for the dialog.
+        /// Gets or sets one of the standard icons as the footer icon for this <see cref="TaskDialog"/>.
         /// Setting this property clears <see cref="CustomFooterIcon"/> and vice versa.
+        /// <br/>Default value: <see cref="TaskDialogStandardIcon.None"/>.
         /// </summary>
         public TaskDialogStandardIcon FooterIcon
         {
@@ -570,7 +577,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets a custom <see cref="System.Drawing.Icon"/> as the footer icon for the dialog.
+        /// Gets or sets a custom <see cref="System.Drawing.Icon"/> as the footer icon for this <see cref="TaskDialog"/>.
         /// Setting this property clears <see cref="FooterIcon"/> and vice versa.
         /// </summary>
         public Icon? CustomFooterIcon
@@ -591,11 +598,13 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets the standard buttons of the dialog.
+        /// Gets or sets the standard buttons of this <see cref="TaskDialog"/>.
         /// If neither standard nor custom buttons (see <see cref="Buttons"/>) are specified, the task dialog will have an OK button by default.
-        /// By default, these buttons will use the current windows language, unless <see cref="TaskDialogOptions.TranslateStandardButtons"/> is set
-        /// in <see cref="Options"/>.
         /// </summary>
+        /// <remarks>
+        /// The standard button texts are localized by using the native Windows resources by default.
+        /// To localize them using the dynamic resources of this library, set <see cref="TaskDialogOptions.TranslateStandardButtons"/> in <see cref="Options"/>.
+        /// </remarks>
         public TaskDialogStandardButtons StandardButtons
         {
             get => standardButtons;
@@ -638,10 +647,10 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets or sets the width of the <see cref="TaskDialog"/> in dialog units.
-        /// The dialog is always at least 100 DLU wide.
-        /// Zero value means that size is auto-calculated.
+        /// Gets or sets the width of the <see cref="TaskDialog"/> in dialog units (1 DLU is about 2 pixels, but may vary based on the default dialog font).
+        /// The dialog is always at least 100 DLU wide. Zero value means that size is auto-calculated.
         /// Re-assigning zero value adjusts the automatic width of the dialog on demand.
+        /// <br/>Default value: 0.
         /// </summary>
         public int Width
         {
@@ -662,7 +671,8 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets a value that contains the TaskDialog controls.
+        /// Gets a <see cref="TaskDialogControlCollection{T}"/> containing <see cref="TaskDialogButton"/> elements,
+        /// representing the custom buttons of this <see cref="TaskDialog"/>.
         /// </summary>
         public TaskDialogControlCollection<TaskDialogButton> Buttons
         {
@@ -674,7 +684,8 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets a value that contains the TaskDialog controls.
+        /// Gets a <see cref="TaskDialogControlCollection{T}"/> containing <see cref="TaskDialogRadioButton"/> elements,
+        /// representing the radio buttons of this <see cref="TaskDialog"/>.
         /// </summary>
         public TaskDialogControlCollection<TaskDialogRadioButton> RadioButtons
         {
@@ -687,6 +698,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Gets or sets the style of the progress bar.
+        /// <br/>Default value: <see cref="TaskDialogProgressBarStyle.None"/>.
         /// </summary>
         public TaskDialogProgressBarStyle ProgressBarStyle
         {
@@ -709,6 +721,7 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Gets or sets the state of the progress bar.
+        /// <br/>Default value: <see cref="ProgressBarState.Normal"/>.
         /// </summary>
         public ProgressBarState ProgressBarState
         {
@@ -732,6 +745,7 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets or sets the minimum value of the progress bar.
         /// This property is used only when <see cref="ProgressBarStyle"/> is <see cref="TaskDialogProgressBarStyle.Regular"/>.
+        /// <br/>Default value: 0.
         /// </summary>
         public int ProgressBarMinimum
         {
@@ -757,6 +771,7 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets or sets the maximum value of the progress bar.
         /// This property is used only when <see cref="ProgressBarStyle"/> is <see cref="TaskDialogProgressBarStyle.Regular"/>.
+        /// <br/>Default value: 100.
         /// </summary>
         public int ProgressBarMaximum
         {
@@ -783,6 +798,7 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets or sets the current value of the progress bar.
         /// This property is used only when <see cref="ProgressBarStyle"/> is <see cref="TaskDialogProgressBarStyle.Regular"/>.
+        /// <br/>Default value: 0.
         /// </summary>
         public int ProgressBarValue
         {
@@ -807,6 +823,7 @@ namespace KGySoft.WinForms.Components
         /// Gets or sets the current animation speed value of the progress bar.
         /// This property is used only when <see cref="ProgressBarStyle"/> is <see cref="TaskDialogProgressBarStyle.Marquee"/>.
         /// Zero value stops the animation.
+        /// <br/>Default value: 20.
         /// </summary>
         public int ProgressBarMarqueeAnimationSpeed
         {
@@ -829,13 +846,13 @@ namespace KGySoft.WinForms.Components
 
         /// <summary>
         /// Gets or sets whether the <see cref="TaskDialog"/> is to be forced to operate in compatibility mode
-        /// even if current operating system supports native task dialogs.
+        /// even if the current operating system supports native task dialogs.
         /// </summary>
         /// <remarks>
         /// <para>Compatibility mode is automatically used in the following cases:
         /// <list type="bullet">
         /// <item>The operating system is not Windows Vista or later.</item>
-        /// <item><see cref="Application.EnableVisualStyles"/> was not called on launching the application.</item>
+        /// <item><see cref="Application.EnableVisualStyles">Application.EnableVisualStyles</see> was not called on launching the application.</item>
         /// <item><see cref="TaskDialogOptions.TranslateStandardButtons"/> is set in <see cref="Options"/>.</item>
         /// <item><see cref="Icon"/> is <see cref="TaskDialogStandardIcon.SecurityQuestion"/> (so the special header colors can be applied).</item>
         /// <item>There is at least one button in <see cref="Buttons"/> that has a custom icon (<see cref="TaskDialogButton.CustomIcon"/> is set).</item>
@@ -863,13 +880,14 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets whether <see cref="TaskDialog"/> is displayed in compatibility mode.
-        /// When dialog is not displayed, returns <see langword="false"/>.
+        /// Gets whether the <see cref="TaskDialog"/> is displayed in compatibility mode.
+        /// When the dialog is not displayed, returns <see langword="false"/>.
         /// </summary>
-        public bool IsInCompatibilityMode => IsDialogShowing && dialogInstance is Form;
+        public bool IsInCompatibilityMode => IsDialogShowing && dialogInstance is TaskDialogForm;
 
         /// <summary>
-        /// After the dialog is closed, gets the index of the clicked custom button defined in <see cref="Buttons"/> collection; otherwise, returns <c>-1</c>.
+        /// After the dialog is closed, gets the index of the clicked custom button defined in the <see cref="Buttons"/> collection.
+        /// If the <see cref="TaskDialog"/> has been closed by a standard button or is not closed yet, this property returns -1.
         /// </summary>
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedRadioButtonIndex"/>
@@ -877,7 +895,8 @@ namespace KGySoft.WinForms.Components
         public int SelectedButtonIndex => selectedButtonIndex;
 
         /// <summary>
-        /// After the dialog is closed, gets the index of the selected radio button defined in <see cref="RadioButtons"/> collection; otherwise, returns <c>-1</c>.
+        /// After the dialog is closed, gets the index of the selected radio button defined in the <see cref="RadioButtons"/> collection.
+        /// If no radio button was selected, this property returns -1.
         /// </summary>
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedButtonIndex"/>
@@ -911,7 +930,7 @@ namespace KGySoft.WinForms.Components
         }
 
         /// <summary>
-        /// Gets the handle of the dialog.
+        /// Gets the native Win32 handle of the dialog.
         /// </summary>
         public IntPtr Handle { get; internal set; }
 
@@ -1006,18 +1025,18 @@ namespace KGySoft.WinForms.Components
         /// Shows the <see cref="TaskDialog"/> using the current configuration.
         /// </summary>
         /// <returns>A <see cref="TaskDialogResult"/> value that indicates one of the pressed standard buttons specified by <see cref="StandardButtons"/> property.
-        /// If return value is <see cref="TaskDialogResult.None"/>, then the dialog might have been closed by a custom button, which can be identified by <see cref="SelectedButtonIndex"/>.
+        /// If the return value is <see cref="TaskDialogResult.None"/>, then the dialog might have been closed by a custom button, which can be identified by <see cref="SelectedButtonIndex"/>.
         /// The result is stored also in the <see cref="DialogResult"/> property.
         /// </returns>
-        /// <param name="owner">Handle of the parent window. If <see cref="IntPtr.Zero">IntPtr.Zero</see>, the dialog is shown as a non-modal window.</param>
-        /// <param name="customButtonIndex">Returns the index of the clicked custom button specified in <see cref="Buttons"/> collection if the button closed the dialog.
-        /// <para>Result is stored also in <see cref="SelectedButtonIndex"/> property.</para>
+        /// <param name="owner">The handle of the owner window. If <see cref="IntPtr.Zero">IntPtr.Zero</see>, the dialog is shown as a non-modal window.</param>
+        /// <param name="customButtonIndex">When this method returns, contains the index of the clicked custom button specified in <see cref="Buttons"/> collection if the button closed the dialog.
+        /// <para>Its value is stored also in the <see cref="SelectedButtonIndex"/> property.</para>
         /// </param>
-        /// <param name="radioButtonIndex">Returns the index of the selected radio button specified in <see cref="RadioButtons"/> collection.
-        /// <para>Result is stored also in <see cref="SelectedRadioButtonIndex"/> property.</para>
+        /// <param name="radioButtonIndex">When this method returns, contains the index of the selected radio button specified in <see cref="RadioButtons"/> collection.
+        /// <para>Its value is stored also in the <see cref="SelectedRadioButtonIndex"/> property.</para>
         /// </param>
-        /// <param name="verificationTextChecked">Returns whether verification checkbox was checked when the dialog was closed.
-        /// <para>Result is stored also in <see cref="CheckBoxChecked"/> property.</para>
+        /// <param name="verificationTextChecked">When this method returns, contains whether the verification checkbox was checked when the dialog was closed.
+        /// <para>Its value is stored also in the <see cref="CheckBoxChecked"/> property.</para>
         /// </param>
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedButtonIndex"/>
@@ -1030,18 +1049,18 @@ namespace KGySoft.WinForms.Components
         /// Shows the <see cref="TaskDialog"/> using the current configuration.
         /// </summary>
         /// <returns>A <see cref="TaskDialogResult"/> value that indicates one of the pressed standard buttons specified by <see cref="StandardButtons"/> property.
-        /// If return value is <see cref="TaskDialogResult.None"/>, then the dialog might have been closed by a custom button, which can be identified by <see cref="SelectedButtonIndex"/>.
+        /// If the return value is <see cref="TaskDialogResult.None"/>, then the dialog might have been closed by a custom button, which can be identified by <see cref="SelectedButtonIndex"/>.
         /// The result is stored also in the <see cref="DialogResult"/> property.
         /// </returns>
-        /// <param name="owner">Handle of the parent window. If <see langword="null"/>, the dialog is shown as a non-modal window.</param>
-        /// <param name="customButtonIndex">Returns the index of the clicked custom button specified in <see cref="Buttons"/> collection if the button closed the dialog.
-        /// <para>Result is stored also in <see cref="SelectedButtonIndex"/> property.</para>
+        /// <param name="owner">The owner of the dialog. If <see langword="null"/>, the dialog is shown as a non-modal window.</param>
+        /// <param name="customButtonIndex">When this method returns, contains the index of the clicked custom button specified in <see cref="Buttons"/> collection if the button closed the dialog.
+        /// <para>Its value is stored also in the <see cref="SelectedButtonIndex"/> property.</para>
         /// </param>
         /// <param name="radioButtonIndex">Returns the index of the selected radio button specified in <see cref="RadioButtons"/> collection.
-        /// <para>Result is stored also in <see cref="SelectedRadioButtonIndex"/> property.</para>
+        /// <para>Its value is stored also in the <see cref="SelectedRadioButtonIndex"/> property.</para>
         /// </param>
         /// <param name="verificationTextChecked">Returns whether verification checkbox was checked when the dialog was closed.
-        /// <para>Result is stored also in <see cref="CheckBoxChecked"/> property.</para>
+        /// <para>Its value is stored also in the <see cref="CheckBoxChecked"/> property.</para>
         /// </param>
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedButtonIndex"/>
@@ -1092,7 +1111,7 @@ namespace KGySoft.WinForms.Components
         public TaskDialogResult Show() => Show(IntPtr.Zero, out int _, out int _, out bool _);
 
         /// <summary>
-        /// Forces to close the dialog. This causes that <see cref="DialogResult"/> will be <see cref="TaskDialogResult.Close"/>
+        /// Forces to close the <see cref="TaskDialog"/>. This causes that <see cref="DialogResult"/> will be <see cref="TaskDialogResult.Close"/>
         /// even if there was no Close button on the dialog.
         /// </summary>
         public void Close() => DialogResult = TaskDialogResult.Close;
