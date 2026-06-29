@@ -26,7 +26,7 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Helper class for fading animations. Host control must implement <see cref="ISupportsFading{TState}"/> interface.
+    /// Helper class for buffered fading animations. Host control must implement <see cref="ISupportsFading{TState}"/> interface.
     /// </summary>
     public class FadingPainter<TState> : IDisposable
     {

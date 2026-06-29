@@ -93,6 +93,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Represents a collection of controls contained within a <see cref="BaseForm"/>.
         /// </summary>
+        [EditorBrowsable(EditorBrowsableState.Never)]
         protected new class ControlCollection : Form.ControlCollection
         {
             #region Fields
@@ -151,11 +152,7 @@ namespace KGySoft.WinForms.Forms
 
             #region Constructors
 
-            /// <summary>
-            /// Initializes a new instance of the <see cref="ControlCollection"/> class with the specified owner.
-            /// </summary>
-            /// <param name="owner">The <see cref="BaseForm"/> that owns this collection.</param>
-            public ControlCollectionMono(BaseForm owner)
+            internal ControlCollectionMono(BaseForm owner)
                 : base(owner ?? throw new ArgumentNullException(nameof(owner), PublicResources.ArgumentNull))
             {
                 this.owner = owner;

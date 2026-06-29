@@ -50,6 +50,7 @@ namespace KGySoft.WinForms
         /// <summary>
         /// Translates the control along with its children controls.
         /// </summary>
+        /// <param name="control">The root control to translate.</param>
         public static void TranslateControls(Control control)
         {
             if (control == null)
@@ -65,12 +66,12 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Translate the control without its children. You may use the <see cref="LocalizableAttribute"/> to
+        /// Translates the control without its children. You may use the <see cref="LocalizableAttribute"/> to
         /// make a derived control type untranslatable. To adjust translation of control instances
         /// you may use the <see cref="Language.MarkLocalizable"/> method.
         /// A custom translatable control may implement the <see cref="ICustomTranslated"/> interface.
         /// </summary>
-        /// <param name="control">The control to translate.</param>
+        /// <param name="control">The root control to translate.</param>
         /// <param name="translationFinished">When returns true, no further translation should be performed on child elements.</param>
         /// <returns>Returns true if translation is not disabled for the control, otherwise, false.</returns>
         /// <remarks>

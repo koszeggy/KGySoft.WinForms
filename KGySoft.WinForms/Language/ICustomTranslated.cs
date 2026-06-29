@@ -25,7 +25,7 @@ namespace KGySoft.Libraries.Language
     /// <summary>
     /// Makes a control custom translatable. See <see cref="Language"/>.
     /// </summary>
-    [Obsolete("This interface relies on the obsoleted Language class and does not translate anything anymore.")]
+    [Obsolete("This type belongs to the obsoleted Language class. Use ICustomLocalizable and LocalizationHelper instead.")]
     public interface ICustomTranslated
     {
         #region Methods

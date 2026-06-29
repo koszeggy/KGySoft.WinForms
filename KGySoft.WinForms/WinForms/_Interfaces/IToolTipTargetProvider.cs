@@ -23,6 +23,7 @@ namespace KGySoft.WinForms
 {
     /// <summary>
     /// Represents a target control provider for tooltips.
+    /// It is used by <see cref="LocalizationHelper"/> for <c>ToolTipText</c> properties.
     /// </summary>
     public interface IToolTipTargetProvider
     {

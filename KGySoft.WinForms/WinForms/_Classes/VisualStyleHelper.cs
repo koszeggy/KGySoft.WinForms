@@ -74,7 +74,7 @@ namespace KGySoft.WinForms
         /// <summary>
         /// Occurs when the visual styles have changed.
         /// Unlike <see cref="Control.SystemColorsChanged">Control.SystemColorsChanged</see>, this event is raised for the <see cref="UserPreferenceCategory.VisualStyle"/> category
-        /// of the <see cref="SystemEvents.UserPreferenceChanged"/> event, and makes sure that the cached value of <see cref="RenderWithVisualStyles"/> is always up-to-date.
+        /// of the <see cref="SystemEvents.UserPreferenceChanged"/> event, and makes sure that the cached values of <see cref="RenderWithVisualStyles"/> and <see cref="HighContrast"/> are always up-to-date.
         /// The event is raised from the same thread as the thread of the event subscription. Make sure unsubscribing is done from the same thread as subscribing, otherwise the event may leak memory.
         /// </summary>
         public static event EventHandler? VisualStylesChanged
@@ -289,7 +289,7 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Renders the visual style element of the specified class, <paramref name="part"/> and <paramref name="state"/> by scaling actual glyph
+        /// Renders the visual style element of the specified class, <paramref name="part"/> and <paramref name="state"/> by scaling the actual glyph
         /// to the desired size specified in the <paramref name="bounds"/> parameter.
         /// </summary>
         /// <param name="className">The class name of the visual style element.</param>

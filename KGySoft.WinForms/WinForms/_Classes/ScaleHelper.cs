@@ -39,7 +39,7 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms
 {
     /// <summary>
-    ///  Helper class for high DPI scaling.
+    ///  A helper class containing members for high DPI scaling, especially when using per-monitor DPI awareness.
     /// </summary>
     public static class ScaleHelper
     {
@@ -323,11 +323,11 @@ namespace KGySoft.WinForms
         public static PointF DefaultScale => defaultScale;
 
         /// <summary>
-        /// If the application is DPI aware, gets the scale factor of the primary display at application startup. Otherwise, it returns the default scale factor of 100% (1.0).
+        /// If the application is DPI aware, gets the scale factor of the primary display at the time of the application startup. Otherwise, it returns the default scale factor of 100% (1.0).
         /// </summary>
         /// <remarks>
-        /// <note>Even if the application has per-monitor DPI awareness enabled, this property always returns the same value, which is the scale factor of the primary display at application startup.
-        /// To get the current scale factor of a control, use the <see cref="GetScale(Control)"/> method.</note>
+        /// <note>Even if the application has per-monitor DPI awareness enabled, this property always returns the same value, which is the scale factor of the primary display
+        /// at the time when the application has been started. To get the current scale factor of a control, use the <see cref="GetScale(Control)"/> method.</note>
         /// </remarks>
         public static PointF SystemScale => systemScale;
 
@@ -385,8 +385,8 @@ namespace KGySoft.WinForms
         /// <remarks>
         /// <note>This property may return different fonts on .NET Framework and .NET [Core], just like the <see cref="Control.DefaultFont">Control.DefaultFont</see> property. Use this property only
         /// to ensure to get a correctly scalable version of <see cref="Control.DefaultFont">Control.DefaultFont</see>. If you target both .NET Framework and .NET [Core] and you want to use the same font on both platforms,
-        /// set the <see cref="Control.Font"/> property of your forms explicitly. You can use the <see cref="SystemFonts.MessageBoxFont">SystemFonts.MessageBoxFont</see> property, which returns the same font on both platforms,
-        /// and returns a correctly scalable <see cref="Font"/> in points.</note>
+        /// set the <see cref="Control.Font"/> property of your forms explicitly. You can use the <see cref="SystemFonts.MessageBoxFont">SystemFonts.MessageBoxFont</see> property,
+        /// which returns the same font on both platforms (though this may not be the case on Mono or Wine), and returns a correctly scalable <see cref="Font"/> in points.</note>
         /// </remarks>
         public static Font DefaultFont
         {
@@ -464,7 +464,7 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Gets the current scale factor of the specified control. If per-monitor DPI awareness is not enabled, it always returns the same value as <see cref="SystemScale"/>.
+        /// Gets the current scale factor of the specified control. If per-monitor DPI awareness is not enabled, it always returns <see cref="SystemScale"/>.
         /// </summary>
         /// <param name="control">The control for which the scale factor is requested.</param>
         /// <returns>A <see cref="PointF"/> representing the scale factor of the control, where X and Y are the horizontal and vertical scale factors, respectively.</returns>.
@@ -539,6 +539,7 @@ namespace KGySoft.WinForms
         /// </summary>
         /// <param name="screen">The <see cref="Screen"/> for which the scale factor is requested.</param>
         /// <returns>A <see cref="PointF"/> representing the scale factor of the screen, where X and Y are the horizontal and vertical scale factors, respectively.</returns>.
+        /// <para>If the process is not per-monitor DPI aware, the result is the value of the <see cref="SystemScale"/> property.</para>
         public static PointF GetScale(this Screen screen)
         {
             if (screen == null!)
@@ -633,10 +634,10 @@ namespace KGySoft.WinForms
             padding.Bottom.Scale(scale.Y));
 
         /// <summary>
-        /// Gets the specified <paramref name="font"/> if it is not null and is not equal to <see cref="Control.DefaultFont">Control.DefaultFont</see>; otherwise, returns the <see cref="DefaultFont"/>.
+        /// Gets the specified <paramref name="font"/> if it is not <see langword="null"/> and is not equal to <see cref="Control.DefaultFont">Control.DefaultFont</see>; otherwise, returns the <see cref="DefaultFont"/>.
         /// </summary>
         /// <param name="font">The <see cref="Font"/> to check.</param>
-        /// <returns>The specified <paramref name="font"/> if it is not null and not equal to <see cref="Control.DefaultFont">Control.DefaultFont</see>; otherwise, the value of the <see cref="DefaultFont"/> property.</returns>
+        /// <returns>The specified <paramref name="font"/> if it is not <see langword="null"/> and is not equal to <see cref="Control.DefaultFont">Control.DefaultFont</see>; otherwise, the value of the <see cref="DefaultFont"/> property.</returns>
         /// <remarks>
         /// <para>This method can be especially useful on .NET Framework, where the <see cref="Control.DefaultFont">Control.DefaultFont</see> property may return a non-scaled font, which is not suitable for high DPI scenarios.</para>
         /// </remarks>

@@ -26,7 +26,7 @@ using KGySoft.WinForms.Reflection;
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Extension methods for <see cref="ContentAlignment"/> enumeration.
+    /// Extension methods for the <see cref="ContentAlignment"/> enumeration.
     /// </summary>
     public static class ContentAlignmentExtensions
     {
@@ -57,7 +57,7 @@ namespace KGySoft.WinForms
         #region Methods
 
         /// <summary>
-        /// Calls the protected <see cref="Control.RtlTranslateContent"/> method as it was a public method.
+        /// Calls the protected <see cref="Control.RtlTranslateContent">Control.RtlTranslateContent</see> method as if it was a public method.
         /// It also applies a workaround for a Mono bug when the internal field value is <see cref="RightToLeft.Inherit"/>.
         /// </summary>
         /// <param name="alignment">The alignment to translate if needed.</param>
@@ -74,31 +74,43 @@ namespace KGySoft.WinForms
         /// <summary>
         /// Gets if any left alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
+        /// <param name="contentAlignment">The content alignment to check.</param>
+        /// <returns><see langword="true"/> if any left alignment is set; otherwise, <see langword="false"/>.</returns>
         public static bool AnyLeft(this ContentAlignment contentAlignment) => (contentAlignment & anyLeft) != 0;
 
         /// <summary>
         /// Gets if any top alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
+        /// <param name="contentAlignment">The content alignment to check.</param>
+        /// <returns><see langword="true"/> if any top alignment is set; otherwise, <see langword="false"/>.</returns>
         public static bool AnyTop(this ContentAlignment contentAlignment) => (contentAlignment & anyTop) != 0;
 
         /// <summary>
         /// Gets if any bottom alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
+        /// <param name="contentAlignment">The content alignment to check.</param>
+        /// <returns><see langword="true"/> if any bottom alignment is set; otherwise, <see langword="false"/>.</returns>
         public static bool AnyBottom(this ContentAlignment contentAlignment) => (contentAlignment & anyBottom) != 0;
 
         /// <summary>
         /// Gets if any middle alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
+        /// <param name="contentAlignment">The content alignment to check.</param>
+        /// <returns><see langword="true"/> if any middle alignment is set; otherwise, <see langword="false"/>.</returns>
         public static bool AnyMiddle(this ContentAlignment contentAlignment) => (contentAlignment & anyMiddle) != 0;
 
         /// <summary>
         /// Gets if any right alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
+        /// <param name="contentAlignment">The content alignment to check.</param>
+        /// <returns><see langword="true"/> if any right alignment is set; otherwise, <see langword="false"/>.</returns>
         public static bool AnyRight(this ContentAlignment contentAlignment) => (contentAlignment & anyRight) != 0;
 
         /// <summary>
         /// Gets if any center alignment is set in <paramref name="contentAlignment"/>.
         /// </summary>
+        /// <param name="contentAlignment">The content alignment to check.</param>
+        /// <returns><see langword="true"/> if any center alignment is set; otherwise, <see langword="false"/>.</returns>
         public static bool AnyCenter(this ContentAlignment contentAlignment) => (contentAlignment & anyCenter) != 0;
         // ReSharper restore BitwiseOperatorOnEnumWithoutFlags
 

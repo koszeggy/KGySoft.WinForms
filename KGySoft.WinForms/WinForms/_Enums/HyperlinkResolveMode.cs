@@ -16,7 +16,7 @@
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Represents hyperlink resolve modes
+    /// Represents hyperlink resolve modes.
     /// </summary>
     public enum HyperlinkResolveMode
     {
@@ -26,7 +26,7 @@ namespace KGySoft.WinForms
         None,
 
         /// <summary>
-        /// Only explicit hyperlinks are resolved, such as <c><example>&gt;a href="http://kgysoft.try.hu"&lt;link&gt;/a&lt;</example></c>
+        /// Only explicit hyperlinks are resolved like <c><![CDATA[<a href="https://github.com/koszeggy">link</a>]]></c>
         /// </summary>
         ResolveHrefsOnly,
 

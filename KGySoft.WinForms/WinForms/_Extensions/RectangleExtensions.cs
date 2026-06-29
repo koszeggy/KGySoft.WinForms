@@ -130,9 +130,12 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Gets whether the rectangle has zero Width OR Height.
-        /// Not just faster than the IsEmpty property but also works better when Intersect returns a non-default practically zero rectangle.
+        /// Gets whether the specified <see cref="Rectangle"/> has zero <see cref="Rectangle.Width"/> or <see cref="Rectangle.Height"/>.
+        /// Not just faster than the <see cref="Rectangle.IsEmpty"/> property, but also works better
+        /// when <see cref="Rectangle.Intersect(Rectangle,Rectangle)">Intersect</see> returns a practically empty non-default rectangle.
         /// </summary>
+        /// <param name="rect">The <see cref="Rectangle"/> to check.</param>
+        /// <returns>><see langword="true"/> if the rectangle has zero <see cref="Rectangle.Width"/> or <see cref="Rectangle.Height"/>; otherwise, <see langword="false"/>.</returns>
         public static bool IsEmpty(this Rectangle rect) => rect.Width == 0 || rect.Height == 0;
 
         /// <summary>
@@ -140,6 +143,9 @@ namespace KGySoft.WinForms
         /// As a contrast, the <see cref="Rectangle.Intersect(Rectangle,Rectangle)"/> method can return a non-<see cref="Rectangle.Empty"/> rectangle with
         /// zero <see cref="Rectangle.Width"/> or <see cref="Rectangle.Height"/>.
         /// </summary>
+        /// <param name="a">The first rectangle to intersect.</param>
+        /// <param name="b">The second rectangle to intersect.</param>
+        /// <returns>A <see cref="Rectangle"/> that represents the intersection of <paramref name="a"/> and <paramref name="b"/>.</returns>
         [MethodImpl(MethodImpl.AggressiveInlining)]
         public static Rectangle IntersectSafe(this Rectangle a, Rectangle b)
         {

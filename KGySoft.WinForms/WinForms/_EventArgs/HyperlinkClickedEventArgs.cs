@@ -25,7 +25,8 @@ using KGySoft.WinForms.Controls;
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Contains arguments of <see cref="TaskDialog.HyperlinkClicked"/> and <see cref="AdvancedLabel.HyperlinkClicked"/> events.
+    /// Provides data for the <see cref="TaskDialog.HyperlinkClicked">TaskDialog.HyperlinkClicked</see>
+    /// and <see cref="AdvancedLabel.HyperlinkClicked">AdvancedLabel.HyperlinkClicked</see> events.
     /// </summary>
     public sealed class HyperlinkClickedEventArgs : HandledEventArgs
     {

@@ -44,7 +44,7 @@ using KGySoft.WinForms.Reflection;
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Extension methods for <see cref="Control"/> class.
+    /// Extension methods for the <see cref="Control"/> class.
     /// </summary>
     public static class ControlExtensions
     {
@@ -128,8 +128,9 @@ namespace KGySoft.WinForms
         #region Public Methods
 
         /// <summary>
-        /// Stores values of all controls derived from <see cref="ucBase"/> to mark modified controls.
+        /// Stores the values of all controls derived from <see cref="ucBase"/> to mark modified controls.
         /// </summary>
+        /// <param name="control">The root control of the operation.</param>
         [Obsolete("ucBase-related functionality.")]
         public static void StoreValues(this Control control)
         {
@@ -141,8 +142,9 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Clears stored values of all controls derived from <see cref="ucBase"/> to unmark modified controls.
+        /// Clears the stored values of all controls derived from <see cref="ucBase"/> to unmark modified controls.
         /// </summary>
+        /// <param name="control">The root control of the operation.</param>
         [Obsolete("ucBase-related functionality.")]
         public static void ClearStoredValues(this Control control)
         {
@@ -154,11 +156,11 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Sets enabled state of the passed <paramref name="control"/> by
-        /// setting its <see cref="Control.Enabled"/> property along with its non-container children recursively.
+        /// Sets the <see cref="Control.Enabled"/> property of the child controls within the specified root <paramref name="control"/>,
+        /// or the <see cref="Control.Enabled"/> property of the specified <paramref name="control"/> itself, if it is not a recognized container control.
         /// By this way pages of a <see cref="TabControl"/> will remain selectable, a <see cref="SplitContainer"/> remains resizable, etc.
         /// </summary>
-        /// <param name="control">The root control.</param>
+        /// <param name="control">The root control of the operation.</param>
         /// <param name="enabled">The enabled state to set.</param>
         public static void SetControlEnabled(this Control control, bool enabled)
         {
@@ -176,8 +178,8 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Recursively sets read-only state for the children of the passed <paramref name="control"/>.
-        /// Affects <see cref="TextBoxBase"/>, <see cref="AdvancedComboBox"/> and <see cref="ucBase"/> instances.
+        /// Recursively sets the read-only state in the children of the specified root <paramref name="control"/>.
+        /// Affects <see cref="TextBoxBase"/> and <see cref="IReadOnlyCapable"/> instances.
         /// </summary>
         /// <param name="control">The root control.</param>
         /// <param name="readOnly">The read-only state to set.</param>
@@ -201,10 +203,10 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Gets formatting flags for a custom drawn control.
+        /// Gets the formatting flags for the text of a custom drawn control.
         /// </summary>
-        /// <param name="c">The control to be drawn.</param>
-        /// <returns>Format flags for drawing the text of the control.</returns>
+        /// <param name="c">The control to draw its text.</param>
+        /// <returns>The format flags for drawing the text of the control.</returns>
         public static TextFormatFlags GetFormatFlags(this Control c)
         {
             TextFormatFlags flags = TextFormatFlags.TextBoxControl;
@@ -313,10 +315,10 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Sets the double buffering state of a control
+        /// Sets the double buffered state of a control
         /// </summary>
-        /// <param name="control">The control to set.</param>
-        /// <param name="useDoubleBuffering"><see langword="true"/>, if <paramref name="control"/> should use double buffering; otherwise, <see langword="false"/>.</param>
+        /// <param name="control">The control to adjust.</param>
+        /// <param name="useDoubleBuffering"><see langword="true"/> if <paramref name="control"/> should use double buffering; otherwise, <see langword="false"/>.</param>
         public static void SetDoubleBuffered(this Control control, bool useDoubleBuffering)
         {
             if (control == null)
@@ -325,7 +327,8 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Sets a specified <see cref="ControlStyles"/> flag to either true or false.
+        /// Sets a specified <see cref="ControlStyles"/> flag to either <see langword="true"/> or <see langword="false"/>.
+        /// It calls the protected <see cref="Control.SetStyle">Control.SetStyle</see> method on the specified <paramref name="control"/> as if it was a public method.
         /// </summary>
         /// <param name="control">The control to set.</param>
         /// <param name="flags">The <see cref="ControlStyles"/> bits to set.</param>

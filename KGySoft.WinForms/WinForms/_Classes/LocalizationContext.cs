@@ -38,7 +38,7 @@ namespace KGySoft.WinForms
 {
     /// <summary>
     /// Represents the context of a localization operation that provides information for the <see cref="LocalizationHelper.LocalizationRequested"/> event,
-    /// and can determine source of the resources for dynamic automatic localization.
+    /// and can determine the source of the resources for dynamic automatic localization.
     /// </summary>
     /// <remarks>
     /// <note>To make dynamic localization work without handling the <see cref="LocalizationHelper.LocalizationRequested"/> event,
@@ -59,25 +59,26 @@ namespace KGySoft.WinForms
 
         /// <summary>
         /// Gets the name of the root control or object that is being localized.
-        /// Can be an <see cref="Assembly"/> name if this <see cref="LocalizationContext"/> was created using the <see cref="FromAssemblyScope"/> method.
+        /// Can be an <see cref="Assembly"/> name if this <see cref="LocalizationContext"/> was created using the <see cref="FromAssemblyScope">FromAssemblyScope</see> method.
         /// </summary>
         public string RootName { get; }
 
         /// <summary>
         /// Gets the type of the root control or object that is being localized.
-        /// Can be <see langword="null"/> if this <see cref="LocalizationContext"/> was created using the <see cref="FromAssemblyScope"/> method.
+        /// Can be <see langword="null"/> if this <see cref="LocalizationContext"/> was created using the <see cref="FromAssemblyScope">FromAssemblyScope</see> method.
         /// </summary>
         public Type? RootType { get; }
 
         /// <summary>
-        /// Gets the culture of the suggested language for the localization operation.
-        /// It is initialized by the UI culture of the current thread, but can be overridden by the handler of the <see cref="LocalizationHelper.LocalizationRequested"/> event.
+        /// Gets the culture of the suggested language for the localization operation. If it was not specified otherwise when creating this instance,
+        /// it is initialized by the UI culture of the current thread, but it can be overridden by the handler of the <see cref="LocalizationHelper.LocalizationRequested"/> event.
         /// </summary>
         public CultureInfo LanguageHint { get; }
 
         /// <summary>
-        /// Gets a <see cref="System.Windows.Forms.ToolTip"/> applicable for the root object, if any.
-        /// When presents, the <see cref="LocalizationHelper.LocalizeStringProperties"/> method can apply <c>{name}.ToolTipText</c> resource keys for <see cref="Control"/> instances.
+        /// Gets a <see cref="System.Windows.Forms.ToolTip"/> applicable for the root object, if any. When presents,
+        /// the <see cref="LocalizationHelper.LocalizeStringProperties">LocalizationHelper.LocalizeStringProperties</see>
+        /// method can apply <c>{name}.ToolTipText</c> resource keys for <see cref="Control"/> instances.
         /// </summary>
         public ToolTip? ToolTip { get; }
 
@@ -109,7 +110,9 @@ namespace KGySoft.WinForms
         /// Initializes a new instance of the <see cref="LocalizationContext"/> class.
         /// </summary>
         /// <param name="root">The root control or object that is being localized.</param>
-        /// <param name="language">The suggested language of the localization operation.</param>
+        /// <param name="language">The suggested language of the localization operation.
+        /// If <see langword="null"/>, the UI culture of the current thread is assumed. This parameter is optional.
+        /// <br/>Default value: <see langword="null"/>.</param>
         /// <exception cref="ArgumentNullException"><paramref name="root"/> is <see langword="null"/>.</exception>
         public LocalizationContext(object root, CultureInfo? language = null)
         {
@@ -176,7 +179,6 @@ namespace KGySoft.WinForms
         }
 
         #endregion
-
 
         #endregion
 

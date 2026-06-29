@@ -45,7 +45,7 @@ using KGySoft.WinForms.Forms;
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Provides members for localization of Windows Forms controls and other objects.
+    /// Provides members to localize Windows Forms controls and other objects.
     /// The <see cref="ApplyStringResources">ApplyStringResources</see> method is automatically called by <see cref="BaseForm"/> and <see cref="BaseUserControl"/> instances
     /// if their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see> property is set to a non-default value.
     /// The <see cref="LocalizationRequested"/> event can be handled to redirect the localization requests to a custom resource manager,
@@ -391,7 +391,7 @@ namespace KGySoft.WinForms
         /// Gets a resource set for the specified <paramref name="context"/> if available. The result can be freely edited.
         /// </summary>
         /// <param name="context">The localization context to use for the operation. To retrieve a resource set,
-        /// the <see cref="LocalizationContext.LocalizationScope"/> must <see cref="DynamicStringLocalization.LocalScope"/> or <see cref="DynamicStringLocalization.AssemblyScope"/>.</param>
+        /// the <see cref="LocalizationContext.LocalizationScope"/> must be <see cref="DynamicStringLocalization.LocalScope"/> or <see cref="DynamicStringLocalization.AssemblyScope"/>.</param>
         /// <param name="culture">The culture for which the resource set is requested. If <see langword="null"/>, the <see cref="LocalizationContext.LanguageHint"/> is used. This parameter is optional.
         /// <br/>Default value: <see langword="null"/>.</param>
         /// <returns>An <see cref="IExpandoResourceSet"/> instance if a resource set is available for the specified context; otherwise, <see langword="null"/>.</returns>

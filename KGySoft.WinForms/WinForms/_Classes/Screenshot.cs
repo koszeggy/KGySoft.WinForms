@@ -24,7 +24,7 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Provides a class for capturing screenshots.
+    /// Provides methods to capture screenshots.
     /// </summary>
     public static class Screenshot
     {
@@ -33,10 +33,11 @@ namespace KGySoft.WinForms
         /// <summary>
         /// Takes a screenshot of the given bounds.
         /// </summary>
+        /// <param name="bounds">The bounds of the screenshot to capture.</param>
         /// <returns>The <see cref="Image"/> of the screenshot</returns>
         public static Image CaptureScreenshot(Rectangle bounds)
         {
-            Bitmap screenshot = new Bitmap(bounds.Width, bounds.Height);
+            var screenshot = new Bitmap(bounds.Width, bounds.Height);
             using Graphics g = Graphics.FromImage(screenshot);
             g.CopyFromScreen(bounds.X, bounds.Y, 0, 0, bounds.Size, CopyPixelOperation.SourceCopy);
 

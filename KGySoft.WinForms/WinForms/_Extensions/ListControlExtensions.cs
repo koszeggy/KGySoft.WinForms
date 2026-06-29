@@ -54,8 +54,9 @@ namespace KGySoft.WinForms
         #region Public Methods
 
         /// <summary>
-        /// Gets whether the there is no selected item in the list control (<see cref="ListControl.SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
+        /// Gets whether there is no selected item in the list control (<see cref="ListControl.SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
         /// </summary>
+        /// <param name="control">The <see cref="ListControl"/> instance to check.</param>
         /// <returns><see langword="true"/> if there is no selected item in this control, otherwise <see langword="false"/>.</returns>
         public static bool IsEmpty(this ListControl control)
         {
@@ -158,7 +159,7 @@ namespace KGySoft.WinForms
         /// </summary>
         /// <param name="control">The target <see cref="ListControl"/> instance.</param>
         /// <param name="dataTable">The data source table.</param>
-        /// <param name="displayMember">Column name to display in the the list control.</param>
+        /// <param name="displayMember">Column name to display in the list control.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the list control.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the value column must have a data type that is convertible to signed integer type.</param>
@@ -168,11 +169,11 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Binds the list control to a <see cref="DataTable"/>. Items will not be sorted and translated.
+        /// Binds the list control to a <see cref="DataTable"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="control">The target <see cref="ListControl"/> instance.</param>
         /// <param name="dataTable">The data source table.</param>
-        /// <param name="displayMember">Column name to display in the the list control.</param>
+        /// <param name="displayMember">Column name to display in the list control.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the list control.</param>
         public static void LoadFrom(this ListControl control, DataTable dataTable, string valueMember, string displayMember)
         {
@@ -259,7 +260,7 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Binds list control box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
+        /// Binds list control box to the values of an <see cref="Enum"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="control">The target <see cref="ListControl"/> instance.</param>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
@@ -270,7 +271,7 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Binds the list control to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
+        /// Binds the list control to the values of an <see cref="Enum"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="control">The target <see cref="ListControl"/> instance.</param>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
@@ -282,14 +283,15 @@ namespace KGySoft.WinForms
         /// <summary>
         /// Binds the list control to a <paramref name="collection"/>.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="control">The target <see cref="ListControl"/> instance.</param>
         /// <param name="collection">The source collection.</param>
-        /// <param name="displayMember">Property name to display in the the list control.</param>
+        /// <param name="displayMember">Property name to display in the list control.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the list control.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, <paramref name="displayMember"/> must be writable and should refer to a <see cref="string"/> property.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
         /// <param name="sortByDisplayedValues">If <see langword="true"/>, then items will be sorted by displayed values. Requested <paramref name="plusItems"/> will always be the first items.</param>
-        /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
+        /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus items are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
         public static void LoadFrom<T>(this ListControl control, IEnumerable<T> collection, string valueMember, string displayMember, bool translateNames, string? distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)
         {
@@ -359,11 +361,12 @@ namespace KGySoft.WinForms
         /// <summary>
         /// Binds the list control to a <paramref name="collection"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="control">The target <see cref="ListControl"/> instance.</param>
         /// <param name="collection">The source collection.</param>
-        /// <param name="displayMember">Property name to display in the the list control.</param>
+        /// <param name="displayMember">Property name to display in the list control.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the list control.</param>
-        /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
+        /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus items are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
         public static void LoadFrom<T>(this ListControl control, IEnumerable<T> collection, string valueMember, string displayMember, SelectionPlusItems plusItems)
         {
@@ -371,11 +374,12 @@ namespace KGySoft.WinForms
         }
 
         /// <summary>
-        /// Binds list control box to a <paramref name="collection"/>. Items will not be sorted and translated.
+        /// Binds list control box to a <paramref name="collection"/>. Items will not be sorted or translated.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="control">The target <see cref="ListControl"/> instance.</param>
         /// <param name="collection">The source collection.</param>
-        /// <param name="displayMember">Property name to display in the the list control.</param>
+        /// <param name="displayMember">Property name to display in the list control.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the list control.</param>
         public static void LoadFrom<T>(this ListControl control, IEnumerable<T> collection, string valueMember, string displayMember)
         {

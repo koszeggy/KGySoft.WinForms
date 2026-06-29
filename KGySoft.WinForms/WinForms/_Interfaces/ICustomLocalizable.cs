@@ -16,7 +16,7 @@
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Represents a custom localizable control that can be localized by the <see cref="LocalizationHelper"/>.
+    /// Represents a custom localizable control that can be localized by <see cref="LocalizationHelper"/>.
     /// </summary>
     public interface ICustomLocalizable
     {

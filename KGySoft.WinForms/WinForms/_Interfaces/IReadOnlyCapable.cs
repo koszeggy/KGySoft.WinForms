@@ -16,14 +16,14 @@
 namespace KGySoft.WinForms
 {
     /// <summary>
-    /// Represents a read-only capable control
+    /// Represents a read-only capable control.
     /// </summary>
     public interface IReadOnlyCapable
     {
         #region Properties
 
         /// <summary>
-        /// Gets or sets read-only status of the control.
+        /// Gets or sets the read-only status of the control.
         /// </summary>
         bool ReadOnly { get; set; }
 
