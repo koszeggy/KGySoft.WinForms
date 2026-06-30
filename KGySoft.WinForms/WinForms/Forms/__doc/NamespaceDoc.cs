@@ -23,7 +23,7 @@ namespace KGySoft.WinForms.Forms
 {
     /// <summary>
     /// Among others, the <c>KGySoft.WinForms.Forms</c> namespace contains a couple of base forms (<see cref="BaseForm"/>, <see cref="DialogBaseForm"/>)
-    /// you can derive your forms from, as well as the static <see cref="Dialogs"/> class to show simple message or user input dialogs.
+    /// you can use as a base form for your forms, as well as the static <see cref="Dialogs"/> class to show simple message or user input dialogs.
     /// </summary>
     [CompilerGenerated]
     internal static class NamespaceDoc;

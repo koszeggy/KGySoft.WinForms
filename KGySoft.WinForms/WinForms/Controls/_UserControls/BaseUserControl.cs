@@ -56,10 +56,10 @@ namespace KGySoft.WinForms.Controls
         #region Events
 
         /// <summary>
-        /// Occurs when the <see cref="DynamicStringLocalization"/> property changes.
+        /// Occurs when the <see cref="DynamicStringLocalization"/> property has changed.
         /// </summary>
         [Category("BaseUserControl")]
-        [Description("Occurs when the DynamicStringLocalization property changes.")]
+        [Description("Occurs when the DynamicStringLocalization property has changed.")]
         public event EventHandler? DynamicStringLocalizationChanged
         {
             add => Events.AddHandler(nameof(DynamicStringLocalization), value);

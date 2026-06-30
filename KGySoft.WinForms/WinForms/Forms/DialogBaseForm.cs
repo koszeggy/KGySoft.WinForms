@@ -24,7 +24,7 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms.Forms
 {
     /// <summary>
-    /// Base form for OK/Cancel(/Apply) dialogs.
+    /// Represents a base form with OK, Cancel, and/or Apply buttons.
     /// </summary>
     public partial class DialogBaseForm : BaseForm
     {
@@ -34,7 +34,7 @@ namespace KGySoft.WinForms.Forms
 
         /// <summary>
         /// Gets or sets whether the OK button is visible.
-        /// Default value: <see langword="true"/>.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         [DefaultValue(true)]
         [Category("DialogBaseForm")]
@@ -51,7 +51,7 @@ namespace KGySoft.WinForms.Forms
 
         /// <summary>
         /// Gets or sets whether the Cancel button is visible.
-        /// Default value: <see langword="true"/>.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         [DefaultValue(true)]
         [Category("DialogBaseForm")]
@@ -68,7 +68,7 @@ namespace KGySoft.WinForms.Forms
 
         /// <summary>
         /// Gets or sets whether the Apply button is visible.
-        /// Default value: <see langword="false"/>.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         [DefaultValue(false)]
         [Category("DialogBaseForm")]
@@ -136,19 +136,16 @@ namespace KGySoft.WinForms.Forms
         #region Public Methods
 
         /// <summary>
-        /// Executes the dialog window.
+        /// Executes the form as a modal dialog, and returns whether the OK button was pressed.
         /// </summary>
-        /// <returns>Returns true, when the OK button was pressed, otherwise, false.</returns>
+        /// <returns><see langword="true"/> if the OK button was pressed; otherwise, <see langword="false"/>.</returns>
         public virtual bool Execute() => ShowDialog() == DialogResult.OK;
 
         #endregion
 
         #region Protected Methods
 
-        /// <summary>
-        /// Clean up any resources being used.
-        /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <inheritdoc />
         protected override void Dispose(bool disposing)
         {
             pnlButtons.OKButton.Click -= btnOK_Click;
@@ -159,7 +156,8 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Override this method when anything needs to be performed when the OK button is pressed.
+        /// Override this method to perform custom actions when the OK button is pressed.
+        /// The base implementation sets the <see cref="Form.DialogResult"/> property to <see cref="DialogResult.OK"/>, and closes the form.
         /// </summary>
         protected virtual void OKPressed()
         {
@@ -168,7 +166,8 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Override this method when anything needs to be performed when the Cancel button is pressed.
+        /// Override this method to perform custom actions when the Cancel button is pressed.
+        /// The base implementation sets the <see cref="Form.DialogResult"/> property to <see cref="DialogResult.Cancel"/>, and closes the form.
         /// </summary>
         protected virtual void CancelPressed()
         {

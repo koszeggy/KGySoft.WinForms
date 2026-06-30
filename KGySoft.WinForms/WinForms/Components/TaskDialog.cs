@@ -60,7 +60,7 @@ namespace KGySoft.WinForms.Components
     /// is used, allowing some small improvements to the native version such as tool tips for regular buttons and radio buttons, more detailed info when copying the
     /// content to the clipboard by <c>Ctrl+C</c>, fixing possible color issues in high contrast mode, etc.</note>
     /// </remarks>
-    /// <example>TODO</example>
+    // <example>TODO</example>
     public sealed class TaskDialog : IWin32Window, IDisposable
     {
         #region Constants

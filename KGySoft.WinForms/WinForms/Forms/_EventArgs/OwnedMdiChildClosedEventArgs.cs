@@ -8,7 +8,7 @@ namespace KGySoft.WinForms.Forms
     public class OwnedMdiChildClosedEventArgs : FormClosedEventArgs
     {
         /// <summary>
-        /// Gets the close MDI child form.
+        /// Gets the closed MDI child form.
         /// </summary>
         public Form MdiChild { get; }
 

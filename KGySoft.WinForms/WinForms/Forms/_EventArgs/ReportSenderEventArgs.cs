@@ -22,7 +22,7 @@ using System;
 namespace KGySoft.WinForms.Forms
 {
     ///<summary>
-    /// Arguments for <see cref="AdvancedMessageDialog.ReportSender"/> event.
+    /// Provides arguments for the <see cref="AdvancedMessageDialog.ReportSender"/> event.
     ///</summary>
     [Obsolete("This type is used by the obsoleted AdvancedMessageDialog")]
     public sealed class ReportSenderEventArgs : EventArgs
@@ -30,23 +30,23 @@ namespace KGySoft.WinForms.Forms
         #region Properties
 
         /// <summary>
-        /// Summary message from the sender <see cref="AdvancedMessageDialog"/>.
+        /// Contains the message of the sender <see cref="AdvancedMessageDialog"/>.
         /// </summary>
         public string Message { get; private set; }
 
         /// <summary>
-        /// Details content of the sender <see cref="AdvancedMessageDialog"/>.
+        /// Contains the details text of the sender <see cref="AdvancedMessageDialog"/>.
         /// </summary>
         public string Details { get; private set; }
 
         /// <summary>
-        /// Path of screenshot or null when screenshot has not been saved.
+        /// Contains the path of the screenshot, or <see langword="null"/> when no screenshot has been saved.
         /// </summary>
         public string ScreenshotPath { get; private set; }
 
         /// <summary>
         /// Gets or sets whether message dialog can be closed after returning from
-        /// handler of <see cref="AdvancedMessageDialog.ReportSender"/>.
+        /// handler of the <see cref="AdvancedMessageDialog.ReportSender"/> event.
         /// </summary>
         public bool CloseMessageDialog { get; set; }
 

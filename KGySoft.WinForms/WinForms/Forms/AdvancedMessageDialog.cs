@@ -42,9 +42,9 @@ using KGySoft.Libraries.Language;
 namespace KGySoft.WinForms.Forms
 {
     /// <summary>
-    /// Provides error and other message dialogs.
+    /// Provides a dialog for error and other kind of messages.
     /// </summary>
-    [Obsolete("Use KGySoft.WinForms.Components.TaskDialog instead.")]
+    [Obsolete("Use the Dialogs class or the KGySoft.WinForms.Components.TaskDialog class instead.")]
     public sealed partial class AdvancedMessageDialog : BaseForm
     {
         #region Fields
@@ -58,12 +58,12 @@ namespace KGySoft.WinForms.Forms
         #region Events
 
         /// <summary>
-        /// Report sender event. When assigned, report sender button will be visible when requested.
+        /// Occurs when the user presses the report sender button, which appears only when this event is subscribed.
         /// </summary>
         public static event EventHandler<ReportSenderEventArgs>? ReportSender;
 
         /// <summary>
-        /// Occurs before the application terminated if user chooses closing application.
+        /// Occurs before the application terminates if user chooses closing the application.
         /// </summary>
         public static event EventHandler? BeforeKillApplication;
 
@@ -76,7 +76,7 @@ namespace KGySoft.WinForms.Forms
         #region Public Properties
         
         /// <summary>
-        /// Gets or sets log directory for saving logs and screenshots.
+        /// Gets or sets the log directory for saving logs and screenshots.
         /// </summary>
         public static string? ErrorLogDirectory { get; set; }
 
@@ -103,7 +103,9 @@ namespace KGySoft.WinForms.Forms
 
         #region Instance Properties
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets or sets the caption text of the dialog.
+        /// </summary>
         [Localizable(false)]
         [AllowNull]
         public override string Text
@@ -113,7 +115,7 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Gets or sets the dialog Image
+        /// Gets or sets the dialog image.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public Image? Image
@@ -129,7 +131,7 @@ namespace KGySoft.WinForms.Forms
         #region Constructors
 
         /// <summary>
-        /// Creates a new instance of AdvancedMessageDialog
+        /// Creates a new instance of the <see cref="AdvancedMessageDialog"/> class.
         /// </summary>
         public AdvancedMessageDialog()
         {
@@ -212,11 +214,12 @@ namespace KGySoft.WinForms.Forms
         #region Public Methods
 
         /// <summary>
-        /// Message dialog for caught exceptions.
+        /// Shows a message dialog for an exception.
         /// </summary>
-        /// <param name="e">Exception</param>
-        /// <param name="caption">Caption</param>
-        /// <param name="logNamePrefix">Prefix of log file name to save. Path can be set in <see cref="ErrorLogDirectory"/>. Can be null for not saving log.</param>
+        /// <param name="e">The exception to show in the dialog.</param>
+        /// <param name="caption">The caption text of the dialog.</param>
+        /// <param name="logNamePrefix">The prefix of the log file name to save. Path can be set in <see cref="ErrorLogDirectory"/>.
+        /// Can be <see langword="null"/> to prevent saving the log.</param>
         public void Execute(Exception? e, string caption, string logNamePrefix)
         {
             ResetDetails(true);
@@ -260,26 +263,26 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Message dialog for caught exceptions with a default caption.
+        /// Shows a message dialog for an exception with a default caption.
         /// Saves log and screenshot if directory is set in <see cref="ErrorLogDirectory"/>.
         /// </summary>
-        /// <param name="e">Exception</param>
+        /// <param name="e">The exception to show in the dialog.</param>
         public void Execute(Exception e)
         {
             Execute(e, Language.Translate("Unhandled error caught__Dialogs"), "fatalerror");
         }
 
         /// <summary>
-        /// Message dialog for any kind of message.
+        /// Shows a message dialog for any kind of message.
         /// </summary>
-        /// <param name="message">Message</param>
-        /// <param name="details">Details (if null or empty, Details button will be hidden)</param>
-        /// <param name="caption">Caption of the window</param>
-        /// <param name="dialogType">Type of the dialog icon</param>
-        /// <param name="buttons">Showed buttons</param>
-        /// <param name="saveLog">True for saving log (see also <see cref="ErrorLogDirectory"/>)</param>
-        /// <param name="saveScreenshot">True for saving screenshot (see also <see cref="ErrorLogDirectory"/>)</param>
-        /// <param name="logNamePrefix">File name prefix if log saving requested.</param>
+        /// <param name="message">The message to show.</param>
+        /// <param name="details">The details text (if <see langword="null"/> or empty, the Details button will be hidden)</param>
+        /// <param name="caption">The caption text of the dialog.</param>
+        /// <param name="dialogType">Specifies the dialog icon.</param>
+        /// <param name="buttons">Specifies the buttons to show.</param>
+        /// <param name="saveLog"><see langword="true"/> to save the logs (see also <see cref="ErrorLogDirectory"/>)</param>
+        /// <param name="saveScreenshot"><see langword="true"/> to save a screenshot (see also <see cref="ErrorLogDirectory"/>)</param>
+        /// <param name="logNamePrefix">The prefix of the log file name to save.</param>
         public DialogResult Execute(string? message, string? details, string? caption, AdvancedDialogTypes dialogType,
             ButtonTypes buttons, bool saveLog, bool saveScreenshot, string? logNamePrefix)
         {
@@ -350,27 +353,29 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Message dialog for any kind of message.
+        /// Shows a message dialog for any kind of message.
         /// </summary>
-        /// <param name="message">Message</param>
-        /// <param name="details">Details (if null or empty, Details button will be hidden)</param>
-        /// <param name="caption">Caption of the window</param>
-        /// <param name="dialogType">Type of the dialog icon</param>
-        /// <param name="buttons">Shown buttons</param>
+        /// <param name="message">The message to show.</param>
+        /// <param name="details">The details text (if <see langword="null"/> or empty, the Details button will be hidden)</param>
+        /// <param name="caption">The caption text of the dialog.</param>
+        /// <param name="dialogType">Specifies the dialog icon</param>
+        /// <param name="buttons">Specifies the buttons to show.</param>
         public DialogResult Execute(string message, string? details, string? caption, AdvancedDialogTypes dialogType, ButtonTypes buttons)
         {
             return Execute(message, details, caption, dialogType, buttons, false, false, null);
         }
 
         /// <summary>
-        /// Message dialog for any kind of message.
-        /// <para>- Details will be shown if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/></para>
-        /// <para>- Log and screenshot will be saved if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/> and <see cref="ReportSender"/> is assigned</para>
-        /// <para>- Buttons are controlled by <paramref name="dialogType"/>.</para>
+        /// Shows a message dialog for any kind of message.
         /// </summary>
-        /// <param name="message">Message</param>
-        /// <param name="caption">Caption of the window</param>
-        /// <param name="dialogType">Affects dialog icon, Details button and send report button</param>
+        /// <param name="message">The message to show.</param>
+        /// <param name="caption">The caption text of the dialog.</param>
+        /// <param name="dialogType">Affects the dialog icon and the buttons of the dialog.</param>
+        /// <remarks>
+        /// <para>Details will be shown if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/>.</para>
+        /// <para>Log and screenshot will be saved if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/> and <see cref="ReportSender"/> is assigned.</para>
+        /// <para>Buttons are controlled by the <paramref name="dialogType"/> parameter.</para>
+        /// </remarks>
         public DialogResult Execute(string message, string caption, AdvancedDialogTypes dialogType)
         {
             bool showDetails = dialogType == AdvancedDialogTypes.Exception;
@@ -403,13 +408,16 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Message dialog for any kind of message.
-        /// <para>- Details will be shown if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/></para>
-        /// <para>- Log and screenshot will be saved if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/> and <see cref="ReportSender"/> is assigned</para>
-        /// <para>- Buttons are controlled by <paramref name="dialogType"/>.</para>
+        /// Shows a message dialog for any kind of message.
         /// </summary>
-        /// <param name="message">Message</param>
-        /// <param name="dialogType">Affects dialog icon, dialog caption, Details button and send report button</param>
+        /// <param name="message">The message to show.</param>
+        /// <param name="dialogType">Affects the dialog icon and the buttons of the dialog.</param>
+        /// <returns>The <see cref="DialogResult"/> returned by the dialog.</returns>
+        /// <remarks>
+        /// <para>Details will be shown if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/>.</para>
+        /// <para>Log and screenshot will be saved if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/> and <see cref="ReportSender"/> is assigned.</para>
+        /// <para>Buttons are controlled by the <paramref name="dialogType"/> parameter.</para>
+        /// </remarks>
         public DialogResult Execute(string message, AdvancedDialogTypes dialogType)
         {
             string title = dialogType.ToString() + Language.DistinctionSeparator + "Dialogs";
@@ -421,7 +429,8 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Shows an information dialog.
         /// </summary>
-        /// <param name="message">Message</param>
+        /// <param name="message">The message to show.</param>
+        /// <returns>The <see cref="DialogResult"/> returned by the dialog.</returns>
         public DialogResult Execute(string message)
         {
             return Execute(message, AdvancedDialogTypes.Information);

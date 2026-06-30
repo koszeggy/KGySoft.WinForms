@@ -107,7 +107,7 @@ namespace KGySoft.WinForms.Forms
         /// To localize both the window caption and buttons, opt-in to use task dialogs by setting the <see cref="UseTaskDialogs"/> property to <see langword="true"/>,
         /// and set the <a href="https://koszeggy.github.io/docs/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
         /// property to <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
-        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
+        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executing application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
         /// </remarks>
@@ -154,7 +154,7 @@ namespace KGySoft.WinForms.Forms
         /// To localize the window caption, you can use the <see cref="ErrorMessage(IWin32Window,string,string)"/> overload and pass a custom localized string to the <c>caption</c> parameter.
         /// To localize both the window caption and buttons, opt-in to use task dialogs by setting the <see cref="UseTaskDialogs"/> property to <see langword="true"/>,
         /// and set the <a href="https://koszeggy.github.io/docs/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
-        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
+        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executing application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
         /// </remarks>
@@ -201,7 +201,7 @@ namespace KGySoft.WinForms.Forms
         /// To localize the window caption, you can use the <see cref="WarningMessage(IWin32Window,string,string)"/> overload and pass a custom localized string to the <c>caption</c> parameter.
         /// To localize both the window caption and buttons, opt-in to use task dialogs by setting the <see cref="UseTaskDialogs"/> property to <see langword="true"/>,
         /// and set the <a href="https://koszeggy.github.io/docs/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
-        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
+        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executing application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
         /// </remarks>
@@ -249,7 +249,7 @@ namespace KGySoft.WinForms.Forms
         /// To localize the window caption, you can use the <see cref="ConfirmMessage(IWin32Window,string,string,bool)"/> overload and pass a custom localized string to the <c>caption</c> parameter.
         /// To localize both the window caption and buttons, opt-in to use task dialogs by setting the <see cref="UseTaskDialogs"/> property to <see langword="true"/>,
         /// and set the <a href="https://koszeggy.github.io/docs/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
-        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
+        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executing application.</note>
         /// <para>This overload sets the <see cref="DialogsOwner"/> as the owner of the dialog; or, if it is <see langword="null"/>, the currently active window will be the owner.</para>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
         /// <para>To show also a Cancel button, use the <see cref="O:KGySoft.WinForms.Forms.Dialogs.CancellableConfirmMessage">CancellableConfirmMessage</see> methods instead.</para>
@@ -411,7 +411,7 @@ namespace KGySoft.WinForms.Forms
         /// <see cref="LocalizationHelper.GetString(string,LocalizationContext)">LocalizationHelper.GetString</see> method.
         /// To localize default prompt text and buttons, set the <a href="https://koszeggy.github.io/docs/corelibraries/html/P_KGySoft_LanguageSettings_DynamicResourceManagersSource.htm">LanguageSettings.DynamicResourceManagersSource</a>
         /// property to <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_Resources_ResourceManagerSources.htm">CompiledAndResX</a> in the startup code of your application, and translate the
-        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executable application.</note>
+        /// auto-generated <c>KGySoft.WinForms.Messages.&lt;LanguageId&gt;.resx</c> files in the <c>Resources</c> folder of the executing application.</note>
         /// <para>To use a right-to-left layout when the UI culture of the current thread is a right-to-left language, set the <see cref="AutoRightToLeftLayout"/> property to <see langword="true"/> before calling this method.</para>
         /// </remarks>
         public static bool InputDialog(IWin32Window? owner, string? caption, string? prompt, ref string value)

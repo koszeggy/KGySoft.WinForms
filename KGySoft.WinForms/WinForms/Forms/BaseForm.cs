@@ -63,7 +63,7 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Forms
 {
     /// <summary>
-    /// A base form with additional features and bug fixes.
+    /// A base form that provides some additional functionality compared to <see cref="Form"/>, and contains also some bug fixes.
     /// </summary>
     /// <remarks>
     /// The <see cref="BaseForm"/> class provides the following features and changes:
@@ -76,8 +76,8 @@ namespace KGySoft.WinForms.Forms
     /// Note that it affects font scaling only (which may indirectly affect also size and content scaling if <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.Font"/>),
     /// but basically auto-sizing behavior still depends on the current platform.</item>
     /// <item>The <see cref="DynamicStringLocalization"/> property allows creating dynamically generated localizations for any language.</item>
-    /// <item><see cref="CommandBindings"/> property. See the <a href="https://github.com/koszeggy/KGySoft.CoreLibraries#command-binding" target="_blank">online documentation</a> for details.</item>
-    /// <item>Advanced MDI application support, see the <see cref="ShowMdiChild"/> method and <see cref="OwnedMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
+    /// <item><see cref="CommandBindings"/> property. See the <a href="https://github.com/koszeggy/KGySoft.CoreLibraries#command-binding" target="_blank">GitHub documentation</a> for details.</item>
+    /// <item>Advanced MDI application support, see the <see cref="ShowMdiChild">ShowMdiChild</see> method, and the <see cref="OwnedMdiChildClosed"/> and <see cref="PaintMdiClientArea"/> events.</item>
     /// <item>Fixes a <a href="https://github.com/dotnet/winforms/issues/1504" target="_blank">resizing bug</a> that exists in .NET Framework and .NET Core 3.x that can occur with multiple displays.</item>
     /// <item><see cref="ToolTip"/> property to create tool tips for the controls on the form.</item>
     /// <item>An <see cref="IsDesignMode"/> property that works even during initialization, when <see cref="Component.DesignMode"/> would return <see langword="false"/>.</item>
@@ -312,7 +312,7 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Occurs when an MDI Child window called by <see cref="ShowMdiChild"/> suspends the caller instance.
+        /// Occurs when an MDI Child window called by <see cref="ShowMdiChild">ShowMdiChild</see> suspends the caller instance.
         /// </summary>
         [Category("BaseForm")]
         [Description("Occurs when an MDI Child window called by ShowMdiChild suspends the caller instance.")]
@@ -323,7 +323,7 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Occurs when the MDI Child window called by <see cref="ShowMdiChild"/> that suspended the caller instance is closed.
+        /// Occurs when the MDI Child window called by <see cref="ShowMdiChild">ShowMdiChild</see> that suspended the caller instance is closed.
         /// </summary>
         [Category("BaseForm")]
         [Description("Occurs when the MDI Child window called by ShowMdiChild that suspended the caller instance is closed.")]
@@ -361,7 +361,7 @@ namespace KGySoft.WinForms.Forms
         /// If you want to prevent auto-scaling by <see cref="Form.DpiChanged"/>, subscribe <see cref="Form.DpiChanged"/> as well (or override <see cref="Form.OnDpiChanged">OnDpiChanged</see>),
         /// and set <see cref="CancelEventArgs.Cancel"/> in the event arguments to <see langword="true"/>.
         /// In contrast, the arguments of the <see cref="DeviceScaleChanged"/> event cannot be canceled, but this event does not do anything automatically if not subscribed.</para>
-        /// <para>Unlike in the <see cref="Form.OnGetDpiScaledSize"/> event arguments, the <see cref="DeviceScaleChangeEventArgs.SuggestedBounds">DeviceScaleChangedEventArgs.SuggestedBounds</see> property
+        /// <para>Unlike in the <see cref="Form.OnGetDpiScaledSize">Form.OnGetDpiScaledSize</see> event arguments, the <see cref="DeviceScaleChangeEventArgs.SuggestedBounds">DeviceScaleChangedEventArgs.SuggestedBounds</see> property
         /// contains a scaled size even if <see cref="ContainerControl.AutoScaleMode"/> is <see cref="AutoScaleMode.None"/>.
         /// The suggested bounds still can be ignored by the subscriber of the event.</para>
         /// <note>You don't need to set the size of the form when handling this event. If you don't set the size, the suggested bounds will be applied automatically.
@@ -379,7 +379,7 @@ namespace KGySoft.WinForms.Forms
 
         /// <summary>
         /// Occurs with per-monitor DPI awareness V2, before calculating the suggested bounds for the <see cref="DeviceScaleChanging "/> and <see cref="DeviceScaleChanged"/> events.
-        /// Similar to the <see cref="Form.OnGetDpiScaledSize"/> method, but this is available also as an event for all .NET versions, and does not cache the result.
+        /// Similar to the <see cref="Form.OnGetDpiScaledSize">Form.OnGetDpiScaledSize</see> method, but this is available also as an event for all .NET versions, and it does not cache the result.
         /// </summary>
         /// <remarks>
         /// <para>This event is raised only on Windows 10 Build 1703 or later, when the application has per-monitor DPI awareness V2.</para>
@@ -429,10 +429,10 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Occurs when the <see cref="DynamicStringLocalization"/> property changes.
+        /// Occurs when the <see cref="DynamicStringLocalization"/> property has changed.
         /// </summary>
         [Category("BaseForm")]
-        [Description("Occurs when the DynamicStringLocalization property changes.")]
+        [Description("Occurs when the DynamicStringLocalization property has changed.")]
         public event EventHandler? DynamicStringLocalizationChanged
         {
             add => Events.AddHandler(nameof(DynamicStringLocalization), value);
@@ -467,13 +467,13 @@ namespace KGySoft.WinForms.Forms
         /// <remarks>
         /// <note>This property offers a different localization strategy to the <c>Localizable</c> property of the Windows Forms designer, and it is not recommended to use them both together.</note>
         /// <para>Unlike the <c>Localizable</c> property of the Windows Forms designer, this property affects the localization of the string properties only,
-        /// and basically determines the behavior of the default <see cref="ApplyStringResources"/> implementation. You still can apply non-string resources
-        /// without enabling <c>Localizable</c> by overriding the <see cref="ApplyResources"/> method, whose default implementation just calls <see cref="ApplyStringResources"/>.</para>
+        /// and basically determines the behavior of the default <see cref="ApplyStringResources">ApplyStringResources</see> implementation. You still can apply non-string resources
+        /// without enabling <c>Localizable</c> by overriding the <see cref="ApplyResources">ApplyResources</see> method, whose default implementation just calls <see cref="ApplyStringResources">ApplyStringResources</see>.</para>
         /// <para>When this property is set to <see cref="DynamicStringLocalization.Disabled"/>, no automatic localization occurs. To localize string resources
-        /// programmatically, you can override the <see cref="ApplyStringResources"/> method.</para>
-        /// <para>The <see cref="ApplyResources"/> method is called automatically when the form is loaded for the first time, but you can explicitly call it whenever
-        /// you need to re-apply the resources (or <see cref="ApplyStringResources"/> to re-apply the string resources only), for example when the display language changes.</para>
-        /// <para>When the value of this property is not <see cref="DynamicStringLocalization.Disabled"/>, then the base <see cref="ApplyStringResources"/> implementation
+        /// programmatically, you can override the <see cref="ApplyStringResources">ApplyStringResources</see> method.</para>
+        /// <para>The <see cref="ApplyResources">ApplyResources</see> method is called automatically when the form is loaded for the first time, but you can explicitly call it whenever
+        /// you need to re-apply the resources (or <see cref="ApplyStringResources">ApplyStringResources</see> to re-apply the string resources only), for example when the display language changes.</para>
+        /// <para>When the value of this property is not <see cref="DynamicStringLocalization.Disabled"/>, then the base <see cref="ApplyStringResources">ApplyStringResources</see> implementation
         /// calls the <see cref="LocalizationHelper.ApplyStringResources">LocalizationHelper.ApplyStringResources</see> method, which traverses the controls of the form recursively,
         /// and invokes the <see cref="LocalizationHelper.LocalizationRequested"/> event for each localizable string property of the controls. If this property is
         /// set to <see cref="DynamicStringLocalization.Custom"/>, then you must handle the event to provide localization for the controls programmatically.
@@ -485,16 +485,16 @@ namespace KGySoft.WinForms.Forms
         /// <br/>See also the <see cref="KGySoft.WinForms.DynamicStringLocalization"/> enumeration for details.
         /// </para>
         /// </remarks>
-        /// <example>
-        /// TODO:
-        /// - creating the invariant resource set
-        ///   - how to use it as a compiled resource
-        ///   - how to use it as a .resx file
-        /// - Applying RTL
-        /// - how to handle the generated localizations
-        ///   - by a resource editor
-        ///   - from within the application, applying the translations at runtime
-        /// </example>
+        // <example>
+        // TODO:
+        // - creating the invariant resource set
+        //   - how to use it as a compiled resource
+        //   - how to use it as a .resx file
+        // - Applying RTL
+        // - how to handle the generated localizations
+        //   - by a resource editor
+        //   - from within the application, applying the translations at runtime
+        // </example>
         [Category("BaseForm")]
         [DefaultValue(DynamicStringLocalization.Disabled)]
         [Description("Specifies the dynamic string localization strategy of the form. LocalScope and AssemblyScope allow using potentially auto-generated .resx files "
@@ -531,6 +531,7 @@ namespace KGySoft.WinForms.Forms
         /// Gets the command bindings of this form. Being a <see cref="WinFormsCommandBindingsCollection"/>,
         /// the <a href="https://koszeggy.github.io/docs/corelibraries/html/Overload_KGySoft_ComponentModel_CommandBindingsCollection_Add.htm" target="_blank">Add</a>
         /// methods also add the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_PropertyCommandStateUpdater.htm" target="_blank">PropertyCommandStateUpdater</a> to the created bindings.
+        /// <br/>See the <a href="https://github.com/koszeggy/KGySoft.CoreLibraries#command-binding" target="_blank">GitHub documentation</a> for details.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
@@ -542,7 +543,7 @@ namespace KGySoft.WinForms.Forms
         /// </summary>
         /// <remarks>
         /// <para>This property is similar to the <see cref="Control.DeviceDpi"/> property, but it returns the scale factor as a <see cref="PointF"/> value,
-        /// and it is available on all .NET versions, even on .NET Framework 3.5.</para>
+        /// and it is available for all .NET versions starting with .NET Framework 3.5.</para>
         /// <note>Even on platforms where the <see cref="Control.DeviceDpi"/> is available, the <see cref="Control.DeviceDpi"/> property
         /// may return an incorrect value (e.g. the .NET Framework requires the DPI awareness settings in the <c>app.config</c> file, even
         /// if the awareness is set in the application manifest). In contrast, this property always returns the correct scale
@@ -577,7 +578,7 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// Gets or sets whether the <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
         /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         /// <remarks>
@@ -588,7 +589,7 @@ namespace KGySoft.WinForms.Forms
         /// <note>Please note that this property directly affects autoscaling the <see cref="Font"/> property only. It still may indirectly affect scaling
         /// the whole form and its contents, if the <see cref="ContainerControl.AutoScaleMode"/> property is <see cref="AutoScaleMode.Font"/>.
         /// Scaling the size on DPI change can also be controlled by the <see cref="DeviceScaleGetNewSize"/> event,
-        /// or can be set on the <see cref="DeviceScaleChanged"/> or <see cref="DeviceScaleAutoResized"/> events.</note>
+        /// or can be adjusted by handling the <see cref="DeviceScaleChanged"/> or <see cref="DeviceScaleAutoResized"/> events.</note>
         /// </remarks>
         [Category("BaseForm")]
         [DefaultValue(true)]
@@ -675,7 +676,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Gets whether the form has already been loaded. This property is <see langword="true"/> after the <see cref="Form.Load"/> event is raised for the first time,
         /// and remains <see langword="true"/> even if the form is shown as a dialog multiple times or the handle is recreated (e.g. because <see cref="Control.RightToLeft"/> changes).
-        /// Can be useful if you override the <see cref="Form.OnLoad"/> method, and you want to avoid executing some initialization more than once.
+        /// Can be useful if you override the <see cref="OnLoad">OnLoad</see> method, and you want to avoid executing some initialization more than once.
         /// </summary>
         [Browsable(false)]
         protected bool IsLoaded => flags[isLoaded];
@@ -806,7 +807,7 @@ namespace KGySoft.WinForms.Forms
         /// a dialog-like behavior can be achieved, as the caller will be suspended until the child is closed.
         /// The child will not be a modal form, so you still will be able to interact with the parent form and other non-suspended child forms.</para>
         /// <para>As the <paramref name="child"/> form is not opened as a real dialog, this call returns immediately after the child is shown.
-        /// You can use the <see cref="OwnedMdiChildClosed"/> event or the <see cref="OnOwnedMdiChildClosed"/> method to get notified when the <paramref name="child"/> form is closed.</para>
+        /// You can use the <see cref="OwnedMdiChildClosed"/> event or the <see cref="OnOwnedMdiChildClosed">OnOwnedMdiChildClosed</see> method to get notified when the <paramref name="child"/> form is closed.</para>
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="child"/> is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">This form is neither an MDI container nor an MDI child that can own the new child.
@@ -864,6 +865,7 @@ namespace KGySoft.WinForms.Forms
         #region Protected Methods
 
         /// <inheritdoc />
+        [EditorBrowsable(EditorBrowsableState.Never)]
         protected override Control.ControlCollection CreateControlsInstance()
             => OSHelper.IsFrameworkMono ? new ControlCollectionMono(this) : new ControlCollection(this);
 
@@ -1001,7 +1003,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Disposes the form and its resources.
         /// </summary>
-        /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        /// <param name="disposing"><see langword="true"/> if managed resources should be disposed; otherwise, <see langword="false"/>.</param>
         protected override void Dispose(bool disposing)
         {
             // Mono bug workaround: If Dispose is called for an MDI child while the form is already disposed, we can finally dispose Events
@@ -1036,9 +1038,9 @@ namespace KGySoft.WinForms.Forms
         }
 
         /// <summary>
-        /// Translates controls and tooltips of given control.
+        /// Translates the controls and tooltips of the given control.
         /// </summary>
-        /// <param name="control">The control to translate</param>
+        /// <param name="control">The control to translate.</param>
         /// <remarks>
         /// <note type="warning">This method is obsolete. It does not perform any translation anymore, it just removes the possible postfixes from the control's text properties.
         /// Use the <see cref="DynamicStringLocalization"/> property and the <see cref="ApplyStringResources">ApplyStringResources</see> method instead.</note>
@@ -1064,10 +1066,10 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Raises the <see cref="CalledMdiChildClosed"/> event.
         /// <br/>This method is obsolete along with the <see cref="CalledMdiChildClosed"/> event.
-        /// Use the <see cref="OwnedMdiChildClosed"/> event and the <see cref="OnOwnedMdiChildClosed"/> method instead.
+        /// Use the <see cref="OwnedMdiChildClosed"/> event and the <see cref="OnOwnedMdiChildClosed">OnOwnedMdiChildClosed</see> method instead.
         /// </summary>
         /// <param name="sender">The closed form, which is the sender of the provided arguments.</param>
-        /// <param name="e">Arguments of the closed form.</param>
+        /// <param name="e">A <see cref="FormClosedEventArgs"/> that contains the event data.</param>
         [Obsolete("The CalledMdiChildClosed event is now obsolete. Use the OwnedMdiChildClosed event and the OnCalledMdiChildClosed method instead.")]
         protected virtual void OnCalledMdiChildClosed(object? sender, FormClosedEventArgs e)
             => Events.GetHandler<FormClosedEventHandler>(nameof(CalledMdiChildClosed))?.Invoke(sender, e);
@@ -1075,21 +1077,21 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Raises the <see cref="OwnedMdiChildClosed"/> event.
         /// </summary>
-        /// <param name="e">Contains the arguments of the event.</param>
+        /// <param name="e">An <see cref="OwnedMdiChildClosedEventArgs"/> that contains the event data.</param>
         protected virtual void OnOwnedMdiChildClosed(OwnedMdiChildClosedEventArgs e)
             => Events.GetHandler<EventHandler<OwnedMdiChildClosedEventArgs>>(nameof(OwnedMdiChildClosed))?.Invoke(this, e);
 
         /// <summary>
         /// Raises the <see cref="Suspended"/> event.
         /// </summary>
-        /// <param name="e">Contains the arguments of the event.</param>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnSuspended(EventArgs e)
             => Events.GetHandler<EventHandler>(nameof(Suspended))?.Invoke(this, e);
 
         /// <summary>
         /// Raises the <see cref="Resumed"/> event.
         /// </summary>
-        /// <param name="e">Contains the arguments of the event.</param>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnResumed(EventArgs e)
             => Events.GetHandler<EventHandler>(nameof(Resumed))?.Invoke(this, e);
 
@@ -1097,7 +1099,7 @@ namespace KGySoft.WinForms.Forms
         /// Raises the <see cref="DeviceScaleChanging"/> event.
         /// <br/>See the <strong>Remarks</strong> section of the <see cref="DeviceScaleChanging"/> event for more details.
         /// </summary>
-        /// <param name="e">Contains the arguments of the event.</param>
+        /// <param name="e">A <see cref="DeviceScaleChangeEventArgs"/> that contains the event data.</param>
         protected virtual void OnDeviceScaleChanging(DeviceScaleChangeEventArgs e)
             => Events.GetHandler<EventHandler<DeviceScaleChangeEventArgs>>(nameof(DeviceScaleChanging))?.Invoke(this, e);
 
@@ -1105,7 +1107,7 @@ namespace KGySoft.WinForms.Forms
         /// Raises the <see cref="DeviceScaleChanged"/> event.
         /// <br/>See the <strong>Remarks</strong> section of the <see cref="DeviceScaleChanged"/> event for more details.
         /// </summary>
-        /// <param name="e">Contains the arguments of the event.</param>
+        /// <param name="e">A <see cref="DeviceScaleChangeEventArgs"/> that contains the event data.</param>
         protected virtual void OnDeviceScaleChanged(DeviceScaleChangeEventArgs e)
             => Events.GetHandler<EventHandler<DeviceScaleChangeEventArgs>>(nameof(DeviceScaleChanged))?.Invoke(this, e);
 
@@ -1113,7 +1115,7 @@ namespace KGySoft.WinForms.Forms
         /// Raises the <see cref="DeviceScaleGetNewSize"/> event.
         /// <br/>See the <strong>Remarks</strong> section of the <see cref="DeviceScaleGetNewSize"/> event for more details.
         /// </summary>
-        /// <param name="e">Contains the arguments of the event.</param>
+        /// <param name="e">A <see cref="DeviceScaleGetNewSizeEventArgs"/> that contains the event data.</param>
         protected virtual void OnDeviceScaleGetNewSize(DeviceScaleGetNewSizeEventArgs e)
             => Events.GetHandler<EventHandler<DeviceScaleGetNewSizeEventArgs>>(nameof(DeviceScaleGetNewSize))?.Invoke(this, e);
 
@@ -1121,14 +1123,14 @@ namespace KGySoft.WinForms.Forms
         /// Raises the <see cref="DeviceScaleAutoResized"/> event.
         /// <br/>See the <strong>Remarks</strong> section of the <see cref="DeviceScaleAutoResized"/> event for more details.
         /// </summary>
-        /// <param name="e">Contains the arguments of the event.</param>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnDeviceScaleAutoResized(EventArgs e)
             => Events.GetHandler<EventHandler>(nameof(DeviceScaleAutoResized))?.Invoke(this, e);
 
         /// <summary>
         /// Raises the <see cref="DynamicStringLocalizationChanged"/> event.
         /// </summary>
-        /// <param name="e">Contains the arguments of the event.</param>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnDynamicStringLocalizationChanged(EventArgs e)
             => Events.GetHandler<EventHandler>(nameof(DynamicStringLocalization))?.Invoke(this, e);
 

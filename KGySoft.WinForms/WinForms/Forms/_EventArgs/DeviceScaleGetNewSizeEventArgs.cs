@@ -54,9 +54,9 @@ namespace KGySoft.WinForms.Forms
         /// To apply a custom size, set the <see cref="HandledEventArgs.Handled"/> property to <see langword="true"/>.
         /// </summary>
         /// <remarks>
-        /// <para>On platforms where the <see cref="Form.OnGetDpiScaledSize"/> method is available, an overridden implementation
+        /// <para>On platforms where the <see cref="Form.OnGetDpiScaledSize">Form.OnGetDpiScaledSize</see> method is available, an overridden implementation
         /// may already have set a desired size. In such case the <see cref="HandledEventArgs.Handled"/> property is already set to <see langword="true"/>.
-        /// To revoke such custom resizing and apply the default scaling behavior instead, set the <see cref="HandledEventArgs.Handled"/> property to <see langword="false"/>.</para>
+        /// To revoke such custom resizing and to apply the default scaling behavior instead, set the <see cref="HandledEventArgs.Handled"/> property to <see langword="false"/>.</para>
         /// </remarks>
         public Size DesiredSize { get; set; }
         
