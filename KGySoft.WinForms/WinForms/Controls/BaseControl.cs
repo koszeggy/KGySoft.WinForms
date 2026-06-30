@@ -26,7 +26,7 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// A base class for custom controls that provides some additional functionality.
+    /// A base class for custom controls that provides some additional functionality compared to <see cref="Control"/>.
     /// </summary>
     /// <remarks>
     /// The <see cref="BaseControl"/> class provides the following additional features:
@@ -143,9 +143,9 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Raises the <see cref="MouseHWheel"/> event with the specified <paramref name="e"/> argument.
+        /// Raises the <see cref="MouseHWheel"/> event.
         /// </summary>
-        /// <param name="e">The event data to pass to the event handlers.</param>
+        /// <param name="e">A <see cref="HandledMouseEventArgs"/> that contains the event data.</param>
         protected virtual void OnMouseHWheel(HandledMouseEventArgs e) => Events.GetHandler<EventHandler<HandledMouseEventArgs>>(nameof(MouseHWheel))?.Invoke(this, e);
 
         /// <summary>

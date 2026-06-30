@@ -37,9 +37,9 @@ namespace KGySoft.WinForms.Controls
     /// <para>When deriving from this control, the following steps must be done:
     /// <list>
     /// <item>Override <see cref="MainControl"/>, <see cref="ControlValue"/> and <see cref="ReadOnly"/> properties.</item>
-    /// <item>Override <see cref="Clear"/>.</item>
-    /// <item>When the <see cref="Control.Enabled"/> or <c>ReadOnly</c> properties of the inner control changes, call <see cref="ResetColor"/>.</item>
-    /// <item>When <see cref="AutoSaveValue"/> is <see langword="true"/>, call <see cref="ResetColor"/> when the effective value of <see cref="MainControl"/> changes.</item>
+    /// <item>Override <see cref="Clear">Clear</see>.</item>
+    /// <item>When the <see cref="Control.Enabled"/> or <c>ReadOnly</c> properties of the inner control changes, call <see cref="ResetColor">ResetColor</see>.</item>
+    /// <item>When <see cref="AutoSaveValue"/> is <see langword="true"/>, call <see cref="ResetColor">ResetColor</see> when the effective value of <see cref="MainControl"/> changes.</item>
     /// </list></para>
     /// </remarks>
     [ToolboxItem(false)]
@@ -66,8 +66,8 @@ namespace KGySoft.WinForms.Controls
         #region Properties
 
         /// <summary>
-        /// Gets the command bindings of this control. The <see cref="O:KGySoft.ComponentModel.CommandBindingsCollection.Add">Add</see> methods also add
-        /// the <see cref="PropertyCommandStateUpdater"/> to the created bindings.
+        /// Gets the command bindings of this control. The <a href="https://koszeggy.github.io/docs/corelibraries/html/Overload_KGySoft_ComponentModel_CommandBindingsCollection_Add.htm" target="_blank">Add</a>
+        /// methods also add the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_PropertyCommandStateUpdater.htm" target="_blank">PropertyCommandStateUpdater</a> to the created bindings.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         public CommandBindingsCollection CommandBindings => commandBindings;
@@ -125,9 +125,9 @@ namespace KGySoft.WinForms.Controls
         public object? SavedValue => savedValue;
 
         /// <summary>
-        /// Tells whether the content of the control is modified since the last <see cref="SaveValue"/> call.
-        /// <remarks>Do not use this property for checking the state of business objects!</remarks>
+        /// Tells whether the content of the control is modified since the last <see cref="SaveValue">SaveValue</see> call.
         /// </summary>
+        /// <remarks>Do not use this property for checking the state of business objects!</remarks>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
         public bool IsModified
@@ -151,7 +151,7 @@ namespace KGySoft.WinForms.Controls
         protected virtual Control? MainControl => null;
 
         /// <summary>
-        /// Gets or sets whether the control should automatically call <see cref="SaveValue"/> to
+        /// Gets or sets whether the control should automatically call <see cref="SaveValue">SaveValue</see> to
         /// display its modified state in <see cref="ColorModified"/> color when data binding context has
         /// been changed. This automatism works only when control is used with data binding and bound
         /// property affects <see cref="ControlValue"/>.
@@ -202,8 +202,8 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// BackColor of the modified inner <see cref="MainControl"/> when control is Enabled and not ReadOnly.
-        /// <remarks>To use this feature call <see cref="SaveValue"/> after setting an initial value in the control.</remarks>
         /// </summary>
+        /// <remarks>To use this feature call <see cref="SaveValue">SaveValue</see> after setting an initial value in the control.</remarks>
         [Category("ucBase")]
         [Description("BackColor of the modified inner main control when control is Enabled and not ReadOnly.")]
         [DefaultValue(typeof(Color), "Gold")]
@@ -332,8 +332,8 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Restores the earlier saved value.
-        /// <remarks>Do not use this feature if the control is bound to a business object that can do this, too!</remarks>
         /// </summary>
+        /// <remarks>Do not use this feature if the control is bound to a business object that can do this, too!</remarks>
         public void RestoreSavedValue()
         {
             if (savedValue != null)
@@ -342,7 +342,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Clears the saved value, so the control will not change its color when modified (like before calling <see cref="SaveValue"/>).
+        /// Clears the saved value, so the control will not change its color when modified (like before calling <see cref="SaveValue">SaveValue</see>).
         /// </summary>
         public void ClearSavedValue()
         {
@@ -359,10 +359,10 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Resets the color of the control.
-        /// <remarks>Call this method in overridden ReadOnly change, Enable change of <see cref="MainControl"/>
-        /// and when the content of <see cref="MainControl"/> has been changed.
-        /// </remarks>
         /// </summary>
+        /// <remarks>Call this method in overridden <see cref="ReadOnly"/> change, <see cref="Control.Enabled"/> change of <see cref="MainControl"/>,
+        /// and when the content of <see cref="MainControl"/> has changed.
+        /// </remarks>
         protected virtual void ResetColor()
         {
             if (MainControl == null)
@@ -406,8 +406,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Sets the ToolTip text for an inner control.
+        /// Sets the tooltip text for an inner control.
         /// </summary>
+        /// <param name="control">The control to set the tooltip text for.</param>
+        /// <param name="toolTipText">The tooltip text to set for the control.</param>
         [SuppressMessage("ReSharper", "ParameterHidesMember", Justification = "Renaming it would be a breaking change")]
         protected void SetToolTip(Control? control, string? toolTipText)
         {
@@ -418,9 +420,9 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// When overridden, may handle special translation of the control.
-        /// <remarks>Will not be called when <see cref="TranslationEnabled"/> is false.</remarks>
         /// </summary>
-        /// <param name="translationFinished">If returns true in overridden methods, no further translation will be performed on child elements.</param>
+        /// <param name="translationFinished">If returns <see langword="true"/> in overridden methods, no further translation will be performed on child elements.</param>
+        /// <remarks>Will not be called when <see cref="TranslationEnabled"/> is <see langword="false"/>.</remarks>
         protected virtual void TranslateContent(ref bool translationFinished)
         {
         }

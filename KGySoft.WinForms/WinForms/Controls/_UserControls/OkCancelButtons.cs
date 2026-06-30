@@ -35,7 +35,7 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Provides a user control with OK, Cancel and optionally Apply buttons.
+    /// Provides a user control with OK, Cancel and Apply buttons, whose visibility and other properties can be adjusted.
     /// </summary>
     [ToolboxBitmap(typeof(OkCancelButtons), "Resources.Toolbox.OkCancelButtons.png")]
     public sealed partial class OkCancelButtons : BaseUserControl, IPerMonitorDpiAware
@@ -58,14 +58,14 @@ namespace KGySoft.WinForms.Controls
         private bool autoScale = true;
 
         #endregion
-        
+
         #endregion
 
         #region Properties
 
         /// <summary>
         /// Gets or sets whether the OK button is visible.
-        /// Default value: <see langword="true"/>.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         [DefaultValue(true)]
         [Category("OkCancelButtons")]
@@ -83,7 +83,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether the Cancel button is visible.
-        /// Default value: <see langword="true"/>.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         [DefaultValue(true)]
         [Category("OkCancelButtons")]
@@ -120,7 +120,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets whether the buttons and their panel should be automatically scaled depending on the current DPI settings,
         /// regardless of the auto-scaling of the current framework or the <see cref="ContainerControl.AutoScaleMode"/> of the form.
-        /// Default value: <see langword="true"/>.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         /// <remarks>
         /// <para>Even if this property is set to <see langword="false"/>, the current executing platform still may scale the buttons with more or less success.</para>

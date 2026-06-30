@@ -48,18 +48,18 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents a label with additional features such as disabled colors, correct auto sizing, fixed auto size, advanced border styles and more.
+    /// Represents a label with additional features such as customizable disabled colors, correct auto sizing, fixed auto sizing behavior, advanced border styles, and more.
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedLabel"/> class offers the following features in addition to <see cref="LinkLabel"/>:
     /// <list type="bullet">
-    /// <item><see cref="Label.AutoSize"/> property works as expected when label is docked</item>
-    /// <item>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</item>
+    /// <item>The <see cref="Label.AutoSize"/> property works as expected when the label is docked.</item>
+    /// <item>Different rendering qualities (see <see cref="TextRenderingQuality"/>).</item>
     /// <item>Advanced border styles.</item>
-    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
-    /// <item>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</item>
+    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/>).</item>
+    /// <item>Buffered fading animations (only on Vista and above with visual styles enabled, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/>).</item>
     /// <item>Automatic resolve of hyperlinks.</item>
-    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/>).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// <item>Fixing some Mono-specific <see cref="Label"/>/<see cref="LinkLabel"/> issues, such as non-visible text with border, wrong rendering with padding, random
     /// exceptions from mouse events when links are used.</item>
@@ -71,7 +71,7 @@ namespace KGySoft.WinForms.Controls
 - Adjustable rendering qualities
 - Advanced border styles
 - Adjustable colors in disabled state
-- Fading animations
+- Buffered fading animations
 - Automatic resolving of hyperlinks
 - Auto scaling Font on all platform targets")]
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
@@ -133,10 +133,11 @@ namespace KGySoft.WinForms.Controls
         #region Events
 
         /// <summary>
-        /// Occurs when a link is clicked.
-        /// To handle clicked links automatically, set <see cref="AutoHandleUrls"/>&#160;<see langword="true"/>, and if this event is subscribed, set <see cref="HandledEventArgs.Handled"/> <see langword="false"/> in the event handler.
+        /// Occurs when a link is clicked. To handle clicked links automatically, set the <see cref="AutoHandleUrls"/> property to <see langword="true"/>.
+        /// If this event is subscribed, you can also set <see cref="HandledEventArgs.Handled"/> to <see langword="false"/> to navigate to the target site automatically.
         /// </summary>
-        [Description("Occurs when a link is clicked. To handle clicked links automatically, set AutoHandleUrls true, and if this event is subsribed, set HyperlinkClickedEventArgs.Handled false in the event handler.")]
+        [Description("Occurs when a link is clicked. To handle clicked links automatically, set the AutoHandleUrls property to true. "
+            + "If this event is subscribed, you can also set Handled to false to navigate to the target site automatically.")]
         [Category("AdvancedLabel")]
         public event EventHandler<HyperlinkClickedEventArgs>? HyperlinkClicked
         {
@@ -163,8 +164,11 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether clicked links should be handled automatically or when <see cref="HandledEventArgs.Handled"/> is set to <see langword="false"/>.
-        /// <note type="caution">Caution: Setting this property to <see langword="true"/> may cause security issues. Use only in secure circumstances!</note>
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
+        /// <remarks>
+        /// <note type="security">Caution: Setting this property to <see langword="true"/> may cause security issues if the <see cref="Text"/> can be set or updated from an external source.</note>
+        /// </remarks>
         [Category("AdvancedLabel")]
         [DefaultValue(false)]
         [Description("Gets or sets whether clicked links should be handled automatically or when HyperlinkClickedEventArgs.Handled is set to false. Caution: Setting this property to true may cause security issues. Use only in secure circumstances!")]
@@ -186,7 +190,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         /// <remarks>
         /// <para>When value is <see cref="HyperlinkResolveMode.ResolveHrefsOnly"/>, hyperlinks will be resolved only in the following form:
-        /// <example><c>This is a &lt;a href="https://github.com/koszeggy"&gt;hyperlink&lt;/a&gt;</c></example>
+        /// <br/><c>This is a &lt;a href="https://github.com/koszeggy"&gt;hyperlink&lt;/a&gt;</c>
         /// </para>
         /// <para>When value is <see cref="HyperlinkResolveMode.ResolveAll"/>, simple inline hyperlinks will be resolved, too.</para>
         /// <para>When value is <see cref="HyperlinkResolveMode.None"/>, you need to explicitly set <see cref="LinkArea"/> to specify a
@@ -218,8 +222,10 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
         }
 
         /// <summary>
-        /// Gets or sets the border style of the <see cref="AdvancedLabel"/> panel.
+        /// Gets or sets the border style of the <see cref="AdvancedLabel"/>.
+        /// <br/>See the <see cref="AdvancedBorderStyle"/> enumeration for the available options.
         /// </summary>
+        /// <seealso cref="AdvancedBorderStyle"/>
         [Category("AdvancedLabel")]
         [Description("Gets or sets the border style of the AdvancedLabel.")]
         [DefaultValue(AdvancedBorderStyle.None)]
@@ -254,13 +260,11 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
 
         /// <summary>
         /// Gets or sets text of the label. When <see cref="ResolveHyperlinks"/> is not <see cref="HyperlinkResolveMode.None"/>,
-        /// hyperlinks in text like the following will be converted to hyperlinks:
-        /// <example><c>This is a &lt;a href=https://github.com/koszeggy"&gt;hyperlink&lt;/a&gt;</c></example>
+        /// hyperlinks in text will be converted to links automatically.
         /// </summary>
         [RefreshProperties(RefreshProperties.Repaint)]
         [Category("AdvancedLabel")]
-        [Description(@"Gets or sets text of the label. When ResolveHyperlinks is set, hyperlinks in text like the following will be converted to hyperlinks:
-This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
+        [Description(@"Gets or sets the text of the label. When ResolveHyperlinks is set, hyperlinks in text will be converted to links automatically.")]
         [AllowNull]
         public override string Text
         {
@@ -269,12 +273,12 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
         }
 
         /// <summary>
-        /// Gets or sets raw text of the label. When <see cref="ResolveHyperlinks"/> is not <see cref="HyperlinkResolveMode.None"/>,
-        /// value of this property may differ from <see cref="Text"/>.
+        /// Gets or sets the raw text of the label. When <see cref="ResolveHyperlinks"/> is not <see cref="HyperlinkResolveMode.None"/>,
+        /// the value of this property may differ from <see cref="Text"/>.
         /// </summary>
         [Category("AdvancedLabel")]
         [RefreshProperties(RefreshProperties.Repaint)]
-        [Description("Gets or sets raw text of the label. When ResolveHyperlinks is not HyperlinkResolveModes.None, value of this property may differ from Text.")]
+        [Description("Gets or sets the raw text of the label. When ResolveHyperlinks is not HyperlinkResolveModes.None, the value of this property may differ from Text.")]
         [Editor(typeof(MultilineStringEditor), typeof(UITypeEditor))]
         public string? RawText
         {
@@ -291,6 +295,7 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
 
         /// <summary>
         /// Gets or sets the text rendering quality of the <see cref="AdvancedLabel"/>.
+        /// <br/>Default value: <see cref="RenderingQuality.SystemDefault"/>.
         /// </summary>
         [Category("AdvancedLabel")]
         [Description("Gets or sets the text rendering quality of the advanced label. Has effect only when FlatStyle is not System.")]
@@ -426,11 +431,12 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
 
         /// <summary>
         /// Gets or sets whether fading animations are enabled for the control.
-        /// Animations work on Windows Vista and above, with non-classic themes.
+        /// Animations work on Windows Vista and above when rendering with visual styles.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         [Category("AdvancedLabel")]
         [DefaultValue(true)]
-        [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above, with non-classic themes.")]
+        [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above when rendering with visual styles.")]
         public bool FadingAnimationsEnabled
         {
             get => flags[fadingAnimationsEnabled];
@@ -445,11 +451,12 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
         }
 
         /// <summary>
-        /// Gets or sets fading options of the control.
+        /// Gets or sets the fading options of the control.
+        /// <br/>Default value: <see cref="FadingOptions.StandardEffects"/>.
         /// </summary>
         [Category("AdvancedLabel")]
         [DefaultValue(FadingOptions.StandardEffects)]
-        [Description("Gets or sets fading options of the control.")]
+        [Description("Gets or sets the fading options of the control.")]
         [TypeConverter(typeof(FlagsEnumConverter))]
         public FadingOptions FadingAnimationOptions
         {
@@ -473,11 +480,12 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
         }
 
         /// <summary>
-        /// Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
+        /// Gets or sets the default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
+        /// <br/>Default value: 500.
         /// </summary>
         [Category("AdvancedLabel")]
         [DefaultValue(500)]
-        [Description("Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
+        [Description("Gets or sets the default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
         public int FadingAnimationDefaultSpeed
         {
             get => fadingAnimationDefaultSpeed;
@@ -494,7 +502,8 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
         }
 
         /// <summary>
-        /// Gets or sets whether to use compatible text rendering engine (GDI+) or not (GDI).
+        /// Gets or sets whether to use the text rendering engine compatible with .NET Framework 1.x (GDI+) or not (GDI).
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         public new bool UseCompatibleTextRendering
         {
@@ -507,7 +516,7 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
         }
 
         /// <summary>
-        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// Gets or sets whether the <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
         /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         /// <remarks>
@@ -695,7 +704,7 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
             base.OnFontChanged(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseMove" />
         protected override void OnMouseMove(MouseEventArgs e)
         {
             try
@@ -716,7 +725,7 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseDown" />
         protected override void OnMouseDown(MouseEventArgs e)
         {
             try
@@ -728,7 +737,7 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseUp" />
         protected override void OnMouseUp(MouseEventArgs e)
         {
             try
@@ -805,7 +814,14 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
                 OnForeColorChanged(EventArgs.Empty);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Implicitly calls the <see cref="OnPaintState">OnPaintState</see> method, which raises both the <see cref="Control.Paint"/> and <see cref="PaintState"/> events.
+        /// </summary>
+        /// <param name="e">A <see cref="PaintEventArgs"/> that contains the event data.</param>
+        /// <remarks>
+        /// <note type="important">It is not recommended to override this method, unless it is really justified. Consider to override <see cref="OnPaintState">OnPaintState</see>
+        /// instead, where painting the desired state of the control can be applied without interfering with the fading animation.</note>
+        /// </remarks>
         protected override void OnPaint(PaintEventArgs e)
         {
             try
@@ -887,7 +903,7 @@ This is a <a href=""https://github.com/koszeggy"">hyperlink</a>")]
                 lastScale = PointF.Empty;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.WndProc" />
         protected override void WndProc(ref Message m)
         {
             switch (m.Msg)

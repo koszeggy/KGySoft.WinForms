@@ -133,7 +133,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets the inner <see cref="AdvancedTextBox"/>.
+        /// Gets the inner <see cref="AdvancedComboBox"/>.
         /// </summary>
         [Category("ucCombo")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -220,7 +220,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets whether the there is no selected item in the combo box (<see cref="SelectedValue"/> or is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
+        /// Gets whether there is no selected item in the combo box (<see cref="SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals to <see cref="ControlExtensions.NotSelectedValue"/>)
         /// </summary>
         [Browsable(false)]
         public bool IsEmpty => cmbCombo.IsEmpty();
@@ -345,10 +345,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         ///<summary>
-        /// Gets or sets a custom <see cref="AutoCompleteStringCollection"/> to <see cref="AutoCompleteSource"/> property is <see cref="System.Windows.Forms.AutoCompleteSource.CustomSource"/>.
+        /// Gets or sets a custom <see cref="AutoCompleteStringCollection"/> if the <see cref="AutoCompleteSource"/> property is <see cref="AutoCompleteSource.CustomSource"/>.
         ///</summary>
         [Category("ucCombo")]
-        [Description("Gets or sets a custom AutoCompleteStringCollection to AutoCompleteSource property is CustomSource.")]
+        [Description("Gets or sets a custom AutoCompleteStringCollection if the AutoCompleteSource property is CustomSource.")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public AutoCompleteStringCollection AutoCompleteCustomSource
@@ -361,7 +361,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to a <see cref="DataTable"/>.
         /// </summary>
         /// <param name="dataTable">The data source table.</param>
-        /// <param name="displayMember">Column name to display in the the combo box.</param>
+        /// <param name="displayMember">Column name to display in the combo box.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, the displayed column must contain string values.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
@@ -377,7 +377,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to a <see cref="DataTable"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
         /// </summary>
         /// <param name="dataTable">The data source table.</param>
-        /// <param name="displayMember">Column name to display in the the combo box.</param>
+        /// <param name="displayMember">Column name to display in the combo box.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the value column must have a data type that is convertible to signed integer type.</param>
@@ -387,10 +387,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Binds the combo box to a <see cref="DataTable"/>. Items will not be sorted and translated.
+        /// Binds the combo box to a <see cref="DataTable"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="dataTable">The data source table.</param>
-        /// <param name="displayMember">Column name to display in the the combo box.</param>
+        /// <param name="displayMember">Column name to display in the combo box.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
         public void LoadFrom(DataTable dataTable, string valueMember, string displayMember)
         {
@@ -425,7 +425,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
+        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
         /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will be used as value member.</param>
@@ -435,7 +435,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
+        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
         public void LoadFrom(Type enumType)
@@ -446,8 +446,9 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Binds the combo box to a <paramref name="collection"/>.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="collection">The source collection.</param>
-        /// <param name="displayMember">Property name to display in the the combo box.</param>
+        /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, <paramref name="displayMember"/> must be writable and should refer to a <see cref="string"/> property.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
@@ -462,8 +463,9 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="collection">The source collection.</param>
-        /// <param name="displayMember">Property name to display in the the combo box.</param>
+        /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
@@ -473,10 +475,11 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted and translated.
+        /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted or translated.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="collection">The source collection.</param>
-        /// <param name="displayMember">Property name to display in the the combo box.</param>
+        /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember)
         {

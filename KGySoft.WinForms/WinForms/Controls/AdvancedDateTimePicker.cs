@@ -33,22 +33,22 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Advanced version of <see cref="DateTimePicker"/> control that provides some advanced features and fixes for the original <see cref="DateTimePicker"/>.
+    /// Represents a date-time picker control with additional features such as adjustable colors, fixed rendering in high DPI mode, and more.
     /// </summary>
     /// <remarks>
     /// The <see cref="DateTimePicker"/> control offers the following features in addition to <see cref="DateTimePicker"/>:
     /// <list type="bullet">
-    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
+    /// <item>Adjustable colors when the control is not focused (or visual styles are disabled).</item>
     /// <item>Its <see cref="Value"/> property is redefined so it returns <see cref="DateTime.MaxValue"/> if <see cref="DateTimePicker.Checked"/> is <see langword="false"/> and
     /// instead of throwing exception when invalid date is assigned to it, it simpy changes <see cref="DateTimePicker.Checked"/> false (if checkbox is visible), or just ignores the value.</item>
-    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/>).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// <item>When rendering with visual styles on high DPI, preferring always the standard check box sizes.
     /// When the standard size cannot be used, improving the rendering quality if <see cref="CheckBoxRenderingQuality"/> is <see cref="RenderingQuality.High"/>.</item>
     /// </list>
     /// </remarks>
     [Description(@"A date-time picker provides the following features in addition to regular DateTimePicker:
-- Adjustable colors in disabled state
+- Adjustable colors
 - Value property is redefined to return DateTime.MaxValue if Checked is false; instead of throwing exceptions, out-of-range values don't change Value
 - Auto scaling Font on all platform targets
 - Adjustable checkbox rendering quality")]
@@ -417,7 +417,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// Gets or sets whether the <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
         /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         /// <remarks>
@@ -682,7 +682,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnGotFocus" />
         protected override void OnGotFocus(EventArgs e)
         {
             base.OnGotFocus(e);

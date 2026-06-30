@@ -452,8 +452,10 @@ namespace KGySoft.WinForms
         #region Public Methods
 
         /// <summary>
-        /// Gets whether the display that the specified control is using has the same DPI as the initial DPI of the primary display.
+        /// Gets whether the display that the specified <paramref name="control"/> belongs to has the same DPI as the initial DPI of the primary display.
         /// </summary>
+        /// <param name="control">The control to check.</param>
+        /// <returns><see langword="true"/> if the display that the specified <paramref name="control"/> belongs to has the same DPI as the initial DPI of the primary display; otherwise, <see langword="false"/>.</returns>
         public static bool HasDefaultScaling(this Control control)
         {
             if (control == null!)

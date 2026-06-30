@@ -34,19 +34,19 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents a button with additional features such as disabled colors, elevated mode, buffered animations and more.
+    /// Represents a button with additional features such as customizable disabled colors, elevated mode, buffered fading animations, and more.
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedButton"/> class offers the following features in addition to <see cref="Button"/>:
     /// <list type="bullet">
     /// <item>Images are displayed also when the <see cref="FlatStyle"/> property is <see cref="FlatStyle.System"/>.</item>
-    /// <item>Elevated mode (see <see cref="IsElevated"/> property). The shield icon is rendered also on a pre-Vista Windows.</item>
-    /// <item>Different rendering qualities (see <see cref="TextRenderingQuality"/>) property.</item>
-    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
-    /// <item>Fading animations (only on Vista and above with visual styles enabled, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</item>
-    /// <item>Slightly different appearance in some cases (e.g. focus rectangle size and width, better fit of images, image shifts along with text in classic or popup appearance,
+    /// <item>Elevated mode (see <see cref="IsElevated"/>). The shield icon is rendered also on a pre-Vista Windows.</item>
+    /// <item>Different rendering qualities (see <see cref="TextRenderingQuality"/>).</item>
+    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/>).</item>
+    /// <item>Buffered fading animations with every <see cref="FlatStyle"/> (only on Vista and above with visual styles enabled, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/>).</item>
+    /// <item>Small appearance changes and improvements (e.g. focus rectangle size and width, better fit of images, image shifts along with text in classic or popup appearance,
     /// fixed highlight fore color in high contrast mode with visual styles enabled, etc.).</item>
-    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/>).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// </list>
     /// </remarks>
@@ -56,7 +56,7 @@ namespace KGySoft.WinForms.Controls
 - IsElevated property (shield icon)
 - Different rendering qualities
 - Adjustable colors in disabled state
-- Fading animations
+- Buffered fading animations with every FlatStyle
 - Fixed appearance in several cases
 - Auto scaling Font on all platform targets")]
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
@@ -152,10 +152,11 @@ namespace KGySoft.WinForms.Controls
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets whether an elevated shield icon should be displayed.
+        /// Gets or sets whether an elevated shield icon should be displayed on the button.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         [Category("AdvancedButton")]
-        [Description("Gets or sets whether an elevated shield icon should be displayed.")]
+        [Description("Gets or sets whether an elevated shield icon should be displayed on the button.")]
         [DefaultValue(false)]
         public bool IsElevated
         {
@@ -178,9 +179,9 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        /// <returns>
-        /// The text associated with this control.
-        /// </returns>
+        /// <summary>
+        /// Gets or sets the text of the button.
+        /// </summary>
         [AllowNull]
         public override string Text
         {
@@ -216,6 +217,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the position of text and image relative to each other.
+        /// <br/>Default value: <see cref="TextImageRelation.ImageBeforeText"/>.
         /// </summary>
         [DefaultValue(TextImageRelation.ImageBeforeText)]
         public new TextImageRelation TextImageRelation
@@ -230,6 +232,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the flat style appearance of the button control.
+        /// <br/>Default value: <see cref="FlatStyle.Standard"/>.
         /// </summary>
         [DefaultValue(FlatStyle.Standard)]
         public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
@@ -265,6 +268,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the text rendering quality of the <see cref="AdvancedButton"/>.
+        /// <br/>Default value: <see cref="RenderingQuality.SystemDefault"/>.
         /// </summary>
         [Category("AdvancedButton")]
         [Description("Gets or sets the text rendering quality of the button control. Has effect only when FlatStyle is not System.")]
@@ -291,7 +295,8 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
+        /// Gets or sets whether to use the text rendering engine compatible with .NET Framework 1.x (GDI+) or not (GDI).
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         [DefaultValue(false)]
         public new bool UseCompatibleTextRendering
@@ -305,7 +310,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// Gets or sets whether the <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
         /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         /// <remarks>
@@ -494,11 +499,12 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether fading animations are enabled for the control.
-        /// Animations work on Windows Vista and above, with non-classic themes.
+        /// Animations work on Windows Vista and above when rendering with visual styles.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         [Category("AdvancedButton")]
         [DefaultValue(true)]
-        [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above, with non-classic themes.")]
+        [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above when rendering with visual styles.")]
         public bool FadingAnimationsEnabled
         {
             get => flags[fadingAnimationsEnabled];
@@ -513,11 +519,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets fading options of the control.
+        /// Gets or sets the fading options of the control.
+        /// <br/>Default value: <see cref="FadingOptions.StandardEffects"/>.
         /// </summary>
         [Category("AdvancedButton")]
         [DefaultValue(FadingOptions.StandardEffects)]
-        [Description("Gets or sets fading options of the control.")]
+        [Description("Gets or sets the fading options of the control.")]
         [TypeConverter(typeof(FlagsEnumConverter))]
         public FadingOptions FadingAnimationOptions
         {
@@ -541,11 +548,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
+        /// Gets or sets the default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
+        /// <br/>Default value: 500.
         /// </summary>
         [Category("AdvancedButton")]
         [DefaultValue(500)]
-        [Description("Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
+        [Description("Gets or sets the default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
         public int FadingAnimationDefaultSpeed
         {
             get => fadingAnimationDefaultSpeed;
@@ -846,7 +854,14 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Implicitly calls the <see cref="OnPaintState">OnPaintState</see> method, which raises both the <see cref="Control.Paint"/> and <see cref="PaintState"/> events.
+        /// </summary>
+        /// <param name="e">A <see cref="PaintEventArgs"/> that contains the event data.</param>
+        /// <remarks>
+        /// <note type="important">It is not recommended to override this method, unless it is really justified. Consider to override <see cref="OnPaintState">OnPaintState</see>
+        /// instead, where painting the desired state of the control can be applied without interfering with the fading animation.</note>
+        /// </remarks>
         protected override void OnPaint(PaintEventArgs e)
         {
             // adjusting FlatStyle if needed (in System mode this is in WndProc)
@@ -959,7 +974,7 @@ namespace KGySoft.WinForms.Controls
                 lastScale = PointF.Empty;
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseLeave" />
         protected override void OnMouseLeave(EventArgs e)
         {
             flags[isHovered] = false;
@@ -967,7 +982,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseLeave(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseEnter" />
         protected override void OnMouseEnter(EventArgs e)
         {
             flags[isHovered] = true;
@@ -975,7 +990,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseEnter(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseUp" />
         protected override void OnMouseUp(MouseEventArgs e)
         {
             flags[isPressed | isMouseDown] = false;
@@ -983,7 +998,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseUp(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseDown" />
         protected override void OnMouseDown(MouseEventArgs e)
         {
             flags[isPressed | isMouseDown] = e.Button == MouseButtons.Left;
@@ -991,16 +1006,16 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseDown(e);
         }
 
-        /// <inheritdoc />
-        protected override void OnMouseMove(MouseEventArgs mevent)
+        /// <inheritdoc cref="Control.OnMouseMove" />
+        protected override void OnMouseMove(MouseEventArgs e)
         {
             if (flags[isMouseDown])
-                flags[isPressed] = mevent.X >= 0 && mevent.X < Width && mevent.Y >= 0 && mevent.Y < Height;
+                flags[isPressed] = e.X >= 0 && e.X < Width && e.Y >= 0 && e.Y < Height;
 
-            base.OnMouseMove(mevent);
+            base.OnMouseMove(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnKeyDown" />
         protected override void OnKeyDown(KeyEventArgs e)
         {
             if (e.KeyData == Keys.Space && !IsPressed)
@@ -1009,7 +1024,7 @@ namespace KGySoft.WinForms.Controls
             base.OnKeyDown(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnKeyUp" />
         protected override void OnKeyUp(KeyEventArgs e)
         {
             if (e.KeyData == Keys.Space && IsPressed)

@@ -55,10 +55,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Occurs on leave when content differs from the content at getting focused.
+        /// Occurs on leaving the control when <see cref="Text"/> is different from the value when the control received focus.
         /// </summary>
         [Category("ucTextBase")]
-        [Description("Occurs on leave when content differs from the content at getting focused.")]
+        [Description("Occurs on leaving the control when Text is different from the value when the control received focus.")]
         public event EventHandler? TextChangedOnLeave;
 
         #endregion
@@ -187,9 +187,9 @@ namespace KGySoft.WinForms.Controls
         #region Protected Methods
 
         /// <summary>
-        /// Fires the <see cref="TextChangedOnLeave"/> event.
+        /// Raises the <see cref="TextChangedOnLeave"/> event.
         /// </summary>
-        /// <param name="e"></param>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnTextChangedOnLeave(EventArgs e) => TextChangedOnLeave?.Invoke(this, e);
 
         #endregion

@@ -54,7 +54,7 @@ namespace KGySoft.WinForms
         #region Public Methods
 
         /// <summary>
-        /// Gets whether there is no selected item in the list control (<see cref="ListControl.SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
+        /// Gets whether there is no selected item in the list control (<see cref="ListControl.SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals to <see cref="ControlExtensions.NotSelectedValue"/>)
         /// </summary>
         /// <param name="control">The <see cref="ListControl"/> instance to check.</param>
         /// <returns><see langword="true"/> if there is no selected item in this control, otherwise <see langword="false"/>.</returns>

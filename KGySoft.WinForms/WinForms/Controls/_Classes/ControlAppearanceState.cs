@@ -23,7 +23,7 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents appearance status information of a control that supports fading animations.
+    /// Represents appearance status information of a control that supports buffered fading animations.
     /// </summary>
     public sealed class ControlAppearanceState
     {

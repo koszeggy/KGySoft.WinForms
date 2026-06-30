@@ -26,8 +26,9 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Helper class for buffered fading animations. Host control must implement <see cref="ISupportsFading{TState}"/> interface.
+    /// Helper class for buffered fading animations. The host control must implement the <see cref="ISupportsFading{TState}"/> interface.
     /// </summary>
+    /// <typeparam name="TState">The type of the state object.</typeparam>
     public class FadingPainter<TState> : IDisposable
     {
         #region Fields
@@ -55,8 +56,7 @@ namespace KGySoft.WinForms.Controls
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the stored last state explicitly. Setting this property does not
-        /// invalidate the host control.
+        /// Gets or sets the stored last state explicitly. Setting this property does not invalidate the host control.
         /// </summary>
         public TState? State { get; set; }
 
@@ -121,10 +121,11 @@ namespace KGySoft.WinForms.Controls
         #region Constructors
 
         /// <summary>
-        /// Creates a new instance of <see cref="FadingPainter{TState}"/>.
+        /// Creates a new instance of the <see cref="FadingPainter{TState}"/> class.
         /// </summary>
         /// <param name="host">The host control that implements <see cref="ISupportsFading{TState}"/>.</param>
-        /// <param name="initialState">Initial state of the host control.</param>
+        /// <param name="initialState">The initial state of the host control.
+        /// If <see langword="null"/>, you must set the <see cref="State"/> property before the control is painted for the first time.</param>
         public FadingPainter(ISupportsFading<TState> host, TState? initialState)
         {
             if (host == null)
@@ -144,7 +145,8 @@ namespace KGySoft.WinForms.Controls
         #region Public Methods
 
         /// <summary>
-        /// Invokes painting using fading animation if state has been changed and fading is supported and enabled.
+        /// Invokes the <see cref="ISupportsFading{TState}.PaintState">PaintState</see> method of the host control if <see cref="State"/> has been changed.
+        /// If buffered fading animations are not available, it acts a regular painting session.
         /// </summary>
         /// <param name="e">Paint event args from the host control <see cref="System.Windows.Forms.Control.OnPaint"/> method or <see cref="System.Windows.Forms.Control.Paint"/> event handler.</param>
         public void Paint(PaintEventArgs e)
@@ -273,7 +275,7 @@ namespace KGySoft.WinForms.Controls
         #region Protected Methods
 
         /// <summary>
-        /// Executed when Windows theme has been changed.
+        /// Called when the Windows theme has changed.
         /// </summary>
         protected virtual void OnThemeChanged()
         {
@@ -290,9 +292,9 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets the speed of the fading animation between specified states.
-        /// When not overridden, hosts <see cref="ISupportsFading{TState}.GetFadingAnimationSpeed"/>
-        /// is requested. If that returns negative value, <see cref="ISupportsFading{TState}.FadingAnimationDefaultSpeed"/> is used.
+        /// Gets the speed of the fading animation between the two specified states.
+        /// When not overridden, the host's <see cref="ISupportsFading{TState}.GetFadingAnimationSpeed">GetFadingAnimationSpeed</see>
+        /// is requested. If that returns a negative value, <see cref="ISupportsFading{TState}.FadingAnimationDefaultSpeed"/> is used.
         /// </summary>
         /// <param name="prevState">Previous state.</param>
         /// <param name="newState">New state.</param>
@@ -310,10 +312,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets whether the previous and new states are equal.
+        /// Gets whether the specified states are equal.
         /// </summary>
-        /// <param name="prevState">Previous state.</param>
-        /// <param name="newState">New state.</param>
+        /// <param name="prevState">The previous state.</param>
+        /// <param name="newState">The new state.</param>
         /// <returns><see langword="true"/>, if states are equal; otherwise, <see langword="false"/>.</returns>
         protected virtual bool StateEquals(TState prevState, TState newState) => Equals(prevState, newState);
 

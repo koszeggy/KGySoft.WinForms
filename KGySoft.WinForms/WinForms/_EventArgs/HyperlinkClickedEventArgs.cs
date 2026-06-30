@@ -33,9 +33,8 @@ namespace KGySoft.WinForms
         #region Properties
 
         /// <summary>
-        /// Gets the hyperlink that was clicked. If resolving was not handled,
-        /// the <see cref="HandledEventArgs.Handled"/> property can be set to <see langword="false"/>
-        /// to make the system resolve the hyperlink.
+        /// Gets the hyperlink that was clicked. If resolving was not handled, the <see cref="HandledEventArgs.Handled"/>
+        /// property can be set to <see langword="false"/> to navigate to the target site automatically.
         /// </summary>
         public string Hyperlink { get; private set; }
 

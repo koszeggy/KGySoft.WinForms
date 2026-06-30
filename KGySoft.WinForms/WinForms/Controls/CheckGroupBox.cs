@@ -68,6 +68,7 @@ namespace KGySoft.WinForms.Controls
             /// Initializes a new instance of the <see cref="ControlCollection"/> class with the specified owner.
             /// </summary>
             /// <param name="owner">The <see cref="CheckGroupBox"/> that owns this collection.</param>
+            [EditorBrowsable(EditorBrowsableState.Never)]
             public ControlCollection(CheckGroupBox owner)
                 : base(owner ?? throw new ArgumentNullException(nameof(owner), PublicResources.ArgumentNull))
             {
@@ -299,7 +300,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Occurs when the <see cref="CheckBox"/> is checked or unchecked.
         /// </summary>
-        internal event EventHandler CheckedChanged
+        public event EventHandler CheckedChanged
         {
             add => Events.AddHandler(nameof(CheckedChanged), value);
             remove => Events.RemoveHandler(nameof(CheckedChanged), value);
@@ -354,6 +355,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the flat style appearance of the <see cref="CheckBox"/> and the <see cref="GroupBox"/>.
+        /// <br/>Default value: <see cref="FlatStyle.Standard"/>.
         /// </summary>
         [DefaultValue(FlatStyle.Standard)]
         [Description("Gets or sets the flat style appearance of the check box and the group box.")]
@@ -380,7 +382,8 @@ namespace KGySoft.WinForms.Controls
         public AdvancedCheckBox CheckBox => checkBox;
 
         /// <summary>
-        /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
+        /// Gets or sets whether to use the text rendering engine compatible with .NET Framework 1.x (GDI+) or not (GDI).
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         [DefaultValue(false)]
         public new bool UseCompatibleTextRendering
@@ -419,6 +422,7 @@ namespace KGySoft.WinForms.Controls
         #region Protected Methods
 
         /// <inheritdoc />
+        [EditorBrowsable(EditorBrowsableState.Never)]
         protected override Control.ControlCollection CreateControlsInstance() => new ControlCollection(this);
 
         /// <inheritdoc />

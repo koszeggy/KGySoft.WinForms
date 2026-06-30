@@ -32,21 +32,21 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Advanced version of the <see cref="ComboBox"/> control that provides some advanced features and fixes for the original <see cref="ComboBox"/>.
+    /// Represents a combo box with additional features such as customizable disabled colors, read-only mode, and more.
     /// </summary>
     /// <remarks>
-    /// The <see cref="AdvancedTextBox"/> control offers the following features in addition to <see cref="TextBox"/>:
+    /// The <see cref="AdvancedComboBox"/> control offers the following features in addition to <see cref="ComboBox"/>:
     /// <list type="bullet">
-    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
+    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/>).</item>
     /// <item><see cref="TextChangedOnLeave"/> event: occurs when leaving the control and <see cref="ComboBox.Text"/> is different from the value when the control received focus.</item>
     /// <item>Auto complete works even in <see cref="ComboBoxStyle.Simple"/> mode.</item>
-    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/>).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// </list>
     /// </remarks>
     [ToolboxBitmap(typeof(ComboBox))]
     [Description(@"A combo box with the following additional features:
-- Disabled colors
+- Adjustable colors in disabled state
 - ReadOnly property and ReadOnlyChanged event
 - TextChangedOnLeave event
 - Auto complete works in Simple mode
@@ -225,7 +225,7 @@ namespace KGySoft.WinForms.Controls
         #region Events
 
         /// <summary>
-        /// Occurs when <see cref="ReadOnly"/> property has been changed.
+        /// Occurs when the <see cref="ReadOnly"/> property has been changed.
         /// </summary>
         [Description("Occurs when ReadOnly property has been changed.")]
         [Category("AdvancedComboBox")]
@@ -236,10 +236,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Occurs on leaving the control when content is different from the original one when the control was focused.
+        /// Occurs on leaving the control when <see cref="ComboBox.Text"/> is different from the value when the control received focus.
         /// </summary>
         [Category("AdvancedComboBox")]
-        [Description("Occurs on leaving the control when content is different from the original one when the control was focused.")]
+        [Description("Occurs on leaving the control when Text is different from the value when the control received focus.")]
         public event EventHandler? TextChangedOnLeave
         {
             add => Events.AddHandler(nameof(TextChangedOnLeave), value);
@@ -270,7 +270,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the foreground color of the control in the current state.
+        /// Gets or sets the foreground color of the control in the current <see cref="Control.Enabled"/> state.
         /// </summary>
         [Description("The text color in the current Enabled state. This property always sets EnabledForeColor or DisabledForeColor.\r\n\r\n"
             + "Please note that in the WinForms designer a control never actually turns disabled.")]
@@ -378,7 +378,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// Gets or sets whether the <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
         /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         /// <remarks>
@@ -465,7 +465,8 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets an option that controls how automatic completion works for the inner combo box.
+        /// Gets or sets how automatic completion works for the inner combo box.
+        /// <br/>Default value: <see cref="AutoCompleteMode.None"/>.
         /// </summary>
         [DefaultValue(AutoCompleteMode.None)]
         public new AutoCompleteMode AutoCompleteMode
@@ -481,7 +482,8 @@ namespace KGySoft.WinForms.Controls
         }
 
         ///<summary>
-        /// Gets or sets a value specifying the source of complete strings used for automatic completion.
+        /// Gets or sets the source of complete strings used for automatic completion.
+        /// <br/>Default value: <see cref="AutoCompleteSource.None"/>.
         ///</summary>
         [DefaultValue(AutoCompleteSource.None)]
         public new AutoCompleteSource AutoCompleteSource
@@ -592,8 +594,8 @@ namespace KGySoft.WinForms.Controls
         #region Public Methods
 
         /// <summary>
-        /// Clears <see cref="ComboBox.Text"/> property. If <see cref="AutoCompleteMode"/> property is set on a simple mode combo box, then
-        /// use this method to clear text instead of setting empty string to Text property.
+        /// Clears the <see cref="ComboBox.Text"/> property. If <see cref="AutoCompleteMode"/> property is set on a simple mode combo box, then
+        /// use this method to clear the text instead of setting empty string to the <see cref="ComboBox.Text"/> property.
         /// </summary>
         public void Clear()
         {
@@ -686,12 +688,14 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Raises the <see cref="ReadOnlyChanged"/> event.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnReadOnlyChanged(EventArgs e) => Events.GetHandler<EventHandler>(nameof(ReadOnlyChanged))?.Invoke(this, e);
 
 
         /// <summary>
         /// Raises the <see cref="TextChangedOnLeave"/> event.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnTextChangedOnLeave(EventArgs e) => Events.GetHandler<EventHandler>(nameof(TextChangedOnLeave))?.Invoke(this, e);
 
         /// <inheritdoc />
@@ -722,7 +726,7 @@ namespace KGySoft.WinForms.Controls
                 base.OnKeyPress(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseDown" />
         protected override void OnMouseDown(MouseEventArgs e)
         {
             if (!OSHelper.IsFrameworkMono || !flags[isReadOnly] || DropDownStyle == ComboBoxStyle.Simple)
@@ -757,9 +761,11 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Draws an item in the dropdown area and also in the control area in DropDownList mode.
-        /// Works only if DrawMode is OwnerDrawFixed.
+        /// Draws an item in the dropdown area and also in the control area in <see cref="ComboBoxStyle.DropDownList"/> mode.
+        /// Works only if <see cref="ComboBox.DrawMode"/> is <see cref="DrawMode.OwnerDrawFixed"/>.
+        /// It also raises the <see cref="ComboBox.DrawItem"/> event.
         /// </summary>
+        /// <param name="e">A <see cref="DrawItemEventArgs"/> that contains the event data.</param>
         protected override void OnDrawItem(DrawItemEventArgs e)
         {
             // drawing an item in the dropdown area
@@ -812,9 +818,7 @@ namespace KGySoft.WinForms.Controls
                 reportedAutoCompleteMode = base.AutoCompleteMode;
         }
 
-        /// <summary>
-        /// Processes Windows messages.
-        /// </summary>
+        /// <inheritdoc />
         protected override void WndProc(ref Message m)
         {
             // NOTE: ComboBox.WndProc does not see WM_PASTE and other messages so they are captured in InnerEditorWindow
@@ -1290,6 +1294,7 @@ namespace KGySoft.WinForms.Controls
         /// </summary>
         [Obsolete("This property reflects the special value represented by the obsoleted SelectionPlusItems and should not be used")]
         [Browsable(false)]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public bool IsEmpty => this.IsEmpty();
 
         /// <summary>
@@ -1304,6 +1309,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the value column must have a data type that is convertible to signed integer type.</param>
         [Obsolete("LoadFrom methods are obsolete. Names are not auto-translated anymore and SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void LoadFrom(DataTable dataTable, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, dataTable, valueMember, displayMember, translateNames, distinctionPostfix, sortByDisplayedValues, plusItems);
 
@@ -1316,16 +1322,18 @@ namespace KGySoft.WinForms.Controls
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the value column must have a data type that is convertible to signed integer type.</param>
         [Obsolete("LoadFrom methods are obsolete. SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void LoadFrom(DataTable dataTable, string valueMember, string displayMember, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, dataTable, valueMember, displayMember, plusItems);
 
         /// <summary>
-        /// Binds the combo box to a <see cref="DataTable"/>. Items will not be sorted and translated.
+        /// Binds the combo box to a <see cref="DataTable"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="dataTable">The data source table.</param>
         /// <param name="displayMember">Column name to display in the combo box.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
         [Obsolete("LoadFrom methods are obsolete. Provide a data source by a view model class instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void LoadFrom(DataTable dataTable, string valueMember, string displayMember)
             => ListControlExtensions.LoadFrom(this, dataTable, valueMember, displayMember);
 
@@ -1340,6 +1348,7 @@ namespace KGySoft.WinForms.Controls
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
         [Obsolete("LoadFrom methods are obsolete. Names are not auto-translated anymore and SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void LoadFrom(Type enumType, Type valueMemberType, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, enumType, valueMemberType, translateNames, distinctionPostfix, sortByDisplayedValues, plusItems);
 
@@ -1351,28 +1360,32 @@ namespace KGySoft.WinForms.Controls
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the <paramref name="valueMemberType"/> must be a signed integer type or an enum with signed underlying type.</param>
         [Obsolete("LoadFrom methods are obsolete. SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void LoadFrom(Type enumType, Type valueMemberType, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, enumType, valueMemberType, plusItems);
 
         /// <summary>
-        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
+        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
         /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will be used as value member.</param>
         [Obsolete("LoadFrom methods are obsolete. Provide a data source by a view model class instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void LoadFrom(Type enumType, Type valueMemberType)
             => ListControlExtensions.LoadFrom(this, enumType, valueMemberType);
 
         /// <summary>
-        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
+        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
         [Obsolete("LoadFrom methods are obsolete. Provide a data source by a view model class instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void LoadFrom(Type enumType) => ListControlExtensions.LoadFrom(this, enumType);
 
         /// <summary>
         /// Binds the combo box to a <paramref name="collection"/>.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="collection">The source collection.</param>
         /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
@@ -1382,28 +1395,33 @@ namespace KGySoft.WinForms.Controls
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus items are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
         [Obsolete("LoadFrom methods are obsolete. Names are not auto-translated anymore and SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember, bool translateNames, string distinctionPostfix, bool sortByDisplayedValues, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, collection, valueMember, displayMember, translateNames, distinctionPostfix, sortByDisplayedValues, plusItems);
 
         /// <summary>
         /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="collection">The source collection.</param>
         /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus items are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
         [Obsolete("LoadFrom methods are obsolete. SelectionPlusItems enumeration is also obsolete. Provide a data source by a view model class instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember, SelectionPlusItems plusItems)
             => ListControlExtensions.LoadFrom(this, collection, valueMember, displayMember, plusItems);
 
         /// <summary>
-        /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted and translated.
+        /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted or translated.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="collection">The source collection.</param>
         /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         [Obsolete("LoadFrom methods are obsolete. Provide a data source by a view model class instead.")]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember)
             => ListControlExtensions.LoadFrom(this, collection, valueMember, displayMember);
 

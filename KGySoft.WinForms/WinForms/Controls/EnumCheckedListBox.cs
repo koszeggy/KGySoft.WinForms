@@ -81,7 +81,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the associated Flags enumerator.
+        /// Gets or sets the associated Flags <see langword="enum"/> type.
         /// </summary>
         [Browsable(true)]
         [Category("EnumCheckedListBox")]
@@ -171,7 +171,7 @@ namespace KGySoft.WinForms.Controls
         #region Public Methods
 
         /// <summary>
-        /// Selects all item.
+        /// Selects all items.
         /// </summary>
         public void SelectAll()
         {
@@ -180,7 +180,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Deselects all item.
+        /// Deselects all items.
         /// </summary>
         public void SelectNone()
         {
@@ -189,7 +189,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Inverts all item.
+        /// Inverts all items.
         /// </summary>
         public void SelectInvert()
         {

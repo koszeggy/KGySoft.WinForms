@@ -16,7 +16,7 @@
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents possible ranges of <see cref="DecimalTextBox"/> control.
+    /// Represents the possible ranges for the <see cref="DecimalTextBox"/> control.
     /// </summary>
     public enum DecimalRange
     {

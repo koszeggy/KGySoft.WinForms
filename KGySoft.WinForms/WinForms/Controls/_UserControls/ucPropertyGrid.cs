@@ -122,7 +122,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the selected object if the property grid.
+        /// Gets or sets the selected object of the property grid.
         /// </summary>
         public override object? ControlValue
         {
@@ -203,7 +203,10 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Methods
 
-        /// <inheritdoc />
+        /// <summary>
+        /// It does nothing in this class.
+        /// </summary>
+        /// <param name="translationFinished">It always returns <see langword="true"/> in this class.</param>
         protected override void TranslateContent(ref bool translationFinished)
         {
             // preventing translation of inner content

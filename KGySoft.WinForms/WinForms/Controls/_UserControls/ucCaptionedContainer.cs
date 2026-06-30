@@ -29,7 +29,7 @@ namespace KGySoft.WinForms.Controls
 {
 
     /// <summary>
-    /// User control with caption (on a groupbox or label) that can be used in design time to drop another controls into it.
+    /// User control with a caption (on a groupbox or label) that can be used in design time to drop another controls into it.
     /// </summary>
     [Designer(typeof(ucCaptionedContainerDesigner))]
     [DefaultBindingProperty("ControlValue")]
@@ -58,7 +58,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the object value associated with the control.
-        /// <see cref="ucCaptionedContainer"/> has no primary inner control so value of this
+        /// <see cref="ucCaptionedContainer"/> has no primary inner control so the value of this
         /// property is not set automatically but can be used for data binding if you need.
         /// </summary>
         [Bindable(BindableSupport.Default, BindingDirection.TwoWay)]
@@ -90,7 +90,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets BackColor regardless of enabled state.
-        /// Setter does not work in <see cref="ucCaptionedContainer"/>.
+        /// Setter does nothing in <see cref="ucCaptionedContainer"/>.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -102,7 +102,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets BackColor regardless of enabled state.
-        /// Setter does not work in <see cref="ucCaptionedContainer"/>.
+        /// Setter does nothing in <see cref="ucCaptionedContainer"/>.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -114,7 +114,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// This property has no meaning for this instance.
-        /// Setter does not work in <see cref="ucCaptionedContainer"/>.
+        /// Setter does nothing in <see cref="ucCaptionedContainer"/>.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -125,8 +125,8 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets constantly the gray text color.
-        /// Setter does not work in <see cref="ucCaptionedContainer"/>.
+        /// Gets always the gray text color.
+        /// Setter does nothing in <see cref="ucCaptionedContainer"/>.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -139,7 +139,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets ForeColor regardless of enabled state.
-        /// Setter does not work in <see cref="ucCaptionedContainer"/>.
+        /// Setter does nothing in <see cref="ucCaptionedContainer"/>.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]

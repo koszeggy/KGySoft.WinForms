@@ -38,8 +38,8 @@ namespace KGySoft.WinForms.Controls
     /// Does not support auto-rendering animated images.
     /// </summary>
     /// <remarks>
-    /// <para>The <see cref="ImageViewer"/> control supports both <see cref="Bitmap"/> and <see cref="Metafile"/> instances,
-    /// including the ones with a <see cref="Image.PixelFormat"/> that is not supported by <see cref="PictureBox"/> or the GDI+ renderer, even on Linux/Mono.</para>
+    /// <para>The <see cref="ImageViewer"/> control supports both <see cref="Bitmap"/> and <see cref="Metafile"/> instances, supporting every <see cref="PixelFormat"/>,
+    /// including the ones that are not supported by the <see cref="PictureBox"/> control or the GDI+ renderer. It supports Wine and Mono runtimes as well.</para>
     /// <para>The control can use optimizations for very fast rendering even if the image is zoomed. It can use multiple CPU cores to generate the displayed image.
     /// The generation happens asynchronously, so the control may display a low-quality preview image while the high-quality one is being generated.
     /// Very huge images may consume much memory, but if too high memory pressure is detected, the optimizations are automatically turned off.</para>
@@ -120,7 +120,7 @@ namespace KGySoft.WinForms.Controls
         #region Events
 
         /// <summary>
-        /// Occurs when the <see cref="AutoZoom"/> property is changed.
+        /// Occurs when the <see cref="AutoZoom"/> property has changed.
         /// </summary>
         [Category("ImageViewer")]
         [Description("Occurs when the AutoZoom property is changed.")]
@@ -131,7 +131,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Occurs when the <see cref="Zoom"/> property is changed.
+        /// Occurs when the <see cref="Zoom"/> property has changed.
         /// </summary>
         [Category("ImageViewer")]
         [Description("Occurs when the Zoom property is changed.")]
@@ -245,8 +245,8 @@ namespace KGySoft.WinForms.Controls
         /// Also, this property never throws an exception if the value is not a valid zoom factor. Instead, it is automatically adjusted to a valid value.</para>
         /// <para>The minimum zoom factor dynamically depends on the image size, so that the minimum zoomed image is at least 1 pixel in width and height.</para>
         /// <para>The maximum zoom factor is also dynamically determined based on the image size and the screen size.
-        /// For <see cref="Metafile"/> images, the maximum zoom is between 1x and 2x screen size. 2x screen size is allowed if that is below 10,000 pixels.
-        /// For <see cref="Bitmap"/> images, the default maximum zoom is image size x 10 (adjusted with DPI) but at least screen size x 2.</para>
+        /// For <see cref="Metafile"/> images, the maximum zoom allows reaching about 4 million pixels width and height.
+        /// For <see cref="Bitmap"/> images, the default maximum zoom is the original image size x 10 (adjusted with DPI) but at least screen size x 2.</para>
         /// </remarks>
         [Category("ImageViewer")]
         [Description("When AutoZoom is False, determines the zoom factor of the displayed image. The value may be automatically adjusted to a valid zoom factor.")]
@@ -258,8 +258,8 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// When a <see cref="Bitmap"/> is assigned to <see cref="Image"/>, gets or sets whether rendering with resize uses interpolation (that is when <see cref="Zoom"/> is not 1).
-        /// When a <see cref="Metafile"/> is assigned to <see cref="Image"/>, gets or sets whether the metafile is rendered with antialiasing. Smoothing metafiles might be turned off automatically on higher zooming levels.
-        /// Default value: <see langword="false"/>.
+        /// <br/>When a <see cref="Metafile"/> is assigned to <see cref="Image"/>, gets or sets whether the metafile is rendered with antialiasing. Smoothing metafiles might be turned off automatically on higher zooming levels.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         /// <remarks>
         /// <para>Smoothing metafiles may not have a noticeable effect if the metafile already contains drawing records with antialiasing, or when the metafile contains bitmap images only.</para>
@@ -313,6 +313,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         [Browsable(false)] // Hiding Cursor property because it is automatically changed. Still allowing to set it at run-time though.
         [AllowNull]
+        [EditorBrowsable(EditorBrowsableState.Never)]
         public override Cursor Cursor
         {
             get => base.Cursor;
@@ -413,6 +414,7 @@ namespace KGySoft.WinForms.Controls
         protected override Size DefaultSize => new(100, 100);
 
         /// <inheritdoc />
+        [EditorBrowsable(EditorBrowsableState.Never)]
         protected override ImeMode DefaultImeMode => ImeMode.Disable;
 
         #endregion
@@ -428,7 +430,7 @@ namespace KGySoft.WinForms.Controls
         #region Constructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ImageViewer"/> class.
+        /// Creates a new instance of the <see cref="ImageViewer"/> class.
         /// </summary>
         public ImageViewer()
         {
@@ -489,7 +491,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Increases the zoom of the displayed image by 25%.
+        /// Increases the <see cref="Zoom"/> by 25%, and turns off <see cref="AutoZoom"/> if it was enabled.
         /// </summary>
         public void IncreaseZoom()
         {
@@ -500,7 +502,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Decreases the zoom of the displayed image by 25%.
+        /// Decreases the <see cref="Zoom"/> by 25%, and turns off <see cref="AutoZoom"/> if it was enabled.
         /// </summary>
         public void DecreaseZoom()
         {
@@ -520,7 +522,10 @@ namespace KGySoft.WinForms.Controls
                 Zoom = 1f;
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Gets the string representation of this instance.
+        /// </summary>
+        /// <returns>The string representation of this instance.</returns>
         public override string ToString() => image is null
             ? base.ToString()
             : $"{image.GetType().Name} {imageSize.Width} x {imageSize.Height}{(flags[isMetafile] ? null : $" {pixelFormat}")}";

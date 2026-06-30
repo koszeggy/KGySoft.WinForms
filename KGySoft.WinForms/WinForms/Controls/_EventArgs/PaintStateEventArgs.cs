@@ -23,7 +23,7 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents arguments of a PaintState event.
+    /// Represents arguments of for the <see cref="ISupportsFading{TState}.PaintState"/> event.
     /// </summary>
     public class PaintStateEventArgs : PaintEventArgs
     {
@@ -32,7 +32,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets the appearance state of the control for the painting.
         /// </summary>
-        public ControlAppearanceState State { get; private set; }
+        public ControlAppearanceState State { get; }
 
         #endregion
 

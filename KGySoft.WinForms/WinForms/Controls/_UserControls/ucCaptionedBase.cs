@@ -372,6 +372,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Translating content in a way which prevents storing Caption text with leading spaces if check box is visible
         /// </summary>
+        /// <param name="translationFinished">In this class it always returns <see langword="true"/>.</param>
         protected override void TranslateContent(ref bool translationFinished)
         {
             RefreshCaption(Language.Translate(Caption));

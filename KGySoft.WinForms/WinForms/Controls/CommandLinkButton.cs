@@ -44,7 +44,7 @@ namespace KGySoft.WinForms.Controls
 
     /// <summary>
     /// Represents a command link button. Works also on Windows XP in compatibility mode. Supports flat styles, elevated mode, high contrast mode,
-    /// custom colors even in disabled mode and even for the default glyph (on Windows 10 and above), buffered animations and more.
+    /// custom colors even in disabled mode and even for the default glyph (on Windows 10 and above), buffered fading animations, and more.
     /// </summary>
     [ToolboxBitmap(typeof(CommandLinkButton), "Resources.Toolbox.CommandLinkButton.png")]
     [Description("Vista-like CommandLink button that works also in compatibility mode. On Vista and above you can set FlatStyle to System to render the button by the Windows.")]
@@ -236,11 +236,12 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether fading animations are enabled for the control.
-        /// Animations work on Windows Vista and above, with non-classic themes.
+        /// Animations work on Windows Vista and above when rendering with visual styles.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         [Category("CommandLinkButton")]
         [DefaultValue(true)]
-        [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above, with non-classic themes.")]
+        [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above when rendering with visual styles.")]
         public bool FadingAnimationsEnabled
         {
             get => flags[fadingAnimationsEnabled];
@@ -255,11 +256,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets fading options of the control.
+        /// Gets or sets the fading options of the control.
+        /// <br/>Default value: <see cref="FadingOptions.StandardEffects"/>.
         /// </summary>
         [Category("CommandLinkButton")]
         [DefaultValue(FadingOptions.StandardEffects)]
-        [Description("Gets or sets fading options of the control.")]
+        [Description("Gets or sets the fading options of the control.")]
         [TypeConverter(typeof(FlagsEnumConverter))]
         public FadingOptions FadingAnimationOptions
         {
@@ -288,11 +290,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
+        /// Gets or sets the default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
+        /// <br/>Default value: 500.
         /// </summary>
         [Category("CommandLinkButton")]
         [DefaultValue(500)]
-        [Description("Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
+        [Description("Gets or sets the default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
         public int FadingAnimationDefaultSpeed
         {
             get => fadingAnimationDefaultSpeed;
@@ -309,10 +312,11 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets whether an elevated shield icon should be displayed.
+        /// Gets or sets whether an elevated shield icon should be displayed on the command link button.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         [Category("CommandLinkButton")]
-        [Description("Gets or sets whether an elevated shield icon should be displayed.")]
+        [Description("Gets or sets whether an elevated shield icon should be displayed on the button.")]
         [DefaultValue(false)]
         public bool IsElevated
         {
@@ -334,7 +338,12 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether the default arrow glyph should be displayed.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
+        /// <value>
+        /// <see langword="true"/> to display the default arrow glyph, unless <see cref="IsElevated"/> is <see langword="true"/>, or <see cref="Image"/> is set.
+        /// <br/><see langword="false"/> to not to display any image, unless <see cref="IsElevated"/> is <see langword="true"/>, or <see cref="Image"/> is set.
+        /// </value>
         [Description("Gets or sets whether the default arrow glyph should be displayed.")]
         [Category("CommandLinkButton")]
         [DefaultValue(true)]
@@ -357,7 +366,9 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the ellipsis character (...) appears at the right edge of the control, denoting that the control text extends beyond the specified length of the control.
+        /// Gets or sets whether the ellipsis character (...) appears at the right edge of the control,
+        /// denoting that the control text extends beyond the specified length of the control.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         [DefaultValue(true)] // This is the only reason for redefining.
         public new bool AutoEllipsis
@@ -368,6 +379,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether the command link button automatically resizes itself to its content.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         [Category("CommandLinkButton")]
         [Description("Gets or sets whether the command link button automatically resizes itself to its content.")]
@@ -390,6 +402,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the mode by which the <see cref="CommandLinkButton"/> automatically resizes itself.
+        /// <br/>Default value: <see cref="AutoSizeMode.GrowAndShrink"/>.
         /// </summary>
         [DefaultValue(AutoSizeMode.GrowAndShrink)] // "overridden" only because of this.
         public new AutoSizeMode AutoSizeMode
@@ -427,6 +440,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the alignment of the image on the command link button control. A Top alignment attempts to align the image to the middle of the first row of <see cref="Text"/>.
+        /// <br/>Default value: <see cref="ContentAlignment.TopLeft"/>.
         /// </summary>
         [DefaultValue(ContentAlignment.TopLeft)] // "overridden" only because of default value
         [Description("Gets or sets the alignment of the image on the command link button control. Has effect only when FlatStyle is not System. "
@@ -813,6 +827,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the text rendering quality of the <see cref="CommandLinkButton"/>.
+        /// <br/>Default value: <see cref="RenderingQuality.SystemDefault"/>.
         /// </summary>
         [Category("CommandLinkButton")]
         [Description("Gets or sets the rendering text quality of the command link button. Has effect only when FlatStyle is not System.")]
@@ -840,6 +855,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the rendering quality of the <see cref="CommandLinkButton"/> visuals.
+        /// <br/>Default value: <see cref="RenderingQuality.High"/>.
         /// </summary>
         [Category("CommandLinkButton")]
         [Description("Gets or sets the rendering quality of the command link button visuals. Affects the default glyph rendering in high DPI mode.")]
@@ -862,7 +878,8 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
+        /// Gets or sets whether to use the text rendering engine compatible with .NET Framework 1.x (GDI+) or not (GDI).
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         [DefaultValue(false)]
         public new bool UseCompatibleTextRendering
@@ -877,6 +894,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the flat style state of the command link button.
+        /// <br/>Default value: <see cref="FlatStyle.Standard"/>.
         /// </summary>
         [DefaultValue(FlatStyle.Standard)]
         public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
@@ -895,7 +913,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the image that is displayed on the button control.
+        /// Gets or sets the image that is displayed on the command link button control.
         /// </summary>
         [DefaultValue(null)]
         public new Image? Image // it is also detected when base.Image changes but reacting onto that in OnPaint has a performance cost
@@ -1244,9 +1262,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Public Methods
 
-        /// <summary>
-        /// Retrieves the size of a rectangular area into which a control can be fitted.
-        /// </summary>
+        /// <inheritdoc />
         public override Size GetPreferredSize(Size proposedSize)
         {
             if (preferredSizeCache.TryGetValue(((long)proposedSize.Height << 32) | (uint)proposedSize.Width, out var preferredSize))
@@ -1433,7 +1449,14 @@ namespace KGySoft.WinForms.Controls
         //        RecreateHandle();
         //}
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Implicitly calls the <see cref="OnPaintState">OnPaintState</see> method, which raises both the <see cref="Control.Paint"/> and <see cref="PaintState"/> events.
+        /// </summary>
+        /// <param name="e">A <see cref="PaintEventArgs"/> that contains the event data.</param>
+        /// <remarks>
+        /// <note type="important">It is not recommended to override this method, unless it is really justified. Consider to override <see cref="OnPaintState">OnPaintState</see>
+        /// instead, where painting the desired state of the control can be applied without interfering with the fading animation.</note>
+        /// </remarks>
         protected override void OnPaint(PaintEventArgs e)
         {
             // adjusting FlatStyle if needed (in System mode this is in WndProc)
@@ -1517,7 +1540,7 @@ namespace KGySoft.WinForms.Controls
             base.OnFontChanged(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseLeave" />
         protected override void OnMouseLeave(EventArgs e)
         {
             flags[isHovered] = false;
@@ -1525,7 +1548,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseLeave(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseEnter" />
         protected override void OnMouseEnter(EventArgs e)
         {
             flags[isHovered] = true;
@@ -1533,7 +1556,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseEnter(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseUp" />
         protected override void OnMouseUp(MouseEventArgs e)
         {
             flags[isPressed | isMouseDown] = false;
@@ -1541,7 +1564,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseUp(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseDown" />
         protected override void OnMouseDown(MouseEventArgs e)
         {
             flags[isPressed | isMouseDown] = e.Button == MouseButtons.Left;
@@ -1549,16 +1572,16 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseDown(e);
         }
 
-        /// <inheritdoc />
-        protected override void OnMouseMove(MouseEventArgs mevent)
+        /// <inheritdoc cref="Control.OnMouseMove" />
+        protected override void OnMouseMove(MouseEventArgs e)
         {
             if (flags[isMouseDown])
-                flags[isPressed] = mevent.X >= 0 && mevent.X < Width && mevent.Y >= 0 && mevent.Y < Height;
+                flags[isPressed] = e.X >= 0 && e.X < Width && e.Y >= 0 && e.Y < Height;
 
-            base.OnMouseMove(mevent);
+            base.OnMouseMove(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnKeyDown" />
         protected override void OnKeyDown(KeyEventArgs e)
         {
             if (e.KeyData == Keys.Space && !flags[isPressed])
@@ -1567,7 +1590,7 @@ namespace KGySoft.WinForms.Controls
             base.OnKeyDown(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnKeyUp" />
         protected override void OnKeyUp(KeyEventArgs e)
         {
             if (e.KeyData == Keys.Space && flags[isPressed])

@@ -28,7 +28,7 @@ using KGySoft.WinForms.Forms;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// A base class for user controls that provides some additional functionality.
+    /// A base class for user controls that provides some additional functionality compared to <see cref="UserControl"/>.
     /// </summary>
     /// <remarks>
     /// The <see cref="BaseUserControl"/> class provides the following additional features:
@@ -36,7 +36,7 @@ namespace KGySoft.WinForms.Controls
     /// <item>Removes all event subscriptions when the user control is disposed. To do that for the events of derived controls as well,
     /// use the <see cref="Component.Events"/> property in your derived event <see langword="add"/>/<see langword="remove"/> accessors.</item>
     /// <item>The <see cref="DynamicStringLocalization"/> property allows creating dynamically generated localizations for any language.</item>
-    /// <item><see cref="CommandBindings"/> property. See the <a href="https://github.com/koszeggy/KGySoft.CoreLibraries#command-binding" target="_blank">online documentation</a> for details.</item>
+    /// <item><see cref="CommandBindings"/> property. See the <a href="https://github.com/koszeggy/KGySoft.CoreLibraries#command-binding" target="_blank">GitHub documentation</a> for details.</item>
     /// <item>An <see cref="IsDesignMode"/> property that works even during initialization, when <see cref="Component.DesignMode"/> would return <see langword="false"/>.</item>
     /// <item><see cref="InvokeOnUIThread">InvokeOnUIThread</see> method.</item>
     /// </list>
@@ -76,6 +76,7 @@ namespace KGySoft.WinForms.Controls
         /// Gets the command bindings of this user control. Being a <see cref="WinFormsCommandBindingsCollection"/>,
         /// the <a href="https://koszeggy.github.io/docs/corelibraries/html/Overload_KGySoft_ComponentModel_CommandBindingsCollection_Add.htm" target="_blank">Add</a>
         /// methods also add the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_PropertyCommandStateUpdater.htm" target="_blank">PropertyCommandStateUpdater</a> to the created bindings.
+        /// <br/>See the <a href="https://github.com/koszeggy/KGySoft.CoreLibraries#command-binding" target="_blank">GitHub documentation</a> for details.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
@@ -83,7 +84,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the dynamic string localization strategy of the user control. It allows using potentially auto-generated string resources from .resx files.
-        /// <br/>See the <strong>Remarks</strong> section for the <see cref="BaseForm.DynamicStringLocalization"/> property for details.
+        /// <br/>See the <strong>Remarks</strong> section for the <see cref="BaseForm.DynamicStringLocalization">BaseForm.DynamicStringLocalization</see> property for details.
         /// </summary>
         [Category("BaseUserControl")]
         [DefaultValue(DynamicStringLocalization.Disabled)]
@@ -124,8 +125,8 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets whether the user control has already been loaded. This property is <see langword="true"/> after the <see cref="UserControl.Load"/> event is raised for the first time,
-        /// and remains <see langword="true"/> even if the  handle is recreated (e.g. because <see cref="Control.RightToLeft"/> changes).
-        /// Can be useful if we overload the <see cref="UserControl.OnLoad"/> method and want to avoid executing some initialization more than once.
+        /// and remains <see langword="true"/> even if the handle is recreated (e.g. because <see cref="Control.RightToLeft"/> changes).
+        /// Can be useful if you override the <see cref="OnLoad">OnLoad</see> method, and you want to avoid executing some initialization more than once.
         /// </summary>
         [Browsable(false)]
         protected bool IsLoaded => isLoaded;
@@ -202,7 +203,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Applies the string resources of the user control. If the <see cref="DynamicStringLocalization"/> property is not set to <see cref="DynamicStringLocalization.Disabled"/>,
-        /// and this user control has no parent form or user control that has a non-disabled <see cref="DynamicStringLocalization"/> mode,
+        /// and this user control has no parent form or a parent user control that has a non-disabled <see cref="DynamicStringLocalization"/> mode,
         /// the default implementation just calls the <see cref="LocalizationHelper.ApplyStringResources">LocalizationHelper.ApplyStringResources</see> method.
         /// In a derived control, this method can be overridden to apply a custom string localization, and it can be called whenever the form's string resources
         /// should be re-applied, e.g. when the display language changes.

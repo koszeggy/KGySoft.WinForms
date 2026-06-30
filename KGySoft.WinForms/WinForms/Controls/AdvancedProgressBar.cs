@@ -31,21 +31,20 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents a progress bar with advanced capabilities.
+    /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedProgressBar"/> class offers the following features in addition to <see cref="ProgressBar"/>:
     /// <list type="bullet">
-    /// <item><description>Paused/error state (see <see cref="State"/> property).</description></item>
-    /// <item><description>New <see cref="Style"/> property that affect rendering mode.</description></item>
-    /// <item><description>Custom colors (when <see cref="Style"/> is not <see cref="AdvancedProgressBarStyle.System"/>)</description></item>
+    /// <item>Paused/error state (see <see cref="State"/> property).</item>
+    /// <item>New <see cref="Style"/> property with four different appearances.</item>
+    /// <item>Custom colors (when <see cref="Style"/> is not <see cref="AdvancedProgressBarStyle.System"/>)</item>
     /// </list>
     /// </remarks>
-    /// </summary>
     [ToolboxBitmap(typeof(ProgressBar))]
     [Description(@"A progress bar that provides the following features in addition to regular ProgressBar:
 - Provides Warning/Error states
-- Custom rendering styles
-- Custom colors for non-system rendering styles
-- Optional block appearance for non-system styles")]
+- Multiple rendering styles
+- Custom colors for non-system rendering styles")]
     public class AdvancedProgressBar : ProgressBar
     {
         #region Constants
@@ -75,12 +74,14 @@ namespace KGySoft.WinForms.Controls
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the state of the progress bar. On pre-Vista Windows versions, or when <see cref="Application.EnableVisualStyles"/>
+        /// Gets or sets the state of the progress bar. On pre-Vista Windows versions, or when <see cref="Application.EnableVisualStyles">Application.EnableVisualStyles</see>
         /// was not called in the executing application, applicable only for non-System <see cref="Style"/>s.
-        /// The progress bar stops any animation when state is not <see cref="ProgressBarState.Normal"/>.
+        /// The progress bar stops animating when state is not <see cref="ProgressBarState.Normal"/>.
+        /// <br/>Default value: <see cref="ProgressBarState.Normal"/>.
         /// </summary>
         [Category("AdvancedProgressBar")]
-        [Description("Gets or sets the state of the progress bar. On pre-Vista Windows versions applicable only when Style is not System. The progress bar stops any animation when state is not Normal.")]
+        [Description("Gets or sets the state of the progress bar. On pre-Vista Windows versions applicable only when Style is not System. "
+            + "The progress bar stops animating when state is not Normal.")]
         [DefaultValue(ProgressBarState.Normal)]
         public ProgressBarState State
         {
@@ -116,6 +117,7 @@ namespace KGySoft.WinForms.Controls
         /// Gets or sets the rendering style of the <see cref="AdvancedProgressBar"/>.
         /// When visual styles are not available, <see cref="AdvancedProgressBarStyle.ThemedShiny"/> and <see cref="AdvancedProgressBarStyle.ThemedFlat"/> styles
         /// are defaulting to <see cref="AdvancedProgressBarStyle.Classic"/> style.
+        /// <br/>Default value: <see cref="AdvancedProgressBarStyle.System"/>.
         /// </summary>
         [Category("AdvancedProgressBar")]
         [Description("Gets or sets the rendering style of the progress bar. When visual styles are not available, ThemedShiny and ThemedFlat styles are defaulting to Classic style.")]
@@ -141,6 +143,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether the progress bar should operate in marquee mode.
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         [Category("AdvancedProgressBar")]
         [Description("Gets or sets whether the progress bar should operate in marquee mode.")]
@@ -161,6 +164,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the interval in milliseconds between two frames of the marquee animation.
+        /// <br/>Default value: 100.
         /// </summary>
         [Description("Gets or sets the interval in milliseconds between two frames of the marquee animation.")]
         [DefaultValue(100)]
@@ -183,6 +187,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the current position of the progress bar.
+        /// <br/>Default value: 0.
         /// </summary>
         [DefaultValue(0)]
         public new int Value
@@ -192,7 +197,7 @@ namespace KGySoft.WinForms.Controls
             {
                 base.Value = value;
 
-                // in system mode paused/error state the stat must be reset, otherwise, the value may not change visually
+                // in system mode paused/error state the state must be reset, otherwise, the value may not change visually
                 if (IsHandleCreated && state != ProgressBarState.Normal && !IsClassicAppearance && style == AdvancedProgressBarStyle.System && OSHelper.IsWindowsVistaOrLater && VisualStyleHelper.InitializedWithVisualStyles)
                 {
                     ProgressBarState currentState = state;
@@ -203,7 +208,9 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the foreground color of the control.
+        /// Gets or sets the foreground color of the control. Has effect when <see cref="Style"/> is not <see cref="AdvancedProgressBarStyle.System"/>,
+        /// or when visual styles are not enabled.
+        /// <br/>Default value: depends on <see cref="Style"/>.
         /// </summary>
         public override Color ForeColor
         {
@@ -227,6 +234,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the fore color of the paused <see cref="State"/>.
         /// Applicable only when <see cref="Style"/> is not <see cref="AdvancedProgressBarStyle.System"/>.
+        /// <br/>Default value: <see cref="Color.Yellow"/>.
         /// </summary>
         [Category("AdvancedProgressBar")]
         [Description("Gets or sets the fore color of the paused state. Applicable only when Style is not System.")]
@@ -248,6 +256,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the fore color of the error <see cref="State"/>.
         /// Applicable only when <see cref="Style"/> is not <see cref="AdvancedProgressBarStyle.System"/>.
+        /// <br/>Default value: <see cref="Color.Red"/>.
         /// </summary>
         [Category("AdvancedProgressBar")]
         [Description("Gets or sets the fore color of the error state. Applicable only when Style is not System.")]
@@ -270,7 +279,7 @@ namespace KGySoft.WinForms.Controls
 
         #region Protected Properties
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.CreateParams" />
         protected override CreateParams CreateParams
         {
             get
@@ -367,7 +376,7 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnHandleCreated" />
         protected override void OnHandleCreated(EventArgs e)
         {
             base.OnHandleCreated(e);
@@ -379,7 +388,7 @@ namespace KGySoft.WinForms.Controls
         /// <inheritdoc />
         protected override void OnPaintBackground(PaintEventArgs pevent)
         {
-            // Framework Mono paints the whole progress bar before calling OnPaint, so deferring out custom paint until then.
+            // Framework Mono paints the whole progress bar before calling OnPaint, so deferring our custom paint until then.
             if (OSHelper.IsFrameworkMono)
                 return;
 
@@ -474,21 +483,15 @@ namespace KGySoft.WinForms.Controls
             if (!VisualStyleHelper.RenderWithVisualStyles)
                 return SystemColors.Highlight;
 
-            switch (style)
+            return style switch
             {
-                case AdvancedProgressBarStyle.ThemedShiny:
-                    return Color.Lime;
-                case AdvancedProgressBarStyle.ThemedFlat:
-                    return Color.LimeGreen;
-                default:
-                    return SystemColors.Highlight;
-            }
+                AdvancedProgressBarStyle.ThemedShiny => Color.Lime,
+                AdvancedProgressBarStyle.ThemedFlat => Color.LimeGreen,
+                _ => SystemColors.Highlight
+            };
         }
 
-        private bool ShouldSerializeForeColor()
-        {
-            return foreColor != Color.Empty;
-        }
+        private bool ShouldSerializeForeColor() => foreColor != Color.Empty;
 
         private void ResetAnimation(bool resetPosition)
         {

@@ -34,17 +34,18 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents a checkbox with additional features such as disabled colors, fixed auto size, buffered animations and more.
+    /// Represents a checkbox with additional features such as customizable disabled colors, fixed auto sizing behavior, buffered fading animations, and more.
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedCheckBox"/> class offers the following features in addition to <see cref="CheckBox"/>:
     /// <list type="bullet">
-    /// <item><see cref="ButtonBase.AutoSize"/> property works as expected when check box is docked</item>
-    /// <item>Different rendering qualities (see <see cref="TextRenderingQuality"/> and <see cref="VisualsRenderingQuality"/>) properties.</item>
-    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
-    /// <item>Fading animations (only with enabled theming, on Vista and above, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/> properties).</item>
-    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// <item>The <see cref="ButtonBase.AutoSize"/> property works as expected when the checkbox is docked.</item>
+    /// <item>Different rendering qualities (see <see cref="TextRenderingQuality"/> and <see cref="VisualsRenderingQuality"/>).</item>
+    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/>).</item>
+    /// <item>Buffered fading animations with every <see cref="FlatStyle"/> (only on Vista and above with visual styles enabled, see <see cref="FadingAnimationsEnabled"/> and <see cref="FadingAnimationOptions"/>).</item>
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/>).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
+    /// <item>Fixed rendering in high DPI modes when the application is DPI aware.</item>
     /// </list>
     /// </remarks>
     [ToolboxBitmap(typeof(CheckBox))]
@@ -52,8 +53,9 @@ namespace KGySoft.WinForms.Controls
 - AutoSize works as expected when check box is docked
 - Adjustable rendering qualities
 - Adjustable colors in disabled state
-- Fading animations
-- Auto scaling Font on all platform targets")]
+- Buffered fading animations with every FlatStyle
+- Auto scaling Font on all platform targets
+- Fixed rendering in high DPI modes when the application is DPI aware")]
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
     public class AdvancedCheckBox : CheckBox, ISupportsDisabledColor, ISupportButtonAdapter, ISupportsFadingInternal, IPerMonitorDpiAware
     {
@@ -133,6 +135,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the text rendering quality of the <see cref="AdvancedCheckBox"/>.
+        /// <br/>Default value: <see cref="RenderingQuality.SystemDefault"/>.
         /// </summary>
         [Category("AdvancedCheckBox")]
         [Description("Gets or sets the text rendering quality of the advanced check box. Has effect only when FlatStyle is not System.")]
@@ -160,6 +163,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the rendering quality of the <see cref="AdvancedCheckBox"/> visuals.
+        /// <br/>Default value: <see cref="RenderingQuality.High"/>.
         /// </summary>
         [Category("AdvancedCheckBox")]
         [Description("Gets or sets the rendering quality of the advanced check box visuals. Has effect only in high DPI mode when FlatStyle is Standard.")]
@@ -292,11 +296,12 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether fading animations are enabled for the control.
-        /// Animations work on Windows Vista and above, with non-classic themes.
+        /// Animations work on Windows Vista and above when rendering with visual styles.
+        /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         [Category("AdvancedCheckBox")]
         [DefaultValue(true)]
-        [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above, with non-classic themes.")]
+        [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above when rendering with visual styles.")]
         public bool FadingAnimationsEnabled
         {
             get => flags[fadingAnimationsEnabled];
@@ -311,11 +316,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets fading options of the control.
+        /// Gets or sets the fading options of the control.
+        /// <br/>Default value: <see cref="FadingOptions.StandardEffects"/>.
         /// </summary>
         [Category("AdvancedCheckBox")]
         [DefaultValue(FadingOptions.StandardEffects)]
-        [Description("Gets or sets fading options of the control.")]
+        [Description("Gets or sets the fading options of the control.")]
         [TypeConverter(typeof(FlagsEnumConverter))]
         public FadingOptions FadingAnimationOptions
         {
@@ -339,11 +345,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
+        /// Gets or sets the default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.
+        /// <br/>Default value: 500.
         /// </summary>
         [Category("AdvancedCheckBox")]
         [DefaultValue(500)]
-        [Description("Gets or sets default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
+        [Description("Gets or sets the default fading animation speed for non-standard animations in milliseconds. Zero value means immediate change.")]
         public int FadingAnimationDefaultSpeed
         {
             get => fadingAnimationDefaultSpeed;
@@ -360,7 +367,8 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets a value that determines whether to use compatible text rendering engine (GDI+) or not (GDI).
+        /// Gets or sets whether to use the text rendering engine compatible with .NET Framework 1.x (GDI+) or not (GDI).
+        /// <br/>Default value: <see langword="false"/>.
         /// </summary>
         [DefaultValue(false)]
         public new bool UseCompatibleTextRendering
@@ -374,7 +382,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// Gets or sets whether the <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
         /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         /// <remarks>
@@ -452,6 +460,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the flat style appearance of the checkbox.
+        /// <br/>Default value: <see cref="FlatStyle.Standard"/>.
         /// </summary>
         [DefaultValue(FlatStyle.Standard)]
         public new FlatStyle FlatStyle // it is also detected when base.FlatStyle changes but reacting onto that in OnPaint has a performance cost
@@ -592,7 +601,14 @@ namespace KGySoft.WinForms.Controls
                 OnForeColorChanged(EventArgs.Empty);
         }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Implicitly calls the <see cref="OnPaintState">OnPaintState</see> method, which raises both the <see cref="Control.Paint"/> and <see cref="PaintState"/> events.
+        /// </summary>
+        /// <param name="e">A <see cref="PaintEventArgs"/> that contains the event data.</param>
+        /// <remarks>
+        /// <note type="important">It is not recommended to override this method, unless it is really justified. Consider to override <see cref="OnPaintState">OnPaintState</see>
+        /// instead, where painting the desired state of the control can be applied without interfering with the fading animation.</note>
+        /// </remarks>
         protected override void OnPaint(PaintEventArgs e)
         {
             // adjusting FlatStyle if needed (in System mode this is in WndProc)
@@ -743,21 +759,21 @@ namespace KGySoft.WinForms.Controls
             }
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseLeave" />
         protected override void OnMouseLeave(EventArgs e)
         {
             flags[isHovered] = false;
             base.OnMouseLeave(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseEnter" />
         protected override void OnMouseEnter(EventArgs e)
         {
             flags[isHovered] = true;
             base.OnMouseEnter(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseUp" />
         protected override void OnMouseUp(MouseEventArgs e)
         {
             // ignoring next paint if check state will change; otherwise, because of double paints,
@@ -769,7 +785,7 @@ namespace KGySoft.WinForms.Controls
             base.OnMouseUp(e);
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnMouseDown" />
         protected override void OnMouseDown(MouseEventArgs e)
         {
             bool prevPressed = flags[isPressed];
@@ -781,21 +797,21 @@ namespace KGySoft.WinForms.Controls
                 Invalidate();
         }
 
-        /// <inheritdoc />
-        protected override void OnMouseMove(MouseEventArgs mevent)
+        /// <inheritdoc cref="Control.OnMouseMove" />
+        protected override void OnMouseMove(MouseEventArgs e)
         {
             bool prevPressed = flags[isPressed];
             if (flags[isMouseDown])
-                flags[isPressed] = mevent.X >= 0 && mevent.X < Width && mevent.Y >= 0 && mevent.Y < Height;
+                flags[isPressed] = e.X >= 0 && e.X < Width && e.Y >= 0 && e.Y < Height;
 
-            base.OnMouseMove(mevent);
+            base.OnMouseMove(e);
 
             // workaround for base Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
             if (flags[isPressed] != prevPressed)
                 Invalidate();
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnKeyDown" />
         protected override void OnKeyDown(KeyEventArgs e)
         {
             bool prevPressed = flags[isPressed];
@@ -807,7 +823,7 @@ namespace KGySoft.WinForms.Controls
                 Invalidate(); // workaround for base Invalidate(DownChangeRectangle), where DownChangeRectangle is not scaled properly
         }
 
-        /// <inheritdoc />
+        /// <inheritdoc cref="Control.OnKeyUp" />
         protected override void OnKeyUp(KeyEventArgs e)
         {
             if (e.KeyData == Keys.Space && flags[isPressed])

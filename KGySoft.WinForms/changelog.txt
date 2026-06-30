@@ -36,8 +36,8 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
   - LanguageSettings class: https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_LanguageSettings.htm
 
 ! Language class: It has been made obsolete. See the note above.
-  ! All properties but ActiveLanguage have been removed.
   ! The RedirectTranslate event has been removed. Use the LocalizationHelper.LocalizationRequested event instead.
+  + The ActiveLanguage have been re-added for compatibility reasons (it was removed in v4.0.0).
 ! ICustomTranslated interface: It has been made obsolete. See the note above.
 ! The RedirectTranslateEventArgs class has been removed.
 

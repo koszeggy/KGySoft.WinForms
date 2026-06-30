@@ -29,16 +29,16 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Advanced version of <see cref="TextBox"/> control that provides some advanced features and fixes for the original <see cref="TextBox"/>.
+    /// Represents a textbox with additional features such as customizable disabled colors, behavioral fixes, and more.
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedTextBox"/> control offers the following features in addition to <see cref="TextBox"/>:
     /// <list type="bullet">
-    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/> properties).</item>
+    /// <item>Adjustable colors in disabled state (see <see cref="DisabledBackColor"/> and <see cref="DisabledForeColor"/>).</item>
     /// <item><see cref="TextBoxBase.AcceptsTab"/> and <see cref="TextBox.AcceptsReturn"/> are ignored in <see cref="TextBoxBase.ReadOnly"/> mode.</item>
     /// <item><see cref="TextChangedOnLeave"/> event: occurs when leaving the control and <see cref="TextBox.Text"/> is different from the value when the control received focus.</item>
     /// <item>Ctrl+A (Select All) works even if auto appending is enabled.</item>
-    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/> property).
+    /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/>).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// </list>
     /// </remarks>
@@ -109,12 +109,12 @@ namespace KGySoft.WinForms.Controls
         #region Events
 
         /// <summary>
-        /// Occurs on leaving the control when content is different from the original one when the control was focused.
-        /// It fires after the <see cref="Control.Leave"/> and before the <see cref="Control.Validating"/> event.
+        /// Occurs on leaving the control when <see cref="TextBox.Text"/> is different from the value when the control received focus.
+        /// It is raised after the <see cref="Control.Leave"/> and before the <see cref="Control.Validating"/> event.
         /// </summary>
         [Category("AdvancedTextBox")]
-        [Description("Occurs on leaving the control when content is different from the original one when the control was focused. "
-            + "It fires after the Leave and before the Validating event.")]
+        [Description("Occurs on leaving the control when Text is different from the value when the control received focus. "
+            + "It is raised after the Leave and before the Validating event.")]
         public event EventHandler? TextChangedOnLeave
         {
             add => Events.AddHandler(nameof(TextChangedOnLeave), value);
@@ -234,7 +234,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets whether <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
+        /// Gets or sets whether the <see cref="Font"/> should be automatically scaled when DPI changes and the current thread has per-monitor DPI awareness.
         /// <br/>Default value: <see langword="true"/>.
         /// </summary>
         /// <remarks>
@@ -392,6 +392,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Raises the <see cref="TextChangedOnLeave"/> event.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnTextChangedOnLeave(EventArgs e) => Events.GetHandler<EventHandler>(nameof(TextChangedOnLeave))?.Invoke(this, e);
 
         /// <inheritdoc/>
@@ -538,8 +539,8 @@ namespace KGySoft.WinForms.Controls
             return base.IsInputKey(keyData);
         }
 
-        /// <inheritdoc/>
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
+        /// <inheritdoc />
+        protected override bool ProcessCmdKey(ref Message m, Keys keyData)
         {
             switch (keyData)
             {
@@ -547,7 +548,7 @@ namespace KGySoft.WinForms.Controls
                     SelectAll();
                     return true;
                 default:
-                    return base.ProcessCmdKey(ref msg, keyData);
+                    return base.ProcessCmdKey(ref m, keyData);
             }
         }
 

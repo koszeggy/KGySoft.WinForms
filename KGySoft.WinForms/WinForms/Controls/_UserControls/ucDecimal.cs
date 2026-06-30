@@ -35,7 +35,7 @@ namespace KGySoft.WinForms.Controls
         #region Events
 
         /// <summary>
-        /// Occurs when <see cref="Value"/> has been changed.
+        /// Occurs when the <see cref="Value"/> property has changed.
         /// </summary>
         [Category("ucDecimal")]
         [Description("Occurs when Value has been changed.")]
@@ -46,7 +46,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Occurs when <see cref="Blank"/> has been changed.
+        /// Occurs when the <see cref="Blank"/> property has changed.
         /// </summary>
         [Category("ucDecimal")]
         [Description("Occurs when Blank has been changed.")]
@@ -71,7 +71,6 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the associated value of the control.
-        /// This can be a text or number or anything else in derived controls.
         /// </summary>
         public override object? ControlValue
         {
@@ -87,7 +86,7 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets whether the <see cref="DecimalTextBox"/> is in blank state.
-        /// Can be set on ly if <see cref="BlankEnabled"/> is <see langword="true"/>.
+        /// Can be set only if <see cref="BlankEnabled"/> is <see langword="true"/>.
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets whether the DecimalTextBox is in blank state. Can be set only if BlankEnabled is true.")]
@@ -125,7 +124,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets what <see cref="Value"/> should be returned in <see cref="Blank"/> state.
+        /// Gets or sets what the <see cref="Value"/> property should return in <see cref="Blank"/> state.
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets what Value should be returned in Blank state.")]
@@ -163,12 +162,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the the valid range of <see cref="Value"/>.
-        /// If <see cref="Value"/> violates newly set range, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <see langword="false"/>.
+        /// Gets or sets the valid range for the <see cref="Value"/> property.
+        /// If <see cref="Value"/> violates the newly set range, then either <see cref="Blank"/> will be set, or <see cref="Value"/> will be corrected if <see cref="BlankEnabled"/> is <see langword="false"/>.
         /// </summary>
         [Category("ucDecimal")]
-        [Description("Gets or sets the the valid range of Value. " +
-                    "If Value violates newly set range, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+        [Description("Gets or sets the the valid range for the Value property. " +
+            "If Value violates the newly set range, then either Blank will be set, or Value will be corrected if BlankEnabled is false.")]
         [DefaultValue(typeof(DecimalRange), "Any")]
         public DecimalRange Range
         {
@@ -177,12 +176,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets accepted minimum <see cref="Value"/>.
-        /// If <see cref="Value"/> violates newly set minimum value, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <see langword="false"/>.
+        /// Gets or sets the accepted minimum <see cref="Value"/>.
+        /// If <see cref="Value"/> violates the newly set minimum value, then either <see cref="Blank"/> will be set, or <see cref="Value"/> will be corrected if <see cref="BlankEnabled"/> is <see langword="false"/>.
         /// </summary>
         [Category("ucDecimal")]
         [Description("Gets or sets accepted minimum Value. " +
-                    "If Value violates newly set minimum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+            "If Value violates the newly set minimum value, then either Blank will be set, or Value will be corrected if BlankEnabled is false.")]
         [DefaultValue(typeof(decimal), "0")]
         [RefreshProperties(RefreshProperties.All)]
         public decimal RangeMinValue
@@ -192,12 +191,12 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets accepted maximum <see cref="Value"/>.
-        /// If <see cref="Value"/> violates newly set maximum value, then <see cref="Blank"/> will be set or <see cref="Value"/> will be corrigied if <see cref="BlankEnabled"/> is <see langword="false"/>.
+        /// Gets or sets the accepted maximum <see cref="Value"/>.
+        /// If <see cref="Value"/> violates the newly set maximum value, then either <see cref="Blank"/> will be set, or <see cref="Value"/> will be corrected if <see cref="BlankEnabled"/> is <see langword="false"/>.
         /// </summary>
         [Category("ucDecimal")]
-        [Description("Gets or sets accepted maximum Value. " +
-                    "If Value violates newly set maximum value, then Blank will be set or Value will be corrigied if BlankEnabled is false.")]
+        [Description("Gets or sets the accepted maximum Value. " +
+            "If Value violates the newly set maximum value, then either Blank will be set, or Value will be corrected if BlankEnabled is false.")]
         [DefaultValue(typeof(decimal), "0")]
         [RefreshProperties(RefreshProperties.All)]
         public decimal RangeMaxValue
@@ -221,7 +220,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets text of the <see cref="DecimalTextBox"/>. Whenever possible use <see cref="Value"/> property instead.
+        /// Gets or sets the text of the <see cref="DecimalTextBox"/>. It is recommended to use the <see cref="Value"/> property instead.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -233,7 +232,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets text align.
+        /// Gets or sets the horizontal text alignment.
         /// </summary>
         [Description("Gets or sets text align.")]
         [Category("ucDecimal")]

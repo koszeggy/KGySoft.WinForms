@@ -141,10 +141,10 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the relevant control value for supporting <see cref="ucBase"/> features of
-        /// saving/restoring value and marking control as modified.
+        /// saving/restoring value and marking the control as modified.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the relevant control value for supporting ucBase features of saving/restoring value and marking control as modified.")]
+        [Description("Gets or sets the relevant control value for supporting ucBase features of saving/restoring value and marking the control as modified.")]
         [DefaultValue(typeof(RelevantControlValues), "Value")]
         public RelevantControlValues RelevantControlValue
         {
@@ -166,7 +166,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the value of the NotSelected <see cref="State"/>.
+        /// Gets or sets the value of the 'NotSelected' <see cref="State"/>.
         /// </summary>
         [Browsable(false)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
@@ -252,8 +252,8 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the state of the selector control.
-        /// If <see cref="Value"/> has meaning in the used scenario, then set Value property instead.
-        /// Setting <see cref="SelectorStates.ValueSet"/> sets <see cref="ControlExtensions.UndefinedValue"/> to <see cref="Value"/> property.
+        /// If <see cref="Value"/> has meaning in the used scenario, then set the <see cref="Value"/> property instead.
+        /// Setting <see cref="SelectorStates.ValueSet"/> sets <see cref="ControlExtensions.UndefinedValue"/> to the <see cref="Value"/> property.
         /// </summary>
         [Category("ucCustomSelector")]
         [Description("Gets or sets the state of the selector control.")]
@@ -386,13 +386,13 @@ namespace KGySoft.WinForms.Controls
         /// Gets or sets whether <see cref="Value"/> should be auto-calculated based on the typed text.
         /// If the value of this property is <see langword="false"/>, then <see cref="Text"/> will be simply assigned to <see cref="Value"/>
         /// on leaving the control. If the property is <see langword="true"/>, then <see cref="Value"/> is calculated by
-        /// <see cref="AutoFind"/> event or by <see cref="DefaultAutoFind"/> method if AutoFind event is not subscribed.
+        /// the <see cref="AutoFind"/> event or by the <see cref="DefaultAutoFind">DefaultAutoFind</see> method if the <see cref="AutoFind"/> event is not subscribed.
         /// </summary>
         [Category("ucCustomSelector")]
         [Description("Gets or sets whether Value should be auto-calculated based on the typed text. " +
             "If the value of this property is false, then Text will be simply assigned to Value " +
             "on leaving the control. If the property is true, then Value is calculated by " +
-            "AutoFind event or by DefaultAutoFind method if AutoFind event is not subscribed.")]
+            "the AutoFind event or by DefaultAutoFind method if the AutoFind event is not subscribed.")]
         [DefaultValue(true)]
         public virtual bool AutoFindText
         {
@@ -411,7 +411,7 @@ namespace KGySoft.WinForms.Controls
         /// </para>
         /// <para>
         /// If <see cref="Value"/> has meaning in a scenario (<see cref="RelevantControlValue"/> is Value), then <see cref="Text"/> should never be set
-        /// directly from code. Text of a value can be returned by an overridden <see cref="GetTextByValue"/> method.
+        /// directly from code. Text of a value can be returned by overriding the <see cref="GetTextByValue">GetTextByValue</see> method.
         /// </para>
         /// <para>
         /// If you need to set both <see cref="Value"/> and <see cref="Text"/> without raising events
@@ -419,7 +419,8 @@ namespace KGySoft.WinForms.Controls
         /// </para>
         /// </remarks>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the text of the inner ComboBox. Can be set only in ValueSet state. For data binding using Value property is preferable. Setting Text property does not change Value, therefore if RelevantControlValue is Value, then primarily Value property should be set.")]
+        [Description("Gets or sets the text of the inner ComboBox. Can be set only in ValueSet state. For data binding using Value property is preferable. "
+            + "Setting Text property does not change Value, therefore if RelevantControlValue is Value, then primarily Value property should be set.")]
         [Browsable(true)]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Visible)]
         [Bindable(BindableSupport.Yes, BindingDirection.TwoWay)]
@@ -444,10 +445,10 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the read-only state for the control. This disables most of the
-        /// buttons, too. To disable manual text editing only, use <see cref="TextEditable"/> property.
+        /// buttons, too. To disable manual text editing only, use the <see cref="TextEditable"/> property.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the read-only state for the control. This disables most of the buttons, too. To disable manual text editing only, use TextEditable property.")]
+        [Description("Gets or sets the read-only state for the control. This disables most of the buttons, too. To disable manual text editing only, use the TextEditable property.")]
         public override bool ReadOnly
         {
             get => readOnly;
@@ -563,10 +564,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Text"/> of NotSelected <see cref="State"/>.
+        /// Gets or sets the <see cref="Text"/> of the 'NotSelected' <see cref="State"/>.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the Text NotSelected State.")]
+        [Description("Gets or sets the Text of the 'NotSelected' State.")]
         [Browsable(true)]
         [RefreshProperties(RefreshProperties.All)]
         [DefaultValue(ControlExtensions.NotSelectedText)]
@@ -582,10 +583,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Text"/> of All <see cref="State"/>.
+        /// Gets or sets the <see cref="Text"/> of the 'All' <see cref="State"/>.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the Text of All State.")]
+        [Description("Gets or sets the Text of 'All' State.")]
         [Browsable(true)]
         [RefreshProperties(RefreshProperties.All)]
         [DefaultValue(ControlExtensions.AllSelectedText)]
@@ -601,10 +602,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the <see cref="Text"/> of None <see cref="State"/>.
+        /// Gets or sets the <see cref="Text"/> of the 'None' <see cref="State"/>.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets the Text of None State.")]
+        [Description("Gets or sets the Text of the 'None' State.")]
         [Browsable(true)]
         [RefreshProperties(RefreshProperties.All)]
         [DefaultValue(ControlExtensions.NoneSelectedText)]
@@ -645,95 +646,95 @@ namespace KGySoft.WinForms.Controls
         #region Events
 
         /// <summary>
-        /// Occurs when <see cref="Value"/> is changed.
+        /// Occurs when <see cref="Value"/> has changed.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs when Value is changed.")]
+        [Description("Occurs when Value has changed.")]
         public event EventHandler? ValueChanged;
 
         /// <summary>
-        /// Occurs when <see cref="State"/> is changed.
+        /// Occurs when <see cref="State"/> has changed.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs when State is changed.")]
+        [Description("Occurs when State has changed.")]
         public event EventHandler? StateChanged;
 
         /// <summary>
-        /// Occurs when Clear button is clicked.
+        /// Occurs when the 'Clear' button is clicked.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs when Clear button is clicked.")]
+        [Description("Occurs when the 'Clear' button is clicked.")]
         public event EventHandler? ButtonClearClick;
 
         /// <summary>
-        /// Occurs when All button is clicked.
+        /// Occurs when the 'All' button is clicked.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs when All button is clicked.")]
+        [Description("Occurs when the 'All' button is clicked.")]
         public event EventHandler? ButtonAllClick;
 
         /// <summary>
-        /// Occurs when None button is clicked.
+        /// Occurs when the 'None' button is clicked.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs when None button is clicked.")]
+        [Description("Occurs when the 'None' button is clicked.")]
         public event EventHandler? ButtonNoneClick;
 
         /// <summary>
-        /// Occurs when Browse button is clicked.
+        /// Occurs when the 'Browse' button is clicked.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs when Browse button is clicked.")]
+        [Description("Occurs when the 'Browse' button is clicked.")]
         public event EventHandler? ButtonBrowseClick;
 
         /// <summary>
-        /// Occurs when Editor button is clicked.
+        /// Occurs when the 'Edit' button is clicked.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs when Editor button is clicked.")]
+        [Description("Occurs when the 'Edit' button is clicked.")]
         public event EventHandler? ButtonEditorClick;
 
         /// <summary>
-        /// Occurs when New button is clicked.
+        /// Occurs when the 'New' button is clicked.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs when New button is clicked.")]
+        [Description("Occurs when the 'New' button is clicked.")]
         public event EventHandler? ButtonNewClick;
 
         /// <summary>
         /// Occurs on leaving the control after editing the text manually and when <see cref="AutoFindText"/> property is <see langword="true"/>.
-        /// Can be used for calculating <see cref="Value"/> based on the typed text. If this event is not subscribed, then <see cref="DefaultAutoFind"/> will be called,
+        /// Can be used to calculate <see cref="Value"/> based on the typed text. If this event is not subscribed, then <see cref="DefaultAutoFind">DefaultAutoFind</see> will be called,
         /// which tries to find the element in <see cref="Items"/> or simply makes <see cref="Value"/> equal to <see cref="Text"/>.
         /// </summary>
         [Category("ucCustomSelector")]
         [Description("Occurs on leaving the control after editing the text manually and when AutoFindText property is true. " +
-            "Can be used for calculating Value based on the typed text. If this event is not subscribed, then DefaultAutoFind will be called, " +
+            "Can be used to calculate Value based on the typed text. If this event is not subscribed, then DefaultAutoFind will be called, " +
             "which tries to find the element in Items or simply makes Value equal to Text.")]
         public event EventHandler<AutoFindEventArgs>? AutoFind;
 
         /// <summary>
         /// Occurs when a displayed text of a value needs to be calculated. Does not occur when <see cref="Value"/> equals <see cref="ValueNotSelected"/>,
         /// <see cref="ValueAllSelected"/> or <see cref="ValueNoneSelected"/>.
-        /// If not handled, then calculated text will gain its value either by the defined <see cref="DataSource"/> or by the string representation of Value.
+        /// If not handled, then the calculated text will gain its value either by the defined <see cref="DataSource"/> or by the string representation of <see cref="Value"/>.
         /// </summary>
         [Category("ucCustomSelector")]
         [Description("Occurs when a displayed text of a value needs to be calculated. Does not occur when Value equals ValueNotSelected, " +
-            "ValueAllSelected or ValueNoneSelected. If not handled, then calculated text will gain its value either by the defined DataSource " +
+            "ValueAllSelected or ValueNoneSelected. If not handled, then the calculated text will gain its value either by the defined DataSource " +
             "or by the string representation of Value.")]
         public event EventHandler<CalculateTextEventArgs>? CalculateText;
 
         /// <summary>
-        /// Occurs when the <see cref="Image"/> of the control been clicked.
+        /// Occurs when the <see cref="Image"/> of the control is clicked.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs when the Image of the control been clicked.")]
+        [Description("Occurs when the Image of the control is clicked.")]
         public event EventHandler? ImageClick;
 
         /// <summary>
-        /// Occurs when the <see cref="Image"/> of the control been double clicked.
+        /// Occurs when the <see cref="Image"/> of the control is double-clicked.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs when the Image of the control been double clicked.")]
+        [Description("Occurs when the Image of the control is double-clicked.")]
         public event EventHandler? ImageDoubleClick;
 
         /// <summary>
@@ -749,10 +750,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Occurs on leave when content differs from the content at getting focused.
+        /// Occurs on leaving the control when <see cref="Text"/> is different from the value when the control received focus.
         /// </summary>
         [Category("ucCustomSelector")]
-        [Description("Occurs on leave when content differs from the content at getting focused.")]
+        [Description("Occurs on leaving the control when Text is different from the value when the control received focus.")]
         public event EventHandler? TextChangedOnLeave
         {
             add => cmbCombo.TextChangedOnLeave += value;
@@ -811,10 +812,12 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Sets the value-text pair without raising events.
-        /// <remarks>
-        /// This can be useful typically for LoadFromDataBase-like methods.
-        /// </remarks>
         /// </summary>
+        /// <param name="value">The value to set in <see cref="Value"/>.</param>
+        /// <param name="text">The text to set in <see cref="Text"/>.</param>
+        /// <remarks>
+        /// This can be useful for initializing.
+        /// </remarks>
         [SuppressMessage("ReSharper", "ParameterHidesMember", Justification = "Public method, changing the name would be breaking")]
         public void Assign(object? value, string text)
         {
@@ -835,7 +838,7 @@ namespace KGySoft.WinForms.Controls
         #region New overridable public methods
 
         /// <summary>
-        /// Default behaviour for clicking the Clear button.
+        /// The default behaviour when clicking the 'Clear' button.
         /// Can be overridden and can be called from a handled <see cref="ButtonClearClick"/>.
         /// </summary>
         public virtual void DefaultClearClick()
@@ -844,7 +847,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Default behaviour for clicking the All button.
+        /// The default behaviour when clicking the 'All' button.
         /// Can be overridden and can be called from a handled <see cref="ButtonAllClick"/>.
         /// </summary>
         public virtual void DefaultAllClick()
@@ -853,7 +856,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Default behaviour for clicking the None button.
+        /// The default behaviour when clicking the 'None' button.
         /// Can be overridden and can be called from a handled <see cref="ButtonNoneClick"/>.
         /// </summary>
         public virtual void DefaultNoneClick()
@@ -862,7 +865,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Default behaviour for clicking the Browse button.
+        /// The default behaviour when clicking the 'Browse' button.
         /// Can be overridden and can be called from a handled <see cref="ButtonBrowseClick"/>.
         /// </summary>
         public virtual void DefaultBrowseClick()
@@ -875,7 +878,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Default behaviour for clicking the Edditor button.
+        /// The default behaviour when clicking the 'Edit' button.
         /// Can be overridden and can be called from a handled <see cref="ButtonEditorClick"/>.
         /// </summary>
         public virtual void DefaultEditorClick()
@@ -887,7 +890,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Default behaviour for clicking the New button.
+        /// The default behaviour when clicking the 'New' button.
         /// Can be overridden and can be called from a handled <see cref="ButtonNewClick"/>.
         /// </summary>
         public virtual void DefaultNewClick()
@@ -909,9 +912,9 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Creates an action button.
         /// </summary>
-        /// <param name="bmp">Image of the button.</param>
+        /// <param name="bmp">The image of the button.</param>
         /// <param name="toolTip">The tooltip of the button</param>
-        /// <returns></returns>
+        /// <returns>The created button.</returns>
         protected Button CreateActionButton(Bitmap? bmp, string toolTip)
         {
             Button result = new Button();
@@ -996,7 +999,7 @@ namespace KGySoft.WinForms.Controls
         #region New overridable protected methods
 
         /// <summary>
-        /// Refreshing controls in action panel.
+        /// Refreshes the controls on the action panel.
         /// </summary>
         protected virtual void RefreshActionPanel()
         {
@@ -1018,7 +1021,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Creating controls in action panel.
+        /// Creates the controls on the action panel.
         /// </summary>
         protected virtual void CreateActionPanel()
         {
@@ -1032,9 +1035,9 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Default AutoFind behaviour if <see cref="AutoFind"/> event is not handled.
+        /// The default AutoFind behaviour if <see cref="AutoFind"/> event is not handled.
         /// Can be overridden to set <see cref="Value"/> and <see cref="Text"/> based on
-        /// the written text or text chunk and can be triggered also from a handled <see cref="AutoFind"/> by setting <see cref="AutoFindEventArgs.DefaultAutoFind"/> property.
+        /// the written text or text chunk and can be triggered also from a handled <see cref="AutoFind"/> event by setting the <see cref="AutoFindEventArgs.DefaultAutoFind"/> property.
         /// The default implementation sets <paramref name="text"/> to <see cref="Value"/>
         /// or tries to find the given text in <see cref="Items"/>.
         /// </summary>
@@ -1060,11 +1063,12 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Returns the text based on <see cref="Value"/>.
-        /// In <see cref="ucCustomSelector"/>&#160;<see cref="GetTextByValue"/> returns only texts for special values
+        /// In <see cref="ucCustomSelector"/> it returns only texts for special values
         /// or when <see cref="DataSource"/> is not <see langword="null"/> and <paramref name="value"/> can be found in <see cref="ValueMember"/> of data source.
         /// Otherwise, returns with the ToString of <see cref="Value"/>.
         /// Override this method to calculate texts for other values.
         /// </summary>
+        /// <param name="value">The value to obtain the text for.</param>
         [SuppressMessage("ReSharper", "ParameterHidesMember", Justification = "Renaming would be a breaking change")]
         protected virtual string GetTextByValue(object? value)
         {
@@ -1100,7 +1104,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Sets value while adjusts <see cref="Text"/> and <see cref="State"/>.
+        /// Sets <see cref="Value"/>, and adjusts <see cref="Text"/> and <see cref="State"/>.
         /// </summary>
         /// <param name="value">The value to set.</param>
         [SuppressMessage("ReSharper", "ParameterHidesMember", Justification = "Intended, sets the value; renaming would be a breaking change")]
@@ -1137,17 +1141,20 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Invokes the <see cref="ValueChanged"/> event.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnValueChanged(EventArgs e) => ValueChanged?.Invoke(this, e);
 
         /// <summary>
         /// Invokes the <see cref="StateChanged"/> event.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnStateChanged(EventArgs e) => StateChanged?.Invoke(this, e);
 
         /// <summary>
-        /// Invokes the <see cref="ButtonClearClick"/> event or when it is not handled
-        /// calls the <see cref="DefaultClearClick"/> method.
+        /// Invokes the <see cref="ButtonClearClick"/> event, or when it is not handled
+        /// calls the <see cref="DefaultClearClick">DefaultClearClick</see> method.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnButtonClearClick(EventArgs e)
         {
             if (ButtonClearClick is EventHandler handler)
@@ -1157,9 +1164,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Invokes the <see cref="ButtonAllClick"/> event or when it is not handled
-        /// calls the <see cref="DefaultAllClick"/> method.
+        /// Invokes the <see cref="ButtonAllClick"/> event, or when it is not handled
+        /// calls the <see cref="DefaultAllClick">DefaultAllClick</see> method.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnButtonAllClick(EventArgs e)
         {
             if (ButtonAllClick is EventHandler handler)
@@ -1169,9 +1177,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Invokes the <see cref="ButtonNoneClick"/> event or when it is not handled
-        /// calls the <see cref="DefaultNoneClick"/> method.
+        /// Invokes the <see cref="ButtonNoneClick"/> event, or when it is not handled
+        /// calls the <see cref="DefaultNoneClick">DefaultNoneClick</see> method.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnButtonNoneClick(EventArgs e)
         {
             if (ButtonNoneClick is EventHandler handler)
@@ -1181,9 +1190,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Invokes the <see cref="ButtonBrowseClick"/> event or when it is not handled
-        /// calls the <see cref="DefaultBrowseClick"/> method.
+        /// Invokes the <see cref="ButtonBrowseClick"/> event, or when it is not handled
+        /// calls the <see cref="DefaultBrowseClick">DefaultBrowseClick</see> method.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnButtonBrowseClick(EventArgs e)
         {
             if (ButtonBrowseClick is EventHandler handler)
@@ -1193,9 +1203,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Invokes the <see cref="ButtonEditorClick"/> event or when it is not handled
-        /// calls the <see cref="DefaultEditorClick"/> method.
+        /// Invokes the <see cref="ButtonEditorClick"/> event, or when it is not handled
+        /// calls the <see cref="DefaultEditorClick">DefaultEditorClick</see> method.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnButtonEditorClick(EventArgs e)
         {
             if (ButtonEditorClick is EventHandler handler)
@@ -1205,9 +1216,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Invokes the <see cref="ButtonNewClick"/> event or when it is not handled
-        /// calls the <see cref="DefaultNewClick"/> method.
+        /// Invokes the <see cref="ButtonNewClick"/> event, or when it is not handled
+        /// calls the <see cref="DefaultNewClick">DefaultNewClick</see> method.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnButtonNewClick(EventArgs e)
         {
             if (ButtonNewClick is EventHandler handler)
@@ -1217,9 +1229,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Invokes the <see cref="AutoFind"/> event or when it is not handled
-        /// calls the <see cref="DefaultAutoFind"/> method.
+        /// Invokes the <see cref="AutoFind"/> event, or when it is not handled
+        /// calls the <see cref="DefaultAutoFind">DefaultAutoFind</see> method.
         /// </summary>
+        /// <param name="e">An <see cref="AutoFindEventArgs"/> that contains the event data.</param>
         protected virtual void OnAutoFind(AutoFindEventArgs e)
         {
             if (AutoFind is EventHandler<AutoFindEventArgs> handler)
@@ -1238,16 +1251,19 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Invokes the <see cref="CalculateText"/> event.
         /// </summary>
+        /// <param name="e">A <see cref="CalculateTextEventArgs"/> that contains the event data.</param>
         protected virtual void OnCalculateText(CalculateTextEventArgs e) => CalculateText?.Invoke(this, e);
 
         /// <summary>
         /// Invokes the <see cref="ImageClick"/> event.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnImageClick(EventArgs e) => ImageClick?.Invoke(this, e);
 
         /// <summary>
         /// Invokes the <see cref="ImageDoubleClick"/> event.
         /// </summary>
+        /// <param name="e">An <see cref="EventArgs"/> that contains the event data.</param>
         protected virtual void OnImageDoubleClick(EventArgs e) => ImageDoubleClick?.Invoke(this, e);
 
         #endregion
@@ -1466,7 +1482,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets whether the there is no selected item in the combo box (<see cref="SelectedValue"/> or is <see langword="null"/>, <see cref="DBNull"/> or equals with <see cref="ControlExtensions.NotSelectedValue"/>)
+        /// Gets whether there is no selected item in the combo box (<see cref="SelectedValue"/> is <see langword="null"/>, <see cref="DBNull"/> or equals to <see cref="ControlExtensions.NotSelectedValue"/>)
         /// </summary>
         [Browsable(false)]
         public bool IsEmpty => cmbCombo.IsEmpty();
@@ -1492,7 +1508,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets currently selected item in the combo box.
+        /// Gets or sets the currently selected item in the combo box.
         /// </summary>
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Hidden)]
         [Browsable(false)]
@@ -1591,10 +1607,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         ///<summary>
-        /// Gets or sets a custom <see cref="AutoCompleteStringCollection"/> to <see cref="AutoCompleteSource"/> property is <see cref="System.Windows.Forms.AutoCompleteSource.CustomSource"/>.
+        /// Gets or sets a custom <see cref="AutoCompleteStringCollection"/> if the <see cref="AutoCompleteSource"/> property is <see cref="AutoCompleteSource.CustomSource"/>.
         ///</summary>
         [Category("ucCustomSelector")]
-        [Description("Gets or sets a custom AutoCompleteStringCollection to AutoCompleteSource property is CustomSource.")]
+        [Description("Gets or sets a custom AutoCompleteStringCollection if the AutoCompleteSource property is CustomSource.")]
         [DesignerSerializationVisibility(DesignerSerializationVisibility.Content)]
         [Editor("System.Windows.Forms.Design.ListControlStringCollectionEditor, System.Design, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a", typeof(UITypeEditor))]
         public AutoCompleteStringCollection AutoCompleteCustomSource
@@ -1607,7 +1623,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to a <see cref="DataTable"/>.
         /// </summary>
         /// <param name="dataTable">The data source table.</param>
-        /// <param name="displayMember">Column name to display in the the combo box.</param>
+        /// <param name="displayMember">Column name to display in the combo box.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, the displayed column must contain string values.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
@@ -1623,7 +1639,7 @@ namespace KGySoft.WinForms.Controls
         /// Binds the combo box to a <see cref="DataTable"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
         /// </summary>
         /// <param name="dataTable">The data source table.</param>
-        /// <param name="displayMember">Column name to display in the the combo box.</param>
+        /// <param name="displayMember">Column name to display in the combo box.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If <see cref="SelectionPlusItems.ItemAll"/> or <see cref="SelectionPlusItems.ItemNone"/> is requested,
         /// then the value column must have a data type that is convertible to signed integer type.</param>
@@ -1633,10 +1649,10 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Binds the combo box to a <see cref="DataTable"/>. Items will not be sorted and translated.
+        /// Binds the combo box to a <see cref="DataTable"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="dataTable">The data source table.</param>
-        /// <param name="displayMember">Column name to display in the the combo box.</param>
+        /// <param name="displayMember">Column name to display in the combo box.</param>
         /// <param name="valueMember">Column name to use as the actual value for the items in the combo box.</param>
         public void LoadFrom(DataTable dataTable, string valueMember, string displayMember)
         {
@@ -1671,7 +1687,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
+        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
         /// <param name="valueMemberType">Type of the actual value for the items in the combo box. If <see langword="null"/>, then original enum value will be used as value member.</param>
@@ -1681,7 +1697,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted and translated.
+        /// Binds the combo box to the values of an <see cref="Enum"/>. Items will not be sorted or translated.
         /// </summary>
         /// <param name="enumType">An <see cref="Enum"/> type with the fields to bind.</param>
         public void LoadFrom(Type enumType)
@@ -1692,8 +1708,9 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Binds the combo box to a <paramref name="collection"/>.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="collection">The source collection.</param>
-        /// <param name="displayMember">Property name to display in the the combo box.</param>
+        /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         /// <param name="translateNames">Indicates whether the displayed values should be translated. If so, <paramref name="displayMember"/> must be writable and should refer to a <see cref="string"/> property.</param>
         /// <param name="distinctionPostfix">Distinction postfix for translated items. Can be <see langword="null"/> to omit distinction.</param>
@@ -1708,8 +1725,9 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted and only the <paramref name="plusItems"/> will be translated.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="collection">The source collection.</param>
-        /// <param name="displayMember">Property name to display in the the combo box.</param>
+        /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         /// <param name="plusItems">Requested additional items (Not selected/All/None). If plus itmes are requested, then <paramref name="valueMember"/> must refer to a property,
         /// which is convertible to signed integer type.</param>
@@ -1719,10 +1737,11 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted and translated.
+        /// Binds the combo box to a <paramref name="collection"/>. Items will not be sorted or translated.
         /// </summary>
+        /// <typeparam name="T">The element type of the <paramref name="collection"/>.</typeparam>
         /// <param name="collection">The source collection.</param>
-        /// <param name="displayMember">Property name to display in the the combo box.</param>
+        /// <param name="displayMember">Property name to display in the combo box.</param>
         /// <param name="valueMember">Property name to use as the actual value for the items in the combo box.</param>
         public void LoadFrom<T>(IEnumerable<T> collection, string valueMember, string displayMember)
         {

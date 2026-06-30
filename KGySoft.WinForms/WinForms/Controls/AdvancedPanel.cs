@@ -28,7 +28,7 @@ using KGySoft.WinForms.WinApi;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents an advanced panel with much more flexible <see cref="BorderStyle"/> than the original <see cref="Panel"/>.
+    /// Represents a panel with advanced <see cref="BorderStyle"/> options.
     /// </summary>
     [ToolboxBitmap(typeof(AdvancedPanel), "Resources.Toolbox.AdvancedPanel.png")]
     [Designer(typeof(AdvancedPanelDesigner))]
@@ -46,8 +46,10 @@ namespace KGySoft.WinForms.Controls
         #region Public Properties
 
         /// <summary>
-        /// Gets or sets the border style of the <see cref="AdvancedPanel"/> panel.
+        /// Gets or sets the border style of the <see cref="AdvancedPanel"/>.
+        /// <br/>See the <see cref="AdvancedBorderStyle"/> enumeration for the available options.
         /// </summary>
+        /// <seealso cref="AdvancedBorderStyle"/>
         [Category("AdvancedPanel")]
         [Description("Gets or sets the border style of the AdvancedPanel.")]
         [DefaultValue(typeof(AdvancedBorderStyle), "Raised")]
