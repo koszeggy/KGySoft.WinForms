@@ -234,6 +234,8 @@ namespace KGySoft.WinForms.Components
                 string propertyName = binding.BindingMemberInfo.BindingField;
                 var args = new SetMessageEventArgs(currentItem, propertyName, currentItem is IDataErrorInfo info ? info[propertyName] : null);
                 OnSetMessage(args);
+                if (args.Cancel)
+                    continue;
 
                 if (!controlMessages.TryGetValue(control, out StringBuilder? message))
                     controlMessages[control] = new StringBuilder(args.Message ?? String.Empty);
@@ -277,7 +279,8 @@ namespace KGySoft.WinForms.Components
                 return;
             var args = new SetMessageEventArgs(null, binding.PropertyName, e.ErrorText);
             OnSetMessage(args);
-            SetError(binding.Control, args.Message);
+            if (!args.Cancel)
+                SetError(binding.Control, args.Message);
         }
 
         private void CurrencyManager_ItemChanged(object? sender, ItemChangedEventArgs e)

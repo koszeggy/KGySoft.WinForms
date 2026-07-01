@@ -26,7 +26,7 @@ namespace KGySoft.WinForms.Components
     /// Provides arguments for the <see cref="AdvancedErrorProvider.SetMessage">AdvancedErrorProvider.SetMessage</see> event.
     /// </summary>
     /// <seealso cref="AdvancedErrorProvider" />
-    public class SetMessageEventArgs : EventArgs
+    public class SetMessageEventArgs : CancelEventArgs
     {
         #region Properties
 
@@ -45,6 +45,10 @@ namespace KGySoft.WinForms.Components
         /// Gets or sets the message to be displayed. If the message is retrieved due to a binding error or the <see cref="Current"/> item
         /// implements the <see cref="IDataErrorInfo"/> interface, then this property may already contain a value.
         /// </summary>
+        /// <remarks>
+        /// <para>To clear the provider message and make the icon disappear for the property, set this property to <see langword="null"/>.</para>
+        /// <para>To skip setting any message, leaving the provider in the previous state, set the <see cref="CancelEventArgs.Cancel"/> property to <see langword="true"/>.</para>
+        /// </remarks>
         public string? Message { get; set; }
 
         #endregion
