@@ -1069,6 +1069,7 @@ namespace KGySoft.WinForms.Controls
         /// Override this method to calculate texts for other values.
         /// </summary>
         /// <param name="value">The value to obtain the text for.</param>
+        /// <returns>The text associated with <paramref name="value"/>.</returns>
         [SuppressMessage("ReSharper", "ParameterHidesMember", Justification = "Renaming would be a breaking change")]
         protected virtual string GetTextByValue(object? value)
         {

@@ -275,6 +275,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Shows a message dialog for any kind of message.
         /// </summary>
+        /// <returns>The <see cref="DialogResult"/> returned by the dialog.</returns>
         /// <param name="message">The message to show.</param>
         /// <param name="details">The details text (if <see langword="null"/> or empty, the Details button will be hidden)</param>
         /// <param name="caption">The caption text of the dialog.</param>
@@ -355,6 +356,7 @@ namespace KGySoft.WinForms.Forms
         /// <summary>
         /// Shows a message dialog for any kind of message.
         /// </summary>
+        /// <returns>The <see cref="DialogResult"/> returned by the dialog.</returns>
         /// <param name="message">The message to show.</param>
         /// <param name="details">The details text (if <see langword="null"/> or empty, the Details button will be hidden)</param>
         /// <param name="caption">The caption text of the dialog.</param>
@@ -371,6 +373,7 @@ namespace KGySoft.WinForms.Forms
         /// <param name="message">The message to show.</param>
         /// <param name="caption">The caption text of the dialog.</param>
         /// <param name="dialogType">Affects the dialog icon and the buttons of the dialog.</param>
+        /// <returns>The <see cref="DialogResult"/> returned by the dialog.</returns>
         /// <remarks>
         /// <para>Details will be shown if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/>.</para>
         /// <para>Log and screenshot will be saved if <paramref name="dialogType"/> is <see cref="AdvancedDialogTypes.Exception"/> and <see cref="ReportSender"/> is assigned.</para>
