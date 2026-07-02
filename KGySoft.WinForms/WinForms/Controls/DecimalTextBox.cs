@@ -402,6 +402,7 @@ namespace KGySoft.WinForms.Controls
         [Description("Gets or sets the value of the DecimalTextBox.")]
         [DefaultValue(typeof(decimal), "0")]
         [RefreshProperties(RefreshProperties.All)]
+        [Bindable(true)]
         public decimal Value
         {
             get => !Blank ? value : BlankValue;
