@@ -200,6 +200,7 @@ namespace KGySoft.WinForms.Example
             td.StandardButtons = TaskDialogStandardButtons.Cancel;
 
             td.Buttons.Add(new TaskDialogButton("LocalizationExample", "Dynamic localization example"));
+            td.Buttons.Add(new TaskDialogButton("AdvancedErrorProviderExample", "AdvancedErrorProvider example"));
             td.Buttons.Add(new TaskDialogButton("MdiDemoForm", "MDI Form Example"));
             td.Buttons.Add(new TaskDialogButton("FadingDemo", "Custom fading control demo"));
 
