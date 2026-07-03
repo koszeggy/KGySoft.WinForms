@@ -99,7 +99,7 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
   + New ForceShowInTaskbar option
 + AdvancedErrorProvider class:
   + New IconSizeMode property: it allows auto-scaling explicitly set icons based on the current DPI
-  - Fixing the icon appearance when its width or height is not divisible by 16 (affects .NET Framework 3.5-4.6.2)
+  - Fixing the icon appearance when its width is not divisible by 16 (affects .NET Framework 3.5-4.6.2)
 
 ! KGySoft.WinForms.Controls namespace:
 ======================================

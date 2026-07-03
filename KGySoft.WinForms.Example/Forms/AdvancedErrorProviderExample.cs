@@ -15,6 +15,8 @@
 
 #region Usings
 
+using System.Drawing;
+
 using KGySoft.ComponentModel;
 using KGySoft.Drawing;
 using KGySoft.WinForms.Components;

@@ -387,24 +387,27 @@ namespace KGySoft.WinForms.Components
         private void SetIcon(Icon icon)
         {
 #if NETFRAMEWORK && !NET47_OR_GREATER
-            // On .NET Framework [3.5..4.7) the icon image gets corrupted if its size is not divisible by 16.
-            // It's because the internally generated Region size must be divisible by 16, which is ensured on NET47+ only.
+            // On .NET Framework [3.5..4.7) the icon image gets corrupted if its width is not divisible by 16.
+            // It's because the internally generated Region width must be divisible by 16, which is ensured on NET47+ only.
             if (OSHelper.IsWindows && !OSHelper.IsMono && icon.GetImagesCount() == 1
 #if !NET35
                 && !OSHelper.IsNet47OrLater // if the actually installed framework is .NET Framework 4.7+, then we don't need the fix
 #endif
                 )
             {
-                int size = icon.Width;
-                int mod = size & 0xF;
+                Size size = icon.Size;
+                int mod = size.Width & 0xF;
                 if (mod != 0)
                 {
+                    int fixedWidth = size.Width + (16 - mod);
                     using Bitmap iconImage = icon.ExtractBitmap(0)!;
                     if (icon != customIcon)
                         icon.Dispose();
 
-                    // creating a larger icon without scaling so apparently it will have the same size as the original one
-                    icon = iconImage.ToIcon(size + (16 - mod), ScalingMode.NoScaling);
+                    // creating a rectangular icon without scaling so apparently it will have the same size as the original one
+                    using var fixedIconImage = new Bitmap(fixedWidth, size.Height);
+                    iconImage.DrawInto(fixedIconImage, new Point(RightToLeft ? fixedWidth - size.Width : 0, 0));
+                    icon = fixedIconImage.ToIcon(Color.Transparent);
                 }
             }
 #endif
