@@ -19,9 +19,13 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
+using System.Drawing.Imaging;
 using System.Text;
 using System.Windows.Forms;
 
+using KGySoft.CoreLibraries;
+using KGySoft.Drawing;
+using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Reflection;
 
 #endregion
@@ -56,11 +60,16 @@ namespace KGySoft.WinForms.Components
     /// </remarks>
     /// <seealso cref="ErrorProvider" />
     [ToolboxBitmap(typeof(ErrorProvider))]
-    public class AdvancedErrorProvider : ErrorProvider
+    public class AdvancedErrorProvider : ErrorProvider, IPerMonitorDpiAware
     {
         #region Fields
 
         private BindingManagerBase? lastManager;
+        private IDisposable? dpiChangeNotifier;
+        private Icon? customIcon; // assigned by the caller, never should be disposed
+        private Icon? adjustedIcon; // always generated, should be always disposed
+        private IconSizeMode iconSizeMode = IconSizeMode.AutoScale;
+        private Size currentScaledSize; // not necessarily the actual size, but the actual calculated one
 
         #endregion
 
@@ -91,6 +100,90 @@ namespace KGySoft.WinForms.Components
         [Category(nameof(AdvancedErrorProvider))]
         [Description("Gets or sets whether binding errors should be shown by this AdvancedErrorProvider.")]
         public bool ShowBindingErrors { get; set; } = true;
+
+        /// <inheritdoc cref="ErrorProvider.ContainerControl"/>
+        public new ContainerControl? ContainerControl
+        {
+            get => base.ContainerControl;
+            set
+            {
+                base.ContainerControl = value;
+                dpiChangeNotifier?.Dispose();
+                dpiChangeNotifier = null;
+                if (customIcon != null && iconSizeMode != IconSizeMode.SystemDefault)
+                    dpiChangeNotifier = value?.RegisterPerMonitorAwarenessNotifications(this);
+                ResetIcon(false);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the icon for this <see cref="AdvancedErrorProvider"/>.
+        /// Explicitly set icons can be scaled automatically, depending on the <see cref="IconSizeMode"/> property.
+        /// <br/>See the <strong>Remarks</strong> section of the <see cref="IconSizeMode"/> property for details.
+        /// </summary>
+        [Category(nameof(AdvancedErrorProvider))]
+        [Description("Gets or sets the icon for this AdvancedErrorProvider. Explicitly set icons can be scaled automatically, depending on the IconSizeMode property.")]
+        public new Icon Icon
+        {
+            get => customIcon ?? base.Icon;
+            set
+            {
+                customIcon = value ?? throw new ArgumentNullException(nameof(value), PublicResources.ArgumentNull);
+                if (iconSizeMode != IconSizeMode.SystemDefault)
+                    dpiChangeNotifier ??= ContainerControl?.RegisterPerMonitorAwarenessNotifications(this);
+
+                currentScaledSize = default;
+                ResetIcon(true);
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the icon sizing behavior for explicitly set icons.
+        /// <br/>Default value: <see cref="IconSizeMode.AutoScale"/>.
+        /// </summary>
+        /// <remarks>
+        /// <para>If the value of this property is <see cref="IconSizeMode.SystemDefault"/>, the behavior is framework dependent.
+        /// Older frameworks may simply pick the smallest image from the assigned icon, which still may be too large if the icon contains only
+        /// a large image. Starting with .NET 8.0 the <see cref="ErrorProvider"/> provider class supports multi-resolution icons,
+        /// though only the existing resolutions are used, similarly to the <see cref="IconSizeMode.GetNearestSize"/> mode.</para>
+        /// <para>If the property is set to <see cref="IconSizeMode.AutoScale"/> or <see cref="IconSizeMode.GetNearestSize"/>,
+        /// the reference size on 100% DPI is 16 x 16 pixels.</para>
+        /// <para>To make auto-scaling work for per-monitor DPI awareness, the <see cref="ContainerControl"/> property must not be <see langword="null"/>.
+        /// The Windows Forms designer sets the <see cref="ContainerControl"/> automatically if you add the <see cref="AdvancedErrorProvider"/>
+        /// to the form or user control from the Toolbox.</para>
+        /// <para>To autoscale the default icon as well, just get and set it explicitly: <c>myErrorProvider.Icon = myErrorProvider.Icon;</c></para>
+        /// <note type="tip">It is recommended to use multi-resolution icons in a DPI aware application. You can use the predefined icons
+        /// from the <a href="https://koszeggy.github.io/docs/drawing/html/T_KGySoft_Drawing_Icons.htm">Icons</a> class.</note>
+        /// </remarks>
+        [Category(nameof(AdvancedErrorProvider))]
+        [Description("Gets or sets the icon sizing behavior for explicitly set icons.")]
+        [DefaultValue(IconSizeMode.AutoScale)]
+        public IconSizeMode IconSizeMode
+        {
+            get => iconSizeMode;
+            set
+            {
+                if (iconSizeMode == value)
+                    return;
+                if (!value.IsDefined())
+                    throw new ArgumentOutOfRangeException(nameof(value), PublicResources.EnumOutOfRange(value));
+
+                iconSizeMode = value;
+                if (customIcon == null)
+                    return;
+
+                currentScaledSize = default;
+                if (value == IconSizeMode.SystemDefault)
+                {
+                    dpiChangeNotifier?.Dispose();
+                    dpiChangeNotifier = null;
+                }
+                else
+                    dpiChangeNotifier ??= ContainerControl?.RegisterPerMonitorAwarenessNotifications(this);
+
+                ResetIcon(true);
+            }
+        }
 
         #endregion
 
@@ -152,8 +245,16 @@ namespace KGySoft.WinForms.Components
                 lastManager = null;
             }
 
+            if (disposing)
+            {
+                Events.Dispose();
+                dpiChangeNotifier?.Dispose();
+                adjustedIcon?.Dispose();
+            }
+
+            customIcon = null;
+            adjustedIcon = null;
             base.Dispose(disposing);
-            Events.Dispose();
         }
 
         /// <summary>
@@ -249,6 +350,78 @@ namespace KGySoft.WinForms.Components
             foreach (var entry in controlMessages)
                 SetError(entry.Key, entry.Value.ToString());
         }
+
+        private void ResetIcon(bool iconChanged)
+        {
+            if (customIcon == null)
+                return;
+
+            switch (iconSizeMode)
+            {
+                case IconSizeMode.SystemDefault:
+                    if (iconChanged)
+                        SetIcon(customIcon);
+                    return;
+
+                case IconSizeMode.AutoScale:
+                case IconSizeMode.GetNearestSize:
+                    var scale = ContainerControl?.GetScale() ?? ScaleHelper.SystemScale;
+                    var size = IconsHelper.SmallIconReferenceSize.Scale(scale);
+                    if (!iconChanged && size == currentScaledSize)
+                        return;
+
+                    adjustedIcon?.Dispose();
+                    SetIcon(iconSizeMode == IconSizeMode.AutoScale
+                        ? customIcon.Resize(size)
+                        : customIcon.ExtractNearestIcon(size, PixelFormat.Format32bppArgb));
+
+                    currentScaledSize = size;
+                    return;
+
+                default:
+                    throw new InvalidOperationException(Res.InternalError($"Unexpected size mode: {iconSizeMode}"));
+
+            }
+        }
+
+        private void SetIcon(Icon icon)
+        {
+#if NETFRAMEWORK && !NET47_OR_GREATER
+            // On .NET Framework [3.5..4.7) the icon image gets corrupted if its size is not divisible by 16.
+            // It's because the internally generated Region size must be divisible by 16, which is ensured on NET47+ only.
+            if (OSHelper.IsWindows && !OSHelper.IsMono && icon.GetImagesCount() == 1
+#if !NET35
+                && !OSHelper.IsNet47OrLater // if the actually installed framework is .NET Framework 4.7+, then we don't need the fix
+#endif
+                )
+            {
+                int size = icon.Width;
+                int mod = size & 0xF;
+                if (mod != 0)
+                {
+                    using Bitmap iconImage = icon.ExtractBitmap(0)!;
+                    if (icon != customIcon)
+                        icon.Dispose();
+
+                    // creating a larger icon without scaling so apparently it will have the same size as the original one
+                    icon = iconImage.ToIcon(size + (16 - mod), ScalingMode.NoScaling);
+                }
+            }
+#endif
+
+            if (icon != customIcon)
+                adjustedIcon = icon;
+            base.Icon = icon;
+        }
+
+        private bool ShouldSerializeIcon() => customIcon != null;
+
+        #endregion
+
+        #region Explicitly Implemented Interface Methods
+
+        void IPerMonitorDpiAware.ParentFormDpiChanging() { }
+        void IPerMonitorDpiAware.ParentFormDpiChanged() => ResetIcon(false);
 
         #endregion
 

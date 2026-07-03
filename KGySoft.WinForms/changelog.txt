@@ -59,6 +59,7 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
 + New IToolTipTargetProvider interface
 + New OSHelper class
 + New RectangleExtensions class
++ New IconSizeMode enum
 
 + KGySoft.ComponentModel namespace:
 ===================================
@@ -96,6 +97,9 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
 + TaskDialogOptions enum:
   + New ForceShowSysMenu option
   + New ForceShowInTaskbar option
++ AdvancedErrorProvider class:
+  + New IconSizeMode property: it allows auto-scaling explicitly set icons based on the current DPI
+  - Fixing the icon appearance when its width or height is not divisible by 16 (affects .NET Framework 3.5-4.6.2)
 
 ! KGySoft.WinForms.Controls namespace:
 ======================================
@@ -341,7 +345,8 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
   + New CommandBindings property
   ...
 
-- KGySoft.WinForms.Components namespace:
+* KGySoft.WinForms.Components namespace:
 ========================================
++ New AdvancedErrorProvider class
 - TaskDialog class:
   - Changing the way of creating the activation context for theming to be compatible with .NET Core

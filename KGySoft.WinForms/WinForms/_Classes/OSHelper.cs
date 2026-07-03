@@ -51,6 +51,11 @@ namespace KGySoft.WinForms
         private static bool? isWine;
         private static Version? windowsVersion;
 
+#if NET40_OR_GREATER && !NET47_OR_GREATER
+        private static bool? isNet47OrLater;
+        private static Version? netFramework4Version;
+#endif
+
         #endregion
 
         #region Properties
@@ -137,11 +142,21 @@ namespace KGySoft.WinForms
         internal static bool IsWindowsMono => IsFrameworkMono && IsWindows;
         internal static bool IsRealWindows => IsWindows && !IsMono && !IsWine;
 
+#if NET40_OR_GREATER && !NET47_OR_GREATER
+        /// <summary>
+        /// Gets for older targeted versions whether the actually installed .NET Framework 4.x version is v4.7 or later.
+        /// </summary>
+        internal static bool IsNet47OrLater
+            => isNet47OrLater ??= GetNet4Version() is Version version && version >= new Version(4, 7);
+#endif
+
         #endregion
 
         #endregion
 
         #region Methods
+
+        #region Public Methods
 
         /// <summary>
         /// Gets the Windows version, or <see langword="null"/> if the current OS is not Windows.
@@ -220,6 +235,40 @@ namespace KGySoft.WinForms
         //    Version.TryParse(version, out monoVersion);
         //    return monoVersion;
         //}
+
+        #endregion
+
+        #region Private Methods
+
+#if NET40_OR_GREATER && !NET47_OR_GREATER
+        internal static Version? GetNet4Version()
+        {
+            if (netFramework4Version is not null)
+                return netFramework4Version;
+            
+            if (IsMono)
+                return null;
+
+            const string path = @"SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full";
+            const string key = "Version";
+            try
+            {
+                using RegistryKey? reg = Registry.LocalMachine.OpenSubKey(path);
+                if (reg?.GetValue(key) is string versionString && VersionExtensions.TryParse(versionString, out Version? version))
+                    netFramework4Version = version;
+                else
+                    netFramework4Version = new Version(4, 0);
+            }
+            catch (Exception e) when (!e.IsCritical())
+            {
+                netFramework4Version = new Version(4, 0);
+            }
+
+            return netFramework4Version;
+        }
+#endif
+
+        #endregion
 
         #endregion
     }

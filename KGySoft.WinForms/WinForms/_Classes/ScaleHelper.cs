@@ -53,16 +53,16 @@ namespace KGySoft.WinForms
             {
                 #region Fields
                 
-                private readonly Control childControl;
+                private readonly IPerMonitorDpiAware notificationReceiver;
                 private readonly Form form;
 
                 #endregion
 
                 #region Constructors
 
-                internal FormNativeListener(Control control, Form form)
+                internal FormNativeListener(IPerMonitorDpiAware receiver, Form form)
                 {
-                    childControl = control;
+                    notificationReceiver = receiver;
                     this.form = form;
                     form.HandleCreated += Form_HandleCreated;
                     if (form.IsHandleCreated)
@@ -91,12 +91,9 @@ namespace KGySoft.WinForms
                     {
                         case Constants.WM_DPICHANGED: // when form is a top-level form
                         case Constants.WM_DPICHANGED_BEFOREPARENT or Constants.WM_DPICHANGED_AFTERPARENT: // when form is an MDI child form
-                            if (childControl is IPerMonitorDpiAware dpiAwareControl)
-                                dpiAwareControl.ParentFormDpiChanging();
-                            else
-                                childControl.Invalidate();
+                            notificationReceiver.ParentFormDpiChanging();
                             base.WndProc(ref m);
-                            (childControl as IPerMonitorDpiAware)?.ParentFormDpiChanged();
+                            notificationReceiver.ParentFormDpiChanged();
                             break;
 
                         default:
@@ -129,6 +126,7 @@ namespace KGySoft.WinForms
             #region Fields
 
             private readonly Control childControl;
+            private readonly IPerMonitorDpiAware notificationReceiver;
             private readonly List<Control> parents = new();
 
             private Form? topLevelForm;
@@ -140,9 +138,12 @@ namespace KGySoft.WinForms
 
             #region Constructors
 
-            internal FormDpiChangeNotifier(Control host)
+            internal FormDpiChangeNotifier(Control host, IPerMonitorDpiAware? receiver)
             {
                 childControl = host;
+                notificationReceiver = receiver
+                    ?? host as IPerMonitorDpiAware
+                    ?? throw new ArgumentException(Res.InternalError("A non-null receiver is expected"), nameof(receiver));
                 host.Disposed += Host_Disposed;
                 ResetParents(true);
             }
@@ -150,16 +151,6 @@ namespace KGySoft.WinForms
             #endregion
 
             #region Methods
-
-            #region Public Methods
-
-            public void Dispose()
-            {
-                childControl.Disposed -= Host_Disposed;
-                ResetParents(false);
-            }
-
-            #endregion
 
             #region Private Methods
 
@@ -207,14 +198,14 @@ namespace KGySoft.WinForms
                         return;
                 }
 
-                if (topForm != topLevelForm && topForm != childControl)
+                if (topForm != topLevelForm && topForm != notificationReceiver)
                 {
                     ReleaseForm(ref topLevelForm, ref topLevelFormListener);
                     if (topForm != null)
                         topLevelForm = RegisterForm(topForm, ref topLevelFormListener);
                 }
 
-                if (childForm != mdiChildForm && childForm != childControl)
+                if (childForm != mdiChildForm && childForm != notificationReceiver)
                 {
                     ReleaseForm(ref mdiChildForm, ref mdiChildFormListener);
                     if (childForm != null)
@@ -235,7 +226,7 @@ namespace KGySoft.WinForms
                 {
                     // We are here when an IPerMonitorDpiAware implementing control is hosted in a non-BaseForm parent form.
                     // To be able to call the Before/After notifications, we need to hook the form's WndProc. In case of many controls, this can lead to deep call stacks.
-                    nativeListener = new FormNativeListener(childControl, form);
+                    nativeListener = new FormNativeListener(notificationReceiver, form);
                 }
 
                 return form;
@@ -258,21 +249,25 @@ namespace KGySoft.WinForms
                 nativeListener = null;
             }
 
+            private void Release()
+            {
+                childControl.Disposed -= Host_Disposed;
+                ResetParents(false);
+            }
+
+            #endregion
+
+            #region Explicitly Implemented Interface Methods
+
+            void IDisposable.Dispose() => Release();
+
             #endregion
 
             #region Event handlers
 
             private void Control_ParentChanged(object? sender, EventArgs e) => ResetParents(true);
-
-            private void BaseForm_DeviceScaleChanging(object? sender, DeviceScaleChangeEventArgs e)
-            {
-                if (childControl is IPerMonitorDpiAware dpiAwareControl)
-                    dpiAwareControl.ParentFormDpiChanging();
-                else
-                    childControl.Invalidate();
-            }
-
-            private void BaseForm_DeviceScaleChanged(object? sender, DeviceScaleChangeEventArgs e) => (childControl as IPerMonitorDpiAware)?.ParentFormDpiChanged();
+            private void BaseForm_DeviceScaleChanging(object? sender, DeviceScaleChangeEventArgs e) => notificationReceiver.ParentFormDpiChanging();
+            private void BaseForm_DeviceScaleChanged(object? sender, DeviceScaleChangeEventArgs e) => notificationReceiver.ParentFormDpiChanged();
 
             private void Parent_FontChanged(object? sender, EventArgs e)
             {
@@ -284,7 +279,7 @@ namespace KGySoft.WinForms
                 topLevelFormListener.AssignHandle(form.Handle);
             }
 
-            private void Host_Disposed(object? sender, EventArgs e) => Dispose();
+            private void Host_Disposed(object? sender, EventArgs e) => Release();
 
             #endregion
 
@@ -698,13 +693,16 @@ namespace KGySoft.WinForms
 
         #region Internal Methods
 
-        internal static void RegisterPerMonitorAwarenessNotifications(this Control control)
+        /// <summary>
+        /// Registers DPI change notifications for a control. The return value can be null if the application is not DPI aware.
+        /// The return value can be omitted if control and receiver instances are the same, in which case it will be disposed with the control.
+        /// </summary>
+        internal static IDisposable? RegisterPerMonitorAwarenessNotifications(this Control control, IPerMonitorDpiAware? receiver = null)
         {
             if (!IsThreadPerMonitorAware)
-                return;
+                return null;
 
-            // No need to store a reference - the notifier will be disposed when the control is disposed.
-            var _ = new FormDpiChangeNotifier(control);
+            return new FormDpiChangeNotifier(control, receiver);
         }
 
 #if NET47_OR_GREATER || NETCOREAPP
