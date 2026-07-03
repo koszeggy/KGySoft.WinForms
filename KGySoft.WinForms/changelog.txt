@@ -236,6 +236,7 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
 + New ImageViewer class: Migrated from the KGySoft.Drawing.ImagingTools project.
 + New ImageViewerOptimizationOptions enum
 + New CheckGroupBox class: Migrated from the KGySoft.Drawing.ImagingTools project.
++ ContentAlignmentExtensions class: new RtlTranslateContent overload.
 - DecimalTextBox class: No more Ding sound when a valid multiplier is applied.
 
 ! KGySoft.WinForms.Forms namespace:

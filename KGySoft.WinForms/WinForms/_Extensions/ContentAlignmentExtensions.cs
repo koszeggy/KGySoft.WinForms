@@ -70,6 +70,52 @@ namespace KGySoft.WinForms
             return instance.RtlTranslateContent(alignment);
         }
 
+        /// <summary>
+        /// If <paramref name="isRightToLeft"/> is <see langword="true"/>, then mirrors the <paramref name="alignment"/> horizontally.
+        /// </summary>
+        /// <param name="alignment">The <see cref="ContentAlignment"/> to translate.</param>
+        /// <param name="isRightToLeft"><see langword="true"/> to mirror the <paramref name="alignment"/> horizontally; otherwise, <see langword="false"/>.</param>
+        /// <returns>The transformed <see cref="ContentAlignment"/>.</returns>
+        public static ContentAlignment RtlTranslateContent(this ContentAlignment alignment, bool isRightToLeft)
+        {
+            if (!isRightToLeft)
+                return alignment;
+
+            if (alignment.AnyTop())
+            {
+                return alignment switch
+                {
+                    ContentAlignment.TopLeft => ContentAlignment.TopRight,
+                    ContentAlignment.TopRight => ContentAlignment.TopLeft,
+                    _ => alignment
+                };
+            }
+
+            if (alignment.AnyMiddle())
+            {
+                return alignment switch
+                {
+                    ContentAlignment.MiddleLeft => ContentAlignment.MiddleRight,
+                    ContentAlignment.MiddleRight => ContentAlignment.MiddleLeft,
+                    _ => alignment
+                };
+            }
+
+            if (alignment.AnyBottom())
+            {
+                return alignment switch
+                {
+                    ContentAlignment.BottomLeft => ContentAlignment.BottomRight,
+                    ContentAlignment.BottomRight => ContentAlignment.BottomLeft,
+                    _ => alignment
+                };
+            }
+
+            // invalid value
+            return alignment;
+        }
+
+
         // ReSharper disable BitwiseOperatorOnEnumWithoutFlags
         /// <summary>
         /// Gets if any left alignment is set in <paramref name="contentAlignment"/>.
