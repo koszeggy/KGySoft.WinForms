@@ -43,7 +43,7 @@ namespace KGySoft.WinForms.Components
 {
     /// <summary>
     /// An <see cref="ErrorProvider"/> with a <see cref="SetMessage"/> event, which is triggered if the <see cref="ErrorProvider.DataSource"/> property is set and the message
-    /// of a bound property is about to be retrieved.
+    /// of a bound property is about to be retrieved. It also fixes the scaling of the displayed icon if the <see cref="Icon"/> property is explicitly set.
     /// </summary>
     /// <remarks>
     /// <para>If the original <see cref="ErrorProvider"/> is used with WinForms data binding (by setting the <see cref="ErrorProvider.DataSource"/> property), the bound items
@@ -57,6 +57,9 @@ namespace KGySoft.WinForms.Components
     /// and handle the <see cref="SetMessage"/> event. You can derive the bound objects from the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm">ValidatingObjectBase</a> class
     /// (or implement the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_IValidatingObject.htm">IValidatingObject</a> interface)
     /// to provide error/warning/info messages for the bound properties.</note>
+    /// <para>If you explicitly set the <see cref="Icon"/> property, and the <see cref="IconSizeMode"/> property is not <see cref="IconSizeMode.SystemDefault"/>,
+    /// the <see cref="AdvancedErrorProvider"/> component ensures that the icon is scaled correctly on all platform targets.
+    /// See the <strong>Remarks</strong> section of the <see cref="IconSizeMode"/> property for more details.</para>
     /// </remarks>
     /// <seealso cref="ErrorProvider" />
     [ToolboxBitmap(typeof(ErrorProvider))]

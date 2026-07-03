@@ -14,7 +14,7 @@ KGy SOFT WinForms Libraries offer advanced Windows Forms controls and other usef
 5. [Examples](#examples)
    - [Advanced Common Controls](#advanced-common-controls)
    - [New Control Types](#new-control-types)
-   - [Advanced Dialogs](#advanced-dialogs)
+   - [Other Components](#other-components)
 6. [License](#license)
 <!--2. [Project Site](#project-site)
 3. [Documentation](#documentation)-->
@@ -52,7 +52,7 @@ See the [change log](https://github.com/koszeggy/KGySoft.WinForms/blob/master/KG
 
 ### Advanced Common Controls
 
-<details>
+<details open>
 <summary><strong>Overview</strong></summary><p/>
 
 The KGy SOFT WinForms libraries contain several advanced controls that are all derived from the standard Windows Forms controls, but offer additional features and fixes for common issues. These controls include: `AdvancedButton`, `AdvancedCheckBox`, `AdvancedComboBox`, `AdvancedDateTimePicker`, `AdvancedLabel`, `AdvancedProgressBar`, `AdvancedRadioButton` and `AdvancedTextBox`.
@@ -238,7 +238,21 @@ In most cases, the `CommandLinkButton` control is used in a [task dialog](#task-
 
 </details>
 
-### Advanced Dialogs
+### Other Components
+
+<details>
+<summary><strong><code>AdvancedErrorProvider</code></strong><a id="task-dialog"/></summary><p/>
+
+When the regular `ErrorProvider` component uses data binding by setting its `DataSource` property, it works only if the data bound items implement `IDataErrorInfo`. The `AdvancedErrorProvider` component offers a `SetMessage` event, which can be used to provide messages for any validation technique with data binding.
+
+When used with custom icons, it also can ensure correct scaling, depending on the current DPI settings.
+
+<p align="center">
+  <img alt="AdvancedErrorProvider" src="https://github.com/user-attachments/assets/19628da5-8b82-409a-8280-7801eb356c97"/>
+  <br/><em>Data bound <code>AdvancedErrorProvider</code> component using <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm"><code>ValidatingObjectBase</code></a> items in the KGySoft.WinForms.Example application on Windows 11</em>
+</p>
+
+</details>
 
 <details>
 <summary><strong>Task Dialogs</strong><a id="task-dialog"/></summary><p/>
