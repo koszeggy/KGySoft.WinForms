@@ -16,6 +16,7 @@
 #region Usings
 
 using System.Drawing;
+using System.Windows.Forms;
 
 using KGySoft.ComponentModel;
 using KGySoft.Drawing;
@@ -40,30 +41,21 @@ namespace KGySoft.WinForms.Example.Forms
         public AdvancedErrorProviderExample()
         {
             InitializeComponent();
+            if (!IsDesignMode && OSHelper.IsWindows && !OSHelper.IsMono && !OSHelper.IsWine && SystemFonts.MessageBoxFont is Font font)
+                Font = font;
 
             errorProvider.Icon = Icons.SystemError;
             warningProvider.Icon = Icons.SystemWarning;
             infoProvider.Icon = Icons.SystemInformation;
 
-            ResetBinding();
-        }
-
-        #endregion
-
-        #region Methods
-
-        #region Private Methods
-
-        private void ResetBinding()
-        {
-            bindingSource.SuspendBinding();
+            bindingSource.SuspendBinding(); // Suspending/resuming is needed on .NET Framework. A data-bound ErrorProvider may cause an exception without it.
             bindingSource.DataSource = viewModel.ValidatingExampleCollection;
             bindingSource.ResumeBinding();
         }
 
         #endregion
 
-        #region Event handlers
+        #region Methods
 
         private void warningProvider_SetMessage(object sender, SetMessageEventArgs e)
         {
@@ -82,8 +74,6 @@ namespace KGySoft.WinForms.Example.Forms
                 : null;
             e.Cancel = propertyValidations is null; // can occur if the handler is setting the binding error and the AdvancedBindingProvider.ShowBindingErrors is true
         }
-
-        #endregion
 
         #endregion
     }

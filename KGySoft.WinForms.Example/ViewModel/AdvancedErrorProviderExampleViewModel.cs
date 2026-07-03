@@ -46,7 +46,7 @@ namespace KGySoft.WinForms.Example.ViewModel
             },
             new ValidatingObjectExample
             {
-                UserName = "spamBot113",
+                UserName = "$pämBöt42😎",
                 DateOfBirth = ThreadSafeRandom.Instance.NextDate(),
                 AccountBalance = ThreadSafeRandom.Instance.NextDecimal(Decimal.MinValue, Decimal.MaxValue),
                 Password = ThreadSafeRandom.Instance.NextString(10, 16, StringCreation.AnyValidChars)

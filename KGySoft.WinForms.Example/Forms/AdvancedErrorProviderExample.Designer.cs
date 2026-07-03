@@ -34,13 +34,9 @@
             System.Windows.Forms.Label passwordLabel;
             System.Windows.Forms.Label accountBalanceLabel;
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(AdvancedErrorProviderExample));
-            this.validatingObjectExampleDataGridView = new System.Windows.Forms.DataGridView();
-            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.bindingSource = new System.Windows.Forms.BindingSource(this.components);
+            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
             this.errorProvider = new KGySoft.WinForms.Components.AdvancedErrorProvider(this.components);
+            this.bindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.warningProvider = new KGySoft.WinForms.Components.AdvancedErrorProvider(this.components);
             this.infoProvider = new KGySoft.WinForms.Components.AdvancedErrorProvider(this.components);
             this.userNameTextBox = new KGySoft.WinForms.Controls.AdvancedTextBox();
@@ -49,16 +45,21 @@
             this.accountBalanceTextBox = new KGySoft.WinForms.Controls.DecimalTextBox();
             this.lblInstruction = new KGySoft.WinForms.Controls.AdvancedLabel();
             this.gbCurrent = new System.Windows.Forms.GroupBox();
+            this.validatingObjectExampleDataGridView = new KGySoft.WinForms.Example.Controls.ValidatingDataGridView();
+            this.dataGridViewTextBoxColumn1 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn2 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn3 = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.dataGridViewTextBoxColumn4 = new System.Windows.Forms.DataGridViewTextBoxColumn();
             userNameLabel = new System.Windows.Forms.Label();
             dateOfBirthLabel = new System.Windows.Forms.Label();
             passwordLabel = new System.Windows.Forms.Label();
             accountBalanceLabel = new System.Windows.Forms.Label();
-            ((System.ComponentModel.ISupportInitialize)(this.validatingObjectExampleDataGridView)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.bindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.warningProvider)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.infoProvider)).BeginInit();
             this.gbCurrent.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.validatingObjectExampleDataGridView)).BeginInit();
             this.SuspendLayout();
             // 
             // userNameLabel
@@ -97,65 +98,27 @@
             accountBalanceLabel.TabIndex = 8;
             accountBalanceLabel.Text = "Account Balance:";
             // 
-            // validatingObjectExampleDataGridView
-            // 
-            this.validatingObjectExampleDataGridView.AutoGenerateColumns = false;
-            this.validatingObjectExampleDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.validatingObjectExampleDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
-            this.dataGridViewTextBoxColumn1,
-            this.dataGridViewTextBoxColumn2,
-            this.dataGridViewTextBoxColumn3,
-            this.dataGridViewTextBoxColumn4});
-            this.validatingObjectExampleDataGridView.DataSource = this.bindingSource;
-            this.validatingObjectExampleDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.validatingObjectExampleDataGridView.Location = new System.Drawing.Point(0, 56);
-            this.validatingObjectExampleDataGridView.Name = "validatingObjectExampleDataGridView";
-            this.validatingObjectExampleDataGridView.Size = new System.Drawing.Size(553, 136);
-            this.validatingObjectExampleDataGridView.TabIndex = 1;
-            // 
-            // dataGridViewTextBoxColumn1
-            // 
-            this.dataGridViewTextBoxColumn1.DataPropertyName = "UserName";
-            this.dataGridViewTextBoxColumn1.HeaderText = "User name";
-            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
-            // 
-            // dataGridViewTextBoxColumn2
-            // 
-            this.dataGridViewTextBoxColumn2.DataPropertyName = "DateOfBirth";
-            this.dataGridViewTextBoxColumn2.HeaderText = "Birth date";
-            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
-            // 
-            // dataGridViewTextBoxColumn3
-            // 
-            this.dataGridViewTextBoxColumn3.DataPropertyName = "Password";
-            this.dataGridViewTextBoxColumn3.HeaderText = "Password";
-            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
-            // 
-            // dataGridViewTextBoxColumn4
-            // 
-            this.dataGridViewTextBoxColumn4.DataPropertyName = "AccountBalance";
-            this.dataGridViewTextBoxColumn4.HeaderText = "Balance";
-            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
-            // 
-            // bindingSource
-            // 
-            this.bindingSource.DataSource = typeof(KGySoft.WinForms.Example.ViewModel.ValidatingObjectExample);
-            // 
             // errorProvider
             // 
             this.errorProvider.ContainerControl = this;
             this.errorProvider.DataSource = this.bindingSource;
             // 
+            // bindingSource
+            // 
+            this.bindingSource.DataSource = typeof(KGySoft.WinForms.Example.ViewModel.ValidatingObjectExample);
+            // 
             // warningProvider
             // 
             this.warningProvider.ContainerControl = this;
             this.warningProvider.DataSource = this.bindingSource;
+            this.warningProvider.ShowBindingErrors = false;
             this.warningProvider.SetMessage += new System.EventHandler<KGySoft.WinForms.Components.SetMessageEventArgs>(this.warningProvider_SetMessage);
             // 
             // infoProvider
             // 
             this.infoProvider.ContainerControl = this;
             this.infoProvider.DataSource = this.bindingSource;
+            this.infoProvider.ShowBindingErrors = false;
             this.infoProvider.SetMessage += new System.EventHandler<KGySoft.WinForms.Components.SetMessageEventArgs>(this.infoProvider_SetMessage);
             // 
             // userNameTextBox
@@ -206,7 +169,7 @@
             this.lblInstruction.Padding = new System.Windows.Forms.Padding(5);
             this.lblInstruction.RawText = resources.GetString("lblInstruction.RawText");
             this.lblInstruction.ResolveHyperlinks = KGySoft.WinForms.HyperlinkResolveMode.ResolveHrefsOnly;
-            this.lblInstruction.Size = new System.Drawing.Size(553, 56);
+            this.lblInstruction.Size = new System.Drawing.Size(553, 106);
             this.lblInstruction.TabIndex = 10;
             this.lblInstruction.TabStop = true;
             this.lblInstruction.UseCompatibleTextRendering = true;
@@ -222,30 +185,73 @@
             this.gbCurrent.Controls.Add(this.passwordTextBox);
             this.gbCurrent.Controls.Add(passwordLabel);
             this.gbCurrent.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.gbCurrent.Location = new System.Drawing.Point(0, 192);
+            this.gbCurrent.Location = new System.Drawing.Point(0, 239);
             this.gbCurrent.Name = "gbCurrent";
             this.gbCurrent.Size = new System.Drawing.Size(553, 157);
             this.gbCurrent.TabIndex = 11;
             this.gbCurrent.TabStop = false;
             this.gbCurrent.Text = "Selected User";
             // 
+            // validatingObjectExampleDataGridView
+            // 
+            this.validatingObjectExampleDataGridView.AutoGenerateColumns = false;
+            this.validatingObjectExampleDataGridView.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.validatingObjectExampleDataGridView.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.dataGridViewTextBoxColumn1,
+            this.dataGridViewTextBoxColumn2,
+            this.dataGridViewTextBoxColumn3,
+            this.dataGridViewTextBoxColumn4});
+            this.validatingObjectExampleDataGridView.DataSource = this.bindingSource;
+            this.validatingObjectExampleDataGridView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.validatingObjectExampleDataGridView.Location = new System.Drawing.Point(0, 106);
+            this.validatingObjectExampleDataGridView.Name = "validatingObjectExampleDataGridView";
+            this.validatingObjectExampleDataGridView.Size = new System.Drawing.Size(553, 133);
+            this.validatingObjectExampleDataGridView.TabIndex = 1;
+            // 
+            // dataGridViewTextBoxColumn1
+            // 
+            this.dataGridViewTextBoxColumn1.DataPropertyName = "UserName";
+            this.dataGridViewTextBoxColumn1.HeaderText = "User name";
+            this.dataGridViewTextBoxColumn1.Name = "dataGridViewTextBoxColumn1";
+            // 
+            // dataGridViewTextBoxColumn2
+            // 
+            this.dataGridViewTextBoxColumn2.DataPropertyName = "DateOfBirth";
+            this.dataGridViewTextBoxColumn2.HeaderText = "Birth date";
+            this.dataGridViewTextBoxColumn2.Name = "dataGridViewTextBoxColumn2";
+            // 
+            // dataGridViewTextBoxColumn3
+            // 
+            this.dataGridViewTextBoxColumn3.DataPropertyName = "Password";
+            this.dataGridViewTextBoxColumn3.HeaderText = "Password";
+            this.dataGridViewTextBoxColumn3.Name = "dataGridViewTextBoxColumn3";
+            // 
+            // dataGridViewTextBoxColumn4
+            // 
+            this.dataGridViewTextBoxColumn4.DataPropertyName = "AccountBalance";
+            dataGridViewCellStyle1.Format = "N2";
+            dataGridViewCellStyle1.NullValue = null;
+            this.dataGridViewTextBoxColumn4.DefaultCellStyle = dataGridViewCellStyle1;
+            this.dataGridViewTextBoxColumn4.HeaderText = "Balance";
+            this.dataGridViewTextBoxColumn4.Name = "dataGridViewTextBoxColumn4";
+            // 
             // AdvancedErrorProviderExample
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(553, 349);
+            this.ClientSize = new System.Drawing.Size(553, 396);
             this.Controls.Add(this.validatingObjectExampleDataGridView);
             this.Controls.Add(this.gbCurrent);
             this.Controls.Add(this.lblInstruction);
             this.Name = "AdvancedErrorProviderExample";
             this.Text = "AdvancedErrorProvider Example";
-            ((System.ComponentModel.ISupportInitialize)(this.validatingObjectExampleDataGridView)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.bindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.errorProvider)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.bindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.warningProvider)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.infoProvider)).EndInit();
             this.gbCurrent.ResumeLayout(false);
             this.gbCurrent.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.validatingObjectExampleDataGridView)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -254,7 +260,7 @@
         #endregion
 
         private System.Windows.Forms.BindingSource bindingSource;
-        private System.Windows.Forms.DataGridView validatingObjectExampleDataGridView;
+        private Controls.ValidatingDataGridView validatingObjectExampleDataGridView;
         private Components.AdvancedErrorProvider errorProvider;
         private Components.AdvancedErrorProvider warningProvider;
         private Components.AdvancedErrorProvider infoProvider;
@@ -262,11 +268,11 @@
         private WinForms.Controls.AdvancedTextBox passwordTextBox;
         private WinForms.Controls.AdvancedDateTimePicker dateOfBirthDateTimePicker;
         private WinForms.Controls.AdvancedTextBox userNameTextBox;
+        private WinForms.Controls.AdvancedLabel lblInstruction;
+        private System.Windows.Forms.GroupBox gbCurrent;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn1;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn2;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn3;
         private System.Windows.Forms.DataGridViewTextBoxColumn dataGridViewTextBoxColumn4;
-        protected WinForms.Controls.AdvancedLabel lblInstruction;
-        private System.Windows.Forms.GroupBox gbCurrent;
     }
 }

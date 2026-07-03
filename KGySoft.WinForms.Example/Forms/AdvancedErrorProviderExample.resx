@@ -132,14 +132,16 @@
   <metadata name="accountBalanceLabel.GenerateMember" type="System.Boolean, mscorlib, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
     <value>False</value>
   </metadata>
-  <metadata name="bindingSource.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
-    <value>135, 17</value>
-  </metadata>
   <metadata name="errorProvider.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>266, 17</value>
   </metadata>
+  <metadata name="bindingSource.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
+    <value>135, 17</value>
+  </metadata>
   <data name="lblInstruction.RawText" xml:space="preserve">
-    <value>This example uses regular WinForms data bindings only to demonstrate how the AdvancedErrorProvider can be used to provide warning/error messages with a DataSource that has &lt;a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm"&gt;ValidatingObjectBase&lt;/a&gt; elements.</value>
+    <value>This example uses regular WinForms data bindings only to demonstrate how the AdvancedErrorProvider can be used to provide warning/info messages with a DataSource that has &lt;a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm"&gt;ValidatingObjectBase&lt;/a&gt; elements.
+
+The validation severity capable grid is not a public control (yet), just a derived control for this example. It does not support scaling, except for the validation icons. On Framework Mono the ErrorProvider does not support data binding, so the validation icons are displayed in the grid only.</value>
   </data>
   <metadata name="warningProvider.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>389, 17</value>

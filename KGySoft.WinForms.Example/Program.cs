@@ -200,8 +200,7 @@ namespace KGySoft.WinForms.Example
             td.StandardButtons = TaskDialogStandardButtons.Cancel;
 
             td.Buttons.Add(new TaskDialogButton("LocalizationExample", "Dynamic localization example"));
-            if (!OSHelper.IsFrameworkMono) // on Framework Mono the ErrorProvider does not support data binding
-                td.Buttons.Add(new TaskDialogButton("AdvancedErrorProviderExample", "AdvancedErrorProvider example"));
+            td.Buttons.Add(new TaskDialogButton("AdvancedErrorProviderExample", "AdvancedErrorProvider example") { Description = "And a grid example with validation levels" });
             td.Buttons.Add(new TaskDialogButton("MdiDemoForm", "MDI Form Example"));
             td.Buttons.Add(new TaskDialogButton("FadingDemo", "Custom fading control demo"));
 
