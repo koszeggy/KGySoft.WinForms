@@ -886,8 +886,8 @@ namespace KGySoft.WinForms.Components
         public bool IsInCompatibilityMode => IsDialogShowing && dialogInstance is TaskDialogForm;
 
         /// <summary>
-        /// After the dialog is closed, gets the index of the clicked custom button defined in the <see cref="Buttons"/> collection.
-        /// If the <see cref="TaskDialog"/> has been closed by a standard button or is not closed yet, this property returns -1.
+        /// After the dialog is closed, gets the index of the clicked custom button defined in the <see cref="Buttons"/> collection that closed the <see cref="TaskDialog"/>.
+        /// If the <see cref="TaskDialog"/> has been closed either programmatically or by a standard button, or is not closed yet, this property returns -1.
         /// </summary>
         /// <seealso cref="DialogResult"/>
         /// <seealso cref="SelectedRadioButtonIndex"/>
@@ -1222,7 +1222,7 @@ namespace KGySoft.WinForms.Components
             }
             finally
             {
-                dialogInstance!.Dispose();
+                dialogInstance?.Dispose();
                 dialogInstance = null;
             }
         }
@@ -1246,6 +1246,9 @@ namespace KGySoft.WinForms.Components
 
         private void Dispose(bool disposing)
         {
+            if (flags[isDisposed])
+                return;
+
             flags[isDisposed] = true;
 
             // clearing events in all circumstances

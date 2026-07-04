@@ -656,7 +656,10 @@ namespace KGySoft.WinForms.Forms
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            if (e.CloseReason == CloseReason.UserClosing)
+            if (flags[isForcedClosing])
+                return;
+
+            if (e.CloseReason == CloseReason.UserClosing || e.CloseReason == CloseReason.None && !flags[isReopening])
             {
                 // preventing ALT+F4 if there is no X (Cancel) option
                 if (flags[altF4Pressed] && !ControlBox)
@@ -712,11 +715,15 @@ namespace KGySoft.WinForms.Forms
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
-            // Happens only when TaskDialog.Dispose was called while showing: forcing close and waiting for being closed
+            // Happens only when TaskDialog.Dispose was called while showing: forcing close
             if (dialogState != TaskDialogStatus.Closed)
             {
                 flags[isForcedClosing] = true;
-                dialogState = TaskDialogStatus.Closed;
+                dialogState = TaskDialogStatus.Closing;
+                Close(); // we could also set the DialogResult, but we need None result when disposing the form, because that is the result also when disposing it before even showing
+                Debug.Assert(dialogState == TaskDialogStatus.Closed && IsDisposed, "Close");
+                if (IsDisposed)
+                    return;
             }
 
             FreeRadioButtons();
@@ -1912,7 +1919,7 @@ namespace KGySoft.WinForms.Forms
             foreach (Button button in pnlButtons.Controls)
             {
                 button.Tag = null;
-                if (button.DialogResult != DialogResult.None)
+                if (button.DialogResult == DialogResult.None)
                     button.Click -= Button_Click;
             }
         }
@@ -2263,7 +2270,7 @@ namespace KGySoft.WinForms.Forms
                 result = TaskDialogResult.Custom;
 
             selectedRadioButtonIndex = -1;
-            TaskDialogRadioButton? selectedRadioButton = host.RadioButtons.FirstOrDefault(rb => rb.Checked);
+            TaskDialogRadioButton? selectedRadioButton = IsDisposed ? null : host.RadioButtons.FirstOrDefault(rb => rb.Checked);
             if (selectedRadioButton != null)
                 selectedRadioButtonIndex = selectedRadioButton.Id;
 

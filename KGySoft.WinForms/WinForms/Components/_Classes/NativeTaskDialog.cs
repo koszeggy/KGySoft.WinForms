@@ -482,6 +482,11 @@ namespace KGySoft.WinForms.Components
                             {
                                 HandledEventArgs e = new HandledEventArgs(true);
                                 host.Buttons[index].OnClick(e);
+
+                                // when the event handler closed/disposed the dialog
+                                if (dialogState == TaskDialogStatus.Closed)
+                                    return Constants.S_OK;
+
                                 isClosing = !e.Handled;
                             }
                             else
@@ -908,23 +913,20 @@ namespace KGySoft.WinForms.Components
 
         private void Dispose(bool disposing)
         {
-            nativeHandler?.DestroyHandle();
-
-            // Happens only when TaskDialog.Dispose was called while showing: forcing close and waiting for being closed
+            // Happens only when TaskDialog.Dispose was called while showing: forcing close
             if (dialogState != TaskDialogStatus.Closed)
             {
                 if (flags[isForcedClosing])
                     return;
 
                 flags[isForcedClosing] = true;
-                DoClose(TaskDialogResult.Close);
-
-                // waiting for being closed
-                while (dialogState != TaskDialogStatus.Closed)
-                    Thread.Sleep(10);
+                DoClose(TaskDialogResult.None);
             }
 
             // freeing unmanaged resources
+            nativeHandler?.DestroyHandle();
+            Debug.Assert(nativeHandler == null || dialogState == TaskDialogStatus.Closed, "DestroyHandle should invoke TDN_DESTROYED");
+            nativeHandler = null;
             FreeUpdatedTexts();
 
             if (disposing)

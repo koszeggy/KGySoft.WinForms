@@ -88,6 +88,7 @@ to v5.0.0 should be relatively easy, as most of the breaking changes are just re
   + Ctrl+C copies the textual content of the task dialog to the clipboard even in compatibility mode.
   + New Closed event
   - Fixing widths
+  - Fixing when disposing the TaskDialog while it is still shown.
   - Native mode: fixing some rare exception cases during Dispose
   - Native mode: when owner was not specified, the caller window remained enabled
   - Compatibility mode: opening without an owner was still modal, which is not how the native TaskDialog works.
