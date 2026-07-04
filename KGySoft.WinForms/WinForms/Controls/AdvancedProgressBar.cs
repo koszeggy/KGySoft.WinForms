@@ -426,7 +426,7 @@ namespace KGySoft.WinForms.Controls
             //return;
 
             if (IsClassicAppearance)
-                PaintClassicAppearance(e, drawOffset);
+                PaintClassicAppearance(e);
             else if (style == AdvancedProgressBarStyle.ThemedShiny)
                 PaintShinyAppearance(e, drawOffset);
             else
@@ -554,7 +554,7 @@ namespace KGySoft.WinForms.Controls
                 this.PaintBackground(e, e.ClipRectangle, BackColor);
         }
 
-        private void PaintClassicAppearance(PaintEventArgs e, float offset)
+        private void PaintClassicAppearance(PaintEventArgs e)
         {
             // frame: when visual styles are disabled, there is already a frame in NC area, except in Framework Mono, where the frame is in the client area
             Rectangle rect = ClientRectangle;

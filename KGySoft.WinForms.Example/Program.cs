@@ -238,7 +238,6 @@ namespace KGySoft.WinForms.Example
         #endregion
 
         #region Event handlers
-#pragma warning disable IDE1006 // Naming Styles
 
         private static void btnOptionsTest_Click(object? sender, HandledEventArgs e)
         {
@@ -783,7 +782,6 @@ namespace KGySoft.WinForms.Example
             dlg.Show(senderDialog);
         }
 
-#pragma warning restore IDE1006 // Naming Styles
         #endregion
 
         #endregion
