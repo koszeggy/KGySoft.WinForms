@@ -656,7 +656,7 @@ namespace KGySoft.WinForms.Forms
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             base.OnFormClosing(e);
-            if (flags[isForcedClosing])
+            if (flags[isForcedClosing] || IsDisposed)
                 return;
 
             if (e.CloseReason == CloseReason.UserClosing || e.CloseReason == CloseReason.None && !flags[isReopening])
@@ -715,6 +715,9 @@ namespace KGySoft.WinForms.Forms
         /// <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
         protected override void Dispose(bool disposing)
         {
+            if (IsDisposed)
+                return;
+
             // Happens only when TaskDialog.Dispose was called while showing: forcing close
             if (dialogState != TaskDialogStatus.Closed)
             {
