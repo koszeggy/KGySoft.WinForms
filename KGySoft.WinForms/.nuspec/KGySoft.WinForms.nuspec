@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>KGySoft.WinForms</id>
-    <version>5.0.0-rc.4</version>
+    <version>5.0.0</version>
     <title>KGy SOFT Windows Forms Libraries</title>
     <authors>György Kőszeg</authors>
     <owners>György Kőszeg</owners>
@@ -11,14 +11,15 @@
     <!--<iconUrl>https://kgysoft.net/images/Icon64.png</iconUrl>-->
     <icon>Icon64.png</icon>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
-    <summary>Advanced Windows Forms controls, components, forms and features with high backward OS and .NET Framework compatibility from Windows XP to Windows 11.</summary>
-    <description xml:space="preserve">KGy SOFT Windows Forms Libraries offer advanced controls and components built around System.Windows.Forms types.
+    <summary>Advanced WinForms components, controls and features compatible with every Windows version since Windows XP (as well as Mono and Wine), supporting every platform target starting with .NET Frameowrk 3.5.</summary>
+    <description xml:space="preserve">The KGy SOFT Windows Forms Libraries package offers advanced controls and components built around System.Windows.Forms types.
 
 Among others:
 - A BaseForm with command bindings, MDI application and dynamic localization support, fixing some high-DPI and multi-monitor issues also for older frameworks
-- Task dialogs also with compatibility mode supporting even Windows XP
-- Advanced components and controls that either extend existing functionality or add new ones
-- Screenshot support
+- Task dialogs with compatibility mode, supporting even Windows XP
+- Advanced components and controls that fix many issues the original versions suffer from (e.g. ajustable colors in disabled mode, fixed high DPI behavior, etc.)
+- Powerful new controls (e.g. image viewer with panning and zooming)
+- Useful helper classes to create dynamic localizations, to deal with high DPI issues, to handle visual styles, to take screenshots, etc.
 
 Find some more examples with images at the project site at https://github.com/koszeggy/KGySoft.WinForms</description>
     <releaseNotes>See the detailed release notes here: https://github.com/koszeggy/KGySoft.WinForms/blob/master/KGySoft.WinForms/changelog.txt</releaseNotes>
@@ -28,34 +29,34 @@ Find some more examples with images at the project site at https://github.com/ko
     <repository type="git" url="https://github.com/koszeggy/KGySoft.WinForms" />
     <dependencies>
       <group targetFramework=".NETFramework3.5">
-        <dependency id="KGySoft.Drawing" version="10.0.2" />
+        <dependency id="KGySoft.Drawing" version="10.1.0" />
       </group>
       <group targetFramework=".NETFramework4.0">
-        <dependency id="KGySoft.Drawing" version="10.0.2" />
+        <dependency id="KGySoft.Drawing" version="10.1.0" />
       </group>
       <group targetFramework=".NETFramework4.5">
-        <dependency id="KGySoft.Drawing" version="10.0.2" />
+        <dependency id="KGySoft.Drawing" version="10.1.0" />
       </group>
       <group targetFramework=".NETFramework4.7">
-        <dependency id="KGySoft.Drawing" version="10.0.2" />
+        <dependency id="KGySoft.Drawing" version="10.1.0" />
       </group>
       <group targetFramework="netcoreapp3.0" >
-        <dependency id="KGySoft.Drawing" version="10.0.2" />
+        <dependency id="KGySoft.Drawing" version="10.1.0" />
       </group>
       <group targetFramework="netcoreapp3.1" >
-        <dependency id="KGySoft.Drawing" version="10.0.2" />
+        <dependency id="KGySoft.Drawing" version="10.1.0" />
       </group>
       <group targetFramework="net5.0-windows7.0" >
-        <dependency id="KGySoft.Drawing" version="10.0.2" />
+        <dependency id="KGySoft.Drawing" version="10.1.0" />
       </group>
       <group targetFramework="net6.0-windows7.0" >
-        <dependency id="KGySoft.Drawing" version="10.0.2" />
+        <dependency id="KGySoft.Drawing" version="10.1.0" />
       </group>
       <group targetFramework="net9.0-windows7.0" >
-        <dependency id="KGySoft.Drawing" version="10.0.2" />
+        <dependency id="KGySoft.Drawing" version="10.1.0" />
       </group>
       <group targetFramework="net10.0-windows7.0" >
-        <dependency id="KGySoft.Drawing" version="10.0.2" />
+        <dependency id="KGySoft.Drawing" version="10.1.0" />
       </group>
     </dependencies>
   </metadata>

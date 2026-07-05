@@ -1,8 +1,23 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
+    <!--Explicitly targeted frameworks
+      - net35/net40/netcoreapp3.0: The lowest supported versions of .NET Framework and .NET Core
+      - net45: Not really needed explicitly, but it allows using Environment.CurrentManagedThreadId instead of the Thread class
+      - net47: Needed to work around handle high DPI handling issues the .NET Framework introduced in 4.7
+      - netcoreapp3.1: Needed because in .NET Core 3.1 several legacy controls have been removed that we handle in lower versions (e.g. for localization support)
+      - net5.0:
+        - to use [SupportedOSPlatform]
+        - to omit the form sizing fix earlier versions had - https://github.com/dotnet/winforms/issues/1504
+        - to apply a fix for a newly introduced bug present in .NET 5.0..9.0 - https://github.com/dotnet/winforms/issues/1378
+      - net6.0: to work around the changed (and buggy) high DPI handling when scaling fonts
+      - net9.0:
+        - to use System.Threading.Lock
+        - to allow using a workaround when the new dark mode is enabled
+      - net10.0: to omit the workaround for the bug existed in .NET 5.0..9.0 - https://github.com/dotnet/winforms/issues/1378
+    -->
     <TargetFrameworks>net35;net40;net45;net47;netcoreapp3.0;netcoreapp3.1;net5.0-windows;net6.0-windows;net9.0-windows;net10.0-windows</TargetFrameworks>
-    <!--<TargetFrameworks>net35;net40;net47;net10.0-windows</TargetFrameworks>-->
+    <!--<TargetFrameworks>net9.0-windows</TargetFrameworks>-->
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <RootNamespace>KGySoft</RootNamespace>
     <DocumentationFile>bin\$(Configuration)\$(TargetFramework)\$(AssemblyName).xml</DocumentationFile>
@@ -23,7 +38,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.201">
+    <PackageReference Include="Microsoft.CodeAnalysis.NetAnalyzers" Version="10.0.301">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers</IncludeAssets>
     </PackageReference>
@@ -39,7 +54,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="KGySoft.Drawing" Version="10.0.2" />
+    <PackageReference Include="KGySoft.Drawing" Version="10.1.0" />
   </ItemGroup>
 
   <!-- .NET Framework only references -->
