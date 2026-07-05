@@ -46,6 +46,8 @@ namespace KGySoft.WinForms.Controls
     /// <item>When rendering with visual styles on high DPI, preferring always the standard check box sizes.
     /// When the standard size cannot be used, improving the rendering quality if <see cref="CheckBoxRenderingQuality"/> is <see cref="RenderingQuality.High"/>.</item>
     /// </list>
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// an example for some features of the <see cref="AdvancedDateTimePicker"/> control.</note>
     /// </remarks>
     [Description(@"A date-time picker provides the following features in addition to regular DateTimePicker:
 - Adjustable colors

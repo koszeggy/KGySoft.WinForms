@@ -60,11 +60,11 @@ The KGy SOFT WinForms libraries contain several advanced controls that are all d
 Exception with `AdvancedProgressBar`, they all support custom disabled colors (which is normally not adjustable) and fixed auto font scaling when the application has per-monitor DPI awareness enabled. Additionally, `AdvancedButton`, `AdvancedCheckBox`, `AdvancedRadioButton` and `AdvancedLabel` support buffered fading animations with every flat style. See more details in the following sections.
 
 > 💡 **Tip**<p/>
-> Try the example application from the [KGySoft.WinForms.Example](KGySoft.WinForms.Example) folder or download its binaries from the [Releases](https://github.com/koszeggy/KGySoft.WinForms/releases).
+> Try the example application from the [KGySoft.WinForms.Example](KGySoft.WinForms.Example) folder or download its binaries at the [Releases](https://github.com/koszeggy/KGySoft.WinForms/releases) page.
 
 <p align="center">
   <img alt="A TaskDialog in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/ad99b5f6-84ae-4306-b610-68549eb348ce"/>
-  <br/><em>Advanced controls selector dialog for testing in the <a href="KGySoft.WinForms.Example">KGySoft.WinForms.Example</a> application</em>
+  <br/><em>Advanced controls selector dialog to test various controls in the <a href="KGySoft.WinForms.Example">KGySoft.WinForms.Example</a> application</em>
 </p>
 
 </details>

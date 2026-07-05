@@ -64,6 +64,8 @@ namespace KGySoft.WinForms.Controls
     /// <item>Fixing some Mono-specific <see cref="Label"/>/<see cref="LinkLabel"/> issues, such as non-visible text with border, wrong rendering with padding, random
     /// exceptions from mouse events when links are used.</item>
     /// </list>
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// an example for some features of the <see cref="AdvancedLabel"/> control.</note>
     /// </remarks>
     [ToolboxBitmap(typeof(AdvancedLabel), "Resources.Toolbox.AdvancedLabel.png")]
     [Description(@"A label that provides the following features in addition to regular Label:

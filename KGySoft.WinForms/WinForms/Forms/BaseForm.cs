@@ -482,19 +482,11 @@ namespace KGySoft.WinForms.Forms
         /// that can be automatically generated for the first time when a localization request is made for a culture that has no resource file yet.</para>
         /// <para>Using <see cref="DynamicStringLocalization.LocalScope"/> or <see cref="DynamicStringLocalization.AssemblyScope"/> works only if the invariant resource set exists for the form or user control.
         /// Only the properties that have an entry in the invariant resource set will be localized automatically.
-        /// <br/>See also the <see cref="KGySoft.WinForms.DynamicStringLocalization"/> enumeration for details.
-        /// </para>
+        /// <br/>See also the <see cref="KGySoft.WinForms.DynamicStringLocalization"/> enumeration for details.</para>
+        /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+        /// an example for dynamic localization using various settings. It also has an editor that allows creating, editing and applying localizations at run-time.
+        /// <br/>The example is located under the <em>Misc Tests</em> / <em>Dynamic localization example</em> menu.</note>
         /// </remarks>
-        // <example>
-        // TODO:
-        // - creating the invariant resource set
-        //   - how to use it as a compiled resource
-        //   - how to use it as a .resx file
-        // - Applying RTL
-        // - how to handle the generated localizations
-        //   - by a resource editor
-        //   - from within the application, applying the translations at runtime
-        // </example>
         [Category("BaseForm")]
         [DefaultValue(DynamicStringLocalization.Disabled)]
         [Description("Specifies the dynamic string localization strategy of the form. LocalScope and AssemblyScope allow using potentially auto-generated .resx files "
@@ -808,6 +800,9 @@ namespace KGySoft.WinForms.Forms
         /// The child will not be a modal form, so you still will be able to interact with the parent form and other non-suspended child forms.</para>
         /// <para>As the <paramref name="child"/> form is not opened as a real dialog, this call returns immediately after the child is shown.
         /// You can use the <see cref="OwnedMdiChildClosed"/> event or the <see cref="OnOwnedMdiChildClosed">OnOwnedMdiChildClosed</see> method to get notified when the <paramref name="child"/> form is closed.</para>
+        /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+        /// an example for working with MDI forms.
+        /// <br/>The example is located under the <em>Misc Tests</em> / <em>MDI Form Example</em> menu.</note>
         /// </remarks>
         /// <exception cref="ArgumentNullException"><paramref name="child"/> is <see langword="null"/>.</exception>
         /// <exception cref="InvalidOperationException">This form is neither an MDI container nor an MDI child that can own the new child.

@@ -52,11 +52,16 @@ namespace KGySoft.WinForms.Components
     /// to allow the messages to be retrieved from any custom source.</para>
     /// <para>If the bound objects implement the <see cref="IDataErrorInfo"/> interface, the error messages are preinitialized in
     /// the <see cref="SetMessageEventArgs.Message">SetMessageEventArgs.Message</see> property when the <see cref="SetMessage"/> event is raised.</para>
-    /// <note type="tip">To provide error/message/info messages for objects, create three instances of this class. Set their icon accordingly (you can use the
+    /// <note type="tip">
+    /// <para>To provide error/message/info messages for objects, create three instances of this class. Set their icon accordingly (you can use the
     /// properties of the <a href="https://koszeggy.github.io/docs/drawing/html/T_KGySoft_Drawing_Icons.htm">Icons</a> class from <c>KGySoft.Drawing</c>),
     /// and handle the <see cref="SetMessage"/> event. You can derive the bound objects from the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm">ValidatingObjectBase</a> class
     /// (or implement the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_IValidatingObject.htm">IValidatingObject</a> interface)
-    /// to provide error/warning/info messages for the bound properties.</note>
+    /// to provide error/warning/info messages for the bound properties.</para>
+    /// <para>See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// an example for using the <see cref="AdvancedErrorProvider"/> component as warning/info providers. It also provides a specialized <see cref="DataGridView"/> to display messages with different validation severities.
+    /// <br/>The example is located under the <em>Misc Tests</em> / <em>AdvancedErrorProvider example</em> menu.</para>
+    /// </note>
     /// <para>If you explicitly set the <see cref="Icon"/> property, and the <see cref="IconSizeMode"/> property is not <see cref="IconSizeMode.SystemDefault"/>,
     /// the <see cref="AdvancedErrorProvider"/> component ensures that the icon is scaled correctly on all platform targets.
     /// See the <strong>Remarks</strong> section of the <see cref="IconSizeMode"/> property for more details.</para>

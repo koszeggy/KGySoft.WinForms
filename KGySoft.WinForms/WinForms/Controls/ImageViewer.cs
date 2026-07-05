@@ -49,6 +49,8 @@ namespace KGySoft.WinForms.Controls
     /// <para>The <see cref="Zoom"/> property allows you to set an arbitrary zoom. The zoom can also be adjusted by the mouse (Ctrl+Mouse wheel).
     /// When the displayed image is larger than the control, the scrollbars are automatically shown. Pan the image by dragging it with the mouse or by using the arrow keys.
     /// You can also use the <see cref="AutoZoom"/> property to <see langword="true"/> to automatically adjust the zoom to fit the image to the control.</para>
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// an example for some features of the <see cref="ImageViewer"/> control.</note>
     /// </remarks>
     [ToolboxBitmap(typeof(PictureBox))]
     public partial class ImageViewer : BaseControl, IPerMonitorDpiAware

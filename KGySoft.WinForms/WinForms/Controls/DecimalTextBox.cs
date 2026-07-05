@@ -56,6 +56,9 @@ namespace KGySoft.WinForms.Controls
     /// <item>Formatting options (see <see cref="Format"/>).</item>
     /// <item>Configurable number of decimal digits or rounding (see <see cref="DecimalDigits"/>).</item>
     /// </list>
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// an example for some features of the <see cref="AdvancedButton"/> control.
+    /// <br/>The example is located under the <em>Controls Tests</em> / <em>AdvancedTextBox</em> menu.</note>
     /// </remarks>
     [Description(@"A text box for decimal values. Some highlighted features:
 - A decimal Value property

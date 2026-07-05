@@ -47,6 +47,8 @@ namespace KGySoft.WinForms.Controls
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// <item>Fixed rendering in high DPI modes when the application is DPI aware.</item>
     /// </list>
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// an example for some features of the <see cref="AdvancedCheckBox"/> control.</note>
     /// </remarks>
     [ToolboxBitmap(typeof(CheckBox))]
     [Description(@"A check box that provides the following features in addition to regular CheckBox:

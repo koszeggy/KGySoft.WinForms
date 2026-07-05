@@ -39,6 +39,8 @@ namespace KGySoft.WinForms.Controls
     /// <item>New <see cref="Style"/> property with four different appearances.</item>
     /// <item>Custom colors (when <see cref="Style"/> is not <see cref="AdvancedProgressBarStyle.System"/>)</item>
     /// </list>
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// an example for some features of the <see cref="AdvancedProgressBar"/> control.</note>
     /// </remarks>
     [ToolboxBitmap(typeof(ProgressBar))]
     [Description(@"A progress bar that provides the following features in addition to regular ProgressBar:

@@ -46,6 +46,10 @@ namespace KGySoft.WinForms.Controls
     /// Represents a command link button. Works also on Windows XP in compatibility mode. Supports flat styles, elevated mode, high contrast mode,
     /// custom colors even in disabled mode and even for the default glyph (on Windows 10 and above), buffered fading animations, and more.
     /// </summary>
+    /// <remarks>
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// an example for some features of the <see cref="CommandLinkButton"/> control.</note>
+    /// </remarks>
     [ToolboxBitmap(typeof(CommandLinkButton), "Resources.Toolbox.CommandLinkButton.png")]
     [Description("Vista-like CommandLink button that works also in compatibility mode. On Vista and above you can set FlatStyle to System to render the button by the Windows.")]
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]

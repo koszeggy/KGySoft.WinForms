@@ -125,7 +125,7 @@ namespace KGySoft.WinForms.Example
             td.Buttons.Add(new TaskDialogButton("AdvancedLabel"));
             td.Buttons.Add(new TaskDialogButton("AdvancedProgressBar"));
             td.Buttons.Add(new TaskDialogButton("CommandLinkButton"));
-            td.Buttons.Add(new TaskDialogButton("AdvancedTextBox"));
+            td.Buttons.Add(new TaskDialogButton("AdvancedTextBox") { Description = "And a small DecimalTextBox example"});
             td.Buttons.Add(new TaskDialogButton("AdvancedComboBox"));
             td.Buttons.Add(new TaskDialogButton("AdvancedDateTimePicker"));
 

@@ -29,6 +29,11 @@ namespace KGySoft.WinForms.Controls
     /// Helper class for buffered fading animations. The host control must implement the <see cref="ISupportsFading{TState}"/> interface.
     /// </summary>
     /// <typeparam name="TState">The type of the state object.</typeparam>
+    /// <remarks>
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// an example for how to use the <see cref="FadingPainter{TState}"/> class for a custom control.
+    /// <br/>The example is located under the <em>Misc Tests</em> / <em>Custom fading control demo</em> menu.</note>
+    /// </remarks>
     public class FadingPainter<TState> : IDisposable
     {
         #region Fields

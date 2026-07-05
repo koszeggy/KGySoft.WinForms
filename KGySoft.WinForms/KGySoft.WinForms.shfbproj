@@ -89,48 +89,49 @@
     <TargetFrameworkProfile />
     <ApiFilter>
       <Filter entryType="Namespace" fullName="KGySoft.WinForms" isExposed="True">
-  <Filter entryType="Class" fullName="KGySoft.WinForms.ControlExtensions" filterName="ControlExtensions" isExposed="False">
-    <Filter entryType="Method" fullName="KGySoft.WinForms.ControlExtensions.GetFormatFlags" filterName="GetFormatFlags" isExposed="True" />
-    <Filter entryType="Method" fullName="KGySoft.WinForms.ControlExtensions.SetControlEnabled" filterName="SetControlEnabled" isExposed="True" />
-    <Filter entryType="Method" fullName="KGySoft.WinForms.ControlExtensions.SetControlReadonly" filterName="SetControlReadonly" isExposed="True" />
-    <Filter entryType="Method" fullName="KGySoft.WinForms.ControlExtensions.SetDoubleBuffered" filterName="SetDoubleBuffered" isExposed="True" />
-    <Filter entryType="Method" fullName="KGySoft.WinForms.ControlExtensions.SetStyle" filterName="SetStyle" isExposed="True" />
-  </Filter>
-  <Filter entryType="Class" fullName="KGySoft.WinForms.LanguageWinForms" filterName="LanguageWinForms" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.ListControlExtensions" filterName="ListControlExtensions" isExposed="False" />
-  <Filter entryType="Enumeration" fullName="KGySoft.WinForms.SelectionPlusItems" filterName="SelectionPlusItems" isExposed="False" />
-</Filter>
-<Filter entryType="Namespace" fullName="KGySoft.WinForms.Controls" isExposed="True">
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.AllInvertNoneEventArgs" filterName="AllInvertNoneEventArgs" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.AutoFindEventArgs" filterName="AutoFindEventArgs" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.CalculateTextEventArgs" filterName="CalculateTextEventArgs" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ContentPanel" filterName="ContentPanel" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.EnumCheckedListBox" filterName="EnumCheckedListBox" isExposed="False" />
-  <Filter entryType="Enumeration" fullName="KGySoft.WinForms.Controls.InvertButtonTypes" filterName="InvertButtonTypes" isExposed="False" />
-  <Filter entryType="Enumeration" fullName="KGySoft.WinForms.Controls.RelevantControlValues" filterName="RelevantControlValues" isExposed="False" />
-  <Filter entryType="Enumeration" fullName="KGySoft.WinForms.Controls.SelectorButtons" filterName="SelectorButtons" isExposed="False" />
-  <Filter entryType="Enumeration" fullName="KGySoft.WinForms.Controls.SelectorStates" filterName="SelectorStates" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucAllInvertNone" filterName="ucAllInvertNone" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucBase" filterName="ucBase" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucCaptionedBase" filterName="ucCaptionedBase" isExposed="False" />
-  <Filter entryType="Enumeration" fullName="KGySoft.WinForms.Controls.ucCaptionedBase.Orientation" filterName="ucCaptionedBase.Orientation" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucCaptionedContainer" filterName="ucCaptionedContainer" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucCheckBox" filterName="ucCheckBox" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucCombo" filterName="ucCombo" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucCustomSelector" filterName="ucCustomSelector" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucDate" filterName="ucDate" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucDateInterval" filterName="ucDateInterval" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucDecimal" filterName="ucDecimal" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucDecimalUpDown" filterName="ucDecimalUpDown" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucPropertyGrid" filterName="ucPropertyGrid" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucText" filterName="ucText" isExposed="False" />
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucTextBase" filterName="ucTextBase" isExposed="False" />
-</Filter>
-<Filter entryType="Namespace" fullName="KGySoft.WinForms.Forms" isExposed="True">
-  <Filter entryType="Class" fullName="KGySoft.WinForms.Forms.DialogBaseForm" filterName="DialogBaseForm" isExposed="True">
-    <Filter entryType="Field" fullName="KGySoft.WinForms.Forms.DialogBaseForm.pnlButtons" filterName="pnlButtons" isExposed="False" />
-  </Filter>
-</Filter></ApiFilter>
+        <Filter entryType="Class" fullName="KGySoft.WinForms.ControlExtensions" filterName="ControlExtensions" isExposed="False">
+          <Filter entryType="Method" fullName="KGySoft.WinForms.ControlExtensions.GetFormatFlags" filterName="GetFormatFlags" isExposed="True" />
+          <Filter entryType="Method" fullName="KGySoft.WinForms.ControlExtensions.SetControlEnabled" filterName="SetControlEnabled" isExposed="True" />
+          <Filter entryType="Method" fullName="KGySoft.WinForms.ControlExtensions.SetControlReadonly" filterName="SetControlReadonly" isExposed="True" />
+          <Filter entryType="Method" fullName="KGySoft.WinForms.ControlExtensions.SetDoubleBuffered" filterName="SetDoubleBuffered" isExposed="True" />
+          <Filter entryType="Method" fullName="KGySoft.WinForms.ControlExtensions.SetStyle" filterName="SetStyle" isExposed="True" />
+        </Filter>
+        <Filter entryType="Class" fullName="KGySoft.WinForms.LanguageWinForms" filterName="LanguageWinForms" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.ListControlExtensions" filterName="ListControlExtensions" isExposed="False" />
+        <Filter entryType="Enumeration" fullName="KGySoft.WinForms.SelectionPlusItems" filterName="SelectionPlusItems" isExposed="False" />
+      </Filter>
+      <Filter entryType="Namespace" fullName="KGySoft.WinForms.Controls" isExposed="True">
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.AllInvertNoneEventArgs" filterName="AllInvertNoneEventArgs" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.AutoFindEventArgs" filterName="AutoFindEventArgs" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.CalculateTextEventArgs" filterName="CalculateTextEventArgs" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ContentPanel" filterName="ContentPanel" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.EnumCheckedListBox" filterName="EnumCheckedListBox" isExposed="False" />
+        <Filter entryType="Enumeration" fullName="KGySoft.WinForms.Controls.InvertButtonTypes" filterName="InvertButtonTypes" isExposed="False" />
+        <Filter entryType="Enumeration" fullName="KGySoft.WinForms.Controls.RelevantControlValues" filterName="RelevantControlValues" isExposed="False" />
+        <Filter entryType="Enumeration" fullName="KGySoft.WinForms.Controls.SelectorButtons" filterName="SelectorButtons" isExposed="False" />
+        <Filter entryType="Enumeration" fullName="KGySoft.WinForms.Controls.SelectorStates" filterName="SelectorStates" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucAllInvertNone" filterName="ucAllInvertNone" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucBase" filterName="ucBase" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucCaptionedBase" filterName="ucCaptionedBase" isExposed="False" />
+        <Filter entryType="Enumeration" fullName="KGySoft.WinForms.Controls.ucCaptionedBase.Orientation" filterName="ucCaptionedBase.Orientation" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucCaptionedContainer" filterName="ucCaptionedContainer" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucCheckBox" filterName="ucCheckBox" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucCombo" filterName="ucCombo" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucCustomSelector" filterName="ucCustomSelector" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucDate" filterName="ucDate" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucDateInterval" filterName="ucDateInterval" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucDecimal" filterName="ucDecimal" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucDecimalUpDown" filterName="ucDecimalUpDown" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucPropertyGrid" filterName="ucPropertyGrid" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucText" filterName="ucText" isExposed="False" />
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Controls.ucTextBase" filterName="ucTextBase" isExposed="False" />
+      </Filter>
+      <Filter entryType="Namespace" fullName="KGySoft.WinForms.Forms" isExposed="True">
+        <Filter entryType="Class" fullName="KGySoft.WinForms.Forms.DialogBaseForm" filterName="DialogBaseForm" isExposed="True">
+          <Filter entryType="Field" fullName="KGySoft.WinForms.Forms.DialogBaseForm.pnlButtons" filterName="pnlButtons" isExposed="False" />
+        </Filter>
+      </Filter>
+    </ApiFilter>
   </PropertyGroup>
   <!-- There are no properties for these groups.  AnyCPU needs to appear in order for Visual Studio to perform
 			 the build.  The others are optional common platform types that may appear. -->
