@@ -114,7 +114,9 @@ namespace KGySoft.WinForms.Reflection
         private static readonly object fieldComboBox_mousePressed = new();
         private static readonly object fieldErrorProvider_currentChanged = new();
         private static readonly object fieldErrorProvider_errorManager = new();
+#if !NET5_0_OR_GREATER
         private static readonly object fieldForm_formState = new();
+#endif
         private static readonly Dictionary<object, Func<FieldInfo?>> fieldLookup = new(7)
         {
 #if NETFRAMEWORK

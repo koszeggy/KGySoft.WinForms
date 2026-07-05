@@ -411,7 +411,7 @@ namespace KGySoft.WinForms.Forms
 #if NET47_OR_GREATER
 
             // .NET 4.7+: As a command handler rather than overriding OnDpiChanged. See the comments below.
-            void OnDpiChangedCommand(ICommandSource<CancelEventArgs> src) => src.EventArgs.Cancel = true;
+            static void OnDpiChangedCommand(ICommandSource<CancelEventArgs> src) => src.EventArgs.Cancel = true;
 
 #endif
             #endregion

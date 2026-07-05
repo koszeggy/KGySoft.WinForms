@@ -28,8 +28,9 @@ namespace KGySoft.WinForms
     {
         #region Fields
 
+        private readonly object? target;
+
         private string key;
-        private object? target;
 
         #endregion
 

@@ -16,7 +16,9 @@
 #region Usings
 
 using System;
+#if NETFRAMEWORK
 using System.Diagnostics;
+#endif
 
 #endregion
 

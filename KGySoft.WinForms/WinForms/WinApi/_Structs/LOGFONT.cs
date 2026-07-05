@@ -46,7 +46,7 @@ namespace KGySoft.WinForms.WinApi
         internal byte lfQuality;
         internal byte lfPitchAndFamily;
 
-        [MarshalAsAttribute(UnmanagedType.ByValTStr, SizeConst = LF_FACESIZE)]
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = LF_FACESIZE)]
         internal string lfFaceName;
 
         #endregion

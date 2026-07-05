@@ -224,7 +224,7 @@ namespace KGySoft.WinForms.Controls
             AnchorStyles none = AnchorStyles.None;
             if (anchor != AnchorStyles.None)
             {
-                for (int i = 1; i <= 8; i = i << 1)
+                for (int i = 1; i <= 8; i <<= 1)
                 {
                     switch ((anchor & (AnchorStyles)i))
                     {

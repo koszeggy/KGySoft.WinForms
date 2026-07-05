@@ -19,8 +19,6 @@ using System;
 using System.Drawing;
 using System.Windows.Forms;
 
-using KGySoft.WinForms.Reflection;
-
 #endregion
 
 namespace KGySoft.WinForms.Controls

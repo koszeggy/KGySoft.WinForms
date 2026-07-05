@@ -15,8 +15,6 @@
 
 #region Usings
 
-using System.Resources;
-
 using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Forms;
 

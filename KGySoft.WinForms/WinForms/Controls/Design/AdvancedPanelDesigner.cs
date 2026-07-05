@@ -56,8 +56,7 @@ namespace KGySoft.WinForms.Controls.Design
 
         private void DrawBorder(Graphics graphics)
         {
-            AdvancedPanel component = (AdvancedPanel)Component;
-            if ((component != null) && component.Visible)
+            if (Component is AdvancedPanel { Visible: true })
             {
                 Pen borderPen = BorderPen;
                 Rectangle clientRectangle = Control.ClientRectangle;

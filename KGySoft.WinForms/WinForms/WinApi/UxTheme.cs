@@ -17,6 +17,7 @@
 
 using System;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.Runtime.CompilerServices;
@@ -29,6 +30,7 @@ namespace KGySoft.WinForms.WinApi
     /// <summary>
     /// Native methods for UxTheme.dll
     /// </summary>
+    [SuppressMessage("ReSharper", "MemberHidesStaticFromOuterClass", Justification = "Not a problem, the inner class does not access any outer members")]
     internal static class UxTheme
     {
         #region Native Methods class

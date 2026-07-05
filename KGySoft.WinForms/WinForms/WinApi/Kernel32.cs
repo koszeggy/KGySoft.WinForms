@@ -15,16 +15,16 @@
 
 #region Usings
 
-using System.ComponentModel;
-#if NETFRAMEWORK
-using System.Security.Permissions;
-#endif
-
 #region Used Namespaces
 
 using System;
+#if NETFRAMEWORK
 using System.Runtime.ConstrainedExecution;
+#endif
 using System.Runtime.InteropServices;
+#if NETFRAMEWORK
+using System.Security.Permissions;
+#endif
 
 using Microsoft.Win32.SafeHandles;
 
