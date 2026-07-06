@@ -41,7 +41,7 @@ namespace KGySoft.WinForms.Controls
     /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/>).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// </list>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
     /// an example for some features of the <see cref="AdvancedTextBox"/> control.</note>
     /// </remarks>
     [ToolboxBitmap(typeof(AdvancedTextBox), "Resources.Toolbox.AdvancedTextBox.png")]

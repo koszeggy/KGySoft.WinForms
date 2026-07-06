@@ -47,7 +47,7 @@ namespace KGySoft.WinForms.Controls
     /// custom colors even in disabled mode and even for the default glyph (on Windows 10 and above), buffered fading animations, and more.
     /// </summary>
     /// <remarks>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
     /// an example for some features of the <see cref="CommandLinkButton"/> control.</note>
     /// </remarks>
     [ToolboxBitmap(typeof(CommandLinkButton), "Resources.Toolbox.CommandLinkButton.png")]

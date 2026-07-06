@@ -47,6 +47,7 @@ namespace KGySoft.WinForms.Components
     #endregion
 
     /// <summary>
+    /// a
     /// Represents a task dialog window that is able to display regular buttons, Vista-like command links,
     /// radio buttons and a progress bar. Can work in compatibility mode so the dialog can be used even with Windows XP or when visual styles are not available.
     /// </summary>
@@ -59,7 +60,7 @@ namespace KGySoft.WinForms.Components
     /// like custom images on the buttons and command links. If you set <see cref="ForceCompatibilityMode"/> to <see langword="true"/>, then always the alternative implementation
     /// is used, allowing some small improvements to the native version such as tool tips for regular buttons and radio buttons, more detailed info when copying the
     /// content to the clipboard by <c>Ctrl+C</c>, fixing possible color issues in high contrast mode, etc.</para>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that has
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that has
     /// several <see cref="TaskDialog"/> examples.</note>
     /// </remarks>
     public sealed class TaskDialog : IWin32Window, IDisposable

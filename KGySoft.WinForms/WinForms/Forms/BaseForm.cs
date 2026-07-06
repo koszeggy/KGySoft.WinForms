@@ -483,7 +483,7 @@ namespace KGySoft.WinForms.Forms
         /// <para>Using <see cref="DynamicStringLocalization.LocalScope"/> or <see cref="DynamicStringLocalization.AssemblyScope"/> works only if the invariant resource set exists for the form or user control.
         /// Only the properties that have an entry in the invariant resource set will be localized automatically.
         /// <br/>See also the <see cref="KGySoft.WinForms.DynamicStringLocalization"/> enumeration for details.</para>
-        /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+        /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
         /// an example for dynamic localization using various settings. It also has an editor that allows creating, editing and applying localizations at run-time.
         /// <br/>The example is located under the <em>Misc Tests</em> / <em>Dynamic localization example</em> menu.</note>
         /// </remarks>
@@ -800,7 +800,7 @@ namespace KGySoft.WinForms.Forms
         /// The child will not be a modal form, so you still will be able to interact with the parent form and other non-suspended child forms.</para>
         /// <para>As the <paramref name="child"/> form is not opened as a real dialog, this call returns immediately after the child is shown.
         /// You can use the <see cref="OwnedMdiChildClosed"/> event or the <see cref="OnOwnedMdiChildClosed">OnOwnedMdiChildClosed</see> method to get notified when the <paramref name="child"/> form is closed.</para>
-        /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+        /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
         /// an example for working with MDI forms.
         /// <br/>The example is located under the <em>Misc Tests</em> / <em>MDI Form Example</em> menu.</note>
         /// </remarks>

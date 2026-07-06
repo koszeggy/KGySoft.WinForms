@@ -58,7 +58,7 @@ namespace KGySoft.WinForms.Components
     /// and handle the <see cref="SetMessage"/> event. You can derive the bound objects from the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm">ValidatingObjectBase</a> class
     /// (or implement the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_IValidatingObject.htm">IValidatingObject</a> interface)
     /// to provide error/warning/info messages for the bound properties.</para>
-    /// <para>See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a> that contains
+    /// <para>See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
     /// an example for using the <see cref="AdvancedErrorProvider"/> component as warning/info providers. It also provides a specialized <see cref="DataGridView"/> to display messages with different validation severities.
     /// <br/>The example is located under the <em>Misc Tests</em> / <em>AdvancedErrorProvider example</em> menu.</para>
     /// </note>

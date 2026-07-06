@@ -27,8 +27,8 @@ namespace KGySoft.WinForms
     /// <see cref="N:KGySoft.WinForms.Controls"/> and <see cref="N:KGySoft.WinForms.Forms"/> namespaces.
     /// </summary>
     /// <remarks>
-    /// <note type="tip">See the <a href="https://github.com/koszeggy/KGySoft.WinForms">project site</a> for various examples with images, and
-    /// also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example">example application</a>.</note>
+    /// <note type="tip">See the <a href="https://github.com/koszeggy/KGySoft.WinForms" target="blank">project site</a> for various examples with images, and
+    /// also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.</note>
     /// </remarks>
     [CompilerGenerated]
     internal static class NamespaceDoc;
