@@ -24,7 +24,7 @@ using KGySoft.CoreLibraries;
 
 namespace KGySoft.WinForms.Example.ViewModel
 {
-    internal class AdvancedErrorProviderExampleViewModel : ObservableObjectBase
+    internal class AdvancedErrorProviderExampleViewModel
     {
         #region Properties
 
