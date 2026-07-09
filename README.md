@@ -128,7 +128,7 @@ To implement your own advanced controls, you can derive from the [`BaseControl`]
 * Other minor enhancements and fixes
 
 <p align="center">
-  <img alt="AdvancedComboBox in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/3642456f-5900-42a7-b0f3-8a5f94d9cfb3"/>
+  <img alt="AdvancedComboBox in the KGySoft.WinForms.Example application" src="KGySoft.WinForms/Help/AdvancedComboBox.gif"/>
   <br/><em><a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedComboBox.htm" target="_blank"><code>AdvancedComboBox</code></a> in the <a href="KGySoft.WinForms.Example">KGySoft.WinForms.Example</a> application</em>
 </p>
 
@@ -158,7 +158,7 @@ The regular `DateTimePicker` control does not allow custom colors, it does not e
 * Auto hyperlink recognition in text (when allowed)
 * Visual enhancements, such as richer `BorderStyle` options or fixed hand cursor for hyperlinks
 <p align="center">
-  <img alt="AdvancedLabel in the KGySoft.WinForms.Example application" src="https://github.com/user-attachments/assets/01bfa7f5-5011-4e7d-8224-37dbba73dfd2"/>
+  <img alt="AdvancedLabel in the KGySoft.WinForms.Example application" src="KGySoft.WinForms/Help/AdvancedLabel.png"/>
   <br/><em>Some <code>Label</code> vs. <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedLabel.htm" target="_blank"><code>AdvancedLabel</code></a> differences</em>
 </p>
 
@@ -243,7 +243,7 @@ When the regular `ErrorProvider` component uses data binding by setting its `Dat
 When used with custom icons, it also can ensure correct scaling, depending on the current DPI settings.
 
 <p align="center">
-  <img alt="AdvancedErrorProvider" src="https://github.com/user-attachments/assets/19628da5-8b82-409a-8280-7801eb356c97"/>
+  <img alt="AdvancedErrorProvider" src="KGySoft.WinForms/Help/AdvancedErrorProvider.png"/>
   <br/><em>Data bound <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Components_AdvancedErrorProvider.htm" target="_blank"><code>AdvancedErrorProvider</code></a> component using <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm"><code>ValidatingObjectBase</code></a> items in the <a href="KGySoft.WinForms.Example">KGySoft.WinForms.Example</a> application on Windows 11</em>
 </p>
 
