@@ -45,11 +45,15 @@ namespace KGySoft.WinForms.Controls
     /// <summary>
     /// Represents a command link button. Works also on Windows XP in compatibility mode. Supports flat styles, elevated mode, high contrast mode,
     /// custom colors even in disabled mode and even for the default glyph (on Windows 10 and above), buffered fading animations, and more.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_CommandLinkButton.htm">online help</a> for an animated image example.</div>
     /// </summary>
-    /// <remarks>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
-    /// an example for some features of the <see cref="CommandLinkButton"/> control.</note>
-    /// </remarks>
+    /// <example>
+    /// <para>The following image illustrates a few features of the <see cref="CommandLinkButton"/> class, like the various <see cref="FlatStyle"/>s,
+    /// elevated mode, custom image support, and buffered fading animations:</para>
+    /// <para><img src="../Help/CommandLinkButton.gif" alt="CommandLinkButton in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
+    /// </example>
     [ToolboxBitmap(typeof(CommandLinkButton), "Resources.Toolbox.CommandLinkButton.png")]
     [Description("Vista-like CommandLink button that works also in compatibility mode. On Vista and above you can set FlatStyle to System to render the button by the Windows.")]
     [SuppressMessage("Performance", "CA1822:Mark members as static", Justification = "ShouldSerialize... methods must be instance methods for designer serialization.")]
@@ -242,7 +246,11 @@ namespace KGySoft.WinForms.Controls
         /// Gets or sets whether fading animations are enabled for the control.
         /// Animations work on Windows Vista and above when rendering with visual styles.
         /// <br/>Default value: <see langword="true"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_CommandLinkButton.htm">online help</a> for an animated image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="CommandLinkButton"/> class for an animated image example.</note>
+        /// </example>
         [Category("CommandLinkButton")]
         [DefaultValue(true)]
         [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above when rendering with visual styles.")]
@@ -262,7 +270,11 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the fading options of the control.
         /// <br/>Default value: <see cref="FadingOptions.StandardEffects"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_CommandLinkButton.htm">online help</a> for an animated image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="CommandLinkButton"/> class for an animated image example.</note>
+        /// </example>
         [Category("CommandLinkButton")]
         [DefaultValue(FadingOptions.StandardEffects)]
         [Description("Gets or sets the fading options of the control.")]
@@ -318,7 +330,11 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets whether an elevated shield icon should be displayed on the command link button.
         /// <br/>Default value: <see langword="false"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_CommandLinkButton.htm">online help</a> for an image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="CommandLinkButton"/> class for an image example.</note>
+        /// </example>
         [Category("CommandLinkButton")]
         [Description("Gets or sets whether an elevated shield icon should be displayed on the button.")]
         [DefaultValue(false)]

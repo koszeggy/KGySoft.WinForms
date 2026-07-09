@@ -23,21 +23,26 @@ using System.ComponentModel;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents possible fading options
+    /// Represents possible fading animation options.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedButton.htm">online help</a> of the <see cref="AdvancedButton"/> class for an animated image example.</div>
     /// </summary>
+    /// <example>
+    /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedButton"/> class for an animated image example.</note>
+    /// </example>
     [Flags]
     public enum FadingOptions
     {
         /// <summary>
-        /// Represents disabled fading options
+        /// Represents no enabled fading animation.
         /// </summary>
         None,
 
         /// <summary>
-        /// Indicates that standard fading animations (enabling, hovering, clicking, etc.) are enabled for the control.
-        /// Speed of these effects are retrieved from the system.
+        /// Indicates that the standard fading animations (toggling the enabled, hovered, pushed and checked states where applicable) are enabled for the control.
+        /// The speed of these effects are retrieved from the operating system.
         /// </summary>
-        [Description("Indicates that standard fading animations (enabling, hovering, clicking, etc.) are enabled for the control. Speed of these effects are retrieved from the system.")]
+        [Description("the standard fading animations (toggling the enabled, hovered, pushed and checked states where applicable) are enabled for the control. "
+            + "The speed of these effects are retrieved from the operating system.")]
         StandardEffects = 1,
 
         /// <summary>

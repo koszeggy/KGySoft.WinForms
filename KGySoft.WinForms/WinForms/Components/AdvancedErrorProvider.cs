@@ -44,6 +44,7 @@ namespace KGySoft.WinForms.Components
     /// <summary>
     /// An <see cref="ErrorProvider"/> with a <see cref="SetMessage"/> event, which is triggered if the <see cref="ErrorProvider.DataSource"/> property is set and the message
     /// of a bound property is about to be retrieved. It also fixes the scaling of the displayed icon if the <see cref="Icon"/> property is explicitly set.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Components_AdvancedErrorProvider.htm">online help</a> for an example.</div>
     /// </summary>
     /// <remarks>
     /// <para>If the original <see cref="ErrorProvider"/> is used with WinForms data binding (by setting the <see cref="ErrorProvider.DataSource"/> property), the bound items
@@ -52,20 +53,31 @@ namespace KGySoft.WinForms.Components
     /// to allow the messages to be retrieved from any custom source.</para>
     /// <para>If the bound objects implement the <see cref="IDataErrorInfo"/> interface, the error messages are preinitialized in
     /// the <see cref="SetMessageEventArgs.Message">SetMessageEventArgs.Message</see> property when the <see cref="SetMessage"/> event is raised.</para>
-    /// <note type="tip">
-    /// <para>To provide error/message/info messages for objects, create three instances of this class. Set their icon accordingly (you can use the
+    /// <note type="tip"><para>To provide error/message/info messages for objects, create three instances of this class. Set their icon accordingly (you can use the
     /// properties of the <a href="https://koszeggy.github.io/docs/drawing/html/T_KGySoft_Drawing_Icons.htm">Icons</a> class from <c>KGySoft.Drawing</c>),
     /// and handle the <see cref="SetMessage"/> event. You can derive the bound objects from the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm">ValidatingObjectBase</a> class
     /// (or implement the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_IValidatingObject.htm">IValidatingObject</a> interface)
-    /// to provide error/warning/info messages for the bound properties.</para>
-    /// <para>See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
-    /// an example for using the <see cref="AdvancedErrorProvider"/> component as warning/info providers. It also provides a specialized <see cref="DataGridView"/> to display messages with different validation severities.
-    /// <br/>The example is located under the <em>Misc Tests</em> / <em>AdvancedErrorProvider example</em> menu.</para>
+    /// to provide error/warning/info messages for the bound properties. See also the <strong>Examples</strong> section for an illustration.</para>
     /// </note>
     /// <para>If you explicitly set the <see cref="Icon"/> property, and the <see cref="IconSizeMode"/> property is not <see cref="IconSizeMode.SystemDefault"/>,
     /// the <see cref="AdvancedErrorProvider"/> component ensures that the icon is scaled correctly on all platform targets.
     /// See the <strong>Remarks</strong> section of the <see cref="IconSizeMode"/> property for more details.</para>
     /// </remarks>
+    /// <example>
+    /// <para>The following image illustrates how to use three <see cref="AdvancedErrorProvider"/> instances to provide error, warning and info messages for controls
+    /// by using data binding, and deriving the items from the <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm">ValidatingObjectBase</a> class:</para>
+    /// <para><img src="../Help/AdvancedErrorProvider.png" alt="Error/Warning/Info providers in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>,
+    /// where you can find the source code of
+    /// <list type="bullet">
+    /// <item>the form (<a href="https://github.com/koszeggy/KGySoft.WinForms/blob/master/KGySoft.WinForms.Example/Forms/AdvancedErrorProviderExample.cs" target="_blank">AdvancedErrorProviderExample.cs</a>) with the three providers,</item>
+    /// <item>the view-model class (<a href="https://github.com/koszeggy/KGySoft.WinForms/blob/master/KGySoft.WinForms.Example/ViewModel/AdvancedErrorProviderExampleViewModel.cs" target="_blank">AdvancedErrorProviderExampleViewModel.cs</a>) containing the bound collection,</item>
+    /// <item>the class of the items (<a href="https://github.com/koszeggy/KGySoft.WinForms/blob/master/KGySoft.WinForms.Example/ViewModel/ValidatingObjectExample.cs" target="_blank">ValidatingObjectExample.cs</a>) derived from <a href="https://koszeggy.github.io/docs/corelibraries/html/T_KGySoft_ComponentModel_ValidatingObjectBase.htm">ValidatingObjectBase</a>,</item>
+    /// <item>and the specialized grid (<a href="https://github.com/koszeggy/KGySoft.WinForms/blob/master/KGySoft.WinForms.Example/Controls/ValidatingDataGridView.cs" target="_blank">ValidatingDataGridView.cs</a>), which is just a bonus, and is not strictly needed for the providers to work.</item>
+    /// </list>
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.
+    /// The example is located under the <em>Misc Tests</em> / <em>AdvancedErrorProvider example</em> menu.</note>
+    /// </example>
     /// <seealso cref="ErrorProvider" />
     [ToolboxBitmap(typeof(ErrorProvider))]
     public class AdvancedErrorProvider : ErrorProvider, IPerMonitorDpiAware

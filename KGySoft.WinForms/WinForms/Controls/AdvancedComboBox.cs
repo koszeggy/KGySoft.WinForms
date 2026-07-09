@@ -33,6 +33,7 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents a combo box with additional features such as customizable disabled colors, read-only mode, and more.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedComboBox.htm">online help</a> for an animated image example.</div>
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedComboBox"/> control offers the following features in addition to <see cref="ComboBox"/>:
@@ -43,9 +44,14 @@ namespace KGySoft.WinForms.Controls
     /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/>).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// </list>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
-    /// an example for some features of the <see cref="AdvancedComboBox"/> control.</note>
     /// </remarks>
+    /// <example>
+    /// <para>The following image illustrates a few features of the <see cref="AdvancedComboBox"/> class, like the default disabled colors difference (the disabled colors are customizable),
+    /// and the <see cref="ReadOnly"/> mode, which is not supported by a regular <see cref="ComboBox"/>:</para>
+    /// <para><img src="../Help/AdvancedComboBox.gif" alt="AdvancedComboBox in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
+    /// </example>
     [ToolboxBitmap(typeof(ComboBox))]
     [Description(@"A combo box with the following additional features:
 - Adjustable colors in disabled state

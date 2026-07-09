@@ -84,8 +84,12 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the dynamic string localization strategy of the user control. It allows using potentially auto-generated string resources from .resx files.
-        /// <br/>See the <strong>Remarks</strong> section for the <see cref="BaseForm.DynamicStringLocalization">BaseForm.DynamicStringLocalization</see> property for details.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/P_KGySoft_WinForms_Forms_BaseForm_DynamicStringLocalization.htm">online help</a>
+        /// of the <see cref="BaseForm.DynamicStringLocalization">BaseForm.DynamicStringLocalization</see> property for an example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="BaseForm.DynamicStringLocalization">BaseForm.DynamicStringLocalization</see> property for an example.</note>
+        /// </example>
         [Category("BaseUserControl")]
         [DefaultValue(DynamicStringLocalization.Disabled)]
         [Description("Specifies the dynamic string localization strategy of the control. LocalScope and AssemblyScope allow using potentially auto-generated .resx files "

@@ -35,6 +35,7 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents a button with additional features such as customizable disabled colors, elevated mode, buffered fading animations, and more.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedButton.htm">online help</a> for an animated image example.</div>
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedButton"/> class offers the following features in addition to <see cref="Button"/>:
@@ -49,9 +50,15 @@ namespace KGySoft.WinForms.Controls
     /// <item>Consistent font scaling on all platforms when per-monitor DPI awareness is enabled (see <see cref="AutoScaleFont"/>).
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// </list>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
-    /// an example for some features of the <see cref="AdvancedButton"/> control.</note>
     /// </remarks>
+    /// <example>
+    /// <para>The following image illustrates a few features of the <see cref="AdvancedButton"/> class, like displaying an image with <see cref="FlatStyle.System"/>&#160;<see cref="FlatStyle"/>,
+    /// elevated mode, rendering quality. The animation highlights the buffered animations support for non-<see cref="FlatStyle.System"/>&#160;<see cref="FlatStyle"/>s,
+    /// which is not supported by a regular <see cref="Button"/>:</para>
+    /// <para><img src="../Help/AdvancedButton.gif" alt="AdvancedButton in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
+    /// </example>
     [ToolboxBitmap(typeof(Button))]
     [Description(@"A button that provides the following features in addition to regular Button:
 - Allows using images even if FlatStyle is System
@@ -156,7 +163,11 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets whether an elevated shield icon should be displayed on the button.
         /// <br/>Default value: <see langword="false"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedButton.htm">online help</a> for an image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedButton"/> class for an image example.</note>
+        /// </example>
         [Category("AdvancedButton")]
         [Description("Gets or sets whether an elevated shield icon should be displayed on the button.")]
         [DefaultValue(false)]
@@ -271,7 +282,11 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the text rendering quality of the <see cref="AdvancedButton"/>.
         /// <br/>Default value: <see cref="RenderingQuality.SystemDefault"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedButton.htm">online help</a> for an image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedButton"/> class for an image example.</note>
+        /// </example>
         [Category("AdvancedButton")]
         [Description("Gets or sets the text rendering quality of the button control. Has effect only when FlatStyle is not System.")]
         [DefaultValue(RenderingQuality.SystemDefault)]
@@ -503,7 +518,11 @@ namespace KGySoft.WinForms.Controls
         /// Gets or sets whether fading animations are enabled for the control.
         /// Animations work on Windows Vista and above when rendering with visual styles.
         /// <br/>Default value: <see langword="true"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedButton.htm">online help</a> for an animated image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedButton"/> class for an animated image example.</note>
+        /// </example>
         [Category("AdvancedButton")]
         [DefaultValue(true)]
         [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above when rendering with visual styles.")]
@@ -523,7 +542,11 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the fading options of the control.
         /// <br/>Default value: <see cref="FadingOptions.StandardEffects"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedButton.htm">online help</a> for an animated image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedButton"/> class for an animated image example.</note>
+        /// </example>
         [Category("AdvancedButton")]
         [DefaultValue(FadingOptions.StandardEffects)]
         [Description("Gets or sets the fading options of the control.")]

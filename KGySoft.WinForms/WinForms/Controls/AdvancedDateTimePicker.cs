@@ -34,6 +34,7 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents a date-time picker control with additional features such as adjustable colors, fixed rendering in high DPI mode, and more.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedDateTimePicker.htm">online help</a> for an image example.</div>
     /// </summary>
     /// <remarks>
     /// The <see cref="DateTimePicker"/> control offers the following features in addition to <see cref="DateTimePicker"/>:
@@ -46,9 +47,14 @@ namespace KGySoft.WinForms.Controls
     /// <item>When rendering with visual styles on high DPI, preferring always the standard check box sizes.
     /// When the standard size cannot be used, improving the rendering quality if <see cref="CheckBoxRenderingQuality"/> is <see cref="RenderingQuality.High"/>.</item>
     /// </list>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
-    /// an example for some features of the <see cref="AdvancedDateTimePicker"/> control.</note>
     /// </remarks>
+    /// <example>
+    /// <para>The following image illustrates a few features of the <see cref="AdvancedDateTimePicker"/> class, like the default disabled colors difference,
+    /// and the fixed checkbox rendering on high DPI (the example uses 125% scaling on Windows 11):</para>
+    /// <para><img src="../Help/AdvancedDateTimePicker.png" alt="AdvancedComboBox in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
+    /// </example>
     [Description(@"A date-time picker provides the following features in addition to regular DateTimePicker:
 - Adjustable colors
 - Value property is redefined to return DateTime.MaxValue if Checked is false; instead of throwing exceptions, out-of-range values don't change Value
@@ -493,7 +499,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the rendering quality of the checkbox visuals when <see cref="DateTimePicker.ShowCheckBox"/> is <see langword="true"/> and visual styles are enabled.
+        /// Gets or sets the rendering quality of the checkbox visuals when <see cref="DateTimePicker.ShowCheckBox"/> is <see langword="true"/>, and visual styles are enabled.
         /// </summary>
         [Category("AdvancedDateTimePicker")]
         [Description("Gets or sets the rendering quality of the check box visuals. Has effect only when ShowCheckBox is true, and rendering with visual styles.")]

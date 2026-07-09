@@ -17,7 +17,11 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents the rendering quality of a control.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedRadioButton.htm">online help</a> of the <see cref="AdvancedRadioButton"/> class for an image example.</div>
     /// </summary>
+    /// <example>
+    /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedRadioButton"/> class for an image example.</note>
+    /// </example>
     public enum RenderingQuality
     {
         /// <summary>

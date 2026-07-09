@@ -13,11 +13,21 @@
 
 #endregion
 
+#region Usings
+
+using KGySoft.WinForms.Controls;
+
+#endregion
+
 namespace KGySoft.WinForms
 {
     /// <summary>
     /// Represents possible progress bar states.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedProgressBar.htm">online help</a> of the <see cref="AdvancedProgressBar"/> class for an animated image example.</div>
     /// </summary>
+    /// <example>
+    /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedProgressBar"/> class for an animated image example.</note>
+    /// </example>
     public enum ProgressBarState
     {
         /// <summary>

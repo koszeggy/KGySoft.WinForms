@@ -156,12 +156,79 @@
   <!-- Import the SHFB build targets during build -->
   <Import Project="$(SHFBROOT)\SandcastleHelpFileBuilder.targets" Condition="'$(MSBuildRestoreSessionId)' == ''" />
   <ItemGroup>
+    <Folder Include="Help\" />
     <Folder Include="icons\" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="icons\logo.png">
       <ImageId>logo</ImageId>
       <AlternateText>logo</AlternateText>
+    </Content>
+    <Content Include="Help\AdvancedButton.gif">
+      <ImageId>AdvancedButton</ImageId>
+    </Content>
+    <Content Include="Help\AdvancedCheckBox.png">
+      <ImageId>AdvancedCheckBox</ImageId>
+    </Content>
+    <Content Include="Help\AdvancedComboBox.gif">
+      <ImageId>AdvancedComboBox</ImageId>
+    </Content>
+    <Content Include="Help\AdvancedDateTimePicker.png">
+      <ImageId>AdvancedDateTimePicker</ImageId>
+    </Content>
+    <Content Include="Help\AdvancedLabel.png">
+      <ImageId>AdvancedLabel</ImageId>
+    </Content>
+    <Content Include="Help\AdvancedProgressBar.gif">
+      <ImageId>AdvancedProgressBar</ImageId>
+    </Content>
+    <Content Include="Help\AdvancedRadioButton.png">
+      <ImageId>AdvancedRadioButton</ImageId>
+    </Content>
+    <Content Include="Help\AdvancedRadioButtonHighDpi.gif">
+      <ImageId>AdvancedRadioButtonHighDpi</ImageId>
+    </Content>
+    <Content Include="Help\CheckGroupBox.gif">
+      <ImageId>CheckGroupBox</ImageId>
+    </Content>
+    <Content Include="Help\CommandLinkButton.gif">
+      <ImageId>CommandLinkButton</ImageId>
+    </Content>
+    <Content Include="Help\ImageViewer.gif">
+      <ImageId>ImageViewer</ImageId>
+    </Content>
+    <Content Include="Help\FadingPainter.gif">
+      <ImageId>FadingPainter</ImageId>
+    </Content>
+    <Content Include="Help\AdvancedErrorProvider.png">
+      <ImageId>AdvancedErrorProvider</ImageId>
+    </Content>
+    <Content Include="Help\EditingResources.png">
+      <ImageId>EditingResources</ImageId>
+    </Content>
+    <Content Include="Help\TaskDialogSimple.png">
+      <ImageId>TaskDialogSimple</ImageId>
+    </Content>
+    <Content Include="Help\TaskDialogSimpleOptions.png">
+      <ImageId>TaskDialogSimpleOptions</ImageId>
+    </Content>
+    <Content Include="Help\TaskDialogTextsAndIcons.png">
+      <ImageId>TaskDialogTextsAndIcons</ImageId>
+    </Content>
+    <Content Include="Help\TaskDialogNativeWin11.png">
+      <ImageId>TaskDialogNativeWin11</ImageId>
+    </Content>
+    <Content Include="Help\TaskDialogCompatibleModeWinXP.png">
+      <ImageId>TaskDialogCompatibleModeWinXP</ImageId>
+    </Content>
+    <Content Include="Help\TaskDialogCompatibleModeNoVisualStyles.png">
+      <ImageId>TaskDialogCompatibleModeNoVisualStyles</ImageId>
+    </Content>
+    <Content Include="Help\TaskDialogHighContrastNative.png">
+      <ImageId>TaskDialogHighContrastNative</ImageId>
+    </Content>
+    <Content Include="Help\TaskDialogHighContrastCompatible.png">
+      <ImageId>TaskDialogHighContrastCompatible</ImageId>
     </Content>
   </ItemGroup>
 </Project>

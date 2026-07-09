@@ -26,6 +26,7 @@ using System.Windows.Forms;
 
 using KGySoft.CoreLibraries;
 using KGySoft.Drawing;
+using KGySoft.WinForms.Controls;
 using KGySoft.WinForms.Forms;
 
 #endregion
@@ -47,22 +48,122 @@ namespace KGySoft.WinForms.Components
     #endregion
 
     /// <summary>
-    /// a
     /// Represents a task dialog window that is able to display regular buttons, Vista-like command links,
     /// radio buttons and a progress bar. Can work in compatibility mode so the dialog can be used even with Windows XP or when visual styles are not available.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Components_TaskDialog.htm">online help</a> for examples.</div>
     /// </summary>
     /// <remarks>
     /// <note type="warning">.NET 5 also introduced task dialogs, so when targeting .NET 5 or later, referencing <see cref="TaskDialog"/>, <see cref="TaskDialogControl"/>,
     /// <see cref="TaskDialogButton"/> and <see cref="TaskDialogRadioButton"/> button classes may require to use fully qualified names or aliases
     /// like <c>using TaskDialog = KGySoft.WinForms.Components.TaskDialog;</c> to avoid ambiguity with the recently added WinForms classes.
-    /// Please also note that unlike this class, <see cref="System.Windows.Forms.TaskDialog">System.Windows.Forms.TaskDialog</see> cannot be used on Windows XP, on Linux/Mono, or when visual styles are not enabled.</note>
+    /// Please also note that unlike the KGy SOFT <see cref="TaskDialog"/>, <see cref="System.Windows.Forms.TaskDialog">System.Windows.Forms.TaskDialog</see> cannot be used on Windows XP, on Linux/Mono, or when visual styles are not enabled.</note>
     /// <para>But you might want to choose the KGy SOFT version even when running on Windows Vista or later with visual styles enabled, because it offers additional features
     /// like custom images on the buttons and command links. If you set <see cref="ForceCompatibilityMode"/> to <see langword="true"/>, then always the alternative implementation
     /// is used, allowing some small improvements to the native version such as tool tips for regular buttons and radio buttons, more detailed info when copying the
     /// content to the clipboard by <c>Ctrl+C</c>, fixing possible color issues in high contrast mode, etc.</para>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that has
-    /// several <see cref="TaskDialog"/> examples.</note>
     /// </remarks>
+    /// <example>
+    /// <para>In the simplest case the <see cref="TaskDialog"/> can offer something similar to a <see cref="MessageBox"/>. In addition to predefined standard buttons you can add buttons with custom texts, too:</para>
+    /// <code lang="C#"><![CDATA[
+    /// using System.Diagnostics;
+    /// using System.Windows.Forms;
+    /// using KGySoft.WinForms.Components;
+    ///
+    /// // These aliases are needed if you target .NET 5.0+
+    /// using TaskDialog = KGySoft.WinForms.Components.TaskDialog;
+    /// using TaskDialogButton = KGySoft.WinForms.Components.TaskDialogButton; // if you use custom buttons
+    /// using TaskDialogRadioButton = KGySoft.WinForms.Components.TaskDialogRadioButton; // if you use radio buttons
+    ///
+    /// void ShowSimpleTaskDialog(IWin32Window? owner = null)
+    /// {
+    ///     using var taskDialog = new TaskDialog
+    ///     {
+    ///         Caption = "Simple Dialog",
+    ///         Message = "Hello TaskDialog",
+    ///         StandardButtons = TaskDialogStandardButtons.OK | TaskDialogStandardButtons.Cancel,
+    ///         Buttons = { new TaskDialogButton("Custom Button 1"), new TaskDialogButton("Custom Button 2") },
+    ///     };
+    ///
+    ///     taskDialog.Show(owner);
+    ///
+    ///     // The selected standard button. Cancel, if you closed the dialog, or Custom if you pressed a custom button.
+    ///     Debug.WriteLine($"Dialog Result: {taskDialog.DialogResult}");
+    ///
+    ///     // The selected custom button index. -1, if you closed the dialog or pressed a standard button.
+    ///     Debug.WriteLine($"Selected Custom Button: {taskDialog.SelectedButtonIndex}");
+    /// }
+    ///
+    /// Application.EnableVisualStyles(); // tip: comment this out to see how it works without visual styles
+    /// Application.SetCompatibleTextRenderingDefault(false);
+    /// ShowSimpleTaskDialog(); ]]></code>
+    /// <para>The example above appears like this:</para>
+    /// <para><img src="../Help/TaskDialogSimple.png" alt="A simple TaskDialog"/></para>
+    /// <para>A task dialog can also offer choices by radio buttons, show a verification text on a checkbox,
+    /// and the custom buttons can be displayed as <see cref="CommandLinkButton">command links</see>:</para>
+    /// <code lang="C#"><![CDATA[
+    /// // the updated body of the ShowSimpleTaskDialog method above:
+    /// using var taskDialog = new TaskDialog
+    /// {
+    ///     Caption = "Simple Dialog",
+    ///     Message = "Hello TaskDialog",
+    ///     StandardButtons = TaskDialogStandardButtons.OK | TaskDialogStandardButtons.Cancel,
+    ///     Buttons = { new TaskDialogButton("Custom Button 1"), new TaskDialogButton("Custom Button 2") },
+    ///
+    ///     // update:
+    ///     RadioButtons = { new TaskDialogRadioButton("Option 1"), new TaskDialogRadioButton("Option 2") },
+    ///     CheckBoxText = "This is a checkbox",
+    ///     Options = TaskDialogOptions.UseCommandLinks // affects the appearance of Buttons
+    /// };
+    ///
+    /// taskDialog.Show(owner);
+    ///
+    /// Debug.WriteLine($"Dialog Result: {taskDialog.DialogResult}");
+    /// Debug.WriteLine($"Selected Custom Button: {taskDialog.SelectedButtonIndex}");
+    /// Debug.WriteLine($"Selected Radio Button: {taskDialog.SelectedRadioButtonIndex}");
+    /// Debug.WriteLine($"Checkbox is checked: {taskDialog.CheckBoxChecked}");
+    ///
+    /// // Alternative way to get every result in a single line:
+    /// TaskDialogResult standardButton = taskDialog.Show(owner, out int customButton, out int radioButton, out bool isChecked);
+    /// ]]></code>
+    /// <para>The updated example is starting to look like a typical task dialog:</para>
+    /// <para><img src="../Help/TaskDialogSimpleOptions.png" alt="A simple TaskDialog with options"/></para>
+    /// <para>And there are quite a few more text elements you can set, as well as a couple of icons. Update the previous example as follows:</para>
+    /// <code lang="C#"><![CDATA[
+    /// // updated initialization:
+    /// using var taskDialog = new TaskDialog
+    /// {
+    ///     Caption = "Simple Dialog",
+    ///     Message = "Hello TaskDialog",
+    ///     StandardButtons = TaskDialogStandardButtons.OK | TaskDialogStandardButtons.Cancel,
+    ///     Buttons = { new TaskDialogButton("Custom Button 1"), new TaskDialogButton("Custom Button 2") },
+    ///     RadioButtons = { new TaskDialogRadioButton("Option 1"), new TaskDialogRadioButton("Option 2") },
+    ///     CheckBoxText = "This is a checkbox",
+    ///     // Options = TaskDialogOptions.UseCommandLinks,
+    ///
+    ///     // update:
+    ///     Options = TaskDialogOptions.UseCommandLinks | TaskDialogOptions.DetailsExpanded,
+    ///     MainInstruction = "Some highlighted title",
+    ///     DetailsText = "An optionally long details text that can be concealed",
+    ///     ShowDetailsText = "Show details",
+    ///     HideDetailsText = "Hide details",
+    ///     FooterText = "Even more text in the footer",
+    ///     Icon = TaskDialogStandardIcon.Information,
+    ///     FooterIcon = TaskDialogStandardIcon.SecurityShield,
+    /// };
+    /// taskDialog.Buttons[0].Description = "Oh, and here I can place even more text";]]></code>
+    /// <para>Our not-so-simple-anymore dialog now looks like this:</para>
+    /// <para><img src="../Help/TaskDialogTextsAndIcons.png" alt="A TaskDialog with all possible texts and icons"/></para>
+    /// <para>Though it contains a lot of elements, the latest example above is still a simple dialog in terms of the quite static content (not considering the collapsible details text),
+    /// meaning that the dialog closes as soon as one of the buttons is pressed. Actually you subscribe the <see cref="TaskDialogButton.Click"/> event
+    /// of the custom buttons, which prevents the dialog from closing by default (unless you set the <see cref="HandledEventArgs.Handled"/> property to <see langword="false"/>),
+    /// which allows you to dynamically change almost everything while dialog is open, including all texts, the <see cref="TaskDialogButtonBase.Enabled"/> state of the
+    /// custom buttons and radio buttons, and even the <see cref="Options"/> property. Additionally, the task dialog supports displaying a <see cref="ProgressBarStyle">progress bar</see>
+    /// and using a <see cref="Tick">timer</see>, which enables a sort of further dynamic actions, as illustrated in the following image:</para>
+    /// <para><img src="../Help/TaskDialogNativeWin11.png" alt="A dynamic TaskDialog with progress bar options in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>, which contains numerous dynamic task dialog examples.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
+    /// <para>See also the <strong>Examples</strong> section of the <see cref="ForceCompatibilityMode"/> property for more image examples.</para>
+    /// </example>
     public sealed class TaskDialog : IWin32Window, IDisposable
     {
         #region Constants
@@ -849,6 +950,7 @@ namespace KGySoft.WinForms.Components
         /// <summary>
         /// Gets or sets whether the <see cref="TaskDialog"/> is to be forced to operate in compatibility mode
         /// even if the current operating system supports native task dialogs.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/P_KGySoft_WinForms_Components_TaskDialog_ForceCompatibilityMode.htm">online help</a> for image examples.</div>
         /// </summary>
         /// <remarks>
         /// <para>Compatibility mode is automatically used in the following cases:
@@ -869,6 +971,24 @@ namespace KGySoft.WinForms.Components
         /// <item>Better support of Right-to-Left mode.</item>
         /// </list></para>
         /// </remarks>
+        /// <example>
+        /// <para>The following image illustrates native rendering on Windows 11:</para>
+        /// <para><img src="../Help/TaskDialogNativeWin11.png" alt="TaskDialog with native rendering on Windows 11 in the KGySoft.WinForms.Example application"/></para>
+        /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+        /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
+        /// <para>The same dialog on Windows XP, using compatible rendering (no matter what the value of this property is):</para>
+        /// <para><img src="../Help/TaskDialogCompatibleModeWinXP.png" alt="TaskDialog with compatible rendering on Windows XP in the KGySoft.WinForms.Example application"/></para>
+        /// <para>The compatible rendering is automatically applied also when visual styles are not enabled by the <see cref="Application.EnableVisualStyles">Application.EnableVisualStyles</see> method.
+        /// Note that attempting to use the <a href="https://learn.microsoft.com/en-us/dotnet/api/system.windows.forms.taskdialog">System.Windows.Forms.TaskDialog</a> (available when targeting .NET 5.0+) would throw an exception in such case.
+        /// The following image is still the same <see cref="TaskDialog"/> as above when visual styles are disabled on Windows 11:</para>
+        /// <para><img src="../Help/TaskDialogCompatibleModeNoVisualStyles.png" alt="TaskDialog with compatible rendering with no visual styles on Windows 11 in the KGySoft.WinForms.Example application"/></para>
+        /// <para>You might want to set this property to <see langword="true"/> even when the native dialog would always work, because the native rendering has some issues in certain cases.
+        /// For example, in high contrast mode it accidentally mixes Window and Control colors for some visual elements, which does not become apparent
+        /// until you use a theme where Window and Control background/foreground colors are the inverse of each other:</para>
+        /// <para><img src="../Help/TaskDialogHighContrastNative.png" alt="Native TaskDialog in high contrast mode with inverted Window/Control colors on Windows 11"/></para>
+        /// <para>Whereas in forced compatible mode every control picks their background/foreground colors correctly:</para>
+        /// <para><img src="../Help/TaskDialogHighContrastCompatible.png" alt="Compatible TaskDialog in high contrast mode with inverted Window/Control colors on Windows 11"/></para>
+        /// </example>
         public bool ForceCompatibilityMode
         {
             get => flags[forceCompatibilityMode];

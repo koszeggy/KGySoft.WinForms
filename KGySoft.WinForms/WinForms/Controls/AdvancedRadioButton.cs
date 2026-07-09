@@ -35,6 +35,7 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents a radio button with additional features such as customizable disabled colors, fixed auto sizing behavior, buffered fading animations, and more.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedRadioButton.htm">online help</a> for a couple of image examples.</div>
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedRadioButton"/> class offers the following features in addition to <see cref="RadioButton"/>:
@@ -47,9 +48,17 @@ namespace KGySoft.WinForms.Controls
     /// Note that it affects font scaling only, so auto-sizing behavior still depends on the current platform.</item>
     /// <item>Fixed rendering in high DPI modes when the application is DPI aware.</item>
     /// </list>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
-    /// an example for some features of the <see cref="AdvancedRadioButton"/> control.</note>
     /// </remarks>
+    /// <example>
+    /// <para>The following image illustrates a few features of the <see cref="AdvancedRadioButton"/> class, like the default disabled colors difference (the disabled colors are customizable),
+    /// text rendering quality, and the fixed auto sizing behavior when the control is docked to the top:</para>
+    /// <para><img src="../Help/AdvancedRadioButton.png" alt="AdvancedRadioButton in the KGySoft.WinForms.Example application"/></para>
+    /// <para>The following animation demonstrates a couple of rendering issues with the regular <see cref="RadioButton"/> in high DPI mode with 150% scaling (as of .NET 10.0),
+    /// as well as the buffered fading animations of <see cref="AdvancedRadioButton"/>, even for non-<see cref="FlatStyle.System"/>&#160;<see cref="FlatStyle"/>s:</para>
+    /// <para><img src="../Help/AdvancedRadioButtonHighDpi.gif" alt="AdvancedRadioButton in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The images above are from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
+    /// </example>
     [ToolboxBitmap(typeof(RadioButton))]
     [Description(@"A radio button that provides the following features in addition to regular RadioButton:
 - AutoSize works as expected when radio button is docked
@@ -139,7 +148,11 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the text rendering quality of the <see cref="AdvancedRadioButton"/>.
         /// <br/>Default value: <see cref="RenderingQuality.SystemDefault"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedRadioButton.htm">online help</a> for an image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedRadioButton"/> class for an image example.</note>
+        /// </example>
         [Category("AdvancedRadioButton")]
         [Description("Gets or sets the text rendering quality of the advanced radio button. Has effect only when FlatStyle is not System.")]
         [DefaultValue(RenderingQuality.SystemDefault)]
@@ -165,7 +178,7 @@ namespace KGySoft.WinForms.Controls
         }
 
         /// <summary>
-        /// Gets or sets the rendering quality of the <see cref="AdvancedRadioButton"/> visuals.
+        /// Gets or sets the rendering quality of the <see cref="AdvancedRadioButton"/> visuals. Has effect only in high DPI mode.
         /// <br/>Default value: <see cref="RenderingQuality.High"/>.
         /// </summary>
         [Category("AdvancedRadioButton")]
@@ -301,7 +314,11 @@ namespace KGySoft.WinForms.Controls
         /// Gets or sets whether fading animations are enabled for the control.
         /// Animations work on Windows Vista and above when rendering with visual styles.
         /// <br/>Default value: <see langword="true"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedRadioButton.htm">online help</a> for an animated image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedRadioButton"/> class for an animated image example.</note>
+        /// </example>
         [Category("AdvancedRadioButton")]
         [DefaultValue(true)]
         [Description("Gets or sets whether fading animations are enabled for the control. Animations work on Windows Vista and above when rendering with visual styles.")]
@@ -321,7 +338,11 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the fading options of the control.
         /// <br/>Default value: <see cref="FadingOptions.StandardEffects"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedRadioButton.htm">online help</a> for an animated image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedRadioButton"/> class for an animated image example.</note>
+        /// </example>
         [Category("AdvancedRadioButton")]
         [DefaultValue(FadingOptions.StandardEffects)]
         [Description("Gets or sets the fading options of the control.")]

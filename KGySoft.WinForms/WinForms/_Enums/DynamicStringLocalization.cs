@@ -25,11 +25,12 @@ namespace KGySoft.WinForms
     /// <summary>
     /// Represents the possible modes of dynamic string localization for forms and user controls
     /// derived from <see cref="BaseForm"/> and <see cref="BaseUserControl"/>.
-    /// <br/>See also the <strong>Remarks</strong> section of the <see cref="BaseForm.DynamicStringLocalization"/> property for details.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/P_KGySoft_WinForms_Forms_BaseForm_DynamicStringLocalization.htm">online help</a>
+    /// of the <see cref="BaseForm.DynamicStringLocalization">BaseForm.DynamicStringLocalization</see> property for an example.</div>
     /// </summary>
-    /// <remarks>
-    /// <para></para>
-    /// </remarks>
+    /// <example>
+    /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="BaseForm.DynamicStringLocalization">BaseForm.DynamicStringLocalization</see> property for an example.</note>
+    /// </example>
     public enum DynamicStringLocalization
     {
         /// <summary>

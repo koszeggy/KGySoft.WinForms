@@ -35,7 +35,8 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents a high-performance image display control with zooming and panning by the keyboard and the mouse.
-    /// Does not support auto-rendering animated images.
+    /// Does not support auto-rendering animated images, but it preserves the current zoom and location if you update the frames of an animation explicitly.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_ImageViewer.htm">online help</a> for an animated image example.</div>
     /// </summary>
     /// <remarks>
     /// <para>The <see cref="ImageViewer"/> control supports both <see cref="Bitmap"/> and <see cref="Metafile"/> instances, supporting every <see cref="PixelFormat"/>,
@@ -52,6 +53,13 @@ namespace KGySoft.WinForms.Controls
     /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
     /// an example for some features of the <see cref="ImageViewer"/> control.</note>
     /// </remarks>
+    /// <example>
+    /// <para>The following image illustrates a few features of the <see cref="ImageViewer"/> class, like panning and zooming by the mouse, and
+    /// setting <see cref="SmoothingEnabled"/>, <see cref="AutoZoom"/> and <see cref="Zoom"/> properties explicitly:</para>
+    /// <para><img src="../Help/ImageViewer.gif" alt="ImageViewer in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
+    /// </example>
     [ToolboxBitmap(typeof(PictureBox))]
     public partial class ImageViewer : BaseControl, IPerMonitorDpiAware
     {
@@ -226,7 +234,11 @@ namespace KGySoft.WinForms.Controls
         /// Gets or sets whether the control automatically adjusts the zoom to fit the image to the control.
         /// It is automatically set to <see langword="false"/> when <see cref="Zoom"/> is set (either programatically or by the user, using the mouse).
         /// <br/>Default value: <see langword="false"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_ImageViewer.htm">online help</a> for an animated image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="ImageViewer"/> class for an animated image example.</note>
+        /// </example>
         [Category("ImageViewer")]
         [Description("Determines whether the control automatically adjusts the zoom to fit the image to the control. "
             + "Gets disabled when Zoom is set or the user changes the zoom by the mouse.")]
@@ -240,6 +252,7 @@ namespace KGySoft.WinForms.Controls
         /// <summary>
         /// Gets or sets the zoom factor of the displayed image.
         /// <br/>Default value: 1.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_ImageViewer.htm">online help</a> for an animated image example.</div>
         /// </summary>
         /// <remarks>
         /// <para>This property can be set only if the <see cref="AutoZoom"/> property is <see langword="false"/>.</para>
@@ -250,6 +263,9 @@ namespace KGySoft.WinForms.Controls
         /// For <see cref="Metafile"/> images, the maximum zoom allows reaching about 4 million pixels width and height.
         /// For <see cref="Bitmap"/> images, the default maximum zoom is the original image size x 10 (adjusted with DPI) but at least screen size x 2.</para>
         /// </remarks>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="ImageViewer"/> class for an animated image example.</note>
+        /// </example>
         [Category("ImageViewer")]
         [Description("When AutoZoom is False, determines the zoom factor of the displayed image. The value may be automatically adjusted to a valid zoom factor.")]
         public float Zoom
@@ -262,10 +278,14 @@ namespace KGySoft.WinForms.Controls
         /// When a <see cref="Bitmap"/> is assigned to <see cref="Image"/>, gets or sets whether rendering with resize uses interpolation (that is when <see cref="Zoom"/> is not 1).
         /// <br/>When a <see cref="Metafile"/> is assigned to <see cref="Image"/>, gets or sets whether the metafile is rendered with antialiasing. Smoothing metafiles might be turned off automatically on higher zooming levels.
         /// <br/>Default value: <see langword="false"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_ImageViewer.htm">online help</a> for an animated image example.</div>
         /// </summary>
         /// <remarks>
         /// <para>Smoothing metafiles may not have a noticeable effect if the metafile already contains drawing records with antialiasing, or when the metafile contains bitmap images only.</para>
         /// </remarks>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="ImageViewer"/> class for an animated image example.</note>
+        /// </example>
         [Category("ImageViewer")]
         [Description("When a Bitmap is assigned to Image, determines whether rendering with resize uses interpolation (that is when Zoom is not 1). "
             + "When a Metafile is assigned to Image, determines whether the metafile is rendered with antialiasing. Smoothing metafiles might be turned off automatically on higher zooming levels.")]

@@ -22,8 +22,12 @@ using System.Windows.Forms;
 namespace KGySoft.WinForms.Controls
 {
     /// <summary>
-    /// Represents possible advanced border styles, used by <see cref="AdvancedPanel"/> and <see cref="AdvancedLabel"/> controls, for example.
+    /// Represents possible advanced border styles, used by <see cref="AdvancedPanel"/> and <see cref="AdvancedLabel"/> controls.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedLabel.htm">online help</a> of the <see cref="AdvancedLabel"/> class for an image example.</div>
     /// </summary>
+    /// <example>
+    /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedLabel"/> class for an image example.</note>
+    /// </example>
     public enum AdvancedBorderStyle
     {
         /// <summary>

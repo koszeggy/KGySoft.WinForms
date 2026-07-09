@@ -29,7 +29,11 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents a panel with advanced <see cref="BorderStyle"/> options.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedLabel.htm">online help</a> of the <see cref="AdvancedLabel"/> class for an image example.</div>
     /// </summary>
+    /// <example>
+    /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedLabel"/> class for an image example, as it uses the same range of possible border styles as <see cref="AdvancedPanel"/>.</note>
+    /// </example>
     [ToolboxBitmap(typeof(AdvancedPanel), "Resources.Toolbox.AdvancedPanel.png")]
     [Designer(typeof(AdvancedPanelDesigner))]
     public class AdvancedPanel : Panel, ISafePaintBackground
@@ -47,8 +51,11 @@ namespace KGySoft.WinForms.Controls
 
         /// <summary>
         /// Gets or sets the border style of the <see cref="AdvancedPanel"/>.
-        /// <br/>See the <see cref="AdvancedBorderStyle"/> enumeration for the available options.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedLabel.htm">online help</a> of the <see cref="AdvancedLabel"/> class for an image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedLabel"/> class for an image example, as it uses the same range of possible border styles as <see cref="AdvancedPanel"/>.</note>
+        /// </example>
         /// <seealso cref="AdvancedBorderStyle"/>
         [Category("AdvancedPanel")]
         [Description("Gets or sets the border style of the AdvancedPanel.")]

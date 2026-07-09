@@ -43,7 +43,16 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents a <see cref="GroupBox"/> control with a <see cref="CheckBox"/> that can be checked or unchecked to enable or disable the content of the group box.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_CheckGroupBox.htm">online help</a> for an animated image example.</div>
     /// </summary>
+    /// <example>
+    /// <para>The following animated image illustrates the behavior of the <see cref="CheckGroupBox"/> class:</para>
+    /// <para><img src="../Help/CheckGroupBox.gif" alt="CheckGroupBox in the KGySoft.Drawing.ImagingTools application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.Drawing.Tools#kgy-soft-imaging-tools">KGy SOFT Imaging Tools</a> application,
+    /// but you can also use the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>
+    /// that has many <see cref="CheckGroupBox"/> instances on the controls test pages.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download its executable binaries.</note>
+    /// </example>
     [ToolboxBitmap(typeof(CheckGroupBox), "Resources.Toolbox.CheckGroupBox.png")]
     public partial class CheckGroupBox : GroupBox, ICustomLocalizable, IToolTipTargetProvider, IObservableParent, ISafePaintBackground // TODO: ISafePaintBackground into an AdvancedGroupBox
     {

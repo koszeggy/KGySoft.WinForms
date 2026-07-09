@@ -50,6 +50,8 @@ namespace KGySoft.WinForms
     /// if their <see cref="BaseForm.DynamicStringLocalization">DynamicStringLocalization</see> property is set to a non-default value.
     /// The <see cref="LocalizationRequested"/> event can be handled to redirect the localization requests to a custom resource manager,
     /// or to set the value for a given key programmatically.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/P_KGySoft_WinForms_Forms_BaseForm_DynamicStringLocalization.htm">online help</a>
+    /// of the <see cref="BaseForm.DynamicStringLocalization">BaseForm.DynamicStringLocalization</see> property for an example.</div>
     /// </summary>
     public static class LocalizationHelper
     {

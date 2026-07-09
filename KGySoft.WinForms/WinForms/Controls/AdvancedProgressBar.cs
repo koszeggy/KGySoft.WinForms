@@ -31,6 +31,7 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents a progress bar with advanced capabilities.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedProgressBar.htm">online help</a> for an animated image example.</div>
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedProgressBar"/> class offers the following features in addition to <see cref="ProgressBar"/>:
@@ -39,9 +40,15 @@ namespace KGySoft.WinForms.Controls
     /// <item>New <see cref="Style"/> property with four different appearances.</item>
     /// <item>Custom colors (when <see cref="Style"/> is not <see cref="AdvancedProgressBarStyle.System"/>)</item>
     /// </list>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
-    /// an example for some features of the <see cref="AdvancedProgressBar"/> control.</note>
     /// </remarks>
+    /// <example>
+    /// <para>The following image illustrates a few features of the <see cref="AdvancedProgressBar"/> class, like the various <see cref="Style"/>s,
+    /// and the stopped/paused <see cref="State"/>s which are not supported by a regular <see cref="ProgressBar"/> (as of .NET 10.0).
+    /// The <see cref="AdvancedProgressBarStyle.System"/> style reflects the Windows 11 appearance:</para>
+    /// <para><img src="../Help/AdvancedProgressBar.gif" alt="AdvancedProgressBar in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
+    /// </example>
     [ToolboxBitmap(typeof(ProgressBar))]
     [Description(@"A progress bar that provides the following features in addition to regular ProgressBar:
 - Provides Warning/Error states
@@ -80,7 +87,11 @@ namespace KGySoft.WinForms.Controls
         /// was not called in the executing application, applicable only for non-System <see cref="Style"/>s.
         /// The progress bar stops animating when state is not <see cref="ProgressBarState.Normal"/>.
         /// <br/>Default value: <see cref="ProgressBarState.Normal"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedProgressBar.htm">online help</a> for an animated image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedProgressBar"/> class for an animated image example.</note>
+        /// </example>
         [Category("AdvancedProgressBar")]
         [Description("Gets or sets the state of the progress bar. On pre-Vista Windows versions applicable only when Style is not System. "
             + "The progress bar stops animating when state is not Normal.")]
@@ -120,7 +131,11 @@ namespace KGySoft.WinForms.Controls
         /// When visual styles are not available, <see cref="AdvancedProgressBarStyle.ThemedShiny"/> and <see cref="AdvancedProgressBarStyle.ThemedFlat"/> styles
         /// are defaulting to <see cref="AdvancedProgressBarStyle.Classic"/> style.
         /// <br/>Default value: <see cref="AdvancedProgressBarStyle.System"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedProgressBar.htm">online help</a> for an animated image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedProgressBar"/> class for an animated image example.</note>
+        /// </example>
         [Category("AdvancedProgressBar")]
         [Description("Gets or sets the rendering style of the progress bar. When visual styles are not available, ThemedShiny and ThemedFlat styles are defaulting to Classic style.")]
         [DefaultValue(AdvancedProgressBarStyle.System)]

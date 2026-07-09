@@ -49,6 +49,7 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Represents a label with additional features such as customizable disabled colors, correct auto sizing, fixed auto sizing behavior, advanced border styles, and more.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedLabel.htm">online help</a> for an image example.</div>
     /// </summary>
     /// <remarks>
     /// The <see cref="AdvancedLabel"/> class offers the following features in addition to <see cref="LinkLabel"/>:
@@ -64,9 +65,14 @@ namespace KGySoft.WinForms.Controls
     /// <item>Fixing some Mono-specific <see cref="Label"/>/<see cref="LinkLabel"/> issues, such as non-visible text with border, wrong rendering with padding, random
     /// exceptions from mouse events when links are used.</item>
     /// </list>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
-    /// an example for some features of the <see cref="AdvancedLabel"/> control.</note>
     /// </remarks>
+    /// <example>
+    /// <para>The following image illustrates a few features of the <see cref="AdvancedLabel"/> class, like as the various <see cref="BorderStyle"/> options,
+    /// the default disabled colors difference, and the fixed auto sizing behavior when the control is docked to the top:</para>
+    /// <para><img src="../Help/AdvancedLabel.png" alt="AdvancedLabel in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
+    /// </example>
     [ToolboxBitmap(typeof(AdvancedLabel), "Resources.Toolbox.AdvancedLabel.png")]
     [Description(@"A label that provides the following features in addition to regular Label:
 - AutoSize works as expected when label is docked
@@ -225,8 +231,11 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
 
         /// <summary>
         /// Gets or sets the border style of the <see cref="AdvancedLabel"/>.
-        /// <br/>See the <see cref="AdvancedBorderStyle"/> enumeration for the available options.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedLabel.htm">online help</a> for an image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedLabel"/> class for an image example.</note>
+        /// </example>
         /// <seealso cref="AdvancedBorderStyle"/>
         [Category("AdvancedLabel")]
         [Description("Gets or sets the border style of the AdvancedLabel.")]
@@ -298,7 +307,11 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
         /// <summary>
         /// Gets or sets the text rendering quality of the <see cref="AdvancedLabel"/>.
         /// <br/>Default value: <see cref="RenderingQuality.SystemDefault"/>.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_AdvancedRadioButton.htm">online help</a> of the <see cref="AdvancedRadioButton"/> class for an image example.</div>
         /// </summary>
+        /// <example>
+        /// <note type="tip">See the <strong>Examples</strong> section of the <see cref="AdvancedRadioButton"/> class for an image example.</note>
+        /// </example>
         [Category("AdvancedLabel")]
         [Description("Gets or sets the text rendering quality of the advanced label. Has effect only when FlatStyle is not System.")]
         [DefaultValue(RenderingQuality.SystemDefault)]
@@ -454,7 +467,7 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
 
         /// <summary>
         /// Gets or sets the fading options of the control.
-        /// <br/>Default value: <see cref="FadingOptions.StandardEffects"/>.
+        /// <br/>Default value: <see cref="FadingOptions.StandardEffects"/>. In case of an <see cref="AdvancedLabel"/>, it covers the animation of the enabled/disabled transition.
         /// </summary>
         [Category("AdvancedLabel")]
         [DefaultValue(FadingOptions.StandardEffects)]

@@ -83,6 +83,9 @@ namespace KGySoft.WinForms.Forms
     /// <item>An <see cref="IsDesignMode"/> property that works even during initialization, when <see cref="Component.DesignMode"/> would return <see langword="false"/>.</item>
     /// <item><see cref="InvokeOnUIThread">InvokeOnUIThread</see> method.</item>
     /// </list>
+    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
+    /// multiple examples for <see cref="BaseForm"/> features, such as the fixed font scaling, dynamic localization, MDI forms handling, etc.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.</note>
     /// </remarks>
     public class BaseForm : Form, IPerMonitorDpiAware, IObservableParent
     {
@@ -463,6 +466,7 @@ namespace KGySoft.WinForms.Forms
 
         /// <summary>
         /// Gets or sets the dynamic string localization strategy of the form. It allows using potentially auto-generated string resources from .resx files.
+        /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/P_KGySoft_WinForms_Forms_BaseForm_DynamicStringLocalization.htm">online help</a> for an example.</div>
         /// </summary>
         /// <remarks>
         /// <note>This property offers a different localization strategy to the <c>Localizable</c> property of the Windows Forms designer, and it is not recommended to use them both together.</note>
@@ -483,10 +487,14 @@ namespace KGySoft.WinForms.Forms
         /// <para>Using <see cref="DynamicStringLocalization.LocalScope"/> or <see cref="DynamicStringLocalization.AssemblyScope"/> works only if the invariant resource set exists for the form or user control.
         /// Only the properties that have an entry in the invariant resource set will be localized automatically.
         /// <br/>See also the <see cref="KGySoft.WinForms.DynamicStringLocalization"/> enumeration for details.</para>
-        /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
-        /// an example for dynamic localization using various settings. It also has an editor that allows creating, editing and applying localizations at run-time.
-        /// <br/>The example is located under the <em>Misc Tests</em> / <em>Dynamic localization example</em> menu.</note>
         /// </remarks>
+        /// <example>
+        /// <para>The following image shows a form of an application that allows localizing its resources to any language, and applying them at run-time:</para>
+        /// <para><img src="../Help/EditingResources.png" alt="A resource editor form in the KGySoft.WinForms.Example application"/></para>
+        /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+        /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.
+        /// The example is located under the <em>Misc Tests</em> / <em>Dynamic localization example</em> menu, which allows testing the various <see cref="DynamicStringLocalization"/> settings as well.</note>
+        /// </example>
         [Category("BaseForm")]
         [DefaultValue(DynamicStringLocalization.Disabled)]
         [Description("Specifies the dynamic string localization strategy of the form. LocalScope and AssemblyScope allow using potentially auto-generated .resx files "

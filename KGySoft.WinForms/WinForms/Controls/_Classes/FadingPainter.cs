@@ -27,13 +27,16 @@ namespace KGySoft.WinForms.Controls
 {
     /// <summary>
     /// Helper class for buffered fading animations. The host control must implement the <see cref="ISupportsFading{TState}"/> interface.
+    /// <div style="display: none;"><br/>See the <a href="https://koszeggy.github.io/docs/winforms/html/T_KGySoft_WinForms_Controls_FadingPainter_1.htm">online help</a> for an animated image example.</div>
     /// </summary>
     /// <typeparam name="TState">The type of the state object.</typeparam>
-    /// <remarks>
-    /// <note type="tip">See also the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a> that contains
-    /// an example for how to use the <see cref="FadingPainter{TState}"/> class for a custom control.
-    /// <br/>The example is located under the <em>Misc Tests</em> / <em>Custom fading control demo</em> menu.</note>
-    /// </remarks>
+    /// <example>
+    /// <para>The following image illustrates a custom control that uses the <see cref="FadingPainter{TState}"/> class:</para>
+    /// <para><img src="../Help/FadingPainter.gif" alt="A custom control using the FadingPainter class in the KGySoft.WinForms.Example application"/></para>
+    /// <note type="tip">The image above is from the <a href="https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example" target="blank">example application</a>.
+    /// At the <a href="https://github.com/koszeggy/KGySoft.WinForms/releases" target="blank">Releases</a> page of the project repository you can download it as executable binaries as well.
+    /// The example is located under the <em>Misc Tests</em> / <em>Custom fading control demo</em> menu, displaying also the source code of the control.</note>
+    /// </example>
     public class FadingPainter<TState> : IDisposable
     {
         #region Fields
