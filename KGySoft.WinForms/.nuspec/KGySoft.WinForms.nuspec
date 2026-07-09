@@ -2,7 +2,7 @@
 <package >
   <metadata>
     <id>KGySoft.WinForms</id>
-    <version>5.0.0</version>
+    <version>5.0.1</version>
     <title>KGy SOFT Windows Forms Libraries</title>
     <authors>György Kőszeg</authors>
     <owners>György Kőszeg</owners>
@@ -15,13 +15,18 @@
     <description xml:space="preserve">The KGy SOFT Windows Forms Libraries package offers advanced controls and components built around System.Windows.Forms types.
 
 Among others:
-- A BaseForm with command bindings, MDI application and dynamic localization support, fixing some high-DPI and multi-monitor issues also for older frameworks
-- Task dialogs with compatibility mode, supporting even Windows XP
 - Advanced components and controls that fix many issues the original versions suffer from (e.g. ajustable colors in disabled mode, fixed high DPI behavior, etc.)
 - Powerful new controls (e.g. image viewer with panning and zooming)
+- Task dialogs with compatibility mode, supporting even Windows XP or Linux/Mono
+- A BaseForm with command bindings, dynamic localization and MDI application support, fixing some high-DPI and multi-monitor issues in older frameworks
 - Useful helper classes to create dynamic localizations, to deal with high DPI issues, to handle visual styles, to take screenshots, etc.
 
-Find some more examples with images at the project site at https://github.com/koszeggy/KGySoft.WinForms</description>
+Example Application: https://github.com/koszeggy/KGySoft.WinForms/tree/master/KGySoft.WinForms.Example
+Online Documentation: https://koszeggy.github.io/docs/winforms
+
+See Also:
+GDI+ specific drawing libraries: https://www.nuget.org/packages/KGySoft.Drawing/
+Debugger Visualizers: https://github.com/koszeggy/KGySoft.Drawing.Tools</description>
     <releaseNotes>See the detailed release notes here: https://github.com/koszeggy/KGySoft.WinForms/blob/master/KGySoft.WinForms/changelog.txt</releaseNotes>
     <copyright>Copyright © KGy SOFT</copyright>
     <tags>KGySoft WinForms controls components TaskDialog forms</tags>

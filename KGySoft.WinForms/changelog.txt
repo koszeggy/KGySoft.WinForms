@@ -6,6 +6,21 @@
 ===============================================================================
 
 ~~~~~~~~~
+* v5.0.1:
+~~~~~~~~~
+
++ General changes:
+==================
++ Inserting links in the XML documentation that navigate to the online documentation where it contains examples or
+  images that are not shown in the IDE.
+
+- KGySoft.WinForms.Components namespace:
+========================================
+- TaskDoalog class:
+  - Fixing a possible issue in compatible mode when the dialog is shown as a non-modal window.
+
+
+~~~~~~~~~
 ! v5.0.0:
 ~~~~~~~~~
 
