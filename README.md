@@ -41,7 +41,7 @@ Find the project site at [kgysoft.net](https://kgysoft.net/winforms/).
 
 ## Documentation
 
-* You can find the online KGy SOFT Core Libraries documentation [here](https://koszeggy.github.io/docs/winforms).
+* You can find the online KGy SOFT WinForms Libraries documentation [here](https://koszeggy.github.io/docs/winforms).
 * See [this](https://koszeggy.github.io/docs) link to access the online documentation of all KGy SOFT libraries.
 
 ## Release Notes
@@ -301,7 +301,7 @@ The static [`Dialogs`](https://koszeggy.github.io/docs/winforms/html/T_KGySoft_W
 </details>
 
 ## License
-KGy SOFT WinForms Libraries are under the [KGy SOFT License 1.0](https://github.com/koszeggy/KGySoft.CoreLibraries/blob/master/LICENSE), which is a permissive GPL-like license. It allows you to copy and redistribute the material in any medium or format for any purpose, even commercially. The only thing is not allowed is to distribute a modified material as yours: though you are free to change and re-use anything, do that by giving appropriate credit. See the [LICENSE](https://github.com/koszeggy/KGySoft.CoreLibraries/blob/master/LICENSE) file for details.
+KGy SOFT WinForms Libraries are under the [KGy SOFT License 1.0](https://github.com/koszeggy/KGySoft.WinForms/blob/master/LICENSE), which is a permissive GPL-like license. It allows you to copy and redistribute the material in any medium or format for any purpose, even commercially. The only thing is not allowed is to distribute a modified material as yours: though you are free to change and re-use anything, do that by giving appropriate credit. See the [LICENSE](https://github.com/koszeggy/KGySoft.WinForms/blob/master/LICENSE) file for details.
 
 <!-----
 See the complete KGy SOFT WinForms Libraries documentation with even more examples at the [docs](https://koszeggy.github.io/docs/winforms) site.-->
