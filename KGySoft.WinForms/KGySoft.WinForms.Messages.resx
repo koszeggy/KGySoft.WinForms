@@ -189,7 +189,7 @@
     <value>[Footer]</value>
   </data>
   <data name="TaskDialog_Initializing" xml:space="preserve">
-    <value>Cannot change this property while the TaskDialog is being initialized.</value>
+    <value>Cannot change this property while the task dialog is being initialized.</value>
   </data>
   <data name="TaskDialog_InvalidState" xml:space="preserve">
     <value>The task dialog property cannot be changed in the current state.</value>
@@ -231,7 +231,7 @@
     <value>Changing property '{0}' is not allowed while the dialog is displayed.</value>
   </data>
   <data name="Localization_InvalidResourceFormat" xml:space="preserve">
-    <value>Localization of key {0} failed because the format string {1} arguments: {2}</value>
+    <value>Localization of key {0} failed with the specified {1} arguments. Format string: {2}</value>
   </data>
   <data name="TaskDialogStandardButtons.OK" xml:space="preserve">
     <value>&amp;OK</value>
@@ -255,7 +255,7 @@
     <value>Visual styles are not available.</value>
   </data>
   <data name="Accessors_PropertyDoesNotExistFormat" xml:space="preserve">
-    <value>Property was "{0}" not found on type "{1}".</value>
+    <value>Property "{0}" was not found on type "{1}".</value>
   </data>
   <data name="Accessors_MethodDoesNotExistFormat" xml:space="preserve">
     <value>Method "{0}" was not found on type "{1}".</value>

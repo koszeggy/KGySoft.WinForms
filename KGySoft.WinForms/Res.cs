@@ -141,7 +141,7 @@ namespace KGySoft
         /// <summary>[Footer]</summary>
         internal static string TaskDialogFooter => Get("TaskDialog_Footer");
 
-        /// <summary>Cannot change this property while the TaskDialog is being initialized.</summary>
+        /// <summary>Cannot change this property while the task dialog is being initialized.</summary>
         internal static string TaskDialogInitializing => Get("TaskDialog_Initializing");
 
         /// <summary>The task dialog property cannot be changed in the current state.</summary>
@@ -249,7 +249,7 @@ namespace KGySoft
 
         #region Localization
 
-        /// <summary>Localization of key {0} failed because the format string {1} arguments: {2}</summary>
+        /// <summary>Localization of key {0} failed with the specified {1} arguments. Format string: {2}</summary>
         internal static string LocalizationInvalidResource(string key, int count, string format) => Get("Localization_InvalidResourceFormat", key, count, format);
 
         #endregion
