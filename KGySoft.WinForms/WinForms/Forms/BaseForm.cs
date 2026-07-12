@@ -671,7 +671,7 @@ namespace KGySoft.WinForms.Forms
         /// this property works even during initialization.
         /// </summary>
         [Browsable(false)]
-        protected bool IsDesignMode => DesignMode || LicenseManager.UsageMode == LicenseUsageMode.Designtime;
+        protected bool IsDesignMode => this.IsDesignMode();
 
         /// <summary>
         /// Gets whether the form has already been loaded. This property is <see langword="true"/> after the <see cref="Form.Load"/> event is raised for the first time,

@@ -96,7 +96,7 @@ namespace KGySoft.WinForms.Controls
                 owner.isAddingControl = true;
                 try
                 {
-                    if (owner.DesignMode || value == owner.checkBox || value == owner.contentPanel
+                    if (owner.IsDesignMode() || value == owner.checkBox || value == owner.contentPanel
                         // Linux/Mono workaround: prevent disabling ErrorProvider's user control when the content is disabled
                         || (!OSHelper.IsWindows || OSHelper.IsFrameworkMono) && value.GetType().DeclaringType == typeof(ErrorProvider))
                     {

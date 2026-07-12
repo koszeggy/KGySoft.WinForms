@@ -10,7 +10,9 @@
         - to use [SupportedOSPlatform]
         - to omit the form sizing fix earlier versions had - https://github.com/dotnet/winforms/issues/1504
         - to apply a fix for a newly introduced bug present in .NET 5.0..9.0 - https://github.com/dotnet/winforms/issues/1378
-      - net6.0: to work around the changed (and buggy) high DPI handling when scaling fonts
+      - net6.0:
+        - to work around the changed (and buggy) high DPI handling when scaling fonts
+        - to use Control.IsAncestorSiteInDesignMode
       - net9.0:
         - to use System.Threading.Lock
         - to allow using a workaround when the new dark mode is enabled

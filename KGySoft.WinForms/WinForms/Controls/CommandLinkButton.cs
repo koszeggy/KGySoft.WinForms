@@ -108,7 +108,6 @@ namespace KGySoft.WinForms.Controls
         private const int isHovered = useDefaultGlyph << 1;
         private const int isMouseDown = isHovered << 1;
         private const int isPressed = isMouseDown << 1;
-        private const int isDesignMode = isPressed << 1; // needed because DesignMode does not work in a user control, and LicenseManager.UsageMode does not work in WM_PAINT
 
         #endregion
 
@@ -676,7 +675,7 @@ namespace KGySoft.WinForms.Controls
             // Standard/System flat style with visual styles: reporting transparent background. This fixes the ugly stripes issue
             // when the parent is enlarged while the control is partially invisible, for example.
             // Not applying on Mono, because it turns fading animations off to prevent flickering.
-            get => !OSHelper.IsFrameworkMono && !flags[isDesignMode] && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
+            get => !OSHelper.IsFrameworkMono && !this.IsDesignMode() && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
                 : !enabledBackColor.IsEmpty ? enabledBackColor
                 : base.BackColor;
             set
@@ -719,7 +718,7 @@ namespace KGySoft.WinForms.Controls
             // Standard/System flat style with visual styles: reporting transparent background. This fixes the ugly stripes issue
             // when the parent is enlarged while the control is partially invisible, for example.
             // Not applying on Mono, because it turns fading animations off to prevent flickering.
-            get => !OSHelper.IsFrameworkMono && !flags[isDesignMode] && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
+            get => !OSHelper.IsFrameworkMono && !this.IsDesignMode() && VisualStyleHelper.RenderWithVisualStyles && FlatStyle is FlatStyle.Standard or FlatStyle.System ? Color.Transparent
                 : !disabledBackColor.IsEmpty ? disabledBackColor
                 : base.BackColor;
             set
@@ -1257,7 +1256,6 @@ namespace KGySoft.WinForms.Controls
             defaultDescriptionFont = new ScalingFont(DefaultDescriptionFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
             flags[isPerMonitorDpiAwarenessV1] = ScaleHelper.PerMonitorDpiAwarenessVersion == 1;
-            flags[isDesignMode] = LicenseManager.UsageMode == LicenseUsageMode.Designtime;
 
             // Using this instead of overriding OnSystemColorsChanged so GetPreferredSize
             // works correctly when FlatStyle is System and visual styles are turned on or off.

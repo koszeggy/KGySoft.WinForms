@@ -125,7 +125,7 @@ namespace KGySoft.WinForms.Controls
         /// this property works even during initialization.
         /// </summary>
         [Browsable(false)]
-        protected bool IsDesignMode => DesignMode || LicenseManager.UsageMode == LicenseUsageMode.Designtime;
+        protected bool IsDesignMode => this.IsDesignMode();
 
         /// <summary>
         /// Gets whether the user control has already been loaded. This property is <see langword="true"/> after the <see cref="UserControl.Load"/> event is raised for the first time,

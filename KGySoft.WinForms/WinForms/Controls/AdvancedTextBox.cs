@@ -61,8 +61,7 @@ namespace KGySoft.WinForms.Controls
         private const int autoScaleFont = 1;
         private const int suppressFontChanged = autoScaleFont << 1;
         private const int isPerMonitorDpiAwarenessV1 = suppressFontChanged << 1;
-        private const int isDesignMode = isPerMonitorDpiAwarenessV1 << 1; // needed because DesignMode does not work in a user control, and LicenseManager.UsageMode does not work in WM_PAINT
-        private const int isRtl = isDesignMode << 1;
+        private const int isRtl = isPerMonitorDpiAwarenessV1 << 1;
 
         #endregion
 
@@ -338,7 +337,6 @@ namespace KGySoft.WinForms.Controls
             defaultFont = new ScalingFont(ScaleHelper.DefaultFont, ScaleHelper.SystemScale);
             this.RegisterPerMonitorAwarenessNotifications();
             flags[isPerMonitorDpiAwarenessV1] = ScaleHelper.PerMonitorDpiAwarenessVersion == 1;
-            flags[isDesignMode] = LicenseManager.UsageMode == LicenseUsageMode.Designtime;
 
             // Needed because in Framework Mono the base ctor calls the overridden BackColor/ForeColor setters
             if (OSHelper.IsFrameworkMono)
@@ -413,9 +411,9 @@ namespace KGySoft.WinForms.Controls
             switch (m.Msg)
             {
                 case Constants.WM_PAINT:
-                    // Here is the delayed the actual setting of AutoCompleteMode to avoid possible "Error creating window handle" exceptions. It would not work from OnHandleCreated.
+                    // Here is the delayed actual setting of AutoCompleteMode to avoid possible "Error creating window handle" exceptions. It would not work from OnHandleCreated.
                     // It may occur when first showing the control on the secondary monitor and the primary monitor has a different DPI.
-                    if (!flags[isDesignMode] && reportedAutoCompleteMode != base.AutoCompleteMode)
+                    if (reportedAutoCompleteMode != base.AutoCompleteMode && !this.IsDesignMode())
                     {
                         base.AutoCompleteMode = reportedAutoCompleteMode;
                         return;

@@ -133,7 +133,7 @@ namespace KGySoft.WinForms.Forms
             protected override void OnPaintBackground(PaintEventArgs e)
             {
                 // if base was called, flickering would happen when expanding/collapsing details with themed background
-                if (DesignMode || !Owner.flags[isSpecialHeadColors])
+                if (this.IsDesignMode() || !Owner.flags[isSpecialHeadColors])
                 {
                     // in design mode avoiding unpainted effect
                     base.OnPaintBackground(e);
@@ -142,9 +142,9 @@ namespace KGySoft.WinForms.Forms
 
             protected override void OnPaint(PaintEventArgs e)
             {
-                if (!DesignMode && Owner.flags[isSpecialHeadColors])
+                if (!this.IsDesignMode() && Owner.flags[isSpecialHeadColors])
                 {
-                    using LinearGradientBrush brush = new LinearGradientBrush(ClientRectangle, Owner.gradientStart, Owner.gradientEnd, LinearGradientMode.Horizontal);
+                    using var brush = new LinearGradientBrush(ClientRectangle, Owner.gradientStart, Owner.gradientEnd, LinearGradientMode.Horizontal);
                     e.Graphics.FillRectangle(brush, ClientRectangle);
                     return;
                 }

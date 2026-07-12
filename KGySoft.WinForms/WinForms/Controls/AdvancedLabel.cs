@@ -649,7 +649,7 @@ When value is ""ResolveAll"", simple inline hyperlinks will be resolved, too.")]
                 proposedSize = lastProposedSize;
 
                 // in design mode further Empty proposedSizes may arrive so clearing only at runtime
-                if (!DesignMode)
+                if (!this.IsDesignMode())
                     lastProposedSize = Size.Empty;
             }
             else

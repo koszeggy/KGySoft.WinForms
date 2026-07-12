@@ -7,8 +7,9 @@ hevent
 ime
 localizable
 mdi
-multiline
 mevent
+multiline
+namespace
 pevent
 rtl
 theming

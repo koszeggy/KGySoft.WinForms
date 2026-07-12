@@ -17,6 +17,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Linq;
@@ -95,6 +96,13 @@ namespace KGySoft.WinForms
         #region Fields
 
         private static IThreadSafeCacheAccessor<Type, FieldAccessor?>? toolTipCache;
+
+#if NETCOREAPP
+        // In .NET [Core] LicenseManager.UsageMode does not work anymore - https://github.com/dotnet/winforms/issues/10960
+        // NOTE: NOT checking "devenv" as entry assembly or current process name for .NET Framework,
+        // because it doesn't necessarily mean we are in design mode (e.g. Visual Studio extensions and debugger visualizers execute in the devenv process as well).
+        private static readonly bool isInDesignerProcess = Assembly.GetEntryAssembly()?.GetName().Name == "DesignToolsServer";
+#endif
 
         #endregion
 
@@ -338,6 +346,44 @@ namespace KGySoft.WinForms
             if (control == null)
                 throw new ArgumentNullException(nameof(control), PublicResources.ArgumentNull);
             Accessors.SetStyle(control, flags, value);
+        }
+
+        /// <summary>
+        /// Gets whether the specified <paramref name="control"/> is in design mode.
+        /// Unlike the <see cref="Component.DesignMode"/> property, this works even during initialization, or when the control is embedded into a user control.
+        /// </summary>
+        /// <param name="control">The control to check. Can be <see langword="null"/>, in which case only the general presence of a designer is attempted to be checked.</param>
+        /// <returns><see langword="true"/>, if the specified <paramref name="control"/> is in design mode; otherwise, <see langword="false"/>.</returns>
+        public static bool IsDesignMode(this Control? control)
+        {
+#if NETCOREAPP
+            if (isInDesignerProcess)
+                return true;
+#endif
+
+            // This does not work anymore for .NET [Core] targets in Visual Studio - https://github.com/dotnet/winforms/issues/10960
+            // Still, we check it even in .NET [Core] to prepare for possible future changes and for other IDEs.
+            // NOTE: Unlike isInDesignerProcess, this must not be pre-initialized, because if we access it from a WM_PAINT session first, the result would be false.
+            //       Also, we must not cache a static true result after detecting design time for the fist time either, because we might be in the devenv process
+            //       even when the control is used normally in a Visual Studio extension, and such controls may break after opening a designer in VS.
+            if (LicenseManager.UsageMode == LicenseUsageMode.Designtime)
+                return true;
+
+            if (control == null)
+                return false;
+
+#if NET6_0_OR_GREATER
+            return control.IsAncestorSiteInDesignMode;
+#else
+            // We must check the whole hierarchy, because the control's own DesignMode may return false if it is embedded in a UserControl, for example.
+            for (Control? c = control; c != null; c = c.Parent)
+            {
+                if (c.Site is ISite site)
+                    return site.DesignMode;
+            }
+
+            return false;
+#endif
         }
 
         #endregion

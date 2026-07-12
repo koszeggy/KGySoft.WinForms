@@ -6,6 +6,31 @@
 ===============================================================================
 
 ~~~~~~~~~
+* v5.0.2:
+~~~~~~~~~
+
++ KGySoft.WinForms namespace:
+=============================
++ ControlExtensions class:
+  + New IsDesignMode method
+
+- KGySoft.WinForms.Controls namespace:
+======================================
+- AdvancedTextBox:
+  - When using in a .NET [Core] project, painting the control in the designer could lead to an exception if the
+    AutoCompleteMode property was set to a non-default value.
+- BaseControl class:
+  - IsDesignMode property: In .NET [Core] it could return a false negative result during initialization.
+- BaseUserControl class:
+  - IsDesignMode property: In .NET [Core] it could return a false negative result during initialization.
+
+- KGySoft.WinForms.Forms namespace:
+======================================
+- BaseForm class:
+  - IsDesignMode property: In .NET [Core] it could return a false negative result during initialization.
+
+
+~~~~~~~~~
 * v5.0.1:
 ~~~~~~~~~
 

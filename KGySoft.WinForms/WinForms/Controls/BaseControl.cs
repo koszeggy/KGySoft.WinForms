@@ -83,7 +83,7 @@ namespace KGySoft.WinForms.Controls
         /// this property works even during initialization.
         /// </summary>
         [Browsable(false)]
-        protected bool IsDesignMode => DesignMode || LicenseManager.UsageMode == LicenseUsageMode.Designtime;
+        protected bool IsDesignMode => this.IsDesignMode();
 
         #endregion
 

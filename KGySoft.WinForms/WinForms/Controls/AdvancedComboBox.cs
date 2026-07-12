@@ -181,8 +181,7 @@ namespace KGySoft.WinForms.Controls
         private const int autoScaleFont = 1;
         private const int suppressFontChanged = autoScaleFont << 1;
         private const int isPerMonitorDpiAwarenessV1 = suppressFontChanged << 1;
-        private const int isDesignMode = isPerMonitorDpiAwarenessV1 << 1; // needed because DesignMode does not work in a user control, and LicenseManager.UsageMode does not work in WM_PAINT
-        private const int isReadOnly = isDesignMode << 1;
+        private const int isReadOnly = isPerMonitorDpiAwarenessV1 << 1;
         private const int systemDrawDropDownListMode = isReadOnly << 1;
         private const int clearingText = systemDrawDropDownListMode << 1;
         private const int isRtl = clearingText << 1;
@@ -592,7 +591,6 @@ namespace KGySoft.WinForms.Controls
             VisualStyleHelper.VisualStylesChanged += VisualStyleHelper_VisualStylesChanged;
             this.RegisterPerMonitorAwarenessNotifications();
             flags[isPerMonitorDpiAwarenessV1] = ScaleHelper.PerMonitorDpiAwarenessVersion == 1;
-            flags[isDesignMode] = LicenseManager.UsageMode == LicenseUsageMode.Designtime;
         }
 
         #endregion
@@ -840,7 +838,7 @@ namespace KGySoft.WinForms.Controls
                 case Constants.WM_PAINT:
                     if (Enabled)
                     {
-                        if (!flags[isDesignMode])
+                        if (!this.IsDesignMode())
                         {
                             // BUG workaround: In .NET 7+ the control resets the Font in WM_DPICHANGED_BEFOREPARENT, which causes a handle recreation and an immediate repaint.
                             // If we also set the font here, it will cause a Win32Exception (Error creating window handle), so we check if DPI is being changed.
